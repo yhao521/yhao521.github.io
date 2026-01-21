@@ -1,0 +1,683 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="[[码农老司机]]">
+  <meta name="keywords" content="java,博客,vue,spring,mysql,docker,linux">
+  
+    <meta name="description" content="兄弟们，今天咱来聊聊容器运行时那点事儿！平时大家用 Docker 用得飞起，但你真的了解它底层是怎么跑起来的吗？ 很多人都把 Docker、containerd、runC 这几个概念搞混，甚至以为它们是同一个东西的不同叫法。其实啊，它们仨可是各司其职，关系密切但又各有不同。 先来捋一捋它们之间的关系： Docker ：大家最熟悉的“老大哥”，提供了一整套容器解决方案，包括镜像构建、分发、运行等。你">
+<meta property="og:type" content="article">
+<meta property="og:title" content="别再傻傻分不清！深度剖析 runC、containerd、Docker 启动速度差异">
+<meta property="og:url" content="https://yhao521.github.io/2025/06/30/%E6%91%98%E5%BD%95/%E5%88%AB%E5%86%8D%E5%82%BB%E5%82%BB%E5%88%86%E4%B8%8D%E6%B8%85%EF%BC%81%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90%20runC%E3%80%81containerd%E3%80%81Docker%20%E5%90%AF%E5%8A%A8%E9%80%9F%E5%BA%A6%E5%B7%AE%E5%BC%82/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="兄弟们，今天咱来聊聊容器运行时那点事儿！平时大家用 Docker 用得飞起，但你真的了解它底层是怎么跑起来的吗？ 很多人都把 Docker、containerd、runC 这几个概念搞混，甚至以为它们是同一个东西的不同叫法。其实啊，它们仨可是各司其职，关系密切但又各有不同。 先来捋一捋它们之间的关系： Docker ：大家最熟悉的“老大哥”，提供了一整套容器解决方案，包括镜像构建、分发、运行等。你">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-06-30T14:07:28.392Z">
+<meta property="article:modified_time" content="2025-06-30T14:07:28.396Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="clippings">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>别再傻傻分不清！深度剖析 runC、containerd、Docker 启动速度差异 - 匆匆过客的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yhao521.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>匆匆过客的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="别再傻傻分不清！深度剖析 runC、containerd、Docker 启动速度差异"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-06-30 22:07" pubdate>
+          2025年6月30日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.7k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          15 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">别再傻傻分不清！深度剖析 runC、containerd、Docker 启动速度差异</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p><em>150</em> <em>0</em> <em>0</em> <em>0</em></p>
+<h2 id="启动速度大比拼"><a href="#启动速度大比拼" class="headerlink" title="启动速度大比拼"></a>启动速度大比拼</h2><h2 id="架构与功能差异"><a href="#架构与功能差异" class="headerlink" title="架构与功能差异"></a>架构与功能差异</h2><h3 id="runC"><a href="#runC" class="headerlink" title="runC"></a>runC</h3><h3 id="containerd"><a href="#containerd" class="headerlink" title="containerd"></a>containerd</h3><h3 id="Docker"><a href="#Docker" class="headerlink" title="Docker"></a>Docker</h3><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>兄弟们，今天咱来聊聊容器运行时那点事儿！平时大家用 Docker 用得飞起，但你真的了解它底层是怎么跑起来的吗？</p>
+<p>很多人都把 Docker、containerd、runC 这几个概念搞混，甚至以为它们是同一个东西的不同叫法。其实啊，它们仨可是各司其职，关系密切但又各有不同。</p>
+<p>先来捋一捋它们之间的关系：</p>
+<ul>
+<li><strong>Docker</strong> ：大家最熟悉的“老大哥”，提供了一整套容器解决方案，包括镜像构建、分发、运行等。你可以把它想象成一个全能管家，啥都帮你搞定。</li>
+<li><strong>containerd</strong> ：Docker 的“幕后功臣”，负责容器的生命周期管理，比如创建、启动、停止、销毁等。它就像一个项目经理，负责协调各个组件的工作。</li>
+<li><strong>runC</strong> ：真正干活的“苦力”，负责创建和运行容器。它按照 OCI（Open Container Initiative）标准，直接与操作系统内核交互，隔离出容器运行环境。你可以把它看作是一个建筑工人，按照图纸搭建房子。</li>
+</ul>
+<p>一句话概括：Docker 使用 containerd 管理容器，containerd 使用 runC 运行容器。</p>
+<h2 id="启动速度大比拼-1"><a href="#启动速度大比拼-1" class="headerlink" title="启动速度大比拼"></a>启动速度大比拼</h2><p>既然它们仨负责不同的工作，那么在容器启动速度上，它们各自的表现又如何呢？</p>
+<p>我们先从理论上分析一下：</p>
+<ul>
+<li><strong>runC</strong> ：作为最底层的容器运行时，runC 直接与操作系统内核打交道，省去了中间环节，理论上启动速度应该是最快的。就好像你直接找工厂拿货，省去了中间商赚差价，速度自然快。</li>
+<li><strong>containerd</strong> ：相比 runC，containerd 多了一层抽象，需要负责更多的管理工作，比如镜像拉取、存储管理、网络配置等，因此理论上启动速度会比 runC 慢一些。但 containerd 做了很多优化，比如使用共享文件系统、优化镜像层加载等，实际使用中差距并不会太大。</li>
+<li><strong>Docker</strong> ：Docker 在 containerd 的基础上又增加了一层，包括 Docker CLI、Docker API、Docker Engine 等组件，功能更丰富，但也带来了更多的开销，因此理论上启动速度是最慢的。但是，Docker 提供了很多便捷的功能，比如镜像构建、网络管理、存储卷管理等，这些功能在实际开发中非常有用，所以大家还是离不开它。</li>
+</ul>
+<p>当然，理论归理论，实际情况还得看具体测试。网上有很多关于 runC、containerd、Docker 启动速度的对比测试，感兴趣的兄弟可以自己去搜一下。这里我简单总结一下：</p>
+<ul>
+<li><strong>对于简单的小型容器</strong> ：runC、containerd、Docker 的启动速度差距并不明显，基本都在毫秒级别。毕竟，容器本身就很轻量级，启动速度本来就很快。</li>
+<li><strong>对于复杂的大型容器</strong> ：runC 的优势会逐渐体现出来，启动速度可能会比 containerd 和 Docker 快一些。但这个差距也不是绝对的，具体还要看容器的配置、镜像的大小、网络环境等因素。</li>
+</ul>
+<h2 id="架构与功能差异-1"><a href="#架构与功能差异-1" class="headerlink" title="架构与功能差异"></a>架构与功能差异</h2><p>除了启动速度，runC、containerd、Docker 在架构和功能上也有很大的差异。</p>
+<h3 id="runC-1"><a href="#runC-1" class="headerlink" title="runC"></a>runC</h3><p>runC 是一个轻量级的命令行工具，主要功能就是创建和运行容器。它遵循 OCI 标准，可以与任何符合 OCI 标准的容器镜像一起使用。runC 的架构非常简单，主要包括以下几个组件：</p>
+<ul>
+<li><strong>runc init</strong> ：负责初始化容器的命名空间、cgroups、文件系统等。</li>
+<li><strong>runc create</strong> ：负责创建容器。</li>
+<li><strong>runc start</strong> ：负责启动容器。</li>
+<li><strong>runc exec</strong> ：负责在容器中执行命令。</li>
+<li><strong>runc kill</strong> ：负责向容器发送信号。</li>
+<li><strong>runc delete</strong> ：负责删除容器。</li>
+</ul>
+<p>runC 的优点是简单、轻量、快速，但缺点是功能单一，只能用于运行容器，不能进行镜像管理、网络配置等操作。</p>
+<h3 id="containerd-1"><a href="#containerd-1" class="headerlink" title="containerd"></a>containerd</h3><p>containerd 是一个更高级的容器运行时，它不仅可以运行容器，还可以管理容器的整个生命周期。containerd 的架构比 runC 复杂一些，主要包括以下几个组件：</p>
+<ul>
+<li><strong>containerd daemon</strong> ：负责接收客户端请求，管理容器的生命周期。</li>
+<li><strong>containerd-shim</strong> ：负责与 runC 交互，创建和运行容器。</li>
+<li><strong>containerd-ctr</strong> ：提供了一个简单的命令行工具，用于与 containerd daemon 交互。</li>
+</ul>
+<p>containerd 的优点是功能更强大，可以管理容器的整个生命周期，支持镜像拉取、存储管理、网络配置等功能。缺点是比 runC 复杂一些，启动速度可能会稍慢一些。</p>
+<h3 id="Docker-1"><a href="#Docker-1" class="headerlink" title="Docker"></a>Docker</h3><p>Docker 是一个完整的容器平台，它不仅包含了 containerd 的所有功能，还提供了很多额外的功能，比如镜像构建、分发、网络管理、存储卷管理等。Docker 的架构是最复杂的，主要包括以下几个组件：</p>
+<ul>
+<li><strong>Docker CLI</strong> ：用户与 Docker 交互的命令行工具。</li>
+<li><strong>Docker API</strong> ：提供了一组 RESTful API，用于与 Docker Engine 交互。</li>
+<li><strong>Docker Engine</strong> ：负责接收客户端请求，管理镜像、容器、网络、存储等。</li>
+<li><strong>containerd</strong> ：负责容器的生命周期管理。</li>
+<li><strong>runC</strong> ：负责创建和运行容器。</li>
+</ul>
+<p>Docker 的优点是功能最强大，提供了完整的容器解决方案，方便用户构建、分发、运行容器。缺点是比 containerd 和 runC 更复杂，启动速度可能会更慢一些。</p>
+<h2 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h2><p>总的来说，runC、containerd、Docker 各有优缺点，适用于不同的场景：</p>
+<ul>
+<li><strong>如果你只需要运行容器，不需要其他功能，那么 runC 是一个不错的选择。</strong></li>
+<li><strong>如果你需要管理容器的整个生命周期，包括镜像拉取、存储管理、网络配置等，那么 containerd 更适合你。</strong></li>
+<li><strong>如果你需要一个完整的容器解决方案，包括镜像构建、分发、网络管理、存储卷管理等，那么 Docker 是你的首选。</strong></li>
+</ul>
+<p>其实，对于大多数开发者来说，直接使用 Docker 就足够了，不用太纠结底层到底是怎么实现的。毕竟，我们的目标是快速构建和部署应用程序，而不是研究容器运行时的底层原理。当然啦，如果你对容器技术非常感兴趣，想要深入了解底层原理，那么研究 runC 和 containerd 也是很有必要的。只有深入理解了底层原理，才能更好地使用容器技术，解决实际问题。</p>
+<p>好啦，今天就聊到这里。希望这篇文章能帮助你更好地理解 runC、containerd、Docker 这三个容器运行时。如果你还有什么问题，欢迎在评论区留言，咱们一起交流学习！记住，实践出真知，多动手操作才能真正掌握容器技术！</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/clippings/" class="print-no-link">#clippings</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>别再傻傻分不清！深度剖析 runC、containerd、Docker 启动速度差异</div>
+      <div>https://yhao521.github.io/2025/06/30/摘录/别再傻傻分不清！深度剖析 runC、containerd、Docker 启动速度差异/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>[[码农老司机]]</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年6月30日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/07/02/%E6%91%98%E5%BD%95/2025%E5%B9%B4%E4%B8%8B%E5%8D%8A%E5%B9%B4%E9%99%95%E8%A5%BF%E7%9C%81%E5%85%A8%E5%9B%BD%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%AD%89%E7%BA%A7%E8%80%83%E8%AF%95%E6%8A%A5%E5%90%8D%E5%85%AC%E5%91%8A-%E9%99%95%E8%A5%BF%E7%9C%81%E6%95%99%E8%82%B2%E8%80%83%E8%AF%95%E9%99%A2/" title="2025年下半年陕西省全国计算机等级考试报名公告-陕西省教育考试院">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">2025年下半年陕西省全国计算机等级考试报名公告-陕西省教育考试院</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/06/30/%E6%91%98%E5%BD%95/docker%E3%80%81containerd%E3%80%81runc%E3%80%81shim...%20%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E5%90%8D%E8%AF%8D%E5%85%A8%E8%A7%A3%E6%9E%90-CSDN%E5%8D%9A%E5%AE%A2/" title="docker、containerd、runc、shim... 容器技术名词全解析-CSDN博客">
+                        <span class="hidden-mobile">docker、containerd、runc、shim... 容器技术名词全解析-CSDN博客</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>  
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

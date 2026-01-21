@@ -1,0 +1,760 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="yhao521">
+  <meta name="keywords" content="java,博客,vue,spring,mysql,docker,linux">
+  
+    <meta name="description" content="WebRTC (Web Real-Time Communications) 是一个基于 web 的实时通信技术，是浏览器应用的 API 技术，使用 Javascript 实现，可以在两个浏览器之间建立端对端（P2P）通信，进而实现一些数据传输、视频流、音频的传输。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="webrtc：基于浏览器实现 P2P 端对端通信">
+<meta property="og:url" content="https://yhao521.github.io/2025/07/23/%E6%91%98%E5%BD%95/webrtc%EF%BC%9A%E5%9F%BA%E4%BA%8E%E6%B5%8F%E8%A7%88%E5%99%A8%E5%AE%9E%E7%8E%B0%20P2P%20%E7%AB%AF%E5%AF%B9%E7%AB%AF%E9%80%9A%E4%BF%A1/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="WebRTC (Web Real-Time Communications) 是一个基于 web 的实时通信技术，是浏览器应用的 API 技术，使用 Javascript 实现，可以在两个浏览器之间建立端对端（P2P）通信，进而实现一些数据传输、视频流、音频的传输。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-07-23T12:01:36.000Z">
+<meta property="article:modified_time" content="2025-07-23T12:01:36.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="clippings">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>webrtc：基于浏览器实现 P2P 端对端通信 - 匆匆过客的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yhao521.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>匆匆过客的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="webrtc：基于浏览器实现 P2P 端对端通信"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-07-23 20:01" pubdate>
+          2025年7月23日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          34 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">webrtc：基于浏览器实现 P2P 端对端通信</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>WebRTC (Web Real-Time Communications) 是一个基于 web 的实时通信技术，是浏览器应用的 高级 API 技术，使用 Javascript 实现，可以在两个浏览器之间建立端对端（P2P）通信，进而实现一些数据传输、视频流、音频的传输。</p>
+<p>它可以实现：</p>
+<ul>
+<li>端对端通信、不经过服务器传输</li>
+<li>音频视频通话</li>
+<li>屏幕分享</li>
+<li>文件数据传输</li>
+</ul>
+<p>webrtc API 有很多，有很多的关键词：信令服务器、视频流、P2P 连接、stun 服务器端口映射等等，不仅仅是连接还包括音视频处理。</p>
+<p>这些突然的概念很难去理解，包括搜到的很多例子，也糅合了很多的概念和场景、一上来就各种视频流、信令服务器又通过 websocket 传输信令，很难去单一理解这件事。那我们现在先只需要实现一些基础的，比如用它实现两个浏览器建立一个连接，用于传输一些基础数据，类似一个 websocket 的双向通信一样。</p>
+<p>在此基础上如果想要实现视频流通信，那么在已有的连接上扩展就可以了，那么按照这个思路进行理解学习。</p>
+<h2 id="NAT-穿透"><a href="#NAT-穿透" class="headerlink" title="NAT 穿透"></a>NAT 穿透</h2><p>关于 NAT 和 UDP 打洞你可能需要了解：</p>
+<ol>
+<li>P2P 传输是通过 stun 服务器进行映射打洞实现的端对端连接，作为浏览器的客户端只能连接公网服务器而不能连接处于另一个家庭之类局域网下的 nat 设备。</li>
+<li>你从家里设备发出的连接到公网 IP 会存在一个本地端口和远程端口，一般情况下是本地随机端口如 12345 连接到远程端口 443 实现 https 网页访问，服务器把网页数据传输给你的 12345 端口，你的浏览器才能展示页面，用完连接就会释放。</li>
+<li>打洞即是 nat 映射，往往家庭设备没有公网 IP，而是内网 IP 如 192.168.1.10，你若需要访问 1.1.1.1:443，路由器会带着你的请求一层层向上递交寻找，直到访问到 1.1.1.1。<br> 假设你内网 IP 之外只有一层 nat 设备，那你的网络访问顺序可能是： 192.168.1.10:1234 -&gt; 192.168.1.1(113.113.113.113:23456) -&gt; 1.1.1.1:443<br> 你的浏览器请求时，创建一个连接，本地端口为 12345，到了路由器，路由器也需要为这个连接创建 nat 映射，否则服务器 1.1.1.1:443 是访问不到 192.168.1.10:1234 这个设备的，他只能访问到 113.113.113.113:23456 这个 IP 和端口，就是这种映射关系使得内网设备能够访问到外网，外网数据能够回传成功。如果你中间的 nat 设备过多， 这种映射关系会更多。</li>
+<li>以上大致就是传统 TCP 的 NAT 技术，STUN 也是同理，只是建立在 UDP 上的一种协议，让这个所谓的端口映射保持的时间更长、且能够双向即时传输。真实场景的 UDP 打洞会更复杂，也不一定能够成功。</li>
+</ol>
+<h2 id="简化流程"><a href="#简化流程" class="headerlink" title="简化流程"></a>简化流程</h2><p>如果你不熟悉 NAT，那没关系，我们暂时就先不引入那么多概念。</p>
+<p><strong>连接到哪里?</strong></p>
+<p>a 和 b 需要通信，a 在本地作为”服务器”的方式监听了 12345 端口，b 此时只需要向 a:12345 发送数据就可以实现单向通信，但此时 b 并不知道 a 监听了 12345 端口，所以我们需要一个中间人来实现信息的传递。</p>
+<p>现在有了一个中间人 c， 可以帮 a 把端口信息传递给 b，同时也可以把 b 在本地的端口信息传递给 a，这样 a 和 b 就可以建立连接双向通信了。</p>
+<p><strong>这个中间人是什么？</strong></p>
+<p>往往是公网服务器，a、b 都可以同时访问到的，一般用 websocket 协议来传递双方的信息，这个过程就是 ICE 信令传递。</p>
+<p>本质上这个过程用什么方式都可以，传递的信息只是一段文本信息，包含了 a 、b 各自的本地接口描述，又称为 <code>本地对象描述符(LocalDescription)</code> ，你可以用 websocket、可以用 HTTP、甚至可以用短信发给对方手动复制粘贴进去实现通信。</p>
+<p>先简化一下连接流程：</p>
+<figure class="highlight xl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs xl"><span class="hljs-function"><span class="hljs-title">a</span>  创建连接和数据管道 -&gt;</span> <span class="hljs-function"><span class="hljs-title">a</span> 发起会话 offer 邀请 -&gt;</span> ICE SERVER  -&gt; <span class="hljs-function"><span class="hljs-title">b</span> 接受会话邀请 -&gt;</span> <span class="hljs-function"><span class="hljs-title">b</span> 创建应答 -&gt;</span> ICE SERVER -&gt; <span class="hljs-function"><span class="hljs-title">a</span> 连接完成 -&gt;</span> 开始双向通信<br></code></pre></td></tr></table></figure>
+<ul>
+<li>新增的 发起会话 offer，实际上就是“创建本地端口”，以及收集本地数据、网络对等信息的过程。</li>
+<li>ICE SERVER 我们通过手工复制实现。</li>
+<li>数据管道是为了满足我们传输数据需要所创建的，这是可选的，也可以创建音频视频流，总之需要有一个东西否则建立的连接是无效的。</li>
+<li>a 并不是会话呼叫方，你可以理解为会话邀请方，而 b 是 收到邀请函赴约的，所以我们理解为应答方。</li>
+</ul>
+<p>这是一个详细的连接流程图：</p>
+<p>![[_resources&#x2F;ba38abe341f717065b36cf1ce020d39f_MD5.svg]]</p>
+<h2 id="API-介绍"><a href="#API-介绍" class="headerlink" title="API 介绍"></a>API 介绍</h2><p>简单介绍下我们用到的几个基础 API</p>
+<h2 id="RTCPeerConnection"><a href="#RTCPeerConnection" class="headerlink" title="RTCPeerConnection"></a>RTCPeerConnection</h2><p>如果我们想要让 a、b 两个人或 a、b 两个浏览器建立连接，就需要通过这个 API 创建一个连接，这个每个端都需要创建一个连接。</p>
+<h2 id="createDataChannel"><a href="#createDataChannel" class="headerlink" title="createDataChannel"></a>createDataChannel</h2><p>基于连接创建数据通道，可以传输文本、二进制数据等。</p>
+<h2 id="createOffer"><a href="#createOffer" class="headerlink" title="createOffer"></a>createOffer</h2><p>创建 offer 邀请， offer 里包含了本地设备信息的一些描述。</p>
+<h2 id="setRemoteDescription"><a href="#setRemoteDescription" class="headerlink" title="setRemoteDescription"></a>setRemoteDescription</h2><p>设置远程描述符，理解这个 API 很重要，对于任意一个连接的断点，其自身都是 local，其对端都是 remote。</p>
+<h2 id="RTCSessionDescription"><a href="#RTCSessionDescription" class="headerlink" title="RTCSessionDescription"></a>RTCSessionDescription</h2><p>用于把文本的描述符实例化为一个具体的描述符对象。</p>
+<h2 id="createAnswer"><a href="#createAnswer" class="headerlink" title="createAnswer"></a>createAnswer</h2><p>针对收到的 offer，创建对应的应答响应，其结果也是一个对象描述符，并将其设置到本地描述符使其连接。</p>
+<h2 id="实现代码"><a href="#实现代码" class="headerlink" title="实现代码"></a>实现代码</h2><p>简单实现 a b 两个页面通信，可以用同一个或者不同的浏览器打开测试。手动复制实现 offer 和 answer 传递。</p>
+<h3 id="a-html"><a href="#a-html" class="headerlink" title="a.html"></a>a.html</h3><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-keyword">html</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">&quot;en&quot;</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">&quot;UTF-8&quot;</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>a page<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">h2</span>&gt;</span>a page<span class="hljs-tag">&lt;/<span class="hljs-name">h2</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="language-javascript"></span><br><span class="language-javascript">    <span class="hljs-keyword">function</span> <span class="hljs-title function_">handleCreateDescriptionError</span>(<span class="hljs-params">error</span>) &#123;</span><br><span class="language-javascript">    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(\<span class="hljs-string">`Unable to create an offer: <span class="hljs-subst">$&#123;error.toString()&#125;</span>\`);</span></span><br><span class="hljs-string"><span class="language-javascript">    &#125;</span></span><br><span class="hljs-string"><span class="language-javascript">    </span></span><br><span class="hljs-string"><span class="language-javascript">    function handleSendChannelStatusChange(event)&#123;</span></span><br><span class="hljs-string"><span class="language-javascript">        console.log(&#x27;handleSendChannelStatusChange:&#x27;, sendChannel.readyState, event)</span></span><br><span class="hljs-string"><span class="language-javascript">    &#125;</span></span><br><span class="hljs-string"><span class="language-javascript">    </span></span><br><span class="hljs-string"><span class="language-javascript">    localConnection = new RTCPeerConnection();</span></span><br><span class="hljs-string"><span class="language-javascript"></span></span><br><span class="hljs-string"><span class="language-javascript">    sendChannel = localConnection.createDataChannel(&quot;sendChannel&quot;);</span></span><br><span class="hljs-string"><span class="language-javascript"></span></span><br><span class="hljs-string"><span class="language-javascript">    sendChannel.onopen = handleSendChannelStatusChange;</span></span><br><span class="hljs-string"><span class="language-javascript">    sendChannel.onclose = handleSendChannelStatusChange;</span></span><br><span class="hljs-string"><span class="language-javascript"></span></span><br><span class="hljs-string"><span class="language-javascript">    sendChannel.onmessage = (event)=&gt;&#123;</span></span><br><span class="hljs-string"><span class="language-javascript">        console.log(&#x27;event.data&#x27;,event.data)</span></span><br><span class="hljs-string"><span class="language-javascript">    &#125;</span></span><br><span class="hljs-string"><span class="language-javascript"></span></span><br><span class="hljs-string"><span class="language-javascript">    localConnection.onicecandidate = (e) =&gt;&#123;</span></span><br><span class="hljs-string"><span class="language-javascript">        console.log(&#x27;a on ice candidate&#x27;,e)</span></span><br><span class="hljs-string"><span class="language-javascript">    &#125;</span></span><br><span class="hljs-string"><span class="language-javascript"></span></span><br><span class="hljs-string"><span class="language-javascript">    localConnection</span></span><br><span class="hljs-string"><span class="language-javascript">    .createOffer()</span></span><br><span class="hljs-string"><span class="language-javascript">    .then((offer) =&gt; localConnection.setLocalDescription(offer))</span></span><br><span class="hljs-string"><span class="language-javascript">    .then(() =&gt;</span></span><br><span class="hljs-string"><span class="language-javascript">        &#123;</span></span><br><span class="hljs-string"><span class="language-javascript">            console.log(&#x27;请去设置远程链接符号：&#x27;, JSON.stringify(localConnection.localDescription.toJSON()))</span></span><br><span class="hljs-string"><span class="language-javascript">        &#125;</span></span><br><span class="hljs-string"><span class="language-javascript">    )</span></span><br><span class="hljs-string"><span class="language-javascript">    .catch(handleCreateDescriptionError);</span></span><br><span class="hljs-string"><span class="language-javascript"></span></span><br><span class="hljs-string"><span class="language-javascript">    function setRemoteDescription(text)&#123;</span></span><br><span class="hljs-string"><span class="language-javascript">        const res = localConnection.setRemoteDescription(text)</span></span><br><span class="hljs-string"><span class="language-javascript">        console.log(&#x27;set remote res:&#x27;, res)</span></span><br><span class="hljs-string"><span class="language-javascript">    &#125;</span></span><br><span class="hljs-string"><span class="language-javascript"></span></span><br><span class="hljs-string"><span class="language-javascript"></span></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="b-html"><a href="#b-html" class="headerlink" title="b.html"></a>b.html</h3><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-keyword">html</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">&quot;en&quot;</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">&quot;UTF-8&quot;</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>b page<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">h2</span>&gt;</span>b page<span class="hljs-tag">&lt;/<span class="hljs-name">h2</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="language-javascript"></span><br><span class="language-javascript">    <span class="hljs-keyword">function</span> <span class="hljs-title function_">handleCreateDescriptionError</span>(<span class="hljs-params">error</span>) &#123;</span><br><span class="language-javascript">    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(\<span class="hljs-string">`Unable to create an offer: <span class="hljs-subst">$&#123;error.toString()&#125;</span>\`);</span></span><br><span class="hljs-string"><span class="language-javascript">    &#125;</span></span><br><span class="hljs-string"><span class="language-javascript">    </span></span><br><span class="hljs-string"><span class="language-javascript">    function handleReceiveChannelStatusChange(event) &#123;</span></span><br><span class="hljs-string"><span class="language-javascript">        if (receiveChannel) &#123;</span></span><br><span class="hljs-string"><span class="language-javascript">            console.log(</span></span><br><span class="hljs-string"><span class="language-javascript">            \`Receive channel&#x27;s status has changed to <span class="hljs-subst">$&#123;receiveChannel.readyState&#125;</span>\`</span></span><br><span class="hljs-string"><span class="language-javascript">            );</span></span><br><span class="hljs-string"><span class="language-javascript">        &#125;</span></span><br><span class="hljs-string"><span class="language-javascript">    &#125;</span></span><br><span class="hljs-string"><span class="language-javascript">    localConnection = new RTCPeerConnection();</span></span><br><span class="hljs-string"><span class="language-javascript"></span></span><br><span class="hljs-string"><span class="language-javascript">    localConnection.onicecandidate = (e) =&gt;&#123;</span></span><br><span class="hljs-string"><span class="language-javascript">        console.log(&#x27;a on ice candidate&#x27;,e)</span></span><br><span class="hljs-string"><span class="language-javascript">    &#125;</span></span><br><span class="hljs-string"><span class="language-javascript"></span></span><br><span class="hljs-string"><span class="language-javascript">    localConnection.ondatachannel = (event)=&gt;&#123;</span></span><br><span class="hljs-string"><span class="language-javascript">        receiveChannel = event.channel</span></span><br><span class="hljs-string"><span class="language-javascript">        receiveChannel.onmessage = (event)=&gt;&#123;</span></span><br><span class="hljs-string"><span class="language-javascript">            console.log(&#x27;event.data&#x27;,event.data)</span></span><br><span class="hljs-string"><span class="language-javascript">        &#125;</span></span><br><span class="hljs-string"><span class="language-javascript">        receiveChannel.onopen = handleReceiveChannelStatusChange;</span></span><br><span class="hljs-string"><span class="language-javascript">        receiveChannel.onclose = handleReceiveChannelStatusChange;</span></span><br><span class="hljs-string"><span class="language-javascript">    &#125;</span></span><br><span class="hljs-string"><span class="language-javascript"></span></span><br><span class="hljs-string"><span class="language-javascript">    function setRemoteDescription(text)&#123;</span></span><br><span class="hljs-string"><span class="language-javascript">        const desc = JSON.parse(text)</span></span><br><span class="hljs-string"><span class="language-javascript">        const res = localConnection.setRemoteDescription(new RTCSessionDescription(desc))</span></span><br><span class="hljs-string"><span class="language-javascript">        console.log(&#x27;set remote res:&#x27;, res)</span></span><br><span class="hljs-string"><span class="language-javascript">    &#125;</span></span><br><span class="hljs-string"><span class="language-javascript"></span></span><br><span class="hljs-string"><span class="language-javascript">    function createAnswer()</span></span><br><span class="hljs-string"><span class="language-javascript">    &#123;</span></span><br><span class="hljs-string"><span class="language-javascript">        localConnection.createAnswer().then(answer =&gt;&#123;</span></span><br><span class="hljs-string"><span class="language-javascript">            console.log(&#x27;current b answer&#x27;, answer)</span></span><br><span class="hljs-string"><span class="language-javascript">            localConnection.setLocalDescription(answer)</span></span><br><span class="hljs-string"><span class="language-javascript">        &#125;)</span></span><br><span class="hljs-string"><span class="language-javascript">    &#125;</span></span><br><span class="hljs-string"><span class="language-javascript"></span></span><br><span class="hljs-string"><span class="language-javascript"></span></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="测试连接"><a href="#测试连接" class="headerlink" title="测试连接"></a>测试连接</h3><ol>
+<li>打开 a.html 手动执行 <code>JSON.stringify(localConnection.localDescription.toJSON())</code> 获取本地描述符</li>
+<li>打开 b.html 手动执行 <code>setRemoteDescription(&#39;a 的描述符&#39;)</code></li>
+<li>在 b.html 执行 <code>createAnswer()</code></li>
+<li>在 b.html 获取 b 的本地描述符 <code>JSON.stringify(localConnection.localDescription)</code></li>
+<li>在 a.html 执行 <code>setRemoteDescription(&#39;a 的描述符&#39;)</code></li>
+<li>双向通信开始，在 a.html 执行 <code>sendChannel.send(&#39;123&#39;)</code></li>
+<li>在 b.html 收到响应， <code>event.data 123</code>, 也可以通过 <code>receiveChannel.send(&#39;456&#39;)</code> 发送给 a</li>
+</ol>
+<p>大致了解流程之后，仔细阅读交互逻辑去理解这个过程。</p>
+<p>当你看完本文并实现了 demo 之后，就可以看官方文档详细了解每一个接口细节：<a target="_blank" rel="noopener" href="https://webrtc.org/getting-started/data-channels">https://webrtc.org/getting-started/data-channels</a></p>
+<h2 id="stun-配置"><a href="#stun-配置" class="headerlink" title="stun 配置"></a>stun 配置</h2><p>当你在本地测试好后，放到公网上，两个不同 nat 下的设备就会发现无法连接了。那是因为本地测试时不需要打洞，而跨网络需要打洞，那么此时就需要引入 stun 服务器来进行 NAT 打洞。</p>
+<p>实现非常简单，只需要配置下 stun 服务器即可：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-keyword">var</span> configuration = &#123;<br>        <span class="hljs-attr">iceServers</span>: [&#123;<br>                <span class="hljs-attr">urls</span>: <span class="hljs-string">&quot;stun:stun.miwifi.com&quot;</span>,<br>            &#125;<br>        ]<br>    &#125;;<br><span class="hljs-keyword">const</span> localConnection = <span class="hljs-keyword">new</span> <span class="hljs-title class_">RTCPeerConnection</span>(configuration);<br></code></pre></td></tr></table></figure>
+<ul>
+<li>需要给每个端点创建连接时配置</li>
+<li>有很多开放的免费 stun 服务器，这里采用小米的。</li>
+</ul>
+<h2 id="信令传递"><a href="#信令传递" class="headerlink" title="信令传递"></a>信令传递</h2><p>候选信令传输，一般情况下为连接创建完 offer，改变完本地描述符之后会受到该事件，然后把 e.candidate 传递给对端并添加到对端候选信令列表里。</p>
+<p>传统做法：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs javascript">localConnection.<span class="hljs-property">onicecandidate</span> = <span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> &#123;<br>       <br>        <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;a on ice candidate&#x27;</span>, e.<span class="hljs-property">candidate</span>) <span class="hljs-comment">// 拿到信令信息</span><br>        <span class="hljs-comment">// 通过信令服务器或者任何方式，包括手动复制粘贴传递</span><br>        localConnectionB.<span class="hljs-title function_">addIceCandidate</span>(e.<span class="hljs-property">candidate</span>) <span class="hljs-comment">// 在对端连接如 b 的逻辑里新增候选信令</span><br>    &#125;<br></code></pre></td></tr></table></figure>
+
+<p>由于我们省略了信令的数据传输，所以 offer 必须在信令候选人 complete 状态之后，再去获取本地描述符发送给对端。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-keyword">function</span> <span class="hljs-title function_">waitIceComplete</span>(<span class="hljs-params">conn</span>)<br>&#123;<br>   <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve</span>)=&gt;</span>&#123;<br>        <span class="hljs-keyword">const</span> <span class="hljs-title function_">callback</span> = ev =&gt;&#123;<br>            <span class="hljs-keyword">if</span>(ev.<span class="hljs-property">currentTarget</span>.<span class="hljs-property">iceGatheringState</span> == <span class="hljs-string">&#x27;complete&#x27;</span>)&#123;<br>                <span class="hljs-title function_">resolve</span>()<br>            &#125;<br>        &#125;<br>        conn.<span class="hljs-title function_">addEventListener</span>(<span class="hljs-string">&#x27;icegatheringstatechange&#x27;</span>,callback)<br>   &#125;)<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>complete 之后的再获取本地描述符就已经包含了信令候选人的信息。</strong></p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs ini"><span class="hljs-attr">v</span>=<span class="hljs-number">0</span><br><span class="hljs-attr">o</span>=- <span class="hljs-number">704537251720792184</span> <span class="hljs-number">2</span> IN IP4 <span class="hljs-number">127.0</span>.<span class="hljs-number">0.1</span><br><span class="hljs-attr">s</span>=-<br><span class="hljs-attr">t</span>=<span class="hljs-number">0</span> <span class="hljs-number">0</span><br><span class="hljs-attr">a</span>=group:BUNDLE <span class="hljs-number">0</span><br><span class="hljs-attr">a</span>=extmap-allow-mixed<br><span class="hljs-attr">a</span>=msid-semantic: WMS<br><span class="hljs-attr">m</span>=application <span class="hljs-number">55286</span> UDP/DTLS/SCTP webrtc-datachannel<br><span class="hljs-attr">c</span>=IN IP4 <span class="hljs-number">116.1</span>.<span class="hljs-number">1.1</span><br><span class="hljs-attr">a</span>=candidate:<span class="hljs-number">866165860</span> <span class="hljs-number">1</span> udp <span class="hljs-number">2113937151</span> <span class="hljs-number">21</span>e0e50c-ecd2-<span class="hljs-number">47</span>e0-a621-e799b32546d4.local <span class="hljs-number">55286</span> typ host generation <span class="hljs-number">0</span> network-cost <span class="hljs-number">999</span><br><span class="hljs-attr">a</span>=candidate:<span class="hljs-number">2955795236</span> <span class="hljs-number">1</span> udp <span class="hljs-number">1677729535</span> <span class="hljs-number">116.1</span>.<span class="hljs-number">1.1</span>(公网 IP) <span class="hljs-number">55286</span> typ srflx raddr <span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span> rport <span class="hljs-number">0</span> generation <span class="hljs-number">0</span> network-cost <span class="hljs-number">999</span><br><span class="hljs-attr">a</span>=ice-ufrag:QVLU<br><span class="hljs-attr">a</span>=ice-pwd:KN74Iuh6PIXO+DHFmfPdTVy8<br><span class="hljs-attr">a</span>=ice-options:trickle<br><span class="hljs-attr">a</span>=fingerprint:sha-<span class="hljs-number">256</span> AA:AA:AA&#123;指纹信息&#125;AA:AA:AA<br><span class="hljs-attr">a</span>=setup:active<br><span class="hljs-attr">a</span>=mid:<span class="hljs-number">0</span><br><span class="hljs-attr">a</span>=sctp-port:<span class="hljs-number">5000</span><br><span class="hljs-attr">a</span>=max-message-size:<span class="hljs-number">262144</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="进阶实现"><a href="#进阶实现" class="headerlink" title="进阶实现"></a>进阶实现</h2><p>当你熟悉了基础的 webrtc API 之后，还可以做很多事情。</p>
+<h2 id="音视频通信"><a href="#音视频通信" class="headerlink" title="音视频通信"></a>音视频通信</h2><p>获取视频流 <code>getUserMedia</code> ，这是非常简单的 API，在 createOffer 前通过 getUserMedia 获取 stream</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-keyword">async</span> <span class="hljs-title function_">getMedia</span>(<span class="hljs-params"></span>)&#123;<br>    <span class="hljs-keyword">return</span> <span class="hljs-keyword">await</span> navigator.<span class="hljs-property">mediaDevices</span>.<span class="hljs-title function_">getUserMedia</span>(&#123;<br>      <span class="hljs-attr">audio</span>: <span class="hljs-literal">true</span>, <span class="hljs-comment">// 麦克风,根据需要获取</span><br>      <span class="hljs-attr">video</span>: <span class="hljs-literal">true</span>, <span class="hljs-comment">// 摄像头,根据需要获取</span><br>    &#125;)<br>&#125;<br><br><span class="hljs-title function_">getMedia</span>().<span class="hljs-title function_">then</span>(<span class="hljs-function"><span class="hljs-params">stream</span> =&gt;</span> localConnection.<span class="hljs-title function_">addStream</span>(stream)).<span class="hljs-title function_">then</span>(<span class="hljs-function">() =&gt;</span> localConnection.<span class="hljs-title function_">createOffer</span>())<br></code></pre></td></tr></table></figure>
+
+<p>在接收端，获取流并显示视频：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs javascript">localConnection.<span class="hljs-property">ontrack</span> = <span class="hljs-function">(<span class="hljs-params">ev</span>)=&gt;</span>&#123;<br>        <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;ontrack&#x27;</span>,ev)<br>        <span class="hljs-keyword">var</span> targetDisplay = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;target-display&#x27;</span>)<br>        targetDisplay.<span class="hljs-property">srcObject</span> = ev.<span class="hljs-property">streams</span>[<span class="hljs-number">0</span>]<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>如果你没有摄像头，却申请了摄像头权限，那么这个 API 执行会报错。建议麦克风和摄像头分开申请。</strong></p>
+<p>另外，addStream 已经被 webrtc 标准标记弃用了。可以使用 addTrack 替代：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs javascript">navigator.<span class="hljs-title function_">getUserMedia</span>(&#123; <span class="hljs-attr">video</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">audio</span>: <span class="hljs-literal">true</span> &#125;, <span class="hljs-function">(<span class="hljs-params">stream</span>) =&gt;</span> &#123;<br>  <span class="hljs-keyword">const</span> pc = <span class="hljs-keyword">new</span> <span class="hljs-title class_">RTCPeerConnection</span>();<br>  stream.<span class="hljs-title function_">getTracks</span>().<span class="hljs-title function_">forEach</span>(<span class="hljs-function">(<span class="hljs-params">track</span>) =&gt;</span> &#123;<br>    pc.<span class="hljs-title function_">addTrack</span>(track, stream);<br>  &#125;);<br>&#125;);<br></code></pre></td></tr></table></figure>
+
+<h2 id="分享屏幕"><a href="#分享屏幕" class="headerlink" title="分享屏幕"></a>分享屏幕</h2><p>和音视频一样，分享屏幕的内容也是非常简单的 API <code>getDisplayMedia</code> 。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs javascript">navigator.<span class="hljs-property">mediaDevices</span><br>    .<span class="hljs-title function_">getDisplayMedia</span>()<br>    .<span class="hljs-title function_">then</span>(<span class="hljs-function"><span class="hljs-params">stream</span> =&gt;</span> localConnection.<span class="hljs-title function_">addStream</span>(stream))<br>    .<span class="hljs-title function_">then</span>(<span class="hljs-function">()=&gt;</span>localConnection.<span class="hljs-title function_">createOffer</span>())<br></code></pre></td></tr></table></figure>
+
+<h2 id="传输文件"><a href="#传输文件" class="headerlink" title="传输文件"></a>传输文件</h2><p>前面例子中我们进行传递最简单的文本信息，除此之外还可以用于传输文件等任何二进制数据。</p>
+<figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs abnf">var dc <span class="hljs-operator">=</span> pc.createDataChannel(<span class="hljs-string">&quot;sendChannel&quot;</span>)<span class="hljs-comment">;</span><br></code></pre></td></tr></table></figure>
+
+<p>这个通道有传输数据的限制，不能超过 64k,否则就会出现莫名其妙的连接断开提示.</p>
+<p><code>RTCDataChannel send arraybuffer close</code></p>
+<p>所以必须将文件拆分后传输，接收时再进行合并组装。</p>
+<p>ArrayBuffer 是 JS 里的二进制数据格式，我们需要把文件转换为 ArrayBuffer，并且通过 DataView 读取其中一部分二进制数据发送给对端。</p>
+<p>然后，接收端需要按照文件大小接收对应 ArrayBuffer 数组，并将其合并成文件对象</p>
+<ul>
+<li>DataView 可理解为数据窗口，从 ArrayBuffer 的数据地址读取一部分数据</li>
+<li>接收端的数据通道消息在 <code>ondatachannel</code> 事件里获取，而不是对端自己的 dc.onmessage</li>
+<li>File 或 Blob 对象实例化参数允许接收多个字节数组</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * </span><br><span class="hljs-comment"> * <span class="hljs-doctag">@param</span> file </span><br><span class="hljs-comment"> * <span class="hljs-doctag">@returns</span> </span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">function</span> <span class="hljs-title function_">fileToArrayBuffer</span>(<span class="hljs-params">file</span>) &#123;<br>    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve</span>) =&gt;</span> &#123;<br>        <span class="hljs-keyword">var</span> reader = <span class="hljs-keyword">new</span> <span class="hljs-title class_">FileReader</span>();<br>        reader.<span class="hljs-title function_">addEventListener</span>(<span class="hljs-string">&#x27;load&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">event</span>) =&gt;</span> &#123;<br>            <span class="hljs-title function_">resolve</span>(event.<span class="hljs-property">target</span>.<span class="hljs-property">result</span>)<br>        &#125;);<br>        reader.<span class="hljs-title function_">readAsArrayBuffer</span>(file);<br>    &#125;);<br><br>&#125;<br><br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * </span><br><span class="hljs-comment"> * <span class="hljs-doctag">@param</span> dc </span><br><span class="hljs-comment"> * <span class="hljs-doctag">@param</span> file </span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">transferFile</span>(<span class="hljs-params">dc, file</span>) &#123;<br>    <span class="hljs-keyword">const</span> fileArrayBuffer = <span class="hljs-keyword">await</span> <span class="hljs-title function_">fileToArrayBuffer</span>(file)<br><br>    <span class="hljs-comment">// 预先通知对端将有一个 file.size 大小的文件到达</span><br>    dc.<span class="hljs-title function_">send</span>(<span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>(&#123;<br>        <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;file&#x27;</span>,<br>        <span class="hljs-attr">file</span>: &#123;<br>            <span class="hljs-attr">name</span>: file.<span class="hljs-property">name</span>,<br>            <span class="hljs-attr">size</span>: file.<span class="hljs-property">size</span>,<br>            <span class="hljs-attr">type</span>: file.<span class="hljs-property">type</span><br>        &#125;<br>    &#125;))<br><br>    <span class="hljs-keyword">const</span> maxLength = <span class="hljs-number">1024</span> * <span class="hljs-number">64</span><br>    <span class="hljs-keyword">let</span> size = <span class="hljs-number">0</span> <span class="hljs-comment">// 已经传输大小</span><br>    <span class="hljs-keyword">while</span> (size &lt; fileArrayBuffer.<span class="hljs-property">byteLength</span>) &#123;<br>        <span class="hljs-keyword">const</span> length = fileArrayBuffer.<span class="hljs-property">byteLength</span> - offset &gt;= maxLength ? maxLength : fileArrayBuffer.<span class="hljs-property">byteLength</span> - offset;<br>        <span class="hljs-keyword">const</span> dv = <span class="hljs-keyword">new</span> <span class="hljs-title class_">DataView</span>(fileArrayBuffer, offset, length);<br><br>        <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(\<span class="hljs-string">`chunk offset:<span class="hljs-subst">$&#123;offset&#125;</span> length: <span class="hljs-subst">$&#123;length&#125;</span>\`, dv)</span><br><span class="hljs-string">        offset += length</span><br><span class="hljs-string">        size += length</span><br><span class="hljs-string"></span><br><span class="hljs-string">        dc.send(dv)</span><br><span class="hljs-string">    &#125;</span><br><span class="hljs-string">&#125;</span><br><span class="hljs-string"></span><br><span class="hljs-string">const pc = new RTCPeerConnection()</span><br><span class="hljs-string">const dc = pc.createDataChannel(&#x27;sendChannel&#x27;)</span><br><span class="hljs-string"></span><br><span class="hljs-string">// ... 省略连接过程</span><br><span class="hljs-string"></span><br><span class="hljs-string">var input = document.createElement(&#x27;input&#x27;)</span><br><span class="hljs-string">input.type = &#x27;file&#x27;</span><br><span class="hljs-string">input.onchange = async () =&gt; &#123;</span><br><span class="hljs-string">    const file = input.files[0]</span><br><span class="hljs-string"></span><br><span class="hljs-string">    transferFile(dc, file)</span><br><span class="hljs-string">&#125;</span><br><span class="hljs-string">input.click()</span><br><span class="hljs-string"></span><br><span class="hljs-string">// 而对端的接收逻辑也非常简单</span><br><span class="hljs-string"></span><br><span class="hljs-string">let receiveQueue = &#123;&#125;</span><br><span class="hljs-string">let receiveFiles = []</span><br><span class="hljs-string"></span><br><span class="hljs-string">const remotePc = new RTCPeerConnection()</span><br><span class="hljs-string">remotePc.ondatachannel = event =&gt; &#123;</span><br><span class="hljs-string">    const receiveChannel = event.channel</span><br><span class="hljs-string"></span><br><span class="hljs-string">    receiveChannel.onmessage = (event) =&gt; &#123;</span><br><span class="hljs-string">        if(event.data instanceof ArrayBuffer)&#123;</span><br><span class="hljs-string">            if(receiveQueue[&#x27;file&#x27;])&#123;</span><br><span class="hljs-string"></span><br><span class="hljs-string">                receiveQueue[&#x27;file&#x27;][&#x27;bytes&#x27;].push(event.data)</span><br><span class="hljs-string">                receiveQueue[&#x27;file&#x27;][&#x27;receivedByte&#x27;] += event.data.byteLength</span><br><span class="hljs-string"></span><br><span class="hljs-string">                if(receiveQueue[&#x27;file&#x27;][&#x27;receivedByte&#x27;] == receiveQueue[&#x27;file&#x27;][&#x27;fullSize&#x27;])&#123;</span><br><span class="hljs-string">                    const &#123;name, bytes, type&#125; = receiveQueue[&#x27;file&#x27;]</span><br><span class="hljs-string">                    delete receiveQueue[&#x27;file&#x27;] // 清除队列</span><br><span class="hljs-string"></span><br><span class="hljs-string">                    const fileInstance = new File(bytes, name, &#123;type: type&#125;)</span><br><span class="hljs-string">                    receiveFiles.push(fileInstance)</span><br><span class="hljs-string"></span><br><span class="hljs-string">                    const fileDownURL = URL.createObjectURL(fileInstance)</span><br><span class="hljs-string">                    console.log(\`Received a file, The download url is <span class="hljs-subst">$&#123;fileDownURL&#125;</span>\`)</span><br><span class="hljs-string">                    </span><br><span class="hljs-string">                &#125;</span><br><span class="hljs-string">            &#125;else&#123;</span><br><span class="hljs-string">                console.error(\`unknown data\`, event)</span><br><span class="hljs-string">            &#125;</span><br><span class="hljs-string">        &#125;else&#123;</span><br><span class="hljs-string">            const payload = JSON.parse(event.data)</span><br><span class="hljs-string">            if(payload.type == &#x27;file&#x27;)&#123;</span><br><span class="hljs-string">                receiveQueue[&#x27;file&#x27;] = &#123;</span><br><span class="hljs-string">                    name: payload.file.name,</span><br><span class="hljs-string">                    size: payload.file.size,</span><br><span class="hljs-string">                    type: payload.file.type,</span><br><span class="hljs-string">                    receivedByte: 0,</span><br><span class="hljs-string">                    bytes: []</span><br><span class="hljs-string">                &#125;</span><br><span class="hljs-string">            &#125;</span><br><span class="hljs-string">        &#125;</span><br><span class="hljs-string">    &#125;</span><br><span class="hljs-string">&#125;</span><br><span class="hljs-string">// ... 省略远端连接过程</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="获取用户真实-IP"><a href="#获取用户真实-IP" class="headerlink" title="获取用户真实 IP"></a>获取用户真实 IP</h2><p>也可以利用 stun 的打洞功能实现获取用户的公网 IP，此方式大部分情况可以绕过用户的系统代理软件，以获取到真实 IP。</p>
+<p>如果你将 ICE 服务器配置一个谷歌一个小米的，如果对方代理有路由分流，你可以同时获取到两个 IP，对应国内和海外 IP。(示例代码只正则匹配了一个)</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-keyword">function</span> <span class="hljs-title function_">waitIceComplete</span>(<span class="hljs-params">conn</span>) &#123;<br>    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve</span>) =&gt;</span> &#123;<br>        <span class="hljs-keyword">const</span> <span class="hljs-title function_">callback</span> = ev =&gt; &#123;<br>            <span class="hljs-keyword">if</span> (ev.<span class="hljs-property">currentTarget</span>.<span class="hljs-property">iceGatheringState</span> == <span class="hljs-string">&#x27;complete&#x27;</span>) &#123;<br>                <span class="hljs-title function_">resolve</span>()<br>            &#125;<br>        &#125;<br>        conn.<span class="hljs-title function_">addEventListener</span>(<span class="hljs-string">&#x27;icegatheringstatechange&#x27;</span>, callback)<br>    &#125;)<br>&#125;<br><span class="hljs-keyword">function</span> <span class="hljs-title function_">matchIP</span>(<span class="hljs-params">text</span>) &#123;<br>    <span class="hljs-keyword">const</span> matches = text.<span class="hljs-title function_">match</span>(<span class="hljs-regexp">/c=IN IP4 (\d+.\d+.\d+.\d+)/</span>)<br>    <span class="hljs-keyword">return</span> matches ? matches[<span class="hljs-number">1</span>] : <span class="hljs-string">&#x27;&#x27;</span><br>&#125;<br><br><span class="hljs-keyword">function</span> <span class="hljs-title function_">getPublicIP</span>(<span class="hljs-params"></span>) &#123;<br>    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> &#123;<br>        <span class="hljs-keyword">var</span> configuration = &#123;<br>            <span class="hljs-attr">iceServers</span>: [&#123;<br>                <span class="hljs-attr">urls</span>: <span class="hljs-string">&quot;stun:stun.miwifi.com&quot;</span>,<br>            &#125;<br>            ]<br>        &#125;;<br>        <span class="hljs-keyword">const</span> localConnection = <span class="hljs-keyword">new</span> <span class="hljs-title class_">RTCPeerConnection</span>(configuration);<br>        localConnection.<span class="hljs-title function_">createDataChannel</span>(<span class="hljs-string">&#x27;data&#x27;</span>)<br>        localConnection.<span class="hljs-title function_">createOffer</span>().<span class="hljs-title function_">then</span>(<span class="hljs-function"><span class="hljs-params">offer</span> =&gt;</span> localConnection.<span class="hljs-title function_">setLocalDescription</span>(offer))<br>            .<span class="hljs-title function_">then</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">waitIceComplete</span>(localConnection))<br>            .<span class="hljs-title function_">then</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">resolve</span>(<span class="hljs-title function_">matchIP</span>(localConnection.<span class="hljs-property">localDescription</span>.<span class="hljs-property">sdp</span>)))<br>    &#125;)<br><br>&#125;<br><br><span class="hljs-title function_">getPublicIP</span>().<span class="hljs-title function_">then</span>(<span class="hljs-function"><span class="hljs-params">ip</span> =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;ip:&#x27;</span>+ip))<br></code></pre></td></tr></table></figure>
+
+<h2 id="实现的一个-Demo"><a href="#实现的一个-Demo" class="headerlink" title="实现的一个 Demo"></a>实现的一个 Demo</h2><p><a target="_blank" rel="noopener" href="https://p2p.mjj.ee/">https://p2p.mjj.ee/</a></p>
+<p>学习 webrtc 过程中实现的一个 demo，实现了多人聊天室内的常见功能。</p>
+<ul>
+<li>语音通话、视频流</li>
+<li>文件传送</li>
+<li>屏幕分享</li>
+</ul>
+<h2 id="一些奇怪的测试记录"><a href="#一些奇怪的测试记录" class="headerlink" title="一些奇怪的测试记录"></a>一些奇怪的测试记录</h2><p>在学习 webrtc 的过程中遇到了很多奇怪的现象，没有找到原因。</p>
+<p><strong>其一是：</strong></p>
+<p>同一份代码，使用 <a target="_blank" rel="noopener" href="http://127.0.0.1:8000/">http://127.0.0.1:8000</a> 访问可以获取到 ICE 信令信息，且可以连接成功。</p>
+<p>而同本机的网卡 <a target="_blank" rel="noopener" href="http://192.168.1.x:8000/">http://192.168.1.x:8000</a> 或者部署到公网之类的地址进行访问，就无法连接。</p>
+<p>两端均在本地测试，不存在网络不通等问题。</p>
+<p>连接过程的状态是：</p>
+<figure class="highlight maxima"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs maxima">ice <span class="hljs-built_in">status</span>: <span class="hljs-built_in">new</span><br>ice <span class="hljs-built_in">status</span>: checking<br>ice <span class="hljs-built_in">status</span>: disconnected<br>connect: failed<br></code></pre></td></tr></table></figure>
+
+<p>测试地址： <a target="_blank" rel="noopener" href="https://sfc.vuejs.org/#eNqlV81u20YQfpUtUUAUaq/q5FRVMho4/UXQBHGAHkIDWi+HFB1yl9hdSggMXXppi/jQS5BLgZ5ydU49FP17Gsu59RU6S1IiRVKygArwz+7OfDPzzezM6tJ5kKZ0loEzdEaaqyg1RIPJ0mNPREkqlSGXREFAFiRQMiE9FO15whNcCm1IokMytudu7yuIY0m+kyr2P+j1PRFkgptICjJnkfmaw4lM0hgMuKgp+uTSE6T2UWhTCSJgTp6gnUiD6yrQMp5Bn4yPm+L2EwUkx6IRhy+ZmYKKRHhqmAEyHpMeL+31WrYqmzm+i852H1uX2meL9lZBBmdxfM74C2QEZlucXknLGKgP51noTp4rw8/ICUYCBWE6j4FPmQjBJ0aSIfnwEmaUZ0qBMM+YCsG0o15MMJBui5aquwH2pK0MQVAFiZzB5zOEfBRpAwKU20PUcIWaB1LE0TtY07OF7j0y0sF8dzIEZb7/fx1b1Na5meJnXdcGtHH7BUkzpkgsEegJgML8cwVowS7KWKyA5avYbEmsdWmx/zgI7AFFf4Ur7cLWUyWFV/SRXTyE4s6iP4VYv9Rh+qXgbn983Eji5orZu9m6oGszDUJWdRtLrNpciPhon2B1Vp61y5JMPvrm9PG3VBu7FwUvKwMItRlEv1XChYsVdTb0p/mqHvsOxHYMhjCh53kWWugF/Q/y82YZbsRfQgwnByXaXp63krbWvTstFdIOv3qFFF55DjfXV8sff7a9eEccpfwqkTV398lkTbwrle2gNkq4ncddeLsKeSOk99d/3/51baN/97rdE2uXujzzBF7v2sWuX83G9RkMVr1eiiAKM8VyjTERWRx3VVpTroGHHJ+CmoHSQ/K83cq2dOBMxd3y6xgdbTIxtL9oEs2jIKLY1z3nYC+V+zSmoZQh8olaw6NP7n98b6vuWcd+oymf1Sj/tIuklFsGcfQ/fXZiaa9moR3wFX/9hnbKqRRIIWfCj/x8guGc2/ZeWNXInCnh9hjBfKAudv9SGScBBrxaNYdBs4zQdueMsdOn8H1zyHT04pZTk/xFYL3qRLHPADSLxxVB1eRvjq4uojUI/wSxBMRIFWIVpf6QGVZuu1gHlZDndFKO/DDrUgEDloMdnNseyCGaQWU5V6ElRFtrU57m5ZHyO+WkSEBrFhZlYE1sKwX7MdNIU0gigz3TcFqq2iLINe+s6q6K2OS3TmRDtnzu1oMqnxijQdHx8P2NCwPY/DFDuCJkND06Xl799MXRveWvb29/ebV88/bmnzf//nl1+/3vNz/8sfzt1ft3r0cDlMqlzzNjsMY/43HEX4w9x75XPOfY/hkNikMUHA3WNpwDp3jyHyYspRdaCvxSkLPnlQfac4YrPj0HvwrYtedMjUn1cDDQAbdfJS40lSoc4H9UZcJECVDQyeG5knONjf0CUcqmkWMMcBM74CE+TX1QoHZhNkRbuBYWiVw4i/8ATmzzDg==">https://sfc.vuejs.org/#eNqlV81u20YQfpUtUUAUaq/q5FRVMho4/UXQBHGAHkIDWi+HFB1yl9hdSggMXXppi/jQS5BLgZ5ydU49FP17Gsu59RU6S1IiRVKygArwz+7OfDPzzezM6tJ5kKZ0loEzdEaaqyg1RIPJ0mNPREkqlSGXREFAFiRQMiE9FO15whNcCm1IokMytudu7yuIY0m+kyr2P+j1PRFkgptICjJnkfmaw4lM0hgMuKgp+uTSE6T2UWhTCSJgTp6gnUiD6yrQMp5Bn4yPm+L2EwUkx6IRhy+ZmYKKRHhqmAEyHpMeL+31WrYqmzm+i852H1uX2meL9lZBBmdxfM74C2QEZlucXknLGKgP51noTp4rw8/ICUYCBWE6j4FPmQjBJ0aSIfnwEmaUZ0qBMM+YCsG0o15MMJBui5aquwH2pK0MQVAFiZzB5zOEfBRpAwKU20PUcIWaB1LE0TtY07OF7j0y0sF8dzIEZb7/fx1b1Na5meJnXdcGtHH7BUkzpkgsEegJgML8cwVowS7KWKyA5avYbEmsdWmx/zgI7AFFf4Ur7cLWUyWFV/SRXTyE4s6iP4VYv9Rh+qXgbn983Eji5orZu9m6oGszDUJWdRtLrNpciPhon2B1Vp61y5JMPvrm9PG3VBu7FwUvKwMItRlEv1XChYsVdTb0p/mqHvsOxHYMhjCh53kWWugF/Q/y82YZbsRfQgwnByXaXp63krbWvTstFdIOv3qFFF55DjfXV8sff7a9eEccpfwqkTV398lkTbwrle2gNkq4ncddeLsKeSOk99d/3/51baN/97rdE2uXujzzBF7v2sWuX83G9RkMVr1eiiAKM8VyjTERWRx3VVpTroGHHJ+CmoHSQ/K83cq2dOBMxd3y6xgdbTIxtL9oEs2jIKLY1z3nYC+V+zSmoZQh8olaw6NP7n98b6vuWcd+oymf1Sj/tIuklFsGcfQ/fXZiaa9moR3wFX/9hnbKqRRIIWfCj/x8guGc2/ZeWNXInCnh9hjBfKAudv9SGScBBrxaNYdBs4zQdueMsdOn8H1zyHT04pZTk/xFYL3qRLHPADSLxxVB1eRvjq4uojUI/wSxBMRIFWIVpf6QGVZuu1gHlZDndFKO/DDrUgEDloMdnNseyCGaQWU5V6ElRFtrU57m5ZHyO+WkSEBrFhZlYE1sKwX7MdNIU0gigz3TcFqq2iLINe+s6q6K2OS3TmRDtnzu1oMqnxijQdHx8P2NCwPY/DFDuCJkND06Xl799MXRveWvb29/ebV88/bmnzf//nl1+/3vNz/8sfzt1ft3r0cDlMqlzzNjsMY/43HEX4w9x75XPOfY/hkNikMUHA3WNpwDp3jyHyYspRdaCvxSkLPnlQfac4YrPj0HvwrYtedMjUn1cDDQAbdfJS40lSoc4H9UZcJECVDQyeG5knONjf0CUcqmkWMMcBM74CE+TX1QoHZhNkRbuBYWiVw4i/8ATmzzDg==</a></p>
+<p><strong>另外一种是：</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-keyword">var</span> configuration = <span class="hljs-literal">null</span><br><span class="hljs-keyword">new</span> <span class="hljs-title class_">RTCPeerConnection</span>(configuration)<br></code></pre></td></tr></table></figure>
+
+<p>正常情况下，如果初始化 RTC 连接，ICE 配置若为空，则认为这是本地连接，只会获取到 xxxx.local 的对等信息。</p>
+<p>当配置了 ICE 服务器，才有可能获取到你的公网 IP 的对等信息。</p>
+<p>但若复制代码到任意网站测试，不加 ICE 配置的情况，基本都无法获取到外网对等信息。</p>
+<p>但复制到 <a target="_blank" rel="noopener" href="https://webrtc.github.io/">https://webrtc.github.io/</a> 打开控制台执行，就会获取到完整有效外网信息。</p>
+<p><strong>以上测试结果很迷惑，无论 Chrome&#x2F;Edge 都存在问题，当完全重启浏览器进程之后，异常又消失了。</strong></p>
+<h2 id="相关代码"><a href="#相关代码" class="headerlink" title="相关代码"></a>相关代码</h2><p>根据 webrtc 实现了一个项目，支持多人在房间内基于 P2P 模式进行语音视频通话、分享屏幕，传送文字和文件等功能。</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/ellermister/ishoni">https://github.com/ellermister/ishoni</a></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/clippings/" class="print-no-link">#clippings</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>webrtc：基于浏览器实现 P2P 端对端通信</div>
+      <div>https://yhao521.github.io/2025/07/23/摘录/webrtc：基于浏览器实现 P2P 端对端通信/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>yhao521</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年7月23日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E6%91%98%E5%BD%95/vue3-%E5%AE%9E%E7%8E%B0%E7%88%B6%E5%AD%90%E7%BB%84%E4%BB%B6%E4%B9%8B%E9%97%B4%E7%9A%84%E9%80%9A%E4%BF%A1%EF%BC%88%E8%AF%A6%E8%A7%A3+%E6%BA%90%E7%A0%81%EF%BC%89/" title="vue3-实现父子组件之间的通信（详解+源码）">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">vue3-实现父子组件之间的通信（详解+源码）</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E6%91%98%E5%BD%95/%E4%BD%A0%E8%AF%BB%E5%BE%97%E6%87%82%E7%9A%84%20Dataview%20%E6%95%99%E7%A8%8B%20-%20Zji/" title="你读得懂的 Dataview 教程 - Zji">
+                        <span class="hidden-mobile">你读得懂的 Dataview 教程 - Zji</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>  
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

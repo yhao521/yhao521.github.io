@@ -1,0 +1,663 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="yhao521">
+  <meta name="keywords" content="java,博客,vue,spring,mysql,docker,linux">
+  
+    <meta name="description" content="关键字gradle配置变化、gradle kotlin版本、gradle新配置方式、签名、打包签名、仓库配置、仓库设置 定制apk位置的变化app打包生成apk后通常需要进行备份，但是要区分好哪个apk是什么版本的、什么时候打包的，以方便以后区分使用。 最开始的想法是把版本号、创建时间这些加在apk文件名上即可，但是公司要求apk使用一个固定的名称，那我怎么保存版本号信息啊，后来想到可以加一个文件">
+<meta property="og:type" content="article">
+<meta property="og:title" content="修改Android打包apk的名字和目录">
+<meta property="og:url" content="https://yhao521.github.io/2025/07/23/%E6%91%98%E5%BD%95/%E4%BF%AE%E6%94%B9Android%E6%89%93%E5%8C%85apk%E7%9A%84%E5%90%8D%E5%AD%97%E5%92%8C%E7%9B%AE%E5%BD%95/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="关键字gradle配置变化、gradle kotlin版本、gradle新配置方式、签名、打包签名、仓库配置、仓库设置 定制apk位置的变化app打包生成apk后通常需要进行备份，但是要区分好哪个apk是什么版本的、什么时候打包的，以方便以后区分使用。 最开始的想法是把版本号、创建时间这些加在apk文件名上即可，但是公司要求apk使用一个固定的名称，那我怎么保存版本号信息啊，后来想到可以加一个文件">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/89dff19a3469500c94ffacf758401cf1.png">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/8fb48aaf8da09cb848013c5f2e1781e6.png">
+<meta property="article:published_time" content="2025-07-23T12:01:39.000Z">
+<meta property="article:modified_time" content="2025-02-19T07:48:05.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="java,博客,vue,spring,mysql,docker,linux">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://i-blog.csdnimg.cn/blog_migrate/89dff19a3469500c94ffacf758401cf1.png">
+  
+  
+  
+  <title>修改Android打包apk的名字和目录 - 匆匆过客的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yhao521.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>匆匆过客的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="修改Android打包apk的名字和目录"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-07-23 20:01" pubdate>
+          2025年7月23日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.8k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          16 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">修改Android打包apk的名字和目录</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="关键字"><a href="#关键字" class="headerlink" title="关键字"></a>关键字</h2><p>gradle配置变化、gradle <a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=kotlin&spm=1001.2101.3001.7020">kotlin</a>版本、gradle新配置方式、签名、打包签名、仓库配置、仓库设置</p>
+<h2 id="定制apk位置的变化"><a href="#定制apk位置的变化" class="headerlink" title="定制apk位置的变化"></a>定制apk位置的变化</h2><p>app打包生成apk后通常需要进行备份，但是要区分好哪个apk是什么版本的、什么时候打包的，以方便以后区分使用。</p>
+<p>最开始的想法是把版本号、<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=%E5%88%9B%E5%BB%BA%E6%97%B6%E9%97%B4&spm=1001.2101.3001.7020">创建时间</a>这些加在apk文件名上即可，但是公司要求apk使用一个固定的名称，那我怎么保存版本号信息啊，后来想到可以加一个文件夹，在文件夹名字上加入这些信息即可，示例如一：</p>
+<p><code>app/build.gradle</code>：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs groovy"><span class="hljs-keyword">import</span> java.text.SimpleDateFormat<br><br>android &#123;<br>	<span class="hljs-comment">//release版本输出位置与文件名配置</span><br>    applicationVariants.all &#123; variant -&gt;<br>        variant.outputs.all &#123; output -&gt;<br>            <span class="hljs-keyword">if</span> (buildType.name == <span class="hljs-string">&#x27;release&#x27;</span>) &#123; <span class="hljs-comment">//只处理生产版本</span><br>                <span class="hljs-keyword">def</span> createTime = <span class="hljs-keyword">new</span> Date().format(<span class="hljs-string">&quot;yyyy-MM-dd-kkmmss&quot;</span>, TimeZone.getTimeZone(<span class="hljs-string">&quot;GMT+08:00&quot;</span>))<br>                <span class="hljs-keyword">def</span> dirName = <span class="hljs-string">&quot;ball_v$&#123;defaultConfig.versionName&#125;_$&#123;defaultConfig.versionCode&#125;_$createTime&quot;</span><br>                <span class="hljs-keyword">def</span> apkDir = rootProject.file(<span class="hljs-string">&quot;apk/$dirName&quot;</span>)<br>                <span class="hljs-keyword">if</span> (!apkDir.exists()) &#123;<br>                    apkDir.mkdirs()<br>                &#125;<br>                variant.packageApplicationProvider.get().outputDirectory = apkDir  <span class="hljs-comment">// 指定apk的输出位置</span><br>                output.outputFileName = <span class="hljs-string">&quot;Railway_4G_Platform_ball.apk&quot;</span>             <span class="hljs-comment">// 指定输出文件名</span><br>            &#125;<br>        &#125;<br>    &#125;<br>&#125;<br><span class="hljs-number">12345678910111213141516171819</span><br></code></pre></td></tr></table></figure>
+
+<p>这里省略了很多其它的信息，只贴关键代码，导包是要放在文件的最前面，关键代码要是写在<code>android</code>节点下的。</p>
+<p>上面是以前的写法了，现在（今天是2024年03月07日）最新版本<code>Android Studio</code>已经使用了更新的<code>Gradle</code>，而且新创建的项目也默认使用<code>Kotlin</code>作为<code>gradle</code>的脚本语言了，那肯定是要追随官方的脚步啊，于是想把上面的配置翻译成<code>Kotlin</code>的版本，即可发现已经用不了，新版本的<code>Gradle</code>已经不允许那种方式来修改<code>apk</code>的名称了，于是又找了新的方式，感觉新的方式还更专业一些，如下：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs kotlin"><span class="hljs-keyword">import</span> java.time.LocalDateTime<br><span class="hljs-keyword">import</span> java.time.format.DateTimeFormatter<br><br>android &#123;    <br>    afterEvaluate &#123;<br>        tasks.named(<span class="hljs-string">&quot;assembleRelease&quot;</span>) &#123;<br>            finalizedBy(<span class="hljs-string">&quot;copyAndRenameApkTask&quot;</span>)<br>        &#125;<br>    &#125;<br>&#125;<br><br><span class="hljs-keyword">val</span> copyAndRenameApkTask <span class="hljs-keyword">by</span> tasks.registering(Copy::<span class="hljs-keyword">class</span>) &#123;<br>    <span class="hljs-keyword">val</span> config = project.android.defaultConfig<br>    <span class="hljs-keyword">val</span> versionName = config.versionName<br>    <span class="hljs-keyword">val</span> versionCode = config.versionCode<br>    <span class="hljs-keyword">val</span> formatter = DateTimeFormatter.ofPattern(<span class="hljs-string">&quot;yyyy-MM-dd-HHmmss&quot;</span>)<br>    <span class="hljs-keyword">val</span> createTime = LocalDateTime.now().format(formatter)<br>    <span class="hljs-keyword">val</span> destDir = File(rootDir, <span class="hljs-string">&quot;apkBackup/big_data_v<span class="hljs-subst">$&#123;versionName&#125;</span>_<span class="hljs-subst">$&#123;versionCode&#125;</span>_<span class="hljs-variable">$createTime</span>&quot;</span>)<br>    from(<span class="hljs-string">&quot;build/outputs/apk/release/app-release.apk&quot;</span>)<br>    into(destDir)<br>    rename &#123; _ -&gt; <span class="hljs-string">&quot;Railway_4G_Platform_big_data.apk&quot;</span> &#125;<br>&#125;<br><span class="hljs-number">12345678910111213141516171819202122</span><br></code></pre></td></tr></table></figure>
+
+<p>与前面的修改方式对比：</p>
+<ul>
+<li>前面的是直接修改了打包apk的位置和apk的文件名。用的是groovy语言。</li>
+<li>后面的是打包后apk后复制该apk到指定的位置并进行重命名。用的是kotlin语言，平时写代码也是用Kotlin了，所以使用kotlin还是感觉比较亲切的。</li>
+</ul>
+<p>打包两个版本的apk看一效果：<br><img src="https://i-blog.csdnimg.cn/blog_migrate/89dff19a3469500c94ffacf758401cf1.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br>这样，我就完成了以公司要求的名字去命名apk，同时我使用文件夹名称来保留了apk的版本信息。</p>
+<p>我们公司的apk在上传到公司服务器时，除了上传apk外，还需要填写apk的相关信息，比如包名、版本号这些，同时也允许通过上传一个配置文件来指定这些信息，像这样每次打包每次要修改这些信息也是挺烦人的，都说Gradle可以完成自动化的事情，于是让Gradle帮我生成一个不就行了吗，实现这个很简单，在之前的复制重命名的任务中添加生成配置文件的代码即可，如下：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><code class="hljs kotlin"><span class="hljs-keyword">val</span> copyAndRenameApkTask <span class="hljs-keyword">by</span> tasks.registering(Copy::<span class="hljs-keyword">class</span>) &#123;<br>    <span class="hljs-keyword">val</span> config = project.android.defaultConfig<br>    <span class="hljs-keyword">val</span> versionName = config.versionName<br>    <span class="hljs-keyword">val</span> versionCode = config.versionCode<br>    <span class="hljs-keyword">val</span> applicationId = config.applicationId<br>    <span class="hljs-keyword">val</span> timeFormatter = DateTimeFormatter.ofPattern(<span class="hljs-string">&quot;yyyy-MM-dd-HHmmss&quot;</span>)<br>    <span class="hljs-keyword">val</span> dateFormatter = DateTimeFormatter.ofPattern(<span class="hljs-string">&quot;yyyy-MM-dd-HHmmss&quot;</span>)<br>    <span class="hljs-keyword">val</span> now = LocalDateTime.now()<br>	<span class="hljs-keyword">val</span> createTime = now.format(timeFormatter)<br>	<span class="hljs-keyword">val</span> createDate = now.format(dateFormatter)<br>    <span class="hljs-keyword">val</span> destDir = File(rootDir, <span class="hljs-string">&quot;apkBackup/big_data_v<span class="hljs-subst">$&#123;versionName&#125;</span>_<span class="hljs-subst">$&#123;versionCode&#125;</span>_<span class="hljs-variable">$createTime</span>&quot;</span>)<br>    from(<span class="hljs-string">&quot;build/outputs/apk/release/app-release.apk&quot;</span>)<br>    into(destDir)<br>    rename &#123; _ -&gt; <span class="hljs-string">&quot;Railway_4G_Platform_big_data.apk&quot;</span> &#125;<br>    doLast &#123;<br>        File(destDir, <span class="hljs-string">&quot;app上传配置.txt&quot;</span>).outputStream().bufferedWriter().use &#123;<br>            it<br>                .appendLine(<span class="hljs-string">&quot;版本号:<span class="hljs-subst">$&#123;versionCode&#125;</span>&quot;</span>)<br>                .appendLine(<span class="hljs-string">&quot;版本名称:<span class="hljs-subst">$&#123;versionName&#125;</span>&quot;</span>)<br>                .appendLine(<span class="hljs-string">&quot;软件名称:掌上运维&quot;</span>)<br>                .appendLine(<span class="hljs-string">&quot;软件包名:<span class="hljs-subst">$&#123;applicationId&#125;</span>&quot;</span>)<br>                .appendLine(<span class="hljs-string">&quot;版本说明:说明&quot;</span>)<br>                .appendLine(<span class="hljs-string">&quot;发布时间:<span class="hljs-subst">$&#123;createDate&#125;</span>&quot;</span>)<br>                .appendLine(<span class="hljs-string">&quot;发布状态:1&quot;</span>)<br>                .appendLine(<span class="hljs-string">&quot;更新类型:0&quot;</span>)    <span class="hljs-comment">// 0-询问更新，1-强制更新到此版本</span><br>                .appendLine(<span class="hljs-string">&quot;强制更新标记:0&quot;</span>) <span class="hljs-comment">// 0-此版本无需强制更新，1-此版本不能使用，必须更新(此参数始终传0)</span><br>                .appendLine(<span class="hljs-string">&quot;软件分类:1&quot;</span>)<br>                .appendLine(<span class="hljs-string">&quot;业务分类:1&quot;</span>)<br>                .appendLine(<span class="hljs-string">&quot;软件级别:1&quot;</span>)<br>                .append(<span class="hljs-string">&quot;备注:&quot;</span>)<br>        &#125;<br>    &#125;<br>&#125;<br><span class="hljs-number">123456789101112131415161718192021222324252627282930313233</span><br></code></pre></td></tr></table></figure>
+
+<p>效果如下：<br><img src="https://i-blog.csdnimg.cn/blog_migrate/8fb48aaf8da09cb848013c5f2e1781e6.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br>app上传配置.txt内容如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs auto">版本号:20240307<br>版本名称:1.0.0<br>软件名称:掌上运维<br>软件包名:cn.dazhou.bluebook<br>版本说明:说明<br>发布时间:2024-03-07-154401<br>发布状态:1<br>更新类型:0<br>强制更新标记:0<br>软件分类:1<br>业务分类:1<br>软件级别:1<br>备注:<br>12345678910111213<br></code></pre></td></tr></table></figure>
+
+<p>另外，还可以把<code>git</code>的提交记录添加到文件夹中，以便可以清楚的知道打包的时候git的当时提交版本是什么，所以，在打包的时候一定要先把所有代码提交了再打包，核心代码如下：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs kotlin"><span class="hljs-keyword">import</span> java.io.ByteArrayOutputStream<br><br><span class="hljs-function"><span class="hljs-keyword">fun</span> <span class="hljs-title">exec</span><span class="hljs-params">(command: <span class="hljs-type">String</span>)</span></span>: String &#123;<br>    <span class="hljs-keyword">val</span> outputStream = ByteArrayOutputStream()<br>    <span class="hljs-keyword">val</span> process = Runtime.getRuntime().exec(command)<br>    process.inputStream.copyTo(outputStream)<br>    <span class="hljs-keyword">return</span> outputStream.toString().trim()<br>&#125;<br><br><span class="hljs-keyword">val</span> copyAndRenameApkTask <span class="hljs-keyword">by</span> tasks.registering(Copy::<span class="hljs-keyword">class</span>) &#123;<br>    。。。<br>    <span class="hljs-keyword">val</span> gitHash = exec(<span class="hljs-string">&quot;git rev-parse --short HEAD&quot;</span>)<br>    <span class="hljs-keyword">val</span> destDir = File(rootDir, <span class="hljs-string">&quot;apkBackup/big_data_v<span class="hljs-subst">$&#123;versionName&#125;</span>_<span class="hljs-subst">$&#123;versionCode&#125;</span>_<span class="hljs-subst">$&#123;createTime&#125;</span>_<span class="hljs-variable">$gitHash</span>&quot;</span>)<br>    。。。<br>&#125;<br><span class="hljs-number">123456789101112131415</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="签名配置的变化"><a href="#签名配置的变化" class="headerlink" title="签名配置的变化"></a>签名配置的变化</h2><p>Kotlin版本：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><code class="hljs kotlin">android &#123;<br>	signingConfigs &#123;<br>		getByName(<span class="hljs-string">&quot;debug&quot;</span>) &#123;<br>            storeFile = file(<span class="hljs-string">&quot;123456.jks&quot;</span>)<br>            storePassword = <span class="hljs-string">&quot;123456&quot;</span><br>            keyAlias = <span class="hljs-string">&quot;key0&quot;</span><br>            keyPassword = <span class="hljs-string">&quot;123456&quot;</span><br>        &#125;<br>        create(<span class="hljs-string">&quot;release&quot;</span>) &#123;<br>            storeFile = file(<span class="hljs-string">&quot;123456.jks&quot;</span>)<br>            storePassword = <span class="hljs-string">&quot;123456&quot;</span><br>            keyAlias = <span class="hljs-string">&quot;key0&quot;</span><br>            keyPassword = <span class="hljs-string">&quot;123456&quot;</span><br>        &#125;<br>    &#125;<br><br>    buildTypes &#123;<br>    	debug &#123;<br>            isMinifyEnabled = <span class="hljs-literal">false</span><br>            proguardFiles(getDefaultProguardFile(<span class="hljs-string">&quot;proguard-android-optimize.txt&quot;</span>), <span class="hljs-string">&quot;proguard-rules.pro&quot;</span>)<br>            signingConfig = signingConfigs.getByName(<span class="hljs-string">&quot;debug&quot;</span>)<br>        &#125;<br>        release &#123;<br>            isMinifyEnabled = <span class="hljs-literal">false</span><br>            proguardFiles(getDefaultProguardFile(<span class="hljs-string">&quot;proguard-android-optimize.txt&quot;</span>), <span class="hljs-string">&quot;proguard-rules.pro&quot;</span>)<br>            signingConfig = signingConfigs.getByName(<span class="hljs-string">&quot;release&quot;</span>)<br>        &#125;<br>    &#125;<br>&#125;<br><span class="hljs-number">1234567891011121314151617181920212223242526272829</span><br></code></pre></td></tr></table></figure>
+
+<p>注意：这里<code>signingConfigs</code>中<code>debug</code>的配置要使用<code>getByName</code>，不能使用<code>create</code>，因为<code>debug</code>这个配置是默认就会创建的，如果你再创建就提示已经存在，所以只能用<code>getByName</code>。对比一下groovy语法旧的签名方式：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs groovy">signingConfigs &#123;<br>    config &#123;<br>        keyAlias <span class="hljs-string">&#x27;key0&#x27;</span><br>        keyPassword <span class="hljs-string">&#x27;123456&#x27;</span><br>        storeFile file(<span class="hljs-string">&#x27;123456.jks&#x27;</span>)<br>        storePassword <span class="hljs-string">&#x27;123456&#x27;</span><br>    &#125;<br>&#125;<br>buildTypes &#123;<br>    debug &#123;<br>        signingConfig signingConfigs.config<br>        minifyEnabled <span class="hljs-literal">false</span><br>        proguardFiles getDefaultProguardFile(<span class="hljs-string">&#x27;proguard-android-optimize.txt&#x27;</span>), <span class="hljs-string">&#x27;proguard-rules.pro&#x27;</span><br>    &#125;<br>    release &#123;<br>        signingConfig signingConfigs.config<br>        minifyEnabled <span class="hljs-literal">false</span><br>        proguardFiles getDefaultProguardFile(<span class="hljs-string">&#x27;proguard-android-optimize.txt&#x27;</span>), <span class="hljs-string">&#x27;proguard-rules.pro&#x27;</span><br>    &#125;<br>&#125;<br><span class="hljs-number">1234567891011121314151617181920</span><br></code></pre></td></tr></table></figure>
+
+<p>如上代码，signingConfigs中我们创建了一个名为 “config”的签名配置，这个名字是可以随便取的，而且这个配置可以同时给debug的构建类型使用，也可以给release的构建类型使用。同理，在Kotlin的版本中，signingConfigs中的<code>create()</code>中的名字也可以随意取，同一个签名配置也可以同时给debug和release使用。</p>
+<h2 id="aar或jar包依赖的变化"><a href="#aar或jar包依赖的变化" class="headerlink" title="aar或jar包依赖的变化"></a>aar或jar包依赖的变化</h2><p>在libs目录中添加jar或aar时的配置：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs kotlin">implementation(fileTree(mapOf(<span class="hljs-string">&quot;include&quot;</span> to arrayOf(<span class="hljs-string">&quot;*.jar&quot;</span>, <span class="hljs-string">&quot;*.aar&quot;</span>), <span class="hljs-string">&quot;dir&quot;</span> to <span class="hljs-string">&quot;libs&quot;</span>)))<br><span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
+
+<p>对比原来<code>Groovy</code>的配置：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs groovy">implementation(fileTree(<span class="hljs-attr">includes:</span> [<span class="hljs-string">&quot;*.jar&quot;</span>, <span class="hljs-string">&quot;*.aar&quot;</span>], <span class="hljs-attr">dir:</span> <span class="hljs-string">&quot;libs&quot;</span>))<br><span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="仓库设置的变化"><a href="#仓库设置的变化" class="headerlink" title="仓库设置的变化"></a>仓库设置的变化</h2><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs kotlin">maven &#123;<br>    isAllowInsecureProtocol = <span class="hljs-literal">true</span> <span class="hljs-comment">// 仓库默认不允许使用非https协议，所以这里设置为允许</span><br>    url = uri(<span class="hljs-string">&quot;http://192.168.1.251:8081/content/repositories/android_repositories/&quot;</span>)<br>&#125;<br>maven &#123; url = uri(<span class="hljs-string">&quot;https://jitpack.io&quot;</span>) &#125;<br><span class="hljs-number">12345</span><br></code></pre></td></tr></table></figure>
+
+<p>对比原来<code>Groovy</code>的配置：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs groovy"> maven &#123;<br>     allowInsecureProtocol = <span class="hljs-literal">true</span> <span class="hljs-comment">// 仓库默认不允许使用非https协议，所以这里设置为允许</span><br>     url <span class="hljs-string">&#x27;http://192.168.1.251:8081/content/repositories/android_repositories/&#x27;</span><br> &#125;<br> maven &#123; url <span class="hljs-string">&#x27;https://jitpack.io&#x27;</span> &#125; <span class="hljs-comment">// 用于：RxPermissions</span><br><span class="hljs-number">12345</span><br></code></pre></td></tr></table></figure>
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>修改Android打包apk的名字和目录</div>
+      <div>https://yhao521.github.io/2025/07/23/摘录/修改Android打包apk的名字和目录/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>yhao521</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年7月23日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E6%91%98%E5%BD%95/%E5%85%B3%E4%BA%8EVue3%E4%B8%AD$refs%E7%9A%84%E4%B8%A4%E7%A7%8D%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F/" title="关于Vue3中$refs的两种使用方式">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">关于Vue3中$refs的两种使用方式</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E6%91%98%E5%BD%95/%E5%89%8D%E7%AB%AF%E5%88%A4%E6%96%ADtxt%E6%96%87%E4%BB%B6%E6%98%AF%E5%90%A6%E4%B8%BAutf-8%E7%BC%96%E7%A0%81/" title="前端判断txt文件是否为utf-8编码">
+                        <span class="hidden-mobile">前端判断txt文件是否为utf-8编码</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>  
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

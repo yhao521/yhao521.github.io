@@ -1,0 +1,759 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="yhao521">
+  <meta name="keywords" content="java,博客,vue,spring,mysql,docker,linux">
+  
+    <meta name="description" content="本文转自 bleem，原文：https:&#x2F;&#x2F;mritd.com&#x2F;about&#x2F;，版权归原作者所有。欢迎投稿，投稿请添加微信好友：cloud-native-yang  1. Taskfile 是什么Taskfile 通过 yaml 来描述各种执行任务, 其核心采用 go 编写; 相较于 Makefile 的 tab 分割和 bash 结合语法  Taskfile 显得更加现代化和易于使用(虽然会变成">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Taskfile - 比 Makefile 更好用的构建工具">
+<meta property="og:url" content="https://yhao521.github.io/2025/07/23/%E6%91%98%E5%BD%95/Taskfile%20-%20%E6%AF%94%20Makefile%20%E6%9B%B4%E5%A5%BD%E7%94%A8%E7%9A%84%E6%9E%84%E5%BB%BA%E5%B7%A5%E5%85%B7/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="本文转自 bleem，原文：https:&#x2F;&#x2F;mritd.com&#x2F;about&#x2F;，版权归原作者所有。欢迎投稿，投稿请添加微信好友：cloud-native-yang  1. Taskfile 是什么Taskfile 通过 yaml 来描述各种执行任务, 其核心采用 go 编写; 相较于 Makefile 的 tab 分割和 bash 结合语法  Taskfile 显得更加现代化和易于使用(虽然会变成">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/a83fba955a2c288c99a9995b068f509f.png">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/4acfffd7052922b7c9291d164d462bcb.png">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/13fc2e158d7a8e9af9e18cbd1afe59cd.png">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/919f79ddcd7c2ae06fab8a10cafee140.png">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/7e6bbb29eb7e9208ac47cd0bbd7cf8e1.png">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/1f7d6d0bdcf28233497961435beb262d.png">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/4365985a46d01d7012218fa0a023c267.png">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/850fc659bece4ff287c1f2b098a7e62d.png">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/dc5b0e622705651d38c1815550f2102b.png">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/e86741dc1eb11829e00b6788d335d212.png">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/50e3e1a16852ce595124a84521856b9f.gif">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/6c241269261df421edba8b50d1fb13f3.png">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/008c424477309db3cfd3940564444eb8.png">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/86dc0054489646b399ee23962d7360ef.gif">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/1ace08c69b2445f770e82c8863918f90.gif">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/0b4f7cae17a6e7fd6671f3bc335357fa.gif">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/5a3bfa92d9df34318b228a5ac4fb59b9.gif">
+<meta property="article:published_time" content="2025-07-23T12:01:31.000Z">
+<meta property="article:modified_time" content="2025-03-06T03:39:25.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="java,博客,vue,spring,mysql,docker,linux">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://i-blog.csdnimg.cn/blog_migrate/a83fba955a2c288c99a9995b068f509f.png">
+  
+  
+  
+  <title>Taskfile - 比 Makefile 更好用的构建工具 - 匆匆过客的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yhao521.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>匆匆过客的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Taskfile - 比 Makefile 更好用的构建工具"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-07-23 20:01" pubdate>
+          2025年7月23日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2.7k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          23 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Taskfile - 比 Makefile 更好用的构建工具</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <blockquote>
+<p>本文转自 bleem，原文：<strong><a target="_blank" rel="noopener" href="https://mritd.com/about/">https://mritd.com/about/</a></strong>，版权归原作者所有。欢迎投稿，投稿请添加微信好友：<strong>cloud-native-yang</strong></p>
+</blockquote>
+<h3 id="1-Taskfile-是什么"><a href="#1-Taskfile-是什么" class="headerlink" title="1. Taskfile 是什么"></a>1. Taskfile 是什么</h3><p>Taskfile 通过 yaml 来描述各种执行任务, 其核心采用 go 编写; 相较于 Makefile 的 tab 分割和 bash 结合语法  Taskfile 显得更加现代化和易于使用(虽然会变成 yaml 工程师). Taskfile  内置了动态变量、操作系统等环境变量识别等高级功能都更贴合现代化的 Coding 方式。</p>
+<p>总体来说如果你是一个对 Makefile 不太熟悉的人, 又期望通过类似 Makefile 的工具完成一些批量任务, 那么相对于 Makefile 来说 Taskfile 会更加便于入门, <a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=%E5%AD%A6%E4%B9%A0%E6%9B%B2%E7%BA%BF&spm=1001.2101.3001.7020">学习曲线</a>更低且速度也足够快。</p>
+<h3 id="2-安装及使用"><a href="#2-安装及使用" class="headerlink" title="2. 安装及使用"></a>2. 安装及使用</h3><h4 id="安装-go-task"><a href="#安装-go-task" class="headerlink" title="安装 go-task"></a>安装 go-task</h4><p>对于 mac 用户来说官方提供了 <a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=brew&spm=1001.2101.3001.7020">brew</a> 安装方式:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs go">$ brew install <span class="hljs-keyword">go</span>-task/tap/<span class="hljs-keyword">go</span>-task<br></code></pre></td></tr></table></figure>
+
+<p>对于 Linux 用户, 官方提供了部分 Linux 发行版的安装包, 但由于其只有一个二进制文件, 所以官方也提供了快速安装脚本:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs go"># For Default Installation to ./bin with debug logging$ sh -c <span class="hljs-string">&quot;$(curl --location https://taskfile.dev/install.sh)&quot;</span> -- -d # For Installation To /usr/local/bin <span class="hljs-keyword">for</span> userwide access with debug logging# May require sudo sh$ sh -c <span class="hljs-string">&quot;$(curl --location https://taskfile.dev/install.sh)&quot;</span> -- -d -b /usr/local/bin<br></code></pre></td></tr></table></figure>
+
+<p>如果本地已经有了 Go 语言开发环境也可以直接通过 go 命令安装:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs go">$ <span class="hljs-keyword">go</span> install github.com/<span class="hljs-keyword">go</span>-task/task/v3/cmd/task@latest<br></code></pre></td></tr></table></figure>
+
+<h4 id="快速开始"><a href="#快速开始" class="headerlink" title="快速开始"></a>快速开始</h4><p>安装完成后, 只需要编写一个 <code>Taskfile.yml</code> 的 yaml 文件, 然后就可以通过 <code>task</code> 命令运行相应的任务:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs go">version: <span class="hljs-string">&#x27;3&#x27;</span> tasks:  build:    cmds:      - echo <span class="hljs-string">&quot;执行 build 任务&quot;</span>        docker:    cmds:      - echo <span class="hljs-string">&quot;打包 docker 镜像&quot;</span><br></code></pre></td></tr></table></figure>
+
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/a83fba955a2c288c99a9995b068f509f.png" srcset="/img/loading.gif" lazyload alt="7e2972fad28a1056dfd7130cb5ef6bc2.png"></p>
+<p>如果需要设置默认执行任务, 只需要创建一个名字为 <code>default</code> 的任务即可:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs go">version: <span class="hljs-string">&#x27;3&#x27;</span> tasks:  <span class="hljs-keyword">default</span>:    cmds:      - echo <span class="hljs-string">&quot;这是默认任务&quot;</span>   build:    cmds:      - echo <span class="hljs-string">&quot;执行 build 任务&quot;</span>   docker:    cmds:      - echo <span class="hljs-string">&quot;打包 docker 镜像&quot;</span><br></code></pre></td></tr></table></figure>
+
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/4acfffd7052922b7c9291d164d462bcb.png" srcset="/img/loading.gif" lazyload alt="b6fed24428b097a48c494a9ec556362c.png"></p>
+<h3 id="3-进阶使用"><a href="#3-进阶使用" class="headerlink" title="3. 进阶使用"></a>3. 进阶使用</h3><h4 id="环境变量"><a href="#环境变量" class="headerlink" title="环境变量"></a>环境变量</h4><p>Taskfile 支持引用三种环境变量:</p>
+<ul>
+<li><p>Shell 环境变量</p>
+</li>
+<li><p>Taskfile 内定义的环境变量</p>
+</li>
+<li><p>变量文件内定义的环境变量</p>
+</li>
+</ul>
+<p>如果需要引用 Shell 内的环境变量只需要使用 <code>$ 变量名</code> 方式直接引用即可:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs go">version: <span class="hljs-string">&#x27;3&#x27;</span> tasks:  <span class="hljs-keyword">default</span>:    cmds:      - echo <span class="hljs-string">&quot;$ABCD&quot;</span><br></code></pre></td></tr></table></figure>
+
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/13fc2e158d7a8e9af9e18cbd1afe59cd.png" srcset="/img/loading.gif" lazyload alt="bd3dd805d8a060ae52d2ad738d9c2691.png"></p>
+<p>同样在 Taskfile 内也可以定义环境变量:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs go">version: <span class="hljs-string">&#x27;3&#x27;</span> env:  TENV2: <span class="hljs-string">&quot;t2&quot;</span> # 全局环境变量 tasks:  <span class="hljs-keyword">default</span>:    cmds:      - echo <span class="hljs-string">&quot;$TENV1&quot;</span>      - echo <span class="hljs-string">&quot;$TENV2&quot;</span>    env:      TENV1: <span class="hljs-string">&quot;t1&quot;</span> # 单个 task 环境变量<br></code></pre></td></tr></table></figure>
+
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/919f79ddcd7c2ae06fab8a10cafee140.png" srcset="/img/loading.gif" lazyload alt="952113999240502a4eb64f0ef77e9210.png"></p>
+<p>除了这种直接引用变量的方式, Taskfile 也支持类似 docker-compose 一样读取 env 文件来加载环境变量; <strong>Taskfile 会默认加载同级目录下的 <code>.env</code> 文件, 也可以在 Taskfile 内通过 <code>dotenv</code> 命令来配置特定文件:</strong></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs go">version: <span class="hljs-string">&#x27;3&#x27;</span> dotenv: [<span class="hljs-string">&quot;.env&quot;</span>, <span class="hljs-string">&quot;.testenv&quot;</span>] tasks:  <span class="hljs-keyword">default</span>:    cmds:      - echo <span class="hljs-string">&quot;$ABCD&quot;</span>      - echo <span class="hljs-string">&quot;$TESTENV&quot;</span><br></code></pre></td></tr></table></figure>
+
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/7e6bbb29eb7e9208ac47cd0bbd7cf8e1.png" srcset="/img/loading.gif" lazyload alt="46508481cc9a179d158d687ab8a27cdb.png"></p>
+<h4 id="增强变量"><a href="#增强变量" class="headerlink" title="增强变量"></a>增强变量</h4><p>除了标准的环境变量以外, 在 Taskfile 中还内置了一种使用更加广泛的增强变量 <code>vars</code>; 该变量模式可以通过 go 的模版引擎进行读取(插值引用), 且具有环境变量不具备的特殊特性. 以下为 vars 变量的示例:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs go">version: <span class="hljs-string">&#x27;3&#x27;</span> # 全局 <span class="hljs-keyword">var</span> 变量vars:  GLOBAL_VAR: <span class="hljs-string">&quot;global var&quot;</span> tasks:  testvar:    # task <span class="hljs-keyword">var</span> 变量    vars:      TASK_VAR: <span class="hljs-string">&quot;task var&quot;</span>    cmds:      - <span class="hljs-string">&quot;echo &#123;&#123;.GLOBAL_VAR&#125;&#125;&quot;</span>      - <span class="hljs-string">&quot;echo &#123;&#123;.TASK_VAR&#125;&#125;&quot;</span><br></code></pre></td></tr></table></figure>
+
+<p>除了上面与环境变量类似的使用以外, vars 增强变量还支持动态定义; 常见的场景, 比如我们想每次 task 执行时都获取当前的 git commit id, 此时可以使用 vars 的动态定义特性:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs go">version: <span class="hljs-string">&#x27;3&#x27;</span> tasks:  build:    cmds:      - <span class="hljs-keyword">go</span> build -ldflags=<span class="hljs-string">&quot;-X main.Version=&#123;&#123;.GIT_COMMIT&#125;&#125;&quot;</span> main.<span class="hljs-keyword">go</span>    vars:      # 每次任务执行时, GIT_COMMIT 都会调用 shell 命令来生成这个变量      GIT_COMMIT:        sh: git log -n <span class="hljs-number">1</span> --format=%h<br></code></pre></td></tr></table></figure>
+
+<p>vars 变量还内置了一些特殊的预定义变量, 例如 <strong><code>&#123;&#123;.TASK&#125;&#125;</code> 变量永远表示当前的任务名称、<code>&#123;&#123;.CLI_ARGS&#125;&#125;</code> 可以引用命令行输入等.</strong></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs go">version: <span class="hljs-string">&#x27;3&#x27;</span> tasks:  yarn:    cmds:      - yarn &#123;&#123;.CLI_ARGS&#125;&#125;<br></code></pre></td></tr></table></figure>
+
+<p>此时如果执行 <code>task yarn -- install</code>, 那么 <code>&#123;&#123;.CLI_ARGS&#125;&#125;</code> 值将会变成 <code>install</code> 从而执行 <code>yarn install</code> 命令.</p>
+<p>除此之外, vars 变量还具备一些其他特性, 比如跨任务引用时可进行覆盖传递等, 这些特性将会在后面介绍.</p>
+<h4 id="执行目录"><a href="#执行目录" class="headerlink" title="执行目录"></a>执行目录</h4><p>Taskfile 内定义的 task 默认在当前目录下执行, 如果期望在其他目录执行, 无需手动编写 <code>cd</code> 等命令, 可以直接通过配置 <code>dir</code> 参数来设置执行目录:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs go">version: <span class="hljs-string">&#x27;3&#x27;</span> tasks:  test1:    dir: /tmp # 在指定目录执行    cmds:      - <span class="hljs-string">&quot;ls&quot;</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="任务依赖"><a href="#任务依赖" class="headerlink" title="任务依赖"></a>任务依赖</h4><p>在 CI 等环境的使用中, 我们常常需要定义任务的执行顺序和依赖关系; Taskfile 中通过 <code>deps</code> 配置来提供任务依赖关系的支持:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs go">version: <span class="hljs-string">&#x27;3&#x27;</span> tasks:  build-jar:    cmds:      - echo <span class="hljs-string">&quot;编译 jar 包...&quot;</span>  build-static:    cmds:      - echo <span class="hljs-string">&quot;编译前端 UI...&quot;</span>  build-docker:    deps: [build-jar, build-static]    cmds:      - echo <span class="hljs-string">&quot;打包 docker 镜像...&quot;</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="任务调用"><a href="#任务调用" class="headerlink" title="任务调用"></a>任务调用</h4><p>当我们在 Taskfile 中定义了多个任务时, 很可能一些任务具有一定的相似性, 此时我们可以通过任务互相调用和 vars 变量动态覆盖的方式来定义<strong>模版 Task</strong>:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs go">version: <span class="hljs-string">&#x27;3&#x27;</span> tasks:  docker:    cmds:      #- docker build -t &#123;&#123;.IMAGE_NAME&#125;&#125; &#123;&#123;.BUILD_CONTEXT&#125;&#125;      - echo &#123;&#123;.IMAGE_NAME&#125;&#125; &#123;&#123;.BUILD_CONTEXT&#125;&#125;   build-backend:    cmds:      - task: docker # 引用其他 task        vars: &#123; # 动态传入变量          IMAGE_NAME: <span class="hljs-string">&quot;backend&quot;</span>,          BUILD_CONTEXT: <span class="hljs-string">&quot;maven/target&quot;</span>        &#125;   build-frontend:    cmds:      - task: docker        vars: &#123;          IMAGE_NAME: <span class="hljs-string">&quot;frontend&quot;</span>,          BUILD_CONTEXT: <span class="hljs-string">&quot;public&quot;</span>        &#125;  <span class="hljs-keyword">default</span>: # <span class="hljs-keyword">default</span> 用于在命令行不显示输入任何 task 名称时调用    cmds:      - task: build-backend      - task: build-frontend<br></code></pre></td></tr></table></figure>
+
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/1f7d6d0bdcf28233497961435beb262d.png" srcset="/img/loading.gif" lazyload alt="2f2cdde1326275a9eb068225f9e00b52.png"></p>
+<h4 id="引入其他文件"><a href="#引入其他文件" class="headerlink" title="引入其他文件"></a>引入其他文件</h4><p>Taskfile 支持通过 <code>includes</code> 关键字来引入其他 Taskfile, 从而方便 Taskfile 的结构化处理.</p>
+<p><strong>需要注意的是, 由于引入的文件中可能会包含多特 task, 所以在使用时需要对引入的文件进行命名, 且通过命名引用目标 task:</strong></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs go">version: <span class="hljs-string">&#x27;3&#x27;</span> includes:  file1: ./file1.yaml # 直接引用 yaml 文件  dir2: ./dir2 # 引用目录时默认引用该目录下的 Taskfile.yaml<br></code></pre></td></tr></table></figure>
+
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/4365985a46d01d7012218fa0a023c267.png" srcset="/img/loading.gif" lazyload alt="4ab888cb193912480c87317e1c63c360.png"></p>
+<p>在引入其他 Taskfile 时, <strong>默认情况下会在当前主 Taskfile 目录下执行命令, 我们同样可以通过 <code>dir</code> 参数来控制引入的 Taskfile 内的 task 在特定目录下执行:</strong></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs go">version: <span class="hljs-string">&#x27;3&#x27;</span> includes:  dir1: ./dirtest.yaml # 直接在当前目录执行  dir2:    taskfile: ./dirtest.yaml    dir: /tmp # 在指定目录执行<br></code></pre></td></tr></table></figure>
+
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/850fc659bece4ff287c1f2b098a7e62d.png" srcset="/img/loading.gif" lazyload alt="f1098a758be9a862276eb2c39e0042f7.png"></p>
+<h4 id="defer-处理"><a href="#defer-处理" class="headerlink" title="defer 处理"></a>defer 处理</h4><p>熟悉 go 语言的同学应该知道, go 里面有个很方便的关键字 <code>defer</code>; 该指令用于定义在最终代码收尾时要执行的动作, 常见的比如资源清理等. Taskfile 中同样支持了该指令, 可以方便我们在任务执行期间完成一些清理操作:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs go">version: <span class="hljs-string">&#x27;3&#x27;</span> tasks:  <span class="hljs-keyword">default</span>: # <span class="hljs-keyword">default</span> 用于在命令行不显示输入任何 task 名称时调用    cmds:      - wget -q https:<span class="hljs-comment">//github.com/containerd/nerdctl/releases/download/v0.19.0/nerdctl-full-0.19.0-linux-amd64.tar.gz      # 定义清理动作      - defer: rm -f nerdctl-full-0.19.0-linux-amd64.tar.gz      - tar -zxf nerdctl-full-0.19.0-linux-amd64.tar.gz</span><br></code></pre></td></tr></table></figure>
+
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/dc5b0e622705651d38c1815550f2102b.png" srcset="/img/loading.gif" lazyload alt="f1706a36f7d41aec707dcde94fc7a8c1.png"></p>
+<p><strong>当然, defer 指令除了直接写命令以外, 还可以引用其他 task 完成清理:</strong></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs go">version: <span class="hljs-string">&#x27;3&#x27;</span> tasks:  cleanup:    cmds:      - rm -f &#123;&#123;.FILE&#125;&#125;  <span class="hljs-keyword">default</span>: # <span class="hljs-keyword">default</span> 用于在命令行不显示输入任何 task 名称时调用    cmds:      - wget -q https:<span class="hljs-comment">//github.com/containerd/nerdctl/releases/download/v0.19.0/nerdctl-full-0.19.0-linux-amd64.tar.gz      # 引用其他 task 进行清理, 同时也可以传递动态变量      - defer: &#123;task: cleanup, vars: &#123;FILE: nerdctl-full-0.19.0-linux-amd64.tar.gz&#125;&#125;      - tar -zxf nerdctl-full-0.19.0-linux-amd64.tar.gz</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="4-高级应用"><a href="#4-高级应用" class="headerlink" title="4. 高级应用"></a>4. 高级应用</h3><h4 id="动态检测"><a href="#动态检测" class="headerlink" title="动态检测"></a>动态检测</h4><h5 id="输出检测"><a href="#输出检测" class="headerlink" title="输出检测"></a>输出检测</h5><p>在某些时候, 一些任务我们可能期望进行缓存处理, 比如说已经下载好了文件就不要重复运行下载; 针对于这种需求, Taskfile 允许我们定义源文件和生成的文件, 通过这组文件的 hash 值来确定是否需要执行该任务:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs go">version: <span class="hljs-string">&#x27;3&#x27;</span> tasks:  <span class="hljs-keyword">default</span>:    cmds:      - wget -q https:<span class="hljs-comment">//github.com/containerd/nerdctl/releases/download/v0.19.0/nerdctl-full-0.19.0-linux-amd64.tar.gz    sources:      - testfile    generates:      - nerdctl-full-0.19.0-linux-amd64.tar.gz</span><br></code></pre></td></tr></table></figure>
+
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/e86741dc1eb11829e00b6788d335d212.png" srcset="/img/loading.gif" lazyload alt="b82948a445de8d75523ddc02b888832d.png"></p>
+<p>从上图中可以看到, 当首次执行任务时会生成 <code>.task</code> 目录, 该目录包含文件的 hash 值; 当重复执行任务时, 如果 hash 值不改变则真实任务不会真正执行. <strong>Taskfile 默认有两种文件检测的方式: <code>checksum</code>、<code>timestamp</code>, <code>checksum</code> 执行文件的 hash 检测(默认), 该模式只需要定义 <code>sources</code> 配置; <code>timestamp</code> 执行文件的时间戳检测, 该模式需要同时定义 <code>sources</code> 和 <code>generates</code> 配置.</strong></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs go">version: <span class="hljs-string">&#x27;3&#x27;</span> tasks:  build:    cmds:      - <span class="hljs-keyword">go</span> build .    sources:      - .<span class="hljs-comment">/*.go    generates:      - app&#123;&#123;exeExt&#125;&#125;    method: checksum # 指定检测方式</span><br></code></pre></td></tr></table></figure>
+
+<p>除了内置的两种检测模式外, 我们还可以通过 <code>status</code> 配置来定义自己的检测命令, <strong>如果命令执行结果为 0, 则认为文件是最新的, 不需要执行任务:</strong></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs go">version: <span class="hljs-string">&#x27;3&#x27;</span> tasks:  generate-files:    cmds:      - mkdir directory      - touch directory/file1.txt      - touch directory/file2.txt    # test existence of files    status:      - test -d directory      - test -f directory/file1.txt      - test -f directory/file2.txt<br></code></pre></td></tr></table></figure>
+
+<h5 id="输入检测"><a href="#输入检测" class="headerlink" title="输入检测"></a>输入检测</h5><p>上面的输出检测用于检测任务生成的文件结果等, 在某些情况下我们可能期望在运行任务之前来判断某个条件, 在完全不执行的情况下确定任务是否需要运行; 此时我们可以使用 <code>preconditions</code> 配置指令:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs go">version: <span class="hljs-string">&#x27;3&#x27;</span> tasks:  generate-files:    cmds:      - mkdir directory      - touch directory/file1.txt      - touch directory/file2.txt    # test existence of files    preconditions:      - test -f .env      - sh: <span class="hljs-string">&quot;[ 1 = 0 ]&quot;</span>        msg: <span class="hljs-string">&quot;One doesn&#x27;t equal Zero, Halting&quot;</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="Go-模版引擎"><a href="#Go-模版引擎" class="headerlink" title="Go 模版引擎"></a>Go 模版引擎</h4><p>在上面变量环节中已经展示了一部分模版引擎的使用, 实际上 Taskfile 内集成了 slim-sprig[1] 库, 该库中提供了一些比较便利的方法, 这些方法都可以在模版引擎内使用:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs go">version: <span class="hljs-string">&#x27;3&#x27;</span> tasks:  <span class="hljs-built_in">print</span>-date:    cmds:      - echo &#123;&#123;now | date <span class="hljs-string">&quot;2006-01-02&quot;</span>&#125;&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>关于这些方法和模版引擎的使用具体请参考 Go Template 相关文档以及 slim-sprig[2] 文档.</strong></p>
+<h4 id="交互式终端"><a href="#交互式终端" class="headerlink" title="交互式终端"></a>交互式终端</h4><p>有些任务命令可能需要交互式终端来执行, 此时可以为 task 设置 <code>interactive</code> 选项; 当 <code>interactive</code> 设置为 <code>true</code> 时, task 在运行时可以打开交互式终端：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs go">version: <span class="hljs-string">&#x27;3&#x27;</span> tasks:  cmds:    - vim my-file.txt  interactive: <span class="hljs-literal">true</span><br></code></pre></td></tr></table></figure>
+
+<p>更多关于 Taskfile 的细节使用请阅读其官方文档[3], 本文限于篇幅不在过多阐述。</p>
+<h4 id="引用链接"><a href="#引用链接" class="headerlink" title="引用链接"></a>引用链接</h4><p>[1]</p>
+<p>slim-sprig: <em><a target="_blank" rel="noopener" href="https://go-task.github.io/slim-sprig/">https://go-task.github.io/slim-sprig/</a></em></p>
+<p>[2]</p>
+<p>slim-sprig: <em><a target="_blank" rel="noopener" href="https://go-task.github.io/slim-sprig/">https://go-task.github.io/slim-sprig/</a></em></p>
+<p>[3]</p>
+<p>官方文档: <em><a target="_blank" rel="noopener" href="https://taskfile.dev/">https://taskfile.dev/</a></em></p>
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/50e3e1a16852ce595124a84521856b9f.gif" srcset="/img/loading.gif" lazyload alt="82cba5af86ef37ceb892e25fc57f8e9f.gif">  </p>
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/6c241269261df421edba8b50d1fb13f3.png" srcset="/img/loading.gif" lazyload alt="1cec635c4fa6317e1734bfae096b4cd7.png"></p>
+<p><strong>你可能还喜欢</strong></p>
+<p>点击下方图片即可阅读  </p>
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/008c424477309db3cfd3940564444eb8.png" srcset="/img/loading.gif" lazyload alt="863f3147a066f0e37b380355a3e04ebe.png"></p>
+<p>RethinkDB：为什么我们失败了</p>
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/86dc0054489646b399ee23962d7360ef.gif" srcset="/img/loading.gif" lazyload alt="90bbf71cf194c4333822e6fe2336979f.gif"></p>
+<p><strong>云原生是一种信仰 🤘</strong></p>
+<p><strong>关注公众号</strong></p>
+<p><strong>后台回复◉k8s◉获取史上最方便快捷的 Kubernetes 高可用部署工具，只需一条命令，连 ssh 都不需要！</strong></p>
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/1ace08c69b2445f770e82c8863918f90.gif" srcset="/img/loading.gif" lazyload alt="1d457af4e81cd612766609a64c88bca2.gif"></p>
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/0b4f7cae17a6e7fd6671f3bc335357fa.gif" srcset="/img/loading.gif" lazyload alt="2ed537dde07e55d4f25fd6f8a116ad00.gif"></p>
+<p>点击 “阅读原文” 获取<strong>更好的阅读体验！</strong></p>
+<p><strong>发现朋友圈变“安静”了吗？</strong></p>
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/5a3bfa92d9df34318b228a5ac4fb59b9.gif" srcset="/img/loading.gif" lazyload alt="9f6844bb53abbf62bd1a0bb9b48c4d48.gif"></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Taskfile - 比 Makefile 更好用的构建工具</div>
+      <div>https://yhao521.github.io/2025/07/23/摘录/Taskfile - 比 Makefile 更好用的构建工具/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>yhao521</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年7月23日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E6%91%98%E5%BD%95/Flux%E7%9A%84%E4%B8%89%E6%AD%A5%E7%82%BC%E4%B8%B9%E7%82%89%E2%80%94%E2%80%94fluxgym%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9A%E8%AE%AD%E7%BB%83%20Lora/" title="Flux的三步炼丹炉——fluxgym（二）：训练 Lora">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Flux的三步炼丹炉——fluxgym（二）：训练 Lora</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E6%91%98%E5%BD%95/Vue.js%20%E5%A6%82%E4%BD%95%E5%9C%A8Vue.js%E4%B8%AD%E5%AF%BC%E5%85%A5%E5%92%8C%E4%BD%BF%E7%94%A8%E6%9C%AC%E5%9C%B0.csv%E6%96%87%E4%BB%B6/" title="Vue.js 如何在Vue.js中导入和使用本地.csv文件">
+                        <span class="hidden-mobile">Vue.js 如何在Vue.js中导入和使用本地.csv文件</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>  
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

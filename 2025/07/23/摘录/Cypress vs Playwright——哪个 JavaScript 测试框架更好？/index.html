@@ -1,0 +1,917 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="yhao521">
+  <meta name="keywords" content="java,博客,vue,spring,mysql,docker,linux">
+  
+    <meta name="description" content="10 年前，自动化测试人员如果要编写 E2E 测试，主要使用 Selenium。每个有机会使用该解决方案的人都应该会记得设置、编写和调试是多么不愉快。在此过程中还创建了一些更有趣的自动化工具，例如 Webdriver.io、TestCafe、Nightwatch.js 和 Puppeteer。但是我们今天不会关注那些，因为我想谈谈Cypress和Playwright中测试自动化的几个问题。Cyp">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Cypress vs Playwright——哪个 JavaScript 测试框架更好？">
+<meta property="og:url" content="https://yhao521.github.io/2025/07/23/%E6%91%98%E5%BD%95/Cypress%20vs%20Playwright%E2%80%94%E2%80%94%E5%93%AA%E4%B8%AA%20JavaScript%20%E6%B5%8B%E8%AF%95%E6%A1%86%E6%9E%B6%E6%9B%B4%E5%A5%BD%EF%BC%9F/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="10 年前，自动化测试人员如果要编写 E2E 测试，主要使用 Selenium。每个有机会使用该解决方案的人都应该会记得设置、编写和调试是多么不愉快。在此过程中还创建了一些更有趣的自动化工具，例如 Webdriver.io、TestCafe、Nightwatch.js 和 Puppeteer。但是我们今天不会关注那些，因为我想谈谈Cypress和Playwright中测试自动化的几个问题。Cyp">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/ec05ac29505b9acb2b3e22e251c9d9e4.png">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/990c5ab5c55224912e11975e3a7ea9dd.png">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/e3a70f3e1e3e6c2959f013d006edc3a7.png">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/ce31259042eca7c839527287f54c0b35.png">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/69d8f0d9807ca72d5525111ba8f515a3.png#pic_center">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/2bbb4c83072abb08cfd4d3db9b4ea739.gif">
+<meta property="article:published_time" content="2025-07-23T12:01:17.000Z">
+<meta property="article:modified_time" content="2025-03-18T06:02:36.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="java,博客,vue,spring,mysql,docker,linux">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://i-blog.csdnimg.cn/blog_migrate/ec05ac29505b9acb2b3e22e251c9d9e4.png">
+  
+  
+  
+  <title>Cypress vs Playwright——哪个 JavaScript 测试框架更好？ - 匆匆过客的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yhao521.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>匆匆过客的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Cypress vs Playwright——哪个 JavaScript 测试框架更好？"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-07-23 20:01" pubdate>
+          2025年7月23日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          3.4k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          29 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Cypress vs Playwright——哪个 JavaScript 测试框架更好？</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p><img src="https://i-blog.csdnimg.cn/blog_migrate/ec05ac29505b9acb2b3e22e251c9d9e4.png" srcset="/img/loading.gif" lazyload></p>
+<p>10 年前，自动化测试人员如果要编写 <a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=E2E&spm=1001.2101.3001.7020">E2E</a> 测试，主要使用 Selenium。每个有机会使用该解决方案的人都应该会记得设置、编写和调试是多么不愉快。在此过程中还创建了一些更有趣的自动化工具，例如 Webdriver.io、TestCafe、Nightwatch.js 和 <a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=Puppeteer&spm=1001.2101.3001.7020">Puppeteer</a>。但是我们今天不会关注那些，因为我想谈谈Cypress和Playwright中测试自动化的几个问题。Cypress 和 Playwright是目前为测试实现创建理想工具的顶级框架。</p>
+<h4 id="两个框架，相似……"><a href="#两个框架，相似……" class="headerlink" title="两个框架，相似……"></a>两个框架，相似……</h4><p>  Cypress 是一种基于 JavaScript 的前端测试工具。设计为对开发人员友好，它直接在浏览器中运行。 Cypress 的第一个版本于 2015 年发布，并于 2018 年开始真正流行，并于 2020 年筹集了 4000 万美元的 B 轮融资。他们以开源为荣，他们相信这将帮助他们在竞争中取得领先。Playwright（微软），于2020年发布。它是一个用于端到端测试的跨浏览器自动化库，也是开源的。它最初是一个 JavaScript 库，但现在已经扩展到还支持 Python、NET 和 Java。它是专门为网络自动化而创建的。</p>
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/990c5ab5c55224912e11975e3a7ea9dd.png" srcset="/img/loading.gif" lazyload></p>
+<p>尽管这两个框架都很年轻，但它们提供了许多很棒的工具，使测试实施变得有趣而不乏味。在本文中，我们将重点关注十几个选定的类别，在我看来，这些类别对开发人员和测试工程师至关重要。质量保证是我们认真对待的事情。<br>它们如下：<br>1.与元素交互<br>2.导航<br>3.处理警报<br>4.内嵌框架支持<br>5.等待<br>6.要求语言支持<br>所讨论的示例是针对前端部分的 TheInternet 应用程序和 API 部分的 Reqres.in 实现的。</p>
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/e3a70f3e1e3e6c2959f013d006edc3a7.png" srcset="/img/loading.gif" lazyload></p>
+<h4 id="与元素交互"><a href="#与元素交互" class="headerlink" title="与元素交互"></a>与元素交互</h4><p>  在第一类中，将比较 Cypress 和 Playwright 的元素交互示例及其断言。测试任务是转到复选框页面，验证项目的数量，验证第一个项目未被选中，选择一个项目，然后验证该项目是否被正确选择。</p>
+<p>Cypress:</p>
+<figure class="highlight lisp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs lisp">describe(&#x27;Interacting with elements&#x27;, () =&gt; &#123;   it(&#x27;First example&#x27;, () =&gt; &#123;     cy.visit(&#x27;/checkboxes&#x27;)<span class="hljs-comment">;      cy.get(&#x27;[type=&quot;checkbox&quot;]&#x27;)       .should(($elm) =&gt; &#123;         expect($elm).to.have.length(2);       &#125;)       .eq(0)       .should(&#x27;not.be.checked&#x27;)       .check()       .should(&#x27;be.checked&#x27;);   &#125;);    it(&#x27;Second example&#x27;, () =&gt; &#123;     cy.visit(&#x27;/checkboxes&#x27;);      cy.get(&#x27;[type=&quot;checkbox&quot;]&#x27;).then(($elm) =&gt; &#123;       expect($elm).to.have.length(2);       expect($elm[0]).not.be.checked;       cy.wrap($elm[0])         .click()         .then(($elm) =&gt; &#123;           expect($elm).to.be.checked;         &#125;);     &#125;);   &#125;); &#125;);</span><br></code></pre></td></tr></table></figure>
+
+<p>Playwright:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cobol">const &#123; test, expect &#125; = require(&#x27;@playwright/test&#x27;);  test(&#x27;Interacting with elements&#x27;, async (&#123; page &#125;) =&gt; &#123;   await page.goto(&#x27;/checkboxes&#x27;);   const checkboxes = page.locator(&#x27;[type=&quot;checkbox&quot;]&#x27;);   const firstCheckbox = checkboxes.nth(0);    await expect(await checkboxes.count()).toEqual(2);   await expect(firstCheckbox).not.toBeChecked();   await firstCheckbox.check();   await expect(firstCheckbox).toBeChecked(); &#125;);<br></code></pre></td></tr></table></figure>
+
+<p>在 Cypress 的实现中，代码乍一看可能比 Playwright 的可读性差一些，为了对给定元素执行操作，必须从 cy.get() 链接。在 Playwright 中，由于每个用户都能毫无问题地理解，可以轻松地将租户分配给变量。通常对元素执行复杂的操作与所谓的callback hell 相关联。在我看来，微软团队的实现肯定更令人赏心悦目。</p>
+<h4 id="导航"><a href="#导航" class="headerlink" title="导航"></a>导航</h4><p>  下一个类别将验证框架如何处理在 Cypress 与 Playwright 中打开新页面的问题。在测试中，用户单击链接，他们将被重定向到新选项卡中的页面。</p>
+<p>Cypress:</p>
+<figure class="highlight lisp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs lisp">describe(&#x27;Multiple windows&#x27;, () =&gt; &#123;   it(&#x27;Windows support - not supported&#x27;, () =&gt; &#123;     cy.visit(&#x27;/windows&#x27;)<span class="hljs-comment">;      cy.get(&#x27;[href=&quot;/windows/new&quot;]&#x27;).click();      cy.get(&#x27;h3&#x27;).should(&#x27;have.text&#x27;, &#x27;New Window&#x27;);   &#125;);    it(&#x27;Windows support - removing &quot;target&quot; attribute&#x27;, () =&gt; &#123;     cy.visit(&#x27;/windows&#x27;);      cy.get(&#x27;[href=&quot;/windows/new&quot;]&#x27;).invoke(&#x27;removeAttr&#x27;, &#x27;target&#x27;).click();      cy.location(&#x27;pathname&#x27;).should(&#x27;eq&#x27;, &#x27;/windows/new&#x27;);     cy.get(&#x27;h3&#x27;).should(&#x27;have.text&#x27;, &#x27;New Window&#x27;);   &#125;); &#125;);</span><br></code></pre></td></tr></table></figure>
+
+<p>Playwright:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cobol">const &#123; test, expect &#125; = require(&#x27;@playwright/test&#x27;);  test(&#x27;Windows support&#x27;, async (&#123; page, context &#125;) =&gt; &#123;   await page.goto(&#x27;/windows&#x27;);    let [newPage] = await Promise.all([     context.waitForEvent(&#x27;page&#x27;),     page.locator(&#x27;[href=&quot;/windows/new&quot;]&#x27;).click(),   ]);    await newPage.waitForLoadState();   const newWindowElement = newPage.locator(&#x27;h3&#x27;);    expect(newPage.url()).toContain(&#x27;/windows/new&#x27;);   await expect(newWindowElement).toHaveText(&#x27;New Window&#x27;); &#125;);<br></code></pre></td></tr></table></figure>
+
+<p>不幸的是，Cypress 不支持在一次测试会话期间打开新窗口，如果被测试的应用程序需要它，这对很多人来说都是一个问题。但是有一个技巧可以绕过这个限制。但是，如果需要留在原始页面上，将无法访问它，因此双方之间的任何交互仍然很困难。使用 Playwright，可以打开的窗口数量没有限制。用户可以完全控制他想要验证的内容。它可以随时与任何上下文相关。</p>
+<h4 id="处理警报"><a href="#处理警报" class="headerlink" title="处理警报"></a>处理警报</h4><p>警报通常是“旧”JavaScript 的残余，如今它们在现代应用程序中越来越不常见。不幸的是，在自动化过程中，并不总是能接触到现代框架。需要能够处理警报。在这个例子中，将分析Alert、Confirm和Prompt的例子。</p>
+<p>Cypress:</p>
+<figure class="highlight lisp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs lisp">describe(&#x27;Handling Alerts in browser&#x27;, () =&gt; &#123;   beforeEach(() =&gt; &#123;     cy.visit(&#x27;/javascript_alerts&#x27;)<span class="hljs-comment">;   &#125;);    it(&#x27;Click &quot;OK&quot; on JS Alert&#x27;, () =&gt; &#123;     cy.contains(&#x27;Click for JS Alert&#x27;).click();      cy.on(&#x27;window:alert&#x27;, (alert) =&gt; &#123;       expect(alert).to.eq(&#x27;I am a JS Alert&#x27;);     &#125;);     cy.on(&#x27;window:confirm&#x27;, () =&gt; true);     cy.get(&#x27;#result&#x27;).should(&#x27;have.text&#x27;, &#x27;You successfully clicked an alert&#x27;);   &#125;);    it(&#x27;Click &quot;OK&quot; on JS Confirm&#x27;, () =&gt; &#123;     cy.contains(&#x27;Click for JS Confirm&#x27;).click();      cy.on(&#x27;window:confirm&#x27;, (str) =&gt; &#123;       expect(str).to.equal(`I am a JS Confirm`);     &#125;);     cy.on(&#x27;window:confirm&#x27;, () =&gt; true);     cy.get(&#x27;#result&#x27;).should(&#x27;have.text&#x27;, &#x27;You clicked: Ok&#x27;);   &#125;);    it(&#x27;Click &quot;Cancel&quot; on JS Confirm&#x27;, () =&gt; &#123;     cy.contains(&#x27;Click for JS Confirm&#x27;).click();      cy.on(&#x27;window:confirm&#x27;, (str) =&gt; &#123;       expect(str).to.equal(`I am a JS Confirm`);     &#125;);     cy.on(&#x27;window:confirm&#x27;, () =&gt; false);     cy.get(&#x27;#result&#x27;).should(&#x27;have.text&#x27;, &#x27;You clicked: Cancel&#x27;);   &#125;);    it(&#x27;Fill JS Prompt&#x27;, () =&gt; &#123;     cy.window().then(($win) =&gt; &#123;       cy.stub($win, &#x27;prompt&#x27;).returns(&#x27;This is a test text&#x27;);       cy.contains(&#x27;Click for JS Prompt&#x27;).click();     &#125;);     cy.get(&#x27;#result&#x27;).should(&#x27;have.text&#x27;, &#x27;You entered: This is a test text&#x27;);   &#125;); &#125;);</span><br></code></pre></td></tr></table></figure>
+
+<p>Playwright:</p>
+<ol>
+<li><p><code>const { test, expect } = require(&#39;@playwright/test&#39;);</code></p>
+</li>
+<li><p><code>test.describe(&#39;Handling Alerts in browser&#39;, () =&gt; {</code></p>
+</li>
+<li><p><code>test.beforeEach(async ({ page }) =&gt; {</code></p>
+</li>
+<li><p><code>await page.goto(&#39;/javascript_alerts&#39;);</code></p>
+</li>
+<li><p><code>});</code></p>
+</li>
+<li><p><code>test(&#39;Click &quot;OK&quot; on JS Alert&#39;, async ({ page }) =&gt; {</code></p>
+</li>
+<li><p><code>page.on(&#39;dialog&#39;, (dialog) =&gt; {</code></p>
+</li>
+<li><p><code>expect(dialog.message()).toBe(&#39;I am a JS Alert&#39;);</code></p>
+</li>
+<li><p><code>dialog.accept();</code></p>
+</li>
+<li><p><code>});</code></p>
+</li>
+<li><p><code>const button = page.locator(&#39;button &gt;&gt; text=Click for JS Alert&#39;);</code></p>
+</li>
+<li><p><code>await button.click();</code></p>
+</li>
+<li><p><code>const result = page.locator(&#39;#result&#39;);</code></p>
+</li>
+<li><p><code>await expect(result).toHaveText(&#39;You successfully clicked an alert&#39;);</code></p>
+</li>
+<li><p><code>});</code></p>
+</li>
+<li><p><code>test(&#39;Click &quot;OK&quot; on JS Confirm&#39;, async ({ page }) =&gt; {</code></p>
+</li>
+<li><p><code>page.on(&#39;dialog&#39;, (dialog) =&gt; {</code></p>
+</li>
+<li><p><code>expect(dialog.message()).toBe(&#39;I am a JS Confirm&#39;);</code></p>
+</li>
+<li><p><code>dialog.accept();</code></p>
+</li>
+<li><p><code>});</code></p>
+</li>
+<li><p><code>const button = page.locator(&#39;button &gt;&gt; text=Click for JS Confirm&#39;);</code></p>
+</li>
+<li><p><code>await button.click();</code></p>
+</li>
+<li><p><code>const result = page.locator(&#39;#result&#39;);</code></p>
+</li>
+<li><p><code>await expect(result).toHaveText(&#39;You clicked: Ok&#39;);</code></p>
+</li>
+<li><p><code>});</code></p>
+</li>
+<li><p><code>test(&#39;Click &quot;Cancel&quot; on JS Confirm&#39;, async ({ page }) =&gt; {</code></p>
+</li>
+<li><p><code>page.on(&#39;dialog&#39;, (dialog) =&gt; {</code></p>
+</li>
+<li><p><code>expect(dialog.message()).toBe(&#39;I am a JS Confirm&#39;);</code></p>
+</li>
+<li><p><code>dialog.dismiss();</code></p>
+</li>
+<li><p><code>});</code></p>
+</li>
+<li><p><code>const button = page.locator(&#39;button &gt;&gt; text=Click for JS Confirm&#39;);</code></p>
+</li>
+<li><p><code>await button.click();</code></p>
+</li>
+<li><p><code>const result = page.locator(&#39;#result&#39;);</code></p>
+</li>
+<li><p><code>await expect(result).toHaveText(&#39;You clicked: Cancel&#39;);</code></p>
+</li>
+<li><p><code>});</code></p>
+</li>
+<li><p><code>test(&#39;Fill JS Prompt&#39;, async ({ page }) =&gt; {</code></p>
+</li>
+<li><p><code>page.on(&#39;dialog&#39;, (dialog) =&gt; {</code></p>
+</li>
+<li><p><code>expect(dialog.message()).toBe(&#39;I am a JS prompt&#39;);</code></p>
+</li>
+<li><p><code>dialog.accept(&#39;This is a test text&#39;);</code></p>
+</li>
+<li><p><code>});</code></p>
+</li>
+<li><p><code>const button = page.locator(&#39;button &gt;&gt; text=Click for JS Prompt&#39;);</code></p>
+</li>
+<li><p><code>await button.click();</code></p>
+</li>
+<li><p><code>const result = page.locator(&#39;#result&#39;);</code></p>
+</li>
+<li><p><code>await expect(result).toHaveText(&#39;You entered: This is a test text&#39;);</code></p>
+</li>
+<li><p><code>});</code></p>
+</li>
+<li><p><code>});</code></p>
+</li>
+</ol>
+<p>  Playwright 使用相同的实现来处理所有类型的警报。用户可以轻松地验证给定窗口的内容，例如，选择他感兴趣的按钮。就 Cypress 而言，原生弹出窗口的处理不够完善。在每种情况下，3 种类型的窗口和运行无头测试的代码都不同，用户无法查看窗口是否得到了正确处理。</p>
+<h4 id="内嵌框架支持"><a href="#内嵌框架支持" class="headerlink" title="内嵌框架支持"></a>内嵌框架支持</h4><p>  在实施测试时，通常需要使用 iframe，例如以外部支付网关的形式。过去，使用 iframe 对自动化测试人员来说是个大问题——现在这个过程要容易得多。在此挑战中，将尝试获取给定的 iframe 并将文本输入其中。</p>
+<p>Cypress:</p>
+<ol>
+<li><p><code>it(&#39;Iframe support&#39;, () =&gt; {</code></p>
+</li>
+<li><p><code>cy.visit(&#39;/iframe&#39;);</code></p>
+</li>
+<li><p><code>const iframe = cy</code></p>
+</li>
+<li><p><code>.get(&#39;#mce_0_ifr&#39;)</code></p>
+</li>
+<li><p><code>.its(&#39;0.contentDocument.body&#39;)</code></p>
+</li>
+<li><p><code>.should(&#39;be.visible&#39;)</code></p>
+</li>
+<li><p><code>.then(cy.wrap);</code></p>
+</li>
+<li><p><code>iframe.clear().type(&#39;Some text&#39;).should(&#39;have.text&#39;, &#39;Some text&#39;);</code></p>
+</li>
+<li><p><code>});</code></p>
+</li>
+</ol>
+<p>Playwright:</p>
+<ol>
+<li><p><code>const { test, expect } = require(&#39;@playwright/test&#39;);</code></p>
+</li>
+<li><p><code>test(&#39;Iframe support&#39;, async ({ page }) =&gt; {</code></p>
+</li>
+<li><p><code>await page.goto(&#39;/iframe&#39;);</code></p>
+</li>
+<li><p><code>const frame = page.frameLocator(&#39;#mce_0_ifr&#39;);</code></p>
+</li>
+<li><p><code>const frameBody = frame.locator(&#39;body&#39;);</code></p>
+</li>
+<li><p><code>await frameBody.fill(&#39;&#39;);</code></p>
+</li>
+<li><p><code>await frameBody.fill(&#39;Some text&#39;);</code></p>
+</li>
+<li><p><code>await expect(frameBody).toHaveText(&#39;Some text&#39;);</code></p>
+</li>
+<li><p><code>});</code></p>
+</li>
+</ol>
+<p>  在 Playwright 中，使用 frameLocator() 方法可以轻松访问 Iframe。要在 Iframe 中执行操作，使用类似的定位器 ()，可以在其中自由执行操作，例如键入文本、单击元素或用户执行的其他操作。另一方面，Cypress并不那么容易支持 iframe。如果要在iframe中执行操作，需要安装npm cypress-iframe包，然后将插件添加到commands.js中。最后，在测试或自定义命令中，创建一个辅助函数，在其中传递要对其执行操作的元素。同样，我的印象是 Cypress 比 Playwright 更难执行简单的 Iframe 操作。你怎么认为？</p>
+<h4 id="等待"><a href="#等待" class="headerlink" title="等待"></a>等待</h4><p>  较旧的框架在等待加载缓慢的元素时总是存在问题，这有时会导致添加硬超时以验证给定元素的可见性。它非常坚持保持代码不稳定。</p>
+<p>Cypress:</p>
+<ol>
+<li><p><code>it(&#39;Waiting for lazy elements&#39;, () =&gt; {</code></p>
+</li>
+<li><p><code>cy.visit(&#39;/dynamic_loading/2&#39;);</code></p>
+</li>
+<li><p><code>cy.contains(&#39;button&#39;, &#39;Start&#39;).click();</code></p>
+</li>
+<li><p><code>// Elements is loading longer then global timeout: 5_000</code></p>
+</li>
+<li><p><code>cy.get(&#39;#finish&#39;, { timeout: 10_000 }).should(&#39;be.visible&#39;).should(&#39;have.text&#39;, &#39;Hello World!&#39;);</code></p>
+</li>
+<li><p><code>});</code></p>
+</li>
+</ol>
+<p>Playwright:</p>
+<ol>
+<li><p><code>const { test, expect } = require(&#39;@playwright/test&#39;);</code></p>
+</li>
+<li><p><code>test(&#39;Waiting for lazy elements&#39;, async ({ page }) =&gt; {</code></p>
+</li>
+<li><p><code>await page.goto(&#39;/dynamic_loading/2&#39;);</code></p>
+</li>
+<li><p><code>await page.getByText(&#39;Start&#39;).click();</code></p>
+</li>
+<li><p><code>const finish = page.locator(&#39;#finish&#39;);</code></p>
+</li>
+<li><p><code>// Elements is loading longer then global timeout: 5_000</code></p>
+</li>
+<li><p><code>await expect(finish).toBeVisible({ timeout: 10_000 });</code></p>
+</li>
+<li><p><code>await expect(finish).toHaveText(&#39;Hello World!&#39;);</code></p>
+</li>
+<li><p><code>});</code></p>
+</li>
+</ol>
+<p>  在 Cypress 和 Playwright 中，如果需要等待一个元素，不需要做任何额外的工作。唯一的额外工作是向元素添加 Cypress 超时。 Cypress 时不时地使用 cy.get，然后在页面上检查给定元素是否存在。如果该元素在默认超时（5_000m s）内不存在，则认为该元素不会出现。可以轻松地在全局范围内增加超时，或者仅针对具有延长加载时间的元素。在 Playwright 中，此机制可用于网络优先断言。在这种情况下，确保元素可见，然后验证其可见性。两种解决方案都令人满意，因为不必等待持续 10_000 毫秒的特定超时，一次可以是 4_500 毫秒，然后 9_500 毫秒，如果用时少于 10 秒，测试将通过。</p>
+<h4 id="Requests"><a href="#Requests" class="headerlink" title="Requests"></a>Requests</h4><p>  测试 Web 应用程序不仅是关于前端元素的验证，一个常见的工作元素也是验证 API 端的东西。可以直接从 Cypress 和 Playwright 框架中的测试代码拦截和发送请求。我们也有模拟查询的能力（请留意关于这个主题的另一篇文章，因为这个主题绝对值得深入研究）。可以直接从 Cypress 和 Playwright 框架中的测试代码拦截和发送请求。在这个简单的示例中，要执行的任务是针对特定用户向 Reqres.in 应用程序发送一个简单的“GET”查询。</p>
+<p>Cypress:</p>
+<ol>
+<li><p><code>it(&#39;Request support - &quot;then&quot; example&#39;, () =&gt; {</code></p>
+</li>
+<li><p><code>cy.request(&#39;GET&#39;, &#39;https://reqres.in/api/users/2&#39;).then(({ status, body }) =&gt; {</code></p>
+</li>
+<li><p><code>expect(status).to.equal(200);</code></p>
+</li>
+<li><p><code>const { email, id } = body.data;</code></p>
+</li>
+<li><p><code>expect(typeof email).to.be.equal(&#39;string&#39;);</code></p>
+</li>
+<li><p><code>expect(typeof id).to.be.equal(&#39;number&#39;);</code></p>
+</li>
+<li><p><code>expect(email).to.be.equal(&#39;janet.weaver@reqres.in&#39;);</code></p>
+</li>
+<li><p><code>expect(id).to.be.equal(2);</code></p>
+</li>
+<li><p><code>});</code></p>
+</li>
+<li><p><code>});</code></p>
+</li>
+<li><p><code>it(&#39;Request support - &quot;chain&quot; example&#39;, () =&gt; {</code></p>
+</li>
+<li><p><code>cy.request(&#39;GET&#39;, &#39;https://reqres.in/api/users/2&#39;).as(&#39;response&#39;);</code></p>
+</li>
+<li><p><code>cy.get(&#39;@response&#39;).its(&#39;status&#39;).should(&#39;eq&#39;, 200);</code></p>
+</li>
+<li><p><code>cy.get(&#39;@response&#39;)</code></p>
+</li>
+<li><p><code>.its(&#39;body.data&#39;)</code></p>
+</li>
+<li><p><code>.then(({ email, id }) =&gt; {</code></p>
+</li>
+<li><p><code>expect(typeof email).to.be.equal(&#39;string&#39;);</code></p>
+</li>
+<li><p><code>expect(typeof id).to.be.equal(&#39;number&#39;);</code></p>
+</li>
+<li><p><code>expect(email).to.be.equal(&#39;janet.weaver@reqres.in&#39;);</code></p>
+</li>
+<li><p><code>expect(id).to.be.equal(2);</code></p>
+</li>
+<li><p><code>});</code></p>
+</li>
+<li><p><code>});</code></p>
+</li>
+</ol>
+<p>Playwright:</p>
+<ol>
+<li><p><code>const { test, expect } = require(&#39;@playwright/test&#39;);</code></p>
+</li>
+<li><p><code>test.use({</code></p>
+</li>
+<li><p><code>baseURL: &#39;https://reqres.in&#39;,</code></p>
+</li>
+<li><p><code>});</code></p>
+</li>
+<li><p><code>test(&#39;Request support&#39;, async ({ request }) =&gt; {</code></p>
+</li>
+<li><p><code>const response = await request.get(&#39;/api/users/2&#39;);</code></p>
+</li>
+<li><p><code>await expect(response).toBeOK();</code></p>
+</li>
+<li><p><code>const body = await response.json();</code></p>
+</li>
+<li><p><code>const { email, id } = body.data;</code></p>
+</li>
+<li><p><code>expect(typeof email).toBe(&#39;string&#39;);</code></p>
+</li>
+<li><p><code>expect(typeof id).toBe(&#39;number&#39;);</code></p>
+</li>
+<li><p><code>expect(email).toEqual(&#39;janet.weaver@reqres.in&#39;);</code></p>
+</li>
+<li><p><code>expect(id).toEqual(2);</code></p>
+</li>
+<li><p><code>});</code></p>
+</li>
+</ol>
+<p>  Cypress 和 Playwright 中请求的实现几乎是彼此的双胞胎。在 Cypress 中，有一个 .request() 方法，它将 URL 和要执行的方法作为参数，然后在回调中，得到一个响应，在解构之后，可以将其分为状态、正文、持续时间等在下一步中，用户使用来自 Chai.js 库的简单断言。在 Playwright 中，有一个同名的方法来发出请求并指定要使用的 REST API 方法。作为此解决方案的一大优势，可以将给定查询的响应分配给变量，可以随时使用 .json() 方法获取感兴趣的变量。如果目标是验证来自服务器的响应，或者如果愿意，可以使用 .status() 。检查状态码。在 Cypress 中，为了能够访问答案，应该将答案保存为别名，然后通过访问别名，以适当的方式验证其他内容。亲自看看哪种实施方式更适合。</p>
+<h4 id="语言支持选择"><a href="#语言支持选择" class="headerlink" title="语言支持选择"></a>语言支持选择</h4><p>  自动化测试框架的关键方面之一是该工具支持的编程语言。在整个团队使用特定语言编写的情况下，使用相同语言编写测试以在合并请求期间支持整个团队要容易得多。目前，前端的很大一部分是用 JavaScript 或 TypeScript 编写的。两者都得到 Cypress 和 Playwright 的支持！</p>
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/ce31259042eca7c839527287f54c0b35.png" srcset="/img/loading.gif" lazyload></p>
+<p>但是，如果团队使用 Java、Python 或 .NET (C#) 编写，则只有 Playwright 才能完成这项工作。许多测试人员在将 Selenium 与 Java 或 PyTest 结合使用方面具有丰富的经验，因此如果不会 JavaScript，则入门门槛不涉及需要学习一门新语言。如果选择 Cypress，团队有效执行测试需要 JS 知识。</p>
+<p><strong>最后：</strong> 下方这份完整的软件测试视频学习教程已经整理上传完成，朋友们如果需要可以自行免费领取**<code>【保证100%免费】</code>**</p>
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/69d8f0d9807ca72d5525111ba8f515a3.png#pic_center" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<p> 这些资料，对于【软件测试】的朋友来说应该是最全面最完整的备战仓库，这个仓库也陪伴上万个测试工程师们走过最艰难的路程，希望也能帮助到你！</p>
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/2bbb4c83072abb08cfd4d3db9b4ea739.gif" srcset="/img/loading.gif" lazyload></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Cypress vs Playwright——哪个 JavaScript 测试框架更好？</div>
+      <div>https://yhao521.github.io/2025/07/23/摘录/Cypress vs Playwright——哪个 JavaScript 测试框架更好？/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>yhao521</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年7月23日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E6%91%98%E5%BD%95/Android%E3%80%81Flutter%E4%B8%BA%E4%B8%8D%E5%90%8C%E7%9A%84CPU%E6%9E%B6%E6%9E%84%E5%8C%85%E6%89%93%E5%8C%85APK(v7a%E3%80%81v8a%E3%80%81x86)/" title="">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile"></span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E6%91%98%E5%BD%95/ionic%E5%AE%9E%E6%88%98-%E6%9B%B4%E6%94%B9app%E5%9B%BE%E6%A0%87(Icons)%E5%92%8C%E5%90%AF%E5%8A%A8%E7%94%BB%E9%9D%A2(Splash%20screens)/" title="">
+                        <span class="hidden-mobile"></span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>  
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

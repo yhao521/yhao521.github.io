@@ -1,0 +1,779 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="[[huawei]]">
+  <meta name="keywords" content="java,博客,vue,spring,mysql,docker,linux">
+  
+    <meta name="description" content="目录前言签名信息的重要性签名的方式自动化签名手动签名签名信息配置示例结束语前言在HarmonyOS应用开发过程中，签名信息配置是一个关键步骤，它确保了应用的安全性和唯一性，签名信息涉及到应用能否正常上架，所以说正确配置签名信息对于应用上架、更新和用户数据保护至关重要。而且鸿蒙官方为了确保鸿蒙应用（包括元服务）的完整性，HarmonyOS通过数字证书和Profile文件对鸿蒙应用进行管控，只有签名后">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HarmonyOS开发：关于签名信息配置详解">
+<meta property="og:url" content="https://yhao521.github.io/2025/09/10/%E6%91%98%E5%BD%95/HarmonyOS%E5%BC%80%E5%8F%91%EF%BC%9A%E5%85%B3%E4%BA%8E%E7%AD%BE%E5%90%8D%E4%BF%A1%E6%81%AF%E9%85%8D%E7%BD%AE%E8%AF%A6%E8%A7%A3/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="目录前言签名信息的重要性签名的方式自动化签名手动签名签名信息配置示例结束语前言在HarmonyOS应用开发过程中，签名信息配置是一个关键步骤，它确保了应用的安全性和唯一性，签名信息涉及到应用能否正常上架，所以说正确配置签名信息对于应用上架、更新和用户数据保护至关重要。而且鸿蒙官方为了确保鸿蒙应用（包括元服务）的完整性，HarmonyOS通过数字证书和Profile文件对鸿蒙应用进行管控，只有签名后">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://developer.huawei.com/consumer/cn/blog/topic/assets/img/topic/hand.svg">
+<meta property="article:published_time" content="2025-09-10T09:20:50.710Z">
+<meta property="article:modified_time" content="2025-09-10T09:20:58.996Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="clippings">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://developer.huawei.com/consumer/cn/blog/topic/assets/img/topic/hand.svg">
+  
+  
+  
+  <title>HarmonyOS开发：关于签名信息配置详解 - 匆匆过客的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yhao521.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>匆匆过客的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="HarmonyOS开发：关于签名信息配置详解"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-09-10 17:20" pubdate>
+          2025年9月10日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2.8k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          24 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">HarmonyOS开发：关于签名信息配置详解</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p><img src="https://developer.huawei.com/consumer/cn/blog/topic/assets/img/topic/hand.svg" srcset="/img/loading.gif" lazyload alt="点赞"></p>
+<p>2</p>
+<p>2</p>
+<p>回复</p>
+<p>分享</p>
+<p>举报</p>
+<p>原创 三掌柜 收纳专栏: 日常记录 2024-09-14 09:38 发布于：上海 1569</p>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li>前言</li>
+<li>签名信息的重要性</li>
+<li>签名的方式</li>
+<li>自动化签名</li>
+<li>手动签名</li>
+<li>签名信息配置示例</li>
+<li>结束语</li>
+</ul>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><blockquote>
+<p>在HarmonyOS应用开发过程中，签名信息配置是一个关键步骤，它确保了应用的安全性和唯一性，签名信息涉及到应用能否正常上架，所以说正确配置签名信息对于应用上架、更新和用户数据保护至关重要。而且鸿蒙官方为了确保鸿蒙应用（包括元服务）的完整性，HarmonyOS通过数字证书和Profile文件对鸿蒙应用进行管控，只有签名后的鸿蒙应用才能安装到真机上运行。那么本文就来详细介绍在HarmonyOS开发中如何配置签名信息，包括生成签名证书、配置签名文件以及在开发环境中应用签名的过程，方便查阅使用。</p>
+</blockquote>
+<h2 id="签名信息的重要性"><a href="#签名信息的重要性" class="headerlink" title="签名信息的重要性"></a>签名信息的重要性</h2><p>在HarmonyOS中，签名信息用于验证应用的身份和完整性，它主要有以下几个重要的作用：</p>
+<ul>
+<li>安全性：确保应用在传输和安装过程中未被篡改。</li>
+<li>唯一性：为应用开发者提供唯一的标识，防止应用被冒充。</li>
+<li>权限管理：控制应用的权限，确保应用只能访问授权的数据和资源。</li>
+</ul>
+<h2 id="签名的方式"><a href="#签名的方式" class="headerlink" title="签名的方式"></a>签名的方式</h2><p>为了确保鸿蒙应用&#x2F;元服务的完整性，HarmonyOS通过数字证书和Profile文件对元服务进行管控，只有签名后的鸿蒙应用&#x2F;元服务才能安装到真机上运行。</p>
+<p>华为提供了两种签名方式：</p>
+<ul>
+<li>自动化签名</li>
+<li>手动签名</li>
+</ul>
+<p>下文会专门介绍这两种签名方式的具体操作步骤。</p>
+<h2 id="自动化签名"><a href="#自动化签名" class="headerlink" title="自动化签名"></a>自动化签名</h2><p>这里还是要强调一下，至于是选择自动化签名还是手动签名，一切根据自己的实际情况为主。先来介绍一下自动化签名的详细操作步骤，大概分为两步操作，具体如下所示。</p>
+<h2 id="1、连接真机"><a href="#1、连接真机" class="headerlink" title="1、连接真机"></a>1、连接真机</h2><p>首先需要连接真机操作，真机连接成功后如下图所示：</p>
+<p>![[_resources&#x2F;4db5cfc158c4dc5f86e8660bf7418ae3_MD5.png]]</p>
+<p>需要注意的是：如果同时连接多个设备，则使用自动化签名时，会同时将这多个设备的信息写到证书文件中在，这一点要记住。</p>
+<h2 id="2、选择"><a href="#2、选择" class="headerlink" title="2、选择"></a>2、选择</h2><p>真机链接成功之后，就是去操作菜单选择。打开菜单，在菜单中选择“File &gt; Project Structure”，打开界面之后在“Project Structure”界面导航选择“Project”，选择“Signing Configs”页签，选择“Debug”页签，勾选“Automatically generate signature” 。但是如果未登录，需要先点击“Sign In”进行登录，具体如下所示：</p>
+<p>![[_resources&#x2F;715a986b08eb4e102dde8f0ce1fc3a23_MD5.png]]</p>
+<p>在完成签名完成之后，界面信息如下所示：</p>
+<p>![[_resources&#x2F;2bf1daa9a5f5455b5d8347a89b404a82_MD5.png]]</p>
+<h2 id="手动签名"><a href="#手动签名" class="headerlink" title="手动签名"></a>手动签名</h2><p>上面的自动化签名是不是很简单，只需两步就可搞定，但是手动签名比较复杂，如果无法联网，不然不推荐使用这种签名方式。在开始使用手动签名之前，需要先了解如下几个基本概念：</p>
+<ul>
+<li>密钥：包含非对称加密中使用的公钥和私钥，存储在密钥库文件中，格式为.p12，公钥和私钥对用于数字签名和验证。</li>
+<li>证书请求文件：格式为.csr，全称为Certificate Signing Request，包含密钥对中的公钥和公共名称、组织名称、组织单位等信息，用于向AppGallery Connect申请数字证书。</li>
+<li>数字证书：格式为.cer，由AppGallery Connect颁发。</li>
+<li>Profile文件：格式为.p7b，包含元服务的包名、数字证书信息、描述元服务允许申请的证书权限列表，以及允许元服务调试的设备列表（如果元服务类型为Release类型，则设备列表为空）等内容，每个元服务包中均必须包含一个Profile文件。</li>
+</ul>
+<h2 id="（一）生成密钥和证书请求文件"><a href="#（一）生成密钥和证书请求文件" class="headerlink" title="（一）生成密钥和证书请求文件"></a>（一）生成密钥和证书请求文件</h2><p>1、首先打开菜单，在菜单中选择“Build &gt; Generate Key and CSR”。</p>
+<p>2、然后找到Key Store File可以点击“Choose Existing”选择，如果已有的密钥库文件（存储有密钥的.p12文件），跳转到下面的步骤4继续配置；如果没有密钥库文件，点击“New”，跳转到下面的步骤3进行创建。</p>
+<p>![[_resources&#x2F;7e0729240d14a92bb98aa63eddf591a5_MD5.png]]</p>
+<p>3、找到“Create Key Store”界面，填写密钥库信息后，点击“OK”。下面是注意事项：</p>
+<ul>
+<li>Key Store File：设置密钥库文件存储路径，并填写p12文件名。</li>
+<li>Password：设置密钥库密码，必须由大写字母、小写字母、数字和特殊符号中的两种以上字符的组合，长度至少为8位。请记住该密码，后续签名配置需要使用。</li>
+<li>Confirm Password：再次输入密钥库密码。</li>
+</ul>
+<p>4、打开“Generate Key and CSR”界面，然后继续填写密钥信息后，接着点击“Next”。下面是注意事项：</p>
+<ul>
+<li>Alias：密钥的别名信息，用于标识密钥名称。请记住该别名，后续签名配置需要使用。</li>
+<li>Password：密钥对应的密码，与密钥库密码保持一致，无需手动输入。</li>
+<li>Validity：证书有效期，建议设置为2025年及以上，覆盖元服务的完整生命周期。</li>
+<li>Certificate：输入证书基本信息，比如组织、城市或地区、国家码等，这与iOS、Android的设置差不多。</li>
+</ul>
+<p>![[_resources&#x2F;dbef82c8f0f653118a1b9ffe33cadef9_MD5.png]]</p>
+<p>5、打开“Generate Key and CSR”界面，然后设置CSR文件存储路径和CSR文件名，最后点击“Finish”。</p>
+<p>![[_resources&#x2F;d8b07573f88d9ebe7713bd4f5afc0767_MD5.png]]</p>
+<p>在CSR文件创建成功后，将在存储路径下获取生成密钥库文件（.p12）和证书请求文件（.csr）。</p>
+<h2 id="（二）申请调试证书"><a href="#（二）申请调试证书" class="headerlink" title="（二）申请调试证书"></a>（二）申请调试证书</h2><p>关于申请调试证书，大概分为四步，具体如下所示：</p>
+<p>1、登录AppGallery Connect： <a target="_blank" rel="noopener" href="https://developer.huawei.com/consumer/cn/service/josp/agc/index.html#/">https://developer.huawei.com/consumer/cn/service/josp/agc/index.html#/</a> ，登录之后如下图所示：</p>
+<p>![[_resources&#x2F;d8e5db78d15d9ae9db1e6cd9a73d7b0e_MD5.png]]</p>
+<p>2、然后在左侧导航栏选择“证书管理”，进入“证书管理”页面，点击“新增证书”。具体如下所示：</p>
+<p>![[_resources&#x2F;2335ee59a6374660c6274df53cd628b1_MD5.png]]</p>
+<p>![[_resources&#x2F;9788563cc12c03c0dd92e066082c2355_MD5.png]]</p>
+<p>3、在弹出“新增证书”界面填写相关信息后，点击“提交”。</p>
+<p>![[_resources&#x2F;e020854e77a73af2dbd2ea36ace85121_MD5.png]]</p>
+<p>![[_resources&#x2F;65b6f9a943e703c97bceea8a412d5688_MD5.png]]</p>
+<p>4、证书申请成功后，“证书管理”页面展示生成的证书内容。</p>
+<ul>
+<li>点击“下载”将生成的证书保存至本地。</li>
+<li>每个帐号最多申请2个调试证书，如果证书已过期或者无需使用，点击“废除”即可删除证书。</li>
+</ul>
+<h2 id="（三）注册调试设备"><a href="#（三）注册调试设备" class="headerlink" title="（三）注册调试设备"></a>（三）注册调试设备</h2><p>1、注册调试设备依然需要登录AppGallery Connect： <a target="_blank" rel="noopener" href="https://developer.huawei.com/consumer/cn/service/josp/agc/index.html#/">https://developer.huawei.com/consumer/cn/service/josp/agc/index.html#/</a> <a target="_blank" rel="noopener" href="https://developer.huawei.com/consumer/cn/service/josp/agc/index.html">，</a> 然后点击“用户与访问”，具体如下所示：</p>
+<p>![[_resources&#x2F;3af95391fefb561250e732abc20aa31f_MD5.png]]</p>
+<p>2、进入之后，点击左侧导航栏选择“设备管理&#x2F;测试账号”，进入“设备管理&#x2F;测试账号”页面，具体如下所示：</p>
+<p>![[_resources&#x2F;fa5b56e5e05d2584a5b26efed91a5134_MD5.png]]</p>
+<ul>
+<li>点击“添加设备&#x2F;新增”，参考下表填写设备信息，单个添加设备。</li>
+<li>点击“批量添加设备”，下载模板，参考下表填写多条设备信息，上传文件，批量添加设备。<br>![[_resources&#x2F;e951e05dc1f3cdfba8e5a237116db1ce_MD5.png]]</li>
+</ul>
+<p>关于手机获取UDID方式，具体如下所示：</p>
+<ol>
+<li>打开“设置 &gt; 关于手机”，多次点击版本号，打开开发者模式。</li>
+<li>打开“设置 &gt; 系统和更新”，在最下方找到“开发人员选项”，打开“USB调试”开关。</li>
+<li>使用PC连接手机后，打开命令行工具，进入HDC目录（一般为：HarmonyOS SDK安装目录&#x2F;toolchains&#x2F;{版本号}），然后输入hdc shell bm get –udid命令，获取设备的UDID即可</li>
+</ol>
+<p>3、设备注册成功，即可在“设备管理”页面查看到设备信息。</p>
+<h2 id="（四）申请调试Profile文件"><a href="#（四）申请调试Profile文件" class="headerlink" title="（四）申请调试Profile文件"></a>（四）申请调试Profile文件</h2><p>1、登录AppGallery Connect： <a target="_blank" rel="noopener" href="https://developer.huawei.com/consumer/cn/service/josp/agc/index.html#/">https://developer.huawei.com/consumer/cn/service/josp/agc/index.html#/</a> ，选择“我的项目”，具体如下所示：</p>
+<p>2、找到对应项目，点击项目卡片中需要调试的元服务。</p>
+<p>3、导航选择“HarmonyOS应用 &gt; HAP Provision Profile管理”，进入“管理HAP Provision Profile”页面，点击“添加”。</p>
+<p>4、在“HarmonyAppProvision信息”界面填写相关信息，点击“提交”，具体设置参数如下所示：</p>
+<p>5、申请成功，即可在“管理HAP Provision Profile”页面查看Profile信息。点击“下载”，将文件下载到本地，具体如下所示：</p>
+<h2 id="（五）配置签名信息"><a href="#（五）配置签名信息" class="headerlink" title="（五）配置签名信息"></a>（五）配置签名信息</h2><p>1、打开DevEco Studio，菜单选择“File &gt; Project Structure”，进入“Project Structure”界面。</p>
+<p>2、导航选择“Project”，点击“Signing Configs”页签。去除勾选的“Automatically generate signature”，填写相关信息后，点击“OK”，具体需要选择的文件释义如下所示：</p>
+<ul>
+<li>Store File：密钥库文件，选择生成密钥和证书请求文件</li>
+<li>Store Password：密钥库密码，需要与生成密钥和证书请求文件</li>
+<li>Key alias：密钥的别名信息，需要与生成密钥和证书请求文件</li>
+<li>Key password：密钥的密码，需要与生成密钥和证书请求文件</li>
+<li>Sign alg：固定设置为“SHA256withECDSA”。</li>
+<li>Profile file：选择申请调试Profile文件</li>
+<li>Certpath file：选择申请调试证书</li>
+</ul>
+<h2 id="结束语"><a href="#结束语" class="headerlink" title="结束语"></a>结束语</h2><p>通过上文对于HarmonyOS开发中签名信息配置的详细介绍，我们不难看出签名信息配置是HarmonyOS应用开发中的一个重要环节。签名不仅是保护应用安全的关键，也是确保应用能够顺利发布和更新的前提，通过生成签名证书、配置签名文件和正确签名应用，可以确保应用的安全性和唯一性。随着技术的不断演进，签名和安全机制可能会有所变化，所以我们需要持续关注HarmonyOS的最新安全实践和更新，以确保应用始终保持最新和最安全的配置，还有就是开发者也应该培养良好的安全意识，从设计和编码阶段就开始考虑应用的安全性，与此同时应遵循官方文档和最佳实践，确保签名过程的正确性和应用的顺利上架。最后，希望本文能够为大家提供实用的指导和帮助，让大家能够更加自信地进行应用开发和签名配置，让我们一起期待并共同构建一个更加安全、可靠和繁荣的HarmonyOS应用生态系统！</p>
+<p>下一篇</p>
+<p>HarmonyOS开发：关于字典、数组、字符串等处理</p>
+<p>全部评论</p>
+<p>0</p>
+<p>最近文章 更多</p>
+<ul>
+<li>HarmonyOS开发：AI套件的技能调用<br>  …</li>
+<li>408</li>
+<li>HarmonyOS开发：HarmonyOS Next 版模拟器使用指南<br>  …</li>
+<li>3321</li>
+<li>HarmonyOS开发：关于字典、数组、字符串等处理<br>  …</li>
+<li>554</li>
+<li>HarmonyOS开发：字符串专辑<br>  …</li>
+<li>126</li>
+<li>HarmonyOS NEXT开发：自定义弹框使用（CustomDialog+TextPicker组…<br>  …</li>
+<li>384</li>
+<li>HarmonyOS开发…<br>  …</li>
+<li>193</li>
+</ul>
+<p>相关文章</p>
+<ul>
+<li>别找了，这可能是全网最全的鸿蒙（HarmonyOS）刷机指南！<br>  …</li>
+<li>2.8W+</li>
+<li>OpenHarmony HDC工具详解<br>  …</li>
+<li>2W+</li>
+<li>解释解释什么叫做HarmonyOS“1+8+N”<br>  …</li>
+<li>1W+</li>
+<li>Windows家庭版 Hyper-V虚拟机的安装和配置教程总结<br>  …</li>
+<li>1W+</li>
+<li>hdc工具安装、常用命令及使用技巧<br>  …</li>
+<li>1W+</li>
+<li>HCIP是什么？<br>  …</li>
+<li>9551</li>
+<li>如何下载和安装纯血鸿蒙系统？<br>  …</li>
+<li>9089</li>
+<li>为鸿蒙（HarmonyOS）运动表开发App<br>  …</li>
+<li>7528</li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/clippings/" class="print-no-link">#clippings</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>HarmonyOS开发：关于签名信息配置详解</div>
+      <div>https://yhao521.github.io/2025/09/10/摘录/HarmonyOS开发：关于签名信息配置详解/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>[[huawei]]</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年9月10日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/09/11/%E6%91%98%E5%BD%95/OpenHarmony%E5%BA%94%E7%94%A8HAP%E5%8C%85%E8%87%AA%E5%8A%A8%E4%B8%8E%E6%89%8B%E5%8A%A8%E7%AD%BE%E5%90%8D%E6%AD%A5%E9%AA%A4-%E5%BC%80%E6%BA%90%E9%B8%BF%E8%92%99%E6%8A%80%E6%9C%AF%E4%BA%A4%E6%B5%81-Bearkey-%E5%BC%80%E6%BA%90%E7%A4%BE%E5%8C%BA/" title="OpenHarmony应用HAP包自动与手动签名步骤-开源鸿蒙技术交流-Bearkey-开源社区">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">OpenHarmony应用HAP包自动与手动签名步骤-开源鸿蒙技术交流-Bearkey-开源社区</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/09/10/%E6%91%98%E5%BD%95/%E9%B8%BF%E8%92%99next%E5%BC%80%E5%8F%91%E9%85%8D%E7%BD%AE%E6%89%8B%E5%8A%A8%E7%AD%BE%E5%90%8D/" title="鸿蒙next开发配置手动签名">
+                        <span class="hidden-mobile">鸿蒙next开发配置手动签名</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>  
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

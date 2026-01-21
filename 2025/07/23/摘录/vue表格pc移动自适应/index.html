@@ -1,0 +1,648 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="yhao521">
+  <meta name="keywords" content="java,博客,vue,spring,mysql,docker,linux">
+  
+    <meta name="description" content="vue表格组件封装问题项目中的表格都是用的element-ui中的table组件，现在项目需要做移动端适配，表格在移动端展示需要是卡片形式的，pc端还是table形式的，如下图：  图一：pc端  图二：移动端 由于需要pc上渲染出来的html是 &lt;table&gt;&lt;tr&gt;&lt;td&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;&lt;&#x2F;table&gt;形式的，而移动">
+<meta property="og:type" content="article">
+<meta property="og:title" content="vue表格pc移动自适应">
+<meta property="og:url" content="https://yhao521.github.io/2025/07/23/%E6%91%98%E5%BD%95/vue%E8%A1%A8%E6%A0%BCpc%E7%A7%BB%E5%8A%A8%E8%87%AA%E9%80%82%E5%BA%94/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="vue表格组件封装问题项目中的表格都是用的element-ui中的table组件，现在项目需要做移动端适配，表格在移动端展示需要是卡片形式的，pc端还是table形式的，如下图：  图一：pc端  图二：移动端 由于需要pc上渲染出来的html是 &lt;table&gt;&lt;tr&gt;&lt;td&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;&lt;&#x2F;table&gt;形式的，而移动">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/dde62629f26e49b6ab47c3734b69ddf3~tplv-k3u1fbpfcp-jj-mark:3024:0:0:0:q75.avis#?w=1858&h=277&s=22346&e=png&b=fefefe">
+<meta property="og:image" content="https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/805587dd9da14c99a70bb1a55e2f6879~tplv-k3u1fbpfcp-jj-mark:3024:0:0:0:q75.avis#?w=367&h=675&s=99242&e=png&b=fdfcfc">
+<meta property="article:published_time" content="2025-07-23T12:01:42.000Z">
+<meta property="article:modified_time" content="2025-03-05T07:04:14.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="java,博客,vue,spring,mysql,docker,linux">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/dde62629f26e49b6ab47c3734b69ddf3~tplv-k3u1fbpfcp-jj-mark:3024:0:0:0:q75.avis#?w=1858&h=277&s=22346&e=png&b=fefefe">
+  
+  
+  
+  <title>vue表格pc移动自适应 - 匆匆过客的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yhao521.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>匆匆过客的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="vue表格pc移动自适应"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-07-23 20:01" pubdate>
+          2025年7月23日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2.4k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          21 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">vue表格pc移动自适应</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="vue表格组件封装"><a href="#vue表格组件封装" class="headerlink" title="vue表格组件封装"></a>vue表格组件封装</h1><h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><p>项目中的表格都是用的<code>element-ui</code>中的<code>table</code>组件，现在项目需要做移动端适配，表格在移动端展示需要是卡片形式的，pc端还是<code>table</code>形式的，如下图：</p>
+<p><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/dde62629f26e49b6ab47c3734b69ddf3~tplv-k3u1fbpfcp-jj-mark:3024:0:0:0:q75.avis#?w=1858&h=277&s=22346&e=png&b=fefefe" srcset="/img/loading.gif" lazyload alt="image.png"></p>
+<p>图一：pc端</p>
+<p><img src="https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/805587dd9da14c99a70bb1a55e2f6879~tplv-k3u1fbpfcp-jj-mark:3024:0:0:0:q75.avis#?w=367&h=675&s=99242&e=png&b=fdfcfc" srcset="/img/loading.gif" lazyload alt="image.png"></p>
+<p>图二：移动端</p>
+<p>由于需要<code>pc</code>上渲染出来的<code>html</code>是 <code>&lt;table&gt;&lt;tr&gt;&lt;td&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;</code>形式的，而移动端上渲染出来是<code>&lt;div class=&quot;card&quot;&gt;&lt;div class=&quot;card-label&quot;&gt;&lt;/div&gt;&lt;div class=&quot;card-cont&quot;&gt;&lt;/div&gt;&lt;/div&gt;</code>这种形式的，但是下面是<code>element</code> <code>table</code>组件的代码，表格的每一栏都是一个<code>el-table-column</code>模板代码，结构是固定的，所以在移动端上没办法复用这个<code>template</code>，于是我们需要另辟蹊径</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><code class="hljs vue">&lt;template&gt;<br>    &lt;el-table<br>      :data=&quot;tableData&quot;<br>      style=&quot;width: 100%&quot;&gt;<br>      &lt;el-table-column<br>        prop=&quot;date&quot;<br>        label=&quot;日期&quot;<br>        width=&quot;180&quot;&gt;<br>      &lt;/el-table-column&gt;<br>      &lt;el-table-column<br>        prop=&quot;name&quot;<br>        label=&quot;姓名&quot;<br>        width=&quot;180&quot;&gt;<br>      &lt;/el-table-column&gt;<br>      &lt;el-table-column<br>        prop=&quot;address&quot;<br>        label=&quot;地址&quot;&gt;<br>      &lt;/el-table-column&gt;<br>    &lt;/el-table&gt;<br>  &lt;/template&gt;<br><br>  &lt;script&gt;<br>    export default &#123;<br>      data() &#123;<br>        return &#123;<br>          tableData: [&#123;<br>            date: &#x27;2016-05-02&#x27;,<br>            name: &#x27;王小虎&#x27;,<br>            address: &#x27;上海市普陀区金沙江路 1518 弄&#x27;<br>          &#125;, &#123;<br>            date: &#x27;2016-05-04&#x27;,<br>            name: &#x27;王小虎&#x27;,<br>            address: &#x27;上海市普陀区金沙江路 1517 弄&#x27;<br>          &#125;, &#123;<br>            date: &#x27;2016-05-01&#x27;,<br>            name: &#x27;王小虎&#x27;,<br>            address: &#x27;上海市普陀区金沙江路 1519 弄&#x27;<br>          &#125;, &#123;<br>            date: &#x27;2016-05-03&#x27;,<br>            name: &#x27;王小虎&#x27;,<br>            address: &#x27;上海市普陀区金沙江路 1516 弄&#x27;<br>          &#125;]<br>        &#125;<br>      &#125;<br>    &#125;<br>  &lt;/script&gt;<br></code></pre></td></tr></table></figure>
+
+<h3 id="方案一"><a href="#方案一" class="headerlink" title="方案一"></a>方案一</h3><p>通过slot传参，再搞一个移动端的<code>template</code>，代码如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><code class="hljs vue">&lt;kl-table :data=&quot;tableData&quot; :columns=&quot;earnRecordColumns&quot; :loading=&quot;!isIntervalReload &amp;&amp; fetchDataLoading &amp;&amp; hasShow&quot; :handleCurrentChange=&quot;handleCurrentChange&quot; :handleSizeChange=&quot;handleSizeChange&quot; :pagesize=&quot;pagesize&quot; :currentPage=&quot;currentPage&quot; :pageSizes=&quot;pageSize&quot; :totalNum=&quot;totalNum&quot;&gt;<br>      &lt;template v-slot:profit&gt;<br>        &lt;el-table-column prop=&quot;profit&quot; label=&quot;收益（$）&quot;&gt;<br>          &lt;template slot-scope=&quot;scope&quot;&gt;&#123;&#123; scope.row.profit | formatCurrency &#125;&#125;&lt;/template&gt;<br>        &lt;/el-table-column&gt;<br>      &lt;/template&gt;<br>      &lt;template v-slot:mobileProfit=&quot;scope&quot;&gt;<br>        &lt;table-card-column label=&quot;收益（$）&quot;&gt;<br>          &lt;template&gt;&#123;&#123; scope.row.profit | formatCurrency &#125;&#125;&lt;/template&gt;<br>        &lt;/table-card-column&gt;<br>      &lt;/template&gt;<br><br>      &lt;template v-slot:profitOfRate&gt;<br>        &lt;el-table-column prop=&quot;profit&quot; label=&quot;收益率&quot;&gt;<br>          &lt;template slot-scope=&quot;scope&quot;&gt;<br>            &lt;div class=&quot;profit-style&quot;&gt;&#123;&#123; scope.row.profitOfRate &#125;&#125;&lt;/div&gt;<br>          &lt;/template&gt;<br>        &lt;/el-table-column&gt;<br>      &lt;/template&gt;<br>      &lt;template v-slot:mobileProfitOfRate=&quot;scope&quot;&gt;<br>        &lt;table-card-column label=&quot;收益率&quot;&gt;<br>          &lt;template&gt;<br>            &lt;div class=&quot;profit-style&quot;&gt;&#123;&#123; scope.row.profitOfRate &#125;&#125;&lt;/div&gt;<br>          &lt;/template&gt;<br>        &lt;/table-card-column&gt;<br>      &lt;/template&gt;<br>&lt;/kl-table&gt;<br><br><br>this.earnRecordColumns = [<br>    &#123;<br>        slot: &#x27;profit&#x27;,<br>        mobileSlot: &#x27;mobileProfit&#x27;,<br>    &#125;,<br>    &#123;<br>        slot: &#x27;profitOfRate&#x27;,<br>        mobileSlot: &#x27;mobileProfitOfRate&#x27;,<br>    &#125;,<br></code></pre></td></tr></table></figure>
+
+<p>上面代码中<code>v-slot:profit</code>是pc端的<code>template</code>,<code>v-slot:mobileProfit</code>是移动端的<code>template</code>这样就能达到目的，但是这种方式太鸡肋啦，没弄一个字段，如果需要自定义<code>template</code>则需要写一遍<code>pc</code>的，还要写一遍<code>mobile</code>，作为一个有追求的搬砖工绝对不允许这种重复工作（没时间摸鱼了..）。</p>
+<h3 id="方案二"><a href="#方案二" class="headerlink" title="方案二"></a>方案二</h3><blockquote>
+<p>思考一下：如果我们能把字段信息和<code>template</code>分离出来，也就是不用<code>template</code>去设置自定义渲染的字段，我们换成通过<code>jsx</code>的形式把渲染模板结构抽离出来，自定义的模板通过一处<code>jsx</code>传递给<code>pc端</code>和<code>移动端</code>的模板，这样就可以只写一处<code>jsx</code>代码了</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><code class="hljs vue">&lt;kl-table<br>    :data=&quot;positionHistoryData&quot;<br>    :columns=&quot;columns&quot;<br>    :loading=&quot;!isPositionHistoryIntervalReload &amp;&amp; fetchPositionHistoryLoading&quot;<br>    :handleCurrentChange=&quot;handleCurrentChange&quot;<br>    :handleSizeChange=&quot;handleSizeChange&quot;<br>    :pagesize=&quot;pagesize&quot;<br>    :currentPage=&quot;currentPage&quot;<br>    :pageSizes=&quot;pageSize&quot;<br>    :totalNum=&quot;totalNum&quot;<br>    &gt;<br>&lt;/kl-table&gt;<br><br><br><br>this.columns = [<br>    &#123;<br>        prop: &#x27;profit&#x27;,<br>        label: &#x27;收益&#x27;,<br>        &#x27;min-width&#x27;: &#x27;120&#x27;,<br>        render: (scope) =&gt; &#123;<br>            return formateToUsd(scope.row.profit)<br>        &#125;,<br>    &#125;,<br>    &#123;<br>        prop: &#x27;profitOfRate&#x27;,<br>        label: &#x27;收益率&#x27;,<br>        width: &#x27;120&#x27;,<br>        render: (scope) =&gt; &#123;<br>            return  &lt;div class=&quot;profit-style&quot;&gt;&#123;scope.row.profitOfRate&#125;&lt;/div&gt;<br>        &#125;,<br>    &#125;,<br>]<br></code></pre></td></tr></table></figure>
+
+<p>如果字段比较多，那么就会省不少代码</p>
+<h4 id="最后看下组件代码，代码中包含了方案一和方案二（一开始使用的方案一，后来迁移到方案二）"><a href="#最后看下组件代码，代码中包含了方案一和方案二（一开始使用的方案一，后来迁移到方案二）" class="headerlink" title="最后看下组件代码，代码中包含了方案一和方案二（一开始使用的方案一，后来迁移到方案二）"></a>最后看下组件代码，代码中包含了方案一和方案二（一开始使用的方案一，后来迁移到方案二）</h4><h4 id="klTable-vue"><a href="#klTable-vue" class="headerlink" title="klTable.vue"></a><code>klTable.vue</code></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br></pre></td><td class="code"><pre><code class="hljs vue">&lt;template&gt;<br>  &lt;table-card :data=&quot;data&quot; :loading=&quot;loading&quot;&gt;<br>    &lt;!-- pc表格 --&gt;<br>    &lt;el-table :data=&quot;data&quot; :key=&quot;tableKey&quot; :max-height=&quot;maxHeight&quot; style=&quot;width: 100%&quot; v-loading=&quot;loading&quot;&gt;<br>      &lt;template v-for=&quot;(column, index) in columns&quot;&gt;<br>        &lt;template v-if=&quot;!(&#x27;v-if&#x27; in column) || column[&#x27;v-if&#x27;]&quot;&gt;<br>          &lt;slot v-if=&quot;column.slot&quot; :name=&quot;column.slot&quot;&gt;&lt;/slot&gt;<br>          &lt;!-- 如果有render，则为jsx传入 --&gt;<br>          &lt;el-table-column v-else-if=&quot;column.render&quot; v-bind=&quot;column&quot; :key=&quot;index&quot;&gt;<br>            &lt;template slot-scope=&quot;scope&quot;&gt;<br>              &lt;Jsx :jsx=&quot;column.render&quot; :scope=&quot;scope&quot;&gt;&lt;/Jsx&gt;<br>            &lt;/template&gt;<br>          &lt;/el-table-column&gt;<br>          &lt;el-table-column v-else v-bind=&quot;column&quot; :key=&quot;index&quot;&gt; &lt;/el-table-column&gt;<br>        &lt;/template&gt;<br>      &lt;/template&gt;<br>      &lt;slot&gt;&lt;/slot&gt;<br>    &lt;/el-table&gt;<br><br>    &lt;!-- pc分页 --&gt;<br>    &lt;el-pagination v-if=&quot;pagination&quot; @size-change=&quot;handleSizeChange&quot; @current-change=&quot;handleCurrentChange&quot; :page-size=&quot;pagesize&quot; :current-page=&quot;currentPage&quot; :page-sizes=&quot;pageSizes&quot; layout=&quot;total, sizes, prev, pager, next, jumper&quot; :total=&quot;totalNum&quot; style=&quot;margin-top: 25px; text-align: right&quot;&gt;<br>    &lt;/el-pagination&gt;<br><br>    &lt;!-- mobile卡片式表格 --&gt;<br>    &lt;template v-slot:mobile=&quot;scope&quot;&gt;<br>      &lt;template v-for=&quot;(column, index) in columns&quot;&gt;<br>        &lt;template v-if=&quot;!(&#x27;v-if&#x27; in column) || column[&#x27;v-if&#x27;]&quot;&gt;<br>          &lt;slot v-if=&quot;column.mobileSlot&quot; :name=&quot;column.mobileSlot&quot; :row=&quot;scope.row&quot;&gt;&lt;/slot&gt;<br>          &lt;table-card-header v-else-if=&quot;column.isHeader&quot; :key=&quot;index&quot;&gt;<br>            &lt;!-- 如果有render，则为jsx传入 --&gt;<br>            &lt;template v-if=&quot;column.render&quot;&gt;<br>              &lt;Jsx :jsx=&quot;column.render&quot; :scope=&quot;&#123; ...scope &#125;&quot;&gt;&lt;/Jsx&gt;<br>            &lt;/template&gt;<br>            &lt;template v-else&gt;<br>              &#123;&#123; scope.row[column.prop] &#125;&#125;<br>            &lt;/template&gt;<br>          &lt;/table-card-header&gt;<br><br>          &lt;table-card-column v-else :label=&quot;column.label&quot; :key=&quot;index&quot;&gt;<br>            &lt;!-- 如果有render，则为jsx传入 --&gt;<br>            &lt;template v-if=&quot;column.render&quot;&gt;<br>              &lt;Jsx :jsx=&quot;column.render&quot; :scope=&quot;&#123; ...scope, $index: scope.index &#125;&quot;&gt;&lt;/Jsx&gt;<br>            &lt;/template&gt;<br>            &lt;template v-else&gt;<br>              &#123;&#123; scope.row[column.prop] &#125;&#125;<br>            &lt;/template&gt;<br>          &lt;/table-card-column&gt;<br>        &lt;/template&gt;<br>      &lt;/template&gt;<br>      &lt;slot name=&quot;mobile&quot; :row=&quot;scope.row&quot;&gt;&lt;/slot&gt;<br>    &lt;/template&gt;<br><br>    &lt;!-- mobile分页 --&gt;<br>    &lt;template v-slot:mobilePagination v-if=&quot;pagination&quot;&gt;<br>      &lt;el-pagination @current-change=&quot;handleCurrentChange&quot; small :pager-count=&quot;5&quot; :page-size=&quot;pagesize&quot; :current-page=&quot;currentPage&quot; :page-sizes=&quot;pageSizes&quot; layout=&quot;total, prev, pager, next&quot; :total=&quot;totalNum&quot; style=&quot;margin-top: 25px; text-align: right&quot;&gt; &lt;/el-pagination&gt;<br>      &lt;!-- &lt;div v-if=&quot;loading&quot; class=&quot;loading-wrap&quot;&gt;&lt;i class=&quot;el-icon-loading&quot;&gt;&lt;/i&gt;&lt;/div&gt;<br>      &lt;table-card-more v-else :load-more=&quot;loadMore&quot; v-show=&quot;currentPage != Math.ceil(totalNum / pagesize)&quot;&gt;&lt;/table-card-more&gt; --&gt;<br>    &lt;/template&gt;<br>  &lt;/table-card&gt;<br>&lt;/template&gt;<br><br>&lt;script&gt;<br>import Jsx from &#x27;./jsx.vue&#x27;<br>export default &#123;<br>  name: &#x27;KlTable&#x27;,<br>  props: &#123;<br>    loading: Boolean,<br>    data: Array,<br>    columns: Array,<br>    handleSizeChange: Function,<br>    handleCurrentChange: Function,<br>    pagesize: Number,<br>    currentPage: Number,<br>    pageSizes: Array,<br>    totalNum: Number,<br>    tableKey: String,<br>    maxHeight: [String, Number],<br>    pagination: &#123;<br>      type: Boolean,<br>      default: true,<br>    &#125;,<br>    // loadMore: Function,<br>  &#125;,<br>  components: &#123; Jsx &#125;,<br>  created() &#123;&#125;,<br>&#125;<br>&lt;/script&gt;<br>&lt;style lang=&quot;scss&quot; scoped&gt;<br>/deep/ .el-table__fixed,<br>/deep/ .el-table__fixed-right &#123;<br>  height: 100% !important; //设置高优先，以覆盖内联样式<br>&#125;<br>.loading-wrap &#123;<br>  display: flex;<br>  justify-content: center;<br>&#125;<br>&lt;/style&gt;<br><br></code></pre></td></tr></table></figure>
+
+<h4 id="jsx-vue"><a href="#jsx-vue" class="headerlink" title="jsx.vue"></a><code>jsx.vue</code></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs vue">&lt;script&gt;<br>export default &#123;<br>  props: &#123;<br>    jsx: &#123;<br>      type: Function,<br>    &#125;,<br>    scope: Object,<br>  &#125;,<br>  render() &#123;<br>    return &lt;div&gt;&#123;this.jsx(this.scope)&#125;&lt;/div&gt;<br>  &#125;,<br>  name: &#x27;jsx&#x27;,<br>&#125;<br>&lt;/script&gt;<br></code></pre></td></tr></table></figure>
+
+<h4 id="tableCard-vue"><a href="#tableCard-vue" class="headerlink" title="tableCard.vue"></a><code>tableCard.vue</code></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><code class="hljs vue">&lt;template&gt;<br>  &lt;div class=&quot;table-container&quot;&gt;<br>    &lt;div class=&quot;table-wrap&quot;&gt;<br>      &lt;slot&gt;&lt;/slot&gt;<br>    &lt;/div&gt;<br>    &lt;div class=&quot;table-mobile-wrap&quot;&gt;<br>      &lt;template v-if=&quot;loading || (data &amp;&amp; data.length &gt; 0)&quot;&gt;<br>        &lt;div class=&quot;tb-card-wrap&quot; v-loading=&quot;loading&quot;&gt;<br>          &lt;div class=&quot;tb-card&quot; v-for=&quot;(item, index) in data&quot; :key=&quot;index&quot;&gt;<br>            &lt;slot name=&quot;mobile&quot; :row=&quot;item&quot; :index=&quot;index&quot;&gt;&lt;/slot&gt;<br>          &lt;/div&gt;<br>        &lt;/div&gt;<br>        &lt;slot name=&quot;mobilePagination&quot; v-if=&quot;data &amp;&amp; data.length &gt; 0&quot;&gt;&lt;/slot&gt;<br>      &lt;/template&gt;<br><br>      &lt;div class=&quot;no-data&quot; v-else&gt;<br>        &lt;el-empty :image-size=&quot;200&quot;&gt;&lt;/el-empty&gt;<br>      &lt;/div&gt;<br>    &lt;/div&gt;<br>  &lt;/div&gt;<br>&lt;/template&gt;<br><br>&lt;script&gt;<br>export default &#123;<br>  name: &#x27;TableCard&#x27;,<br>  props: &#123;<br>    data: Array,<br>    loading: Boolean,<br>  &#125;,<br>  created() &#123;<br>    // console.log(&#x27;table $props&#x27;, this)<br>  &#125;,<br>&#125;<br>&lt;/script&gt;<br>&lt;style lang=&quot;scss&quot; scoped&gt;<br>.tb-card &#123;<br>  margin-bottom: 20px;<br>  padding: 32px 24px;<br>  background: #fff;<br>&#125;<br>.no-data &#123;<br>  background: #fff;<br>&#125;<br>.tb-card-wrap &#123;<br>  min-height: 300px;<br>&#125;<br>.table-wrap &#123;<br>  display: block;<br>&#125;<br>.table-mobile-wrap &#123;<br>  display: none;<br>&#125;<br>@media (max-width: 767px) &#123;<br>  .table-wrap &#123;<br>    display: none;<br>  &#125;<br>  .table-mobile-wrap &#123;<br>    display: block;<br>    background-color: #ecf0f5;<br>    margin: -16px -24px;<br>  &#125;<br>&#125;<br>.el-dialog__wrapper &#123;<br>  .table-mobile-wrap &#123;<br>    background-color: transparent;<br>    margin: 0;<br>    .tb-card &#123;<br>      background: rgba(151, 160, 168, 0.05);<br>      border-left: 2px solid #97a0a8;<br>    &#125;<br>  &#125;<br>&#125;<br>&lt;/style&gt;<br><br><br></code></pre></td></tr></table></figure>
+
+<h4 id="tableCardColumn-vue"><a href="#tableCardColumn-vue" class="headerlink" title="tableCardColumn.vue"></a><code>tableCardColumn.vue</code></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><code class="hljs vue">&lt;template&gt;<br>  &lt;div&gt;<br>    &lt;div class=&quot;tb-lst-item&quot;&gt;<br>      &lt;span class=&quot;tb-card-label&quot;&gt;&#123;&#123; label &#125;&#125;&lt;/span&gt;<br>      &lt;span class=&quot;tb-card-cont&quot;&gt;<br>        &lt;slot&gt;&lt;/slot&gt;<br>      &lt;/span&gt;<br>    &lt;/div&gt;<br>  &lt;/div&gt;<br>&lt;/template&gt;<br><br>&lt;script&gt;<br>export default &#123;<br>  name: &#x27;TableCardColumn&#x27;,<br>  props: &#123;<br>    label: String,<br>  &#125;,<br>  created() &#123;<br>    // console.log(&#x27;table $props&#x27;, this)<br>  &#125;,<br>&#125;<br>&lt;/script&gt;<br>&lt;style lang=&quot;scss&quot; scoped&gt;<br>.tb-lst-item &#123;<br>  align-items: center;<br>  margin-top: 16px;<br>  display: flex;<br>  justify-content: space-between;<br>  font-size: 14px;<br>  line-height: 20px;<br>&#125;<br>.tb-card-label &#123;<br>  color: rgba(0, 0, 0, 0.65);<br>&#125;<br>.tb-card-cont &#123;<br>  color: rgba(0, 0, 0, 0.85);<br>  font-weight: 600;<br>  text-align: right;<br>&#125;<br>&lt;/style&gt;<br><br></code></pre></td></tr></table></figure>
+
+<h4 id="tableCardHeader-vue"><a href="#tableCardHeader-vue" class="headerlink" title="tableCardHeader.vue"></a><code>tableCardHeader.vue</code></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><code class="hljs vue">&lt;template&gt;<br>  &lt;div class=&quot;tb-card-hd&quot;&gt;<br>    &lt;h3 class=&quot;tb-card-tit&quot;&gt;&lt;slot name=&quot;default&quot;&gt;&lt;/slot&gt;&lt;/h3&gt;<br>    &lt;span class=&quot;tb-card-sub&quot;&gt;&lt;slot name=&quot;subTitle&quot;&gt;&lt;/slot&gt;&lt;/span&gt;<br>  &lt;/div&gt;<br>&lt;/template&gt;<br><br>&lt;script&gt;<br>export default &#123;<br>  name: &#x27;TableCardHeader&#x27;,<br>  props: &#123;<br>    label: String,<br>  &#125;,<br>  created() &#123;<br>    // console.log(&#x27;table $props&#x27;, this)<br>  &#125;,<br>&#125;<br>&lt;/script&gt;<br>&lt;style lang=&quot;scss&quot; scoped&gt;<br>.tb-card-hd &#123;<br>  display: flex;<br>  justify-content: space-between;<br>  align-items: center;<br>  border-bottom: 1px solid #bccae0;<br>  padding-bottom: 16px;<br>  line-height: 24px;<br>  color: rgba(0, 0, 0, 0.85);<br>&#125;<br>.tb-card-tit &#123;<br>  font-weight: 600;<br>  font-size: 16px;<br>&#125;<br>.tb-card-sub &#123;<br>  font-weight: 400;<br>  font-size: 12px;<br>&#125;<br>&lt;/style&gt;<br><br></code></pre></td></tr></table></figure>
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>vue表格pc移动自适应</div>
+      <div>https://yhao521.github.io/2025/07/23/摘录/vue表格pc移动自适应/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>yhao521</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年7月23日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E6%91%98%E5%BD%95/Java%E4%B8%AD%E5%AF%86%E7%A0%81%E5%8A%A0%E5%AF%86%E4%B9%8BPBE%E7%AE%97%E6%B3%95/" title="Java中密码加密之PBE算法">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Java中密码加密之PBE算法</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E6%91%98%E5%BD%95/vue%E9%A1%B9%E7%9B%AE%E6%95%B4%E5%90%88cordova/" title="vue项目整合cordova">
+                        <span class="hidden-mobile">vue项目整合cordova</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>  
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

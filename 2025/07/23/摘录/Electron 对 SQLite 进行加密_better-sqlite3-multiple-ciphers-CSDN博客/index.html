@@ -1,0 +1,702 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="yhao521">
+  <meta name="keywords" content="java,博客,vue,spring,mysql,docker,linux">
+  
+    <meta name="description" content="文章浏览阅读1.2k次，点赞2次，收藏2次。本文介绍了如何在Electron应用中使用better-sqlite3-multiple-ciphers库对SQLite数据进行加密，以保护敏感信息。同时处理了在Mac上遇到的架构不一致错误，通过重新编译解决并验证了加密效果。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Electron 对 SQLite 进行加密_better-sqlite3-multiple-ciphers-CSDN博客">
+<meta property="og:url" content="https://yhao521.github.io/2025/07/23/%E6%91%98%E5%BD%95/Electron%20%E5%AF%B9%20SQLite%20%E8%BF%9B%E8%A1%8C%E5%8A%A0%E5%AF%86_better-sqlite3-multiple-ciphers-CSDN%E5%8D%9A%E5%AE%A2/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="文章浏览阅读1.2k次，点赞2次，收藏2次。本文介绍了如何在Electron应用中使用better-sqlite3-multiple-ciphers库对SQLite数据进行加密，以保护敏感信息。同时处理了在Mac上遇到的架构不一致错误，通过重新编译解决并验证了加密效果。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-07-23T12:01:04.000Z">
+<meta property="article:modified_time" content="2025-07-23T12:01:04.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="clippings">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>Electron 对 SQLite 进行加密_better-sqlite3-multiple-ciphers-CSDN博客 - 匆匆过客的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yhao521.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>匆匆过客的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Electron 对 SQLite 进行加密_better-sqlite3-multiple-ciphers-CSDN博客"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-07-23 20:01" pubdate>
+          2025年7月23日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2.6k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          22 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Electron 对 SQLite 进行加密_better-sqlite3-multiple-ciphers-CSDN博客</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="Electron-对-SQLite-进行加密"><a href="#Electron-对-SQLite-进行加密" class="headerlink" title="Electron 对 SQLite 进行加密"></a>Electron 对 SQLite 进行加密</h2><p>最新推荐文章于 2025-04-03 09:22:06 发布</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/hawk2014bj" title="hawk2014bj">hawk2014bj</a> 于 2024-05-04 14:40:22 发布</p>
+<p>文章标签： <a target="_blank" rel="noopener" href="https://so.csdn.net/so/search/s.do?q=%E5%89%8D%E7%AB%AF&t=all&o=vip&s=&l=&f=&viparticle=&from_tracking_code=tag_word&from_code=app_blog_art">前端</a></p>
+<p>版权声明：本文为博主原创文章，遵循 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-sa/4.0/">CC 4.0 BY-SA</a> 版权协议，转载请附上原文出处链接和本声明。</p>
+<p>本文链接： <a target="_blank" rel="noopener" href="https://blog.csdn.net/hawk2014bj/article/details/138438661">https://blog.csdn.net/hawk2014bj/article/details/138438661</a></p>
+<p>版权</p>
+<p>本文介绍了如何在Electron应用中使用better-sqlite3-multiple-ciphers库对SQLite数据进行加密，以保护敏感信息。同时处理了在Mac上遇到的架构不一致错误，通过重新编译解决并验证了加密效果。</p>
+<p>摘要生成于 <a target="_blank" rel="noopener" href="https://ai.csdn.net/?utm_source=cknow_pc_ai_abstract">C知道</a> ，由 DeepSeek-R1 满血版支持， <a target="_blank" rel="noopener" href="https://ai.csdn.net/?utm_source=cknow_pc_ai_abstract">前往体验 &gt;</a></p>
+<p>上一篇讲了如何在 Electron 使用 SQLite，如果 SQLite 中存有敏感数据， <a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=%E5%AE%A2%E6%88%B7%E7%AB%AF&spm=1001.2101.3001.7020">客户端</a> 采用明文存储风险很高，为了保护客户数据，就需要对数据进行加密，由于 electron 对代码并不加密，所以这里排除通过逆向工程进行数据库解密。</p>
+<p>SQLite 可以采用第三方库 SQLCipher 对数据进行加密，本文用的是better-sqlite3-multiple-ciphers。</p>
+<p>安装依赖</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">npm</span> install  electron-rebuild@^<span class="hljs-number">3</span>.<span class="hljs-number">2</span>.<span class="hljs-number">9</span> --save-dev<br><span class="hljs-attribute">npm</span> install better-sqlite3-multiple-ciphers@^<span class="hljs-number">9</span>.<span class="hljs-number">5</span>.<span class="hljs-number">0</span><br><span class="hljs-attribute">npm</span> install electron@^<span class="hljs-number">29</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span> --save-dev<br><br><span class="hljs-attribute">1234</span><br></code></pre></td></tr></table></figure>
+
+<p>在 Mac 运行会出现架构不一致错误<br>![[_resources&#x2F;53f11b1e8b532da69e9f940c62dd66a2_MD5.png]]</p>
+<p>需要重新编译，编译成功之后，启动程序，程序启动之后数据库文件会自动生成。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">./node_modules/.bin/electron-rebuild --<span class="hljs-built_in">arch</span> arm64<br>1<br></code></pre></td></tr></table></figure>
+
+<p>从命令行打开数据库，可以看到文件已经不能被正确识别，加密成功<br>![[_resources&#x2F;2181b2dfa01957051ec2f38120f4e401_MD5.png]]</p>
+<p>![[_resources&#x2F;3845bc093f7a7241eff280ffe5f20ccd_MD5.png]]<a target="_blank" rel="noopener" href="https://blog.csdn.net/2301_79326616/article/details/133052647">使用 <em>Electron</em> 降级 <em>加密</em> 的 <em>Sqlite</em> 数据库文件</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/2301_79326616">2301_79326616的博客</a></p>
+<p>09-19 275<a target="_blank" rel="noopener" href="https://blog.csdn.net/2301_79326616/article/details/133052647">然而，在某些情况下，我们可能需要降级 <em>加密</em> 的 <em>Sqlite</em> 数据库文件。首先，我们需要创建一个新的 <em>Sqlite</em> 数据库文件，并将其 <em>加密</em> 。模块来处理 <em>加密</em> 的数据库文件，并使用提供的密码将其降级为非 <em>加密</em> 的数据库文件。在本文中，我们学习了如何在 <em>Electron</em> 应用程序中降级 <em>加密</em> 的 <em>Sqlite</em> 数据库文件。模块打开 <em>加密</em> 的数据库文件。语句将一个新的非 <em>加密</em> 数据库实例附加到 <em>加密</em> 的数据库上，并使用空密码连接。语句将数据库附加到 <em>加密</em> 的数据库实例上，并使用提供的密码进行 <em>加密</em> 。语句将非 <em>加密</em> 的数据库分离，并关闭 <em>加密</em> 的数据库连接。</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/yijianxx/article/details/144352635">knex.js+ <em>better</em> <em>-</em> <em>sqlite</em> <em>3</em> <em>-</em> <em>multiple</em> <em>-</em> <em>ciphers</em> 实现数据库 <em>加密</em></a></p>
+<p>5-6<a target="_blank" rel="noopener" href="https://blog.csdn.net/yijianxx/article/details/144352635">需要 <em>加密</em> 使用开始考虑sqlcipher。但sqlcipher没有sql构建器,不太好用。网上看到knex的评价比较高,但knex默认只有 <em>sqlite</em> <em>3</em> 和 <em>better</em> <em>-</em> <em>sqlite</em> <em>3</em>,这两个默认都不支持 <em>加密</em>,后来找到一个库 <em>better</em> <em>-</em> <em>sqlite</em> <em>3</em> <em>-</em> <em>multiple</em> <em>-</em> <em>ciphers</em>,而且 <em>better</em> <em>-</em> <em>sqlite</em> <em>3</em> 号称最快的js <em>sqlite</em> <em>3</em> 数据库,就想能不能在knex.js上使用它,最后根据knex文档成功解决。</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/gitblog_01106/article/details/144207020">Capacitor <em>SQLite</em> 插件常见问题解决方案</a></p>
+<p>4-29<a target="_blank" rel="noopener" href="https://blog.csdn.net/gitblog_01106/article/details/144207020">使用npm 安装插件: npm install <em>-</em> <em>-</em> save @capacitor <em>-</em> community&#x2F; <em>sqlite</em> 使用yarn 安装插件: yarn add @capacitor <em>-</em> community&#x2F; <em>sqlite</em> 使用pnpm 安装插件: pnpm install <em>-</em> <em>-</em> save @capacitor <em>-</em> community&#x2F; <em>sqlite</em> 安装完成后,同步插件到你的 Native 应用: npxcapsync 问题二:如何在项目中配置和使用 Capacitor <em>SQLite</em>? 解决步骤:…</a><a target="_blank" rel="noopener" href="https://uikoo9.blog.csdn.net/article/details/123924787"><em>Electron</em> 那些事10：本地数据库 <em>sqlite</em></a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/uikoo9">uikoo9的专栏</a></p>
+<p>04-02 9002<a target="_blank" rel="noopener" href="https://uikoo9.blog.csdn.net/article/details/123924787">【前言】 上一节讲了本地日志，本地数据（文件）的部分， 详见： <em>Electron</em> 那些事09：本地数据_uikoo9的博客 <em>-</em> CSDN博客 虽然本地日志可以记录日志信息， 本地数据可以记录简单的配置文件， 但是像一些复杂的业务，需要维护一个本地数据库进行查询，本节讲一下本地数据库 <em>sqlite</em> 【 <em>sqlite</em> 】 <em>sqlite</em> 是有名的本地数据库，在很多系统中都有应用， <em>SQLite</em> Home Page 当然也有nodejs的版本，一般配套和 <em>electron</em> 使用， <em>sqlite</em> <em>3</em> <em>-</em> np…</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/gitblog_00400/article/details/146971387"><em>better</em> <em>-</em> <em>sqlite</em> <em>3</em> <em>-</em> <em>multiple</em> <em>-</em> <em>ciphers</em> ：为Node.js带来多 <em>加密</em> 算法支持的 <em>SQLite</em> <em>3</em> 库</a></p>
+<p>[</p>
+<p>最新发布</p>
+<p>](<a target="_blank" rel="noopener" href="https://blog.csdn.net/gitblog_00400/article/details/146971387">https://blog.csdn.net/gitblog_00400/article/details/146971387</a>)</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/gitblog_00400">gitblog_00400的博客</a></p>
+<p>04-03 586<a target="_blank" rel="noopener" href="https://blog.csdn.net/gitblog_00400/article/details/146971387"><em>better</em> <em>-</em> <em>sqlite</em> <em>3</em> <em>-</em> <em>multiple</em> <em>-</em> <em>ciphers</em> ：为Node.js带来多 <em>加密</em> 算法支持的 <em>SQLite</em> <em>3</em> 库 <em>better</em> <em>-</em> <em>sqlite</em> <em>3</em> <em>-</em> <em>multiple</em> <em>-</em> <em>ciphers</em> <em>better</em> <em>-</em> <em>sqlite</em> <em>3</em> with <em>multiple</em> <em>-</em> cipher encryption support????…</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/bemybest/article/details/50640022">关于 <em>sqlite</em> <em>3</em> _key 和 <em>sqlite</em> <em>3</em> _rekey_数据库 pkey是什么意思?</a></p>
+<p>5-2<a target="_blank" rel="noopener" href="https://blog.csdn.net/bemybest/article/details/50640022"><em>sqlite</em> <em>3</em> _key是输入密钥,如果数据库已 <em>加密</em> 必须先执行此函数并输入正确密钥才能进行操作,如果数据库没有 <em>加密</em>,执行此函数后进行数据库操作反而会出现“此数据库已 <em>加密</em> 或不是一个数据库文件”的错误。 int <em>sqlite</em> <em>3</em> _key( <em>sqlite</em> <em>3</em> *db, const void *pKey, int nKey),db 是指定数据库,pKey 是密钥,nKey 是密钥长度…</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/zsczaki/article/details/132167971">NodeJs中读取 <em>加密</em> 的 <em>sqlite</em> 数据库</a></p>
+<p>4-28<a target="_blank" rel="noopener" href="https://blog.csdn.net/zsczaki/article/details/132167971">1.先对 <em>sqLite</em> 数据库进行 <em>加密</em>,再尝试在nodejs项目中传入password参数打开数据库,再进行后续操作,后来发现一直报错。 2.查看sequelize英文官网文档,发现对 <em>sqlite</em> 数据库需要特殊处理,仅支持SQLCipher <em>加密</em> 。 官网链接:Sequelize | Sequelize <em>3</em>.下载好sqlcipher <em>加密</em> 工具,输入4个命令完成 <em>加密</em> 操作。</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_33994429/article/details/93891312"><em>Electron</em> 把网页打包成桌面应用并进行源码 <em>加密</em></a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_33994429">weixin_33994429的博客</a></p>
+<p>12-02 2351<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_33994429/article/details/93891312">前言 　　最近想把自己用html+css+js做的网页界面打包成桌面应用，网上一搜，发现 <em>Electron</em> 是一个不错的选择，试了试，发现效果真的不错。这里记录一下打包过程以作记录，便于自己以后查看学习。 一、简介 　　 <em>Electron</em> 是由Github开发，用HTML，CSS和JavaScript来构建跨平台桌面应用程序的一个开源库。 <em>Electron</em> 通过将Chromium和Node.js…</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/gitblog_00045/article/details/139874856">开源推荐： <em>better</em> <em>-</em> <em>sqlite</em> <em>3</em> <em>-</em> <em>multiple</em> <em>-</em> <em>ciphers</em> ——Node.js下的 <em>SQLite</em> <em>3</em> <em>加密</em> 利器</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/gitblog_00045">gitblog_00045的博客</a></p>
+<p>06-22 1549<a target="_blank" rel="noopener" href="https://blog.csdn.net/gitblog_00045/article/details/139874856">开源推荐： <em>better</em> <em>-</em> <em>sqlite</em> <em>3</em> <em>-</em> <em>multiple</em> <em>-</em> <em>ciphers</em> ——Node.js下的 <em>SQLite</em> <em>3</em> <em>加密</em> 利器 去发现同类优质开源项目:https://gitcode.com/ 在现代软件开发中，数据库的安全性至关重要，尤其是在处理敏感数据时。今天，我们要介绍一个令人瞩目的开源项目—— <em>better</em> <em>-</em> <em>sqlite</em> <em>3</em> <em>-</em> <em>multiple</em> <em>-</em> <em>ciphers</em> ，它为Node.js开发者提供了快速、高效且安…</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/tsing_best/article/details/9058821">深入理解 <em>SQLite</em>:特性与应用</a></p>
+<p>5-1<a target="_blank" rel="noopener" href="https://blog.csdn.net/tsing_best/article/details/9058821"><em>SQLite</em> 是遵守ACID[Atomicity、Consistency、Isolation、Durability][原子性、一致性、隔离性、持久性]的关系数据库。 <em>SQLite</em> 实现多数的SQL <em>-</em> 92标准:包括事务、触发器和复杂查询;不进行类型检查[字符串可以插入到整数列]。 <em>SQLite</em> 官方网站 http://www.<em>sqlite</em>.org…</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/bluejoe2000/article/details/50885197/">Hadoop可视化分析利器之Hue</a></p>
+<p>5-1<a target="_blank" rel="noopener" href="https://blog.csdn.net/bluejoe2000/article/details/50885197/">14,数据库(MySQL,PostGres,<em>SQlite</em>,Oracle)的查询和展示 (<em>3</em>)Hue怎么用或者什么时候应该用? 如果你们公司用的是CDH的hadoop,那么很幸运,Hue也是出自CDH公司,自家的东西用起来当然很爽。 如果你们公司用的是Apache Hadoop或者是HDP的hadoop,那么也没事,Hue是开源的,而且支持任何版本的hadoop。</a><a target="_blank" rel="noopener" href="https://killsudo.blog.csdn.net/article/details/79807076">给 <em>Sqlite</em> 数据库设置密码</a></p>
+<p>[</p>
+<p>热门推荐</p>
+<p>](<a target="_blank" rel="noopener" href="https://killsudo.blog.csdn.net/article/details/79807076">https://killsudo.blog.csdn.net/article/details/79807076</a>)</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_39568531">Mr.Sugarcane</a></p>
+<p>04-03 3万+<a target="_blank" rel="noopener" href="https://killsudo.blog.csdn.net/article/details/79807076">免费版Sqlie是不提供设置密码功能的，经过查阅资料最终找到了解决方案方案一，从 <em>sqlite</em> 源码入手，据说 <em>sqlite</em> 源码已经提供了 <em>加密</em> 的接口，只是免费版没有实现，可以参考这位仁兄的博客以了解详情：http://www.cnblogs.com/hiloves/archive/2010/04/25/1719749.html方案二，使用System.Data.<em>SQLite</em> 这个ADO.Net驱动写好的方…</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_37243717/article/details/79061132">大数据_HUE_sasl maxbufsize</a></p>
+<p>4-29<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_37243717/article/details/79061132">(<em>3</em>)配置HUE (*)添加Linux用户:hue 对&#x2F;root&#x2F;training&#x2F;hue有权限 adduser hue chown <em>-</em> R hue.hue&#x2F;root&#x2F;training&#x2F;hue (*)配置Hadoop hdfs <em>-</em> site.xml<property> <name>dfs.webhdfs.enabled</name> <value>true</value> </property> core <em>-</em> site.xml<property>…</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/u011250186/article/details/110191611">Hue 之 SparkSql interpreters的配置及使用_10015端口</a></p>
+<p>5-2<a target="_blank" rel="noopener" href="https://blog.csdn.net/u011250186/article/details/110191611"><em>3</em>. spark thrift server 配置及启动 hdp 2.4 V <em>3</em> 的sparkthriftserver默认端口是10015,我们将此信息配置到 &#x2F;usr&#x2F;hdp&#x2F;current&#x2F;spark <em>-</em> thriftserver&#x2F;conf&#x2F;hive <em>-</em> site.xml中,如下:(我没找到在ambari启动spark thrift <em>-</em> server的入口,只能手动启动) 1 2 <em>3</em> 4</a><a target="_blank" rel="noopener" href="https://adean.blog.csdn.net/article/details/9411643"><em>SQLite</em> <em>3</em> 数据库 <em>加密</em> 方案</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/whgggg">呆萌院长</a></p>
+<p>07-22 5394<a target="_blank" rel="noopener" href="https://adean.blog.csdn.net/article/details/9411643">http://mobile.51cto.com/iphone <em>-</em> <em>3</em> 88420.htm 针对 <em>sqlite</em> 数据库文件，进行 <em>加密</em> 。现有两种方案如下 1.对数据库中的数据进行 <em>加密</em> 。 2.对数据库文件进行 <em>加密</em> 两种 <em>加密</em> 方式的优缺点，比较如下： 一、对数据库中的数据进行 <em>加密</em> 优点： 1.实现数据 <em>加密</em> 快速，只需添加两个方法 一是：对明文数据进行 <em>加密</em> 返回密文数据 二是：</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_34117522/article/details/89424724">从零开始使用 <em>Electron</em> + jQuery开发桌面应用 （二） 打包应用</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_34117522">weixin_34117522的博客</a></p>
+<p>04-04 531<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_34117522/article/details/89424724">上节已经讲到如何用命令行将我们的程序启动了，但是用户不可能也得像我们一样用命令行去启动app，本节我们就讲怎么将我们的应用打包成.exe执行文件 （ <em>electron</em> 中文API下载） 1.安装 <em>electron</em> <em>-</em> packager 注意：先复制一份package.json文件到.&#x2F;app目录下，（千万记住这一点，我在这步这折腾了好几个小时…</a><a target="_blank" rel="noopener" href="https://xuxiaowei.blog.csdn.net/article/details/106302689"><em>Electron</em> 项目（二）：源码 <em>加密</em></a></p>
+<p>05-23 1891<a target="_blank" rel="noopener" href="https://xuxiaowei.blog.csdn.net/article/details/106302689">在package.json 中设置： { “config”: { “forge”: { “ <em>electron</em> PackagerConfig”: { “asar”: true } } } } 打包安装后如图所示：</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_42208826/article/details/105637970"><em>Electron</em> 源码学习： <em>Electron</em> <em>加密</em> 与安全</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_42208826">星空漫步者</a></p>
+<p>04-20 8950<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_42208826/article/details/105637970"><em>Electron</em> <em>加密</em> 与安全 引言 目前网络上主要流传的 <em>加密</em> 就只是网页文件打包成asar和JS混淆 <em>加密</em> ，以及用addon的方式，这几种方式的话，基本就没有什么破解难度。针对的官方asar的打包，这种方式就仅仅是将众多的文件以原文的形式放在一个文件中，不存在任何的 <em>加密</em> 手段；JS混淆 <em>加密</em> 这种方式仍然是可以通过看代码的方式来分析出原本的逻辑；addon的方式只要找到调用的接口那么很容易就会被干掉。我们…</a></p>
+<p>登录后您可以享受以下权益：</p>
+<ul>
+<li>免费复制代码</li>
+<li>和博主大V互动</li>
+<li>下载海量资源</li>
+<li>发动态&#x2F;写文章&#x2F;加入社区<br>×</li>
+</ul>
+<p>实付 元</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/hawk2014bj/article/details/">使用余额支付</a></p>
+<p>点击重新获取</p>
+<p>扫码支付</p>
+<p>钱包余额 0</p>
+<p>抵扣说明：</p>
+<p>1.余额是钱包充值的虚拟货币，按照1:1的比例进行支付金额的抵扣。<br>2.余额无法直接购买下载，可以购买VIP、付费专栏及课程。</p>
+<p><a target="_blank" rel="noopener" href="https://i.csdn.net/#/wallet/balance/recharge">余额充值</a></p>
+<p>举报</p>
+<p> [![[_resources&#x2F;35c7362356adf5a11cd3cc47fd01628f_MD5.png]] 点击体验<br>DeepSeekR1满血版](<a target="_blank" rel="noopener" href="https://ai.csdn.net/?utm_source=cknow_pc_blogdetail&spm=1001.2101.3001.10583">https://ai.csdn.net/?utm_source=cknow_pc_blogdetail&amp;spm=1001.2101.3001.10583</a>) ![[_resources&#x2F;90bd0cbf3aff8fdff8bf9b011b581e20_MD5.png]]</p>
+<p>程序员都在用的中文IT技术交流社区</p>
+<p>![[_resources&#x2F;08a47e60886378fe60a3d9c8f4ae8bc6_MD5.png]]</p>
+<p>专业的中文 IT 技术社区，与千万技术人共成长</p>
+<p>![[_resources&#x2F;a51be6c085b867a5bd82d8dc1cea9b46_MD5.png]]</p>
+<p>关注【CSDN】视频号，行业资讯、技术分享精彩不断，直播好礼送不停！</p>
+<p>客服 返回顶部</p>
+<p>![[_resources&#x2F;53f11b1e8b532da69e9f940c62dd66a2_MD5.png]] ![[_resources&#x2F;2181b2dfa01957051ec2f38120f4e401_MD5.png]]</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/clippings/" class="print-no-link">#clippings</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Electron 对 SQLite 进行加密_better-sqlite3-multiple-ciphers-CSDN博客</div>
+      <div>https://yhao521.github.io/2025/07/23/摘录/Electron 对 SQLite 进行加密_better-sqlite3-multiple-ciphers-CSDN博客/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>yhao521</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年7月23日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E6%91%98%E5%BD%95/Comfyui%E5%88%B6%E4%BD%9CAI%E8%A7%86%E9%A2%91%EF%BC%8C%E6%94%AF%E6%8C%81%E6%96%87%E7%94%9F%E8%A7%86%E9%A2%91%E3%80%81%E5%9B%BE%E7%94%9F%E8%A7%86%E9%A2%91%E3%80%81%E8%A7%86%E9%A2%91%E7%94%9F%E8%A7%86%E9%A2%91%EF%BC%8C%E4%B8%87%E7%9B%B82.1%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2%E8%AF%A6%E7%BB%86%E6%96%B9%E6%B3%95%20-%20%E8%85%BE%E8%AE%AF%E4%BA%91%E5%BC%80%E5%8F%91%E8%80%85%E7%A4%BE%E5%8C%BA-%E8%85%BE%E8%AE%AF%E4%BA%91/" title="Comfyui制作AI视频，支持文生视频、图生视频、视频生视频，万相2.1本地部署详细方法 - 腾讯云开发者社区-腾讯云">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Comfyui制作AI视频，支持文生视频、图生视频、视频生视频，万相2.1本地部署详细方法 - 腾讯云开发者社区-腾讯云</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E6%91%98%E5%BD%95/Ionic%20+%20Vue3%20+%20Capacitor%20%E9%85%8D%E7%BD%AE%E5%BA%94%E7%94%A8%E4%BF%A1%EF%BC%88App%20%E5%8C%85%E5%90%8D%E3%80%81%E5%BA%94%E7%94%A8%E5%90%8D%E3%80%81%E5%BA%94%E7%94%A8%E5%9B%BE%E6%A0%87%E3%80%81%E5%90%AF%E5%8A%A8%E5%8A%A8%E7%94%BB%E3%80%81%E7%89%88%E6%9C%AC%E4%BF%A1%E6%81%AF%EF%BC%89/" title="">
+                        <span class="hidden-mobile"></span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>  
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

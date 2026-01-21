@@ -1,0 +1,808 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="[[m0_46423830]]">
+  <meta name="keywords" content="java,博客,vue,spring,mysql,docker,linux">
+  
+    <meta name="description" content="文章浏览阅读2k次，点赞7次，收藏9次。Git补丁技术是多人协作与代码迁移中的实用工具，本文系统介绍了其核心用法。主要内容包括：1）通过git diff导出未提交修改或git format-patch生成带提交历史的补丁文件；2）使用git apply快速应用修改或git am完整保留提交记录；3) 典型场景如跨仓库迁移代码的操作流程。文章还提供了合并提交、冲突处理等进阶技巧，并对比了不同工具特性">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Git Patch 使用详解：生成、应用与多提交合并导出">
+<meta property="og:url" content="https://yhao521.github.io/2025/09/18/%E6%91%98%E5%BD%95/Git%20Patch%20%E4%BD%BF%E7%94%A8%E8%AF%A6%E8%A7%A3%EF%BC%9A%E7%94%9F%E6%88%90%E3%80%81%E5%BA%94%E7%94%A8%E4%B8%8E%E5%A4%9A%E6%8F%90%E4%BA%A4%E5%90%88%E5%B9%B6%E5%AF%BC%E5%87%BA/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="文章浏览阅读2k次，点赞7次，收藏9次。Git补丁技术是多人协作与代码迁移中的实用工具，本文系统介绍了其核心用法。主要内容包括：1）通过git diff导出未提交修改或git format-patch生成带提交历史的补丁文件；2）使用git apply快速应用修改或git am完整保留提交记录；3) 典型场景如跨仓库迁移代码的操作流程。文章还提供了合并提交、冲突处理等进阶技巧，并对比了不同工具特性">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-09-18T00:38:09.253Z">
+<meta property="article:modified_time" content="2025-09-18T00:38:16.197Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="clippings">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>Git Patch 使用详解：生成、应用与多提交合并导出 - 匆匆过客的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yhao521.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>匆匆过客的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Git Patch 使用详解：生成、应用与多提交合并导出"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-09-18 08:38" pubdate>
+          2025年9月18日 早上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.1k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          10 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Git Patch 使用详解：生成、应用与多提交合并导出</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>在多人协作、 代码审查 、离线提交或跨仓库迁移的场景中， <code>git patch</code> 是非常实用的技术。本文将系统地介绍如何使用 Git 的补丁机制导出和应用修改内容。</p>
+<hr>
+<h3 id="📖-什么是-Git-Patch？"><a href="#📖-什么是-Git-Patch？" class="headerlink" title="📖 什么是 Git Patch？"></a>📖 什么是 Git Patch？</h3><p>严格来说， <code>git patch</code> 并不是一个 <a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=Git%20%E5%91%BD%E4%BB%A4&spm=1001.2101.3001.7020">Git 命令</a> ，而是指 <strong>使用 Git 的补丁机制</strong> ，借助以下命令完成相关操作：</p>
+<ul>
+<li><code>git diff</code></li>
+<li><code>git format-patch</code></li>
+<li><code>git apply</code></li>
+<li><code>git am</code></li>
+</ul>
+<p>这些命令共同构成了 Git 补丁工作流。</p>
+<hr>
+<h3 id="📦-Git-Patch-常用工作流概览"><a href="#📦-Git-Patch-常用工作流概览" class="headerlink" title="📦 Git Patch 常用工作流概览"></a>📦 Git Patch 常用工作流概览</h3><h4 id="🔹-1-生成-Patch-文件"><a href="#🔹-1-生成-Patch-文件" class="headerlink" title="🔹 1. 生成 Patch 文件"></a>🔹 1. 生成 Patch 文件</h4><h5 id="✅-方法-1：仅导出修改内容（不含提交信息）"><a href="#✅-方法-1：仅导出修改内容（不含提交信息）" class="headerlink" title="✅ 方法 1：仅导出修改内容（不含提交信息）"></a>✅ 方法 1：仅导出修改内容（不含提交信息）</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">git diff &gt; my.patch<br>bash1<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>生成的是基于当前修改与 HEAD 差异的补丁，适合用于分享尚未提交的改动。</p>
+</blockquote>
+<hr>
+<h5 id="✅-方法-2：导出带有提交历史的补丁（推荐）"><a href="#✅-方法-2：导出带有提交历史的补丁（推荐）" class="headerlink" title="✅ 方法 2：导出带有提交历史的补丁（推荐）"></a>✅ 方法 2：导出带有提交历史的补丁（推荐）</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 导出某一次提交</span><br>git format-patch -1 &lt;commit-hash&gt;<br><br><span class="hljs-comment"># 导出最近 3 次提交</span><br>git format-patch -3<br><br><span class="hljs-comment"># 导出当前分支与主分支之间的所有提交</span><br>git format-patch origin/main..HEAD<br>bash12345678<br></code></pre></td></tr></table></figure>
+
+<p>这些命令会生成 <code>.patch</code> 文件，每个提交一个文件，名称格式如：</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs glsl"><span class="hljs-number">0001</span>-描述.<span class="hljs-keyword">patch</span><br><span class="hljs-number">0002</span>-描述.<span class="hljs-keyword">patch</span><br><span class="hljs-number">12</span><br></code></pre></td></tr></table></figure>
+
+<p>你可以通过 <code>--output-directory=&lt;目录&gt;</code> 指定生成路径：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">git format-patch origin/main --output-directory=./patches<br>bash1<br></code></pre></td></tr></table></figure>
+
+<hr>
+<h4 id="🔹-2-应用-Patch-文件"><a href="#🔹-2-应用-Patch-文件" class="headerlink" title="🔹 2. 应用 Patch 文件"></a>🔹 2. 应用 Patch 文件</h4><h5 id="✅-使用-git-apply（不记录提交）"><a href="#✅-使用-git-apply（不记录提交）" class="headerlink" title="✅ 使用 git apply（不记录提交）"></a>✅ 使用 git apply（不记录提交）</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">git apply my.patch<br>bash1<br></code></pre></td></tr></table></figure>
+<ul>
+<li>只会应用内容，不保留原始提交记录。</li>
+<li>无法撤销，建议先备份或使用 <code>git apply -R</code> 撤销。</li>
+</ul>
+<hr>
+<h5 id="✅-使用-git-am（保留原始提交信息）"><a href="#✅-使用-git-am（保留原始提交信息）" class="headerlink" title="✅ 使用 git am（保留原始提交信息）"></a>✅ 使用 git am（保留原始提交信息）</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">git am 0001-*.patch<br>bash1<br></code></pre></td></tr></table></figure>
+
+<p>或批量导入所有补丁：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">git am *.patch<br>bash1<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>如果出现冲突，可通过：</p>
+<ul>
+<li><code>git am --abort</code> 中止操作</li>
+<li><code>git am --skip</code> 跳过冲突补丁</li>
+<li><code>git am --continue</code> 解决冲突后继续应用</li>
+</ul>
+</blockquote>
+<hr>
+<h3 id="🧰-常用命令整理（速查表）"><a href="#🧰-常用命令整理（速查表）" class="headerlink" title="🧰 常用命令整理（速查表）"></a>🧰 常用命令整理（速查表）</h3><table>
+<thead>
+<tr>
+<th>操作</th>
+<th>命令示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>导出未提交修改</td>
+<td><code>git diff &gt; my.patch</code></td>
+</tr>
+<tr>
+<td>导出最近 N 次提交</td>
+<td><code>git format-patch -N</code></td>
+</tr>
+<tr>
+<td>导出某个提交</td>
+<td><code>git format-patch -1 &lt;commit-hash&gt;</code></td>
+</tr>
+<tr>
+<td>导出某个分支差异</td>
+<td><code>git format-patch origin/main..HEAD</code></td>
+</tr>
+<tr>
+<td>合并多个 patch 为一个</td>
+<td><code>cat *.patch &gt; all-in-one.patch</code></td>
+</tr>
+<tr>
+<td>应用普通 patch</td>
+<td><code>git apply my.patch</code></td>
+</tr>
+<tr>
+<td>应用带提交记录的 patch</td>
+<td><code>git am *.patch</code></td>
+</tr>
+<tr>
+<td>撤销 apply 应用</td>
+<td><code>git apply -R my.patch</code></td>
+</tr>
+<tr>
+<td>中止 am 应用</td>
+<td><code>git am --abort</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="🎯-进阶：合并多个提交为一个-Patch"><a href="#🎯-进阶：合并多个提交为一个-Patch" class="headerlink" title="🎯 进阶：合并多个提交为一个 Patch"></a>🎯 进阶：合并多个提交为一个 Patch</h3><p>如果你有多个已提交的记录想合并为一个 patch，可使用如下方法：</p>
+<h4 id="✅-步骤一：交互式-rebase-合并多个提交"><a href="#✅-步骤一：交互式-rebase-合并多个提交" class="headerlink" title="✅ 步骤一：交互式 rebase 合并多个提交"></a>✅ 步骤一：交互式 rebase 合并多个提交</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">git rebase -i HEAD~3  <span class="hljs-comment"># 合并最近 3 次提交</span><br>bash1<br></code></pre></td></tr></table></figure>
+
+<p>将后两个提交改为 <code>squash</code> ，保存退出。</p>
+<hr>
+<h4 id="✅-步骤二：导出合并后的单一提交"><a href="#✅-步骤二：导出合并后的单一提交" class="headerlink" title="✅ 步骤二：导出合并后的单一提交"></a>✅ 步骤二：导出合并后的单一提交</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">git format-patch -1 HEAD<br>bash1<br></code></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="✅-典型场景：迁移提交到另一个仓库"><a href="#✅-典型场景：迁移提交到另一个仓库" class="headerlink" title="✅ 典型场景：迁移提交到另一个仓库"></a>✅ 典型场景：迁移提交到另一个仓库</h3><ol>
+<li>在源仓库使用 <code>git format-patch</code> 导出提交</li>
+<li>在目标仓库使用 <code>git am</code> 应用补丁</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 在源仓库</span><br>git format-patch origin/main..HEAD --output-directory=./patch<br><br><span class="hljs-comment"># 在目标仓库</span><br>git am ./patch/*.patch<br>bash12345<br></code></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="📌-注意事项"><a href="#📌-注意事项" class="headerlink" title="📌 注意事项"></a>📌 注意事项</h3><ul>
+<li>使用 <code>git apply</code> 时不生成提交记录，适合轻量临时修改；</li>
+<li>使用 <code>git am</code> 会保留作者、提交信息等元数据；</li>
+<li>patch 文件应用失败时，一定记得 <code>git am --abort</code> 清理状态；</li>
+<li>patch 文件内容依赖于当前目录的状态，请保持代码干净。</li>
+</ul>
+<hr>
+<h3 id="✅-小结"><a href="#✅-小结" class="headerlink" title="✅ 小结"></a>✅ 小结</h3><table>
+<thead>
+<tr>
+<th>工具</th>
+<th>是否带提交记录</th>
+<th>是否可撤销</th>
+<th>应用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>git diff</code></td>
+<td>否</td>
+<td>可（-R）</td>
+<td>未提交改动的临时导出</td>
+</tr>
+<tr>
+<td><code>git format-patch</code></td>
+<td>是</td>
+<td>否</td>
+<td>提交历史导出、离线代码迁移</td>
+</tr>
+<tr>
+<td><code>git apply</code></td>
+<td>否</td>
+<td>可</td>
+<td>应用内容变更，轻量修复</td>
+</tr>
+<tr>
+<td><code>git am</code></td>
+<td>是</td>
+<td>是</td>
+<td>严谨迁移、有审计需求的场景</td>
+</tr>
+</tbody></table>
+<hr>
+<p>微信公众号</p>
+<p>登录后您可以享受以下权益：</p>
+<ul>
+<li>免费复制代码</li>
+<li>和博主大V互动</li>
+<li>下载海量资源</li>
+<li>发动态&#x2F;写文章&#x2F;加入社区<br>×</li>
+</ul>
+<p>打赏作者</p>
+<p>¥1 ¥2 ¥4 ¥6 ¥10 ¥20</p>
+<p>扫码支付： ¥1</p>
+<p>获取中</p>
+<p>扫码支付</p>
+<p>您的余额不足，请更换扫码支付或 <a target="_blank" rel="noopener" href="https://i.csdn.net/#/wallet/balance/recharge?utm_source=RewardVip">充值</a></p>
+<p>打赏作者</p>
+<p>实付 元</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_46423830/article/details/">使用余额支付</a></p>
+<p>点击重新获取</p>
+<p>扫码支付</p>
+<p>钱包余额 0</p>
+<p>抵扣说明：</p>
+<p>1.余额是钱包充值的虚拟货币，按照1:1的比例进行支付金额的抵扣。<br>2.余额无法直接购买下载，可以购买VIP、付费专栏及课程。</p>
+<p><a target="_blank" rel="noopener" href="https://i.csdn.net/#/wallet/balance/recharge">余额充值</a></p>
+<p>举报</p>
+<p> [![[_resources&#x2F;35c7362356adf5a11cd3cc47fd01628f_MD5.png]] 点击体验<br>DeepSeekR1满血版](<a target="_blank" rel="noopener" href="https://ai.csdn.net/?utm_source=cknow_pc_blogdetail&spm=1001.2101.3001.10583">https://ai.csdn.net/?utm_source=cknow_pc_blogdetail&amp;spm=1001.2101.3001.10583</a>) ![[_resources&#x2F;90bd0cbf3aff8fdff8bf9b011b581e20_MD5.png]]</p>
+<p>程序员都在用的中文IT技术交流社区</p>
+<p>![[_resources&#x2F;08a47e60886378fe60a3d9c8f4ae8bc6_MD5.png]]</p>
+<p>专业的中文 IT 技术社区，与千万技术人共成长</p>
+<p>![[_resources&#x2F;a51be6c085b867a5bd82d8dc1cea9b46_MD5.png]]</p>
+<p>关注【CSDN】视频号，行业资讯、技术分享精彩不断，直播好礼送不停！</p>
+<p>客服 返回顶部</p>
+<p>微信公众号</p>
+<p>![[_resources&#x2F;e5337146ee2b49027bad2fa3372252ec_MD5.jpg]] 公众号名称：DZSpace 微信扫码关注或搜索公众号名称</p>
+<p>复制公众号名称</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/clippings/" class="print-no-link">#clippings</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Git Patch 使用详解：生成、应用与多提交合并导出</div>
+      <div>https://yhao521.github.io/2025/09/18/摘录/Git Patch 使用详解：生成、应用与多提交合并导出/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>[[m0_46423830]]</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年9月18日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/09/22/%E6%91%98%E5%BD%95/%E7%BB%88%E7%AB%AF%E6%95%88%E7%8E%87%E6%8F%90%E5%8D%87%E7%A5%9E%E5%99%A8%EF%BC%9AiTerm2%20%E7%9A%84%E8%BF%9B%E9%98%B6%E6%8A%80%E5%B7%A7%E5%88%86%E4%BA%AB/" title="终端效率提升神器：iTerm2 的进阶技巧分享">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">终端效率提升神器：iTerm2 的进阶技巧分享</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/09/16/%E6%91%98%E5%BD%95/OkHttp%E7%BD%91%E7%BB%9C%E8%AF%B7%E6%B1%82%E6%A1%86%E6%9E%B6%E5%9C%A8Android%E4%B8%AD%E7%9A%84%E4%BD%BF%E7%94%A8/" title="OkHttp网络请求框架在Android中的使用">
+                        <span class="hidden-mobile">OkHttp网络请求框架在Android中的使用</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>  
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

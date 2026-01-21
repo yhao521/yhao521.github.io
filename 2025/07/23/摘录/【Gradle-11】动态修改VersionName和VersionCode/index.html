@@ -1,0 +1,684 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="yhao521">
+  <meta name="keywords" content="java,博客,vue,spring,mysql,docker,linux">
+  
+    <meta name="description" content="前言有个读者问了一个比较有意思又很常见的问题，怎么修改VersionName和VersionCode？这位读者提问的方式也挺好，报错信息和尝试过的方式都提到了。关于报错以及解决方案，正如上图我评论回复所说。 静态修改直接在build.gradle文件改就好了，动态修改还是有点意思的。但是这种需求也比较常见，比如加上git commit id啊，时间戳啊等等，以便于区分，省的测试同学提了bug搞半天">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【Gradle-11】动态修改VersionName和VersionCode">
+<meta property="og:url" content="https://yhao521.github.io/2025/07/23/%E6%91%98%E5%BD%95/%E3%80%90Gradle-11%E3%80%91%E5%8A%A8%E6%80%81%E4%BF%AE%E6%94%B9VersionName%E5%92%8CVersionCode/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="前言有个读者问了一个比较有意思又很常见的问题，怎么修改VersionName和VersionCode？这位读者提问的方式也挺好，报错信息和尝试过的方式都提到了。关于报错以及解决方案，正如上图我评论回复所说。 静态修改直接在build.gradle文件改就好了，动态修改还是有点意思的。但是这种需求也比较常见，比如加上git commit id啊，时间戳啊等等，以便于区分，省的测试同学提了bug搞半天">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/74da2bfb20217a03176d26ba30f92255.png">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/74405910f3ad4f3b249f8efede669934.jpeg">
+<meta property="article:published_time" content="2025-07-23T12:01:24.000Z">
+<meta property="article:modified_time" content="2025-03-25T05:10:53.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="java,博客,vue,spring,mysql,docker,linux">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://i-blog.csdnimg.cn/blog_migrate/74da2bfb20217a03176d26ba30f92255.png">
+  
+  
+  
+  <title>【Gradle-11】动态修改VersionName和VersionCode - 匆匆过客的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yhao521.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>匆匆过客的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="【Gradle-11】动态修改VersionName和VersionCode"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-07-23 20:01" pubdate>
+          2025年7月23日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.2k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          11 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">【Gradle-11】动态修改VersionName和VersionCode</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>有个读者问了一个比较有意思又很常见的问题，怎么修改VersionName和VersionCode？<br><img src="https://i-blog.csdnimg.cn/blog_migrate/74da2bfb20217a03176d26ba30f92255.png" srcset="/img/loading.gif" lazyload alt="读者.png"><br>这位读者提问的方式也挺好，报错信息和尝试过的方式都提到了。<br>关于报错以及解决方案，正如上图我评论回复所说。</p>
+<p>静态修改直接在build.gradle文件改就好了，动态修改还是有点意思的。<br>但是这种需求也比较常见，比如加上git commit id啊，时间戳啊等等，以便于区分，省的测试同学提了bug搞半天是包不对…<br>那么本文就来带大家实践一下，以及探索有没有其他方式。</p>
+<h2 id="配置BuildType"><a href="#配置BuildType" class="headerlink" title="配置BuildType"></a>配置BuildType</h2><p>我们可以通过配置不同的<code>BuildType</code>，然后使用<code>versionNameSuffix</code>，分别设置对应的版本名称后缀。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs auto">    buildTypes &#123;<br>        debug&#123;<br>            versionNameSuffix &quot;-测试包&quot;<br>        &#125;<br>        release &#123;<br>            versionNameSuffix &quot;-正式包&quot;<br>        &#125;<br>    &#125;<br>12345678AI写代码<br></code></pre></td></tr></table></figure>
+
+<p>现在的版本名称和版本号：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs auto">    defaultConfig &#123;<br>        versionCode 1<br>        versionName &quot;1.0&quot;<br>    &#125;<br>1234AI写代码<br></code></pre></td></tr></table></figure>
+
+<p>调用看看有没有生效：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs auto">    override fun onResume() &#123;<br>        super.onResume()<br><br>        val packageInfo = applicationContext.packageManager.getPackageInfo(applicationContext.packageName, 0)<br>        Log.wtf(&quot;yechaoa&quot;, &quot;versionName = &quot; + packageInfo.versionName)<br>        Log.wtf(&quot;yechaoa&quot;, &quot;versionCode = &quot; + packageInfo.versionCode)<br>    &#125;<br>1234567AI写代码<br></code></pre></td></tr></table></figure>
+
+<p>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs auto">E  versionName = 1.0-测试包<br>E  versionCode = 1<br>12AI写代码<br></code></pre></td></tr></table></figure>
+
+<p>生效是生效了，但是这种方式可以改versionName，改不了versionCode，有一定局限性。</p>
+<h2 id="动态Property"><a href="#动态Property" class="headerlink" title="动态Property"></a>动态Property</h2><p>这种呢，就是通过占位符的方式，原有的versionName和versionCode不是写死的，通过动态获取的方式来设置，我们就可以打包脚本里加上VersionName的配置，以达到编译期动态修改的效果，这种方式在<code>CI/CD</code>中比较常见。</p>
+<p>先加两个方法来获取versionName和versionCode：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs auto">def getVersionNameByProperty() &#123;<br>    def name<br>    if (hasProperty(&quot;VersionName&quot;) &amp;&amp; getProperty(&#x27;VersionName&#x27;) != null) &#123;<br>        name = getProperties().get(&#x27;VersionName&#x27;)<br>    &#125; else &#123;<br>        name = &quot;2.0-default&quot;<br>    &#125;<br>    return name<br>&#125;<br><br>def getVersionCodeByProperty() &#123;<br>    def code<br>    if (hasProperty(&quot;VersionCode&quot;) &amp;&amp; getProperties().get(&#x27;VersionCode&#x27;) != null) &#123;<br>        code = getProperties().get(&#x27;VersionCode&#x27;)<br>    &#125; else &#123;<br>        code = 2<br>    &#125;<br>    return code<br>&#125;<br>12345678910111213141516171819AI写代码<br></code></pre></td></tr></table></figure>
+
+<p>defaultConfig引用方法：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs auto">    defaultConfig &#123;<br>        versionCode getVersionCodeByProperty()<br>        versionName getVersionNameByProperty()<br>    &#125;<br>1234AI写代码<br></code></pre></td></tr></table></figure>
+
+<p>如上，正常点击按钮编译versionName应该是”2.0-default”，versionCode应该是的2。<br>我们编译看下是不是符合预期：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs auto"> E  versionName = 2.0-default-测试包<br> E  versionCode = 2<br>12AI写代码<br></code></pre></td></tr></table></figure>
+
+<p>符合预期，而且加上了我们在buildType里面设置的后缀“测试包”。</p>
+<p>那么接下来再用命令执行试试：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs auto">./gradlew installDebug -PVersionName=2.0-property<br>1AI写代码<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>这里只是加了-PVersionName，VerisonCode同理。</p>
+</blockquote>
+<p>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs auto"> E  versionName = 2.0-property-测试包<br> E  versionCode = 2<br>12AI写代码<br></code></pre></td></tr></table></figure>
+
+<p>可以看到，versionName由「2.0-default-测试包」变成「2.0-property-测试包」了，我们的效果达到了。</p>
+<h2 id="Variants"><a href="#Variants" class="headerlink" title="Variants"></a>Variants</h2><p><code>variants</code>是变体的意思，在构建中通常用来配置不同的版本、不同的环境等，比如多渠道打包，上面刚介绍的buildType也是。<br>但这里要介绍的variants方式，跟buildType的时间要晚一些，是在<code>Configuration</code>阶段，也就是拿到所有的variants之后再去改。<br>variants能力是Gradle提供的，在Android中对应的是<code>applicationVariants</code>。</p>
+<p>首先遍历所有variants，然后通过Flavor拿到versionName和versionCode，然后再赋值。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs auto">    applicationVariants.configureEach &#123; variant -&gt;<br>        def flavor = variant.mergedFlavor<br>        flavor.versionName = &#x27;3.0&#x27;<br>        flavor.versionCode = 3<br>    &#125;<br>12345AI写代码<br></code></pre></td></tr></table></figure>
+
+<p>结果编译报错：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs auto">Caused by: java.lang.RuntimeException: com.android.build.gradle.internal.crash.ExternalApiUsageException: com.android.builder.errors.EvalIssueException: versionName cannot be set on a mergedFlavor directly.<br>1AI写代码<br></code></pre></td></tr></table></figure>
+
+<p>然后瞅了下源码，是<code>MergedFlavor</code>里面抛出来的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><code class="hljs auto">class MergedFlavor(<br>    name: String,<br>    private val _applicationId: Property&lt;String&gt;,<br>    private val services: VariantServices<br>) : AbstractProductFlavor(name), InternalBaseVariant.MergedFlavor &#123;<br><br>  	//...<br><br>    override var versionCode: Int?<br>        get() = super.versionCode<br>        set(value) &#123;<br>            // calling setVersionCode results in a sync Error because the manifest merger doesn&#x27;t pick<br>            // up the change.<br>            reportErrorWithWorkaround(&quot;versionCode&quot;, &quot;versionCodeOverride&quot;, value)<br>        &#125;<br><br>    override var versionName: String?<br>        get() = super.versionName<br>        set(value) &#123;<br>            // calling setVersionName results in a sync Error because the manifest merger doesn&#x27;t pick<br>            // up the change.<br>            reportErrorWithWorkaround(&quot;versionName&quot;, &quot;versionNameOverride&quot;, value)<br>        &#125;<br><br>    private fun reportErrorWithWorkaround(<br>        fieldName: String,<br>        outputFieldName: String,<br>        fieldValue: Any?<br>    ) &#123;<br>        val formattedFieldValue = if (fieldValue is String) &#123;<br>            &quot;\&quot;&quot; + fieldValue + &quot;\&quot;&quot;<br>        &#125; else &#123;<br>            fieldValue.toString()<br>        &#125;<br><br>        val message = &quot;&quot;&quot;$fieldName cannot be set on a mergedFlavor directly.<br>                |$outputFieldName can instead be set for variant outputs using the following syntax:<br>                |android &#123;<br>                |    applicationVariants.all &#123; variant -&gt;<br>                |        variant.outputs.each &#123; output -&gt;<br>                |            output.$outputFieldName = $formattedFieldValue<br>                |        &#125;<br>                |    &#125;<br>                |&#125;&quot;&quot;&quot;.trimMargin()<br><br>        services.issueReporter.reportError(IssueReporter.Type.GENERIC, message)<br>    &#125;<br>&#125;<br><br>12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849AI写代码<br></code></pre></td></tr></table></figure>
+
+<p><em>调用setVersionName会导致同步错误，清单文件接收不到更新。</em></p>
+<p>当然异常里面也给了解决方案，使用<code>versionNameOverride</code>。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs auto">    applicationVariants.configureEach &#123; variant -&gt;<br>        variant.outputs.each &#123; output -&gt;<br>            if (variant.buildType.name == &quot;debug&quot;) &#123;<br>                output.versionNameOverride = &quot;3.0&quot;<br>                output.versionCodeOverride = 3<br>            &#125;<br>        &#125;<br>    &#125;<br>12345678AI写代码<br></code></pre></td></tr></table></figure>
+
+<p>然后我们这里还把versionName和versionCode升级了一下，再来试试。<br>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs auto"> E  versionName = 3.0<br> E  versionCode = 3<br>12AI写代码<br></code></pre></td></tr></table></figure>
+
+<p>ok，这达到我们想要效果了。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本文通过BuildType、Property、Variants三种方式介绍了动态修改VersionCode和VersionName的方法，但是他们的时机却有不同。<br><img src="https://i-blog.csdnimg.cn/blog_migrate/74405910f3ad4f3b249f8efede669934.jpeg" srcset="/img/loading.gif" lazyload></p>
+<ul>
+<li>BuildType：有局限性，仅能修改VersionName，无法修改VersionCode；</li>
+<li>Property：使用比较方便，在云编译场景比较常见，本地的话可以写在打包脚本里面；</li>
+<li>Variants：比较彻底，能完全覆盖，而且也可以抽成Plugin，但是如果有云编译的话，会导致云编译的更改失效；</li>
+</ul>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>以上即是本文介绍内容，学废了吗，写作不易，记得三连~</p>
+<h2 id="GitHub"><a href="#GitHub" class="headerlink" title="GitHub"></a>GitHub</h2><p><a target="_blank" rel="noopener" href="https://github.com/yechaoa/GradleX">https://github.com/yechaoa/GradleX</a></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>【Gradle-11】动态修改VersionName和VersionCode</div>
+      <div>https://yhao521.github.io/2025/07/23/摘录/【Gradle-11】动态修改VersionName和VersionCode/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>yhao521</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年7月23日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E6%91%98%E5%BD%95/PyTorch%E6%A8%A1%E5%9E%8B%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%20.pt%20%E4%B8%8E%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%A0%BC%E5%BC%8F%20.bin%20%E8%BD%AC%E6%8D%A2%20-%20%E6%8A%80%E6%9C%AF%E6%A0%88/" title="PyTorch模型文件格式 .pt 与二进制格式 .bin 转换 - 技术栈">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">PyTorch模型文件格式 .pt 与二进制格式 .bin 转换 - 技术栈</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E6%91%98%E5%BD%95/%E3%80%90VS%20Code%E3%80%91Continue%E5%8A%A0%E8%BD%BD%E6%9C%AC%E5%9C%B0%E4%B8%8E%E5%B1%80%E5%9F%9F%E7%BD%91Ollama%E6%A8%A1%E5%9E%8B%E7%9A%84%E6%AD%A3%E7%A1%AE%E6%96%B9%E5%BC%8F/" title="【VS Code】Continue加载本地与局域网Ollama模型的正确方式">
+                        <span class="hidden-mobile">【VS Code】Continue加载本地与局域网Ollama模型的正确方式</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>  
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

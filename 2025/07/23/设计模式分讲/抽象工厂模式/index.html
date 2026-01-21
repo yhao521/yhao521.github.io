@@ -1,0 +1,737 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="yhao521">
+  <meta name="keywords" content="java,博客,vue,spring,mysql,docker,linux">
+  
+    <meta name="description" content="抽象工厂模式抽象工厂模式（Abstract Factory Pattern）是围绕一个超级工厂创建其他工厂。该超级工厂又称为其他工厂的工厂。这种类型的设计模式属于创建型模式，它提供了一种创建对象的最佳方式。在抽象工厂模式中，接口是负责创建一个相关对象的工厂，不需要显式指定它们的类。每个生成的工厂都能按照工厂模式提供对象。 介绍**意图：**提供一个创建一系列相关或相互依赖对象的接口，而无需指定它们">
+<meta property="og:type" content="article">
+<meta property="og:title" content="抽象工厂模式">
+<meta property="og:url" content="https://yhao521.github.io/2025/07/23/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%88%86%E8%AE%B2/%E6%8A%BD%E8%B1%A1%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="抽象工厂模式抽象工厂模式（Abstract Factory Pattern）是围绕一个超级工厂创建其他工厂。该超级工厂又称为其他工厂的工厂。这种类型的设计模式属于创建型模式，它提供了一种创建对象的最佳方式。在抽象工厂模式中，接口是负责创建一个相关对象的工厂，不需要显式指定它们的类。每个生成的工厂都能按照工厂模式提供对象。 介绍**意图：**提供一个创建一系列相关或相互依赖对象的接口，而无需指定它们">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.runoob.com/wp-content/uploads/2014/08/3E13CDD1-2CD2-4C66-BD33-DECBF172AE03.jpg">
+<meta property="og:image" content="https://www.runoob.com/wp-content/uploads/2018/07/1530601914-2143-DP-SimpleFactory.png">
+<meta property="og:image" content="https://www.runoob.com/wp-content/uploads/2018/07/1530601917-1999-DP-Factory.png">
+<meta property="og:image" content="https://www.runoob.com/wp-content/uploads/2018/07/1530601916-7298-DP-AbstractFactory.png">
+<meta property="og:image" content="https://www.runoob.com/wp-content/uploads/2018/07/1530601980-8080-P-AbstractFactory-AddFactory.png">
+<meta property="og:image" content="https://www.runoob.com/wp-content/uploads/2018/07/1530601917-7462-P-AbstractFactory-AddProduct.png">
+<meta property="article:published_time" content="2025-07-23T12:01:48.000Z">
+<meta property="article:modified_time" content="2023-09-03T04:36:32.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="java,博客,vue,spring,mysql,docker,linux">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.runoob.com/wp-content/uploads/2014/08/3E13CDD1-2CD2-4C66-BD33-DECBF172AE03.jpg">
+  
+  
+  
+  <title>抽象工厂模式 - 匆匆过客的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yhao521.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>匆匆过客的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="抽象工厂模式"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-07-23 20:01" pubdate>
+          2025年7月23日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.9k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          16 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">抽象工厂模式</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="抽象工厂模式"><a href="#抽象工厂模式" class="headerlink" title="抽象工厂模式"></a>抽象工厂模式</h1><p>抽象工厂模式（Abstract Factory Pattern）是围绕一个超级工厂创建其他工厂。该超级工厂又称为其他工厂的工厂。这种类型的设计模式属于创建型模式，它提供了一种创建对象的最佳方式。<br>在抽象工厂模式中，接口是负责创建一个相关对象的工厂，不需要显式指定它们的类。每个生成的工厂都能按照工厂模式提供对象。</p>
+<h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>**意图：**提供一个创建一系列相关或相互依赖对象的接口，而无需指定它们具体的类。</p>
+<p>**主要解决：**主要解决接口选择的问题。</p>
+<p>**何时使用：**系统的产品有多于一个的产品族，而系统只消费其中某一族的产品。</p>
+<p>**如何解决：**在一个产品族里面，定义多个产品。</p>
+<p>**关键代码：**在一个工厂里聚合多个同类产品。</p>
+<p>**应用实例：**工作了，为了参加一些聚会，肯定有两套或多套衣服吧，比如说有商务装（成套，一系列具体产品）、时尚装（成套，一系列具体产品），甚至对于一个家庭来说，可能有商务女装、商务男装、时尚女装、时尚男装，这些也都是成套的，即一系列具体产品。假设一种情况（现实中是不存在的，要不然，没法进入共产主义了，但有利于说明抽象工厂模式），在您的家中，某一个衣柜（具体工厂）只能存放某一种这样的衣服（成套，一系列具体产品），每次拿这种成套的衣服时也自然要从这个衣柜中取出了。用 OOP 的思想去理解，所有的衣柜（具体工厂）都是衣柜类的（抽象工厂）某一个，而每一件成套的衣服又包括具体的上衣（某一具体产品），裤子（某一具体产品），这些具体的上衣其实也都是上衣（抽象产品），具体的裤子也都是裤子（另一个抽象产品）。</p>
+<p>**优点：**当一个产品族中的多个对象被设计成一起工作时，它能保证客户端始终只使用同一个产品族中的对象。</p>
+<p>**缺点：**产品族扩展非常困难，要增加一个系列的某一产品，既要在抽象的 Creator 里加代码，又要在具体的里面加代码。</p>
+<p><strong>使用场景：</strong><br>1、QQ 换皮肤，一整套一起换。<br>2、生成不同操作系统的程序。</p>
+<p>**注意事项：**产品族难扩展，产品等级易扩展。</p>
+<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><p>我们将创建 <em>Shape</em> 和 <em>Color</em> 接口和实现这些接口的实体类。下一步是创建抽象工厂类 <em>AbstractFactory</em>。接着定义工厂类 <em>ShapeFactory</em> 和 <em>ColorFactory</em>，这两个工厂类都是扩展了 <em>AbstractFactory</em>。然后创建一个工厂创造器&#x2F;生成器类 <em>FactoryProducer</em>。</p>
+<p><em>AbstractFactoryPatternDemo</em> 类使用 <em>FactoryProducer</em> 来获取 <em>AbstractFactory</em> 对象。它将向 <em>AbstractFactory</em> 传递形状信息 <em>Shape</em>（<em>CIRCLE &#x2F; RECTANGLE &#x2F; SQUARE</em>），以便获取它所需对象的类型。同时它还向 <em>AbstractFactory</em> 传递颜色信息 <em>Color</em>（<em>RED &#x2F; GREEN &#x2F; BLUE</em>），以便获取它所需对象的类型。</p>
+<p><a target="_blank" rel="noopener" href="https://www.runoob.com/wp-content/uploads/2014/08/3E13CDD1-2CD2-4C66-BD33-DECBF172AE03.jpg"><img src="https://www.runoob.com/wp-content/uploads/2014/08/3E13CDD1-2CD2-4C66-BD33-DECBF172AE03.jpg" srcset="/img/loading.gif" lazyload alt="抽象工厂模式的 UML 图"></a></p>
+<h3 id="步骤-1"><a href="#步骤-1" class="headerlink" title="步骤 1"></a>步骤 1</h3><p>为形状创建一个接口。</p>
+<h2 id="Shape-java"><a href="#Shape-java" class="headerlink" title="Shape.java"></a>Shape.java</h2><figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs csharp"><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title">Shape</span> &#123;<br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">draw</span>()</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="步骤-2"><a href="#步骤-2" class="headerlink" title="步骤 2"></a>步骤 2</h3><p>创建实现接口的实体类。</p>
+<p><em>Rectangle.java</em></p>
+<h2 id="Rectangle-java"><a href="#Rectangle-java" class="headerlink" title="Rectangle.java"></a>Rectangle.java</h2><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs typescript"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Rectangle</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Shape</span> &#123;<br><br> <span class="hljs-meta">@Override</span><br><span class="hljs-keyword">public</span> <span class="hljs-built_in">void</span> <span class="hljs-title function_">draw</span>(<span class="hljs-params"></span>) &#123;<br><span class="hljs-title class_">System</span>.<span class="hljs-property">out</span>.<span class="hljs-title function_">println</span>(<span class="hljs-string">&quot;Inside Rectangle::draw() method.&quot;</span>);<br> &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+
+<h2 id="Square-java"><a href="#Square-java" class="headerlink" title="Square.java"></a>Square.java</h2><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs typescript"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Square</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Shape</span> &#123;<br><br> <span class="hljs-meta">@Override</span><br><span class="hljs-keyword">public</span> <span class="hljs-built_in">void</span> <span class="hljs-title function_">draw</span>(<span class="hljs-params"></span>) &#123;<br><span class="hljs-title class_">System</span>.<span class="hljs-property">out</span>.<span class="hljs-title function_">println</span>(<span class="hljs-string">&quot;Inside Square::draw() method.&quot;</span>);<br> &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+
+<h2 id="Circle-java"><a href="#Circle-java" class="headerlink" title="Circle.java"></a>Circle.java</h2><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs typescript"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Circle</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Shape</span> &#123;<br><br> <span class="hljs-meta">@Override</span><br><span class="hljs-keyword">public</span> <span class="hljs-built_in">void</span> <span class="hljs-title function_">draw</span>(<span class="hljs-params"></span>) &#123;<br><span class="hljs-title class_">System</span>.<span class="hljs-property">out</span>.<span class="hljs-title function_">println</span>(<span class="hljs-string">&quot;Inside Circle::draw() method.&quot;</span>);<br> &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="步骤-3"><a href="#步骤-3" class="headerlink" title="步骤 3"></a>步骤 3</h3><p>为颜色创建一个接口。</p>
+<h2 id="Color-java"><a href="#Color-java" class="headerlink" title="Color.java"></a>Color.java</h2><figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs csharp"><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title">Color</span> &#123;<br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">fill</span>()</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="步骤4"><a href="#步骤4" class="headerlink" title="步骤4"></a>步骤4</h3><p>创建实现接口的实体类。</p>
+<h2 id="Red-java"><a href="#Red-java" class="headerlink" title="Red.java"></a>Red.java</h2><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs typescript"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Red</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Color</span> &#123;<br><br> <span class="hljs-meta">@Override</span><br><span class="hljs-keyword">public</span> <span class="hljs-built_in">void</span> <span class="hljs-title function_">fill</span>(<span class="hljs-params"></span>) &#123;<br><span class="hljs-title class_">System</span>.<span class="hljs-property">out</span>.<span class="hljs-title function_">println</span>(<span class="hljs-string">&quot;Inside Red::fill() method.&quot;</span>);<br> &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+
+<h2 id="Green-java"><a href="#Green-java" class="headerlink" title="Green.java"></a>Green.java</h2><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs typescript"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Green</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Color</span> &#123;<br><br> <span class="hljs-meta">@Override</span><br><span class="hljs-keyword">public</span> <span class="hljs-built_in">void</span> <span class="hljs-title function_">fill</span>(<span class="hljs-params"></span>) &#123;<br><span class="hljs-title class_">System</span>.<span class="hljs-property">out</span>.<span class="hljs-title function_">println</span>(<span class="hljs-string">&quot;Inside Green::fill() method.&quot;</span>);<br> &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+
+<h2 id="Blue-java"><a href="#Blue-java" class="headerlink" title="Blue.java"></a>Blue.java</h2><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs typescript"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Blue</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Color</span> &#123;<br><br> <span class="hljs-meta">@Override</span><br><span class="hljs-keyword">public</span> <span class="hljs-built_in">void</span> <span class="hljs-title function_">fill</span>(<span class="hljs-params"></span>) &#123;<br><span class="hljs-title class_">System</span>.<span class="hljs-property">out</span>.<span class="hljs-title function_">println</span>(<span class="hljs-string">&quot;Inside Blue::fill() method.&quot;</span>);<br> &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="步骤-5"><a href="#步骤-5" class="headerlink" title="步骤 5"></a>步骤 5</h3><p>为 Color 和 Shape 对象创建抽象类来获取工厂。</p>
+<h2 id="AbstractFactory-java"><a href="#AbstractFactory-java" class="headerlink" title="AbstractFactory.java"></a>AbstractFactory.java</h2><figure class="highlight processing"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs processing"><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">AbstractFactory</span> &#123;<br><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> Color <span class="hljs-title function_">getColor</span>(<span class="hljs-built_in">String</span> <span class="hljs-type">color</span>);<br> <span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> Shape <span class="hljs-title function_">getShape</span>(<span class="hljs-built_in">String</span> <span class="hljs-built_in">shape</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="步骤-6"><a href="#步骤-6" class="headerlink" title="步骤 6"></a>步骤 6</h3><p>创建扩展了 AbstractFactory 的工厂类，基于给定的信息生成实体类的对象。</p>
+<h2 id="ShapeFactory-java"><a href="#ShapeFactory-java" class="headerlink" title="ShapeFactory.java"></a>ShapeFactory.java</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs scala"><br><br>public <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ShapeFactory</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractFactory</span> </span>&#123;<br><br> <span class="hljs-meta">@Override</span><br>public <span class="hljs-type">Shape</span> getShape(<span class="hljs-type">String</span> shapeType)&#123;<br><span class="hljs-keyword">if</span>(shapeType == <span class="hljs-literal">null</span>)&#123;<br><span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;<br> &#125;<br><span class="hljs-keyword">if</span>(shapeType.equalsIgnoreCase(<span class="hljs-string">&quot;CIRCLE&quot;</span>))&#123;<br><span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-type">Circle</span>();<br> &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(shapeType.equalsIgnoreCase(<span class="hljs-string">&quot;RECTANGLE&quot;</span>))&#123;<br><span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-type">Rectangle</span>();<br> &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(shapeType.equalsIgnoreCase(<span class="hljs-string">&quot;SQUARE&quot;</span>))&#123;<br><span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-type">Square</span>();<br> &#125;<br><span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;<br> &#125;<br><br> <span class="hljs-meta">@Override</span><br>public <span class="hljs-type">Color</span> getColor(<span class="hljs-type">String</span> color) &#123;<br><span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;<br> &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+
+<h2 id="ColorFactory-java"><a href="#ColorFactory-java" class="headerlink" title="ColorFactory.java"></a>ColorFactory.java</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs scala">public <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ColorFactory</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractFactory</span> </span>&#123;<br><br> <span class="hljs-meta">@Override</span><br>public <span class="hljs-type">Shape</span> getShape(<span class="hljs-type">String</span> shapeType)&#123;<br><span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;<br> &#125;<br><br> <span class="hljs-meta">@Override</span><br>public <span class="hljs-type">Color</span> getColor(<span class="hljs-type">String</span> color) &#123;<br><span class="hljs-keyword">if</span>(color == <span class="hljs-literal">null</span>)&#123;<br><span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;<br> &#125;<br><span class="hljs-keyword">if</span>(color.equalsIgnoreCase(<span class="hljs-string">&quot;RED&quot;</span>))&#123;<br><span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-type">Red</span>();<br> &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(color.equalsIgnoreCase(<span class="hljs-string">&quot;GREEN&quot;</span>))&#123;<br><span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-type">Green</span>();<br> &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(color.equalsIgnoreCase(<span class="hljs-string">&quot;BLUE&quot;</span>))&#123;<br><span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-type">Blue</span>();<br> &#125;<br><span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;<br> &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+<h3 id="步骤-7"><a href="#步骤-7" class="headerlink" title="步骤 7"></a>步骤 7</h3><p>创建一个工厂创造器&#x2F;生成器类，通过传递形状或颜色信息来获取工厂。</p>
+<h2 id="FactoryProducer-java"><a href="#FactoryProducer-java" class="headerlink" title="FactoryProducer.java"></a>FactoryProducer.java</h2><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs typescript"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">FactoryProducer</span> &#123;<br><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-title class_">AbstractFactory</span> <span class="hljs-title function_">getFactory</span>(<span class="hljs-params"><span class="hljs-title class_">String</span> choice</span>)&#123;<br><span class="hljs-keyword">if</span>(choice.<span class="hljs-title function_">equalsIgnoreCase</span>(<span class="hljs-string">&quot;SHAPE&quot;</span>))&#123;<br><span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ShapeFactory</span>();<br> &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(choice.<span class="hljs-title function_">equalsIgnoreCase</span>(<span class="hljs-string">&quot;COLOR&quot;</span>))&#123;<br><span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ColorFactory</span>();<br> &#125;<br><span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;<br> &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="步骤-8"><a href="#步骤-8" class="headerlink" title="步骤 8"></a>步骤 8</h3><p>使用 FactoryProducer 来获取 AbstractFactory，通过传递类型信息来获取实体类的对象。</p>
+<h2 id="AbstractFactoryPatternDemo-java"><a href="#AbstractFactoryPatternDemo-java" class="headerlink" title="AbstractFactoryPatternDemo.java"></a>AbstractFactoryPatternDemo.java</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">AbstractFactoryPatternDemo</span> &#123;<br><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br><span class="hljs-comment">//获取形状工厂</span><br><span class="hljs-type">AbstractFactory</span> <span class="hljs-variable">shapeFactory</span> <span class="hljs-operator">=</span> FactoryProducer.getFactory(<span class="hljs-string">&quot;SHAPE&quot;</span>);<br><br> <span class="hljs-comment">//获取形状为 Circle 的对象</span><br><span class="hljs-type">Shape</span> <span class="hljs-variable">shape1</span> <span class="hljs-operator">=</span> shapeFactory.getShape(<span class="hljs-string">&quot;CIRCLE&quot;</span>);<br><br> <span class="hljs-comment">//调用 Circle 的 draw 方法</span><br>shape1.draw();<br><br> <span class="hljs-comment">//获取形状为 Rectangle 的对象</span><br><span class="hljs-type">Shape</span> <span class="hljs-variable">shape2</span> <span class="hljs-operator">=</span> shapeFactory.getShape(<span class="hljs-string">&quot;RECTANGLE&quot;</span>);<br><br> <span class="hljs-comment">//调用 Rectangle 的 draw 方法</span><br>shape2.draw();<br><br> <span class="hljs-comment">//获取形状为 Square 的对象</span><br><span class="hljs-type">Shape</span> <span class="hljs-variable">shape3</span> <span class="hljs-operator">=</span> shapeFactory.getShape(<span class="hljs-string">&quot;SQUARE&quot;</span>);<br><br> <span class="hljs-comment">//调用 Square 的 draw 方法</span><br>shape3.draw();<br><br> <span class="hljs-comment">//获取颜色工厂</span><br><span class="hljs-type">AbstractFactory</span> <span class="hljs-variable">colorFactory</span> <span class="hljs-operator">=</span> FactoryProducer.getFactory(<span class="hljs-string">&quot;COLOR&quot;</span>);<br><br> <span class="hljs-comment">//获取颜色为 Red 的对象</span><br><span class="hljs-type">Color</span> <span class="hljs-variable">color1</span> <span class="hljs-operator">=</span> colorFactory.getColor(<span class="hljs-string">&quot;RED&quot;</span>);<br><br> <span class="hljs-comment">//调用 Red 的 fill 方法</span><br>color1.fill();<br><br> <span class="hljs-comment">//获取颜色为 Green 的对象</span><br><span class="hljs-type">Color</span> <span class="hljs-variable">color2</span> <span class="hljs-operator">=</span> colorFactory.getColor(<span class="hljs-string">&quot;GREEN&quot;</span>);<br><br> <span class="hljs-comment">//调用 Green 的 fill 方法</span><br>color2.fill();<br><br> <span class="hljs-comment">//获取颜色为 Blue 的对象</span><br><span class="hljs-type">Color</span> <span class="hljs-variable">color3</span> <span class="hljs-operator">=</span> colorFactory.getColor(<span class="hljs-string">&quot;BLUE&quot;</span>);<br><br> <span class="hljs-comment">//调用 Blue 的 fill 方法</span><br>color3.fill();<br> &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="步骤-9"><a href="#步骤-9" class="headerlink" title="步骤 9"></a>步骤 9</h3><p>执行程序，输出结果：</p>
+<figure class="highlight maxima"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs maxima"><br>Inside Circle::<span class="hljs-built_in">draw</span>() <span class="hljs-built_in">method</span>.<br>Inside Rectangle::<span class="hljs-built_in">draw</span>() <span class="hljs-built_in">method</span>.<br>Inside Square::<span class="hljs-built_in">draw</span>() <span class="hljs-built_in">method</span>.<br>Inside Red::fill() <span class="hljs-built_in">method</span>.<br>Inside Green::fill() <span class="hljs-built_in">method</span>.<br>Inside Blue::fill() <span class="hljs-built_in">method</span>.<br><br></code></pre></td></tr></table></figure>
+
+
+
+
+<h3 id="简单工厂模式"><a href="#简单工厂模式" class="headerlink" title="简单工厂模式"></a>简单工厂模式</h3><p>简单工厂模式不是 23 种里的一种，简而言之，就是有一个专门生产某个产品的类。</p>
+<p>比如下图中的鼠标工厂，专业生产鼠标，给参数 0，生产戴尔鼠标，给参数 1，生产惠普鼠标。</p>
+<p><img src="//www.runoob.com/wp-content/uploads/2018/07/1530601914-2143-DP-SimpleFactory.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="工厂模式"><a href="#工厂模式" class="headerlink" title="工厂模式"></a>工厂模式</h3><p>工厂模式也就是鼠标工厂是个父类，有生产鼠标这个接口。</p>
+<p>戴尔鼠标工厂，惠普鼠标工厂继承它，可以分别生产戴尔鼠标，惠普鼠标。</p>
+<p>生产哪种鼠标不再由参数决定，而是创建鼠标工厂时，由戴尔鼠标工厂创建。</p>
+<p>后续直接调用鼠标工厂.生产鼠标()即可</p>
+<p><img src="//www.runoob.com/wp-content/uploads/2018/07/1530601917-1999-DP-Factory.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="抽象工厂模式-1"><a href="#抽象工厂模式-1" class="headerlink" title="抽象工厂模式"></a>抽象工厂模式</h3><p>抽象工厂模式也就是不仅生产鼠标，同时生产键盘。</p>
+<p>也就是 PC 厂商是个父类，有生产鼠标，生产键盘两个接口。</p>
+<p>戴尔工厂，惠普工厂继承它，可以分别生产戴尔鼠标+戴尔键盘，和惠普鼠标+惠普键盘。</p>
+<p>创建工厂时，由戴尔工厂创建。</p>
+<p>后续工厂.生产鼠标()则生产戴尔鼠标，工厂.生产键盘()则生产戴尔键盘。</p>
+<p><img src="//www.runoob.com/wp-content/uploads/2018/07/1530601916-7298-DP-AbstractFactory.png" srcset="/img/loading.gif" lazyload></p>
+<blockquote>
+<p>在抽象工厂模式中，假设我们需要增加一个工厂</p>
+</blockquote>
+<p>假设我们增加华硕工厂，则我们需要增加华硕工厂，和戴尔工厂一样，继承 PC 厂商。</p>
+<p>之后创建华硕鼠标，继承鼠标类。创建华硕键盘，继承键盘类即可。</p>
+<p><img src="//www.runoob.com/wp-content/uploads/2018/07/1530601980-8080-P-AbstractFactory-AddFactory.png" srcset="/img/loading.gif" lazyload></p>
+<blockquote>
+<p>在抽象工厂模式中，假设我们需要增加一个产品</p>
+</blockquote>
+<p>假设我们增加耳麦这个产品，则首先我们需要增加耳麦这个父类，再加上戴尔耳麦，惠普耳麦这两个子类。</p>
+<p>之后在PC厂商这个父类中，增加生产耳麦的接口。最后在戴尔工厂，惠普工厂这两个类中，分别实现生产戴尔耳麦，惠普耳麦的功能。<br>以上。</p>
+<p><img src="//www.runoob.com/wp-content/uploads/2018/07/1530601917-7462-P-AbstractFactory-AddProduct.png" srcset="/img/loading.gif" lazyload></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>抽象工厂模式</div>
+      <div>https://yhao521.github.io/2025/07/23/设计模式分讲/抽象工厂模式/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>yhao521</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年7月23日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%88%86%E8%AE%B2/%E4%B8%9A%E5%8A%A1%E4%BB%A3%E8%A1%A8%E6%A8%A1%E5%BC%8F/" title="业务代表模式">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">业务代表模式</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%88%86%E8%AE%B2/%E7%BB%84%E5%90%88%E5%AE%9E%E4%BD%93%E6%A8%A1%E5%BC%8F/" title="组合实体模式">
+                        <span class="hidden-mobile">组合实体模式</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>  
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,689 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="[[戴竹蜻蜓穿过森林]]">
+  <meta name="keywords" content="java,博客,vue,spring,mysql,docker,linux">
+  
+    <meta name="description" content="在前端项目中，按需引入是优化项目的一个方向，在element-ui库中如果要按需引入组件 unplugin-auto-import在vue3项目实践">
+<meta property="og:type" content="article">
+<meta property="og:title" content="unplugin-auto-import在vue3项目实践及报错处理">
+<meta property="og:url" content="https://yhao521.github.io/2025/10/07/%E6%91%98%E5%BD%95/unplugin-auto-import%E5%9C%A8vue3%E9%A1%B9%E7%9B%AE%E5%AE%9E%E8%B7%B5%E5%8F%8A%E6%8A%A5%E9%94%99%E5%A4%84%E7%90%86/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="在前端项目中，按需引入是优化项目的一个方向，在element-ui库中如果要按需引入组件 unplugin-auto-import在vue3项目实践">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-10-07T06:12:07.345Z">
+<meta property="article:modified_time" content="2025-10-07T06:12:14.034Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="clippings">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>unplugin-auto-import在vue3项目实践及报错处理 - 匆匆过客的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yhao521.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>匆匆过客的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="unplugin-auto-import在vue3项目实践及报错处理"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-10-07 14:12" pubdate>
+          2025年10月7日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.2k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          10 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">unplugin-auto-import在vue3项目实践及报错处理</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>![[_resources&#x2F;5748e291ac82a16d9a71a2181319849b_MD5.jpg]]![[_resources&#x2F;206b42a7c013357424f6aae87d90ca68_MD5.png]]</p>
+<h4 id="序言"><a href="#序言" class="headerlink" title="序言"></a>序言</h4><p>在前端项目中，按需引入是优化项目的一个方向，在element-ui库中如果要按需引入组件需要安装 <code>babel-plugin-component</code> ，然后将.babelrc 修改为：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs json"><span class="hljs-punctuation">&#123;</span><br>        <span class="hljs-attr">&quot;presets&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;es2015&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">&#123;</span> <span class="hljs-attr">&quot;modules&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span> <span class="hljs-punctuation">&#125;</span> <span class="hljs-punctuation">]</span> <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span><br>        <span class="hljs-attr">&quot;plugins&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span> <span class="hljs-punctuation">[</span> <span class="hljs-string">&quot;component&quot;</span><span class="hljs-punctuation">,</span><br>            <span class="hljs-punctuation">&#123;</span><br>                <span class="hljs-attr">&quot;libraryName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;element-ui&quot;</span><span class="hljs-punctuation">,</span><br>                <span class="hljs-attr">&quot;styleLibraryName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;theme-chalk&quot;</span><br>            <span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">]</span><br>        <span class="hljs-punctuation">]</span><br>    <span class="hljs-punctuation">&#125;</span><br></code></pre></td></tr></table></figure>
+
+<p>还需要在 main.js 中引入要用到的组件：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-keyword">import</span> <span class="hljs-title class_">Vue</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vue&#x27;</span>;<br><span class="hljs-keyword">import</span> &#123; <span class="hljs-title class_">Button</span>, <span class="hljs-title class_">Select</span> &#125; <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;element-ui&#x27;</span>;<br><span class="hljs-keyword">import</span> <span class="hljs-title class_">App</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./App.vue&#x27;</span>;<br><span class="hljs-title class_">Vue</span>.<span class="hljs-title function_">component</span>(<span class="hljs-title class_">Button</span>.<span class="hljs-property">name</span>, <span class="hljs-title class_">Button</span>);<br><span class="hljs-title class_">Vue</span>.<span class="hljs-title function_">component</span>(<span class="hljs-title class_">Select</span>.<span class="hljs-property">name</span>, <span class="hljs-title class_">Select</span>);<br><br><span class="hljs-comment">/* 或写为</span><br><span class="hljs-comment">* Vue.use(Button)</span><br><span class="hljs-comment">* Vue.use(Select)</span><br><span class="hljs-comment">*/</span><br></code></pre></td></tr></table></figure>
+
+<p>在项目不断的迭代中可能会写很长一串需要用的组件，到最后几乎和全局引入差不了多少。但是按需引入也始终会比全部引入少一些打包占用，可是太长的引入组件也伤脑筋。</p>
+<h4 id="真香警告⚠"><a href="#真香警告⚠" class="headerlink" title="真香警告⚠"></a>真香警告⚠</h4><p>随着 vue3 生态圈的不断发展，越来越多的支持插件让vue3 + vite项目越来越丝滑。 <code>element-plus</code> + <code>unplugin-auto-import</code> 的组合方式使得在组件的使用上也更加灵活。</p>
+<p>在element-plus中如果按需导入需要安装 首先你需要安装 <code>unplugin-vue-components</code>  和  <code>unplugin-auto-import</code> 这两款插件</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs arduino">npm install -D unplugin-vue-components unplugin-<span class="hljs-keyword">auto</span>-<span class="hljs-keyword">import</span><br>或者<br>yarn add unplugin-vue-components unplugin-<span class="hljs-keyword">auto</span>-<span class="hljs-keyword">import</span> -D<br></code></pre></td></tr></table></figure>
+
+<p>其中 <code>unplugin-auto-import</code> 不仅仅是按需导入element-plus组件，还可以配置自动按需导入vue，vue-router或者vueuse等</p>
+<p>vue3api调用时：</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs csharp">import &#123; computed, <span class="hljs-keyword">ref</span> &#125; <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vue&#x27;</span><br><span class="hljs-keyword">const</span> count = <span class="hljs-keyword">ref</span>(<span class="hljs-number">0</span>)<br><span class="hljs-keyword">const</span> doubled = computed(() =&gt; count.<span class="hljs-keyword">value</span> * <span class="hljs-number">2</span>)<br></code></pre></td></tr></table></figure>
+
+<p>安装 <code>unplugin-auto-import</code> 后</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs angelscript"><span class="hljs-keyword">const</span> count = <span class="hljs-built_in">ref</span>(<span class="hljs-number">0</span>)<br><span class="hljs-keyword">const</span> <span class="hljs-built_in">double</span>d = computed(() =&gt; count.value * <span class="hljs-number">2</span>)<br></code></pre></td></tr></table></figure>
+
+<p>是不是方便很多。</p>
+<p>el-icon里有着丰富的样式可供项目使用，但是丰富的组件也伴随着项目文件打包后的大小，所以 unplugin-auto-import 又站了出来，是的，它又出手了。它的让el-icon在使用时更灵活，让前端项目也更加简洁，只需要在 vite.config 里做好配置，剩下的就交给它处理。引用 <a href="https://link.juejin.cn/?target=">官方推荐的配置</a> 用法如下：</p>
+<p>在vite项目里引入方式：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><code class="hljs typescript"><span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> &#123; <span class="hljs-title class_">Plugin</span> &#125; <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;vite&quot;</span>;<br><br><span class="hljs-keyword">import</span> path <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;path&quot;</span>;<br><br><span class="hljs-keyword">import</span> vue <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@vitejs/plugin-vue&quot;</span>;<br><span class="hljs-keyword">import</span> <span class="hljs-title class_">AutoImport</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;unplugin-auto-import/vite&quot;</span>;<br><span class="hljs-keyword">import</span> <span class="hljs-title class_">Components</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;unplugin-vue-components/vite&quot;</span>;<br><span class="hljs-keyword">import</span> &#123; <span class="hljs-title class_">ElementPlusResolver</span> &#125; <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;unplugin-vue-components/resolvers&quot;</span>;<br><span class="hljs-keyword">import</span> <span class="hljs-title class_">IconsResolver</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;unplugin-icons/resolver&quot;</span>;<br><span class="hljs-keyword">import</span> <span class="hljs-title class_">Icons</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;unplugin-icons/vite&quot;</span>;<br><br><span class="hljs-keyword">const</span> pathSrc = path.<span class="hljs-title function_">resolve</span>(__dirname, <span class="hljs-string">&quot;src&quot;</span>);<br><br><span class="hljs-keyword">import</span> &#123; configCompressPlugin &#125; <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./compress&quot;</span>;<br><br><span class="hljs-keyword">import</span> &#123; configSvgIconsPlugin &#125; <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./svgSprite&quot;</span>;<br><br><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">createVitePlugins</span>(<span class="hljs-params"><span class="hljs-attr">mode</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">isBuild</span>: <span class="hljs-built_in">boolean</span></span>) &#123;<br>  <span class="hljs-keyword">const</span> <span class="hljs-attr">vitePlugins</span>: (<span class="hljs-title class_">Plugin</span> | <span class="hljs-title class_">Plugin</span>[])[] = [<br>    <span class="hljs-comment">// have to</span><br>    <span class="hljs-title function_">vue</span>(),<br>    <span class="hljs-comment">// have to</span><br>    <span class="hljs-comment">// vueJsx(),</span><br>    <span class="hljs-title class_">AutoImport</span>(&#123;<br>      <span class="hljs-comment">// Auto import functions from Vue, e.g. ref, reactive, toRef...</span><br>      <span class="hljs-comment">// 自动导入 Vue 相关函数，如：ref, reactive, toRef 等</span><br>      <span class="hljs-attr">imports</span>: [<span class="hljs-string">&quot;vue&quot;</span>, <span class="hljs-string">&quot;vue-router&quot;</span>],<br><br>      <span class="hljs-comment">// dirs: [&quot;src/utils/request.ts&quot;],</span><br><br>      <span class="hljs-comment">// Auto import functions from Element Plus, e.g. ElMessage, ElMessageBox... (with style)</span><br>      <span class="hljs-comment">// 自动导入 Element Plus 相关函数，如：ElMessage, ElMessageBox... (带样式)</span><br>      <span class="hljs-attr">resolvers</span>: [<br>        <span class="hljs-title class_">ElementPlusResolver</span>(),<br><br>        <span class="hljs-comment">// Auto import icon components</span><br>        <span class="hljs-comment">// 自动导入图标组件</span><br>        <span class="hljs-title class_">IconsResolver</span>()<br>      ],<br><br>      <span class="hljs-attr">dts</span>: path.<span class="hljs-title function_">resolve</span>(pathSrc, <span class="hljs-string">&quot;auto-imports.d.ts&quot;</span>)<br>    &#125;),<br><br>    <span class="hljs-title class_">Components</span>(&#123;<br>      <span class="hljs-attr">resolvers</span>: [<br>        <span class="hljs-comment">// Auto register icon components</span><br>        <span class="hljs-comment">// 自动注册图标组件</span><br>        <span class="hljs-title class_">IconsResolver</span>(&#123;<br>          <span class="hljs-attr">enabledCollections</span>: [<span class="hljs-string">&quot;ep&quot;</span>]<br>        &#125;),<br>        <span class="hljs-comment">// Auto register Element Plus components</span><br>        <span class="hljs-comment">// 自动导入 Element Plus 组件</span><br>        <span class="hljs-title class_">ElementPlusResolver</span>()<br>      ],<br><br>      <span class="hljs-attr">dts</span>: path.<span class="hljs-title function_">resolve</span>(pathSrc, <span class="hljs-string">&quot;components.d.ts&quot;</span>)<br>    &#125;),<br><br>    <span class="hljs-title class_">Icons</span>(&#123;<br>      <span class="hljs-attr">autoInstall</span>: <span class="hljs-literal">true</span><br>    &#125;)<br>  ];<br>  <span class="hljs-keyword">return</span> vitePlugins;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>在配置好组件后，node_modules会增加两个依赖文件夹</p>
+<p>![[_resources&#x2F;1a07918466c66cf38073bcdeff114779_MD5.webp]]</p>
+<p>页面使用icon组件时:</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-section">&lt;i-ep-location&gt;</span><span class="hljs-section">&lt;/i-ep-location&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>component.d.ts就自动导入了该组件</p>
+<p>![[_resources&#x2F;19cf0eb44f6ca676347222fddfe7038b_MD5.webp]]</p>
+<h4 id="解决报错提示"><a href="#解决报错提示" class="headerlink" title="解决报错提示"></a>解决报错提示</h4><p>通过以上的配置项目运行起来了，但是会出现一些错误提示，比如</p>
+<p>![[_resources&#x2F;7096702f1f84a9f790b6dd1750af3340_MD5.webp]]</p>
+<p>原因是虽然前面已经通过 <code>AutoImport</code> 对项目自动做了引用，但是未做 eslint 和 ts 检测，下面就添加它们的配置。</p>
+<h5 id="第一步："><a href="#第一步：" class="headerlink" title="第一步："></a>第一步：</h5><p><a href="https://link.juejin.cn/?target=">unplugin-auto-import 仓库</a> 有做 <code> eslintrc-auto-import.json</code> 的配置参考</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs json">eslintrc<span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span><br>    enabled<span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span> <span class="hljs-comment">// Default \`false\`</span><br>    filepath<span class="hljs-punctuation">:</span> &#x27;./.eslintrc-auto-import.json&#x27;<span class="hljs-punctuation">,</span> <span class="hljs-comment">// Default \`./.eslintrc-auto-import.json\`</span><br>    globalsPropValue<span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span> <span class="hljs-comment">// Default \`true\`, (true | false | &#x27;readonly&#x27; | &#x27;readable&#x27; | &#x27;writable&#x27; | &#x27;writeable&#x27;)</span><br>  <span class="hljs-punctuation">&#125;</span><br></code></pre></td></tr></table></figure>
+
+<p>添加设置，当配置 <code>enabled: true</code> 时，会根据 <code>filepath</code> 配置的路径生成一个 <code>.eslintrc-auto-import.json</code> 文件</p>
+<p>![[_resources&#x2F;0d44c5f7b10cfcc0e1063efda9eb487e_MD5.webp]]</p>
+<h5 id="第二步："><a href="#第二步：" class="headerlink" title="第二步："></a>第二步：</h5><p>在 <code>tsconfig.json</code> 文件中 <code>include</code> 配置中加入 <code>auto-imports.d.ts</code></p>
+<p>![[_resources&#x2F;78f52ae0aca857fde67bc8a53efcfb75_MD5.webp]]</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs json"><span class="hljs-attr">&quot;include&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><br>    <span class="hljs-string">&quot;src/**/*.d.ts&quot;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-string">&quot;types/**/*.d.ts&quot;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-string">&quot;build/**/*.d.ts&quot;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-string">&quot;./auto-imports.d.ts&quot;</span><br>  <span class="hljs-punctuation">]</span><br></code></pre></td></tr></table></figure>
+
+<p>配置保存后再看项目文件内就已无警告报错</p>
+<p>![[_resources&#x2F;57d4fdc07339d82b182d5d62ce8e629e_MD5.webp]]</p>
+<p>![[_resources&#x2F;fe713f919fc87219de59ff1cdedd5727_MD5.webp]]</p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>多数情况下关于 TS 指示的报错可能都跟 <code>tsconfig</code> 相关，或许是 <code>*.d.ts</code> ，抑或许是其他原因，先看文档，再分析问题，最后再解决问题。</p>
+<p><strong>开启掘金成长之旅！这是我参与「掘金日新计划 · 2 月更文挑战」的第 1 天， <a target="_blank" rel="noopener" href="https://juejin.cn/post/7194721470063312933" title="https:&#x2F;&#x2F;juejin.cn&#x2F;post&#x2F;7194721470063312933">点击查看活动详情</a></strong></p>
+<p>本文收录于以下专栏</p>
+<p>![[_resources&#x2F;132b91bcaa85ce6800c3cf09a63943e0_MD5.webp]]</p>
+<p>vue</p>
+<p>专栏目录</p>
+<p>无所谓，vue会出手</p>
+<p>0 订阅</p>
+<p>·</p>
+<p>7 篇文章</p>
+<p>评论 11</p>
+<p>![[_resources&#x2F;8aa0edd6548990f443375260912fd566_MD5.svg]] 10</p>
+<p>![[_resources&#x2F;fa2f65e8e81f497181f67176f5244689_MD5.svg]] 11</p>
+<p>![[_resources&#x2F;dad6c8314633039dd8616b47c0db6d5f_MD5.svg]] 收藏</p>
+<p>APP内打开</p>
+<p>![[_resources&#x2F;570b1d78d33410e177b1a221f5a5a501_MD5.png]]</p>
+<h2 id="登录掘金领取礼包"><a href="#登录掘金领取礼包" class="headerlink" title="登录掘金领取礼包"></a>登录掘金领取礼包</h2><p>更多登录后权益等你解锁</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/clippings/" class="print-no-link">#clippings</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>unplugin-auto-import在vue3项目实践及报错处理</div>
+      <div>https://yhao521.github.io/2025/10/07/摘录/unplugin-auto-import在vue3项目实践及报错处理/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>[[戴竹蜻蜓穿过森林]]</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年10月7日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/10/08/%E6%91%98%E5%BD%95/%E5%A4%9A%E7%A7%9F%E6%88%B7%E7%9C%8B%E8%BF%99%E4%B8%80%E7%AF%87%E5%B0%B1%E5%A4%9F%E4%BA%86/" title="多租户看这一篇就够了">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">多租户看这一篇就够了</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/10/07/%E6%91%98%E5%BD%95/vite%20plugin%E9%A1%B9%E7%9B%AE%E4%BC%98%E5%8C%96%E6%B1%87%E6%80%BB/" title="vite plugin项目优化汇总">
+                        <span class="hidden-mobile">vite plugin项目优化汇总</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>  
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,774 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="[[成就一亿技术人!]],[[hope_wisdom 发出的红包]]">
+  <meta name="keywords" content="java,博客,vue,spring,mysql,docker,linux">
+  
+    <meta name="description" content="文章浏览阅读4.2k次，点赞2次，收藏16次。本文介绍了如何在Docker中使用CentOS镜像和MySQL官方镜像构建MySQL5.7容器。首先，通过编写Dockerfile从CentOS镜像构建MySQL，包括安装依赖、MySQL及其初始化。接着，展示了如何拉取MySQL官方镜像并运行，以及配置外网访问。此外，文章还提到了如何使用初始化脚本执行SQL文件和本地化部署MySQL镜像的方法，包括打">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用docker构建并部署MySQL5.7镜像_docker mysql 5.7-CSDN博客">
+<meta property="og:url" content="https://yhao521.github.io/2025/08/13/%E6%91%98%E5%BD%95/%E4%BD%BF%E7%94%A8docker%E6%9E%84%E5%BB%BA%E5%B9%B6%E9%83%A8%E7%BD%B2MySQL5.7%E9%95%9C%E5%83%8F_docker%20mysql%205.7-CSDN%E5%8D%9A%E5%AE%A2/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="文章浏览阅读4.2k次，点赞2次，收藏16次。本文介绍了如何在Docker中使用CentOS镜像和MySQL官方镜像构建MySQL5.7容器。首先，通过编写Dockerfile从CentOS镜像构建MySQL，包括安装依赖、MySQL及其初始化。接着，展示了如何拉取MySQL官方镜像并运行，以及配置外网访问。此外，文章还提到了如何使用初始化脚本执行SQL文件和本地化部署MySQL镜像的方法，包括打">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-08-13T00:57:12.538Z">
+<meta property="article:modified_time" content="2025-08-13T00:57:17.938Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="clippings">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>使用docker构建并部署MySQL5.7镜像_docker mysql 5.7-CSDN博客 - 匆匆过客的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yhao521.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>匆匆过客的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="使用docker构建并部署MySQL5.7镜像_docker mysql 5.7-CSDN博客"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-08-13 08:57" pubdate>
+          2025年8月13日 早上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          17 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">使用docker构建并部署MySQL5.7镜像_docker mysql 5.7-CSDN博客</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>本文介绍了如何在Docker中使用CentOS镜像和MySQL官方镜像构建MySQL5.7容器。首先，通过编写Dockerfile从CentOS镜像构建MySQL，包括安装依赖、MySQL及其初始化。接着，展示了如何拉取MySQL官方镜像并运行，以及配置外网访问。此外，文章还提到了如何使用初始化脚本执行SQL文件和本地化部署MySQL镜像的方法，包括打包、加载和启动容器。</p>
+<p>摘要生成于 <a target="_blank" rel="noopener" href="https://ai.csdn.net/?utm_source=cknow_pc_ai_abstract">C知道</a> ，由 DeepSeek-R1 满血版支持， <a target="_blank" rel="noopener" href="https://ai.csdn.net/?utm_source=cknow_pc_ai_abstract">前往体验 &gt;</a></p>
+<hr>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>这几天在研究如何将服务器和 <a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%81%E7%A7%BB&spm=1001.2101.3001.7020">数据库迁移</a> 至 <code>docker容器</code> ，中间遇到了许多问题，特此写篇博客记录一下。</p>
+<hr>
+<p><code>提示：本篇文章主要讲解如何在docker容器中构建及部署MySQL</code></p>
+<h2 id="一、docker中部署MySQL主要有哪几种方式？"><a href="#一、docker中部署MySQL主要有哪几种方式？" class="headerlink" title="一、docker中部署MySQL主要有哪几种方式？"></a>一、docker中部署MySQL主要有哪几种方式？</h2><ol>
+<li>从 CentOS 镜像中构建 MySQL 容器</li>
+<li>从 MySQL 官方镜像中构建容器</li>
+</ol>
+<blockquote>
+<p>从 CentOS 镜像中构建 MySQL 容器可以更好地控制操作系统的版本和配置，而从 MySQL 官方镜像中构建容器则可以更方便地获取最新版本的 MySQL。具体选择哪个镜像，可以根据自己的需求和实际情况来决定。</p>
+</blockquote>
+<p>下面我们来尝试上面两种构建MySQL容器的方式</p>
+<h2 id="二、CentOS-镜像中构建-MySQL-容器"><a href="#二、CentOS-镜像中构建-MySQL-容器" class="headerlink" title="二、CentOS 镜像中构建 MySQL 容器"></a>二、CentOS 镜像中构建 MySQL 容器</h2><h3 id="1-编写Dockerfile"><a href="#1-编写Dockerfile" class="headerlink" title="1.编写Dockerfile"></a>1.编写Dockerfile</h3><p>Dockerfile（示例）：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><code class="hljs c"># <span class="hljs-number">1.</span> 镜像基于centos7<br>FROM centos:<span class="hljs-number">7</span><br><br># <span class="hljs-number">2.</span> 更改镜像时区<br>RUN echo <span class="hljs-string">&#x27;Asia/Shanghai&#x27;</span> &gt;/etc/timezone<br>MAINTAINER 作者<br><br># <span class="hljs-number">3.</span> 安装必要的软件包<br>RUN yum -y install epel-release <br>RUN yum install initscripts -y<br><br># <span class="hljs-number">4.</span> 安装jdk<br>RUN yum install java<span class="hljs-number">-1.8</span>.<span class="hljs-number">0</span>-openjdk.x86_64 -y<br><br># <span class="hljs-number">5.</span>安装wget<br>RUN yum -y install wget<br><br># <span class="hljs-number">6.</span> 安装MySQL<br>## <span class="hljs-number">6.1</span> wget下载MySQL5.<span class="hljs-number">7</span> <br>RUN wget http:<span class="hljs-comment">//dev.mysql.com/get/mysql57-community-release-el7-7.noarch.rpm</span><br>注：【MySQL5.<span class="hljs-number">6</span>地址】：http:<span class="hljs-comment">//repo.mysql.com/mysql-community-release-el7-5.noarch.rpm</span><br><br>## <span class="hljs-number">6.2</span> 安装MySQL5.<span class="hljs-number">7</span> <br>RUN rpm -ivh mysql57-community-release-el7<span class="hljs-number">-7.</span>noarch.rpm<br>注：【MySQL5.<span class="hljs-number">6</span>包】：rpm -ivh mysql-community-release-el7<span class="hljs-number">-5.</span>noarch.rpm<br><br>## <span class="hljs-number">6.3</span> 安装MySQL5.<span class="hljs-number">7</span> 所需秘钥【MySQL5.<span class="hljs-number">6</span>则无需秘钥】<br>RUN rpm --import https:<span class="hljs-comment">//repo.mysql.com/RPM-GPG-KEY-mysql-2022</span><br><br>## <span class="hljs-number">6.4</span> 执行安装 &amp;&amp; 赋予mysql安装目录访问权限<br>RUN yum -y install mysql-community-server<br>RUN chown -R root:root /var/lib/mysql<br><br># <span class="hljs-number">7.</span> 将数据库初始化脚本放入镜像<br>COPY ./mysqlinit/init.sql /usr/local/mysql/init.sql<br><br># <span class="hljs-number">8.</span> 暴露端口<br>EXPOSE <span class="hljs-number">80</span> <span class="hljs-number">3306</span> <span class="hljs-number">443</span> <span class="hljs-number">6379</span><br><br># <span class="hljs-number">9.</span> 启动服务<br>CMD [<span class="hljs-string">&quot;/usr/sbin/init&quot;</span>]<br><br>c123456789101112131415161718192021222324252627282930313233343536373839404142<br></code></pre></td></tr></table></figure>
+
+<h3 id="2-初始化MySQL"><a href="#2-初始化MySQL" class="headerlink" title="2.初始化MySQL"></a>2.初始化MySQL</h3><p><code>1. docker build 生成MySQL镜像</code> ：</p>
+<blockquote>
+<p>docker build -t 镜像名称 -f Dockerfile.</p>
+</blockquote>
+<p><code>2. docker volume 创建数据卷</code> ：</p>
+<blockquote>
+<p>docker volume create mysql_data</p>
+</blockquote>
+<p><code>3. docker run 运行容器</code> ：</p>
+<blockquote>
+<p>docker run –privileged&#x3D;true -d –name 容器别名 -p 3306:3306 -v mysql_data:&#x2F;var&#x2F;lib&#x2F;mysql 运行的容器ID</p>
+</blockquote>
+<p>&#x3D;&#x3D;注： –privileged&#x3D;true 参数的意思是以特权的身份去运行容器，否则在容器中运行MySQL【 <code>systemctl restart mysqld.service</code> 】时会提示无权限&#x3D;&#x3D;<br>&#x3D;&#x3D;-v 参数的意思是将宿主机的目录&#x2F;数据卷和容器目录进行挂载&#x3D;&#x3D;</p>
+<p><code>4. 进入docker容器</code> ：</p>
+<blockquote>
+<p>docker exec -it 容器名&#x2F;容器id bash</p>
+</blockquote>
+<p><code>5. 启动mysql</code> ：</p>
+<blockquote>
+<p>先使用命令查询mysql是否运行<br>ps -ef|grep mysql<br>如果未启动则执行<br>systemctl restart mysqld.service</p>
+</blockquote>
+<p><code>6. 查看mysql初始密码</code> ：</p>
+<blockquote>
+<p>grep ‘temporary password’ &#x2F;var&#x2F;log&#x2F;mysqld.log</p>
+</blockquote>
+<p><code>7. 登录mysql并修改密码</code> ：</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs pgsql"><span class="hljs-number">1.</span> 修改密码<br><span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">USER</span> <span class="hljs-string">&#x27;root&#x27;</span>@<span class="hljs-string">&#x27;%&#x27;</span> IDENTIFIED <span class="hljs-keyword">BY</span> <span class="hljs-string">&#x27;你的密码&#x27;</span>;<br>配置新账号参考：<br><span class="hljs-keyword">grant</span> <span class="hljs-keyword">all</span> <span class="hljs-keyword">privileges</span> <span class="hljs-keyword">on</span> *.* <span class="hljs-keyword">to</span> 你的账号@<span class="hljs-string">&#x27;%&#x27;</span> identified <span class="hljs-keyword">by</span> <span class="hljs-string">&#x27;你的密码&#x27;</span> <span class="hljs-keyword">with</span> <span class="hljs-keyword">grant</span> <span class="hljs-keyword">option</span>;<br><span class="hljs-number">2.</span> 刷新密码改动<br>flush <span class="hljs-keyword">privileges</span>;<br><span class="hljs-number">123456</span><br></code></pre></td></tr></table></figure>
+
+<p><code>8. mysql一些常见指令</code> ：</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs pgsql"><span class="hljs-number">1.</span> 创建数据库<br><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">DATABASE</span> <span class="hljs-keyword">IF</span> <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">EXISTS</span> 数据库名称 <span class="hljs-keyword">DEFAULT</span> <span class="hljs-type">CHARACTER</span> <span class="hljs-keyword">SET</span> utf8mb4 <span class="hljs-keyword">COLLATE</span> utf8mb4_general_ci;<br><span class="hljs-number">2.</span> 开启mysql语句执行记录【但是并不建议用户开启 需定期清理 否则会造成日志堆积】<br><span class="hljs-keyword">set</span> <span class="hljs-keyword">global</span> general_log=<span class="hljs-number">1</span>;<br><span class="hljs-number">3.</span> 找到日志存放目录<br><span class="hljs-keyword">show</span> variables <span class="hljs-keyword">like</span> <span class="hljs-string">&#x27;general%&#x27;</span>;<br><span class="hljs-number">123456</span><br></code></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="三、MySQL-官方镜像中构建容器"><a href="#三、MySQL-官方镜像中构建容器" class="headerlink" title="三、MySQL 官方镜像中构建容器"></a>三、MySQL 官方镜像中构建容器</h2><h3 id="1-拉取官方镜像"><a href="#1-拉取官方镜像" class="headerlink" title="1. 拉取官方镜像"></a>1. 拉取官方镜像</h3><blockquote>
+<p>docker pull mysql:5.7</p>
+</blockquote>
+<h3 id="2-运行镜像"><a href="#2-运行镜像" class="headerlink" title="2. 运行镜像"></a>2. 运行镜像</h3><p><code>创建数据卷</code></p>
+<blockquote>
+<p>docker volume create mysql_data7</p>
+</blockquote>
+<p><code>运行镜像并挂载数据卷</code></p>
+<blockquote>
+<p>docker run -d -e MYSQL_ROOT_PASSWORD&#x3D;root –name mysql57 -d -p 13307:3306 -v mysql_data7:&#x2F;var&#x2F;lib&#x2F;mysql -v &#x2F;usr&#x2F;local&#x2F;docker&#x2F;mysql5.7&#x2F;log:&#x2F;var&#x2F;log&#x2F; mysql:5.7</p>
+</blockquote>
+<h3 id="3-配置镜像外网访问"><a href="#3-配置镜像外网访问" class="headerlink" title="3. 配置镜像外网访问"></a>3. 配置镜像外网访问</h3><p><code>进入镜像</code></p>
+<blockquote>
+<p>docker exec -it mysql57 bash</p>
+</blockquote>
+<p><code>登录mysql设置允许外网访问</code></p>
+<blockquote>
+<p>use mysql;<br>update user set host &#x3D; ‘%’ where user &#x3D; ‘root’;<br>FLUSH PRIVILEGES;</p>
+</blockquote>
+<p>&#x3D;&#x3D;注意：update user set host &#x3D; ‘%’ where user &#x3D; ‘root’; 这一行可能会报错 但是不用管 依然会生效的&#x3D;&#x3D;</p>
+<h2 id="四、MySQL-容器初始化脚本"><a href="#四、MySQL-容器初始化脚本" class="headerlink" title="四、MySQL 容器初始化脚本"></a>四、MySQL 容器初始化脚本</h2><h3 id="1-将sql文件放入docker"><a href="#1-将sql文件放入docker" class="headerlink" title="1. 将sql文件放入docker"></a>1. 将sql文件放入docker</h3><p><code>docker build 构建容器时放入sql文件</code></p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs gradle"><span class="hljs-keyword">COPY</span> .<span class="hljs-regexp">/mysqlinit/i</span>nit.sql <span class="hljs-regexp">/usr/</span>local<span class="hljs-regexp">/mysql/i</span>nit.sql<br><span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
+
+<p><code>docker启动后放入sql文件</code></p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs swift">docker cp <span class="hljs-keyword">init</span>.sql 容器id:<span class="hljs-regexp">/usr/</span>local<span class="hljs-regexp">/mysql/</span><span class="hljs-keyword">init</span>.sql<br><span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="2-执行sql文件"><a href="#2-执行sql文件" class="headerlink" title="2. 执行sql文件"></a>2. 执行sql文件</h3><p><code>执行文件前可以开启sql执行日志</code></p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs routeros"><span class="hljs-built_in">set</span> global <span class="hljs-attribute">general_log</span>=1;<br>1<br></code></pre></td></tr></table></figure>
+
+<p><code>查询sql执行日志输出目录</code></p>
+<figure class="highlight gams"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs gams">show <span class="hljs-keyword">variables</span> like <span class="hljs-comment">&#x27;general%&#x27;</span>;<br><span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
+
+<p>![[_resources&#x2F;66388d22912c55c05fc091396f52b4c0_MD5.png]]<br><code>执行sql文件</code></p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs swift">mysql <span class="hljs-operator">-</span>uroot <span class="hljs-operator">-</span>p 数据库名 <span class="hljs-operator">&lt;</span> <span class="hljs-regexp">/usr/</span>local<span class="hljs-regexp">/mysql/</span><span class="hljs-keyword">init</span>.sql<br><span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="五、MySQL-容器本地化部署"><a href="#五、MySQL-容器本地化部署" class="headerlink" title="五、MySQL 容器本地化部署"></a>五、MySQL 容器本地化部署</h2><p>本地化部署含义：将 <code>MySQL镜像（含数据）</code> 打成包保存到本地，然后部署到需要这台MySQL的服务器上。<br>&#x3D;&#x3D;要求MySQL镜像、MySQL镜像中的数据库、mysql配置文件都部署到新服务器上。&#x3D;&#x3D;<br>我们来看看具体应该如何操作</p>
+<h3 id="1-打包mysql镜像"><a href="#1-打包mysql镜像" class="headerlink" title="1. 打包mysql镜像"></a>1. 打包mysql镜像</h3><p><code>1. 打包镜像</code></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs xml">docker save -o <span class="hljs-tag">&lt;<span class="hljs-name">image_file_name</span>&gt;</span>.tar <span class="hljs-tag">&lt;<span class="hljs-name">image_name</span>&gt;</span><br>1<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>比如执行： <code>docker save -o mysql7.tar mysql7</code> 就是将 <code>mysql7</code> 这个镜像打包成名称为 <code>mysql7.tar</code> 的压缩包下</p>
+</blockquote>
+<p><code>2. 找到镜像挂载数据卷</code></p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs dockerfile">docker <span class="hljs-keyword">volume</span><span class="language-bash"> inspect mysql_data7</span><br><span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
+
+<p>![[_resources&#x2F;c5ff624239d1843a64b7b737e040af27_MD5.png]]</p>
+<blockquote>
+<p>注:什么是挂载 <code>数据卷</code> ？我们知道 <code>docker</code> 镜像每次重启后数据是会重置的。但是 <code>MySQL</code> 作为数据库，对它的任何改动都应该是要被 <code>持久化的</code>,这个时候只需在宿主机创建一个 <code>数据卷</code>,然后通过 <code>-v</code> 指令将容器映射到这个 <code>数据卷</code> 上，这样容器内 <code>MySQL</code> 的改动就会保留到宿主机的 <code>数据卷</code> 上,下次重启容器时，改动就会被保留</p>
+</blockquote>
+<p><code>3. 进入挂载目录</code></p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs awk">cd <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>volumes/mysql_data7<br><span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
+
+<p><code>4. 压缩镜像目录</code></p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs stylus">tar -czvf mysql7<span class="hljs-selector-class">.tar</span><span class="hljs-selector-class">.gz</span> _data/<br><span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
+
+<p><code>5. 找到原mysql配置文件 my.cnf</code></p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs routeros">[mysqld]<br>skip-host-cache<br>skip-name-resolve<br><span class="hljs-attribute">datadir</span>=/var/lib/mysql<br><span class="hljs-attribute">socket</span>=/var/run/mysqld/mysqld.sock<br><span class="hljs-attribute">secure-file-priv</span>=/var/lib/mysql-files<br><span class="hljs-attribute">user</span>=mysql<br><span class="hljs-comment"># 表名大小写不敏感，根据项目实际要求来配置即可</span><br><span class="hljs-attribute">lower_case_table_names</span>=1<br><br><span class="hljs-comment"># Disabling symbolic-links is recommended to prevent assorted security risks</span><br><span class="hljs-attribute">symbolic-links</span>=0<br><br><span class="hljs-comment">#log-error=/var/log/mysqld.log</span><br><span class="hljs-attribute">pid-file</span>=/var/run/mysqld/mysqld.pid<br>[client]<br><span class="hljs-attribute">socket</span>=/var/run/mysqld/mysqld.sock<br><br>!includedir /etc/mysql/conf.d/<br>!includedir /etc/mysql/mysql.conf.d/<br>1234567891011121314151617181920<br></code></pre></td></tr></table></figure>
+
+<p>上述操作处理完生成三个文件 ：<br>![[_resources&#x2F;37275025fc80b86a328aa5a5eb013894_MD5.png]]<br><code>6. 将这三个文件放入目标服务器</code></p>
+<h3 id="2-部署MySQL镜像"><a href="#2-部署MySQL镜像" class="headerlink" title="2. 部署MySQL镜像"></a>2. 部署MySQL镜像</h3><p><code>1. 加载镜像</code></p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs stylus">docker load -<span class="hljs-selector-tag">i</span> mysql7<span class="hljs-selector-class">.tar</span><br><span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
+
+<p>&#x3D;&#x3D;加载后即可看到镜像&#x3D;&#x3D;<br>![[_resources&#x2F;6afc0fb864f97c0698e6e783e78cdd76_MD5.png]]</p>
+<p><code>2. 创建数据卷</code></p>
+<figure class="highlight gauss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs gauss">docker <span class="hljs-built_in">volume</span> <span class="hljs-keyword">create</span> mysql_data7<br><span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
+
+<p><code>3. 查询数据卷目录并进入</code></p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs dockerfile">docker <span class="hljs-keyword">volume</span><span class="language-bash"> inspect mysql_data7</span><br><span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
+
+<p>![[_resources&#x2F;7077fb5341abffe74aebedf0757677c8_MD5.png]]</p>
+<p><code>3.进入数据卷目录</code></p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs awk">cd <span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/docker/</span>volumes/mysql_data7<br><span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
+
+<p><code>4. 复制备份压缩包到目录下 并解压</code><br>![[_resources&#x2F;d380b225a2264b57a9719af1ee0381ec_MD5.png]]</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs stylus">tar -zxvf mysql7-volume<span class="hljs-selector-class">.tar</span><span class="hljs-selector-class">.gz</span><br><span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
+
+<p><code>5.启动docker镜像</code></p>
+<blockquote>
+<p>docker run -d -e MYSQL_ROOT_PASSWORD&#x3D;root –name mysql7 -d -p 3306:3306 -v mysql_data7:&#x2F;var&#x2F;lib&#x2F;mysql -v &#x2F;root&#x2F;my.cnf:&#x2F;etc&#x2F;my.cnf mysql7</p>
+</blockquote>
+<p><code>-e MYSQL_ROOT_PASSWORD</code> 代表mysql初始密码<br><code>--name </code> 代表容器启动别名 <code> -d</code> 代表后台启动 <code>-p</code> 代表端口映射<br><code>-v</code> 代表文件&#x2F;数据卷映射 比如 -v mysql_data7:&#x2F;var&#x2F;lib&#x2F;mysql 代表将宿主机的 <code>mysql_data7</code> 数据卷映射到容器的 <code>/var/lib/mysql</code> 目录下</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>以上就是今天要讲的内容，本文主要介绍了如何使用docker构建及部署mysql5.7镜像，后续会介绍更多的docker内容，如有疑问可以在评论区留言。</p>
+<p>实付 元</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/zjq852533445/article/details/">使用余额支付</a></p>
+<p>点击重新获取</p>
+<p>扫码支付</p>
+<p>钱包余额 0</p>
+<p>抵扣说明：</p>
+<p>1.余额是钱包充值的虚拟货币，按照1:1的比例进行支付金额的抵扣。<br>2.余额无法直接购买下载，可以购买VIP、付费专栏及课程。</p>
+<p><a target="_blank" rel="noopener" href="https://i.csdn.net/#/wallet/balance/recharge">余额充值</a></p>
+<p>举报</p>
+<p> [![[_resources&#x2F;35c7362356adf5a11cd3cc47fd01628f_MD5.png]] 点击体验<br>DeepSeekR1满血版](<a target="_blank" rel="noopener" href="https://ai.csdn.net/?utm_source=cknow_pc_blogdetail&spm=1001.2101.3001.10583">https://ai.csdn.net/?utm_source=cknow_pc_blogdetail&amp;spm=1001.2101.3001.10583</a>) ![[_resources&#x2F;90bd0cbf3aff8fdff8bf9b011b581e20_MD5.png]]</p>
+<p>程序员都在用的中文IT技术交流社区</p>
+<p>![[_resources&#x2F;08a47e60886378fe60a3d9c8f4ae8bc6_MD5.png]]</p>
+<p>专业的中文 IT 技术社区，与千万技术人共成长</p>
+<p>![[_resources&#x2F;a51be6c085b867a5bd82d8dc1cea9b46_MD5.png]]</p>
+<p>关注【CSDN】视频号，行业资讯、技术分享精彩不断，直播好礼送不停！</p>
+<p>客服 返回顶部</p>
+<p>![[_resources&#x2F;66388d22912c55c05fc091396f52b4c0_MD5.png]] ![[_resources&#x2F;c5ff624239d1843a64b7b737e040af27_MD5.png]] ![[_resources&#x2F;37275025fc80b86a328aa5a5eb013894_MD5.png]] ![[_resources&#x2F;6afc0fb864f97c0698e6e783e78cdd76_MD5.png]] ![[_resources&#x2F;7077fb5341abffe74aebedf0757677c8_MD5.png]] ![[_resources&#x2F;d380b225a2264b57a9719af1ee0381ec_MD5.png]]</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/clippings/" class="print-no-link">#clippings</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>使用docker构建并部署MySQL5.7镜像_docker mysql 5.7-CSDN博客</div>
+      <div>https://yhao521.github.io/2025/08/13/摘录/使用docker构建并部署MySQL5.7镜像_docker mysql 5.7-CSDN博客/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>[[成就一亿技术人!]],[[hope_wisdom 发出的红包]]</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年8月13日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/08/13/%E6%91%98%E5%BD%95/docker%20%E5%88%B6%E4%BD%9C%E8%87%AA%E5%B7%B1%E7%9A%84mysql%E9%95%9C%E5%83%8F/" title="docker 制作自己的mysql镜像">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">docker 制作自己的mysql镜像</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/08/13/%E6%91%98%E5%BD%95/%E5%9F%BA%E4%BA%8EAlpine%E6%9E%84%E5%BB%BAMySQL%E9%95%9C%E5%83%8F/" title="基于Alpine构建MySQL镜像">
+                        <span class="hidden-mobile">基于Alpine构建MySQL镜像</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>  
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

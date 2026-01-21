@@ -1,0 +1,725 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="[[danshiming]]">
+  <meta name="keywords" content="java,博客,vue,spring,mysql,docker,linux">
+  
+    <meta name="description" content="文章浏览阅读309次。但只会从数据库文件中截断空闲列表中的页， 而不会回收数据库中的碎片，也不会像VACUUM 命令那样重新整理数据库内容。有些朋友可能会有这种疑惑，为什么明明删除了许多数据，数据库文件的大小却没有变化，这是因为从Sqlite删除数据后，未使用的磁盘空间被添加到一个内在的”空闲列表”中用于存储你下次插入的数据。VACUUM 命令只适用于主数据库，附加的数据库文件是不可能使用 VAC">
+<meta property="og:type" content="article">
+<meta property="og:title" content="解决sqlite删除数据后，db文件大小不变问题(VACUUM)">
+<meta property="og:url" content="https://yhao521.github.io/2025/08/20/%E6%91%98%E5%BD%95/%E8%A7%A3%E5%86%B3sqlite%E5%88%A0%E9%99%A4%E6%95%B0%E6%8D%AE%E5%90%8E%EF%BC%8Cdb%E6%96%87%E4%BB%B6%E5%A4%A7%E5%B0%8F%E4%B8%8D%E5%8F%98%E9%97%AE%E9%A2%98(VACUUM)/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="文章浏览阅读309次。但只会从数据库文件中截断空闲列表中的页， 而不会回收数据库中的碎片，也不会像VACUUM 命令那样重新整理数据库内容。有些朋友可能会有这种疑惑，为什么明明删除了许多数据，数据库文件的大小却没有变化，这是因为从Sqlite删除数据后，未使用的磁盘空间被添加到一个内在的”空闲列表”中用于存储你下次插入的数据。VACUUM 命令只适用于主数据库，附加的数据库文件是不可能使用 VAC">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-08-20T08:06:24.147Z">
+<meta property="article:modified_time" content="2025-08-20T08:06:29.260Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="clippings">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>解决sqlite删除数据后，db文件大小不变问题(VACUUM) - 匆匆过客的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yhao521.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>匆匆过客的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="解决sqlite删除数据后，db文件大小不变问题(VACUUM)"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-08-20 16:06" pubdate>
+          2025年8月20日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          3.9k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          33 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">解决sqlite删除数据后，db文件大小不变问题(VACUUM)</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>最新推荐文章于 2025-07-18 14:11:16 发布</p>
+<p>转载 于 2025-04-25 15:13:32 发布 · 309 阅读 · 1 ·</p>
+<p>CC 4.0 BY-SA版权</p>
+<p>原文链接： <a target="_blank" rel="noopener" href="https://blog.csdn.net/HardWorkingAnt/article/details/70667104">https://blog.csdn.net/HardWorkingAnt/article/details/70667104</a></p>
+<p>文章标签：</p>
+<p><a target="_blank" rel="noopener" href="https://so.csdn.net/so/search/s.do?q=%E6%95%B0%E6%8D%AE%E5%BA%93&t=all&o=vip&s=&l=&f=&viparticle=&from_tracking_code=tag_word&from_code=app_blog_art">#数据库</a> <a target="_blank" rel="noopener" href="https://so.csdn.net/so/search/s.do?q=sqlite&t=all&o=vip&s=&l=&f=&viparticle=&from_tracking_code=tag_word&from_code=app_blog_art">#sqlite</a> <a target="_blank" rel="noopener" href="https://so.csdn.net/so/search/s.do?q=VACUUM&t=all&o=vip&s=&l=&f=&viparticle=&from_tracking_code=tag_word&from_code=app_blog_art">#VACUUM</a></p>
+<p>前言<br>有些朋友可能会有这种疑惑，为什么明明删除了许多数据， <a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=%E6%95%B0%E6%8D%AE%E5%BA%93%E6%96%87%E4%BB%B6&spm=1001.2101.3001.7020">数据库文件</a> 的大小却没有变化，这是因为从Sqlite删除数据后，未使用的磁盘空间被添加到一个内在的”空闲列表”中用于存储你下次插入的数据。磁盘空间并没有丢失。但是也不向操作系统返回磁盘空间。</p>
+<p>既然知道原因，当然也有解决方法，就是现在要讲的Vacuum命令。</p>
+<p>Vacuum<br>VACUUM 命令通过复制主数据库中的内容到一个临时数据库文件，然后清空主数据库，并从副本中重新载入原始的数据库文件。这消除了空闲页，把表中的数据排列为连续的，另外会清理数据库文件结构。</p>
+<p>如果表中没有明确的整型主键（INTEGER PRIMARY KEY），VACUUM 命令可能会改变表中条目的行 ID（ROWID）。VACUUM 命令只适用于主数据库，附加的数据库文件是不可能使用 VACUUM 命令。</p>
+<p>如果有一个活动的事务，VACUUM 命令就会失败。VACUUM 命令是一个用于内存数据库的任何操作。由于 VACUUM 命令从头开始重新创建数据库文件，所以 VACUUM 也可以用于修改许多数据库特定的配置参数。手动 VACUUM<br>下面是在命令提示符中对整个数据库发出 VACUUM 命令的语法：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">sqlite3 database_name &quot;VACUUM;&quot;<span class="hljs-keyword">sql</span><br></code></pre></td></tr></table></figure>
+
+<p>在 <a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=SQLite&spm=1001.2101.3001.7020">SQLite</a> 提示符中运行 VACUUM，如下所示：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">sqlite<span class="hljs-operator">&gt;</span> VACUUM;<span class="hljs-keyword">sql</span><br></code></pre></td></tr></table></figure>
+
+<p>也可以在特定的表上运行 VACUUM，如下所示：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">sqlite<span class="hljs-operator">&gt;</span> VACUUM table_name;<span class="hljs-keyword">sql</span><br></code></pre></td></tr></table></figure>
+
+<p>Auto-VACUUM<br>SQLite 的 Auto-VACUUM 与 VACUUM 不大一样，它只是把空闲页移到数据库末尾，从而减小数据库大小。</p>
+<p>但只会从数据库文件中截断空闲列表中的页， 而不会回收数据库中的碎片，也不会像VACUUM 命令那样重新整理数据库内容。实际上，由于需要在数据库文件中移动页， auto-vacuum 会产生更多的碎片。而且，在执行删除操作的时候，也有那个.db-journal文件产生。</p>
+<p>要使用auto-vacuum，需要一些前题条件。 数据库中需要存储一些额外的信息以记录它所跟踪的每个数据库页都找回其指针位置。 所以，auto-vacumm 必须在建表之前就开启。在一个表创建之后， 就不能再开启或关闭 auto-vacumm。从命令提示符中运行下面的命令来检查 auto-vacuum 设置：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">sqlite3 database_name &quot;PRAGMA auto_vacuum&quot;;<span class="hljs-keyword">sql</span><br></code></pre></td></tr></table></figure>
+
+<p>在 SQLite 提示符中，您可以通过下面的编译运行，启用&#x2F;禁用 SQLite 的 Auto-VACUUM：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs sql">sqlite<span class="hljs-operator">&gt;</span> PRAGMA auto_vacuum <span class="hljs-operator">=</span> <span class="hljs-keyword">NONE</span>;  <span class="hljs-comment">-- 0 means disable auto vacuum</span><br><br>sqlite<span class="hljs-operator">&gt;</span> PRAGMA auto_vacuum <span class="hljs-operator">=</span> INCREMENTAL;  <span class="hljs-comment">-- 1 means enable incremental vacuum</span><br><br>sqlite<span class="hljs-operator">&gt;</span> PRAGMA auto_vacuum <span class="hljs-operator">=</span> <span class="hljs-keyword">FULL</span>;  <span class="hljs-comment">-- 2 means enable full auto vacuum</span><br><span class="hljs-keyword">sql</span><br></code></pre></td></tr></table></figure>
+
+<p>要想了解 PRAMA 命令的使用和功能，可以看看我的另一篇博客 <a target="_blank" rel="noopener" href="http://blog.csdn.net/hardworkingant/article/details/70474107" title="SQLite的PRAGMA命令">SQLite的PRAGMA命令</a> 。</p>
+<p>原文链接：<a target="_blank" rel="noopener" href="https://blog.csdn.net/HardWorkingAnt/article/details/70667104[%E5%8E%8B%E7%BC%A9">https://blog.csdn.net/HardWorkingAnt/article/details/70667104[压缩</a> *Sqlite* *数据* *文件大小* ， *解决* *数据* *删除* 后占用空间 *不变* 的 *问题*](<a target="_blank" rel="noopener" href="https://blog.csdn.net/linsentong/article/details/51648847">https://blog.csdn.net/linsentong/article/details/51648847</a>)</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/linsentong">Sam Lin’s Space</a></p>
+<p>06-12 1万+<a target="_blank" rel="noopener" href="https://blog.csdn.net/linsentong/article/details/51648847">最近有一网站使用 <em>Sqlite</em> <em>数据库</em> 作为 <em>数据</em> 临时性的缓存，对多片区进行划分 <em>Sqlite</em> <em>数据库</em> 文件，每天大概新增近1万的 <em>数据</em> 量，起初效率有明显的提高，但历经一个多月后 <em>数据库</em> 文件从几K也上升到了近160M， <em>数据</em> 量也达到了40多万条，平均每一条 <em>数据</em> 占用了 4K的空间，虽然使用上的效率直观上没有造成太大的影响，但服务器的占用内存却比原来多占用了20%左右。今天刚好打算清除一个 <em>Sqlite</em> 的冗余 <em>数据</em> ，将保留最</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/lyfwwb/article/details/137726613"><em>SQLite</em> 的PRAGMA 声明（二十三）</a></p>
+<p>04-13 1600<a target="_blank" rel="noopener" href="https://blog.csdn.net/lyfwwb/article/details/137726613"><em>SQLite</em> 拥有别人无法比拟的装机量，究竟什么成就了 <em>SQLite</em> 呢，本文将 <em>SQLite</em> 的历史版本记录粗列一下，供各位朋友参详如何做一个高质量的程序的引文。 <em>SQLite</em> 拥有超过225个API，本系列文章将深入介绍 <em>SQLite</em> C&#x2F;C++ <em>数据库</em> 接口的基础知识，包括如何连接和打开 <em>SQLite</em> <em>数据库</em> 、执行查询和事务管理、提取查询结果集等等，帮助开发者更好地了解和使用 <em>SQLite</em> <em>数据库</em> 接口。</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_44732146/article/details/149441762"><em>SQLite</em> &#x2F; Lite <em>DB</em> 单文件 <em>数据库</em> 为何“清空表后仍占几 GB”?——原理解析…</a></p>
+<p>8-13<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_44732146/article/details/149441762">注意:<em>VACUUM</em> 会生成同 <em>大小</em> 临时文件,磁盘需有足够空间并加排他锁,务必在维护时间执行! # 进入 <em>sqlite</em> 3 shell <em>sqlite</em> 3 test.<em>db</em> –1*)* 看看是否在 WAL 模式 PRAGMA journal_mode;–2*)* 手动触发 checkpoint <em>(<em>若是 WAL</em>)</em> PRAGMA wal_checkpoint <em>(<em>TRUNCATE</em>)</em>;–3*)* 查看空闲页统计 PRAGMA freelist_count;–4*)* 真正压缩 <em>VACUUM</em>;…</a><a target="_blank" rel="noopener" href="https://download.csdn.net/download/wkf1231/3599127">sqllite使用说明以及使用方法如何使用_拉发器的使用方法资源-CSDN…</a></p>
+<p>8-11<a target="_blank" rel="noopener" href="https://download.csdn.net/download/wkf1231/3599127">需要注意的是,` <em>sqlite</em> _stat1`表本身不可撤销,但其中的内容可以被 <em>删除</em> 。 ### 五、ATTACH DATABASE `ATTACH DATABASE`命令用于将一个已存在的 <em>数据库</em> 文件添加到当前的 <em>数据库</em> 连接中。语法如下: - `ATTACH [DATABASE] ‘database-filename’ AS database-name;` 此命令允许用户读写附加的 <em>数据库</em> 文件,甚至可以修改其…</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/yangchun1213/article/details/7656146"><em>解决</em> <em>sqlite</em> <em>删除</em> <em>数据</em> 后， <em>文件大小</em> <em>不变</em> <em>问题</em></a></p>
+<p>[</p>
+<p>热门推荐</p>
+<p>](<a target="_blank" rel="noopener" href="https://blog.csdn.net/yangchun1213/article/details/7656146">https://blog.csdn.net/yangchun1213/article/details/7656146</a>)</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/yangchun1213">yangchun1213的专栏</a></p>
+<p>06-12 2万+<a target="_blank" rel="noopener" href="https://blog.csdn.net/yangchun1213/article/details/7656146">说了这么多，没进主题，我的主题是给 <em>Sqlite</em> 在 <em>删除</em> <em>数据</em> 后擦屁股。 大家或许发现了，当你在 <em>sqlite</em> 中 <em>删除</em> 了大量 <em>数据</em> 后， <em>数据库</em> 文件的 <em>大小</em> 还是那样，没有变。 就用我的项目来说，3M的 <em>数据</em> <em>删除</em> 后， <em>sqlite</em> 的.<em>db</em> 文件依然是3M，而我要的结果实际上只有35K，在压缩一下也就10几K了。为什么会出现这个 <em>问题</em> ，SqlCe的.sdf文件是即删即减的。 原因是： 当你从 <em>Sqlite</em> <em>删除</em> <em>数据</em> 后</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/yangshuoSB/article/details/147208151">【Qt】 <em>sqlite</em> <em>数据库</em> 中将 <em>数据</em> 全部 <em>删除</em> 后， <em>db</em> 文件没有变小</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/yangshuoSB">-凌凌漆-的博客</a></p>
+<p>04-14 318<a target="_blank" rel="noopener" href="https://blog.csdn.net/yangshuoSB/article/details/147208151">【代码】【Qt】 <em>sqlite</em> <em>数据库</em> 中将 <em>数据</em> 全部 <em>删除</em> 后， <em>db</em> 文件没有变小。</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/z_d_zhang/article/details/79023309"><em>SQLite</em> 教程</a></p>
+<p>7-29<a target="_blank" rel="noopener" href="https://blog.csdn.net/z_d_zhang/article/details/79023309"><em>SQLite</em> 库包含一个名字叫做 <em>sqlite</em> 3的命令行,它可以让用户手工输入并执行面向 <em>SQLite</em> <em>数据库</em> 的SQL命令。本文档提供一个样使用 <em>sqlite</em> 3的简要说明. 一.qlite3一些常用Sql语句操作 创建表: create table 表名 <em>(<em>元素名 类型,…</em>)</em>; <em>删除</em> 表: drop table 表名; 插入 <em>数据</em>:insertinto 表名 values <em>(</em>,,,<em>)</em>;…</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/linjiebelfast/article/details/17246259"><em>Sqlite</em> 大 <em>数据</em> 量 <em>删除</em> <em>问题</em> _ <em>sqlite</em> <em>删除</em> 千万 <em>数据</em> 有没有快速的方法-CSDN博…</a></p>
+<p>8-11<a target="_blank" rel="noopener" href="https://blog.csdn.net/linjiebelfast/article/details/17246259">探讨了 <em>Sqlite</em> <em>数据库</em> 在批量 <em>删除</em> 大量 <em>数据</em> 时的性能 <em>问题</em> 及Google提供的 <em>解决</em> 方案,通过循环 <em>删除</em> 每批100条记录并引入延迟来避免 <em>数据库</em> 锁死。 摘要生成于C知道,由 DeepSeek-R1 满血版支持,前往体验 &gt; 不知道大家有没有尝试过在 <em>Sqlite</em> <em>数据库</em> 中一次性 <em>删除</em> 上千条 <em>数据</em> 。你会发现 <em>删除</em> 函数返回后,但是 <em>数据</em> 并未 <em>删除</em> 。这是怎么回事喃…</a><a target="_blank" rel="noopener" href="https://devpress.csdn.net/v1/article/detail/149441762"><em>SQLite</em> &#x2F; Lite <em>DB</em> 单文件 <em>数据库</em> 为何“清空表后仍占几 GB”？——原理解析与空间回收实战</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_44732146">菜鸡的博客</a></p>
+<p>07-18 687<a target="_blank" rel="noopener" href="https://devpress.csdn.net/v1/article/detail/149441762">删光 <em>数据</em> 文件却 <em>不变</em> 小” 99 % 都是因为你没有。了解单文件 <em>数据库</em> 的页式存储后，你就能自信地将文件瘦到最精简，也避免下次被 3 GB 大文件吓到。</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/jutun5887/article/details/78984814">关于 <em>sqlite</em> 3 <em>删除</em> 表内 <em>数据</em> 后， <em>数据库</em> <em>大小</em> 仍然不 变的 <em>问题</em></a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/jutun5887">jutun5887的博客</a></p>
+<p>01-05 3607<a target="_blank" rel="noopener" href="https://blog.csdn.net/jutun5887/article/details/78984814">最近由于项目的需要，用到了 <em>sqlite</em> 3 <em>数据库</em> 相关的操作。因为之前用的是QT中自带的，不是用C语言来操作，不过总的来说相差不大。之前是在 操作 <em>数据库</em> 过程中，会导致内存不断的增加。后来是发现操作的过程中很多内存没有释放。但是最近又有新的 <em>问题</em> 是，在我 <em>删除</em> 表中的 <em>数据</em> 后，发现 <em>数据库</em> 文件的 <em>大小</em> 仍然 <em>不变</em> ，而且下次打开 <em>数据库</em> 后，发现仍然占用着系统的内存。找了很多方法，终于让我找到了根本原因。原来是因为从Sqli</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/yuxiayiji/article/details/8439777"><em>sqlite</em> 清空表还原自动增长序列_ <em>sqlite</em> <em>删除</em> 表后如何重置自增主键顺序…</a></p>
+<p>8-13<a target="_blank" rel="noopener" href="https://blog.csdn.net/yuxiayiji/article/details/8439777">C知道,由 DeepSeek-R1 满血版支持,前往体验 &gt; <em>SQLite</em> 清空表代替Mysql中TRUNCATE TABLE的方法 如何清空 <em>SQLIte</em> 表中的 <em>数据</em> 并且自增长id 还原为 1? 在 <em>SQlite</em> 中的 <em>解决</em> 方案: delete from’表名’; select * from <em>sqlite</em> _sequence; update <em>sqlite</em> _sequence set seq&#x3D;0where name&#x3D;’表名’;…</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/Daxue_haha/article/details/77894503">android-一个文件搞定 <em>SQLite</em> <em>数据库</em> 的创建与更新以及增删查改_安卓 <em>数据</em>…</a></p>
+<p>8-7<a target="_blank" rel="noopener" href="https://blog.csdn.net/Daxue_haha/article/details/77894503">&#x2F;&#x2F;根据用户名注销publicbooleandeleteUserDatabyname <em>(<em>String name</em>)</em> {returnm <em>SQLite</em> Database.delete <em>(<em>TABLE_NAME, PcrConfig.Columns.USER_NAME +”&#x3D;’”+ name+”‘“,null</em>)</em> &gt;0; }&#x2F;&#x2F; <em>删除</em> 所有用户publicbooleandeleteAllUserDatas <em>(**)</em> {returnm <em>SQLite</em> Database.delete <em>(<em>TABLE_NAME,null,null</em>)</em> &gt;0; }&#x2F;&#x2F;更新用户信息,如修改…</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/chenwr2018/article/details/122024054"><em>sqlite</em> auto- <em>vacuum</em> 的使用</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/chenwr2018">chenwr2018的博客</a></p>
+<p>12-19 4482<a target="_blank" rel="noopener" href="https://blog.csdn.net/chenwr2018/article/details/122024054">背景 <em>sqlite</em> 有个不足的地方，就是当你对 <em>数据库</em> 的表进行 <em>删除</em> 时， <em>数据库</em> <em>文件大小</em> 不会变小。根本原因是它只是将 <em>删除</em> 部分的页打了标记，意味着这部分 <em>数据</em> 是脏 <em>数据</em> ，可以直接覆盖。因此对于用户空间它的容量还是 <em>不变</em> 。 这样导致应用如果要对每个业务 <em>数据库</em> 容量进行限制变得很麻烦。 auto- <em>vacuum</em> 作用 auto- <em>vacuum</em> 原理是把空闲页移到 <em>数据库</em> 末尾，从而减小 <em>数据库</em> <em>大小</em> 。但是存在个 <em>问题</em> ，会出现 <em>数据库</em> 碎片化。而vaccum刚好与之相反，该命令会对 <em>数据库</em> 进行反碎片化。 vaccum原理是通过复制主 <em>数据库</em> 中的内容到一个临</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/liukang325/article/details/23422335">sql中 <em>vacuum</em> 命令：回收空白空间，减少 <em>数据库</em> <em>大小</em></a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/liukang325">阳光柠檬_的技术笔记</a></p>
+<p>04-11 1万+<a target="_blank" rel="noopener" href="https://blog.csdn.net/liukang325/article/details/23422335">The <em>VACUUM</em> command rebuilds the entire database. There are several reasons an application might do this: 1. Unless <em>SQLite</em> is running in “auto_ <em>vacuum</em> &#x3D;FULL” mode, when a large amount of data is deleted</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/efeics/article/details/19160715"><em>SQLITE</em> 原子提交机制详解</a></p>
+<p>7-28<a target="_blank" rel="noopener" href="https://blog.csdn.net/efeics/article/details/19160715">VFS的xDeviceCharacteristics也可能会指出文件系统总是先写 <em>数据</em> 后更新文件的 <em>大小</em>,这种情况下,<em>SQLITE</em> 可以跳过一些过于小心的 <em>数据库</em> 保护操作,从而减少一次提交所需的磁盘I&#x2F;O数量。但目前windows和unix上的VFS实现都没有做这个假设。 <em>SQLITE</em> 假设文件 <em>删除</em> 是原子的,至少从用户程序的角度来看要是这样。也就是说,如果 <em>SQLITE</em> 要…</a><a target="_blank" rel="noopener" href="https://wenku.csdn.net/answer/58xjy3muvg"><em>SQLite</em> 的auto_ <em>vacuum</em> 参数建议</a></p>
+<p>[</p>
+<p>最新发布</p>
+<p>](<a target="_blank" rel="noopener" href="https://wenku.csdn.net/answer/58xjy3muvg">https://wenku.csdn.net/answer/58xjy3muvg</a>)</p>
+<p>08-13<a target="_blank" rel="noopener" href="https://wenku.csdn.net/answer/58xjy3muvg">- 引用[5]提到：当开启auto_ <em>vacuum</em> （FULL模式）时，提交 <em>删除</em> <em>数据</em> 的事务后， <em>数据库</em> 文件会自动收缩，但会使得 <em>数据库</em> 文件比不开启时稍微大一些（因为需要存储一些额外信息）。 三种模式详解： 1. NONE <em>(<em>0</em>)</em>: 默认…</a><a target="_blank" rel="noopener" href="https://iihero.blog.csdn.net/article/details/136748728">PostgreSQL中 <em>vacuum</em> 物理文件truncate发生的条件</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/iihero">iihero@CSDN</a></p>
+<p>03-15 1200<a target="_blank" rel="noopener" href="https://iihero.blog.csdn.net/article/details/136748728">前段时间，有些同学说到 <em>vacuum</em> 截断的行为时，认为，只要末尾是空页，无论多少，都会被截断，真是这样的吗？PostgreSQL当中，由于 <em>vacuum</em> 的操作并不总能将死元组的空间进行”物理截断”，虽然说是回收了（表示空间可重用），但是真正的物理文件的 <em>大小</em> 依然不会收缩。那么什么时候这个空间会被真正截断呢？摘自： src&#x2F;backend&#x2F;access&#x2F;heap&#x2F; <em>vacuum</em> lazy.c&#x2F;**&#x2F;&#x2F;**&#x2F;if <em>(</em>!</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/lyfwwb/article/details/137979243"><em>SQLite</em> FTS3 和 FTS4 扩展 <em>(<em>三十二</em>)</em></a></p>
+<p>04-20 1436<a target="_blank" rel="noopener" href="https://blog.csdn.net/lyfwwb/article/details/137979243"><em>SQLite</em> 拥有别人无法比拟的装机量，究竟什么成就了 <em>SQLite</em> 呢，本文将 <em>SQLite</em> 的历史版本记录粗列一下，供各位朋友参详如何做一个高质量的程序的引文。 <em>SQLite</em> 拥有超过225个API，本系列文章将深入介绍 <em>SQLite</em> C&#x2F;C++ <em>数据库</em> 接口的相关知识，包括如何连接和打开 <em>SQLite</em> <em>数据库</em> 、执行查询和事务管理、提取查询结果集等等，帮助开发者更好地了解和使用 <em>SQLite</em> <em>数据库</em> 接口。</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/T0620514/article/details/127608294"><em>SQlite</em> <em>删除</em> <em>数据</em> 后 <em>DB</em> <em>大小</em> 无改变 <em>解决</em> 方案</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/T0620514">T0620514的博客</a></p>
+<p>10-31 812<a target="_blank" rel="noopener" href="https://blog.csdn.net/T0620514/article/details/127608294"><em>SQlite</em> <em>删除</em> <em>数据</em> 后 <em>DB</em> <em>大小</em> 无改变 <em>解决</em> 方案</a><a target="_blank" rel="noopener" href="https://luyecong.blog.csdn.net/article/details/131954352"><em>Sqlite</em> 使用WAL模式指南</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/mba16c35">陆业聪</a></p>
+<p>07-27 1万+<a target="_blank" rel="noopener" href="https://luyecong.blog.csdn.net/article/details/131954352">本文阐述如何配置 <em>SQLite</em> 的WAL模式，实现 <em>数据库</em> 的读写并发。</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_33698043/article/details/85434623"><em>SQLite</em> 入门与分析 <em>(<em>九</em>)</em> — <em>VACUUM</em> 命令分析</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_33698043">weixin_33698043的博客</a></p>
+<p>09-16 594<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_33698043/article/details/85434623"><em>VACUUM</em> 命令是 <em>SQLite</em> 的一个扩展功能，模仿PostgreSQL中的相同命令而来。若调用 <em>VACUUM</em> 带一个表名或索引名， 则将整理该表或索引。在 <em>SQLite</em> 1.0中， <em>VACUUM</em> 命令调用 g <em>db</em> m_reorganize <em>(**)</em> 整理后端 <em>数据库</em> 文件。 <em>SQLITE</em> 2.0.0中去掉了G <em>DB</em> M后端， <em>VACUUM</em> 无效。在2.8.1版中， <em>VACUUM</em> 被重新实现。现在索引名或表名被忽略。当 <em>数据库</em> 中的一个对象…</a><a target="_blank" rel="noopener" href="https://libaineu2004.blog.csdn.net/article/details/28433633"><em>解决</em> <em>sqlite</em> <em>删除</em> <em>数据</em> 后， <em>文件大小</em> <em>不变</em> <em>问题</em> <em>(<strong>VACUUM</strong>)</em></a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/libaineu2004">$firecat利白的代码足迹$</a></p>
+<p>06-04 1万+<a target="_blank" rel="noopener" href="https://libaineu2004.blog.csdn.net/article/details/28433633"><em>删除</em> 表格的全部 <em>数据</em> ： DELETE FROM [*****]</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_38048955/article/details/135193443"><em>数据库</em> delete 表 <em>数据</em> ，磁盘空间还是被一直占用，为什么?</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_38048955">m0_38048955的博客</a></p>
+<p>12-25 1158<a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_38048955/article/details/135193443">明明已经执行了delete，可表文件的 <em>大小</em> 却没减小，令人费解</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/luoxia0805/article/details/143214752">mysql delete命令操作后， <em>数据库</em> <em>文件大小</em> 并未变化，该怎么 <em>解决</em> ？</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/luoxia0805">luoxia0805的专栏</a></p>
+<p>10-24 1308<a target="_blank" rel="noopener" href="https://blog.csdn.net/luoxia0805/article/details/143214752">在 MySQL 中，使用 DELETE 命令 <em>删除</em> <em>数据</em> 后， <em>数据</em> 表的 <em>大小</em> 可能不会立即减小，因为 MySQL 并不总是立即回收已 <em>删除</em> <em>数据</em> 所占用的空间。TRUNCATE TABLE 命令会快速 <em>删除</em> 表中的所有 <em>数据</em> ，并重置表的自增计数器。选择哪种方法取决于你的具体需求，比如表的 <em>大小</em> 、是否需要保留某些 <em>数据</em> 、是否可以承受表锁定等。注意：TRUNCATE TABLE 是一种 DDL（ <em>数据</em> 定义语言）操作，而不是 DML（ <em>数据</em> 操作语言）操作，因此它会隐式地提交事务，并且不能回滚。这个命令会重建表和索引，从而回收未使用的空间。</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/fivestar2009/article/details/135977345"><em>sqlite</em> 不会自动缩减 <em>问题</em></a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/fivestar2009">fivestar2009的博客</a></p>
+<p>02-01 888<a target="_blank" rel="noopener" href="https://blog.csdn.net/fivestar2009/article/details/135977345"><em>sqlite</em> 不会自动缩减</a><a target="_blank" rel="noopener" href="https://wenku.csdn.net/answer/2jmkxym1x6">python的 <em>sqlite</em> 如何 <em>删除</em> <em>数据</em> 后更新 <em>数据库</em> <em>文件大小</em></a></p>
+<p>09-11<a target="_blank" rel="noopener" href="https://wenku.csdn.net/answer/2jmkxym1x6">在Python中，使用 <em>sqlite</em> <em>删除</em> <em>数据</em> 后并不会立即更新 <em>数据库</em> 文件的 <em>大小</em> ，因为 <em>SQLite</em> <em>数据库</em> 可能会使用空闲列表（free list）来重用被 <em>删除</em> 的空间，以便于之后的插入操作。如果你希望 <em>数据库</em> <em>文件大小</em> 立即减小，你可以使用…</a></p>
+<p>登录后您可以享受以下权益：</p>
+<ul>
+<li>免费复制代码</li>
+<li>和博主大V互动</li>
+<li>下载海量资源</li>
+<li>发动态&#x2F;写文章&#x2F;加入社区<br>×</li>
+</ul>
+<p>实付 元</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/danshiming/article/details/">使用余额支付</a></p>
+<p>点击重新获取</p>
+<p>扫码支付</p>
+<p>钱包余额 0</p>
+<p>抵扣说明：</p>
+<p>1.余额是钱包充值的虚拟货币，按照1:1的比例进行支付金额的抵扣。<br>2.余额无法直接购买下载，可以购买VIP、付费专栏及课程。</p>
+<p><a target="_blank" rel="noopener" href="https://i.csdn.net/#/wallet/balance/recharge">余额充值</a></p>
+<p>举报</p>
+<p> [![[_resources&#x2F;35c7362356adf5a11cd3cc47fd01628f_MD5.png]] 点击体验<br>DeepSeekR1满血版](<a target="_blank" rel="noopener" href="https://ai.csdn.net/?utm_source=cknow_pc_blogdetail&spm=1001.2101.3001.10583">https://ai.csdn.net/?utm_source=cknow_pc_blogdetail&amp;spm=1001.2101.3001.10583</a>) ![[_resources&#x2F;90bd0cbf3aff8fdff8bf9b011b581e20_MD5.png]]</p>
+<p>程序员都在用的中文IT技术交流社区</p>
+<p>![[_resources&#x2F;08a47e60886378fe60a3d9c8f4ae8bc6_MD5.png]]</p>
+<p>专业的中文 IT 技术社区，与千万技术人共成长</p>
+<p>![[_resources&#x2F;a51be6c085b867a5bd82d8dc1cea9b46_MD5.png]]</p>
+<p>关注【CSDN】视频号，行业资讯、技术分享精彩不断，直播好礼送不停！</p>
+<p>客服 返回顶部</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/clippings/" class="print-no-link">#clippings</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>解决sqlite删除数据后，db文件大小不变问题(VACUUM)</div>
+      <div>https://yhao521.github.io/2025/08/20/摘录/解决sqlite删除数据后，db文件大小不变问题(VACUUM)/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>[[danshiming]]</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年8月20日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/08/22/%E6%91%98%E5%BD%95/%E3%80%90UI%E3%80%91Vue3%20+%20Naive-ui%20%E4%BD%BF%E7%94%A8%E8%A1%A8%E6%A0%BCData%20Table%20%E4%BB%A5%E5%8F%8A%E5%88%86%E9%A1%B5%E9%A1%B5%E7%A0%81%E6%98%BE%E7%A4%BA%E4%B8%8D%E5%85%A8%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/" title="【UI】Vue3 + Naive-ui 使用表格Data Table 以及分页页码显示不全问题解决">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">【UI】Vue3 + Naive-ui 使用表格Data Table 以及分页页码显示不全问题解决</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/08/19/%E6%91%98%E5%BD%95/shadcn%20vue%EF%BC%88%E6%89%8B%E6%8A%8A%E6%89%8B%E8%AE%B2%E8%A7%A3%EF%BC%89%20-%20%E5%BC%82%E5%B8%B8%E6%95%99%E7%A8%8B/" title="shadcn vue（手把手讲解） - 异常教程">
+                        <span class="hidden-mobile">shadcn vue（手把手讲解） - 异常教程</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>  
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

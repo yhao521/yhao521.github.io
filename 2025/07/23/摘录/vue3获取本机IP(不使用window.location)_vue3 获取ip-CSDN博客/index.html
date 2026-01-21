@@ -1,0 +1,751 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="yhao521">
+  <meta name="keywords" content="java,博客,vue,spring,mysql,docker,linux">
+  
+    <meta name="description" content="文章浏览阅读1k次，点赞9次，收藏4次。要实现一个登录界面获取本地IP的功能，查资料发现在Vue3中，可以通过组件的setup函数中使用window.location来获取IP,但是获取本机Ip不能够访问直接通过js在前端层面完成，出于安全原因，浏览器不允许直接访问本机IP.如果是在用户的本地网络上运行（如:通过localhost或特定的内网地址访问），所以使用WebRTC技术来获取本地IP地址。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="vue3获取本机IP(不使用window.location)_vue3 获取ip-CSDN博客">
+<meta property="og:url" content="https://yhao521.github.io/2025/07/23/%E6%91%98%E5%BD%95/vue3%E8%8E%B7%E5%8F%96%E6%9C%AC%E6%9C%BAIP(%E4%B8%8D%E4%BD%BF%E7%94%A8window.location)_vue3%20%E8%8E%B7%E5%8F%96ip-CSDN%E5%8D%9A%E5%AE%A2/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="文章浏览阅读1k次，点赞9次，收藏4次。要实现一个登录界面获取本地IP的功能，查资料发现在Vue3中，可以通过组件的setup函数中使用window.location来获取IP,但是获取本机Ip不能够访问直接通过js在前端层面完成，出于安全原因，浏览器不允许直接访问本机IP.如果是在用户的本地网络上运行（如:通过localhost或特定的内网地址访问），所以使用WebRTC技术来获取本地IP地址。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-07-23T12:01:14.000Z">
+<meta property="article:modified_time" content="2025-07-23T12:01:14.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="clippings">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>vue3获取本机IP(不使用window.location)_vue3 获取ip-CSDN博客 - 匆匆过客的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yhao521.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>匆匆过客的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="vue3获取本机IP(不使用window.location)_vue3 获取ip-CSDN博客"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-07-23 20:01" pubdate>
+          2025年7月23日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2.3k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          20 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">vue3获取本机IP(不使用window.location)_vue3 获取ip-CSDN博客</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="vue3获取本机IP-不使用window-location"><a href="#vue3获取本机IP-不使用window-location" class="headerlink" title="vue3获取本机IP(不使用window.location)"></a>vue3获取本机IP(不使用window.location)</h2><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_43287787" title="火锅加可乐de前端之路">火锅加可乐de前端之路</a> 已于 2024-12-13 10:50:00 修改</p>
+<p>文章标签： <a target="_blank" rel="noopener" href="https://so.csdn.net/so/search/s.do?q=tcp/ip&t=all&o=vip&s=&l=&f=&viparticle=&from_tracking_code=tag_word&from_code=app_blog_art">tcp&#x2F;ip</a></p>
+<p>于 2024-12-13 10:03:17 首次发布</p>
+<p>版权声明：本文为博主原创文章，遵循 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-sa/4.0/">CC 4.0 BY-SA</a> 版权协议，转载请附上原文出处链接和本声明。</p>
+<p>本文链接： <a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_43287787/article/details/144442825">https://blog.csdn.net/weixin_43287787&#x2F;article&#x2F;details&#x2F;144442825</a></p>
+<p>版权</p>
+<p>要实现一个登录界面获取本地IP的功能，查资料发现在 <a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=Vue3&spm=1001.2101.3001.7020">Vue3</a> 中，可以通过组件的setup函数中使用window.location来获取IP,但是获取本机Ip不能够访问直接通过js在前端层面完成，出于安全原因，浏览器不允许直接访问本机IP.如果是在用户的本地网络上运行（如:通过localhost或特定的内网地址访问），所以使用WebRTC技术来获取本地IP地址。</p>
+<p>![[_resources&#x2F;7cadd7687e87c6f8f6da6cf3d902e5fd_MD5.png]]</p>
+<blockquote>
+<p>代码：</p>
+<p>const localIP &#x3D; ref(‘’)</p>
+<p>const getLocalIp &#x3D; async () &#x3D;&gt; {</p>
+<p>const RTCPeerConnection &#x3D; window.RTCPeerConnection;</p>
+<p>if (RTCPeerConnection) {</p>
+<p>const pc &#x3D; new RTCPeerConnection({ iceServers: [] });</p>
+<p>pc.createDataChannel(‘’);</p>
+<p>pc.createOffer().then(sdp &#x3D;&gt; pc.setLocalDescription(sdp)).catch(console.error);</p>
+<p>pc.onicecandidate &#x3D; ice &#x3D;&gt; {</p>
+<p>if (ice &amp;&amp; ice.candidate &amp;&amp; ice.candidate.candidate) {</p>
+<p>const s &#x3D; ice.candidate.candidate.split(‘ ‘);</p>
+<p>if (s[7] &#x3D;&#x3D;&#x3D; ‘host’) {</p>
+<p>localIP.value &#x3D; s[4];</p>
+<p>pc.onicecandidate &#x3D; null;</p>
+<p>console.log(‘获取’,localIP.value)</p>
+<p>}</p>
+<p>}</p>
+<p>};</p>
+<p>} else {</p>
+<p>console.error(‘暂不支持获取本地IP,请输入本地IP’);</p>
+<p>}</p>
+<p>}</p>
+</blockquote>
+<p>如果想获取到本地的多网卡的IP，则用这种方式</p>
+<p>![[_resources&#x2F;2d224a83b35c8122b2cefc132c3554b5_MD5.png]]</p>
+<blockquote>
+<p>代码：</p>
+<p>const getLocalIp &#x3D; async () &#x3D;&gt; {</p>
+<p>const RTCPeerConnection &#x3D; window.RTCPeerConnection;</p>
+<p>if (RTCPeerConnection) {</p>
+<p>let ipAddressArr &#x3D;[];</p>
+<p>const pc &#x3D; new RTCPeerConnection({ iceServers: [] });</p>
+<p>&#x2F;&#x2F; 创建一个数据通道来触发NAT收集过程</p>
+<p>pc.createDataChannel(‘’);</p>
+<p>&#x2F;&#x2F; 创建一个offer来触发NAT收集过程</p>
+<p>pc.createOffer().then(sdp &#x3D;&gt; pc.setLocalDescription(sdp)).catch(console.error);</p>
+<p>pc.onicecandidate &#x3D; event &#x3D;&gt; {</p>
+<p>if (event.candidate) {</p>
+<p>let ipRegex &#x3D; &#x2F;([0-9]{1,3}(\.[0-9]{1,3}){3})&#x2F;;</p>
+<p>let ipMatch &#x3D; ipRegex.exec(event.candidate.candidate);</p>
+<p>if (ipMatch &amp;&amp; ipMatch.length &gt; 1) {</p>
+<p>ipAddressArr.push(ipMatch[1])</p>
+<p>const getIpAddress &#x3D; […new Set(ipAddressArr)];</p>
+<p>&#x2F;&#x2F;这里是下拉框显示的内容</p>
+<p>localIpOption.value&#x3D; getIpAddress.map(item &#x3D;&gt; ({ label: item, value:item}));</p>
+<p>}</p>
+<p>}</p>
+<p>};</p>
+<p>}</p>
+<p>else {</p>
+<p>console.error(‘暂不支持获取本地IP,请输入本地IP’);</p>
+<p>}</p>
+<p>}</p>
+</blockquote>
+<p>关注博主即可阅读全文</p>
+<p>![[_resources&#x2F;3845bc093f7a7241eff280ffe5f20ccd_MD5.png]]<a target="_blank" rel="noopener" href="https://blog.csdn.net/2301_79330511/article/details/133326362"><em>Vue</em>*.*js 如何 <em>获取</em> <em>本机</em> <em>IP</em> 地址</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/2301_79330511">2301_79330511的博客</a></p>
+<p>09-27 3422<a target="_blank" rel="noopener" href="https://blog.csdn.net/2301_79330511/article/details/133326362">在 <em>Vue</em>*.*js 中，要 <em>获取</em> <em>本机</em> <em>IP</em> 地址，你可以 <em>使用</em> JavaScr <em>ip</em> t 来实现。在上述代码中，我们创建了一个 Promise 对象，用于异步 <em>获取</em> <em>IP</em> 地址。首先，你需要在 <em>Vue</em> 组件中创建一个方法，需要在 <em>Vue</em> 组件中创建一个方法，用于 <em>获取</em> <em>本机</em> <em>IP</em> 地址。在这个方法中，我们将 <em>使用</em> 浏览器提供的 WebRTC API 来 <em>获取</em> <em>IP</em> 地址。最后，你可以在 <em>Vue</em> 组件的模板中显示 <em>获取</em> 到的 <em>IP</em> 地址。生命周期钩子中调用该方法，并将 <em>获取</em> 到的 <em>IP</em> 地址存储在组件的数据属性中。在上述代码中，我们在。</a><a target="_blank" rel="noopener" href="https://download.csdn.net/download/weixin_42122432/18164822">node- <em>ip</em> -address:<em>获取</em> 本地 <em>IP</em> 地址_ <em>vue</em> <em>3</em> <em>获取</em> 本地 <em>IP</em> 地址资源-CSDN文库</a></p>
+<p>4-16<a target="_blank" rel="noopener" href="https://download.csdn.net/download/weixin_42122432/18164822">资源浏览查阅171次。node- <em>ip</em> -address:<em>获取</em> 本地 <em>IP</em> 地址,<em>IP</em> 地址返回本地计算机的外部 <em>IP</em> 地址安装$npminstall <em>ip</em> -address–save用法varaddress&#x3D;require <em>(</em>&amp;# <em>3</em> 9;<em>ip</em> -address&amp;# <em>3</em> 9;<em>)</em>;address <em>(**)</em>;&#x2F;&#x2F;10*.<em>0</em>.<em>0</em>.*,更多下载资源、学习资料请访问CSDN文库频道</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_59866374/article/details/143606853"><em>vue</em> <em>3</em> +高德api 拿到用户地理位置_ <em>vue</em> <em>使用</em> 高德地图api <em>获取</em> 定位</a></p>
+<p>4-25<a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_59866374/article/details/143606853">&#x2F;&#x2F; <em>使用</em> 高德API的 <em>IP</em> 定位服务 <em>获取</em> <em>IP</em> 省市信息 const <em>ip</em> Response &#x3D; await axios*.<em>get <em>(</em> &amp;# <em>3</em> 9;https://restapi</em>.<em>amap</em>.<em>com&#x2F;v <em>3</em> &#x2F; <em>ip</em>?key&#x3D;这儿填写你刚刚申请到的key复制粘贴到这&amp;# <em>3</em> 9; <em>)</em>; console</em>.<em>log <em>(</em>&amp;# <em>3</em> 9;<em>ip</em> Response&amp;# <em>3</em> 9;, <em>ip</em> Response</em>.<em>data</em>)<em>;&#x2F;&#x2F; <em>ip</em> Response</em>.*data打印拿到了你所在的城市 <em>.<strong>.</strong>.</em></a><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_41579104/article/details/130627226"><em>vue</em> <em>3</em> 【 <em>使用</em> axios并封装axios请求】</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_41579104">蜗牛~~</a></p>
+<p>05-12 3525<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_41579104/article/details/130627226">由于 <em>Vue</em> <em>3</em> 中，在setup中无法通过this <em>获取</em> 组件实例，console*.<em>log <em>(<em>this</em>)</em> 打印出来的值是undefined。1、我们可以通过 <em>window</em></em>.<strong>location</strong>.<em>protocol和 <em>window</em></em>.<strong>location</strong>.<em>host <em>获取</em> 协议和主机 <em>ip</em> 端口，然后统一设置axios的默认请求baseURL。来绑定的，例如 <em>Vue</em></em>.<em>prototype</em>.*$toast &#x3D; Toast。proxy是getCurrentInstance <em>(**)</em> 对象中的一个属性，然后通过对象的解构赋值方式拿到proxy。</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_65360496/article/details/134013500">jeecgboot <em>vue</em> <em>3</em> 页面 <em>获取</em> 登录人信息&#x2F; <em>获取</em> url <em>IP</em> 地址和端口号信息</a></p>
+<p>4-18<a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_65360496/article/details/134013500"><em>获取</em> 登录人信息 import{ useUserStore }from&amp;# <em>3</em> 9;&#x2F;@&#x2F;store&#x2F;modules&#x2F;user&amp;# <em>3</em> 9;; constuserStore &#x3D;useUserStore <em>(**)</em>; constUserName&#x3D; <em>(<em>userStore</em>.<em>getUserInfo</em>.<em>username</em>)</em>; console*.*log <em>(<em>userStore</em>.<em>getUserInfo</em>)</em> 打印出来是 <em>获取</em> <em>IP</em> 和端口号信息 import{ useGlobSetting }from&amp;# <em>3</em> 9;&#x2F;@&#x2F;hooks&#x2F;setting&amp;# <em>3</em> 9;; <em>.<strong>.</strong>.</em></a><a target="_blank" rel="noopener" href="https://download.csdn.net/download/weixin_38587473/14007278">以 <em>IP</em> 来 <em>获取</em> 客户端电脑名称 <em>(<em>一句代码实现</em>)</em> _ <em>vue</em> <em>获取</em> 计算机名称,<em>vue</em><em>.<strong>.</strong>.</em></a></p>
+<p>4-24<a target="_blank" rel="noopener" href="https://download.csdn.net/download/weixin_38587473/14007278">利用InetAddress*.<em>getLocalHost <em>(**)</em> <em>获取</em> <em>本机</em> <em>ip</em> 地址和本地主机名 <em>获取</em> 内网 <em>ip</em> 地址 <em>3</em> 种方法 浏览:1 <em>3</em> 9 5星 · 资源好评率100% <em>获取</em> 内网 <em>ip</em> 地址 <em>3</em> 种方法。 1、TId <em>IP</em> Watch控件方法 2、TGStack <em>3</em> 、TWSADATA <em>vue</em> 在手机中通过 <em>本机</em> <em>IP</em> 地址访问webApp的方法 浏览:167 主要介绍了 <em>vue</em> 在手机中通过 <em>本机</em> <em>IP</em> 地址访问webApp的方法,需要的</em>.<strong>.</strong>.*</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_74824661/article/details/145479005">WebRTC实现双端音视频聊天（ <em>Vue</em> <em>3</em> + SpringBoot）</a></p>
+<p>[</p>
+<p>最新发布</p>
+<p>](<a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_74824661/article/details/145479005">https://blog.csdn.net/m0_74824661/article/details/145479005</a>)</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_74824661">m0_74824661的博客</a></p>
+<p>02-06 1342<a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_74824661/article/details/145479005">文章描述 <em>使用</em> WebRTC技术实现一对一音视频通话。由于设备摄像头限制（一台电脑作测试无法在开启的双端同时 <em>获取</em> 摄像头数据流），导致一台电脑无法同时测试双端，因此文章 <em>使用</em> mp4音视频文件模拟摄像头音视频数据流输入。 <em>使用</em> 技术前端： <em>Vue</em> <em>3</em> ，WebRTC相关API，axios后端信令服务器实现：SpringBoot，WebSocket在大致知道了上面介绍的WebRTC基本概念之后，我们以双端音视频互联的整体过程。假设存在A端（发起端）和B端（接收端）。1*.*</a><a target="_blank" rel="noopener" href="https://download.csdn.net/download/superly1213/9920335">*.<strong>.</strong>.*<em>IP</em> 转换成Number地址_electron <em>获取</em> <em>ip</em> 资源-CSDN文库 资源-CSDN文库</a></p>
+<p>4-24<a target="_blank" rel="noopener" href="https://download.csdn.net/download/superly1213/9920335">在 <em>Window</em> s下,可以 <em>使用</em> WMI <em>(<em><em>Window</em> s Management Instrumentation</em>)</em> 来查询NetBIOS信息 <em>获取</em> MAC地址;在Unix&#x2F;Linux系统中,可以通过`&#x2F;sys&#x2F;class&#x2F;net`目录下的接口文件或` <em>ip</em> link`命令 <em>获取</em>;在Python中,`uuid*.<em>getnode <em>(**)</em> `函数也能提供MAC地址。 <em>3</em></em>.* **判断内网 <em>IP</em> **: 内网 <em>IP</em> 通常是私有 <em>IP</em> 地址,范围包括10*.<em>0</em>.<em>0</em>.<em>0&#x2F;8, 172</em>.<em>16</em>.<em>0</em>.<em>0</em>.<strong>.</strong>.*</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_36152801/article/details/143745989"><em>vue</em> <em>3</em> <em>获取</em> 当前 <em>ip</em> 地址所在的经纬度_ <em>vue</em> <em>3</em> <em>获取</em> 当前经纬度</a></p>
+<p>4-16<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_36152801/article/details/143745989">import {ref, onMounted }from&amp;# <em>3</em> 9;<em>vue</em> &amp;# <em>3</em> 9;; import axiosfrom&amp;# <em>3</em> 9;axios&amp;# <em>3</em> 9;; exportdefault{ setup <em>(**)</em> { const longitude&#x3D;ref <em>(<em>null</em>)</em>; const latitude&#x3D;ref <em>(<em>null</em>)</em>; const get <em>Location</em> By <em>IP</em> &#x3D;async <em>(**)</em> &#x3D;&gt;{ try { const response&#x3D;await axios*.<em>get <em>(</em>&amp;# <em>3</em> 9;https:&#x2F;&#x2F; <em>ip</em> api</em>.<em>co&#x2F;json&#x2F;&amp;# <em>3</em> 9;</em>)*; <em>.<strong>.</strong>.</em></a><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_39291270/article/details/143764719"><em>vue</em> <em>3</em> <em>ip</em> ify <em>获取</em> <em>IP</em> 地址</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_39291270">qq_39291270的博客</a></p>
+<p>11-14 370<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_39291270/article/details/143764719"><em>vue</em> 、js <em>获取</em> <em>IP</em></a><a target="_blank" rel="noopener" href="https://devpress.csdn.net/v1/article/detail/132870095">配置Vite <em>获取</em> 内网 <em>IP</em> （ <em>Vue</em> <em>3</em> 项目ts版本 <em>获取</em> <em>本机</em> 局域网 <em>IP</em> 地址*)*</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_45525250">qq_45525250的博客</a></p>
+<p>09-14 4340<a target="_blank" rel="noopener" href="https://devpress.csdn.net/v1/article/detail/132870095">2*.<em>替换为你实际想要设置的基础 <em>IP</em> 地址，确保这是一个字符串。 <em>3</em></em>.<em>确保端口号配置正确，可以根据你的需求进行更改。接着保存文件。并且重新启动你的 Vite 项目。确保在重新启动后，新的配置生效。现在，import</em>.<em>meta</em>.<em>env</em>.*BASE_ <em>IP</em> 能够在项目中被正确访问，包含你在中设置的值。</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_45398124/article/details/135099824"><em>vue</em> <em>获取</em> <em>本机</em> <em>ip</em> 地址</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_45398124">weixin_45398124的博客</a></p>
+<p>12-20 2633<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_45398124/article/details/135099824"><em>vue</em> 前端 <em>获取</em> <em>本机</em> <em>ip</em> 地址</a><a target="_blank" rel="noopener" href="https://devpress.csdn.net/v1/article/detail/136630855"><em>vue</em> 前端 <em>获取</em> 本地 <em>IP</em> 地址</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_59383491">比起日出，我更喜欢日落。我的意思是比起遇见你，我更喜欢与你终老</a></p>
+<p>03-11 5015<a target="_blank" rel="noopener" href="https://devpress.csdn.net/v1/article/detail/136630855">在index*.*js文件中添加以下配置。</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_53791978/article/details/135918930">【 <em>vue</em> 】 <em>vue</em>*.<em>config</em>.*js里面 <em>获取</em> <em>本机</em> <em>ip</em> ：</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_53791978">SunPeng的博客</a></p>
+<p>01-29 2109<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_53791978/article/details/135918930">【 <em>vue</em> 】 <em>vue</em>*.<em>config</em>.*js里面 <em>获取</em> <em>本机</em> <em>ip</em> ：</a><a target="_blank" rel="noopener" href="https://huaweicloud.csdn.net/63a55e25b878a545459453d8.html"><em>vue</em> <em>获取</em> <em>IP</em> 地址</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/sxmzhw">sxm的博客</a></p>
+<p>12-23 7244<a target="_blank" rel="noopener" href="https://huaweicloud.csdn.net/63a55e25b878a545459453d8.html"><em>vue</em> –用户登录需要 <em>使用</em> 用户 <em>Ip</em> 1、创建一个 <em>Ip</em><em>.<em>js export function getUser <em>IP</em> <em>(<em>onNew <em>IP</em></em>)</em> { let MyPeerConnection &#x3D; <em>window</em></em>.<em>RTCPeerConnection || <em>window</em></em>.<em>mozRTCPeerConnection || <em>window</em></em>.<em>webkitRTCPeerConnection; let pc &#x3D; new MyPeerConnection <em>(</em>{ iceServers: [] }</em>)</em>; let</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/MrJovia/article/details/122876026"><em>vue</em> 中 <em>获取</em> 本地内网 <em>ip</em></a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/MrJovia">MrJovia的博客</a></p>
+<p>02-11 5288<a target="_blank" rel="noopener" href="https://blog.csdn.net/MrJovia/article/details/122876026">相关参考 1*.<em><em>获取</em> 当前url 2</em>.<em><em>vue</em> 自动 <em>获取</em> <em>ip</em> 地址 在项目的config&#x2F;index</em>.<em>js下插入代码 const os &#x3D; require <em>(</em>‘os’</em>)<em>; function getNetwork <em>Ip</em> <em>(**)</em> { let needHost &#x3D; ‘’; &#x2F;&#x2F; 打开的host try { &#x2F;&#x2F; 获得网络接口列表 let network &#x3D; os</em>.<em>networkInterfaces <em>(**)</em>; &#x2F;&#x2F; console</em>.<em>log <em>(</em>“network”,network</em>)* for *(*let dev i</a><a target="_blank" rel="noopener" href="https://wenku.csdn.net/answer/7de6ec269418409baa6bd980cb3885b0"><em>vue</em> <em>获取</em> <em>本机</em> <em>IP</em> 地址</a></p>
+<p>03-31<a target="_blank" rel="noopener" href="https://wenku.csdn.net/answer/7de6ec269418409baa6bd980cb3885b0">在 <em>Vue</em> 中 <em>获取</em> <em>本机</em> <em>IP</em> 地址，可以 <em>使用</em> 浏览器提供的` <em>window</em> `对象中的` <em>location</em> `属性 <em>获取</em> 当前页面的URL，然后从中提取出 <em>IP</em> 地址部分。 代码示例： ```javascr <em>ip</em> t export default { data <em>(**)</em> { return { <em>ip</em>: null } }, <em>.<strong>.</strong>.</em></a><a target="_blank" rel="noopener" href="https://devpress.csdn.net/v1/article/detail/137457483"><em>vue</em> 项目 <em>获取</em> <em>本机</em> <em>ip</em> 地址–谷歌浏览器</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_47907069">weixin_47907069的博客</a></p>
+<p>04-07 2235<a target="_blank" rel="noopener" href="https://devpress.csdn.net/v1/article/detail/137457483"><em>vue</em> 、 <em>ip</em></a><a target="_blank" rel="noopener" href="https://devpress.csdn.net/v1/article/detail/135859241"><em>vue</em> 项目 <em>获取</em> 本地 <em>ip</em> 地址</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/alisa_sister">alisa_sister的博客</a></p>
+<p>01-26 857<a target="_blank" rel="noopener" href="https://devpress.csdn.net/v1/article/detail/135859241">【代码】 <em>vue</em> 项目 <em>获取</em> 本地 <em>ip</em> 地址。</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_47930439/article/details/129255924">JS <em>获取</em> 用户 <em>IP</em> 地址 如果是 <em>vue</em> 可以结合 <em>vue</em> <em>3</em> 全局方法 <em>使用</em> 因为我当时就是需要 <em>获取</em> <em>IP</em> 所以结合 <em>使用</em> 了</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_47930439">weixin_47930439的博客</a></p>
+<p>02-28 1242<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_47930439/article/details/129255924">JS <em>获取</em> 用户 <em>IP</em> 地址 如果是 <em>vue</em> 可以结合 <em>vue</em> <em>3</em> 全局方法 <em>使用</em> 因为我当时就是需要 <em>获取</em> <em>IP</em> 所以结合 <em>使用</em> 了</a></p>
+<p>登录后您可以享受以下权益：</p>
+<ul>
+<li>免费复制代码</li>
+<li>和博主大V互动</li>
+<li>下载海量资源</li>
+<li>发动态&#x2F;写文章&#x2F;加入社区<br>×</li>
+</ul>
+<p>实付 元</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_43287787/article/details/">使用余额支付</a></p>
+<p>点击重新获取</p>
+<p>扫码支付</p>
+<p>钱包余额 0</p>
+<p>抵扣说明：</p>
+<p>1.余额是钱包充值的虚拟货币，按照1:1的比例进行支付金额的抵扣。<br>2.余额无法直接购买下载，可以购买VIP、付费专栏及课程。</p>
+<p><a target="_blank" rel="noopener" href="https://i.csdn.net/#/wallet/balance/recharge">余额充值</a></p>
+<p>举报</p>
+<p> [![[_resources&#x2F;35c7362356adf5a11cd3cc47fd01628f_MD5.png]] 点击体验<br>DeepSeekR1满血版](<a target="_blank" rel="noopener" href="https://ai.csdn.net/?utm_source=cknow_pc_blogdetail&spm=1001.2101.3001.10583">https://ai.csdn.net/?utm_source=cknow_pc_blogdetail&amp;spm=1001.2101.3001.10583</a>) ![[_resources&#x2F;90bd0cbf3aff8fdff8bf9b011b581e20_MD5.png]]</p>
+<p>程序员都在用的中文IT技术交流社区</p>
+<p>![[_resources&#x2F;08a47e60886378fe60a3d9c8f4ae8bc6_MD5.png]]</p>
+<p>专业的中文 IT 技术社区，与千万技术人共成长</p>
+<p>![[_resources&#x2F;a51be6c085b867a5bd82d8dc1cea9b46_MD5.png]]</p>
+<p>关注【CSDN】视频号，行业资讯、技术分享精彩不断，直播好礼送不停！</p>
+<p>客服 返回顶部</p>
+<p>![[_resources&#x2F;7cadd7687e87c6f8f6da6cf3d902e5fd_MD5.png]] ![[_resources&#x2F;2d224a83b35c8122b2cefc132c3554b5_MD5.png]]</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/clippings/" class="print-no-link">#clippings</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>vue3获取本机IP(不使用window.location)_vue3 获取ip-CSDN博客</div>
+      <div>https://yhao521.github.io/2025/07/23/摘录/vue3获取本机IP(不使用window.location)_vue3 获取ip-CSDN博客/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>yhao521</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年7月23日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E6%91%98%E5%BD%95/%E3%80%8A%E6%9A%97%E9%BB%91%E4%B8%96%E7%95%8C%E3%80%8B%E7%BC%96%E8%AF%91%E6%AD%A5%E9%AA%A4%20%E7%AE%80%E6%98%93%E7%89%88%EF%BC%88%E5%8D%81%E6%AD%A5%E6%90%9E%E5%AE%9Aios%E5%92%8Candroid%EF%BC%89_%E6%9A%97%E9%BB%91%E4%B8%96%E7%95%8C%E6%89%8B%E6%B8%B8%E6%BA%90%E7%A0%81-CSDN%E5%8D%9A%E5%AE%A2/" title="《暗黑世界》编译步骤 简易版（十步搞定ios和android）_暗黑世界手游源码-CSDN博客">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">《暗黑世界》编译步骤 简易版（十步搞定ios和android）_暗黑世界手游源码-CSDN博客</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E6%91%98%E5%BD%95/%E5%A6%82%E4%BD%95%E4%BF%AE%E6%94%B9%E6%96%87%E4%BB%B6%E7%9A%84%20%E2%80%9C%E5%88%9B%E5%BB%BA%E6%97%B6%E9%97%B4%E2%80%9D%20%E5%92%8C%20%E2%80%9C%E4%BF%AE%E6%94%B9%E6%97%B6%E9%97%B4%E2%80%9D%20(macOS,%20Linux,%20Windows)/" title="">
+                        <span class="hidden-mobile"></span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>  
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

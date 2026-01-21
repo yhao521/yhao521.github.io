@@ -1,0 +1,746 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="[[成就一亿技术人!]],[[hope_wisdom 发出的红包]]">
+  <meta name="keywords" content="java,博客,vue,spring,mysql,docker,linux">
+  
+    <meta name="description" content="文章浏览阅读6.9k次，点赞15次，收藏41次。云原生的概念在最近两年得到了广泛的关注，各大云厂商和技术团队都纷纷推出了各种“云原生”的技术和产品。虽然云原生到底包括哪些概念和技术并没有一个公认的答案，但容器技术是云原生的基础和核心应该是现阶段的一个共识。但是容器技术经过多年的发展和演变，各种实现方案和早期版本相比已经有了巨大的差异，而且仍然在不断演进的过程中。各种组件的产生、随之而来的接口规范、">
+<meta property="og:type" content="article">
+<meta property="og:title" content="docker、containerd、runc、shim... 容器技术名词全解析-CSDN博客">
+<meta property="og:url" content="https://yhao521.github.io/2025/06/30/%E6%91%98%E5%BD%95/docker%E3%80%81containerd%E3%80%81runc%E3%80%81shim...%20%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E5%90%8D%E8%AF%8D%E5%85%A8%E8%A7%A3%E6%9E%90-CSDN%E5%8D%9A%E5%AE%A2/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="文章浏览阅读6.9k次，点赞15次，收藏41次。云原生的概念在最近两年得到了广泛的关注，各大云厂商和技术团队都纷纷推出了各种“云原生”的技术和产品。虽然云原生到底包括哪些概念和技术并没有一个公认的答案，但容器技术是云原生的基础和核心应该是现阶段的一个共识。但是容器技术经过多年的发展和演变，各种实现方案和早期版本相比已经有了巨大的差异，而且仍然在不断演进的过程中。各种组件的产生、随之而来的接口规范、">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-06-30T13:59:00.651Z">
+<meta property="article:modified_time" content="2025-07-01T06:59:14.412Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="clippings">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>docker、containerd、runc、shim... 容器技术名词全解析-CSDN博客 - 匆匆过客的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yhao521.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>匆匆过客的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="docker、containerd、runc、shim... 容器技术名词全解析-CSDN博客"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-06-30 21:59" pubdate>
+          2025年6月30日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          8k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          67 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">docker、containerd、runc、shim... 容器技术名词全解析-CSDN博客</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="docker、containerd、runc、shim…-容器技术名词全解析"><a href="#docker、containerd、runc、shim…-容器技术名词全解析" class="headerlink" title="docker、containerd、runc、shim… 容器技术名词全解析"></a>docker、containerd、runc、shim… 容器技术名词全解析</h2><p>本文链接： <a target="_blank" rel="noopener" href="https://blog.csdn.net/dillanzhou/article/details/116505401">https://blog.csdn.net/dillanzhou/article/details/116505401</a></p>
+<p>云原生的概念在最近两年得到了广泛的关注，各大云厂商和技术团队都纷纷推出了各种“云原生”的技术和产品。虽然云原生到底包括哪些概念和技术并没有一个公认的答案，但容器技术是云原生的基础和核心应该是现阶段的一个共识。</p>
+<p>但是容器技术经过多年的发展和演变，各种实现方案和早期版本相比已经有了巨大的差异，而且仍然在不断演进的过程中。各种组件的产生、随之而来的接口规范、基于接口规范实现的新可选组件让相关的名称和概念更加复杂。新的开发使用者很难全面理解容器相关的各类名词和概念，以及这些名词和概念在真实的容器部署环境中的作用和关系。</p>
+<p>笔者作为容器运行时开发人员，对于容器相关的概念仍然经常犯迷糊。 docker 、libcontainer、containerd、shim、runc分别起什么作用？CRI、OCI是什么层次的规范、有什么区别？各个组件的功能和协作方式是怎样的？使用k8s管理容器后相关组件和结构又有怎样的变化？这些问题经常让笔者困扰。这篇文章将尝试将这些问题做一个全面的回答，尽量完整的解释相关的名词，从而对容器的具体实现和部署有一个全面的认识。为了更清晰的说明容器概念和技术的当前状态，避免混淆，本文将尽量避免对容器技术历史版本的具体概念和架构做详细介绍。</p>
+<h2 id="一、docker相关概念和组件"><a href="#一、docker相关概念和组件" class="headerlink" title="一、docker相关概念和组件"></a>一、docker相关概念和组件</h2><p>容器技术并不是从docker才开始出现的，docker最主要的三项特性：镜像化、空间隔离和资源隔离，其对应的技术unionfs、namespace和cgroup在docker技术出现前就已经在 linux 内核中工作了很多年。lxc（linux <a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=container&spm=1001.2101.3001.7020">container</a> ）是最早组合使用这些技术来实现容器的，docker的早期版本干脆就是基于lxc实现的namespace和cgroup管理。但docker确实是让容器化部署变得真正可用、易用的关键技术，在docker出现后，容器技术才真正成为一种高效的业务部署模式而被广泛使用。到目前为止，docker（系列技术和组件）仍然是使用最广泛的容器技术和容器领域的事实标准。</p>
+<p>经过长期演变，docker从最初的单个整体模块变成了多个通过标准接口协同工作的多个模块。在不同的使用场景下（例如k8s部署场景），使用到的模块会有所不同。这一节首先分析一下使用docker创建运行容器时涉及到的组件和组件间的关系。</p>
+<p>![[_resources&#x2F;a1979d4e42c046c76c9d16864da97aaa_MD5.png]]</p>
+<p>上图展示了docker运行容器时的主要组件和组件间的关系。（图片来自 <a target="_blank" rel="noopener" href="https://www.cnblogs.com/sparkdev/p/9129334.html">https://www.cnblogs.com/sparkdev/p/9129334.html</a> ，本文参考了博客作者sparkdev的多篇相关文章）</p>
+<p>组件包括：</p>
+<p><strong>docker：</strong> docker既是整套技术和产品的名称，又是其中一个组件的名称。到今天，docker组件只是一个最外围的入口，为使用者提供一种命令行形式的客户端(CLI)来执行容器的各种操作，使用golang实现。docker客户端将用户输入的命令和参数转换为后端服务的调用参数，通过调用后端服务来实现各类容器操作。</p>
+<p>这个组件其实是可替代性最强的组件，有很多的替代性实现，例如各种其他语言的docker客户端和库。这个客户端组件使用docker这个名称是为了和最早期的docker使用习惯保持一致。在docker的早期实现中，所有功能都实现在一个二进制程序docker中，docker既能作为客户端，又能作为服务端，所有操作都是基于docker程序完成的。</p>
+<p><strong>dockerd：</strong> dockerd是运行于服务器上的后台守护进程（daemon），负责实现容器镜像的拉取和管理以及容器创建、运行等各类操作。dockerd向外提供RESTful API，其他程序（例如docker客户端）可以通过API来调用dockerd的各种功能，实现对容器的操作。但时至今日，在dockerd中实现的容器管理功能也已经不多，主要是镜像下载和管理相关的功能，其他的容器操作能力已经分离到containerd组件中，通过grpc接口来调用。又被称为 <strong>docker engine</strong> 、 <strong>docker daemon</strong> 。</p>
+<p><strong>containerd：</strong> containerd是另一个后台守护进程，是真正实现容器创建、运行、销毁等各类操作的组件，它也包含了独立于dockerd的镜像下载、上传和管理功能。containerd向外暴露grpc形式的接口来提供容器操作能力。dockerd在启动时会自动启动containerd作为其容器管理工具，当然containerd也可以独立运行。containerd是从docker中分离出来的容器管理相关的核心能力组件， <a target="_blank" rel="noopener" href="https://www.docker.com/blog/docker-containerd-integration/">https://www.docker.com/blog/docker-containerd-integration/</a> 和 <a target="_blank" rel="noopener" href="https://www.docker.com/blog/what-is-containerd-runtime/">https://www.docker.com/blog/what-is-containerd-runtime/</a> 介绍了将其从docker中独立出来的原因（虽然基于这两篇文章笔者还是没太看懂这个操作在当时的必要性…）。但是为了支持容器功能实现的灵活性和开放性，更底层的容器操作实现（例如cgroup的创建和管理、namespace的创建和使用等）并不是由containerd提供的，而是通过调用另一个组件runc来实现。</p>
+<p><strong>runc：</strong> runc实现了容器的底层功能，例如创建、运行等。runc通过调用内核接口为容器创建和管理cgroup、namespace等Linux内核功能，来实现容器的核心特性。runc是一个可以直接运行的二进制程序，对外提供的接口就是程序运行时提供的子命令和命令参数。runc内通过调用内置的libcontainer库功能来操作cgroup、namespace等内核特性。</p>
+<p>可以看到从docker cli、dockerd、containerd到runc，这些组件都号称提供了容器操作能力，但上层组件提供的可能只是接口封装、状态展现相关的能力，而下层组件则负责更基础、更核心的内核功能调用、底层功能实现。虽然不太容易清楚的区分各层组件提供的具体能力，但将这些层次想象成软件设计中的功能抽象、接口封装和底层实现就能大体理解这些组件间的关系和拆分成多个组件的原因。</p>
+<p><strong>containerd-shim：</strong> 除了这些主要组件外，图中还有containerd-shim这个组件。containerd-shim位于containerd和runc之间，当containerd需要创建运行容器时，它没有直接运行runc，而是运行了shim，再由shim间接的运行runc。据开发者介绍（ <a target="_blank" rel="noopener" href="https://groups.google.com/g/docker-dev/c/zaZFlvIx1_k?pli=1">https://groups.google.com/g/docker-dev/c/zaZFlvIx1_k?pli&#x3D;1</a> ），shim主要有3个用途：</p>
+<p>1. 让runc进程可以退出，不需要一直运行。这里有个疑问，为了让runc可以退出所以再启动一个shim，听起来似乎没什么意义。我理解这样设计的原因还是想让runc的功能集中在容器核心功能本身，同时也便于runc的后续升级。shim作为一个简单的中间进程，不太需要升级，其他组件升级时它可以保持运行，从而不影响已运行的容器。</p>
+<p>2. 作为容器中进程的父进程，为容器进程维护stdin等管道fd。如果containerd直接作为容器进程的父进程，那么一旦containerd需要升级重启，就会导致管道和tty master fd被关闭，容器进程也会执行异常而退出。</p>
+<p>3. 运行容器的退出状态被上报到docker等上层组件，又避免上层组件进程作为容器进程的直接父进程来执行wait4等待。这一条没太理解，可能与shim实现相关，或许是shim有什么别的方式可以上报容器的退出状态从而不需要直接等待它？需要阅读shim的实现代码来确认。</p>
+<p>除了上述组件，还有一些相关名称和概念值得一提。</p>
+<p><strong>lxc：</strong> 上文中提到，lxc是最早的linux容器技术，早期版本的docker直接使用lxc来实现容器的底层功能。虽然使用者相对较少，但lxc项目仍在持续开发演进中。</p>
+<p><strong>libcontainer：</strong> docker从0.9版本开始自行开发了libcontainer模块来作为lxc的替代品实现容器底层特性，并在1.10版本彻底去除了lxc。在1.11版本拆分出runc后，libcontainer也随之成为了runc的核心功能模块。</p>
+<p><strong>moby：</strong> moby是docker公司发起的开源项目，其中最主要的部分就是同名组件moby，事实上这个moby就是dockerd目前使用的开源项目名称，docker项目中的engine（dockerd）仓库现在就是从moby仓库fork而来的。</p>
+<p><strong>docker-ce：</strong> docker的开源版本，CE指 Community Edition。docker-ce中的组件来自于moby、containerd等其他项目。</p>
+<p><strong>docker-ee：</strong> docker的收费版本，EE指Enterprise Edition。其基础组件来源和docker-ce是一样的，但附加了一些其他的组件和功能。docker-ee只能在一些企业版操作系统或云计算平台中使用，相关的资料也很少见，应该没有多少使用者。 <a target="_blank" rel="noopener" href="https://medium.com/devops-dudes/2020-differences-between-docker-ce-and-ee-abd10b646597">https://medium.com/devops-dudes/2020-differences-between-docker-ce-and-ee-abd10b646597</a> 中对其做了一些介绍，并将其称作“docker公司垂死挣扎的挣钱手段”。。。</p>
+<h2 id="二、kubernetes引入的相关概念和组件"><a href="#二、kubernetes引入的相关概念和组件" class="headerlink" title="二、kubernetes引入的相关概念和组件"></a>二、kubernetes引入的相关概念和组件</h2><p><strong>kubernetes：</strong> kubernetes（简写为k8s）是google开源的容器编排、部署、运维系统。k8s的目标是更清晰便捷的使用和管理容器，因此其功能是构建在docker等容器技术之上的。这里我们只讨论k8s与容器技术相关的部分概念，而不对k8s本身的概念和组件做过多探讨。</p>
+<p>![[_resources&#x2F;93d6c2e49e3d29c0da7403c53543cd21_MD5.png]]</p>
+<p>上图是k8s在单个节点上的容器运行架构。可以看到，上图中除了已经介绍过的docker相关组件dockerd、containerd、containerd-shim、runc之外，还多了kubelet和dockershim两个组件。</p>
+<p><strong>kubelet：</strong> kubelet是k8s在单机节点上的服务进程，负责为k8s系统管理这台节点上的容器。k8s系统对容器的创建、删除等调度行为都需要通过节点上的kubelet来完成。</p>
+<p><strong>dockershim：</strong> kubelet并没有直接和dockerd交互，而是通过了一个dockershim的组件间接操作dockerd。dockershim提供了一个标准的接口，让kubelet能够专注于容器调度逻辑本身，而不用去适配dockerd的接口变动。而其他实现了相同标准接口的容器技术也可以被kubelet集成使用，这个接口称作CRI。dockershim和CRI的出现也是容器生态系统演化的历史产物。在k8s最早期的版本中是不存在dockershim的，kubelet直接和dockerd交互。但为了支持更多不同的容器技术（避免完全被docker控制容器技术市场），kubelet在之后的版本开始支持另一种容器技术rkt。这给kubelet的维护工作造成了巨大的挑战，因为两种容器技术没有统一的接口和使用逻辑，kubelet同时支持两种技术的使用还要保证一致的容器功能表现，对代码逻辑和功能可靠性都有很大的影响。为了解决这个问题，k8s提出了一个统一接口CRI，kubelet统一通过这个接口来调用容器功能。但是dockerd并不支持CRI，k8s就自己实现了配套的dockershim将CRI接口调用转换成dockerd接口调用来支持CRI。因此，dockershim并不是docker技术的一部分，而是k8s系统的一部分。</p>
+<p>在2020年12月，k8s宣布从其1.20版本开始将默认不再使用dockershim，并将在后续版本中删除dockershim。这也意味着kubelet不再通过dockerd操作容器，docker这个名词不再直接出现在k8s官方生态中。但kubelet仍然基于来自于docker的containerd、runc等组件，因此其底层容器管理逻辑并没有很大的变化。其组件架构变化如下图：</p>
+<p>![[_resources&#x2F;64471f2334fbce9b5240bf274c31efe5_MD5.png]]</p>
+<p>可以看到，在新的架构中，kubelet直接与containerd交互，跳过了dockershim和dockerd这两个步骤。containerd通过其内置的CRI插件提供了CRI兼容接口。</p>
+<p><strong>cri-containerd：</strong> 在k8s和containerd的适配过程中，还曾经出现过cri-containerd这个组件。在containerd1.0版本中，containerd提供了cri-containerd作为独立进程来实现CRI接口，其定位和dockershim类似。但在containerd1.1版本中，就将这个功能改写成了插件形式直接集成到了containerd进程内部，使containerd可以直接支持CRI接口，cri-containerd也就成了历史名词，其repo（ <a target="_blank" rel="noopener" href="https://github.com/containerd/cri">https://github.com/containerd/cri</a> ）也被合入了containerd，作为其一个内置插件包存在（ <a target="_blank" rel="noopener" href="https://github.com/containerd/containerd/tree/master/pkg/cri"><code>github.com/containerd/containerd/pkg/cri</code></a> ）。</p>
+<h2 id="三、容器运行时相关标准和概念"><a href="#三、容器运行时相关标准和概念" class="headerlink" title="三、容器运行时相关标准和概念"></a>三、容器运行时相关标准和概念</h2><p>在上文中已经出现了两种接口标准：CRI和OCI。</p>
+<p>这两种接口标准的出现使容器技术的组件化和标准化成为了可能，也随之产生了大量符合接口规范的不同容器实现技术，很大程度上促进了容器技术的发展和市场的繁荣。</p>
+<p><strong>CRI：</strong> CRI是Container Runtime Interface（容器运行时接口）的缩写。如上文所述，它是k8s团队提出的容器操作接口标准，符合CRI标准的容器模块才能集成到k8s体系中与kubelet交互。符合CRI的容器技术模块包括dockershim（用于兼容dockerd）、rktlet（用于兼容rkt）、containerd(with CRI plugin)、CRI-O等。</p>
+<p><strong>rkt与rktlet：</strong> rkt是CoreOS公司主导的容器技术，在早期得到了k8s的支持成为k8s集成的两种容器技术之一。随着CRI接口的提出，k8s团队也为rkt提供了rktlet模块用于与rkt交互，rktlet和dockersim的意义基本相同。随着CoreOS被Redhat收购，rkt已经停止了研发，rktlet已停止维护了。</p>
+<p><strong>CRI-O：</strong> CRI-O是Redhat公司推出的容器技术。从名字就能看出CRI-O的出发点就是一种原生支持CRI接口规范的容器技术。CRI-O同时兼容OCI接口和docker镜像格式。CRI-O的设计目标和特点在于它是一项轻量级的技术，k8s可以通过使用CRI-O来调用不同的底层容器运行时模块，例如runc。</p>
+<p><strong>OCI：</strong> OCI是Open Container Initiative（开放容器倡议）的缩写。OCI是以docker为首的容器技术公司创建的组织，也是这个组织制定的容器相关标准的统称。OCI标准主要包括两部分：镜像标准和运行时标准。符合OCI运行时标准的容器底层实现模块能够被containerd、CRI-O等容器操作模块集成调用。runc就是从docker中拆分出来捐献给OCI组织的底层实现模块，也是第一个支持OCI标准的模块。除了runc外，还有gVisor（runsc）、kata等其他符合OCI标准的实现。</p>
+<p><strong>gVisor：</strong> google开源的一种容器底层实现技术，对应的模块名称是runsc。其特点是安全性，runsc中实现了对linux系统调用的模拟实现，从而在用户态实现应用程序需要的内核功能，减小了恶意程序通过内核漏洞逃逸或攻击主机的可能性。</p>
+<p><strong>kata：</strong> Hyper和Intel合作开源的一种容器底层实现技术。kata通过轻量级虚拟机的方式运行容器，容器内的进程都运行在一个kvm虚拟机中。通过这种方式，kata实现了容器和物理主机间的安全隔离。</p>
+<p><strong>容器运行时：</strong> 最后讨论一下容器运行时的概念。在前文中，笔者尽量避免使用“容器运行时”这个名词，因为这个名词从容器技术出现开始就被用来描述各种容器技术，已经无法作为一个精确的技术名称使用了。docker是容器运行时，dockershim是容器运行时，containerd是容器运行时，runc还是容器运行时。大体上，容器运行时这个名词相当于是“容器技术的某种具体实现”这么一个模糊概念。在CRI和OCI标准的名称中，也都说明自己是容器运行时的标准，但很显然两者约束的对象不是同一层次的。大体上，我们可以把符合CRI接口的这类容器运行时称作高层容器运行时，这类运行时技术提供容器的创建、运行、删除等高层功能接口。而符合OCI接口的运行时则称作底层容器运行时，这类运行时技术真正调用各类内核特性、实现容器在操作系统中的运行和管理。笔者个人认为后者更符合运行时的概念，毕竟真正让容器运行起来的正是这些底层实现技术。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>本文总结了笔者所了解的主要容器相关技术概念。可以看到容器技术是一项快速发展中的技术，不同的技术不断出现、演化和消亡。很多技术形态和标准都是历史演化和商业斗争的产物，小型技术创业公司如docker、CoreOS和技术巨头如Google、Redhat在容器生态的建设中起到了不同维度的作用。这篇文章介绍的概念可能很快会过时或不完整，需要持续的跟进容器和云原生技术的发展来保持相关知识的时效性。</p>
+<p>![[_resources&#x2F;3845bc093f7a7241eff280ffe5f20ccd_MD5.png]]<a target="_blank" rel="noopener" href="https://blog.csdn.net/u013072756/article/details/124825109">1*.*<em>Containerd</em> <em>容器</em> 运行时初识与尝试</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/u013072756">WeiyiGeek 唯一极客IT知识分享</a></p>
+<p>07-13 1458<a target="_blank" rel="noopener" href="https://blog.csdn.net/u013072756/article/details/124825109">0x00 前言简述1*.<em>基础介绍2</em>.<em>专业术语3</em>.<em>架构简述0x01 安装配置1</em>.<em>Ubuntu安装 <em>Containerd</em></em>.<em>io流程0x02 简单使用1</em>.<em>镜像拉取与运行2</em>.<em>创建和使用网络3</em>.<em>与宿主机和其它 <em>容器</em> 共享文件4</em>.<em><em>Docker</em> 与 <em>Containerd</em> 并用配置0x03 <em>Containerd</em> 与 <em>Docker</em> CLI 工具命令表ctr 命令 - <em>Containerd</em> 管理命令</em>.<strong>.</strong>.*</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/JiMoKuangXiangQu/article/details/146256450">Linux:用 <em>runc</em> 构建 ARM 平台 <em>容器</em></a></p>
+<p>6-19<a target="_blank" rel="noopener" href="https://blog.csdn.net/JiMoKuangXiangQu/article/details/146256450"><em>runc</em> 是 <em>容器</em> 的运行时 <em>容器</em> 运行时的基础组件,常见 <em>容器</em> 直接使用 <em>Docker</em> 构建,但在资源受限的一些嵌入式设备,<em>Docker</em> 整体就会显得庞大且冗余,这时候我们通常会使用 <em>runc</em> + OCI 镜像的简单组合,来构建 <em>容器</em> 。 2*.<em>1 准备 C 交叉编译器 本文描述在Ubuntu 22</em>.<em>04</em>.*5 LTS桌面系统下,为aarch64平台构建 <em>容器</em> 的过程,不管是构建</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_24433609/article/details/129357688">【 <em>容器</em> 运行时-转载】 <em>RunC</em> 是什么?</a></p>
+<p>6-20<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_24433609/article/details/129357688"><em>RunC</em> 主要是调用 CRIU(Checkpoint and Restore in Userspace)来完成热迁移操作。CIRU 负责冻结进程,并将作为一系列文件存储在硬盘上。并负责使用这些文件还原这个被冻结的进程。 总结 <em>RunC</em> 作为标准化 <em>容器</em> 运行时的一个实现目前已经被 <em>docker</em> 内置为默认的 <em>容器</em> 运行时。相信随着 <em>runC</em> 自身的成熟和完善会有越来越多的大厂*.<strong>.</strong>.*</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/u013072756/article/details/133004610"><em>云原生</em> 之路 | 1*.*快速了解 <em>容器</em> （Container）及 <em>容器</em> 编排 <em>技术</em></a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/u013072756">WeiyiGeek 唯一极客IT知识分享</a></p>
+<p>09-18 1478<a target="_blank" rel="noopener" href="https://blog.csdn.net/u013072756/article/details/133004610">2022年，原本是准备和同事一起完成出一本 <em>Kubernetes</em> 在企业落地实践的书的，但是由于老婆怀孕以及后来娃娃的出生需要照顾，从而错过了发版时间（工期赶不赢），后来一想是有点后悔，浪费了这一次宝贵机会，但是也无可奈何，出书对主题大纲、书籍目录、代码贴图、文章内容以及来源等格式都有严格的限制，所以说就是想赶上时间也是没办法的，不过在之前我已经完成了六章，如今生活一切都步入了正规，作者不详所以写和总结的文章吃灰，遂一一分享出来给大家一起学习，并且后续作者也会继续更新 <em>云原生</em> 在企业落地实践等相关文章，在。</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/daemon365/article/details/139221158"><em>容器</em> 启动流程（ <em>containerd</em> 和 <em>runc</em> ）</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/daemon365">daemon365的博客</a></p>
+<p>05-26 1291<a target="_blank" rel="noopener" href="https://blog.csdn.net/daemon365/article/details/139221158">因为 第一个 <em>containerd</em> - <em>shim</em> 会在创建完第二个 <em>containerd</em> - <em>shim</em> 后退出，而作为第一个进程子进程的第二个 <em>containerd</em> - <em>shim</em> 会成为孤儿进程，这样就会被 init 进程接管，而和 <em>containerd</em> 本身脱离了关系。为了保证稳定性和独立性。这样 <em>containerd</em> - <em>shim</em> - <em>runc</em> -v2 的父进程就是 init 进程（1），而 init 进程的父进程是 <em>containerd</em> - <em>shim</em> - <em>runc</em> -v2 进程，这样就形成了一个进程树。可以看到我们的结论是正确的。</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/gitblog_00643/article/details/140949108">开源推荐:<em>runc</em> —— 轻量级 <em>容器</em> 运行时管理工具</a></p>
+<p>6-15<a target="_blank" rel="noopener" href="https://blog.csdn.net/gitblog_00643/article/details/140949108"><em>runc</em> 是一个基于开放 <em>容器</em> 倡议(Open Container Initiative, OCI)规范的命令行工具,用于启动和管理符合 OCI 标准的 <em>容器</em> 。它的核心目标是为应用程序提供安 <em>全</em> 且高效的沙箱环境,并且与 OCI 运行时规范保持同步。 <em>技术</em> 分析 <em>runc</em> 的构建依赖于最新版本的 Go 语言,并且支持多种架构,包括但不限于Linux。为了启用系统调用过滤功能,<em>.<strong>.</strong>.</em></a><a target="_blank" rel="noopener" href="https://blog.csdn.net/gitblog_09452/article/details/142224134"><em>runc</em>:OCI 规范的 <em>容器</em> 运行时工具</a></p>
+<p>6-18<a target="_blank" rel="noopener" href="https://blog.csdn.net/gitblog_09452/article/details/142224134">1*.* 项目基础介绍和主要编程语言 <em>runc</em> 是一个遵循 OCI(Open Container Initiative)规范的 CLI 工具,用于在Linux系统上创建和运行 <em>容器</em> 。该项目的主要编程语言是Go。 <em>runc</em> 是 <em>容器</em> 生态系统中的一个关键组件,广泛用于各种 <em>容器</em> 管理工具和平台中。 2*.* 项目的核心功能 <em>runc</em> 的核心功能包括: <em>容器</em> 创建和运行:根据 OCI 规范创建*.<strong>.</strong>.*</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/nicole_smile/article/details/115496748"><em>docker</em> ， <em>containerd</em> ， <em>runc</em> ， <em>docker</em> - <em>shim</em></a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/nicole_smile">nicole_smile的博客</a></p>
+<p>06-28 585<a target="_blank" rel="noopener" href="https://blog.csdn.net/nicole_smile/article/details/115496748"><em>docker</em> ，是一个客户端工具，用来把用户的请求发送给 <em>docker</em> daemon(<em>docker</em> d)。 <em>docker</em> d, <em>docker</em> daemon，一般也会被称为 <em>docker</em> engine。 <em>docker</em> d 启动时会启动 <em>containerd</em> 子进程。 <em>Containerd</em> 是一个工业级标准的 <em>容器</em> 运行时，它强调简单性、健壮性和可移植性，几乎囊括了单机运行一个 <em>容器</em> 运行时所需要的一切：执行，分发，监控，网络，构建，日志等。主要作用是： 管理 <em>容器</em> 的生命周期(从创建 <em>容器</em> 到销毁 <em>容器</em>) 拉取&#x2F;推送 <em>容器</em> 镜像</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_28862967/article/details/147913779">一文详解银河麒麟配置 <em>容器</em> 运行时及gVisor(runsc)、Kata(runv)详细指南</a></p>
+<p>[</p>
+<p>最新发布</p>
+<p>](<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_28862967/article/details/147913779">https://blog.csdn.net/weixin_28862967/article/details/147913779</a>)</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_28862967">weixin_28862967的博客</a></p>
+<p>05-13 76<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_28862967/article/details/147913779"><em>容器</em> 运行时（Container Runtime）是管理 <em>容器</em> 生命周期（创建、启动、停止、删除）和资源隔离的核心组件，通过与操作系统内核协作实现 <em>容器</em> 化环境。根据功能层级和 <em>技术</em> 实现， <em>容器</em> 运行时可分为以下三类。运行时类型代表工具优势局限性高层运行时 <em>Docker</em> 轻量、功能丰富性能较低，安 <em>全</em> 性风险高层运行时 <em>Containerd</em> 轻量、高性能、 <em>Kubernetes</em> 原生支持功能相对基础，需搭配其他工具高层运行时CRI-O专为 <em>Kubernetes</em> 优化，资源消耗低社区生态较新，生产实践较少。</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/niufw_qb/article/details/136114218"><em>runc</em> 中文翻译系列一 <em>runc</em> 入门</a></p>
+<p>6-28<a target="_blank" rel="noopener" href="https://blog.csdn.net/niufw_qb/article/details/136114218">本文详细介绍了 <em>runc</em>,一个基于OCI规范在Linux上管理和运行 <em>容器</em> 的低级工具,包括其编译、安装步骤,以及如何使用、测试和配合其他系统管理工具如 <em>Docker</em> 和systemd。还涉及了无根权限 <em>容器</em> 和rootless模式的配置方法。 摘要生成于 C知道,由 DeepSeek-R1 满血版支持, 前往体验 &gt;<em>.<strong>.</strong>.</em></a><a target="_blank" rel="noopener" href="https://blog.csdn.net/projim_tao/article/details/129534626">学习 <em>容器</em> 你不能错过核心 <em>技术</em> <em>runC</em> 和Libcontainer</a></p>
+<p>6-23<a target="_blank" rel="noopener" href="https://blog.csdn.net/projim_tao/article/details/129534626">使用 <em>runC</em> 也能直接进行 <em>容器</em> 管理,下面演示一下直接使用 <em>runC</em> 创建 <em>容器</em> 以及 <em>容器</em> 的启停。 四、使用 <em>runc</em> 进行 <em>容器</em> 管理 4*.<em>1、下载 <em>runC</em> 最新版本 第一步:从github上下载 <em>runC</em> 并解压缩,使用make和make install进行安装 目前 <em>runC</em> 的最新版本是V1</em>.<em>1</em>.<em>4,可以直接从github上下载,根据你的服务器的不同平台下载不同的版本,这里选择通用Linux</em>.<strong>.</strong>.*</a><a target="_blank" rel="noopener" href="https://devpress.csdn.net/v1/article/detail/121589121"><em>Docker</em> 基础之 <em>containerd</em> 的 <em>shim</em></a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_43405302">m0_43405302的博客</a></p>
+<p>11-28 5083<a target="_blank" rel="noopener" href="https://devpress.csdn.net/v1/article/detail/121589121">一、 <em>shim</em> <em>containerd</em> 下的 <em>shim</em> 是充当 <em>containerd</em> 和 <em>runc</em> 之间的中间件，用来组装 <em>runc</em> 命令的参数，负责 <em>容器</em> 中进程的启动。 <em>containerd</em> 中调用 <em>shim</em> 时执行的命令如下： &#x2F;root&#x2F;lib- <em>containerd</em> &#x2F; <em>containerd</em> &#x2F;bin&#x2F; <em>containerd</em> - <em>shim</em> {containerID} {bundleDirPath} <em>runc</em> 其中三个参数如下： 1、Arg0:<em>容器</em> Id 2、Arg1:路径 3、Arg2:执行时间 二、主函数main() func main()</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_34248705/article/details/90334774"><em>容器</em> <em>技术</em> 概览</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_34248705">weixin_34248705的博客</a></p>
+<p>10-12 204<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_34248705/article/details/90334774">本文讲的是 <em>容器</em> <em>技术</em> 概览【编者的话】关于 <em>容器</em> ，这里有你想要的一切，包括 <em>容器</em> 与虚拟机的区别， <em>容器</em> 的优缺点以及 <em>容器</em> 的不同种类。【3 天烧脑式 <em>容器</em> 存储网络训练营 | 深圳站】本次培训以 <em>容器</em> 存储和网络为主题，包括： <em>Docker</em> Plugin、 <em>Docker</em> storage driver、 <em>Docker</em> Volume Pulgin、 <em>Kubernetes</em> Storage机*.<strong>.</strong>.*</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/2501_90241293/article/details/145091639"><em>runc</em> 的简介</a></p>
+<p>6-17<a target="_blank" rel="noopener" href="https://blog.csdn.net/2501_90241293/article/details/145091639">• <em>runC</em> 是一个实现了 OCI Runtime Specification 的 <em>容器</em> 运行时。 • 它可以直接创建和管理 <em>容器</em>,不依赖于 <em>Docker</em> 或其他 <em>容器</em> 管理工具。 2*.* 低级运行时: • <em>runC</em> 是 <em>容器</em> 引擎(如 <em>Docker</em> 和 <em>Kubernetes</em>)底层运行 <em>容器</em> 的核心工具。 • 它处理 <em>容器</em> 生命周期中的关键操作,例如启动、停止和销毁 <em>容器</em> 。</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_45396500/article/details/142691051">[k8s理论知识]1*.<em><em>runc</em> <em>容器</em> 管理工具_麒麟系统的 <em>runc</em> 是什么东西?做什么用</em>.<strong>.</strong>.*</a></p>
+<p>6-30<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_45396500/article/details/142691051"><em>runc</em> 是一个用来启动和管理 <em>容器</em> 的轻量级工具,它是开放 <em>容器</em> 项目(Open Container Initiative, OCI)的标准实现。 <em>runc</em> 是一个 CLI 工具,用于根据 OCI 规范创建和运行 <em>容器</em> 。它是 <em>容器</em> 底层的核心组件,负责直接与Linux内核的 cgroups 和 namespaces 交互,以实现 <em>容器</em> 的隔离和资源限制。</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/kingu_crimson/article/details/126030334">一文搞懂 <em>Docker</em> 、 <em>RunC</em> 、 <em>Containerd</em> 之间的关系</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/kingu_crimson">kingu_crimson的博客</a></p>
+<p>07-28 4405<a target="_blank" rel="noopener" href="https://blog.csdn.net/kingu_crimson/article/details/126030334">于是通过grpc调用的方式，并规定了grpc的接口方法和字段，各个厂商必须实现，也就是我们所谓的CRI（ContainerRuntimeInterface）。 <em>RunC</em> 是 <em>容器</em> 运行工具，纯从系统角度， <em>Runc</em> 才是底层运行时， <em>Runc</em> 是 <em>Docker</em> 中最为核心的部分， <em>容器</em> 的创建、运行、销毁等等操作最终都将通过调用 <em>Runc</em> 完成。 <em>Containerd</em> 是 <em>容器</em> 运行时，从 <em>容器</em> 编排角度， <em>Containerd</em> 是 <em>容器</em> 运行时。我们常说的 <em>docker</em> 一般指的是 <em>docker</em> - <em>shim</em> ，其也是一种 <em>容器</em> 运行时。<em>.<strong>.</strong>.<strong>.</strong>.**.</em></a><a target="_blank" rel="noopener" href="https://blog.csdn.net/Michaelwubo/article/details/135596069">说清楚 <em>Kubernetes</em> 、 <em>Docker</em> 、 <em>Docker</em> <em>shim</em> 、 <em>Containerd</em> 、 <em>runC</em> 、CRI、OCI的关系</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/Michaelwubo">码农崛起</a></p>
+<p>01-15 1864<a target="_blank" rel="noopener" href="https://blog.csdn.net/Michaelwubo/article/details/135596069"><em>Kubernetes</em> v1*.<em>20版本 的 release note 里说 deprecated <em>docker</em> 。并且在后续版本 v1</em>.<em>24 正式删除了 <em>docker</em> <em>shim</em> 组件，这对我们有什么影响呢？为了搞明白这件事情，以及理解一系列 <em>容器</em> <em>名词</em> <em>docker</em>, <em>docker</em> <em>shim</em>, <em>containerd</em>, <em>containerd</em> - <em>shim</em>, <em>runC</em>, CRI, OCI</em>.<strong>.</strong>.*。我们先捋一下 <em>Kubernetes</em> 与 <em>Docker</em> 的发展与关系。</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_61620566/article/details/143442882"><em>Docker</em> <em>Runc</em> <em>容器</em> 逃逸浅析</a></p>
+<p>6-27<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_61620566/article/details/143442882">地址:https://github*.<em>com&#x2F;opencontainers&#x2F; <em>runc</em> &#x2F;releases 直接下载 <em>runc</em></em>.<em>amd64,然后进入到下载目录,执行以下命令 chmod+x <em>runc</em></em>.<em>amd64 sudocp <em>runc</em></em>.<em>amd64 &#x2F;usr&#x2F;sbin&#x2F; <em>runc</em> sudoln-sf &#x2F;usr&#x2F;sbin&#x2F; <em>runc</em> &#x2F;usr&#x2F;bin&#x2F; <em>runc</em> <em>runc</em> -v AI写代码bash 安装成功后,任意创建一个文件夹作为工作目录,在文件夹下创建一个 <em>Docker</em> file,</em>.<strong>.</strong>.*</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/s_alted/article/details/140445124">K8S 中的 CRI、OCI、CRI <em>shim</em> 、 <em>containerd</em></a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/s_alted">s_alted的博客</a></p>
+<p>07-15 1252<a target="_blank" rel="noopener" href="https://blog.csdn.net/s_alted/article/details/140445124">哈喽大家好，我是咸鱼。好久没发文了，最近这段时间都在学 K8S。不知道大家是不是和咸鱼一样，刚开始学 K8S、 <em>Docker</em> 的时候，往往被 CRI、OCI、CRI <em>shim</em> 、 <em>containerd</em> 这些 <em>名词</em> 搞得晕乎乎的，不清楚它们到底是干什么用的。所以今天，咸鱼打算借这篇文章来解释一下这些 <em>名词</em> ，帮助大家理清它们的关系。我们以 K8S 创建 <em>容器</em> 的过程为例，来引申出各个概念。</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/jks212454/article/details/130995898">【 <em>Docker</em> 基础】初识 <em>Docker</em> 及 <em>Docker</em> 基本原理</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/jks212454">jks212454的博客</a></p>
+<p>06-01 1057<a target="_blank" rel="noopener" href="https://blog.csdn.net/jks212454/article/details/130995898">【 <em>Docker</em> 基础】初识 <em>Docker</em> 及 <em>Docker</em> 基本原理</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/phone1126/article/details/127921970"><em>Docker</em> 组件介绍： <em>runc</em> 和 <em>containerd</em></a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/phone1126">phone1126的专栏</a></p>
+<p>11-18 1928<a target="_blank" rel="noopener" href="https://blog.csdn.net/phone1126/article/details/127921970"><em>Docker</em> 组件介绍： <em>runc</em> 和 <em>containerd</em></a><a target="_blank" rel="noopener" href="https://chunyang.blog.csdn.net/article/details/138483188">常见的 <em>容器</em> <em>技术</em> 有哪些</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/wochunyang">一个写了10年bug的程序员日常笔记。</a></p>
+<p>05-06 1553<a target="_blank" rel="noopener" href="https://chunyang.blog.csdn.net/article/details/138483188"><em>容器</em> <em>技术</em> 是一种轻量级的软件封装方式，它将软件代码及其依赖项打包在一起，这样应用可以在任何支持 <em>容器</em> 的系统上无缝运行。它允许应用程序及其依赖项在一个隔离的环境中运行，这个环境被称为 <em>容器</em> 。 <em>容器</em> <em>技术</em> 有助于提高应用程序的可移植性、一致性和资源效率。</a><a target="_blank" rel="noopener" href="https://devpress.csdn.net/v1/article/detail/129357250">【 <em>容器</em> 运行时】一文理解 OCI、 <em>runc</em> 、 <em>containerd</em> 、 <em>docker</em> 、 <em>shim</em> 进程、cri、kubelet 之间的关系</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_24433609">叮当猫的喵i</a></p>
+<p>03-06 4469<a target="_blank" rel="noopener" href="https://devpress.csdn.net/v1/article/detail/129357250">方法 https://github*.<em>com&#x2F; <em>containerd</em> &#x2F; <em>containerd</em> &#x2F;blob&#x2F;v1</em>.<em>4</em>.<em>3&#x2F;runtime&#x2F;v2&#x2F; <em>runc</em> &#x2F;v2&#x2F;service</em>.<em>go#L174-L286。结合源码 https://github</em>.<em>com&#x2F; <em>containerd</em> &#x2F; <em>containerd</em> &#x2F;blob&#x2F;v1</em>.<em>4</em>.<em>3&#x2F;runtime&#x2F;v2&#x2F; <em>shim</em> &#x2F; <em>shim</em></em>.*go#L221-L229。可以看出， <em>containerd</em> 是 <em>containerd</em> - <em>shim</em> 的父进程，contaienrd- <em>shim</em> 是 <em>容器</em> 进程的父进程。</a><a target="_blank" rel="noopener" href="https://devpress.csdn.net/v1/article/detail/60138820"><em>Docker</em> d <em>docker</em> - <em>containerd</em> <em>docker</em> - <em>containerd</em> - <em>shim</em> <em>runC</em></a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/chenhaifeng2016">陈海峰的博客</a></p>
+<p>03-03 5546<a target="_blank" rel="noopener" href="https://devpress.csdn.net/v1/article/detail/60138820"><em>Docker</em> 自从1*.*11以后整个架构做了调整。 <em>Docker</em> 安装成功后， <em>容器</em> 引擎运行着两个守护进程分别是 <em>docker</em> d和 <em>docker</em> - <em>containerd</em> 。 运行 <em>容器</em> <em>docker</em> run -it ubuntu bash， 会创建新的进程 <em>docker</em> - <em>containerd</em> - <em>shim</em> <em>runc</em> 是OCI定义的 <em>容器</em> 运行时标准。 整个运行架构如下图 参考资料</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/rually/article/details/51504896"><em>docker</em> 学习笔记—- <em>containerd</em> 和 <em>runC</em></a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/rually">rually的专栏</a></p>
+<p>05-26 527<a target="_blank" rel="noopener" href="https://blog.csdn.net/rually/article/details/51504896">在这之前先来用一张图看下 <em>docker</em> 1*.*11之后的架构变化： 1 什么是 1 什么是 <em>containerd</em> ？</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/lmix___/article/details/113895834"><em>Docker</em> 、 <em>containerd</em> 、 <em>docker</em> - <em>shim</em> 、 <em>runC</em> 之间的关系</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/lmix___">lmix___的博客</a></p>
+<p>02-20 2298<a target="_blank" rel="noopener" href="https://blog.csdn.net/lmix___/article/details/113895834"><em>Docker</em> 、 <em>containerd</em> 、 <em>docker</em> - <em>shim</em> 、 <em>runC</em> 之间的关系 <em>docker</em> ： <em>docker</em> 本身而言包括了 <em>docker</em> client和 <em>docker</em> d， <em>docker</em> d实属是对 <em>容器</em> 相关操作的api的最上层封装，直接面向操作用户； <em>containerd</em> ： <em>docker</em> d实际真实调用的还是 <em>containerd</em> 的api接口(rpc方式实现)， <em>containerd</em> 是 <em>docker</em> d*.<strong>.</strong>.*</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/whatday/article/details/132600879"><em>云原生</em> 专有 <em>名词</em> container <em>docker</em> client <em>docker</em> -daemon <em>containerd</em> <em>containerd</em> - <em>shim</em> - <em>runc</em> -v2进程 <em>runC</em> OCI cri-o简介</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/whatday">whatday的专栏</a></p>
+<p>08-31 4274<a target="_blank" rel="noopener" href="https://blog.csdn.net/whatday/article/details/132600879">环境说明：先看一张 <em>Docker</em> 的。</a><a target="_blank" rel="noopener" href="https://devpress.csdn.net/v1/article/detail/125353593">探秘 <em>Containerd</em> <em>容器</em> 中的 <em>Shim</em> 进程</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/easylife206">easylife206的专栏</a></p>
+<p>06-18 4176<a target="_blank" rel="noopener" href="https://devpress.csdn.net/v1/article/detail/125353593">公众号关注「奇妙的 Linux 世界」设为「星标」，每天带你玩转 Linux ！ <em>Kubernetes</em> 1*.<em>20 版开始废除了对 <em>docker</em> <em>shim</em> 的支持，改用 <em>Containerd</em> [1]作为默认的 <em>容器</em> 运行时。本文将介绍 <em>Containerd</em> 中的 “ <em>shim</em> “ 接口。每一个 <em>Containerd</em> 或 <em>Docker</em> <em>容器</em> 都有一个相应的 “ <em>shim</em> “ 守护进程，这个守</em>.<strong>.</strong>.*</a><a target="_blank" rel="noopener" href="https://wenku.csdn.net/answer/0623e59aaace4785b4642be07b9e8c94"><em>docker</em> run和 <em>docker</em> - <em>containerd</em> - <em>shim</em></a></p>
+<p>06-01<a target="_blank" rel="noopener" href="https://wenku.csdn.net/answer/0623e59aaace4785b4642be07b9e8c94">当我们执行 <em>docker</em> run命令时， <em>Docker</em> 会调用底层的 <em>containerd</em> - <em>shim</em> 进程来启动 <em>容器</em> ，并将 <em>容器</em> 的标准输入、输出和错误输出重定向到 <em>容器</em> 的标准流中。 <em>containerd</em> - <em>shim</em> 是 <em>Docker</em> 运行时的一个组件，它负责启动和管理 <em>容器</em><em>.<strong>.</strong>.</em></a></p>
+<p>登录后您可以享受以下权益：</p>
+<ul>
+<li>免费复制代码</li>
+<li>和博主大V互动</li>
+<li>下载海量资源</li>
+<li>发动态&#x2F;写文章&#x2F;加入社区<br>×</li>
+</ul>
+<p>实付 元</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/dillanzhou/article/details/">使用余额支付</a></p>
+<p>点击重新获取</p>
+<p>扫码支付</p>
+<p>钱包余额 0</p>
+<p>抵扣说明：</p>
+<p>1.余额是钱包充值的虚拟货币，按照1:1的比例进行支付金额的抵扣。<br>2.余额无法直接购买下载，可以购买VIP、付费专栏及课程。</p>
+<p><a target="_blank" rel="noopener" href="https://i.csdn.net/#/wallet/balance/recharge">余额充值</a></p>
+<p>举报</p>
+<p> [![[_resources&#x2F;35c7362356adf5a11cd3cc47fd01628f_MD5.png]] 点击体验<br>DeepSeekR1满血版](<a target="_blank" rel="noopener" href="https://ai.csdn.net/?utm_source=cknow_pc_blogdetail&spm=1001.2101.3001.10583">https://ai.csdn.net/?utm_source=cknow_pc_blogdetail&amp;spm=1001.2101.3001.10583</a>) ![[_resources&#x2F;90bd0cbf3aff8fdff8bf9b011b581e20_MD5.png]]</p>
+<p>程序员都在用的中文IT技术交流社区</p>
+<p>![[_resources&#x2F;08a47e60886378fe60a3d9c8f4ae8bc6_MD5.png]]</p>
+<p>专业的中文 IT 技术社区，与千万技术人共成长</p>
+<p>![[_resources&#x2F;a51be6c085b867a5bd82d8dc1cea9b46_MD5.png]]</p>
+<p>关注【CSDN】视频号，行业资讯、技术分享精彩不断，直播好礼送不停！</p>
+<p>客服 返回顶部</p>
+<p>![[_resources&#x2F;a1979d4e42c046c76c9d16864da97aaa_MD5.png]] ![[_resources&#x2F;93d6c2e49e3d29c0da7403c53543cd21_MD5.png]] ![[_resources&#x2F;64471f2334fbce9b5240bf274c31efe5_MD5.png]]</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/clippings/" class="print-no-link">#clippings</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>docker、containerd、runc、shim... 容器技术名词全解析-CSDN博客</div>
+      <div>https://yhao521.github.io/2025/06/30/摘录/docker、containerd、runc、shim... 容器技术名词全解析-CSDN博客/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>[[成就一亿技术人!]],[[hope_wisdom 发出的红包]]</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年6月30日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/06/30/%E6%91%98%E5%BD%95/%E5%88%AB%E5%86%8D%E5%82%BB%E5%82%BB%E5%88%86%E4%B8%8D%E6%B8%85%EF%BC%81%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90%20runC%E3%80%81containerd%E3%80%81Docker%20%E5%90%AF%E5%8A%A8%E9%80%9F%E5%BA%A6%E5%B7%AE%E5%BC%82/" title="别再傻傻分不清！深度剖析 runC、containerd、Docker 启动速度差异">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">别再傻傻分不清！深度剖析 runC、containerd、Docker 启动速度差异</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/06/26/%E6%91%98%E5%BD%95/%E8%AF%B4%E8%AF%B4%20Spring%20%E5%90%AF%E5%8A%A8%E8%BF%87%E7%A8%8B%EF%BC%9F,%E7%A8%8B%E5%BA%8F%E5%91%98%E7%BB%8F%E5%85%B8%E9%9D%A2%E8%AF%95%E7%AC%94%E8%AF%95%E9%A2%98%E7%9B%AE,%20%E7%A0%81%E5%B0%8F%E8%AF%BE/" title="说说 Spring 启动过程？,程序员经典面试笔试题目, 码小课">
+                        <span class="hidden-mobile">说说 Spring 启动过程？,程序员经典面试笔试题目, 码小课</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>  
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

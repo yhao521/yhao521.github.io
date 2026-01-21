@@ -1,0 +1,674 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="[[孤雨​李子家的程序猿]]">
+  <meta name="keywords" content="java,博客,vue,spring,mysql,docker,linux">
+  
+    <meta name="description" content="简介 上一篇文章介绍了mergo库的使用，mergo是用来给结构体或map赋值的。mergo有一个明显的不足——它只能处理相同类型的结构！如果类型不同，即使字段名和类型完全相同，mergo也无能为力。今天我们要介绍的copier…">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go 每日一库之 copier">
+<meta property="og:url" content="https://yhao521.github.io/2025/08/29/%E6%91%98%E5%BD%95/Go%20%E6%AF%8F%E6%97%A5%E4%B8%80%E5%BA%93%E4%B9%8B%20copier/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="简介 上一篇文章介绍了mergo库的使用，mergo是用来给结构体或map赋值的。mergo有一个明显的不足——它只能处理相同类型的结构！如果类型不同，即使字段名和类型完全相同，mergo也无能为力。今天我们要介绍的copier…">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-08-29T03:19:40.263Z">
+<meta property="article:modified_time" content="2025-08-29T03:19:45.492Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="clippings">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>Go 每日一库之 copier - 匆匆过客的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yhao521.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>匆匆过客的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Go 每日一库之 copier"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-08-29 11:19" pubdate>
+          2025年8月29日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.3k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          11 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Go 每日一库之 copier</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>![[_resources&#x2F;05a85ed726cdf1852a62fda077b94362_MD5.webp]]</p>
+<p>Go 每日一库之 copier</p>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p><a target="_blank" rel="noopener" href="https://darjun.github.io/2020/03/11/godailylib/mergo">上一篇文章</a> 介绍了 <code>mergo</code> 库的使用， <code>mergo</code> 是用来给结构体或 <code>map</code> 赋值的。 <code>mergo</code> 有一个明显的不足——它只能处理相同类型的结构！如果类型不同，即使字段名和类型完全相同， <code>mergo</code> 也无能为力。今天我们要介绍的 <code>copier</code> 库就能处理不同类型之间的赋值。除此之外， <code>copier</code> 还能：</p>
+<ul>
+<li>调用同名方法为字段赋值；</li>
+<li>以源对象字段为参数调用目标对象的方法，从而为目标对象赋值（当然也可以做其它的任何事情）；</li>
+<li>将切片赋值给切片（可以是不同类型哦）；</li>
+<li>将结构体追加到切片中。</li>
+</ul>
+<p>感谢 <a target="_blank" rel="noopener" href="https://github.com/thinkgos">@thinkgos</a> 推荐。</p>
+<p>顺带一提，作者是国人 <a target="_blank" rel="noopener" href="https://github.com/jinzhu">jinzhu</a> 大佬，如果你想找一个 <a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=113308712&content_type=Article&match_order=1&q=Go+%E8%AF%AD%E8%A8%80&zd_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ6aGlkYV9zZXJ2ZXIiLCJleHAiOjE3NTY2MTAzNDEsInEiOiJHbyDor63oqIAiLCJ6aGlkYV9zb3VyY2UiOiJlbnRpdHkiLCJjb250ZW50X2lkIjoxMTMzMDg3MTIsImNvbnRlbnRfdHlwZSI6IkFydGljbGUiLCJtYXRjaF9vcmRlciI6MSwiemRfdG9rZW4iOm51bGx9.i2LszsnFf5ez_SeAu8iAlpLsulAMqp7rqHdCiAtpbl0&zhida_source=entity">Go 语言</a> 的 ORM 库， <a target="_blank" rel="noopener" href="https://github.com/jinzhu/gorm">gorm</a> 你值得拥有！</p>
+<h2 id="快速使用"><a href="#快速使用" class="headerlink" title="快速使用"></a>快速使用</h2><p>先安装：</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs vim">$ <span class="hljs-keyword">go</span> <span class="hljs-built_in">get</span> github.<span class="hljs-keyword">com</span>/jinzhu/copier<br></code></pre></td></tr></table></figure>
+
+<p>后使用：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-keyword">package</span> main<br><br><span class="hljs-keyword">import</span> (<br>  <span class="hljs-string">&quot;fmt&quot;</span><br><br>  <span class="hljs-string">&quot;github.com/jinzhu/copier&quot;</span><br>)<br><br><span class="hljs-keyword">type</span> User <span class="hljs-keyword">struct</span> &#123;<br>  Name <span class="hljs-type">string</span><br>  Age  <span class="hljs-type">int</span><br>&#125;<br><br><span class="hljs-keyword">type</span> Employee <span class="hljs-keyword">struct</span> &#123;<br>  Name <span class="hljs-type">string</span><br>  Age  <span class="hljs-type">int</span><br>  Role <span class="hljs-type">string</span><br>&#125;<br><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span> &#123;<br>  user := User&#123;Name: <span class="hljs-string">&quot;dj&quot;</span>, Age: <span class="hljs-number">18</span>&#125;<br>  employee := Employee&#123;&#125;<br><br>  copier.Copy(&amp;employee, &amp;user)<br>  fmt.Printf(<span class="hljs-string">&quot;%#v\n&quot;</span>, employee)<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>很好理解，就是将 <code>user</code> 对象中的字段赋值到 <code>employee</code> 的同名字段中。如果目标对象中没有同名的字段，则该字段被忽略。</p>
+<h3 id="高级特性"><a href="#高级特性" class="headerlink" title="高级特性"></a>高级特性</h3><h2 id="方法赋值"><a href="#方法赋值" class="headerlink" title="方法赋值"></a>方法赋值</h2><p>目标对象中的一些字段，源对象中没有，但是源对象有同名的方法。这时 <code>Copy</code> 会调用这个方法，将返回值赋值给目标对象中的字段：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-keyword">type</span> User <span class="hljs-keyword">struct</span> &#123;<br>  Name <span class="hljs-type">string</span><br>  Age  <span class="hljs-type">int</span><br>&#125;<br><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(u *User)</span></span> DoubleAge() <span class="hljs-type">int</span> &#123;<br>  <span class="hljs-keyword">return</span> <span class="hljs-number">2</span> * u.Age<br>&#125;<br><br><span class="hljs-keyword">type</span> Employee <span class="hljs-keyword">struct</span> &#123;<br>  Name      <span class="hljs-type">string</span><br>  DoubleAge <span class="hljs-type">int</span><br>  Role      <span class="hljs-type">string</span><br>&#125;<br><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span> &#123;<br>  user := User&#123;Name: <span class="hljs-string">&quot;dj&quot;</span>, Age: <span class="hljs-number">18</span>&#125;<br>  employee := Employee&#123;&#125;<br><br>  copier.Copy(&amp;employee, &amp;user)<br>  fmt.Printf(<span class="hljs-string">&quot;%#v\n&quot;</span>, employee)<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>我们给 <code>User</code> 添加一个 <code>DoubleAge</code> 方法。 <code>Employee</code> 结构有字段 <code>DoubleAge</code> ， <code>User</code> 中没有，但是 <code>User</code> 有一个同名的方法，这时 <code>Copy</code> 调用 <code>user</code> 的 <code>DoubleAge</code> 方法为 <code>employee</code> 的 <code>DoubleAge</code> 赋值，得到 36。</p>
+<h2 id="调用目标方法"><a href="#调用目标方法" class="headerlink" title="调用目标方法"></a>调用目标方法</h2><p>有时候源对象中的某个字段没有出现在目标对象中，但是目标对象有一个同名的方法，方法接受一个同类型的参数，这时 <code>Copy</code> 会以源对象的这个字段作为参数调用目标对象的该方法：</p>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs crmsh"><span class="hljs-keyword">type</span> <span class="hljs-keyword">User</span> <span class="hljs-title">struct</span> &#123;<br>  Name <span class="hljs-keyword">string</span><br>  Age  int<br>  <span class="hljs-keyword">Role</span> <span class="hljs-title">string</span><br>&#125;<br><br><span class="hljs-keyword">type</span> Employee struct &#123;<br>  Name      <span class="hljs-keyword">string</span><br>  Age       int<br>  SuperRole <span class="hljs-keyword">string</span><br>&#125;<br><br>func (e *Employee) Role(<span class="hljs-keyword">role</span> <span class="hljs-title">string</span>) &#123;<br>  e.SuperRole = <span class="hljs-string">&quot;Super&quot;</span> + <span class="hljs-keyword">role</span><br><span class="hljs-title">&#125;</span><br><span class="hljs-title"></span><br><span class="hljs-title">func</span> main() &#123;<br>  <span class="hljs-keyword">user</span> <span class="hljs-title">:= User</span>&#123;Name: <span class="hljs-string">&quot;dj&quot;</span>, Age: <span class="hljs-number">18</span>, Role: <span class="hljs-string">&quot;Admin&quot;</span>&#125;<br>  employee := Employee&#123;&#125;<br><br>  copier.Copy(&amp;employee, &amp;user)<br>  fmt.Printf(<span class="hljs-string">&quot;%#v\n&quot;</span>, employee)<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>我们给 <code>Employee</code> 添加了一个 <code>Role</code> 方法， <code>User</code> 的字段 <code>Role</code> 没有出现在 <code>Employee</code> 中，但是 <code>Employee</code> 有一个同名方法。 <code>Copy</code> 函数内部会以 <code>user</code> 对象的 <code>Role</code> 字段为参数调用 <code>employee</code> 的 <code>Role</code> 方法。最终，我们的 <code>employee</code> 对象的 <code>SuperRole</code> 值变为 <code>SuperAdmin</code> 。实际上，这个方法中可以执行任何操作，不一定是赋值。</p>
+<h3 id="切片赋值"><a href="#切片赋值" class="headerlink" title="切片赋值"></a>切片赋值</h3><p>使用一个切片来为另一个切片赋值。如果类型相同，那好办，直接 <code>append</code> 就行。如果类型不同呢？ <code>copier</code> 就派上大用场了：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-keyword">type</span> User <span class="hljs-keyword">struct</span> &#123;<br>  Name <span class="hljs-type">string</span><br>  Age  <span class="hljs-type">int</span><br>&#125;<br><br><span class="hljs-keyword">type</span> Employee <span class="hljs-keyword">struct</span> &#123;<br>  Name <span class="hljs-type">string</span><br>  Age  <span class="hljs-type">int</span><br>  Role <span class="hljs-type">string</span><br>&#125;<br><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span> &#123;<br>  users := []User&#123;<br>    &#123;Name: <span class="hljs-string">&quot;dj&quot;</span>, Age: <span class="hljs-number">18</span>&#125;,<br>    &#123;Name: <span class="hljs-string">&quot;dj2&quot;</span>, Age: <span class="hljs-number">18</span>&#125;,<br>  &#125;<br>  employees := []Employee&#123;&#125;<br><br>  copier.Copy(&amp;employees, &amp;users)<br>  fmt.Printf(<span class="hljs-string">&quot;%#v\n&quot;</span>, employees)<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这个实际上就是将源切片中每个元素分别赋值到目标切片中。</p>
+<h3 id="将结构赋值到切片"><a href="#将结构赋值到切片" class="headerlink" title="将结构赋值到切片"></a>将结构赋值到切片</h3><p>这个不难，实际上就是根据源对象生成一个和目标切片类型相符合的对象，然后 <code>append</code> 到目标切片中：</p>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs crmsh"><span class="hljs-keyword">type</span> <span class="hljs-keyword">User</span> <span class="hljs-title">struct</span> &#123;<br>  Name <span class="hljs-keyword">string</span><br>  Age  int<br>&#125;<br><br><span class="hljs-keyword">type</span> Employee struct &#123;<br>  Name <span class="hljs-keyword">string</span><br>  Age  int<br>  <span class="hljs-keyword">Role</span> <span class="hljs-title">string</span><br>&#125;<br><br>func main() &#123;<br>  <span class="hljs-keyword">user</span> <span class="hljs-title">:= User</span>&#123;Name: <span class="hljs-string">&quot;dj&quot;</span>, Age: <span class="hljs-number">18</span>&#125;<br>  employees := []Employee&#123;&#125;<br><br>  copier.Copy(&amp;employees, &amp;user)<br>  fmt.Printf(<span class="hljs-string">&quot;%#v\n&quot;</span>, employees)<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>上面代码中， <code>Copy</code> 先通过 <code>user</code> 生成一个 <code>Employee</code> 对象，然后 <code>append</code> 到切片 <code>employees</code> 中。</p>
+<h3 id="汇总"><a href="#汇总" class="headerlink" title="汇总"></a>汇总</h3><p>最后将所有的特性汇总在一个例子中，其实就是 <code>Copier</code> 的 GitHub 仓库首页的例子：</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><code class="hljs pgsql"><span class="hljs-keyword">type</span> <span class="hljs-keyword">User</span> struct &#123;<br>  <span class="hljs-type">Name</span> string<br>  Age  <span class="hljs-type">int</span><br>  <span class="hljs-keyword">Role</span> string<br>&#125;<br><br>func (u *<span class="hljs-keyword">User</span>) DoubleAge() <span class="hljs-type">int</span> &#123;<br>  <span class="hljs-keyword">return</span> u.Age * <span class="hljs-number">2</span><br>&#125;<br><br><span class="hljs-keyword">type</span> Employee struct &#123;<br>  <span class="hljs-type">Name</span>      string<br>  Age       <span class="hljs-type">int</span><br>  SuperRole string<br>&#125;<br><br>func (e *Employee) <span class="hljs-keyword">Role</span>(<span class="hljs-keyword">role</span> string) &#123;<br>  e.SuperRole = &quot;Super&quot; + <span class="hljs-keyword">role</span><br>&#125;<br><br>func main() &#123;<br>  var (<br>    <span class="hljs-keyword">user</span>  = <span class="hljs-keyword">User</span>&#123;<span class="hljs-type">Name</span>: &quot;dj&quot;, Age: <span class="hljs-number">18</span>&#125;<br>    users = []<span class="hljs-keyword">User</span>&#123;<br>      &#123;<span class="hljs-type">Name</span>: &quot;dj&quot;, Age: <span class="hljs-number">18</span>, <span class="hljs-keyword">Role</span>: &quot;Admin&quot;&#125;,<br>      &#123;<span class="hljs-type">Name</span>: &quot;dj2&quot;, Age: <span class="hljs-number">18</span>, <span class="hljs-keyword">Role</span>: &quot;Dev&quot;&#125;,<br>    &#125;<br>    employee  = Employee&#123;&#125;<br>    employees = []Employee&#123;&#125;<br>  )<br><br>  copier.<span class="hljs-keyword">Copy</span>(&amp;employee, &amp;<span class="hljs-keyword">user</span>)<br>  fmt.Printf(&quot;%#v\n&quot;, employee)<br><br>  copier.<span class="hljs-keyword">Copy</span>(&amp;employees, &amp;<span class="hljs-keyword">user</span>)<br>  fmt.Printf(&quot;%#v\n&quot;, employees)<br><br>  // employees = []Employee&#123;&#125;<br><br>  copier.<span class="hljs-keyword">Copy</span>(&amp;employees, &amp;users)<br>  fmt.Printf(&quot;%#v\n&quot;, employees)<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>上面例子中，我故意把 <code>employees = []Employee{}</code> 这一行注释掉，最后输出的 <code>employees</code> 是 3 个元素，能更清楚的看出切片到切片是 <code>append</code> 的，目标切片原来的元素还是保留的。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p><code>copier</code> 库的代码量很小，用了不到 200 行的代码就实现了如此实用的一个功能，非常值得一看！</p>
+<p>大家如果发现好玩、好用的 Go 语言库，欢迎到 Go 每日一库 GitHub 上提交 issue</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li>copier GitHub： <a target="_blank" rel="noopener" href="https://github.com/jinzhu/copier">github.com&#x2F;jinzhu&#x2F;copie</a></li>
+<li>Go 每日一库 GitHub： <a target="_blank" rel="noopener" href="https://github.com/darjun/go-daily-lib">github.com&#x2F;darjun&#x2F;go-da</a></li>
+</ol>
+<h2 id="我"><a href="#我" class="headerlink" title="我"></a>我</h2><p><a target="_blank" rel="noopener" href="https://darjun.github.io/">我的博客</a></p>
+<p>欢迎关注我的微信公众号【GoUpUp】，共同学习，一起进步~</p>
+<p><a target="_blank" rel="noopener" href="http://weixin.qq.com/r/9y-s9OfEYboeraOX93rl">weixin.qq.com&#x2F;r&#x2F;9y-s9Of</a> (二维码自动识别)</p>
+<p>发布于 2020-03-15 11:08<a target="_blank" rel="noopener" href="https://www.zhihu.com/topic/19625982">Go 语言</a><a target="_blank" rel="noopener" href="https://www.zhihu.com/topic/20052037">Go 编程</a><a target="_blank" rel="noopener" href="https://www.zhihu.com/topic/19652988">代码阅读</a></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/clippings/" class="print-no-link">#clippings</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Go 每日一库之 copier</div>
+      <div>https://yhao521.github.io/2025/08/29/摘录/Go 每日一库之 copier/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>[[孤雨​李子家的程序猿]]</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年8月29日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/09/02/%E6%91%98%E5%BD%95/Go%20%E5%9F%BA%E4%BA%8Egorm%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%86%E9%9B%B6%E5%80%BC%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/" title="Go 基于gorm如何处理零值问题解决方案">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Go 基于gorm如何处理零值问题解决方案</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/08/29/%E6%91%98%E5%BD%95/golang%20struct%E6%8B%B7%E8%B4%9D%E5%B7%A5%E5%85%B7%EF%BC%88%E7%B1%BB%E4%BC%BC%E4%BA%8Ejava%E4%B8%AD%20BeanUtils.copyProperties()%EF%BC%89_golang%20struct%20copy-CSDN%E5%8D%9A%E5%AE%A2/" title="golang struct拷贝工具（类似于java中 BeanUtils.copyProperties()）_golang struct copy-CSDN博客">
+                        <span class="hidden-mobile">golang struct拷贝工具（类似于java中 BeanUtils.copyProperties()）_golang struct copy-CSDN博客</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>  
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

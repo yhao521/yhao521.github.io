@@ -1,0 +1,676 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="[[成就一亿技术人!]],[[hope_wisdom 发出的红包]]">
+  <meta name="keywords" content="java,博客,vue,spring,mysql,docker,linux">
+  
+    <meta name="description" content="文章浏览阅读2k次，点赞3次，收藏5次。文章讲述了如何在Android中获取通过WIFI连接的局域网IP以及在手机热点模式下找到可用的无线网络接口获取IP地址。作者提供了遍历网络接口并过滤LinkLocalAddress的示例代码。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java &#x2F; Android 获取本机开启热点、连接 WIFI 时的 IP_安卓获取热点ip-CSDN博客">
+<meta property="og:url" content="https://yhao521.github.io/2025/09/14/%E6%91%98%E5%BD%95/Java%20%20Android%20%E8%8E%B7%E5%8F%96%E6%9C%AC%E6%9C%BA%E5%BC%80%E5%90%AF%E7%83%AD%E7%82%B9%E3%80%81%E8%BF%9E%E6%8E%A5%20WIFI%20%E6%97%B6%E7%9A%84%20IP_%E5%AE%89%E5%8D%93%E8%8E%B7%E5%8F%96%E7%83%AD%E7%82%B9ip-CSDN%E5%8D%9A%E5%AE%A2/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="文章浏览阅读2k次，点赞3次，收藏5次。文章讲述了如何在Android中获取通过WIFI连接的局域网IP以及在手机热点模式下找到可用的无线网络接口获取IP地址。作者提供了遍历网络接口并过滤LinkLocalAddress的示例代码。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-09-14T09:40:08.389Z">
+<meta property="article:modified_time" content="2025-09-14T09:40:49.301Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="clippings">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>Java / Android 获取本机开启热点、连接 WIFI 时的 IP_安卓获取热点ip-CSDN博客 - 匆匆过客的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yhao521.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>匆匆过客的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Java / Android 获取本机开启热点、连接 WIFI 时的 IP_安卓获取热点ip-CSDN博客"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-09-14 17:40" pubdate>
+          2025年9月14日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.3k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          11 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Java / Android 获取本机开启热点、连接 WIFI 时的 IP_安卓获取热点ip-CSDN博客</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>文章讲述了如何在Android中获取通过WIFI连接的局域网IP以及在手机热点模式下找到可用的无线网络接口获取IP地址。作者提供了遍历网络接口并过滤LinkLocalAddress的示例代码。</p>
+<p>最近在做一个 <a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=Android&spm=1001.2101.3001.7020">Android</a> 关于的无线局域网项目，需要获取本机在所连接局域网上的IP地址。手机可以通过WIFI连接已知的局域网，也可通过打开手机热点去组建一个局域网。</p>
+<p>在通过WIFI连接 <a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=%E5%B1%80%E5%9F%9F%E7%BD%91&spm=1001.2101.3001.7020">局域网</a> 时，本机的 IP 地址可以通过 “ WifiManager ” 和“ WifiInfo ”获得，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> String <span class="hljs-title function_">getIP</span><span class="hljs-params">(Context context)</span> &#123;<br><br>        <span class="hljs-type">WifiManager</span> <span class="hljs-variable">wifiManager</span> <span class="hljs-operator">=</span> (WifiManager) context.getSystemService(Context.WIFI_SERVICE);<br><br>        <span class="hljs-keyword">if</span> (wifiManager.isWifiEnabled()) &#123;<br><br>            <span class="hljs-comment">// 若已经开启了 WIFI</span><br><br>            <span class="hljs-type">WifiInfo</span> <span class="hljs-variable">wifiInfo</span> <span class="hljs-operator">=</span> wifiManager.getConnectionInfo();<br><br>            <span class="hljs-type">int</span> <span class="hljs-variable">ip</span> <span class="hljs-operator">=</span> wifiInfo.getIpAddress();<br><br>            <span class="hljs-keyword">return</span> (ip &amp; <span class="hljs-number">0xFF</span>) + <span class="hljs-string">&quot;.&quot;</span> + ((ip &gt;&gt; <span class="hljs-number">8</span>) &amp; <span class="hljs-number">0xFF</span>) + <span class="hljs-string">&quot;.&quot;</span> + ((ip &gt;&gt; <span class="hljs-number">16</span>) &amp; <span class="hljs-number">0xFF</span>) + <span class="hljs-string">&quot;.&quot;</span> + ((ip &gt;&gt; <span class="hljs-number">24</span>) &amp; <span class="hljs-number">0xFF</span>);<br><br>        &#125; <span class="hljs-keyword">else</span> &#123;<br><br>            <span class="hljs-comment">// 未打开 WIFI</span><br><br>            <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;<br><br>        &#125;<br><br>    &#125;<br>java<br></code></pre></td></tr></table></figure>
+
+<p>但是如果通过“便携式热点”的方式自己开启局域网时，本机的 IP 一时想不到方案怎么获取（上述方式就不管用了，因为手机开启热点后WIFI会被关闭）。终于通过这篇文章有了可行的解决办法：</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_39471607/article/details/107047109?spm=1001.2101.3001.6650.2&utm_medium=distribute.pc_relevant.none-task-blog-2~default~CTRLIST~Rate-2-107047109-blog-128700512.235%5Ev38%5Epc_relevant_sort_base1&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2~default~CTRLIST~Rate-2-107047109-blog-128700512.235%5Ev38%5Epc_relevant_sort_base1&utm_relevant_index=5" title="Android 中获取本机热点ip地址_android 获取usb共享网络设备的ip-CSDN博客">Android 中获取本机热点ip地址_android 获取usb共享网络设备的ip-CSDN博客</a></p>
+</blockquote>
+<p>大致的原理是通过遍历所有已知的网络接口，最后找到名为“ wlan0 ”（或“eth0”或“ap0”）的 <a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=%E6%97%A0%E7%BA%BF%E5%B1%80%E5%9F%9F%E7%BD%91&spm=1001.2101.3001.7020">无线局域网</a> 接口即可。我通过下面代码大致输出了一下它的遍历结果（因为我的Android Studio不知道为什么在打 log 输出时，IP地址会显示为 “********”，因此我把‘.’ 替换成了 ‘@’，有知道的小伙伴告诉我一下，谢谢！）：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> InetAddress <span class="hljs-title function_">getApIpAddress2</span><span class="hljs-params">()</span> &#123;<br><br>    <span class="hljs-keyword">try</span> &#123;<br><br>        Enumeration&lt;NetworkInterface&gt; networkInterfaces = NetworkInterface.getNetworkInterfaces();<br><br>        <span class="hljs-keyword">while</span> (networkInterfaces.hasMoreElements()) &#123;<br><br>            <span class="hljs-type">NetworkInterface</span> <span class="hljs-variable">networkInterface</span> <span class="hljs-operator">=</span> networkInterfaces.nextElement();<br><br>            Log.d(<span class="hljs-string">&quot;test&quot;</span>, <span class="hljs-string">&quot;networkInterface: &quot;</span> + networkInterface.getDisplayName());<br><br> <br><br>            <span class="hljs-comment">// getInetAddresses</span><br><br>            Enumeration&lt;InetAddress&gt; ipAddresses = networkInterface.getInetAddresses();<br><br>            <span class="hljs-keyword">while</span> (ipAddresses.hasMoreElements()) &#123;<br><br>                <span class="hljs-type">InetAddress</span> <span class="hljs-variable">inetAddress</span> <span class="hljs-operator">=</span> ipAddresses.nextElement();<br><br>                Log.d(<span class="hljs-string">&quot;test&quot;</span>, <span class="hljs-string">&quot;    inetAddress: &quot;</span> + inetAddress.toString().replace(<span class="hljs-string">&#x27;.&#x27;</span>,<span class="hljs-string">&#x27;@&#x27;</span>));<br><br>            &#125;<br><br>            <span class="hljs-comment">// getInterfaceAddresses</span><br><br>            List&lt;InterfaceAddress&gt; interfaceAddressList = networkInterface.getInterfaceAddresses();<br><br>            <span class="hljs-keyword">for</span> (InterfaceAddress interfaceAddress : interfaceAddressList) &#123;<br><br>                Log.d(<span class="hljs-string">&quot;test&quot;</span>, <span class="hljs-string">&quot;    interfaceAddress: &quot;</span> + interfaceAddress.getAddress().toString().replace(<span class="hljs-string">&#x27;.&#x27;</span>,<span class="hljs-string">&#x27;@&#x27;</span>) + <span class="hljs-string">&quot;   &quot;</span> + interfaceAddress.getNetworkPrefixLength());<br><br>            &#125;<br><br>        &#125;<br><br>    &#125; <span class="hljs-keyword">catch</span> (SocketException e) &#123;<br><br>        e.printStackTrace();<br><br>    &#125;<br><br>    <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;<br><br>&#125;<br>java<br></code></pre></td></tr></table></figure>
+
+<p>上面的代码得到的结果是（此时我手机连上了另一台手机的热点）：</p>
+<p>![[_resources&#x2F;74a1f5cad0bcc333fe076a9e5bddda98_MD5.png]]</p>
+<p>可以看到，在名为“ wlan0 ”（或“eth0”或“ap0”）的网络接口中，找到了我所需要的 IP 地址甚至是网络前缀。但是同时也存在了一个 Ipv6 的输出（链路本地地址 LinkLocalAddress），这个我不需要，等一下在正式代码中我可以将其过滤掉。因此， <strong>结论： 找到DisplayName 为 “wlan0”（或“eth0”或“ap0”）</strong> <strong>的网络接口，再对 “wlan0”（或“eth0”或“ap0”）内的地址做过滤即可。</strong></p>
+<p><strong>下面是正式代码：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> String <span class="hljs-title function_">getApIpAddress2</span><span class="hljs-params">()</span> &#123;<br><br>    <span class="hljs-keyword">try</span> &#123;<br><br>        Enumeration&lt;NetworkInterface&gt; networkInterfaces = NetworkInterface.getNetworkInterfaces();<br><br>        <span class="hljs-keyword">while</span> (networkInterfaces.hasMoreElements()) &#123;<br><br>            <span class="hljs-type">NetworkInterface</span> <span class="hljs-variable">networkInterface</span> <span class="hljs-operator">=</span> networkInterfaces.nextElement();<br><br>            <span class="hljs-keyword">if</span> (networkInterface.getDisplayName().contains(<span class="hljs-string">&quot;wlan0&quot;</span>) ||<br><br>                        networkInterface.getDisplayName().contains(<span class="hljs-string">&quot;eth0&quot;</span>) ||<br><br>                        networkInterface.getDisplayName().contains(<span class="hljs-string">&quot;ap0&quot;</span>)) &#123;<br><br>                <span class="hljs-comment">// getInterfaceAddresses</span><br><br>                List&lt;InterfaceAddress&gt; interfaceAddressList = networkInterface.getInterfaceAddresses();<br><br>                <span class="hljs-keyword">for</span> (InterfaceAddress interfaceAddress : interfaceAddressList) &#123;<br><br>                    <span class="hljs-type">InetAddress</span> <span class="hljs-variable">inetAddress</span> <span class="hljs-operator">=</span> interfaceAddress.getAddress();<br><br>                    <span class="hljs-keyword">if</span> (!inetAddress.isLinkLocalAddress()) &#123; <span class="hljs-comment">// 过滤掉 链路本地地址</span><br><br>                        <span class="hljs-comment">// 获取网络前缀（子网掩码）</span><br><br>                        <span class="hljs-type">int</span> <span class="hljs-variable">prefix</span> <span class="hljs-operator">=</span> interfaceAddress.getNetworkPrefixLength();<br><br>                        <span class="hljs-comment">// 输出：192.168.43.197/24</span><br><br>                        <span class="hljs-keyword">return</span> inetAddress.toString().substring(<span class="hljs-number">1</span>) + <span class="hljs-string">&quot;/&quot;</span> + prefix;<br><br>                    &#125;<br><br>                &#125;<br><br>            &#125;<br><br>        &#125;<br><br>    &#125; <span class="hljs-keyword">catch</span> (SocketException e) &#123;<br><br>        e.printStackTrace();<br><br>    &#125;<br><br>    <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;<br><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>说明：</p>
+<ol>
+<li>正式代码经过测试，可以获取到连接 WIFI 时本机的 IP 地址，也可以获取到作为热点源时 本机的 IP 地址。</li>
+<li>代码中，返回时为什么要subString(1)呢？是因为InetAddress.toString()时会加上“&#x2F;”，比如“&#x2F;192.168.43.197”，因此需要将这个斜杠去掉。</li>
+<li>什么原因结果会返回 null 呢？返回 null 是因为找不到 “wlan0”（或“eth0”或“ap0”），找不到“wlan0”（或“eth0”或“ap0”）大概率是因为没有打开 WIFI 或 热点。</li>
+<li>上述代码只是从我观察到的现象来写出的，可靠性仍不清楚，比如对于不同手机中 “wlan0”的名字是否唯一、是否都叫这个名等等的不确定性，仍然需要结合实际去使用。本文只是记录一下这个方法而已😂。</li>
+<li>若有其他的更好更可靠的方式的话，欢迎交流指导，同时本文若有错误，敬请各位指出，作为新人表示十分感谢！</li>
+</ol>
+<p>登录后您可以享受以下权益：</p>
+<ul>
+<li>免费复制代码</li>
+<li>和博主大V互动</li>
+<li>下载海量资源</li>
+<li>发动态&#x2F;写文章&#x2F;加入社区<br>×</li>
+</ul>
+<p>实付 元</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_45204138/article/details/">使用余额支付</a></p>
+<p>点击重新获取</p>
+<p>扫码支付</p>
+<p>钱包余额 0</p>
+<p>抵扣说明：</p>
+<p>1.余额是钱包充值的虚拟货币，按照1:1的比例进行支付金额的抵扣。<br>2.余额无法直接购买下载，可以购买VIP、付费专栏及课程。</p>
+<p><a target="_blank" rel="noopener" href="https://i.csdn.net/#/wallet/balance/recharge">余额充值</a></p>
+<p>举报</p>
+<p> [![[_resources&#x2F;35c7362356adf5a11cd3cc47fd01628f_MD5.png]] 点击体验<br>DeepSeekR1满血版](<a target="_blank" rel="noopener" href="https://ai.csdn.net/?utm_source=cknow_pc_blogdetail&spm=1001.2101.3001.10583">https://ai.csdn.net/?utm_source=cknow_pc_blogdetail&amp;spm=1001.2101.3001.10583</a>) ![[_resources&#x2F;90bd0cbf3aff8fdff8bf9b011b581e20_MD5.png]]</p>
+<p>程序员都在用的中文IT技术交流社区</p>
+<p>![[_resources&#x2F;08a47e60886378fe60a3d9c8f4ae8bc6_MD5.png]]</p>
+<p>专业的中文 IT 技术社区，与千万技术人共成长</p>
+<p>![[_resources&#x2F;a51be6c085b867a5bd82d8dc1cea9b46_MD5.png]]</p>
+<p>关注【CSDN】视频号，行业资讯、技术分享精彩不断，直播好礼送不停！</p>
+<p>客服 返回顶部</p>
+<p>![[_resources&#x2F;74a1f5cad0bcc333fe076a9e5bddda98_MD5.png]]</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/clippings/" class="print-no-link">#clippings</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Java / Android 获取本机开启热点、连接 WIFI 时的 IP_安卓获取热点ip-CSDN博客</div>
+      <div>https://yhao521.github.io/2025/09/14/摘录/Java  Android 获取本机开启热点、连接 WIFI 时的 IP_安卓获取热点ip-CSDN博客/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>[[成就一亿技术人!]],[[hope_wisdom 发出的红包]]</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年9月14日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/09/15/%E6%91%98%E5%BD%95/%E5%AE%89%E5%8D%93%E5%BC%80%E5%8F%91%E4%B8%AD%E7%9A%84%E7%BD%91%E7%BB%9C%E4%BA%A4%E4%BA%92%EF%BC%9A%E4%BB%8E%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%90%AD%E5%BB%BA%E5%88%B0%20IP%E8%8E%B7%E5%8F%96%E2%80%8B-%E8%85%BE%E8%AE%AF%E4%BA%91%E5%BC%80%E5%8F%91%E8%80%85%E7%A4%BE%E5%8C%BA-%E8%85%BE%E8%AE%AF%E4%BA%91/" title="安卓开发中的网络交互：从服务端搭建到 IP获取​-腾讯云开发者社区-腾讯云">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">安卓开发中的网络交互：从服务端搭建到 IP获取​-腾讯云开发者社区-腾讯云</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/09/14/%E6%91%98%E5%BD%95/Android%E8%8E%B7%E5%8F%96%E6%9C%AC%E6%9C%BAIPv4%E5%9C%B0%E5%9D%80_getipv4address-CSDN%E5%8D%9A%E5%AE%A2/" title="Android获取本机IPv4地址_getipv4address-CSDN博客">
+                        <span class="hidden-mobile">Android获取本机IPv4地址_getipv4address-CSDN博客</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>  
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

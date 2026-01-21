@@ -1,0 +1,691 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="yhao521">
+  <meta name="keywords" content="java,博客,vue,spring,mysql,docker,linux">
+  
+    <meta name="description" content="经过网上查找很多资料，发现很多只有vue+cordova的项目整合，但是vue使用cordova插件的文章很少，现在把从创建cordova和创建vue到vue使用插件到项目打包到android手机运行过程记录下来； 先上项目结构目录  cordova项目创建1、安装cordova环境这个这边就不描述了，网上很多教程2、创建cordova应用 1cordova create app com.demo">
+<meta property="og:type" content="article">
+<meta property="og:title" content="vue+cordova项目整合">
+<meta property="og:url" content="https://yhao521.github.io/2025/07/23/%E6%91%98%E5%BD%95/vue+cordova%E9%A1%B9%E7%9B%AE%E6%95%B4%E5%90%88/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="经过网上查找很多资料，发现很多只有vue+cordova的项目整合，但是vue使用cordova插件的文章很少，现在把从创建cordova和创建vue到vue使用插件到项目打包到android手机运行过程记录下来； 先上项目结构目录  cordova项目创建1、安装cordova环境这个这边就不描述了，网上很多教程2、创建cordova应用 1cordova create app com.demo">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/dc0d93c5e6bf45d65bda33ec3013b3d1.png">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/fc63dbf980514feffcafeb63ca4fa547.png">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/2af8976ec0ca02b7f3b31d7ff9aff0ed.png">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/1b1e955443d180ac5ced6bcf5eea27cb.png">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/20b5a1f55d552db798f89c5184b1fdca.png">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/fda9883808f36b998245b9ced2ad53ef.png">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/a237a0ba1cec77f448ccad7fb085ac36.png">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/7e3f8d0aeabe551ad72361d7a90392f3.png">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/6f2acce5df979dbb147d13e59b956700.png">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/17e6a9f9e9e54fecc88ccba39960230e.png">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/79fe1cb1bb0479088cc89a8d4c9e0ef0.png">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/f7195b0fe2b46194438918dc043187b9.png">
+<meta property="article:published_time" content="2025-07-23T12:01:41.000Z">
+<meta property="article:modified_time" content="2024-09-10T05:25:53.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="java,博客,vue,spring,mysql,docker,linux">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://i-blog.csdnimg.cn/blog_migrate/dc0d93c5e6bf45d65bda33ec3013b3d1.png">
+  
+  
+  
+  <title>vue+cordova项目整合 - 匆匆过客的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yhao521.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>匆匆过客的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="vue+cordova项目整合"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-07-23 20:01" pubdate>
+          2025年7月23日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          633 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          6 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">vue+cordova项目整合</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>经过网上查找很多资料，发现很多只有<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=vue&spm=1001.2101.3001.7020">vue</a>+cordova的项目整合，但是vue使用cordova插件的文章很少，现在把从创建cordova和创建vue到vue使用插件到项目打包到android手机运行过程记录下来；</p>
+<p>先上项目结构目录<br><img src="https://i-blog.csdnimg.cn/blog_migrate/dc0d93c5e6bf45d65bda33ec3013b3d1.png" srcset="/img/loading.gif" lazyload alt="图片描述"></p>
+<hr>
+<h3 id="cordova项目创建"><a href="#cordova项目创建" class="headerlink" title="cordova项目创建"></a>cordova项目创建</h3><p>1、安装cordova环境这个这边就不描述了，网上很多教程<br>2、创建cordova应用</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">cordova <span class="hljs-keyword">create</span> app com.demo app<br></code></pre></td></tr></table></figure>
+
+<p>cordova create 创建cordova项目 app为目录 com.demo命名空间 app项目名称</p>
+<p>3、添加平台</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cobol">cd appcordova platform add android@6.0.0        //版本为本机已装的sdk android 版本<br></code></pre></td></tr></table></figure>
+
+<p>cd命令进入到项目文件夹里面添加安卓平台，要添加ios就把安卓换成ios就可以了</p>
+<p>4、编译安卓app</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs undefined">cordova build android<br></code></pre></td></tr></table></figure>
+
+<p>编译安卓系统，如果成功就表示编译完成<br>注：如果没编译成功，那么就用检查环境命令去检查</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs undefined">cordova requirements<br></code></pre></td></tr></table></figure>
+
+<p>运行命令后会有提示环境或者其他问题</p>
+<p>5、<code>cordova emulate android</code><br>在安卓模拟器上运行</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs undefined">cordova serve android<br></code></pre></td></tr></table></figure>
+
+<p>在浏览器上面运行</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cobol">cordova run android<br></code></pre></td></tr></table></figure>
+
+<p>在安卓手机上面运行，前提是电脑连接了安卓手机并且装好驱动和打开usb调试</p>
+<p>到这里cordova项目创建完成</p>
+<hr>
+<h3 id="vue项目创建"><a href="#vue项目创建" class="headerlink" title="vue项目创建"></a>vue项目创建</h3><p>1、vue环境和webpack安装这边就不详述了，网上很多<br>2、安装好vue后进入到cordova项目里面</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs csharp">vue <span class="hljs-keyword">init</span> webpack vue<br></code></pre></td></tr></table></figure>
+
+<p>最后的‘vue’为项目的名字<br>3、<img src="https://i-blog.csdnimg.cn/blog_migrate/fc63dbf980514feffcafeb63ca4fa547.png" srcset="/img/loading.gif" lazyload alt="图片描述"></p>
+<p>4、根据图上面提示的cd 指向vue项目后 npm run dev用开发模式跑起来项目</p>
+<h3 id="vue和cordova项目整合"><a href="#vue和cordova项目整合" class="headerlink" title="vue和cordova项目整合"></a>vue和cordova项目整合</h3><p>1、把cordova项目的index.html里面的meta标签和cordova.js引用复制到vue项目的index.html<br><img src="https://i-blog.csdnimg.cn/blog_migrate/2af8976ec0ca02b7f3b31d7ff9aff0ed.png" srcset="/img/loading.gif" lazyload alt="图片描述"></p>
+<p>2、修改vue项目里面的配置，直接上图，<img src="https://i-blog.csdnimg.cn/blog_migrate/1b1e955443d180ac5ced6bcf5eea27cb.png" srcset="/img/loading.gif" lazyload alt="图片描述"></p>
+<p>到这里修改完成</p>
+<h3 id="添加cordova插件"><a href="#添加cordova插件" class="headerlink" title="添加cordova插件"></a>添加cordova插件</h3><p>这里以相机为例<br>1、进入到cordova项目目录，不是vue<br><img src="https://i-blog.csdnimg.cn/blog_migrate/20b5a1f55d552db798f89c5184b1fdca.png" srcset="/img/loading.gif" lazyload alt="图片描述"></p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs csharp">cordova plugin <span class="hljs-keyword">add</span> cordova-plugin-camera<br></code></pre></td></tr></table></figure>
+
+<p>添加相机插件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">cordova plugin <span class="hljs-built_in">ls</span><br></code></pre></td></tr></table></figure>
+
+<p>列出所有已安装的cordova插件</p>
+<p>参考w3c的文档<a target="_blank" rel="noopener" href="https://www.w3cschool.cn/cordova/cordova_camera.html">https://www.w3cschool.cn/cord...</a></p>
+<p>到这里cordova安装的相机插件</p>
+<h3 id="重点来了：vue怎么用相机"><a href="#重点来了：vue怎么用相机" class="headerlink" title="重点来了：vue怎么用相机"></a>重点来了：vue怎么用相机</h3><p>1、修改vue项目的main.js的写法<br><img src="https://i-blog.csdnimg.cn/blog_migrate/fda9883808f36b998245b9ced2ad53ef.png" srcset="/img/loading.gif" lazyload alt="图片描述"></p>
+<p>添加deviceready事件监听，当cordova设备准备完成后再new vue<br>2、创建一个js文件，我这边叫cordovaplugin.js<br><img src="https://i-blog.csdnimg.cn/blog_migrate/a237a0ba1cec77f448ccad7fb085ac36.png" srcset="/img/loading.gif" lazyload alt="图片描述"></p>
+<p>3、修改App.vue文件，增加按钮和事件调用<br><img src="https://i-blog.csdnimg.cn/blog_migrate/7e3f8d0aeabe551ad72361d7a90392f3.png" srcset="/img/loading.gif" lazyload alt="图片描述"></p>
+<p>到这边就完成了，剩下编译和打包<br>4、进入vue文件夹</p>
+<figure class="highlight coffeescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs coffeescript"><span class="hljs-built_in">npm</span> run build<br></code></pre></td></tr></table></figure>
+
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/6f2acce5df979dbb147d13e59b956700.png" srcset="/img/loading.gif" lazyload alt="图片描述"></p>
+<p>到这边vue项目编译完成<br>5、回到cordova项目文件夹，进行打包<br><img src="https://i-blog.csdnimg.cn/blog_migrate/17e6a9f9e9e54fecc88ccba39960230e.png" srcset="/img/loading.gif" lazyload alt="图片描述"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cobol">cordova run android<br></code></pre></td></tr></table></figure>
+
+<p>运行到安卓手机上，前提是有用手机连接电脑</p>
+<h3 id="完成-手机截图"><a href="#完成-手机截图" class="headerlink" title="完成-手机截图"></a>完成-手机截图</h3><p><img src="https://i-blog.csdnimg.cn/blog_migrate/79fe1cb1bb0479088cc89a8d4c9e0ef0.png" srcset="/img/loading.gif" lazyload alt="图片描述"></p>
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/f7195b0fe2b46194438918dc043187b9.png" srcset="/img/loading.gif" lazyload alt="图片描述"></p>
+<p>sdk安装教程：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/summary-2017/p/8073225.html">https://www.cnblogs.com/summary-2017/p/8073225.html</a></p>
+<p>gradle插件安装教程：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/NyanKoSenSei/p/11458953.html">https://www.cnblogs.com/NyanKoSenSei/p/11458953.html</a></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>vue+cordova项目整合</div>
+      <div>https://yhao521.github.io/2025/07/23/摘录/vue+cordova项目整合/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>yhao521</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年7月23日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E6%91%98%E5%BD%95/Ionic2%E5%A6%82%E4%BD%95%E4%B8%8B%E6%8B%89%E5%88%B7%E6%96%B0%E5%92%8C%E4%B8%8A%E6%8B%89%E5%8A%A0%E8%BD%BD/" title="Ionic2如何下拉刷新和上拉加载">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Ionic2如何下拉刷新和上拉加载</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E6%91%98%E5%BD%95/vue3+vite%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86%E6%8F%92%E4%BB%B6/" title="vue3+vite代码混淆插件">
+                        <span class="hidden-mobile">vue3+vite代码混淆插件</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>  
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

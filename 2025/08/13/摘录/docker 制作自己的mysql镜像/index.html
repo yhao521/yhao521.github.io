@@ -1,0 +1,704 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="[[勤劳の洗碗机]]">
+  <meta name="keywords" content="java,博客,vue,spring,mysql,docker,linux">
+  
+    <meta name="description" content="1、下载mysql，本次以mysql-5.7.29-1.el7.x86_64.rpm-bundle.tar为例 2、编辑启动脚本start.sh，容器启动时会运行这个脚本，主要是安装并初始化mysql #!&#x2F;bin&#x2F;bash if [ -z &quot;$MYSQL_ROOT_PASSWORD&amp;qu">
+<meta property="og:type" content="article">
+<meta property="og:title" content="docker 制作自己的mysql镜像">
+<meta property="og:url" content="https://yhao521.github.io/2025/08/13/%E6%91%98%E5%BD%95/docker%20%E5%88%B6%E4%BD%9C%E8%87%AA%E5%B7%B1%E7%9A%84mysql%E9%95%9C%E5%83%8F/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="1、下载mysql，本次以mysql-5.7.29-1.el7.x86_64.rpm-bundle.tar为例 2、编辑启动脚本start.sh，容器启动时会运行这个脚本，主要是安装并初始化mysql #!&#x2F;bin&#x2F;bash if [ -z &quot;$MYSQL_ROOT_PASSWORD&amp;qu">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-08-13T01:09:37.247Z">
+<meta property="article:modified_time" content="2025-08-13T01:09:42.298Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="clippings">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>docker 制作自己的mysql镜像 - 匆匆过客的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yhao521.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>匆匆过客的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="docker 制作自己的mysql镜像"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-08-13 09:09" pubdate>
+          2025年8月13日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          9 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">docker 制作自己的mysql镜像</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>[![[_resources&#x2F;5dd0f096c164b34052408fd74b3f93c2_MD5.webp]]](<a target="_blank" rel="noopener" href="https://www.doubao.com/?channel=cnblogs&source=hw_db_cnblogs&type=lunt&theme=bianc">https://www.doubao.com/?channel=cnblogs&amp;source=hw_db_cnblogs&amp;type=lunt&amp;theme=bianc</a>)</p>
+<h2 id="缺月挂梧桐-漏断人初静"><a href="#缺月挂梧桐-漏断人初静" class="headerlink" title="缺月挂梧桐 漏断人初静"></a>缺月挂梧桐 漏断人初静</h2><h3 id="导航"><a href="#导航" class="headerlink" title="导航"></a>导航</h3><table><tbody><tr><td colspan="7"><table><tbody><tr><td><a target="_blank" rel="noopener" href="https://www.cnblogs.com/zphqq/p/">&lt;</a></td><td align="center">2025年8月</td><td align="right"><a target="_blank" rel="noopener" href="https://www.cnblogs.com/zphqq/p/">&gt;</a></td></tr></tbody></table></td></tr><tr><th align="center">日</th><th align="center">一</th><th align="center">二</th><th align="center">三</th><th align="center">四</th><th align="center">五</th><th align="center">六</th></tr><tr><td align="center">27</td><td align="center">28</td><td align="center">29</td><td align="center">30</td><td align="center">31</td><td align="center">1</td><td align="center">2</td></tr><tr><td align="center">3</td><td align="center">4</td><td align="center">5</td><td align="center">6</td><td align="center">7</td><td align="center">8</td><td align="center">9</td></tr><tr><td align="center">10</td><td align="center">11</td><td align="center">12</td><td align="center">13</td><td align="center">14</td><td align="center">15</td><td align="center">16</td></tr><tr><td align="center">17</td><td align="center">18</td><td align="center">19</td><td align="center">20</td><td align="center">21</td><td align="center">22</td><td align="center">23</td></tr><tr><td align="center">24</td><td align="center">25</td><td align="center">26</td><td align="center">27</td><td align="center">28</td><td align="center">29</td><td align="center">30</td></tr><tr><td align="center">31</td><td align="center">1</td><td align="center">2</td><td align="center">3</td><td align="center">4</td><td align="center">5</td><td align="center">6</td></tr></tbody></table>
+
+<h3 id="统计"><a href="#统计" class="headerlink" title="统计"></a>统计</h3><ul>
+<li>随笔 - 58</li>
+<li>文章 - 9</li>
+<li>评论 - 7</li>
+<li>阅读 - 90042</li>
+</ul>
+<h3 id="阅读排行榜"><a href="#阅读排行榜" class="headerlink" title="阅读排行榜"></a>阅读排行榜</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/zphqq/p/9267722.html">1. centos7,进程最大打开文件数 too many open files错误(13929)</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/zphqq/p/13155394.html">2. k8s备份工具之velero(5738)</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/zphqq/p/10044597.html">3. jenkins Manage and Assign Roles使用(5612)</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/zphqq/p/13123910.html">4. docker 制作自己的mysql镜像(3824)</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/zphqq/p/10302883.html">5. es定期删除数据(3783)</a></li>
+</ul>
+<h3 id="推荐排行榜"><a href="#推荐排行榜" class="headerlink" title="推荐排行榜"></a>推荐排行榜</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/zphqq/p/9267722.html">1. centos7,进程最大打开文件数 too many open files错误(2)</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/zphqq/p/12889559.html">2. docker 使用bind (1)</a></li>
+</ul>
+<p>1、下载mysql，本次以mysql-5.7.29-1.el7.x86_64.rpm-bundle.tar为例</p>
+<p>2、编辑启动脚本start.sh，容器启动时会运行这个脚本，主要是安装并初始化mysql</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-meta">#!/bin/bash</span><br><br><span class="hljs-keyword">if</span> [ -z <span class="hljs-string">&quot;<span class="hljs-variable">$MYSQL_ROOT_PASSWORD</span>&quot;</span> ];<span class="hljs-keyword">then</span><br> <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;MYSQL_ROOT_PASSWORD is empty&quot;</span><br> <span class="hljs-built_in">exit</span> 0<br><span class="hljs-keyword">fi</span><br><span class="hljs-function"><span class="hljs-title">INIT_MYSQL</span></span>()&#123;<br>   <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;mysql初始化&quot;</span><br>   yum install -y libaio  libnuma* net-tools perl.x86_64<br>   <span class="hljs-built_in">cd</span> /usr/local/src <br>   <span class="hljs-comment">#tar xvf mysql-5.7.29-1.el7.x86_64.rpm-bundle.tar</span><br>   rpm -ivh mysql-community-common-5.7.29-1.el7.x86_64.rpm<br>   rpm -ivh mysql-community-libs-5.7.29-1.el7.x86_64.rpm<br>   rpm -ivh mysql-community-client-5.7.29-1.el7.x86_64.rpm <br>   rpm -ivh mysql-community-server-5.7.29-1.el7.x86_64.rpm<br>   <span class="hljs-built_in">mkdir</span> -p /usr/local/mysql/data &amp;&amp; <span class="hljs-built_in">chown</span> -R mysql.mysql /usr/local/mysql<br>   sed -i <span class="hljs-string">&#x27;s/datadir=\/var\/lib\/mysql/datadir=\/usr\/local\/mysql\/data/&#x27;</span> /etc/my.cnf<br>   sed -i <span class="hljs-string">&#x27;/datadir/i default_password_lifetime=0&#x27;</span> /etc/my.cnf<br>   mysqld  --initialize --user=mysql --datadir=/usr/local/mysql/data<br>   mysqld --daemonize --pid-file=/var/run/mysqld/mysqld.pid --user=mysql<br>   dbPassword=\`grep <span class="hljs-string">&#x27;temporary password&#x27;</span> /var/log/mysqld.log | awk <span class="hljs-string">&#x27;&#123;print $11&#125;&#x27;</span>\`<br>   mysqladmin -uroot -p<span class="hljs-variable">$dbPassword</span> password  <span class="hljs-variable">$MYSQL_ROOT_PASSWORD</span><br>   host=<span class="hljs-string">&#x27;127.0.0.1&#x27;</span><br>   dbUser=<span class="hljs-string">&#x27;root&#x27;</span><br>   sql_file=<span class="hljs-string">&#x27;/usr/local/bin/init.sql&#x27;</span><br>   mysql -h <span class="hljs-variable">$host</span> -u <span class="hljs-variable">$dbUser</span> -p<span class="hljs-variable">$MYSQL_ROOT_PASSWORD</span> -e <span class="hljs-string">&quot;source <span class="hljs-variable">$sql_file</span>&quot;</span>;<br>   <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Remote connection is set&quot;</span><br>   <span class="hljs-built_in">rm</span> -rf /usr/local/src/mysql*<br>&#125;<br><span class="hljs-keyword">if</span> [ \`<span class="hljs-built_in">ls</span> /usr/local/mysql/data |<span class="hljs-built_in">wc</span> -l\` -eq 0 ];<span class="hljs-keyword">then</span><br>   INIT_MYSQL<br><span class="hljs-keyword">else</span><br>   mysqld --daemonize --pid-file=/var/run/mysqld/mysqld.pid --user=mysql<br><span class="hljs-keyword">fi</span><br><span class="hljs-built_in">tail</span> -f /var/log/mysqld.log<br></code></pre></td></tr></table></figure>
+
+<p>3、编写init.sql，主要是开启root 远程连接，看需求可以不要</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs pgsql">use mysql;<br><span class="hljs-keyword">update</span> <span class="hljs-keyword">user</span> <span class="hljs-keyword">set</span> host = <span class="hljs-string">&#x27;%&#x27;</span> <span class="hljs-keyword">where</span> <span class="hljs-keyword">user</span> = <span class="hljs-string">&#x27;root&#x27;</span>;<br>flush <span class="hljs-keyword">privileges</span>;<br></code></pre></td></tr></table></figure>
+
+<p>4、编写dockerfile</p>
+<p>需要将init.sql 、 localtime（为了和宿主机时间同步，可以不要，要的话，从宿主机拷贝过来即可）、mysql-5.7.29-1.el7.x86_64.rpm-bundle.tar、start.sh放与dockerfile同一目录下</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs pgsql"><span class="hljs-keyword">FROM</span>  centos7<span class="hljs-number">.2</span><br><span class="hljs-keyword">ADD</span> mysql<span class="hljs-number">-5.7</span><span class="hljs-number">.29</span><span class="hljs-number">-1.</span>el7.x86_64.rpm-bundle.tar /usr/<span class="hljs-keyword">local</span>/src<br><span class="hljs-keyword">ADD</span> <span class="hljs-built_in">localtime</span> /etc/<span class="hljs-built_in">localtime</span><br><span class="hljs-keyword">ADD</span> <span class="hljs-keyword">start</span>.sh /usr/<span class="hljs-keyword">local</span>/bin<br><span class="hljs-keyword">ADD</span> init.<span class="hljs-keyword">sql</span> /usr/<span class="hljs-keyword">local</span>/bin<br>CMD [&quot;/usr/local/bin/start.sh&quot;]<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">centos7</span>.<span class="hljs-number">2</span>镜像也是自己制作的，可以自己制作系统基础镜像，也可以用网上的<br></code></pre></td></tr></table></figure>
+
+<p>5、制作镜像</p>
+<figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mipsasm">docker <span class="hljs-keyword">build </span>-t mysql5.<span class="hljs-number">7</span>:<span class="hljs-built_in">v1</span>  .<br></code></pre></td></tr></table></figure>
+
+<p>6、运行</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">docker</span> run -it -e MYSQL_ROOT_PASSWORD=<span class="hljs-number">123456</span> -p <span class="hljs-number">1112</span>:<span class="hljs-number">3306</span>  -d mysql5.<span class="hljs-number">7</span>:v1<br></code></pre></td></tr></table></figure>
+
+<p>7、其他服务器连接测试</p>
+<p>-——————————————————————–</p>
+<p>上面制作的镜像，运行环境需要能联网才可以，因为要下载依赖包</p>
+<p>如果镜像运行没有网，可以先在有网的环境制作好，再上传到无网环境运行</p>
+<p>制作方法类似，只需更改dockerfile 和start.sh</p>
+<p>dockerfile</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">FROM</span>  centos7.<span class="hljs-number">2</span><br><span class="hljs-attribute">ADD</span> mysql-<span class="hljs-number">5</span>.<span class="hljs-number">7</span>.<span class="hljs-number">29</span>-<span class="hljs-number">1</span>.el7.x86_64.rpm-bundle.tar /usr/local/src<br><span class="hljs-attribute">ADD</span> localtime /etc/localtime<br><span class="hljs-attribute">ADD</span> start.sh /usr/local/bin<br><span class="hljs-attribute">ADD</span> init.sql /usr/local/bin<br><span class="hljs-attribute">RUN</span> rpm --rebuilddb &amp;&amp; yum install -y libaio  libnuma* net-tools perl.x86_64 <br><span class="hljs-attribute">RUN</span> cd /usr/local/src &amp;&amp; rpm -ivh mysql-community-common-<span class="hljs-number">5</span>.<span class="hljs-number">7</span>.<span class="hljs-number">29</span>-<span class="hljs-number">1</span>.el7.x86_64.rpm &amp;&amp;  rpm -ivh mysql-community-libs-<span class="hljs-number">5</span>.<span class="hljs-number">7</span>.<span class="hljs-number">29</span>-<span class="hljs-number">1</span>.el7.x86_64.rpm &amp;&amp; rpm -ivh mysql-community-client-<span class="hljs-number">5</span>.<span class="hljs-number">7</span>.<span class="hljs-number">29</span>-<span class="hljs-number">1</span>.el7.x86_64.rpm &amp;&amp; rpm -ivh mysql-community-server-<span class="hljs-number">5</span>.<span class="hljs-number">7</span>.<span class="hljs-number">29</span>-<span class="hljs-number">1</span>.el7.x86_64.rpm &amp;&amp; rm -rf /usr/local/src/mysql*<br><span class="hljs-attribute">CMD</span><span class="hljs-meta"> [&quot;/usr/local/bin/start.sh&quot;]</span><br></code></pre></td></tr></table></figure>
+
+<p>start.sh</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-meta">#!/bin/bash</span><br><br><span class="hljs-keyword">if</span> [ -z <span class="hljs-string">&quot;<span class="hljs-variable">$MYSQL_ROOT_PASSWORD</span>&quot;</span> ];<span class="hljs-keyword">then</span><br> <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;MYSQL_ROOT_PASSWORD is empty&quot;</span><br> <span class="hljs-built_in">exit</span> 0<br><span class="hljs-keyword">fi</span><br><span class="hljs-function"><span class="hljs-title">INIT_MYSQL</span></span>()&#123;<br>   <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;mysql初始化&quot;</span><br>   <span class="hljs-built_in">mkdir</span> -p /usr/local/mysql/data &amp;&amp; <span class="hljs-built_in">chown</span> -R mysql.mysql /usr/local/mysql<br>   sed -i <span class="hljs-string">&#x27;s/datadir=\/var\/lib\/mysql/datadir=\/usr\/local\/mysql\/data/&#x27;</span> /etc/my.cnf<br>   sed -i <span class="hljs-string">&#x27;/datadir/i default_password_lifetime=0&#x27;</span> /etc/my.cnf<br>   mysqld  --initialize --user=mysql --datadir=/usr/local/mysql/data<br>   mysqld --daemonize --pid-file=/var/run/mysqld/mysqld.pid --user=mysql<br>   dbPassword=\`grep <span class="hljs-string">&#x27;temporary password&#x27;</span> /var/log/mysqld.log | awk <span class="hljs-string">&#x27;&#123;print $11&#125;&#x27;</span>\`<br>   mysqladmin -uroot -p<span class="hljs-variable">$dbPassword</span> password  <span class="hljs-variable">$MYSQL_ROOT_PASSWORD</span><br>   dbUser=<span class="hljs-string">&#x27;root&#x27;</span><br>   sql_file=<span class="hljs-string">&#x27;/usr/local/bin/init.sql&#x27;</span><br>   mysql -u <span class="hljs-variable">$dbUser</span> -p<span class="hljs-variable">$MYSQL_ROOT_PASSWORD</span> -e <span class="hljs-string">&quot;source <span class="hljs-variable">$sql_file</span>&quot;</span>;<br>   <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Remote connection is set&quot;</span><br>&#125;<br><span class="hljs-keyword">if</span> [ \`<span class="hljs-built_in">ls</span> /usr/local/mysql/data |<span class="hljs-built_in">wc</span> -l\` -eq 0 ];<span class="hljs-keyword">then</span><br>   INIT_MYSQL<br><span class="hljs-keyword">else</span><br>   mysqld --daemonize --pid-file=/var/run/mysqld/mysqld.pid --user=mysql<br><span class="hljs-keyword">fi</span><br><span class="hljs-built_in">tail</span> -f /var/log/mysqld.log<br></code></pre></td></tr></table></figure>
+
+<p>-—————————————–主从复制镜像————————————–</p>
+<p>前提：使用上面制作好的mysql5.7:latest镜像</p>
+<p>创建目录</p>
+<p>mkdir -p {master,slave}</p>
+<p>1、master镜像制作</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">cd</span> master/<br></code></pre></td></tr></table></figure>
+
+<p>制作my.cnf</p>
+<p>制作dockerfile</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs dockerfile"><span class="hljs-keyword">FROM</span> mysql5.<span class="hljs-number">7</span>:latest<br><span class="hljs-keyword">ADD</span><span class="language-bash"> my.cnf /etc/my.cnf</span><br></code></pre></td></tr></table></figure>
+
+<p>制作镜像</p>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs crmsh">docker build -t mysql5.<span class="hljs-number">7</span>:<span class="hljs-keyword">master</span> <span class="hljs-title">.</span><br></code></pre></td></tr></table></figure>
+
+<p>2、slave镜像</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">cd</span> slave<br></code></pre></td></tr></table></figure>
+
+<p>制作my.cnf</p>
+<p>dockerfile</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs dockerfile"><span class="hljs-keyword">FROM</span> mysql5.<span class="hljs-number">7</span>:latest<br><span class="hljs-keyword">ADD</span><span class="language-bash"> my.cnf /etc/my.cnf</span><br></code></pre></td></tr></table></figure>
+
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">docker</span> build -t mysql5.<span class="hljs-number">7</span>:slave .<br></code></pre></td></tr></table></figure>
+
+<p>3、启动</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">docker</span> run -it -p <span class="hljs-number">1111</span>:<span class="hljs-number">3306</span> -e MYSQL_ROOT_PASSWORD=<span class="hljs-number">123456</span>  -d -v /data/master:/usr/local/mysql/data mysql5.<span class="hljs-number">7</span>:maste<br><span class="hljs-attribute">docker</span> run -it -p <span class="hljs-number">2222</span>:<span class="hljs-number">3306</span> -e MYSQL_ROOT_PASSWORD=<span class="hljs-number">123456</span>  -d -v /data/slave:/usr/local/mysql/data mysql5.<span class="hljs-number">7</span>:slave<br></code></pre></td></tr></table></figure>
+
+<p>posted on <a target="_blank" rel="noopener" href="https://www.cnblogs.com/zphqq">勤劳の洗碗机</a> 阅读(3825)  评论(5) <a target="_blank" rel="noopener" href="https://www.cnblogs.com/zphqq/p/">收藏</a> <a target="_blank" rel="noopener" href="https://www.cnblogs.com/zphqq/p/">举报</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.trae.cn/?utm_source=community&utm_medium=CPA_cnblogs&utm_campaign=webtest">字节旗下的 AI IDE</a></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/clippings/" class="print-no-link">#clippings</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>docker 制作自己的mysql镜像</div>
+      <div>https://yhao521.github.io/2025/08/13/摘录/docker 制作自己的mysql镜像/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>[[勤劳の洗碗机]]</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年8月13日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/08/18/%E6%91%98%E5%BD%95/Wails%20V2%20%E5%A4%87%E5%BF%98%E6%B8%85%E5%8D%95%20&amp;%20%20wails%20cheatsheet%20&amp;%20%20Quick%20Reference/" title="Wails V2 备忘清单 &amp;  wails cheatsheet &amp;  Quick Reference">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Wails V2 备忘清单 &amp;  wails cheatsheet &amp;  Quick Reference</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/08/13/%E6%91%98%E5%BD%95/%E4%BD%BF%E7%94%A8docker%E6%9E%84%E5%BB%BA%E5%B9%B6%E9%83%A8%E7%BD%B2MySQL5.7%E9%95%9C%E5%83%8F_docker%20mysql%205.7-CSDN%E5%8D%9A%E5%AE%A2/" title="使用docker构建并部署MySQL5.7镜像_docker mysql 5.7-CSDN博客">
+                        <span class="hidden-mobile">使用docker构建并部署MySQL5.7镜像_docker mysql 5.7-CSDN博客</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>  
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

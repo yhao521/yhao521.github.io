@@ -1,0 +1,747 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="[[成就一亿技术人!]],[[hope_wisdom 发出的红包]]">
+  <meta name="keywords" content="java,博客,vue,spring,mysql,docker,linux">
+  
+    <meta name="description" content="文章浏览阅读3.3k次，点赞2次，收藏4次。HarmonyOS 应用通过数字证书和授权文件来保证应用的完整性，在申请数字证书和 Profile 文件前，需要通过 DevEco Studio 来生成私钥（存放在 .p12 文件中）和证书请求文件（.csr 文件）。同时，也可以使用命令行工具的方式来生成密钥和证书请求文件，用于构筑工程流水线。使用 DevEco Studio 生成证书请求文件使用 De">
+<meta property="og:type" content="article">
+<meta property="og:title" content="鸿蒙OS 生成密钥和证书请求文件_ota密匙-CSDN博客">
+<meta property="og:url" content="https://yhao521.github.io/2025/09/29/%E6%91%98%E5%BD%95/%E9%B8%BF%E8%92%99OS%20%E7%94%9F%E6%88%90%E5%AF%86%E9%92%A5%E5%92%8C%E8%AF%81%E4%B9%A6%E8%AF%B7%E6%B1%82%E6%96%87%E4%BB%B6_ota%E5%AF%86%E5%8C%99-CSDN%E5%8D%9A%E5%AE%A2/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="文章浏览阅读3.3k次，点赞2次，收藏4次。HarmonyOS 应用通过数字证书和授权文件来保证应用的完整性，在申请数字证书和 Profile 文件前，需要通过 DevEco Studio 来生成私钥（存放在 .p12 文件中）和证书请求文件（.csr 文件）。同时，也可以使用命令行工具的方式来生成密钥和证书请求文件，用于构筑工程流水线。使用 DevEco Studio 生成证书请求文件使用 De">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-09-29T14:38:24.000Z">
+<meta property="article:modified_time" content="2025-09-29T14:38:24.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="clippings">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>鸿蒙OS 生成密钥和证书请求文件_ota密匙-CSDN博客 - 匆匆过客的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yhao521.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>匆匆过客的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="鸿蒙OS 生成密钥和证书请求文件_ota密匙-CSDN博客"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-09-29 22:38" pubdate>
+          2025年9月29日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          5.9k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          49 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">鸿蒙OS 生成密钥和证书请求文件_ota密匙-CSDN博客</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="鸿蒙OS-生成密钥和证书请求文件"><a href="#鸿蒙OS-生成密钥和证书请求文件" class="headerlink" title="鸿蒙OS 生成密钥和证书请求文件"></a>鸿蒙OS 生成密钥和证书请求文件</h2><p>最新推荐文章于 2025-04-25 10:30:00 发布</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/chehec2010" title="月疯">月疯</a> 于 2021-06-12 20:17:51 发布</p>
+<p>分类专栏：</p>
+<p>版权声明：本文为博主原创文章，遵循 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-sa/4.0/">CC 4.0 BY-SA</a> 版权协议，转载请附上原文出处链接和本声明。</p>
+<p>本文链接： <a target="_blank" rel="noopener" href="https://blog.csdn.net/chehec2010/article/details/117854865">https://blog.csdn.net/chehec2010/article/details/117854865</a></p>
+<p>版权</p>
+<p><a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=HarmonyOS&spm=1001.2101.3001.7020">HarmonyOS</a> 应用通过数字证书和授权文件来保证应用的完整性，在申请数字证书和 Profile 文件前，需要通过 DevEco Studio 来生成私钥（存放在.p12 文件中）和证书请求文件（.csr 文件）。同时，也可以使用 命令行工具 的方式来生成密钥和证书请求文件，用于构筑工程流水线。</p>
+<p><strong>使用 DevEco Studio 生成证书请求文件</strong></p>
+<hr>
+<p>使用 DevEco Studio 生成证书请求文件的方式有以下两种情况：</p>
+<p>1、如果还未生成密钥文件，则可以一键生成密钥和证书请求文件。</p>
+<p>2、如果已有密钥文件，则可以使用已有密钥生成证书请求文件。</p>
+<p><strong>一键生成密钥和证书请求文件</strong></p>
+<hr>
+<p>1、在主菜单栏点击 Build &gt; Generate Key。<br>2、在 Key Store Path 中，可以点击 Choose Existing 选择已有的密钥库文件；如果没有密钥库文 件，点击 New 进行创建。下面以新创建密钥库文件为例进行说明。<br>3、在 Create Key Store 窗口中，填写密钥库信息后，点击 OK。<br>4、Key Store Path：选择密钥库文件存储路径。</p>
+<p>5、Password：设置密钥库密码，必须由大写字母、小写字母、数字和特殊符号中的两种以上字符的组合，长度至少为 8 位。请记住该密码，后续签名配置需要使用。<br>6、Confirm Password：再次输入密钥库密码。</p>
+<p>![[_resources&#x2F;0a5c33bffc05299cc32fd2d21b34ceab_MD5.png]]</p>
+<p>点击确认。</p>
+<p><strong>继续填写：</strong></p>
+<p>1、在 Generate Key 界面中，继续填写密钥信息后，点击 Generate Key and CSR。<br>2、Alias：密钥的别名信息，用于标识密钥名称。请记住该别名，后续签名配置需要使用。<br>3、Password：输入密钥对应的密码，密钥密码需要与密钥库密码保持一致。请记住该密码，后续签名配置需要使用。<br>4、Confirm Password：再次输入密钥密码。<br>5、Validity：证书有效期，建议设置为 25 年及以上，覆盖应用的完整生命周期。<br>6、Certificate：输入证书基本信息，如组织、城市或地区、国家码等。</p>
+<p>![[_resources&#x2F;70beb07f30978be5ba5c3494e9cebdb1_MD5.png]]</p>
+<p>在弹出的窗口中，点击 CSR File Path 对应的图标，选择 CSR 文件存储路径。</p>
+<p>![[_resources&#x2F;18af8666ac51efee388deadd1580c10d_MD5.png]]</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs html">点击 OK 按钮，创建 CSR 文件成功，工具会同时生成密钥文件（.p12）和证书请求文件（.csr）。<br>html<br></code></pre></td></tr></table></figure>
+
+<p>![[_resources&#x2F;239707a90414ea8b8b18534350d2c684_MD5.png]]</p>
+<p><strong>使用已有密钥生成证书请求文件</strong></p>
+<p>1、在主菜单栏点击 Build &gt; Generate Certificate Request File。<br>2、在 Generate CSR 界面，填写证书请求文件生成参数，点击 OK。<br>3、key Store Path：点击 Choose Existing 选择已有的密钥库文件，后缀格式为.p12。<br>4、Key Store Password：输入创建密钥时填写的密钥库密码。<br>5、Key Alias：输入创建密钥时填写的别名信息。<br>5、Key Password：输入创建密钥时填写的密钥密码。<br>6、Certificate Path：点击img按钮，选择证书请求文件存储路径和名称。</p>
+<p>![[_resources&#x2F;7ae49f6fecc3303337d87bbfc09625cf_MD5.png]]</p>
+<p>打开证书请求文件存储目录，获取证书请求文件（.csr文件）</p>
+<p><strong>使用命令行工具生成证书请求文件</strong></p>
+<hr>
+<p>使用 Open JDK 携带的 Keytool 工具生成证书请求文件。</p>
+<p>使用管理员身份运行命令行工具。</p>
+<p>![[_resources&#x2F;8e98fe6bba25d19b7605b2a6fa51b41f_MD5.png]]</p>
+<p>切换到 keytool 工具所在路径，实际路径请根据安装目录进行修改。</p>
+<p>![[_resources&#x2F;bc582c0fe459a918fd829ead0f5a7077_MD5.png]]</p>
+<p>执行如下命令，生成密钥文件。例如，生成的密钥名称为 ide_demo_app.p12，存储到 D 盘根目录下。</p>
+<p>![[_resources&#x2F;afa8a0e92eeebda0962e5a37dee7a4bd_MD5.png]]</p>
+<p>生成密钥文件的参数说明如下：</p>
+<p>说明</p>
+<p>请记录 下 alias、storepass 和 keypass 的值，后续编译构建生成 HAP和编译构建生成 APP会使用到。</p>
+<p>alias：密钥的别名信息，用于标识密钥名称。<br>sigalg：签名算法，固定为 SHA256withECDSA。<br>dname<br>：按照操作界面提示进行输入。</p>
+<p>C：国家&#x2F;地区代码，如 CN。<br>O：组织名称，如 HUAWEI。<br>OU：组织单位名称，如 HUAWEI IDE。<br>CN：名字与姓氏，建议与别名一致。<br>validity：证书有效期，建议设置为 9125（25年）。<br>storepass：设置密钥库密码。<br>keypass：设置密钥的密码，请与 storepass 保持一致。</p>
+<p>执行如下命令，执行后需要输入 storepass 密码，生成证书请求文件，后缀格式为.csr。</p>
+<p>![[_resources&#x2F;742cb0cbf9ce33d08ad5efb1bccc69a5_MD5.png]]</p>
+<p>生成证书请求文件的参数说明如下：</p>
+<p>alias：与 3 中输入的 alias 保持一致。<br>file：生成的证书请求文件名称，后缀为.csr。<a target="_blank" rel="noopener" href="https://blog.csdn.net/HarmonyOS_666/article/details/140721140">【 <em>鸿蒙</em> 实战开发】Harmony <em>OS</em> 应用签名 <em>证书</em> (全流程)</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/HarmonyOS_666">HarmonyOS_666的博客</a></p>
+<p>07-26 3851<a target="_blank" rel="noopener" href="https://blog.csdn.net/HarmonyOS_666/article/details/140721140">这份 <em>鸿蒙</em> （Harmony <em>OS</em> NEXT）文档包含了 <em>鸿蒙</em> 开发必掌握的核心知识要点，内容包含了（ArkTS、ArkUI开发组件、Stage模型、多端部署、分布式应用开发、音频、视频、WebGL、OpenHarmony多媒体技术、Napi组件、OpenHarmony内核、OpenHarmony南向开发、 <em>鸿蒙</em> 项目实战等等） <em>鸿蒙</em> （Harmony <em>OS</em> NEXT）技术知识点。</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_39710041/article/details/117352958">harmony <em>os</em> 编译打包 <em>生成</em> app,手把手教你上架Harmony <em>OS</em> （ <em>鸿蒙</em> ）应用</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_39710041">weixin_39710041的博客</a></p>
+<p>05-27 3699<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_39710041/article/details/117352958">Harmony <em>OS</em> (<em>鸿蒙</em>)应用上架流程html前言9月 <em>鸿蒙</em> 开发者大会，12月16号Harmony <em>OS</em> 2.0手机开发者Beta版发布，相信在那以后将会有愈来愈多开发者加入 <em>鸿蒙</em> 开发这个系列中，那么开发的应用如何上架应用市场呢？今天将由深鸿会深大学习小组博主(Zzt_01-23)手把手教你上架Harmony <em>OS</em> 应用，本次应用源代码选取从零实现Harmony <em>OS</em> (<em>鸿蒙</em>)运动手表两个游戏的合并、Harmon…</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/kada936/article/details/89420831">NRF52832串口升级_nrf52832 串口升级</a></p>
+<p>6-10<a target="_blank" rel="noopener" href="https://blog.csdn.net/kada936/article/details/89420831">本文详细介绍了NRF52832串口 <em>OTA</em> (Over-The-Air)升级的实现过程,包括环境搭建、 <em>密匙</em> <em>生成</em> 、bootloader编译、python脚本修改、固件打包与烧录等关键步骤,为嵌入式物联网设备提供远程升级方案。 摘要 <em>生成</em> 于C知道,由 DeepSeek-R1 满血版支持,前往体验 &gt; NRF52832串口升级 写在前面 刚开始入门5283</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_41665637/article/details/146097070">day8:票务系统 <em>OTA</em> 接口规范_ <em>ota</em> 平台 接口 下载</a></p>
+<p>5-20<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_41665637/article/details/146097070">实时性:旺季时门票秒光,接口需快速同步数据,避免超卖。 兼容性:不同 <em>OTA</em> 可能有不同规则,需提前测试接口是否适配。 总结 <em>OTA</em> 接口规范就是票务系统与旅游平台对话的规则,确保双方数据同步、安全可靠。核心是格式统一、功能完善、传输安全,让游客买票、退票、入园都能流畅完成!</a><a target="_blank" rel="noopener" href="https://devpress.csdn.net/v1/article/detail/147471848"><em>鸿蒙</em> -使用Charles抓包</a></p>
+<p>[</p>
+<p>最新发布</p>
+<p>](<a target="_blank" rel="noopener" href="https://devpress.csdn.net/v1/article/detail/147471848">https://devpress.csdn.net/v1/article/detail/147471848</a>)</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/huangyuan_xuan">Huang兄</a></p>
+<p>04-25 2597<a target="_blank" rel="noopener" href="https://devpress.csdn.net/v1/article/detail/147471848">抓包，对于各位开发者应该不陌生，各种抓包工具应该的都听说过，像 charles、fiddler、Wireshark等。在 Android <em>和</em> i <em>OS</em> 上抓包都挺简单的，把 <em>证书</em> 存放到手机上，然后安装一下，网络设置里面配置一下代理，代码里面忽略一下 <em>证书</em> 校验或者信任一下用户 <em>证书</em> 就好了。但在 <em>鸿蒙</em> 手机上，似乎第一步把 <em>证书</em> 存放到手机上就卡住了一部分人。</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_70748845/article/details/140189684"><em>鸿蒙</em> 开发：Universal Keystore Kit（ <em>密钥</em> 管理服务）【 <em>密钥</em> <em>生成</em> 介绍及算法规格】</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_70748845">鸿蒙的技术博客</a></p>
+<p>07-04 590<a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_70748845/article/details/140189684">当业务需要使用HUKS <em>生成</em> 随机 <em>密钥</em> ，并由HUKS进行安全保存时，可以调用HUKS的接口 <em>生成</em> <em>密钥</em> 。 <em>密钥</em> 别名中禁止包含个人数据等敏感信息。点击或者复制转到。</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/Razor_/article/details/7600157">Android系统移植技术详解_ayamelluxie</a></p>
+<p>6-4<a target="_blank" rel="noopener" href="https://blog.csdn.net/Razor_/article/details/7600157">PRODUCT_COPY_FILES <em>文件</em> 复制列表,格式为“原 <em>文件</em> 路径:目的 <em>文件</em> 路径”,编译过程中会按照此规则复制 <em>文件</em> PRODUCT_ <em>OTA</em> _PUBLIC_KEYS产品的 <em>OTA</em> 公共 <em>密匙</em> 列表 PRODUCT_POLICY声明此产品使用的政策 PRODUCT_PACKAGE_OVERLAYS指示是否使用默认资源或添加任何产品特定的资源,例如:vendor&#x2F;acme&#x2F;overlay PRODUCT_CONTRIBUTORS_FILE HTML <em>文件</em>…</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_45576679/article/details/120726858">汽车 <em>OTA</em> 技术:改变智能汽车时代的升级与服务</a></p>
+<p>6-11<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_45576679/article/details/120726858">在智能手机时代,<em>OTA</em> 常被用于对手机进行系统更新。 <em>OTA</em> 主要分为F <em>OTA</em> (Firmware-Over-The-Air,固件在线升级)是对固件下载安装镜像,S <em>OTA</em> Software-Over-The-Air软件在线升级)是对部分应用层软件的迭代更新。 在汽车智能联网技术未普及的时代,一辆汽车包含约1000万行软件代码。而现在智能化、网联化的汽车运行的代码量高达约…</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_30367543/article/details/95437456">使用JDK自带的keytool工具 <em>生成</em> <em>证书</em></a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_30367543">weixin_30367543的博客</a></p>
+<p>12-20 285<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_30367543/article/details/95437456">一、keytool 简介 　　keytool 是java用于管理 <em>密钥</em> <em>和</em> <em>证书</em> 的工具，它使用户能够管理自己的公钥&#x2F;私钥对及相关 <em>证书</em> ，用于（通过数字签名）自我认证（用户向别的用户&#x2F;服务认证自己）或数据完整性以及认证服务。在JDK1.4以后的版本中都包含了这一工具，它的位置为%JAVA_HOME%\bin\keytool.exe，如下图所示： 其功能包括： 创建并管理 <em>密钥</em> 创建并管理 <em>证书</em>…</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_30265103/article/details/101908383">[转帖] <em>密钥</em> 库 <em>文件</em> 格式(Keystore) <em>和</em> <em>证书</em> <em>文件</em> 格式(Certificate)</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_30265103">weixin_30265103的博客</a></p>
+<p>09-09 358<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_30265103/article/details/101908383"><em>密钥</em> 库 <em>文件</em> 格式[keystore]代码 https://blog.csdn.net/zzhongcy/article/details/22755317 格式: JKS 扩展名:.jks/.ks 描述: [Java Keystore] <em>密钥</em> 库的Java实现版本，provider为SUN 特点:…</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/zhaobmox/article/details/2044517">MIDlet签名及安装全攻略_验证签名 mid</a></p>
+<p>6-16<a target="_blank" rel="noopener" href="https://blog.csdn.net/zhaobmox/article/details/2044517">3.使用SUN WTK的 <em>OTA</em> 运行方式来安装,从中看到签名的验证 本文包含的步骤包括: 1.基于openSSL创建自己的CA,并 <em>生成</em> 顶级 <em>和</em> 二级CA <em>证书</em>; 2.使用WTK工具来新建 <em>密匙</em> 对,并提交CSR(Certification Request Standard); 3.采用二级CA <em>证书</em> 对第1步中提交的CSR进行签名,<em>生成</em> 经CA签名的 <em>证书</em>;…</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_62941746/article/details/144419107"><em>OTA</em> AB差分升级示例_ab差异包升级</a></p>
+<p>6-14<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_62941746/article/details/144419107">本文档主要介绍在OpenHamrony中如何验证 <em>OTA</em> AB差分升级。包括环境搭建及问题案例说明。 一、工程修改 要使能AB差分升级,需要在工程中打开这个功能,并配置分区表: 1.1 修改config.json 路径: vendor&#x2F;hihope&#x2F;rk3568&#x2F;config.json 修改enable_absystem “enable_absystem”:true,…</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_69135651/article/details/134669345"><em>鸿蒙</em> 原生应用&#x2F;元服务开发-AGC分发如何 <em>生成</em> <em>密钥</em> <em>和</em> <em>和</em> <em>证书</em> <em>请求</em> <em>文件</em></a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_69135651">weixin_69135651的博客</a></p>
+<p>11-28 1098<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_69135651/article/details/134669345">Harmony <em>OS</em> 通过数字 <em>证书</em> （.cer <em>文件</em> ） <em>和</em> Profile <em>文件</em> （.p7b <em>文件</em> ）等签名信息来保证应用的完整性，应用如需上架到华为应用市场必须通过签名校验。 <em>证书</em> <em>请求</em> <em>文件</em> ：格式为.csr，全称为Certificate Signing Request，包含 <em>密钥</em> 对中的公钥 <em>和</em> 公共名称、组织名称、组织单位等信息，用于向AGC申请数字 <em>证书</em> 。 <em>密钥</em> ：包含非对称加密中使用的公钥 <em>和</em> 私钥，存储在 <em>密钥</em> 库 <em>文件</em> 中，格式为.p12，公钥 <em>和</em> 私钥对用于数字签名 <em>和</em> 验证。Password： <em>密钥</em> 对应的密码，与 <em>密钥</em> 库密码保持一致，无需手动输入。</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_43281464/article/details/141875492"><em>鸿蒙</em> 开发如何 <em>生成</em> <em>证书</em> 以及配置 <em>证书</em> 保姆级步骤</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_43281464">qq_43281464的博客</a></p>
+<p>09-04 1599<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_43281464/article/details/141875492">然后添加应用名称 <em>和</em> 包名，包名在项目中AppScope目录中 的app.json5 <em>文件</em> 里有bundleName如图(包名的创建是不能重复的)然后点击下一步。上面就已经设置好p12 <em>证书</em> 的地址 <em>和</em> 名称，下来设置好csr <em>证书</em> 的 <em>文件</em> 存放地址 <em>和</em> 名称(可以都放在同一个 <em>文件</em> 夹下并名字相同)如图。然后如图完成配置点击ok后就可以了，(使用服务的前提是要在module.json5中配置好你当时在AUG平台开启的服务)然后还需要在启动项目中引入 <em>证书</em> 在编译器中选择找到file中的project Structure点击进去。</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_39580685/article/details/130339854">JWT解密Token报错解决_jwttokenstore读取token错误的 <em>密匙</em></a></p>
+<p>6-5<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_39580685/article/details/130339854">.setSigningKey(JWT_ <em>OTA</em> _TOKEN_SECRET.getBytes()) &#x2F;&#x2F; 默认字符集,UTF-8.parseClaimsJws(token).getBody(); 就解决了。 总结: secretkey的字符集,如果传入的是字符串,则转为byte[]时是采用ASCII的,而 <em>生成</em> key是是采用UTF-8的,因此出现了解密异常。</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/shiweisi_hqu/article/details/6166582">andy学java系列之J2ME移动支付的J2EE服务器端的实现_java写j2me服务端…</a></p>
+<p>6-11<a target="_blank" rel="noopener" href="https://blog.csdn.net/shiweisi_hqu/article/details/6166582">B:用户通过在网站或通过发送短信点播WapPush链接的方式,由 <em>OTA</em> 服务器提供MIDlet的下载。其中每个MIDlet都已经内嵌了RSA的私匙-公匙对,而这些 <em>密匙</em> 对是由RSA <em>密匙</em> 对管理模块维护的。 C:商家登录自服务子系统进行注册帐号,发布、修改或删除商品的信息。 服务器端的主要模块的实现如下:…</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_39652397/article/details/145595406"><em>鸿蒙</em> NEXT版实战开发：如何使用手动 <em>生成</em> <em>证书</em> 打包</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_39652397">qq_39652397的博客</a></p>
+<p>02-12 856<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_39652397/article/details/145595406">如何使用手动 <em>生成</em> <em>证书</em> 打包…….</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/a639735331/article/details/92847337/">支付宝沙箱环境支付(当面付教程)_支付宝拟支付沙盒</a></p>
+<p>6-17<a target="_blank" rel="noopener" href="https://blog.csdn.net/a639735331/article/details/92847337/">第一、点击设置应用公匙。 第二、点击设置应用公匙。 第三、点击查看 <em>密钥</em> <em>生成</em> 方法 第四、点击下载对应工具。 第五、解压下载好的工具,点击以下运行程序。 第六、点击 <em>生成</em> <em>密匙</em> 。 复制私钥到 zfbinfo.properties 中的 private_key,复制公钥到 zfbinfo.properties 中的 public_key…</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/gaojianyingOS/article/details/144428498">Harmony <em>OS</em> Next - <em>密钥</em> 管理系统架构解析</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/gaojianyingOS">gaojianyingOS的博客</a></p>
+<p>12-12 1839<a target="_blank" rel="noopener" href="https://blog.csdn.net/gaojianyingOS/article/details/144428498">当某个应用或系统组件需要使用 <em>密钥</em> 时，它向 <em>密钥</em> 管理器发出 <em>请求</em> ， <em>密钥</em> 管理器会根据 <em>请求</em> 的合法性从 <em>密钥</em> 库中取出相应的 <em>密钥</em> 并提供给 <em>请求</em> 者。它会从一个高熵的随机源（如系统的随机数 <em>生成</em> 器，这个随机数 <em>生成</em> 器本身也是经过特殊设计，以确保 <em>生成</em> 的随机数具有高度的随机性 <em>和</em> 不可预测性）获取随机数据，然后通过一系列复杂的数学运算 <em>和</em> 变换，将这些随机数据转化为符合 AES 算法要求的 <em>密钥</em> 格式。它会通知 <em>密钥</em> <em>生成</em> 器 <em>生成</em> 新的 <em>密钥</em> （如果是更新操作），然后将新 <em>密钥</em> 安全地存储到 <em>密钥</em> 库中，并确保旧 <em>密钥</em> 被妥善销毁，以防止旧 <em>密钥</em> 被继续使用而带来安全风险。</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/citywu123/article/details/123047628">全网最全的keytool <em>证书</em> <em>生成</em> 、 <em>证书</em> 管理命令</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/citywu123">Hanko的专栏</a></p>
+<p>02-21 3349<a target="_blank" rel="noopener" href="https://blog.csdn.net/citywu123/article/details/123047628"># 1.<em>生成</em> 根 <em>证书</em> <em>密钥</em> 库-&gt;root.jks keytool -genkeypair -keyalg RSA -dname “CN&#x3D;localh <em>os</em> t” -alias root -keystore root.jks -keypass 123465 -storepass 123465 # 2.<em>生成</em> 用户 <em>证书</em> <em>密钥</em> 库-&gt;server.jks keytool -genkey -keyalg RSA -dname “cn&#x3D;hankserver,ou&#x3D;cysignet,o&#x3D;none,l&#x3D;china,st.</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44326002/article/details/117257675">generate key and csr时报错incorrect keystore password</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44326002">遥望星河的博客</a></p>
+<p>05-25 786<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44326002/article/details/117257675">问题： devecho：build - generate key and csr 解决方法： 一定要这么做，如果是先新建一个空白的.p12 <em>文件</em> ，然后在这里选中，会提示如下信息： 点了yes之后可以进行下一步，但是在后续步骤会引发开头提到的问题。 另外就是要注意密码的设置，需要至少含一下四种字符中的两种，并且密码长度需大于等于8…</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_69135651/article/details/137599322">企业 <em>鸿蒙</em> 原生应用元服务备案实操包名公钥签名信息</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_69135651">weixin_69135651的博客</a></p>
+<p>04-10 728<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_69135651/article/details/137599322">（3）打开已保存的 <em>证书</em> ，点击“详细信息-公钥”，获取APP的公钥信息；点击“详细信息-指纹”，获取APP的签名信息。（2）使用文本编辑器（如，记事本）打开已下载的 <em>证书</em> ，按照图示内容删除根 <em>证书</em> <em>和</em> 中间 <em>证书</em> ，保留叶子 <em>证书</em> 后，点击保存；，点击“用户与访问”，在页面左侧点击“ <em>证书</em> 管理”，下载需要备案的 <em>鸿蒙</em> 应用&#x2F;元服务开发者 <em>证书</em> ；，点击“我的应用”，输入应用名称可查询到需要备案的 <em>鸿蒙</em> 应用&#x2F;元服务包名。</a><a target="_blank" rel="noopener" href="https://devpress.csdn.net/v1/article/detail/117423448"><em>鸿蒙</em> <em>os</em> 申请填写方法,<em>鸿蒙</em> <em>OS</em> <em>生成</em> <em>密钥</em> <em>和</em> <em>证书</em> <em>请求</em> <em>文件</em></a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_29156679">weixin_29156679的博客</a></p>
+<p>05-30 1240<a target="_blank" rel="noopener" href="https://devpress.csdn.net/v1/article/detail/117423448">Harmony <em>OS</em> 应用通过数字 <em>证书</em> <em>和</em> 授权 <em>文件</em> 来保证应用的完整性，在申请数字 <em>证书</em> <em>和</em> Profile <em>文件</em> 前，需要通过 DevEco Studio 来 <em>生成</em> 私钥(存放在.p12 <em>文件</em> 中) <em>和</em> <em>证书</em> <em>请求</em> <em>文件</em> (.csr <em>文件</em>)。同时，也可以使用命令行工具的方式来 <em>生成</em> <em>密钥</em> <em>和</em> <em>证书</em> <em>请求</em> <em>文件</em> ，用于构筑工程流水线。使用 DevEco Studio <em>生成</em> <em>证书</em> <em>请求</em> <em>文件</em> 使用 DevEco Studio <em>生成</em> <em>证书</em> <em>请求</em> <em>文件</em> 的方…</a><a target="_blank" rel="noopener" href="https://devpress.csdn.net/v1/article/detail/120510728">04.<em>鸿蒙</em> Harmony <em>OS</em> 卡片 <em>生成</em> p12 <em>文件</em> 获取SHA256 <em>证书</em> 指纹</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/jingbin_">jingbin_的博客</a></p>
+<p>09-28 2499<a target="_blank" rel="noopener" href="https://devpress.csdn.net/v1/article/detail/120510728">在接入华为账号时，发现需要release签名，有分debug的 <em>证书</em> <em>和</em> release的 <em>证书</em> 在官方文档：应用发布 ，会 <em>生成</em>.csr <em>文件</em> <em>和</em>.p12 <em>文件</em> 。 然后在这里：发布Harmony <em>OS</em> 应用，按流程走完后，在 <em>证书</em> 管理会得到.cer <em>文件</em> ，在管理HAP Provision Profile会得到.p7b <em>文件</em> 至此我们得到了所有的 <em>文件</em> ： release.csr release.p12 release.cer release.p7b 配置后运行选择这里为release： 还需要在这里配置： 直接运.</a><a target="_blank" rel="noopener" href="https://devpress.csdn.net/v1/article/detail/117372857"><em>鸿蒙</em> 系统源码获取,<em>鸿蒙</em> 系统真机调试 <em>证书</em> <em>和</em> 设备ID获取</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_39655049">weixin_39655049的博客</a></p>
+<p>05-28 1393<a target="_blank" rel="noopener" href="https://devpress.csdn.net/v1/article/detail/117372857"><em>鸿蒙</em> 系统真机调试创建项目创建项目 创建应用创建 <em>鸿蒙</em> 应用(注意，测试阶段需要发邮件申请即可) 关联应用项目进入关联 添加引用 准备调试使用的 p12 <em>和</em> <em>证书</em> <em>请求</em> csr使用以下命令&#x2F;&#x2F; 别名”test”可以修改，但必须前后一致，密码请自行修改keytool -genkeypair -alias “test” -keyalg EC -sigalg SHA256withECDSA -dname “C&#x3D;C…</a><a target="_blank" rel="noopener" href="https://liumiaocn.blog.csdn.net/article/details/103590983">Android应用构建：8:使用keytool确认 <em>证书</em> 与私钥信息</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/liumiaocn">知行合一 止于至善</a></p>
+<p>12-18 1471<a target="_blank" rel="noopener" href="https://liumiaocn.blog.csdn.net/article/details/103590983">在前面的文章中我们使用Android Studio创建了签名用于APK <em>文件</em> 的构建，这篇文章我们将使用keytool来反向解析一下此 <em>文件</em> 的详细内容。</a><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_35601445/article/details/111928165">apk私钥_Android创建私钥并为APK <em>文件</em> 签名</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_35601445">weixin_35601445的博客</a></p>
+<p>12-24 1001<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_35601445/article/details/111928165">=&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;Android创建私钥并为APK <em>文件</em> 签名的相关命令创建私钥命令：keytool -genkey -keystore.keystore -keyalg RSA -validity -alias 该命令位于jdk安装目录的bin目录下，用于…</a><a target="_blank" rel="noopener" href="https://wenku.csdn.net/answer/7h09xctfg7">如何在DevEco Studio中使用DeepSeek <em>生成</em> 代码进行编程。</a></p>
+<p>02-18<a target="_blank" rel="noopener" href="https://wenku.csdn.net/answer/7h09xctfg7"><think>好的，用户问的是如何在DevEco Studio中使用DeepSeek <em>生成</em> 代码进行编程。首先，我需要确认DevEco Studio是什么，以及DeepSeek的功能。DevEco Studio是华为推出的Harmony <em>OS</em> 应用开发IDE，而DeepSeek可能是一个AI代码 <em>生成</em> 工具，类似GitHub Copilot。 用户可能是Harmony <em>OS</em> 的开发者，想要提高开发效率，所以想了解如何集成AI工具到开发环境中。我需要先检查DeepSeek是否有官方插件支持DevEco Studio。如果没有，可能需要通过其他方式，比如API调用或者使用通用插件。 接下来，可能的步骤包括安装插件、配置API <em>密钥</em> 、以及具体的使用方法。需要分步骤详细说明，确保用户能跟着操作。同时，要注意可能遇到的问题，比如网络问题、API调用限制或者插件兼容性。 另外，用户可能对 <em>生成</em> 的代码质量有顾虑，可能需要提醒他们审查 <em>和</em> 测试 <em>生成</em> 的代码，确保符合Harmony <em>OS</em> 的标准。还可能想了解DeepSeek在Harmony <em>OS</em> 开发中的具体应用场景，比如UI布局、事件处理等。 需要确保语言口语化，避免技术术语过于复杂，让不同水平的开发者都能理解。同时，如果DeepSeek目前不支持DevEco Studio，也要给出替代方案或建议等待官方支持。</think>在 DevEco Studio 中使用 DeepSeek <em>生成</em> 代码进行编程，主要可以通过 **API 调用**或 **IDE 插件集成** 的方式实现。由于目前（截至2024年1月）DeepSeek 尚未推出官方的 DevEco Studio 插件，以下是通过 API 调用的常用方法： — ### **操作步骤指南** #### 1️⃣ **获取 DeepSeek API <em>密钥</em> ** - 访问 <a target="_blank" rel="noopener" href="https://www.deepseek.com/">DeepSeek 官网</a> 注册账号 - 在开发者控制台创建 API Key（通常有免费试用额度） #### 2️⃣ **DevEco Studio 插件配置** - 安装 **HTTP <em>请求</em> 插件**（如 _HTTP Client_ 或 _Restful Tool_） - 在 IDE 设置中配置 API 端点： ```text <a target="_blank" rel="noopener" href="https://api.deepseek.com/v1/chat/completions">https://api.deepseek.com/v1/chat/completions</a> ``` #### 3️⃣ **代码 <em>生成</em> 示例**（以 Harmony <em>OS</em> ArkTS 为例） ```typescript &#x2F;&#x2F; 通过注释描述需求（中英文皆可） &#x2F;&#x2F; @deepseek 请 <em>生成</em> 一个Harmony <em>OS</em> 的TextInput组件，带边框 <em>和</em> 圆角样式 async function generateCodeWithDeepSeek() { const response &#x3D; await fetch(‘<a target="_blank" rel="noopener" href="https://api.deepseek.com/v1/chat/completions">https://api.deepseek.com/v1/chat/completions</a>‘, { method: ‘P <em>OS</em> T’, headers: { ‘Content-Type’: ‘application&#x2F;json’, ‘Authorization’: ‘Bearer your_api_key_here’ }, body: JSON.stringify({ model: “deepseek-coder-33b-instruct”, messages: [ { role: “user”, content: “用ArkTS写一个带圆角 <em>和</em> 边框的TextInput组件” } ] }) }); const data &#x3D; await response.json(); console.log(data.choices[0].message.content); } ``` #### 4️⃣ **典型响应结果** ```typescript &#x2F;&#x2F; DeepSeek <em>生成</em> 的示例代码 @Entry @Component struct StyleInputExample { @State text: string &#x3D; ‘’ build() { Column() { TextInput({ text: this.text }).placeholder(‘请输入…’).borderRadius(20) &#x2F;&#x2F; 设置圆角.border({ width: 2, color: Color.Blue }) &#x2F;&#x2F; 蓝色边框.padding(10).onChange((value: string) &#x3D;&gt; { this.text &#x3D; value }) }.width(‘100%’).padding(20) } } ``` — ### **最佳实践技巧** 1. **精准提示词**：用中文明确描述组件功能（如” <em>生成</em> 带滑动删除功能的List容器”） 2. **上下文关联**：在 <em>请求</em> 中包含当前代码片段，保持风格统一 3. **错误处理**：添加 `try-catch` 块处理 API 异常 4. **代码验证**：始终检查 <em>生成</em> 代码是否符合 [Harmony *OS* 开发规范](<a target="_blank" rel="noopener" href="https://developer.harmony/">https://developer.harmony</a> *os*.com&#x2F;cn&#x2F;docs&#x2F;documentation&#x2F;) — ### **常见应用场景** - **UI 组件 <em>生成</em> **：快速创建复杂布局 - **业务逻辑实现**：网络 <em>请求</em> &#x2F;数据持久化代码 <em>生成</em> - **错误排查**：粘贴报错信息获取修复建议 - **文档查询**：通过自然语言查询API用法 — 如果未来 DeepSeek 推出官方插件，预计会支持以下功能： 1. 右键直接 <em>生成</em> 代码片段 2. 代码解释&#x2F;注释自动 <em>生成</em> 3. 实时智能补全建议 4. 代码问题诊断与修复建议 建议持续关注 <a target="_blank" rel="noopener" href="https://deepseek.com/">DeepSeek 官方动态</a> 获取最新集成方案。当前阶段通过 API 调用已能有效提升 Harmony <em>OS</em> 开发效率。</a></p>
+<p>登录后您可以享受以下权益：</p>
+<ul>
+<li>免费复制代码</li>
+<li>和博主大V互动</li>
+<li>下载海量资源</li>
+<li>发动态&#x2F;写文章&#x2F;加入社区<br>×</li>
+</ul>
+<p>实付 元</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/chehec2010/article/details/">使用余额支付</a></p>
+<p>点击重新获取</p>
+<p>扫码支付</p>
+<p>钱包余额 0</p>
+<p>抵扣说明：</p>
+<p>1.余额是钱包充值的虚拟货币，按照1:1的比例进行支付金额的抵扣。<br>2.余额无法直接购买下载，可以购买VIP、付费专栏及课程。</p>
+<p><a target="_blank" rel="noopener" href="https://i.csdn.net/#/wallet/balance/recharge">余额充值</a></p>
+<p>举报</p>
+<p>[![[_resources&#x2F;4bc9ab7d6ff27653410cf36782730aac_MD5.gif]]](<a target="_blank" rel="noopener" href="https://mall.csdn.net/vip?utm_source=25618_vip_blogrighticon">https://mall.csdn.net/vip?utm_source=25618_vip_blogrighticon</a>) [![[_resources&#x2F;35c7362356adf5a11cd3cc47fd01628f_MD5.png]] 点击体验<br>DeepSeekR1满血版](<a target="_blank" rel="noopener" href="https://ai.csdn.net/?utm_source=cknow_pc_blogdetail&spm=1001.2101.3001.10583">https://ai.csdn.net/?utm_source=cknow_pc_blogdetail&amp;spm=1001.2101.3001.10583</a>) ![[_resources&#x2F;90bd0cbf3aff8fdff8bf9b011b581e20_MD5.png]]</p>
+<p>程序员都在用的中文IT技术交流社区</p>
+<p>![[_resources&#x2F;08a47e60886378fe60a3d9c8f4ae8bc6_MD5.png]]</p>
+<p>专业的中文 IT 技术社区，与千万技术人共成长</p>
+<p>![[_resources&#x2F;a51be6c085b867a5bd82d8dc1cea9b46_MD5.png]]</p>
+<p>关注【CSDN】视频号，行业资讯、技术分享精彩不断，直播好礼送不停！</p>
+<p>客服 返回顶部</p>
+<p>![[_resources&#x2F;0a5c33bffc05299cc32fd2d21b34ceab_MD5.png]] ![[_resources&#x2F;70beb07f30978be5ba5c3494e9cebdb1_MD5.png]] ![[_resources&#x2F;18af8666ac51efee388deadd1580c10d_MD5.png]] ![[_resources&#x2F;239707a90414ea8b8b18534350d2c684_MD5.png]] ![[_resources&#x2F;7ae49f6fecc3303337d87bbfc09625cf_MD5.png]] ![[_resources&#x2F;8e98fe6bba25d19b7605b2a6fa51b41f_MD5.png]] ![[_resources&#x2F;bc582c0fe459a918fd829ead0f5a7077_MD5.png]] ![[_resources&#x2F;afa8a0e92eeebda0962e5a37dee7a4bd_MD5.png]] ![[_resources&#x2F;742cb0cbf9ce33d08ad5efb1bccc69a5_MD5.png]]</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/clippings/" class="print-no-link">#clippings</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>鸿蒙OS 生成密钥和证书请求文件_ota密匙-CSDN博客</div>
+      <div>https://yhao521.github.io/2025/09/29/摘录/鸿蒙OS 生成密钥和证书请求文件_ota密匙-CSDN博客/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>[[成就一亿技术人!]],[[hope_wisdom 发出的红包]]</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年9月29日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/09/29/%E6%91%98%E5%BD%95/%E5%AE%8C%E5%85%A8%E5%85%8D%E8%B4%B9%E7%9A%84obsidian%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%A4%9A%E8%AE%BE%E5%A4%87%E5%90%8C%E6%AD%A5%E6%96%B9%E6%A1%88%20-%20%E5%B0%91%E6%95%B0%E6%B4%BE/" title="完全免费的obsidian跨平台多设备同步方案 - 少数派">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">完全免费的obsidian跨平台多设备同步方案 - 少数派</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/09/29/%E6%91%98%E5%BD%95/Obsidian-%E6%8F%92%E4%BB%B6%E6%B1%87%E6%80%BB%EF%BC%8820240112%E6%9B%B4%E6%96%B0-%E6%8C%81%E7%BB%AD%E4%BF%AE%E6%94%B9%E5%A2%9E%E6%B7%BB%E4%B8%AD%EF%BC%89/" title="">
+                        <span class="hidden-mobile"></span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>  
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

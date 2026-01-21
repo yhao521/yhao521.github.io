@@ -1,0 +1,730 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="yhao521">
+  <meta name="keywords" content="java,博客,vue,spring,mysql,docker,linux">
+  
+    <meta name="description" content="学习万相2.1本地部署，包括安装WanVideoWrapper插件，根据显卡显存下载合适模型，如I2V、T2V等，还需下载VAE、clip文件，更新comfyui至最新版本，最后打开工作流用本地模型生成视频。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Comfyui制作AI视频，支持文生视频、图生视频、视频生视频，万相2.1本地部署详细方法 - 腾讯云开发者社区-腾讯云">
+<meta property="og:url" content="https://yhao521.github.io/2025/07/23/%E6%91%98%E5%BD%95/Comfyui%E5%88%B6%E4%BD%9CAI%E8%A7%86%E9%A2%91%EF%BC%8C%E6%94%AF%E6%8C%81%E6%96%87%E7%94%9F%E8%A7%86%E9%A2%91%E3%80%81%E5%9B%BE%E7%94%9F%E8%A7%86%E9%A2%91%E3%80%81%E8%A7%86%E9%A2%91%E7%94%9F%E8%A7%86%E9%A2%91%EF%BC%8C%E4%B8%87%E7%9B%B82.1%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2%E8%AF%A6%E7%BB%86%E6%96%B9%E6%B3%95%20-%20%E8%85%BE%E8%AE%AF%E4%BA%91%E5%BC%80%E5%8F%91%E8%80%85%E7%A4%BE%E5%8C%BA-%E8%85%BE%E8%AE%AF%E4%BA%91/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="学习万相2.1本地部署，包括安装WanVideoWrapper插件，根据显卡显存下载合适模型，如I2V、T2V等，还需下载VAE、clip文件，更新comfyui至最新版本，最后打开工作流用本地模型生成视频。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cloud.tencent.com/lzDCDJVR2s0TJTtJ64AEOSvtWZLNEOG0D8/Ht27cf//3/9v9+/Pg/9vHx8Uv2Lv9L+AToy2Ld5Omjdp7k4Zqtz2drzNZZ9au98/mfJDZ+7wl8t/zqLeBbTZ+uH6wm32HrdVWu6tbA8SRP73i5lY/e1ezT+eo+9g3pTulN/HFDrF+nhRu1m3bH12zNZ3/4ah99Zzk9aGrysF4qv4pf+fm6mv34Zn33DXE6D6kvN+TuvkzftOHsg7/r0yfz+Fp5Kjd75su9wLPMGffZ3KznviGzU3kj9+Ubknv3tngL6Xg4a/oT8yefmG/UXBOWUZOH9UofPn34r9R9Q75yen8g+3JDftfUs0/3lvlM/CvfSh/9eFRrrGruofPry9/58Fd9w79viFN7SD1uiKl/dV/6eCuu4m7dzKePPnhr8sA8V3GXx2fN/nQ8fKXuG3LllP6i57u35rNrynsbYP0S4/lhNf2J+dSVPnw83Zp6dXrmYbmsKz39Fe8bUk/jAc/Hz5Dci7clp93xXR6ffRLzqat16Pxnldea8FlmaOnr8vjsl3k6/0zfN8QpPaSOP/f9/NNfNzX879qvt0JfWH88rPLREw9fcrAeWfVKvsP6dbmruv76yA1+3xCn85B6/AwxJVOzv+QT86l0OPvhVXrm6Gr6EvONuupVvWf+XAO+mu/20fUZffcNydN9Mz5uyNnUxh5NO314n6PT8aocLH+V73yzvfJaI2vuIfXE+mUusVzH02vdN6SexgOeX/6VZU/eAtiUO57vri6n5jqJ+VT6wNauHN+ZLle9V55znVUffr7EY819Q66c/F/0HDfk6pqzqY4sXh9vAax2vuT5Vf34EvONmtoK1+xZni/3kDx8tdrf8O8bcvXU/pLv+G1vnVJdO9+Gzlcz41kO3+X46B3ueP1HXfWg18wsZ6304fWB+ZKH6enH17pvSD2NBzwf30PsZTVFek4fpuuHh7N2uj50+Gq++roe+Oodzx3/WV+X85nU4ds3JE/rzfi4Iabk7YBzf3Q8X/KJ0wfrs6rZL/HIZ0945q3+Ts898WXfxJ1Pv/TjR903pJ7GA54vfw8xVXvOtwCftfMlD2d+heu+9KjcWZ6fRw4P07OufKnD2afifUPqaTzg+fgeknvpponv3p7U+fDW+So/y+OssVoz/XKrmn0Td3nrnfn3DelO7038d9MyvW4fV32rPvTsB1s/ffisfJXXiwbzrPhOl1/VzFsff5bfN+TsdN6gtf/KMs2cLpx75U+en574d/lHH2voaS04K3/68Pyp4+/69MmcfqPuG1JP4wHPL9/U7ambpul2epdPP8yvdv3Tzyc3anqqduU5e3b90qd38plf6aPPviFO8yG1/R5imjnl3DedP3WYzr/i6Wrmsw9frTI4GTycOqx2fnr2wat0ffCzum/I7FTeyL18DzHN3FM33ZWfnnk4ddj6ifHycK1dpnrGsx78n8X6ysOq/rDKX/V9Q5zOQ+rtnyGmabqrz5E+OPvA2Y8fn76K0yuTVSb9eP7EeLXT8dlfTuWDR903pJ7GA573QB4whLqFlx/qrtnsOo0gvTYZz50/fV2eL3V9k+/8+FFlKzee9aIn5l/xfPrAcnDWM/++IXlab8bHLxe7qeY0V/vNPvL4xNmPnnzmU/8M1rPL5l74k+/yycvjZ332DXE6D6nHDbEfUzS9DvOr6cd3lZ+e6+Cznvk6DZ+9YHtJH55PTR9elfuMb98Qp/iQevz6PfdjuqZNh1NfYfmrNftljp78wJ1m7zLpS51vVeVW/ej8+la8b4hTeUh9uSGmZZr2mTh9MP/dejfPX/c142b7qJmqJ69f9Yzn5OU6PvOdf/j2DcnTejM+frlouqaX+6Lj0wevfHR+/fCwykdX6Ynxo9L0qNrsOf1yyWeWnnyHz/z7hnSn9ib+5XtI7qN7S3LK6fvdfbJ/4lyv4s6L583PhOdLHc+XOv5O3Tfkzmn9Be9xQ0zblOHcw0pPPywH3+0vnzn86HumWfesZj69da2h8ePhu7nq3zeknsYDntt/ZXVT9xZ0evKJ8zOv9M6f/B2cn6HL2htdDqaveDq//IzfN8TpPKQefzHM/cymVz2d3vE1O569Lfz0xHg1dX3os9plkpfNnp0v+cwlzv6ZH/q+IU7pIfX4GWI/pmp6Kj0rXa7T8XyZS8z/J+vVvaQv90RPHvbZYHWW2zfE6TykHt9D7Mc0Z9PjGZWvcuM5c3zJZw7u/MnDcrVaiwfm6fiVnjlYTu3Wo6t8tc++IU7nIfXjv+n8/A8pm5Z9mRoepiefuPPhVzX7wXK5H/yovOnB86aO5+v0zidHz3zqfLXuG1JP4wHPL38xzKnCOV18foarvi6Xfbt++PSPvjMu16s4e3V5PtnOR+fvfHi+kds3xOk9pLY/Q+zPFGG1ThU3q/IrP1/2kKPD6Rs4PYlnmc/k9O36ne3xbL2h7RvSneqb+OXvsnJf3fS9Nakn5su+HebPPjP/yqNXZlc5fnn+xHx3q34jt2/I3dP7w/6X32Wt1vNW8JmuiufDJ77r41f1g2u1ZuXqM/2sR/V7loOzdv3kUofpo9++IXmqb8btz5DVvkxXrVOuWToO5lfxfFnp/PSKeWirWrPVi9cPrp7xvOLlu9xM3zckT+vN+PimPpvWbG/dW8GrT/rw6YPVzK347Ms/avaCM5M8rNaeV56zf5fRv/r3DelO60388fcQUzK13E/qMJ8cHqZn5Ut+hVd9az7XyOxVPXPWkO90vqxy+JrfN8SpPKQeP0M+u5863dEjcb4Nuc5VP59+cO13pg0fvWbGs16dzp96l8PLqVfy+4Y4rYfUL9+Qbuo+n7dl5Vv56Wr2w49Ky7U7XLPjmQ/f9aPz86mppy/1gfcNcSoPqS83JKd7dZ85fTjz+NU6fPLppyc//Kl1uOudfObpWVe+3Gvi0W/fkDzVN+Pje8jdfcymW3t4Wyp39qxf5jpeL/rAspXjm1X+1ORTx/PTk08dTp88fdR9Q+ppPOB5D+QBQ6hb+BdGnF5MgCF4mQAAAABJRU5ErkJggg==">
+<meta property="article:published_time" content="2025-07-23T12:01:04.000Z">
+<meta property="article:modified_time" content="2025-07-23T12:01:04.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="clippings">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://cloud.tencent.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">
+  
+  
+  
+  <title>Comfyui制作AI视频，支持文生视频、图生视频、视频生视频，万相2.1本地部署详细方法 - 腾讯云开发者社区-腾讯云 - 匆匆过客的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yhao521.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>匆匆过客的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Comfyui制作AI视频，支持文生视频、图生视频、视频生视频，万相2.1本地部署详细方法 - 腾讯云开发者社区-腾讯云"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-07-23 20:01" pubdate>
+          2025年7月23日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          9 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Comfyui制作AI视频，支持文生视频、图生视频、视频生视频，万相2.1本地部署详细方法 - 腾讯云开发者社区-腾讯云</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>精选内容&#x2F;技术社群&#x2F;优惠产品,<em>尽在小程序</em></p>
+<p>立即前往</p>
+<h2 id="Comfyui制作AI视频，支持文生视频、图生视频、视频生视频，万相2-1本地部署详细方法"><a href="#Comfyui制作AI视频，支持文生视频、图生视频、视频生视频，万相2-1本地部署详细方法" class="headerlink" title="Comfyui制作AI视频，支持文生视频、图生视频、视频生视频，万相2.1本地部署详细方法"></a>Comfyui制作AI视频，支持文生视频、图生视频、视频生视频，万相2.1本地部署详细方法</h2><p>文章来源：企鹅号 - 橙色C</p>
+<p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/news/">举报</a></p>
+<p>万相2.1可以在comfyui上自由调用，支持文生视频、图生视频和视频生视频，而且现在还出现了很多wan2.1的lora，今天我们一起来学习wan2.1的本地部署。</p>
+<p>一、安装插件</p>
+<p>在comfyui中调用万相2.1模型需要用到WanVideoWrapper插件</p>
+<p>插件地址：<a target="_blank" rel="noopener" href="https://github.com/kijai/ComfyUI-WanVideoWrapper">https://github.com/kijai/ComfyUI-WanVideoWrapper</a></p>
+<p>进入comfyui的节点文件夹“custom_nodes”，在地址栏输入”cmd”，然后敲回车，调出命令行</p>
+<p>在命令行内输入指令： git clone <a target="_blank" rel="noopener" href="https://github.com/kijai/ComfyUI-WanVideoWrapper.git">https://github.com/kijai/ComfyUI-WanVideoWrapper.git</a></p>
+<p>![[_resources&#x2F;6da78af2836a3a963c8c0a5da7520b4d_MD5.png]]</p>
+<p>插件安装完成后关闭命令行</p>
+<p>二、模型下载</p>
+<p>（1）模型下载地址：</p>
+<p><a target="_blank" rel="noopener" href="https://huggingface.co/Kijai/WanVideo/_comfy/tree/main">https://huggingface.co/Kijai/WanVideo\_comfy/tree/main</a></p>
+<p>![[_resources&#x2F;80b3e74452d0d22b333fc909346e2dfa_MD5.png]]</p>
+<p>（2）模型含义</p>
+<p>I2V 代表image to Video，意思是图生视频</p>
+<p>T2V 代表Text to Video，意思是文生视频</p>
+<p>（3）模型选择</p>
+<p>显卡显存10G或更低</p>
+<p>文生视频：建议使用 T2V 1.3B的Fp16精度模型</p>
+<p>图生视频：建议使用GGUF，具体介绍见下文</p>
+<p>显卡显存12G或更高</p>
+<p>文生视频：选择 T2V 14B fp8 精度模型</p>
+<p>图生视频：选择 I2V 480p fp8 精度模型</p>
+<p>显卡显存16G或更高</p>
+<p>文生视频：选择 T2V 14B fp16 精度模型</p>
+<p>图生视频：选择 I2V 720p fp16 精度模型</p>
+<p>显卡显存12G以上，建议使用 I2V 480B fp8精度模型</p>
+<p>显卡显存24G或更高，如4090、5090，随便用</p>
+<p>建议：本地模型可以追求高分辨率，但不要追求高精度，比如同分辨率下的fp16和fp8视频区分不是很大，但高精度的fp16速度非常慢！</p>
+<p>10G以下低显存可以选择GGUF模型</p>
+<p>4G显存：可以选择Q3_K_S</p>
+<p>6G显存：可以选择Q3_K_S或Q3_K_M</p>
+<p>8G显存：可以选择Q3_K_M或Q4_1</p>
+<p>大于12G显存：建议使用GGUF的Q6_K或Q8_0</p>
+<p>网址：</p>
+<p><a target="_blank" rel="noopener" href="https://huggingface.co/city96/Wan2.1-T2V-14B-gguf/tree/main">https://huggingface.co/city96/Wan2.1-T2V-14B-gguf/tree/main</a></p>
+<p>![[_resources&#x2F;6b25e0dcb2547aa0bf9a00515366e018_MD5.png]]</p>
+<p>（4）模型安装目录</p>
+<p>主模型安装路径：models\diffusion_models</p>
+<p>UUGF模型安装路径：models\text_encoders</p>
+<p>三、下载VAE文件和clip文件</p>
+<p>（1）从下面地址下载VAE文件</p>
+<p><a target="_blank" rel="noopener" href="https://huggingface.co/ratoenien/wan/_2.1/_vae/tree/main">https://huggingface.co/ratoenien/wan\_2.1\_vae/tree/main</a></p>
+<p>![[_resources&#x2F;73c2d7f2a4901b1e4c0f4201fac65d5d_MD5.png]]</p>
+<p>（2）安装VAE文件</p>
+<p>将下载好的文件复制到文件夹 models\vae</p>
+<p>![[_resources&#x2F;61ad838ba20ed117378bfbf72a12f4c5_MD5.png]]</p>
+<p>（3）安装clip文件</p>
+<p>放置路径：models\clip</p>
+<p>下载地址：</p>
+<p><a target="_blank" rel="noopener" href="https://huggingface.co/Kijai/WanVideo/_comfy/tree/main">https://huggingface.co/Kijai/WanVideo\_comfy/tree/main</a></p>
+<p>![[_resources&#x2F;583b79465e4872aa74bedf543906f0c2_MD5.png]]</p>
+<p>（4）下载text_encoders文件</p>
+<p>放置路径：models\text_encoders</p>
+<p>下载地址：</p>
+<p><a target="_blank" rel="noopener" href="https://huggingface.co/Kijai/WanVideo/_comfy/tree/main">https://huggingface.co/Kijai/WanVideo\_comfy/tree/main</a></p>
+<p>![[_resources&#x2F;bcc6127ccf8a67d410a61ea656b17fb3_MD5.png]]</p>
+<p>四、更新comfyui至最新版本</p>
+<p>按下图将comfyi更新至最新版本，减少报错机率，下载完后重启comfyui。</p>
+<p>![[_resources&#x2F;4375a46b75782f56ac6df6375159d5d6_MD5.png]]</p>
+<p>五、打开工作流</p>
+<p>打开下面的路径，可以找到插件自带的工作流文件</p>
+<p>custom_nodes\ComfyUI-WanVideoWrapper\example_workflows</p>
+<p>![[_resources&#x2F;5298c410ddfc0f22dfbf20816339cf0b_MD5.png]]</p>
+<p>打开默认的文生图工作流，将工作流中的模型全部改变本地模型，然后点击生成，用默认提示词生成一段视频。</p>
+<p>![[_resources&#x2F;08a1a2dd069f2eca73b01814e23789ac_MD5.png]]</p>
+<p>![[_resources&#x2F;37cd9bfc72e93410f54416422a97461d_MD5.gif]]</p>
+<p>在显卡玩命运转几分钟后，视频生成了。</p>
+<p>下节我们详细讲一下图生视频及视频生视频的玩法。</p>
+<ul>
+<li>发表于:</li>
+<li>原文链接：<a target="_blank" rel="noopener" href="https://page.om.qq.com/page/OFhvuihjREkP/_q1MTg2QYMaw0">https://page.om.qq.com/page/OFhvuihjREkP\_q1MTg2QYMaw0</a></li>
+<li>腾讯「腾讯云开发者社区」是腾讯内容开放平台帐号（企鹅号）传播渠道之一，根据 <a target="_blank" rel="noopener" href="https://om.qq.com/notice/a/20160429/047194.htm">《腾讯内容开放平台服务协议》</a> 转载发布内容。</li>
+<li>如有侵权，请联系 <a href="mailto:&#x63;&#108;&#x6f;&#x75;&#x64;&#99;&#x6f;&#x6d;&#109;&#x75;&#x6e;&#x69;&#x74;&#x79;&#x40;&#x74;&#x65;&#x6e;&#x63;&#x65;&#110;&#x74;&#x2e;&#99;&#x6f;&#109;">cloudcommunity@tencent.com</a> 删除。</li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/news/">0</a></p>
+<p>分享</p>
+<ul>
+<li><p><img src="https://cloud.tencent.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" srcset="/img/loading.gif" lazyload alt="Scan me!"><br>  分享快讯到朋友圈</p>
+</li>
+<li><p>分享快讯到 QQ</p>
+</li>
+<li><p>分享快讯到微博</p>
+</li>
+<li><p>复制快讯链接到剪贴板</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/news/2491210">上一篇：品高云售后值班 | 2025五一期间值班通知</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/news/2491227">下一篇：全国首部！茵冠生物牵头起草《软琼脂克隆形成试验》团体标准正式发布！</a></p>
+</li>
+</ul>
+<p>添加站长 进交流群</p>
+<p>领取专属 <em>10元无门槛券</em></p>
+<p>私享最新 <em>技术干货</em></p>
+<p>![[_resources&#x2F;42d5f7bfd03e8c687154139669339739_MD5.png]]</p>
+<p>领券</p>
+<p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer">首页</a></p>
+<p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/mcp">MCP广场</a></p>
+<p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/program/tm">返回腾讯云官网</a></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/clippings/" class="print-no-link">#clippings</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Comfyui制作AI视频，支持文生视频、图生视频、视频生视频，万相2.1本地部署详细方法 - 腾讯云开发者社区-腾讯云</div>
+      <div>https://yhao521.github.io/2025/07/23/摘录/Comfyui制作AI视频，支持文生视频、图生视频、视频生视频，万相2.1本地部署详细方法 - 腾讯云开发者社区-腾讯云/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>yhao521</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年7月23日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E6%91%98%E5%BD%95/AI%E7%94%B5%E5%BD%B1%E4%B8%80%E9%95%9C%E5%88%B0%E5%BA%95%EF%BC%8C%E6%97%A0%E9%99%90%E6%97%B6%E9%95%BF%EF%BC%81SkyReels-V2%E7%9B%B4%E6%8E%A5%E7%94%9F%E6%88%90%E9%95%BF%E8%A7%86%E9%A2%91%EF%BC%8CComfyUI%E6%9C%AC%E5%9C%B0%E8%BF%90%E8%A1%8C%EF%BC%81%20-%20%E8%85%BE%E8%AE%AF%E4%BA%91%E5%BC%80%E5%8F%91%E8%80%85%E7%A4%BE%E5%8C%BA-%E8%85%BE%E8%AE%AF%E4%BA%91/" title="AI电影一镜到底，无限时长！SkyReels-V2直接生成长视频，ComfyUI本地运行！ - 腾讯云开发者社区-腾讯云">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">AI电影一镜到底，无限时长！SkyReels-V2直接生成长视频，ComfyUI本地运行！ - 腾讯云开发者社区-腾讯云</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E6%91%98%E5%BD%95/Electron%20%E5%AF%B9%20SQLite%20%E8%BF%9B%E8%A1%8C%E5%8A%A0%E5%AF%86_better-sqlite3-multiple-ciphers-CSDN%E5%8D%9A%E5%AE%A2/" title="Electron 对 SQLite 进行加密_better-sqlite3-multiple-ciphers-CSDN博客">
+                        <span class="hidden-mobile">Electron 对 SQLite 进行加密_better-sqlite3-multiple-ciphers-CSDN博客</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>  
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

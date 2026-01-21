@@ -1,0 +1,711 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="yhao521">
+  <meta name="keywords" content="java,博客,vue,spring,mysql,docker,linux">
+  
+    <meta name="description" content="ComfyUI借助Easy-Use和KJNodes插件，通过for循环节点可实现图片批量放大。利用图像分块减少显存占用，还能提升计算效率。将放大工作流与for节点结合，从文件夹加载多张图片，经一系列操作，能一键批量放大，细节清晰。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ComfyUI一键批量高清无损放大图片，For循环实现图片批量处理 - 腾讯云开发者社区-腾讯云">
+<meta property="og:url" content="https://yhao521.github.io/2025/07/23/%E6%91%98%E5%BD%95/ComfyUI%E4%B8%80%E9%94%AE%E6%89%B9%E9%87%8F%E9%AB%98%E6%B8%85%E6%97%A0%E6%8D%9F%E6%94%BE%E5%A4%A7%E5%9B%BE%E7%89%87%EF%BC%8CFor%E5%BE%AA%E7%8E%AF%E5%AE%9E%E7%8E%B0%E5%9B%BE%E7%89%87%E6%89%B9%E9%87%8F%E5%A4%84%E7%90%86%20-%20%E8%85%BE%E8%AE%AF%E4%BA%91%E5%BC%80%E5%8F%91%E8%80%85%E7%A4%BE%E5%8C%BA-%E8%85%BE%E8%AE%AF%E4%BA%91%202/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="ComfyUI借助Easy-Use和KJNodes插件，通过for循环节点可实现图片批量放大。利用图像分块减少显存占用，还能提升计算效率。将放大工作流与for节点结合，从文件夹加载多张图片，经一系列操作，能一键批量放大，细节清晰。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cloud.tencent.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">
+<meta property="article:published_time" content="2025-07-23T12:01:11.000Z">
+<meta property="article:modified_time" content="2025-07-23T12:01:11.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="clippings">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://cloud.tencent.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">
+  
+  
+  
+  <title>ComfyUI一键批量高清无损放大图片，For循环实现图片批量处理 - 腾讯云开发者社区-腾讯云 - 匆匆过客的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yhao521.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>匆匆过客的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="ComfyUI一键批量高清无损放大图片，For循环实现图片批量处理 - 腾讯云开发者社区-腾讯云"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-07-23 20:01" pubdate>
+          2025年7月23日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.3k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          12 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">ComfyUI一键批量高清无损放大图片，For循环实现图片批量处理 - 腾讯云开发者社区-腾讯云</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>精选内容&#x2F;技术社群&#x2F;优惠产品,<em>尽在小程序</em></p>
+<p>立即前往</p>
+<h2 id="ComfyUI一键批量高清无损放大图片，For循环实现图片批量处理"><a href="#ComfyUI一键批量高清无损放大图片，For循环实现图片批量处理" class="headerlink" title="ComfyUI一键批量高清无损放大图片，For循环实现图片批量处理"></a>ComfyUI一键批量高清无损放大图片，For循环实现图片批量处理</h2><p>文章来源：企鹅号 - 橙色C</p>
+<p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/news/">举报</a></p>
+<p>前几天跟大家介绍了在ComfyUI中如何用4种方法对图片进行高清放大，具体方法请见文章：4种方法，ComfyUI最强图片高清放大工作流，无损放大，细节补全 ，轻松将图片完美修复至4K8K壁纸级别！</p>
+<p>今天跟大家介绍如何对图片进行批量放大。</p>
+<p>批量放大功能可以通过Easy-Use插件的for循环节点来实现，它能够给我们的工作带来很多便利性，非常实用。</p>
+<p>![[_resources&#x2F;60cf0ba1ff4a0978986e80bfeeb8371c_MD5.png]]</p>
+<p>这里需要用到几个插件：</p>
+<p>Easy-Use插件</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/yolain/ComfyUI-Easy-Use">https://github.com/yolain/ComfyUI-Easy-Use</a></p>
+<p>KJNodes插件</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/kijai/ComfyUI-KJNodes">https://github.com/kijai/ComfyUI-KJNodes</a></p>
+<p>一、for循环的基础操作</p>
+<p>先在ComfyUI中添加两个For循环节点，让它来帮助我们执行一些重复的操作。</p>
+<p>![[_resources&#x2F;37fedb386b828f5dc83e7f9aa26c8a13_MD5.png]]</p>
+<p>索引是用来快速调用符合条件的数据，通常是从0开始递增的整数，如0,1,2,3……</p>
+<p>下面是一个基础的Fro循环工作流。</p>
+<p>![[_resources&#x2F;7333555523af2e0c692cdb1bd0f5f0e0_MD5.png]]</p>
+<p>一、基础放大工作流</p>
+<p>1、基础放大工作流</p>
+<p>下面这个是最基础简单的通过模型放大的工作流。通过这个工作流可以非常有效地实现图片放大功能，而且不改变原图片的基本信息。</p>
+<p>![[_resources&#x2F;c945d1b76b11704a1cefa54cc0e2016f_MD5.png]]</p>
+<p>如果只运行这个工作流，需要占用的显存是可以接受的，但如果把这个工作流加在别的工作流后面，可能就会占用更多的显存，低显存显存表示压力巨大。</p>
+<p>2、图像分块</p>
+<p>我们可以通过增加一个图像分块节点，下图中将行列分别设为2行和2列，这样放大后的图片将会被分为4块分别进行计算，大大减少显存占用。</p>
+<p>![[_resources&#x2F;d534a7ecb0e1fc271ffaa7d6ae954a86_MD5.png]]</p>
+<p>再增加一个分块合并的节点，将分块后的图片合并，这里的行数和列数要和前面保持一致。</p>
+<p>![[_resources&#x2F;c8dc55fef99b982a1994cfb9bf99b8fd_MD5.png]]</p>
+<p>还可以再增加一个图像对比节点，将图像放大前和放大后的力进行对比。</p>
+<p>![[_resources&#x2F;170e64c26be6fbec72ddbbaa423b70a5_MD5.png]]</p>
+<p>通过左右对比，可以很清楚地看到图片确实被放大了，特别是眉毛和头发处相比原图清晰了很多。</p>
+<p>![[_resources&#x2F;a0868cbcc7bcc9d5ac3273cc20b007de_MD5.png]]</p>
+<p>有了这个分块节点，能有效减少低显存显卡放大图片的压力，如果再提高一些分块数量，比如4*4或8*8，低显存的显卡也可以完成将图片放大到8K的挑战。</p>
+<p>对于高显存的显卡，通过这个分块节点可以利用显卡的 <a target="_blank" rel="noopener" href="https://cloud.tencent.com/product/gpu?from=20067&from_column=20067">并行计算</a> 提高计算效率，减少图片计算时间。</p>
+<p>三、批量放大</p>
+<p>将刚刚的放大工作流和之前的for节点工作流进行结合，实现批量放大功能。</p>
+<p>1、添加一个KJ的加载图像的节点，它可以让我们从文件夹直接加载多张图片</p>
+<p>![[_resources&#x2F;57b6f42d501fcdd1a8565bab1dffe78e_MD5.png]]</p>
+<p>2、添加图片路径，设置图片上限为100，连接一个预览图像节点，点击运行后可以预览文件夹内的图片。</p>
+<p>![[_resources&#x2F;839e320e2695f3c4a131d3b279159483_MD5.png]]</p>
+<p>3、将图像放大工作流的加载图像节点替换成带路径的图像批量加载节点。</p>
+<p>![[_resources&#x2F;8ef304d8505739404e54a0e714b25339_MD5.png]]</p>
+<p>4、再将图像批量加载节点的左侧连接到for循环-起始的索引端</p>
+<p>这里的数量设为文件夹内图片的总数量</p>
+<p>![[_resources&#x2F;1febcd94f21adc26eeb111a6ce3d5fc1_MD5.png]]</p>
+<p>5、在工作流的末端还需要增加一个“任何批次组合”节点，分别连接Fro循环的起始和结束</p>
+<p>![[_resources&#x2F;7753b1a51381fdac17b5c6bf4ea4262b_MD5.png]]</p>
+<p>看下完整工作流</p>
+<p>![[_resources&#x2F;70d2dde3fd1ad2f33fa8ee207c65af55_MD5.png]]</p>
+<p>挑一张放大看下细节，细节拉满，毛发清晰可见。</p>
+<p>![[_resources&#x2F;ecc0da7e888e01cb401e1483c1e1c70b_MD5.png]]</p>
+<p>以上是今天的内容，利用 For节点实现文件夹内图片一键批量放大功能，希望对大家有帮助。</p>
+<p>往期内容：</p>
+<p>4种方法，ComfyUI最强图片高清放大工作流，无损放大，细节补全 ，轻松将图片完美修复至4K8K壁纸级别！</p>
+<p>让AI视频实现精准控制！wan2.1首尾帧模型FLF2V，畅享丝滑过渡，comfyui官方支持！</p>
+<p>一次性生成120秒的AI长视频，6G显存就能使用，完全开源免费，FramePack王一般的存在</p>
+<ul>
+<li>发表于:</li>
+<li>原文链接：<a target="_blank" rel="noopener" href="https://page.om.qq.com/page/OTvY27k0GCM0chQLWvbuakQw0">https://page.om.qq.com/page/OTvY27k0GCM0chQLWvbuakQw0</a></li>
+<li>腾讯「腾讯云开发者社区」是腾讯内容开放平台帐号（企鹅号）传播渠道之一，根据 <a target="_blank" rel="noopener" href="https://om.qq.com/notice/a/20160429/047194.htm">《腾讯内容开放平台服务协议》</a> 转载发布内容。</li>
+<li>如有侵权，请联系 <a href="mailto:&#x63;&#x6c;&#111;&#x75;&#100;&#x63;&#x6f;&#109;&#x6d;&#x75;&#x6e;&#x69;&#116;&#x79;&#x40;&#x74;&#x65;&#x6e;&#99;&#101;&#x6e;&#x74;&#46;&#99;&#x6f;&#109;">cloudcommunity@tencent.com</a> 删除。</li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/news/">1</a></p>
+<p>分享</p>
+<ul>
+<li><p><img src="https://cloud.tencent.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" srcset="/img/loading.gif" lazyload alt="Scan me!"><br>  分享快讯到朋友圈</p>
+</li>
+<li><p>分享快讯到 QQ</p>
+</li>
+<li><p>分享快讯到微博</p>
+</li>
+<li><p>复制快讯链接到剪贴板</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/news/2587116">上一篇：智慧方案智慧酒店信息化设计规划方案（70页PPT）（文末有下载方式，长期有效）</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/news/2587131">下一篇：RAKsmart服务器：企业AI转型的算力基石</a></p>
+</li>
+</ul>
+<p>领券</p>
+<p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer">首页</a></p>
+<p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/mcp">MCP广场</a></p>
+<p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/program/tm">返回腾讯云官网</a></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/clippings/" class="print-no-link">#clippings</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>ComfyUI一键批量高清无损放大图片，For循环实现图片批量处理 - 腾讯云开发者社区-腾讯云</div>
+      <div>https://yhao521.github.io/2025/07/23/摘录/ComfyUI一键批量高清无损放大图片，For循环实现图片批量处理 - 腾讯云开发者社区-腾讯云 2/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>yhao521</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年7月23日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E6%91%98%E5%BD%95/%E5%85%B3%E4%BA%8ETypeScript%20%E6%89%A9%E5%B1%95%E5%85%A8%E5%B1%80%20Window%20%E6%97%B6%E6%8A%A5%E9%94%99%E3%80%8C%E7%B1%BB%E5%9E%8B%E2%80%9CWindow%20&amp;%20typeof%20gl/" title="关于TypeScript 扩展全局 Window 时报错「类型“Window &amp; typeof globalThis”上不存在属性“xx”」的解决方案【TS+已解决】">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">关于TypeScript 扩展全局 Window 时报错「类型“Window &amp; typeof globalThis”上不存在属性“xx”」的解决方案【TS+已解决】</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E6%91%98%E5%BD%95/Vue%20Loading%20PostCSS%20Plugin%20failed_%20Cannot%20find%20mod/" title="Vue Loading PostCSS Plugin failed_ Cannot find module ‘autoprefixer‘ 问题">
+                        <span class="hidden-mobile">Vue Loading PostCSS Plugin failed_ Cannot find module ‘autoprefixer‘ 问题</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>  
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

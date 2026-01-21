@@ -1,0 +1,719 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="[[知乎专栏]]">
+  <meta name="keywords" content="java,博客,vue,spring,mysql,docker,linux">
+  
+    <meta name="description" content="上次在文章《 fluxgym安装教程：只需几步即可开始训练模型！》中已经分享了flux的便捷炼丹炉，并且手把手分享了安装方法，现在丹炉有了，那就开始着手炼丹！如何炼丹（训练 Lora）？使用方法非常简单，总的来说就…">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flux的三步炼丹炉——fluxgym（二）：训练 Lora">
+<meta property="og:url" content="https://yhao521.github.io/2025/07/23/%E6%91%98%E5%BD%95/Flux%E7%9A%84%E4%B8%89%E6%AD%A5%E7%82%BC%E4%B8%B9%E7%82%89%E2%80%94%E2%80%94fluxgym%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9A%E8%AE%AD%E7%BB%83%20Lora/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="上次在文章《 fluxgym安装教程：只需几步即可开始训练模型！》中已经分享了flux的便捷炼丹炉，并且手把手分享了安装方法，现在丹炉有了，那就开始着手炼丹！如何炼丹（训练 Lora）？使用方法非常简单，总的来说就…">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-07-23T12:01:31.000Z">
+<meta property="article:modified_time" content="2025-07-23T12:01:31.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="clippings">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>Flux的三步炼丹炉——fluxgym（二）：训练 Lora - 匆匆过客的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yhao521.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>匆匆过客的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Flux的三步炼丹炉——fluxgym（二）：训练 Lora"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-07-23 20:01" pubdate>
+          2025年7月23日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2.5k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          21 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Flux的三步炼丹炉——fluxgym（二）：训练 Lora</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>![[_resources&#x2F;126e9eaddf6b653759fd2596bf7c694a_MD5.png]]</p>
+<p>Flux的三步炼丹炉——fluxgym（二）：训练 Lora</p>
+<p>上次在文章《 <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/16897253736">fluxgym安装教程：只需几步即可开始训练模型！</a> 》中已经分享了flux的便捷炼丹炉，并且手把手分享了安装方法，现在丹炉有了，那就开始着手炼丹！</p>
+<h2 id="如何炼丹（训练-Lora）？"><a href="#如何炼丹（训练-Lora）？" class="headerlink" title="如何炼丹（训练 Lora）？"></a>如何炼丹（训练 Lora）？</h2><p>使用方法非常简单，总的来说就以下三步：</p>
+<ol>
+<li>输入 lora 信息</li>
+<li>上传图片并为其添加标题（使用触发词）</li>
+<li>点击“训练”。</li>
+</ol>
+<p>然后喝杯咖啡慢慢等待即可。</p>
+<p>下面我们来训练一个刘亦菲的 Lora，看看效果怎么样。</p>
+<h2 id="1-获取训练素材"><a href="#1-获取训练素材" class="headerlink" title="1.获取训练素材"></a>1.获取训练素材</h2><p>训练素材渠道很多，可以从网上找，如果想训练其它的东西，可以使用 <a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=252979121&content_type=Article&match_order=1&q=midjourney&zd_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ6aGlkYV9zZXJ2ZXIiLCJleHAiOjE3NDc0NjY0OTEsInEiOiJtaWRqb3VybmV5IiwiemhpZGFfc291cmNlIjoiZW50aXR5IiwiY29udGVudF9pZCI6MjUyOTc5MTIxLCJjb250ZW50X3R5cGUiOiJBcnRpY2xlIiwibWF0Y2hfb3JkZXIiOjEsInpkX3Rva2VuIjpudWxsfQ.R5HpOOXD58tZJcVeabtnElACr6LDaA4jXh1phdGsRd8&zhida_source=entity">midjourney</a> 、 <a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=252979121&content_type=Article&match_order=1&q=SD&zd_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ6aGlkYV9zZXJ2ZXIiLCJleHAiOjE3NDc0NjY0OTEsInEiOiJTRCIsInpoaWRhX3NvdXJjZSI6ImVudGl0eSIsImNvbnRlbnRfaWQiOjI1Mjk3OTEyMSwiY29udGVudF90eXBlIjoiQXJ0aWNsZSIsIm1hdGNoX29yZGVyIjoxLCJ6ZF90b2tlbiI6bnVsbH0.T7TYX1k2zYN2y_lt41KsL8agID6jj3S1cO3WHv-re0Y&zhida_source=entity">SD</a> 、Flux 等生成图片，然后挑选合适的作为素材用来训练。我从网上随便找了几张：</p>
+<p>![[_resources&#x2F;78418c3ecc3ae127dcc74aedc1d5abf5_MD5.jpg]]</p>
+<p>这里只是是顺手改了图片名，也可以不修改，在这个丹炉中炼丹主打的就是一个方便~</p>
+<h2 id="2-基本处理（可选）"><a href="#2-基本处理（可选）" class="headerlink" title="2.基本处理（可选）"></a>2.基本处理（可选）</h2><p>得到图片素材后可以选择进行一定的处理，提高质量。特别是找到的图片清晰度不高（马赛克风）的话，可以使用超分（超分辨率）提高质量。当然追求更高质量的话，还可以对图片进行抠图操作，抠图后只保留需要训练的主体，能够有利于算法捕捉到特征。可以先进行抠图，然后再使用超分提高质量。</p>
+<h3 id="①-抠图"><a href="#①-抠图" class="headerlink" title="① 抠图"></a>① 抠图</h3><p>我使用 <a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=252979121&content_type=Article&match_order=1&q=ComfyUI&zd_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ6aGlkYV9zZXJ2ZXIiLCJleHAiOjE3NDc0NjY0OTEsInEiOiJDb21meVVJIiwiemhpZGFfc291cmNlIjoiZW50aXR5IiwiY29udGVudF9pZCI6MjUyOTc5MTIxLCJjb250ZW50X3R5cGUiOiJBcnRpY2xlIiwibWF0Y2hfb3JkZXIiOjEsInpkX3Rva2VuIjpudWxsfQ.d6qbqJ-N9KSEnFZDaIsCeBwmq4FEVkqm84lN-HcugYI&zhida_source=entity">ComfyUI</a> 工作流进行批量处理，当然 sd-webui 还有 Ps 都可以。下面是我抠图的工作流，主要是使用 BRIA_AI 节点（没有的可以安装），处理下来效果挺不错的。</p>
+<p>![[_resources&#x2F;e4a827f39ade5e890191c3028742fd71_MD5.jpg]]</p>
+<h3 id="②-超分放大"><a href="#②-超分放大" class="headerlink" title="② 超分放大"></a>② 超分放大</h3><p>超分放大（高清修复、高分放大）有很多种方法，按原理大致可分为：像素放大、模型放大、重采样放大、区块放大。在 stable diffusion webui 中可以通过插件来获取这些功能，比如： <a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=252979121&content_type=Article&match_order=1&q=Ultimate+SDupscale&zd_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ6aGlkYV9zZXJ2ZXIiLCJleHAiOjE3NDc0NjY0OTEsInEiOiJVbHRpbWF0ZSBTRHVwc2NhbGUiLCJ6aGlkYV9zb3VyY2UiOiJlbnRpdHkiLCJjb250ZW50X2lkIjoyNTI5NzkxMjEsImNvbnRlbnRfdHlwZSI6IkFydGljbGUiLCJtYXRjaF9vcmRlciI6MSwiemRfdG9rZW4iOm51bGx9.Qy-waXkI0QiED9rgr265XqqkUqHA808lVlVxBLxXxmk&zhida_source=entity">Ultimate SDupscale</a> （终极 sd 放大）、ControlNet 的 tile、AI upscaler（AI 放大）等等，也可以混合使用，下面我通过使用 ControlNet 的 tile 和终极 sd 放大法相结合进行图片超分（混合会增加处理时长）。</p>
+<p>需要一提的是 Ultimate SDupscale（终极 sd 放大）和 ControlNet 的 tile 的方法都需要额外的模型支撑，也就是需要下对于的模型，但是并不大，一共也就几百 MB。</p>
+<p><strong>Ultimate SDupscale</strong> （终极 sd 放大）：</p>
+<p>安装方法如下图：</p>
+<p>![[_resources&#x2F;497a69d9c11cd55a6d39365c8e566330_MD5.jpg]]</p>
+<p>插件地址为： <a target="_blank" rel="noopener" href="https://e.gitee.com/gz_donkey/docs/2635781/file/6076022?sub_id=12451591&scope=root">https://github.com/Coyote-A/ultimate-upscale-for-automatic1111.git</a></p>
+<p>安装后，重新启动 sd webui 即可。</p>
+<p><strong>ControlNet 的 tile：</strong></p>
+<p>ControlNet 的地址为： <a target="_blank" rel="noopener" href="https://e.gitee.com/gz_donkey/docs/2635781/file/6076022?sub_id=12451591&scope=root">https://github.com/Mikubill/sd-webui-controlnet.git</a></p>
+<p>安装方法和上面相同，ControlNet 的功能有很多，每个功能有对应的模型，这里我们只使用 tile 功能，因此只需下载对应的模型。</p>
+<p>我的模型下载地址如下：</p>
+<p><a target="_blank" rel="noopener" href="https://e.gitee.com/gz_donkey/docs/2635781/file/6076022?sub_id=12451591&scope=root">https://hf-mirror.com/bdsqlsz/qinglong_controlnet-lllite</a></p>
+<p>![[_resources&#x2F;e6faf447ec009d098f3ddfa29bbff4cf_MD5.jpg]]</p>
+<p>上面两个是动漫类型的，最后一个是我们需要的现实风模型，将其下载后放到 <code>/stable-diffusion-webui/extensions/sd-webui-controlnet/models/</code> 文件夹下。下载完成后就可以进行图片处理操作了。</p>
+<p><strong>操作步骤：</strong></p>
+<p>![[_resources&#x2F;905b1fbb7b85f327d97a0d3fea5612b5_MD5.jpg]]</p>
+<p>设置 Sampling steps 为 20，这是迭代步数，想要更多细节可以适当调大。</p>
+<p>设置 Denoising strength（去噪强度）为 0.2，也称为重绘幅度，值越大，AI 越放飞自我；值越小，与原图就越像。</p>
+<p>然后点击 ControlNet 选项卡：</p>
+<p>![[_resources&#x2F;1cae48d27bf5a106a380a778d3a3f700_MD5.jpg]]</p>
+<p>其中，Enable 表示启用 controlnet 功能，如果显存小就把 Low VRAM 勾选上，Pixl Perfect （完美像素模式）选上。然后在 Preprocessor 中选择 tile_resample 功能，并在 Model 处选择下载好的模型，例如我的为：bdsqlsz_controlllite_xl_tile_realistic [12b261fe]</p>
+<p>然后点击 Script 选项卡，选择 Ultimate SD Uscale，并按下图选择：</p>
+<p>![[_resources&#x2F;48eaf09242039a84914ddb161b70b44e_MD5.jpg]]</p>
+<p>全部设置完成之后点击“Generate”进行生图，其中，Ultimate SD upscale 会自动下载它的模型，如果因为网络问题无法下载，可在下面的网址中手动下载并将其放到 <code>/stable-diffusion-webui/models/RealESRGAN/</code> 文件夹，并重新启动 webui。</p>
+<p>下载地址： <a target="_blank" rel="noopener" href="https://e.gitee.com/gz_donkey/docs/2635781/file/6076022?sub_id=12451591&scope=root">https://hf-mirror.com/epishchik/RealESRGAN_x4plus&#x2F;tree&#x2F;main</a></p>
+<p>![[_resources&#x2F;284c6ad4f443bbe01fa963ff4e81e6a5_MD5.jpg]]</p>
+<p>处理完成之后，如下：</p>
+<p>![[_resources&#x2F;eda71fcfdccd86b2e64b7c0f9a1ee325_MD5.jpg]]</p>
+<p>使用 ControlNet 的 tile 和 Ultimate SD upscale 进行超分处理前后的对比图：</p>
+<p>![[_resources&#x2F;19497521604ffc5aac98240e00822d8c_MD5.jpg]]</p>
+<p>![[_resources&#x2F;452bedeb8bfd25926db145b9d43b662a_MD5.jpg]]</p>
+<p>可以看出处理的效果还是不错的。如果用处理后的图片进行 Lora 模型训练，那效果就会好的多。想要追求质量的话当然是需要处理更多的东西的，下面就可以正式开始炼丹了！</p>
+<h2 id="3-开始炼丹"><a href="#3-开始炼丹" class="headerlink" title="3.开始炼丹"></a>3.开始炼丹</h2><p>经过前面的处理，我们已经有了训练 Lora 的资本了，接下来是紧张又激动的环节，操作步骤如下（非常简单）：</p>
+<p>![[_resources&#x2F;0e7366267eb1dd0d0519703c3c67d34d_MD5.jpg]]</p>
+<p>没错就只需要以上几步你就可以训练自己的模型了，后面只需等待“起丹”即可：</p>
+<p>![[_resources&#x2F;487e35415a84e07ec60dd4775353bae5_MD5.jpg]]</p>
+<h3 id="其它功能"><a href="#其它功能" class="headerlink" title="其它功能"></a>其它功能</h3><p>虽然，只需要上面三步就已经进行训练，但是想要更好的控制训练的过程和质量，就需要更多的参数，下面这些也起到很大的作用，一起来看看吧：  </p>
+<p>![[_resources&#x2F;899be627cae22c371cf1abee093b9076_MD5.jpg]]</p>
+<p>①VARM 也就是显存大小，正如之前介绍中所提到的一样，本丹炉对于低显存玩家也非常友好，你可以根据自己的显存进行选择。</p>
+<p>③Max Train Epochs 表示完整遍历图片的轮数，比如我的图片素材有 5 张，训练的时候依次从图片 1 到图片 5 遍历一遍，这就称为一轮。</p>
+<p>②Repeat trains per image 这个超参数的的意思是一轮中每张图像重复训练的次数，举个栗子：还是那 5 张图片，在一轮中，每张图片训练一次就开始下一张，每张重复了 1 次那“Repeat trains per image”就是 1；但是在一轮中，我每张图片重复训练 15 次，那“Repeat trains per image”就为 15。</p>
+<p>④Expected training steps 是通过计算出来的：总步骤&#x3D;轮次 * 每张图片重复次数 * 图片的数量。</p>
+<p>⑤Sample Image Prompts (Separate with new lines)：这个是在我们炼丹时通过生成图片的方式实时反馈我们的训练效果。默认情况下， fluxgym 在训练期间不会生成任何样本图像。但是，你可以将 Fluxgym 配置为每 N 个步骤自动生成样本图像。这是它的样子：</p>
+<p>![[_resources&#x2F;d59f96dd8dae95c9a3f325ccb26bc29a_MD5.jpg]]</p>
+<p>要打开此功能，只需设置两个字段：</p>
+<ol>
+<li><strong>示例图像提示</strong> ：也就是上面的标号 ⑤ 。输入的这些提示将用于训练期间自动生成图像。如果需要多个，换行再输入提示就行。</li>
+<li><strong>每 n 步采样图像</strong> （标号 ⑥） <strong>：</strong> 如果你的的“Expected training steps(预期训练步骤)”为 960，“Sample Image Every N Steps(每 N 步样本图像)”为 100，则将在步骤 100、200、300、400、500、600、700、800、900 为每个提示生成图像。</li>
+</ol>
+<p>⑦Resize dataset images 用于调整数据集中图像的大小。所有的图像会被重设为指定的尺寸，以便训练过程中的图像大小一致。如果设置为 512，所有数据集的图像会被调整为 512x512 像素大小，推荐为 1024。</p>
+<h3 id="高级选项"><a href="#高级选项" class="headerlink" title="高级选项"></a>高级选项</h3><p>通常高级选项中的参数是默认的，我们可以不用修改直接炼丹即可。但是其中有几个参数还是建议根据实际情况进行修改，一起来看看吧：</p>
+<p>![[_resources&#x2F;f495a20fcef4cbb91e14b7e23bfaf172_MD5.jpg]]</p>
+<ol>
+<li><code>--seed</code> （Seed） ：</li>
+</ol>
+<p>这是训练过程中的随机数种子，决定了随机数生成的序列。设定一个固定的种子可以保证结果的可重复性。每次使用相同的种子训练模型，模型的训练过程和输出结果将是一致的，方便调试和对比。</p>
+<ol>
+<li><code>--max_data_loader_n_workers</code> （Number of Workers） ：</li>
+</ol>
+<p>表示数据加载时使用的工作线程数。更多的工作线程可以加速数据加载，特别是在处理大型数据集时。设置较高的线程数能加快数据的预处理和加载，但会占用更多的 CPU 资源。这需要根据实际设备的能力进行修改。</p>
+<ol>
+<li><code>--learning_rate</code> （Learning Rate） ：</li>
+</ol>
+<p>这是学习率，学习率决定了模型在每一步更新时参数的变化速度。较大的学习率会使模型收敛更快，但可能导致跳过最优解；较小的学习率则会使训练更加稳定，但可能收敛得较慢。默认的学习率是 <code>8e-4</code> （即 0.0008），表示每次更新参数时会按 0.0008 的比例调整。</p>
+<ol>
+<li><code>--save_every_n_epochs</code> （Save every N epochs） ：</li>
+</ol>
+<p>每 <code>N</code> 个 <code>epoch</code> （轮次）保存一次模型。这里设置为 <code>4</code> ，意味着模型每训练 4 个 轮次就会保存一次。定期保存模型，以防训练中断或者之后可以使用中间模型进行评估，这是最需要修改的选项，如果你的轮次设置的多，那么建议这个参数也相应的修改，但是建议和 <code>epoch</code> 成整数倍。比如：我设置 20 论，那么这个参数为:4*5、</p>
+<ol>
+<li><strong><code>--network_dim</code> （LoRA Rank）</strong> ：</li>
+</ol>
+<p>这是 <a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=252979121&content_type=Article&match_order=1&q=LoRA+%E6%A8%A1%E5%9E%8B&zd_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ6aGlkYV9zZXJ2ZXIiLCJleHAiOjE3NDc0NjY0OTEsInEiOiJMb1JBIOaooeWeiyIsInpoaWRhX3NvdXJjZSI6ImVudGl0eSIsImNvbnRlbnRfaWQiOjI1Mjk3OTEyMSwiY29udGVudF90eXBlIjoiQXJ0aWNsZSIsIm1hdGNoX29yZGVyIjoxLCJ6ZF90b2tlbiI6bnVsbH0.DsNqZ96pMDSrfsR63WgiLMSEt5YzYtsNLdbRxfofmnQ&zhida_source=entity">LoRA 模型</a> 的秩（ <code>Rank</code> ）参数，影响 LoRA 低秩矩阵的维度。较高的维度会增加模型的容量，但也会增加训练时间和资源消耗。调节 LoRA 模型的复杂性。值越大，模型能够学习到的细节越多，但会增加计算量。</p>
+<h2 id="3-起丹"><a href="#3-起丹" class="headerlink" title="3.起丹"></a>3.起丹</h2><p>等待训练结束后，可在 <code>/fluxgym/outputs/</code> 文件夹下获取，每一次保存的节点模型都在这里， <code>yifei.safetensors</code> 是最终的模型，如下图：</p>
+<p>![[_resources&#x2F;0201ca8e0502fea650925b9fd668da80_MD5.jpg]]</p>
+<p>这些模型效果各异，也不一定就是最后一个模型效果最好，我们可以通过 xyz 的方法进行模型测试，然后挑选最好出来使用，测试的方法后面再介绍吧~</p>
+<p>发布于 2025-01-24 10:22・贵州<a target="_blank" rel="noopener" href="https://www.zhihu.com/topic/20075047">LoRa</a><a target="_blank" rel="noopener" href="https://www.zhihu.com/topic/25838804">模型训练</a><a target="_blank" rel="noopener" href="https://www.zhihu.com/topic/387872564">算家云</a></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/clippings/" class="print-no-link">#clippings</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Flux的三步炼丹炉——fluxgym（二）：训练 Lora</div>
+      <div>https://yhao521.github.io/2025/07/23/摘录/Flux的三步炼丹炉——fluxgym（二）：训练 Lora/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>[[知乎专栏]]</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年7月23日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E6%91%98%E5%BD%95/04-%20Vite%E4%B8%AD%E5%A4%84%E7%90%86CSS%EF%BC%88%E5%AD%A6%E4%B9%A0vite%E6%89%93%E5%8C%85%E5%B7%A5%E5%85%B7%E7%9A%84%E7%AC%94%E8%AE%B0%EF%BC%89/" title="">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile"></span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E6%91%98%E5%BD%95/Taskfile%20-%20%E6%AF%94%20Makefile%20%E6%9B%B4%E5%A5%BD%E7%94%A8%E7%9A%84%E6%9E%84%E5%BB%BA%E5%B7%A5%E5%85%B7/" title="Taskfile - 比 Makefile 更好用的构建工具">
+                        <span class="hidden-mobile">Taskfile - 比 Makefile 更好用的构建工具</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>  
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

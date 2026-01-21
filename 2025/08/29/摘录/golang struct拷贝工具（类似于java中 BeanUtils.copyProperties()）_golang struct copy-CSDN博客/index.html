@@ -1,0 +1,667 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="[[成就一亿技术人!]],[[hope_wisdom 发出的红包]]">
+  <meta name="keywords" content="java,博客,vue,spring,mysql,docker,linux">
+  
+    <meta name="description" content="文章浏览阅读2.5k次。介绍了一款用于Golang的结构体深拷贝工具，该工具类似于Java中的BeanUtils.copyProperties()方法，能够方便地实现结构体之间的属性复制，适用于前后端交互等场景。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="golang struct拷贝工具（类似于java中 BeanUtils.copyProperties()）_golang struct copy-CSDN博客">
+<meta property="og:url" content="https://yhao521.github.io/2025/08/29/%E6%91%98%E5%BD%95/golang%20struct%E6%8B%B7%E8%B4%9D%E5%B7%A5%E5%85%B7%EF%BC%88%E7%B1%BB%E4%BC%BC%E4%BA%8Ejava%E4%B8%AD%20BeanUtils.copyProperties()%EF%BC%89_golang%20struct%20copy-CSDN%E5%8D%9A%E5%AE%A2/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="文章浏览阅读2.5k次。介绍了一款用于Golang的结构体深拷贝工具，该工具类似于Java中的BeanUtils.copyProperties()方法，能够方便地实现结构体之间的属性复制，适用于前后端交互等场景。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-08-29T02:56:34.335Z">
+<meta property="article:modified_time" content="2025-08-29T02:59:35.938Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="clippings">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>golang struct拷贝工具（类似于java中 BeanUtils.copyProperties()）_golang struct copy-CSDN博客 - 匆匆过客的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yhao521.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>匆匆过客的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="golang struct拷贝工具（类似于java中 BeanUtils.copyProperties()）_golang struct copy-CSDN博客"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-08-29 10:56" pubdate>
+          2025年8月29日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.5k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          13 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">golang struct拷贝工具（类似于java中 BeanUtils.copyProperties()）_golang struct copy-CSDN博客</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>介绍了一款用于Golang的结构体深拷贝工具，该工具类似于Java中的BeanUtils.copyProperties()方法，能够方便地实现结构体之间的属性复制，适用于前后端交互等场景。</p>
+<p>摘要生成于 <a target="_blank" rel="noopener" href="https://ai.csdn.net/?utm_source=cknow_pc_ai_abstract">C知道</a> ，由 DeepSeek-R1 满血版支持， <a target="_blank" rel="noopener" href="https://ai.csdn.net/?utm_source=cknow_pc_ai_abstract">前往体验 &gt;</a></p>
+<h2 id="golang-struct拷贝工具（类似于java中-BeanUtils-copyProperties-）"><a href="#golang-struct拷贝工具（类似于java中-BeanUtils-copyProperties-）" class="headerlink" title="golang struct拷贝工具（类似于java中 BeanUtils.copyProperties()）"></a>golang struct拷贝工具（类似于java中 BeanUtils.copyProperties()）</h2><p>在开发中我们经常需要拷贝结构体的属性，例如前端传参时会比db表中对应接口体多一个属性</p>
+<p>我们用 <code>gin</code> 开发时，一般都会用一个结构体来保存前端传来的json数据，例如：</p>
+<figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs stata"><span class="hljs-keyword">type</span> UserParams struct &#123;<br>        models.UserBasic<br>        RePassword string \`validate:<span class="hljs-string">&quot;eqfield=Password&quot;</span> reg_error_info:<span class="hljs-string">&quot;两次密码不一样&quot;</span>\`<br>&#125;<br>userParams := &amp;UserParams&#123;&#125;<br>    <span class="hljs-keyword">if</span> <span class="hljs-keyword">err</span> := c.BindJSON(userParams); <span class="hljs-keyword">err</span> != nil &#123;<br>        c.JSON(-1, response.<span class="hljs-keyword">Err</span>.WithMsg(<span class="hljs-string">&quot;参数有误，err:&quot;</span>+<span class="hljs-keyword">err</span>.<span class="hljs-keyword">Error</span>()))<br>        <span class="hljs-keyword">return</span><br>&#125;<br>go123456789<br></code></pre></td></tr></table></figure>
+
+<p>但是传给 其他 服务时（例如保存到db中），我们又希望只要db中对应的结构体，这时候我们只需要</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs css">userBasic := &amp;models.UserBasic&#123;&#125;<br>// 将结构体的属性从 <span class="hljs-selector-tag">from</span> 深拷贝到 <span class="hljs-selector-tag">to</span><br>err := utils.<span class="hljs-built_in">Copy</span>(userParams).<span class="hljs-built_in">To</span>(userBasic)<br>go123<br></code></pre></td></tr></table></figure>
+
+<p>这个是github上比较出名的开源工具</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/ulule/deepcopier">https://github.com/ulule/deepcopier</a></li>
+</ul>
+<p>其实就是一个文件，如下，使用即可</p>
+<p>![[_resources&#x2F;92680f32753bc018d39c6867d937c122_MD5.png]]</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br><span class="line">318</span><br><span class="line">319</span><br><span class="line">320</span><br><span class="line">321</span><br><span class="line">322</span><br><span class="line">323</span><br><span class="line">324</span><br><span class="line">325</span><br><span class="line">326</span><br><span class="line">327</span><br><span class="line">328</span><br><span class="line">329</span><br><span class="line">330</span><br><span class="line">331</span><br><span class="line">332</span><br><span class="line">333</span><br><span class="line">334</span><br><span class="line">335</span><br><span class="line">336</span><br><span class="line">337</span><br><span class="line">338</span><br><span class="line">339</span><br><span class="line">340</span><br><span class="line">341</span><br><span class="line">342</span><br><span class="line">343</span><br><span class="line">344</span><br><span class="line">345</span><br><span class="line">346</span><br><span class="line">347</span><br><span class="line">348</span><br><span class="line">349</span><br><span class="line">350</span><br><span class="line">351</span><br><span class="line">352</span><br><span class="line">353</span><br><span class="line">354</span><br><span class="line">355</span><br><span class="line">356</span><br><span class="line">357</span><br><span class="line">358</span><br><span class="line">359</span><br><span class="line">360</span><br><span class="line">361</span><br><span class="line">362</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-keyword">package</span> deepcopier<br><br><span class="hljs-keyword">import</span> (<br>    <span class="hljs-string">&quot;database/sql/driver&quot;</span><br>    <span class="hljs-string">&quot;fmt&quot;</span><br>    <span class="hljs-string">&quot;reflect&quot;</span><br>    <span class="hljs-string">&quot;strings&quot;</span><br>)<br><br><span class="hljs-keyword">const</span> (<br>    <span class="hljs-comment">// TagName is the deepcopier struct tag name.</span><br>    TagName = <span class="hljs-string">&quot;deepcopier&quot;</span><br>    <span class="hljs-comment">// FieldOptionName is the from field option name for struct tag.</span><br>    FieldOptionName = <span class="hljs-string">&quot;field&quot;</span><br>    <span class="hljs-comment">// ContextOptionName is the context option name for struct tag.</span><br>    ContextOptionName = <span class="hljs-string">&quot;context&quot;</span><br>    <span class="hljs-comment">// SkipOptionName is the skip option name for struct tag.</span><br>    SkipOptionName = <span class="hljs-string">&quot;skip&quot;</span><br>    <span class="hljs-comment">// ForceOptionName is the skip option name for struct tag.</span><br>    ForceOptionName = <span class="hljs-string">&quot;force&quot;</span><br>)<br><br><span class="hljs-keyword">type</span> (<br>    <span class="hljs-comment">// TagOptions is a map that contains extracted struct tag options.</span><br>    TagOptions <span class="hljs-keyword">map</span>[<span class="hljs-type">string</span>]<span class="hljs-type">string</span><br><br>    <span class="hljs-comment">// Options are copier options.</span><br>    Options <span class="hljs-keyword">struct</span> &#123;<br>        <span class="hljs-comment">// Context given to WithContext() method.</span><br>        Context <span class="hljs-keyword">map</span>[<span class="hljs-type">string</span>]<span class="hljs-keyword">interface</span>&#123;&#125;<br>        <span class="hljs-comment">// Reversed reverses struct tag checkings.</span><br>        Reversed <span class="hljs-type">bool</span><br>    &#125;<br>)<br><br><span class="hljs-comment">// DeepCopier deep copies a struct to/from a struct.</span><br><span class="hljs-keyword">type</span> DeepCopier <span class="hljs-keyword">struct</span> &#123;<br>    dst <span class="hljs-keyword">interface</span>&#123;&#125;<br>    src <span class="hljs-keyword">interface</span>&#123;&#125;<br>    ctx <span class="hljs-keyword">map</span>[<span class="hljs-type">string</span>]<span class="hljs-keyword">interface</span>&#123;&#125;<br>&#125;<br><br><span class="hljs-comment">// Copy sets source or destination.</span><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">Copy</span><span class="hljs-params">(src <span class="hljs-keyword">interface</span>&#123;&#125;)</span></span> *DeepCopier &#123;<br>    <span class="hljs-keyword">return</span> &amp;DeepCopier&#123;src: src&#125;<br>&#125;<br><br><span class="hljs-comment">// WithContext injects the given context into the builder instance.</span><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(dc *DeepCopier)</span></span> WithContext(ctx <span class="hljs-keyword">map</span>[<span class="hljs-type">string</span>]<span class="hljs-keyword">interface</span>&#123;&#125;) *DeepCopier &#123;<br>    dc.ctx = ctx<br>    <span class="hljs-keyword">return</span> dc<br>&#125;<br><br><span class="hljs-comment">// To sets the destination.</span><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(dc *DeepCopier)</span></span> To(dst <span class="hljs-keyword">interface</span>&#123;&#125;) <span class="hljs-type">error</span> &#123;<br>    dc.dst = dst<br>    <span class="hljs-keyword">return</span> process(dc.dst, dc.src, Options&#123;Context: dc.ctx&#125;)<br>&#125;<br><br><span class="hljs-comment">// From sets the given the source as destination and destination as source.</span><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(dc *DeepCopier)</span></span> From(src <span class="hljs-keyword">interface</span>&#123;&#125;) <span class="hljs-type">error</span> &#123;<br>    dc.dst = dc.src<br>    dc.src = src<br>    <span class="hljs-keyword">return</span> process(dc.dst, dc.src, Options&#123;Context: dc.ctx, Reversed: <span class="hljs-literal">true</span>&#125;)<br>&#125;<br><br><span class="hljs-comment">// process handles copy.</span><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">process</span><span class="hljs-params">(dst <span class="hljs-keyword">interface</span>&#123;&#125;, src <span class="hljs-keyword">interface</span>&#123;&#125;, args ...Options)</span></span> <span class="hljs-type">error</span> &#123;<br>    <span class="hljs-keyword">var</span> (<br>        options        = Options&#123;&#125;<br>        srcValue       = reflect.Indirect(reflect.ValueOf(src))<br>        dstValue       = reflect.Indirect(reflect.ValueOf(dst))<br>        srcFieldNames  = getFieldNames(src)<br>        srcMethodNames = getMethodNames(src)<br>    )<br><br>    <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(args) &gt; <span class="hljs-number">0</span> &#123;<br>        options = args[<span class="hljs-number">0</span>]<br>    &#125;<br><br>    <span class="hljs-keyword">if</span> !dstValue.CanAddr() &#123;<br>        <span class="hljs-keyword">return</span> fmt.Errorf(<span class="hljs-string">&quot;destination %+v is unaddressable&quot;</span>, dstValue.Interface())<br>    &#125;<br><br>    <span class="hljs-keyword">for</span> _, f := <span class="hljs-keyword">range</span> srcFieldNames &#123;<br>        <span class="hljs-keyword">var</span> (<br>            srcFieldValue               = srcValue.FieldByName(f)<br>            srcFieldType, srcFieldFound = srcValue.Type().FieldByName(f)<br>            srcFieldName                = srcFieldType.Name<br>            dstFieldName                = srcFieldName<br>            tagOptions                  TagOptions<br>        )<br><br>        <span class="hljs-keyword">if</span> !srcFieldFound &#123;<br>            <span class="hljs-keyword">continue</span><br>        &#125;<br><br>        <span class="hljs-keyword">if</span> options.Reversed &#123;<br>            tagOptions = getTagOptions(srcFieldType.Tag.Get(TagName))<br>            <span class="hljs-keyword">if</span> v, ok := tagOptions[FieldOptionName]; ok &amp;&amp; v != <span class="hljs-string">&quot;&quot;</span> &#123;<br>                dstFieldName = v<br>            &#125;<br>        &#125; <span class="hljs-keyword">else</span> &#123;<br>            <span class="hljs-keyword">if</span> name, opts := getRelatedField(dst, srcFieldName); name != <span class="hljs-string">&quot;&quot;</span> &#123;<br>                dstFieldName, tagOptions = name, opts<br>            &#125;<br>        &#125;<br><br>        <span class="hljs-keyword">if</span> _, ok := tagOptions[SkipOptionName]; ok &#123;<br>            <span class="hljs-keyword">continue</span><br>        &#125;<br><br>        <span class="hljs-keyword">var</span> (<br>            dstFieldType, dstFieldFound = dstValue.Type().FieldByName(dstFieldName)<br>            dstFieldValue               = dstValue.FieldByName(dstFieldName)<br>        )<br><br>        <span class="hljs-keyword">if</span> !dstFieldFound &#123;<br>            <span class="hljs-keyword">continue</span><br>        &#125;<br><br>        <span class="hljs-comment">// Force option for empty interfaces and nullable types</span><br>        _, force := tagOptions[ForceOptionName]<br><br>        <span class="hljs-comment">// Valuer -&gt; ptr</span><br>        <span class="hljs-keyword">if</span> isNullableType(srcFieldType.Type) &amp;&amp; dstFieldValue.Kind() == reflect.Ptr &amp;&amp; force &#123;<br>            <span class="hljs-comment">// We have same nullable type on both sides</span><br>            <span class="hljs-keyword">if</span> srcFieldValue.Type().AssignableTo(dstFieldType.Type) &#123;<br>                dstFieldValue.Set(srcFieldValue)<br>                <span class="hljs-keyword">continue</span><br>            &#125;<br><br>            v, _ := srcFieldValue.Interface().(driver.Valuer).Value()<br>            <span class="hljs-keyword">if</span> v == <span class="hljs-literal">nil</span> &#123;<br>                <span class="hljs-keyword">continue</span><br>            &#125;<br><br>            valueType := reflect.TypeOf(v)<br><br>            ptr := reflect.New(valueType)<br>            ptr.Elem().Set(reflect.ValueOf(v))<br><br>            <span class="hljs-keyword">if</span> valueType.AssignableTo(dstFieldType.Type.Elem()) &#123;<br>                dstFieldValue.Set(ptr)<br>            &#125;<br><br>            <span class="hljs-keyword">continue</span><br>        &#125;<br><br>        <span class="hljs-comment">// Valuer -&gt; value</span><br>        <span class="hljs-keyword">if</span> isNullableType(srcFieldType.Type) &#123;<br>            <span class="hljs-comment">// We have same nullable type on both sides</span><br>            <span class="hljs-keyword">if</span> srcFieldValue.Type().AssignableTo(dstFieldType.Type) &#123;<br>                dstFieldValue.Set(srcFieldValue)<br>                <span class="hljs-keyword">continue</span><br>            &#125;<br><br>            <span class="hljs-keyword">if</span> force &#123;<br>                v, _ := srcFieldValue.Interface().(driver.Valuer).Value()<br>                <span class="hljs-keyword">if</span> v == <span class="hljs-literal">nil</span> &#123;<br>                    <span class="hljs-keyword">continue</span><br>                &#125;<br><br>                rv := reflect.ValueOf(v)<br>                <span class="hljs-keyword">if</span> rv.Type().AssignableTo(dstFieldType.Type) &#123;<br>                    dstFieldValue.Set(rv)<br>                &#125;<br>            &#125;<br><br>            <span class="hljs-keyword">continue</span><br>        &#125;<br><br>        <span class="hljs-keyword">if</span> dstFieldValue.Kind() == reflect.Interface &#123;<br>            <span class="hljs-keyword">if</span> force &#123;<br>                dstFieldValue.Set(srcFieldValue)<br>            &#125;<br>            <span class="hljs-keyword">continue</span><br>        &#125;<br><br>        <span class="hljs-comment">// Ptr -&gt; Value</span><br>        <span class="hljs-keyword">if</span> srcFieldType.Type.Kind() == reflect.Ptr &amp;&amp; !srcFieldValue.IsNil() &amp;&amp; dstFieldType.Type.Kind() != reflect.Ptr &#123;<br>            indirect := reflect.Indirect(srcFieldValue)<br><br>            <span class="hljs-keyword">if</span> indirect.Type().AssignableTo(dstFieldType.Type) &#123;<br>                dstFieldValue.Set(indirect)<br>                <span class="hljs-keyword">continue</span><br>            &#125;<br>        &#125;<br><br>        <span class="hljs-comment">// Other types</span><br>        <span class="hljs-keyword">if</span> srcFieldType.Type.AssignableTo(dstFieldType.Type) &#123;<br>            dstFieldValue.Set(srcFieldValue)<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-keyword">for</span> _, m := <span class="hljs-keyword">range</span> srcMethodNames &#123;<br>        name, opts := getRelatedField(dst, m)<br>        <span class="hljs-keyword">if</span> name == <span class="hljs-string">&quot;&quot;</span> &#123;<br>            <span class="hljs-keyword">continue</span><br>        &#125;<br><br>        <span class="hljs-keyword">if</span> _, ok := opts[SkipOptionName]; ok &#123;<br>            <span class="hljs-keyword">continue</span><br>        &#125;<br><br>        method := reflect.ValueOf(src).MethodByName(m)<br>        <span class="hljs-keyword">if</span> !method.IsValid() &#123;<br>            <span class="hljs-keyword">return</span> fmt.Errorf(<span class="hljs-string">&quot;method %s is invalid&quot;</span>, m)<br>        &#125;<br><br>        <span class="hljs-keyword">var</span> (<br>            dstFieldType, _ = dstValue.Type().FieldByName(name)<br>            dstFieldValue   = dstValue.FieldByName(name)<br>            _, withContext  = opts[ContextOptionName]<br>            _, force        = opts[ForceOptionName]<br>        )<br><br>        args := []reflect.Value&#123;&#125;<br>        <span class="hljs-keyword">if</span> withContext &#123;<br>            args = []reflect.Value&#123;reflect.ValueOf(options.Context)&#125;<br>        &#125;<br><br>        <span class="hljs-keyword">var</span> (<br>            result          = method.Call(args)[<span class="hljs-number">0</span>]<br>            resultInterface = result.Interface()<br>            resultValue     = reflect.ValueOf(resultInterface)<br>            resultType      = resultValue.Type()<br>        )<br><br>        <span class="hljs-comment">// Value -&gt; Ptr</span><br>        <span class="hljs-keyword">if</span> dstFieldValue.Kind() == reflect.Ptr &amp;&amp; force &#123;<br>            ptr := reflect.New(resultType)<br>            ptr.Elem().Set(resultValue)<br><br>            <span class="hljs-keyword">if</span> ptr.Type().AssignableTo(dstFieldType.Type) &#123;<br>                dstFieldValue.Set(ptr)<br>            &#125;<br><br>            <span class="hljs-keyword">continue</span><br>        &#125;<br><br>        <span class="hljs-comment">// Ptr -&gt; value</span><br>        <span class="hljs-keyword">if</span> resultValue.Kind() == reflect.Ptr &amp;&amp; force &#123;<br>            <span class="hljs-keyword">if</span> resultValue.Elem().Type().AssignableTo(dstFieldType.Type) &#123;<br>                dstFieldValue.Set(resultValue.Elem())<br>            &#125;<br><br>            <span class="hljs-keyword">continue</span><br>        &#125;<br><br>        <span class="hljs-keyword">if</span> resultType.AssignableTo(dstFieldType.Type) &amp;&amp; result.IsValid() &#123;<br>            dstFieldValue.Set(result)<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span><br>&#125;<br><br><span class="hljs-comment">// getTagOptions parses deepcopier tag field and returns options.</span><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">getTagOptions</span><span class="hljs-params">(value <span class="hljs-type">string</span>)</span></span> TagOptions &#123;<br>    options := TagOptions&#123;&#125;<br><br>    <span class="hljs-keyword">for</span> _, opt := <span class="hljs-keyword">range</span> strings.Split(value, <span class="hljs-string">&quot;;&quot;</span>) &#123;<br>        o := strings.Split(opt, <span class="hljs-string">&quot;:&quot;</span>)<br><br>        <span class="hljs-comment">// deepcopier:&quot;keyword; without; value;&quot;</span><br>        <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(o) == <span class="hljs-number">1</span> &#123;<br>            options[o[<span class="hljs-number">0</span>]] = <span class="hljs-string">&quot;&quot;</span><br>        &#125;<br><br>        <span class="hljs-comment">// deepcopier:&quot;key:value; anotherkey:anothervalue&quot;</span><br>        <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(o) == <span class="hljs-number">2</span> &#123;<br>            options[strings.TrimSpace(o[<span class="hljs-number">0</span>])] = strings.TrimSpace(o[<span class="hljs-number">1</span>])<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-keyword">return</span> options<br>&#125;<br><br><span class="hljs-comment">// getRelatedField returns first matching field.</span><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">getRelatedField</span><span class="hljs-params">(instance <span class="hljs-keyword">interface</span>&#123;&#125;, name <span class="hljs-type">string</span>)</span></span> (<span class="hljs-type">string</span>, TagOptions) &#123;<br>    <span class="hljs-keyword">var</span> (<br>        value      = reflect.Indirect(reflect.ValueOf(instance))<br>        fieldName  <span class="hljs-type">string</span><br>        tagOptions TagOptions<br>    )<br><br>    <span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; value.NumField(); i++ &#123;<br>        <span class="hljs-keyword">var</span> (<br>            vField     = value.Field(i)<br>            tField     = value.Type().Field(i)<br>            tagOptions = getTagOptions(tField.Tag.Get(TagName))<br>        )<br><br>        <span class="hljs-keyword">if</span> tField.Type.Kind() == reflect.Struct &amp;&amp; tField.Anonymous &#123;<br>            <span class="hljs-keyword">if</span> n, o := getRelatedField(vField.Interface(), name); n != <span class="hljs-string">&quot;&quot;</span> &#123;<br>                <span class="hljs-keyword">return</span> n, o<br>            &#125;<br>        &#125;<br><br>        <span class="hljs-keyword">if</span> v, ok := tagOptions[FieldOptionName]; ok &amp;&amp; v == name &#123;<br>            <span class="hljs-keyword">return</span> tField.Name, tagOptions<br>        &#125;<br><br>        <span class="hljs-keyword">if</span> tField.Name == name &#123;<br>            <span class="hljs-keyword">return</span> tField.Name, tagOptions<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-keyword">return</span> fieldName, tagOptions<br>&#125;<br><br><span class="hljs-comment">// getMethodNames returns instance&#x27;s method names.</span><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">getMethodNames</span><span class="hljs-params">(instance <span class="hljs-keyword">interface</span>&#123;&#125;)</span></span> []<span class="hljs-type">string</span> &#123;<br>    <span class="hljs-keyword">var</span> methods []<span class="hljs-type">string</span><br><br>    t := reflect.TypeOf(instance)<br>    <span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; t.NumMethod(); i++ &#123;<br>        methods = <span class="hljs-built_in">append</span>(methods, t.Method(i).Name)<br>    &#125;<br><br>    <span class="hljs-keyword">return</span> methods<br>&#125;<br><br><span class="hljs-comment">// getFieldNames returns instance&#x27;s field names.</span><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">getFieldNames</span><span class="hljs-params">(instance <span class="hljs-keyword">interface</span>&#123;&#125;)</span></span> []<span class="hljs-type">string</span> &#123;<br>    <span class="hljs-keyword">var</span> (<br>        fields []<span class="hljs-type">string</span><br>        v      = reflect.Indirect(reflect.ValueOf(instance))<br>        t      = v.Type()<br>    )<br><br>    <span class="hljs-keyword">if</span> t.Kind() != reflect.Struct &#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span><br>    &#125;<br><br>    <span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; v.NumField(); i++ &#123;<br>        <span class="hljs-keyword">var</span> (<br>            vField = v.Field(i)<br>            tField = v.Type().Field(i)<br>        )<br><br>        <span class="hljs-comment">// Is exportable?</span><br>        <span class="hljs-keyword">if</span> tField.PkgPath != <span class="hljs-string">&quot;&quot;</span> &#123;<br>            <span class="hljs-keyword">continue</span><br>        &#125;<br><br>        <span class="hljs-keyword">if</span> tField.Type.Kind() == reflect.Struct &amp;&amp; tField.Anonymous &#123;<br>            fields = <span class="hljs-built_in">append</span>(fields, getFieldNames(vField.Interface())...)<br>            <span class="hljs-keyword">continue</span><br>        &#125;<br><br>        fields = <span class="hljs-built_in">append</span>(fields, tField.Name)<br>    &#125;<br><br>    <span class="hljs-keyword">return</span> fields<br>&#125;<br><br><span class="hljs-comment">// isNullableType returns true if the given type is a nullable one.</span><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">isNullableType</span><span class="hljs-params">(t reflect.Type)</span></span> <span class="hljs-type">bool</span> &#123;<br>    <span class="hljs-keyword">return</span> t.ConvertibleTo(reflect.TypeOf((*driver.Valuer)(<span class="hljs-literal">nil</span>)).Elem())<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>登录后您可以享受以下权益：</p>
+<ul>
+<li>免费复制代码</li>
+<li>和博主大V互动</li>
+<li>下载海量资源</li>
+<li>发动态&#x2F;写文章&#x2F;加入社区<br>×</li>
+</ul>
+<p>实付 元</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/fengxiandada/article/details/">使用余额支付</a></p>
+<p>点击重新获取</p>
+<p>扫码支付</p>
+<p>钱包余额 0</p>
+<p>抵扣说明：</p>
+<p>1.余额是钱包充值的虚拟货币，按照1:1的比例进行支付金额的抵扣。<br>2.余额无法直接购买下载，可以购买VIP、付费专栏及课程。</p>
+<p><a target="_blank" rel="noopener" href="https://i.csdn.net/#/wallet/balance/recharge">余额充值</a></p>
+<p>举报</p>
+<p> [![[_resources&#x2F;35c7362356adf5a11cd3cc47fd01628f_MD5.png]] 点击体验<br>DeepSeekR1满血版](<a target="_blank" rel="noopener" href="https://ai.csdn.net/?utm_source=cknow_pc_blogdetail&spm=1001.2101.3001.10583">https://ai.csdn.net/?utm_source=cknow_pc_blogdetail&amp;spm=1001.2101.3001.10583</a>) ![[_resources&#x2F;90bd0cbf3aff8fdff8bf9b011b581e20_MD5.png]]</p>
+<p>程序员都在用的中文IT技术交流社区</p>
+<p>![[_resources&#x2F;08a47e60886378fe60a3d9c8f4ae8bc6_MD5.png]]</p>
+<p>专业的中文 IT 技术社区，与千万技术人共成长</p>
+<p>![[_resources&#x2F;a51be6c085b867a5bd82d8dc1cea9b46_MD5.png]]</p>
+<p>关注【CSDN】视频号，行业资讯、技术分享精彩不断，直播好礼送不停！</p>
+<p>客服 返回顶部</p>
+<p>![[_resources&#x2F;92680f32753bc018d39c6867d937c122_MD5.png]]</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/clippings/" class="print-no-link">#clippings</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>golang struct拷贝工具（类似于java中 BeanUtils.copyProperties()）_golang struct copy-CSDN博客</div>
+      <div>https://yhao521.github.io/2025/08/29/摘录/golang struct拷贝工具（类似于java中 BeanUtils.copyProperties()）_golang struct copy-CSDN博客/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>[[成就一亿技术人!]],[[hope_wisdom 发出的红包]]</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年8月29日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/08/29/%E6%91%98%E5%BD%95/Go%20%E6%AF%8F%E6%97%A5%E4%B8%80%E5%BA%93%E4%B9%8B%20copier/" title="Go 每日一库之 copier">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Go 每日一库之 copier</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/08/29/%E6%91%98%E5%BD%95/Windows%E6%80%8E%E4%B9%88%E8%AE%A9%E9%98%B2%E7%81%AB%E5%A2%99%E5%BC%80%E6%94%BE%E7%AB%AF%E5%8F%A3_%E7%94%B5%E8%84%91%E9%98%B2%E7%81%AB%E5%A2%99%E6%80%8E%E4%B9%88%E5%BC%80%E6%94%BE%E7%AB%AF%E5%8F%A3-CSDN%E5%8D%9A%E5%AE%A2/" title="Windows怎么让防火墙开放端口_电脑防火墙怎么开放端口-CSDN博客">
+                        <span class="hidden-mobile">Windows怎么让防火墙开放端口_电脑防火墙怎么开放端口-CSDN博客</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>  
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

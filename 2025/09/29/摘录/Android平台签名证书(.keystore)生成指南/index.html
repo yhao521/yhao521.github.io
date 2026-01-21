@@ -1,0 +1,657 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="yhao521">
+  <meta name="keywords" content="java,博客,vue,spring,mysql,docker,linux">
+  
+    <meta name="description" content="Android平台打包发布apk应用，需要使用数字证书（.keystore文件）进行签名，用于表明开发者身份。 Android证书的生成是自助和免费的，不需要审批或付费。 可以使用JRE环境中的keytool命令生成。以下是windows平台生成证书的方法： 安装JRE环境（推荐使用JRE8环境，如已有可跳过）在控制台输入cmd 输入java查询版本号 可从Oracle官方下载jre安装包：htt">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android平台签名证书(.keystore)生成指南">
+<meta property="og:url" content="https://yhao521.github.io/2025/09/29/%E6%91%98%E5%BD%95/Android%E5%B9%B3%E5%8F%B0%E7%AD%BE%E5%90%8D%E8%AF%81%E4%B9%A6(.keystore)%E7%94%9F%E6%88%90%E6%8C%87%E5%8D%97/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="Android平台打包发布apk应用，需要使用数字证书（.keystore文件）进行签名，用于表明开发者身份。 Android证书的生成是自助和免费的，不需要审批或付费。 可以使用JRE环境中的keytool命令生成。以下是windows平台生成证书的方法： 安装JRE环境（推荐使用JRE8环境，如已有可跳过）在控制台输入cmd 输入java查询版本号 可从Oracle官方下载jre安装包：htt">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/4f4cf00e7b981e75b999c0c8e5cd4def.png">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/27ef1e0740f880a3615d42498cdbfd21.png">
+<meta property="article:published_time" content="2025-09-29T14:38:24.000Z">
+<meta property="article:modified_time" content="2025-02-19T07:02:04.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="java,博客,vue,spring,mysql,docker,linux">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://i-blog.csdnimg.cn/blog_migrate/4f4cf00e7b981e75b999c0c8e5cd4def.png">
+  
+  
+  
+  <title>Android平台签名证书(.keystore)生成指南 - 匆匆过客的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yhao521.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>匆匆过客的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Android平台签名证书(.keystore)生成指南"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-09-29 22:38" pubdate>
+          2025年9月29日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.2k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          11 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Android平台签名证书(.keystore)生成指南</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>Android平台打包发布apk应用，需要使用数字证书（.keystore文件）进行签名，用于表明开发者身份。</p>
+<p>Android证书的生成是自助和免费的，不需要审批或付费。</p>
+<p>可以使用JRE环境中的keytool命令生成。以下是windows平台生成证书的方法：</p>
+<p>安装JRE环境（推荐使用JRE8环境，如已有可跳过）<br>在控制台输入cmd 输入java查询版本号<br><img src="https://i-blog.csdnimg.cn/blog_migrate/4f4cf00e7b981e75b999c0c8e5cd4def.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述|720x24"></p>
+<p>可从Oracle官方下载jre安装包：<a target="_blank" rel="noopener" href="https://www.oracle.com/technetwork/java/[javase](https://so.csdn.net/so/search?q=javase&spm=1001.2101.3001.7020)/downloads/index.html">https://www.oracle.com/technetwork/java/[javase](https://so.csdn.net/so/search?q=javase&amp;spm=1001.2101.3001.7020)/downloads/index.html</a><br><img src="https://i-blog.csdnimg.cn/blog_migrate/27ef1e0740f880a3615d42498cdbfd21.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述|720x24"></p>
+<p>下面以Windows平台，jre安装目录为“C:\Program Files\Java\jdk1.8.0_301”为例，实际操作时请修改为自己安装目录<br>建议将JRE安装路径添加到系统环境变量，已配置可跳过此章节<br><strong>打开命令行（cmd），输入以下命令：</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql">d:  <br><span class="hljs-keyword">set</span> PATH<span class="hljs-operator">=</span><span class="hljs-operator">%</span>PATH<span class="hljs-operator">%</span>;&quot;C:\Program Files\Java\jdk1.8.0_301\bin&quot;<br><span class="hljs-number">12</span><br></code></pre></td></tr></table></figure>
+
+<p>第一行：切换工作目录到D:路径，生成的证书也会保存这个目录下<br>第二行：将jre命令添加到临时环境变量中</p>
+<p>因为是临时环境，当你退出重新进入，如果没有配置过环境，也需要配置临时环境再输入keytool相关操作</p>
+<h3 id="生成签名证书"><a href="#生成签名证书" class="headerlink" title="生成签名证书"></a>生成签名证书</h3><p>使用keytool -genkey命令生成证书：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql">keytool <span class="hljs-operator">-</span>genkey <span class="hljs-operator">-</span>alias testalias <span class="hljs-operator">-</span>keyalg RSA <span class="hljs-operator">-</span>keysize <span class="hljs-number">2048</span> <span class="hljs-operator">-</span>validity <span class="hljs-number">36500</span> <span class="hljs-operator">-</span>keystore test.keystore<br><span class="hljs-operator">/</span><span class="hljs-operator">/</span>test.keystore为证书名，我这里建立的是一个案例<br><span class="hljs-number">12</span><br></code></pre></td></tr></table></figure>
+
+<p>testalias是证书别名，可修改为自己想设置的字符，建议使用英文字母和数字<br>test.keystore是证书文件名称，可修改为自己想设置的文件名称，也可以指定完整文件路径<br>36500是证书的有效期，表示100年有效期，单位天，建议时间设置长一点，避免证书过期<br>回车后会提示：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs sql">Enter keystore password:  <span class="hljs-operator">/</span><span class="hljs-operator">/</span>输入证书文件密码，输入完成回车  <br>Re<span class="hljs-operator">-</span>enter <span class="hljs-keyword">new</span> password:   <span class="hljs-operator">/</span><span class="hljs-operator">/</span>再次输入证书文件密码，输入完成回车  <br>What <span class="hljs-keyword">is</span> your <span class="hljs-keyword">first</span> <span class="hljs-keyword">and</span> <span class="hljs-keyword">last</span> name?  <br>  [<span class="hljs-literal">Unknown</span>]:  <span class="hljs-operator">/</span><span class="hljs-operator">/</span>输入名字和姓氏，输入完成回车  <br>What <span class="hljs-keyword">is</span> the name <span class="hljs-keyword">of</span> your organizational unit?  <br>  [<span class="hljs-literal">Unknown</span>]:  <span class="hljs-operator">/</span><span class="hljs-operator">/</span>输入组织单位名称，输入完成回车  <br>What <span class="hljs-keyword">is</span> the name <span class="hljs-keyword">of</span> your organization?  <br>  [<span class="hljs-literal">Unknown</span>]:  <span class="hljs-operator">/</span><span class="hljs-operator">/</span>输入组织名称，输入完成回车  <br>What <span class="hljs-keyword">is</span> the name <span class="hljs-keyword">of</span> your City <span class="hljs-keyword">or</span> Locality?  <br>  [<span class="hljs-literal">Unknown</span>]:  <span class="hljs-operator">/</span><span class="hljs-operator">/</span>输入城市或区域名称，输入完成回车  <br>What <span class="hljs-keyword">is</span> the name <span class="hljs-keyword">of</span> your State <span class="hljs-keyword">or</span> Province?  <br>  [<span class="hljs-literal">Unknown</span>]:  <span class="hljs-operator">/</span><span class="hljs-operator">/</span>输入省<span class="hljs-operator">/</span>市<span class="hljs-operator">/</span>自治区名称，输入完成回车  <br>What <span class="hljs-keyword">is</span> the two<span class="hljs-operator">-</span>letter country code <span class="hljs-keyword">for</span> this unit?  <br>  [<span class="hljs-literal">Unknown</span>]:  <span class="hljs-operator">/</span><span class="hljs-operator">/</span>输入国家<span class="hljs-operator">/</span>地区代号（两个字母），中国为CN，输入完成回车  <br><span class="hljs-keyword">Is</span> CN<span class="hljs-operator">=</span>XX, OU<span class="hljs-operator">=</span>XX, O<span class="hljs-operator">=</span>XX, L<span class="hljs-operator">=</span>XX, ST<span class="hljs-operator">=</span>XX, C<span class="hljs-operator">=</span>XX correct?  <br>  [<span class="hljs-keyword">no</span>]:  <span class="hljs-operator">/</span><span class="hljs-operator">/</span>确认上面输入的内容是否正确，输入y，回车  <br><br>Enter key password <span class="hljs-keyword">for</span> <span class="hljs-operator">&lt;</span>testalias<span class="hljs-operator">&gt;</span>  <br>        (<span class="hljs-keyword">RETURN</span> if same <span class="hljs-keyword">as</span> keystore password):  <span class="hljs-operator">/</span><span class="hljs-operator">/</span>确认证书密码与证书文件密码一样（HBuilder<span class="hljs-operator">|</span>HBuilderX要求这两个密码一致），直接回车就可以<br><span class="hljs-number">12345678910111213141516171819</span><br></code></pre></td></tr></table></figure>
+
+<p>中文版本：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs sql">C:\Users\panda<span class="hljs-operator">-</span>tu<span class="hljs-operator">&gt;</span>keytool <span class="hljs-operator">-</span>genkey <span class="hljs-operator">-</span>alias testalias <span class="hljs-operator">-</span>keyalg RSA <span class="hljs-operator">-</span>keysize <span class="hljs-number">2048</span> <span class="hljs-operator">-</span>validity <span class="hljs-number">36500</span> <span class="hljs-operator">-</span>keystore panda.keystore<br>输入密钥库口令: <span class="hljs-operator">/</span><span class="hljs-operator">/</span>不可见形式，输入不可见，但是系统记录了<br>再次输入新口令:<span class="hljs-operator">/</span><span class="hljs-operator">/</span>不可见形式，输入不可见，但是系统记录了<br>您的名字与姓氏是什么?<br>  [<span class="hljs-literal">Unknown</span>]:  panda<br>您的组织单位名称是什么?<br>  [<span class="hljs-literal">Unknown</span>]:  APE<br>您的组织名称是什么?<br>  [<span class="hljs-literal">Unknown</span>]:  APE<br>您所在的城市或区域名称是什么?<br>  [<span class="hljs-literal">Unknown</span>]:  QingYuan<br>您所在的省<span class="hljs-operator">/</span>市<span class="hljs-operator">/</span>自治区名称是什么?<br>  [<span class="hljs-literal">Unknown</span>]:  guangdong<br>该单位的双字母国家<span class="hljs-operator">/</span>地区代码是什么?<br>  [<span class="hljs-literal">Unknown</span>]:  CN<br>CN<span class="hljs-operator">=</span>panda, OU<span class="hljs-operator">=</span>APE, O<span class="hljs-operator">=</span>APE, L<span class="hljs-operator">=</span>QingYuan, ST<span class="hljs-operator">=</span>guangdong, C<span class="hljs-operator">=</span>CN是否正确?<br>  [否]:  Y<br><span class="hljs-number">1234567891011121314151617</span><br></code></pre></td></tr></table></figure>
+
+<p>上命令运行完成后就会生成证书，路径为“D:\test.keystore” 上面步骤切换的工作路径里</p>
+<p>注意：上述信息填写要规范，乱填有可能会影响应用上架应用市场。</p>
+<h3 id="查看证书信息"><a href="#查看证书信息" class="headerlink" title="查看证书信息"></a>查看证书信息</h3><p>可以使用以下命令查看：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql">keytool <span class="hljs-operator">-</span>list <span class="hljs-operator">-</span>v <span class="hljs-operator">-</span>keystore test.keystore  <br><span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
+
+<p>会输出以下信息</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs sql">输入密钥库口令:<br>密钥库类型: PKCS12<br>密钥库提供方: SUN<br><br>您的密钥库包含 <span class="hljs-number">1</span> 个条目<br><br>别名: testalias<br>创建日期: <span class="hljs-number">2021</span>年<span class="hljs-number">7</span>月<span class="hljs-number">14</span>日<br>条目类型: PrivateKeyEntry<br>证书链长度: <span class="hljs-number">1</span><br>证书[<span class="hljs-number">1</span>]:<br>所有者: CN<span class="hljs-operator">=</span>panda, OU<span class="hljs-operator">=</span>APE, O<span class="hljs-operator">=</span>apache, L<span class="hljs-operator">=</span>qingcheng, ST<span class="hljs-operator">=</span>qingyuan, C<span class="hljs-operator">=</span>CN<br>发布者: CN<span class="hljs-operator">=</span>panda, OU<span class="hljs-operator">=</span>APE, O<span class="hljs-operator">=</span>apache, L<span class="hljs-operator">=</span>qingcheng, ST<span class="hljs-operator">=</span>qingyuan, C<span class="hljs-operator">=</span>CN<br>序列号: <span class="hljs-number">32</span>c4c4831891d686<br>生效时间: Wed Jul <span class="hljs-number">14</span> <span class="hljs-number">09</span>:<span class="hljs-number">00</span>:<span class="hljs-number">17</span> CST <span class="hljs-number">2021</span>, 失效时间: Fri Jun <span class="hljs-number">20</span> <span class="hljs-number">09</span>:<span class="hljs-number">00</span>:<span class="hljs-number">17</span> CST <span class="hljs-number">2121</span><br>证书指纹:<br>         SHA1: BA:<span class="hljs-number">1</span>F:F0:<span class="hljs-number">46</span>:F6:AE:<span class="hljs-number">5</span>E:BF:<span class="hljs-number">4</span>E:E5:<span class="hljs-number">14</span>:<span class="hljs-number">70</span>:A3:B0:<span class="hljs-number">5</span>B:EC:<span class="hljs-number">8</span>D:<span class="hljs-number">74</span>:<span class="hljs-number">51</span>:F7<br>         SHA256: <span class="hljs-number">24</span>:<span class="hljs-number">2</span>F:<span class="hljs-number">48</span>:<span class="hljs-number">28</span>:<span class="hljs-number">45</span>:<span class="hljs-number">97</span>:<span class="hljs-number">46</span>:C2:<span class="hljs-number">58</span>:<span class="hljs-number">28</span>:<span class="hljs-number">30</span>:C2:<span class="hljs-number">4</span>E:A2:<span class="hljs-number">4</span>F:<span class="hljs-number">96</span>:<span class="hljs-number">8</span>E:<span class="hljs-number">7</span>B:B1:<span class="hljs-number">24</span>:<span class="hljs-number">28</span>:F1:FA:<span class="hljs-number">31</span>:BF:D3:<span class="hljs-number">70</span>:BB:<span class="hljs-number">9</span>A:<span class="hljs-number">61</span>:<span class="hljs-number">2</span>F:CB<br>签名算法名称: SHA256withRSA<br>主体公共密钥算法: <span class="hljs-number">2048</span> 位 RSA 密钥<br>版本: <span class="hljs-number">3</span><br><span class="hljs-number">123456789101112131415161718192021</span><br></code></pre></td></tr></table></figure>
+
+<p>当查看时，出现以下情况时，说明jdk的环境没配置好</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sql">C:\Users\panda<span class="hljs-operator">-</span>tu<span class="hljs-operator">&gt;</span>keytool <span class="hljs-operator">-</span>list <span class="hljs-operator">-</span>v <span class="hljs-operator">-</span>keystore test.keystore<br><span class="hljs-string">&#x27;keytool&#x27;</span> 不是内部或外部命令，也不是可运行的程序<br>或批处理文件。<br><span class="hljs-number">123</span><br></code></pre></td></tr></table></figure>
+
+<p>可以用上面的方法，在工作目录下创建临时的环境</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql">C:\Users\panda<span class="hljs-operator">-</span>tu<span class="hljs-operator">&gt;</span><span class="hljs-keyword">set</span> PATH<span class="hljs-operator">=</span><span class="hljs-operator">%</span>PATH<span class="hljs-operator">%</span>;&quot;C:\Program Files\Java\jdk1.8.0_301\bin&quot;<br><span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
+
+<p>继续操作即可</p>
+<p>参考：<a target="_blank" rel="noopener" href="https://ask.dcloud.net.cn/article/35777">https://ask.dcloud.net.cn/article/35777</a></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Android平台签名证书(.keystore)生成指南</div>
+      <div>https://yhao521.github.io/2025/09/29/摘录/Android平台签名证书(.keystore)生成指南/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>yhao521</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年9月29日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/09/29/%E6%91%98%E5%BD%95/adb%E8%BF%9E%E6%8E%A5%E4%B8%8D%E4%B8%8Aandroid%20%E6%8A%A5%E9%94%995037%E7%AB%AF%E5%8F%A3/" title="adb连接不上android 报错5037端口">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">adb连接不上android 报错5037端口</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/09/29/%E6%91%98%E5%BD%95/ComfyUI-Impact-Pack_%20%E4%BF%AE%E5%A4%8D%E6%A8%A1%E7%B3%8A%E4%BA%BA%E8%84%B8/" title="">
+                        <span class="hidden-mobile"></span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>  
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

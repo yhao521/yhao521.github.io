@@ -1,0 +1,788 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="yhao521">
+  <meta name="keywords" content="java,博客,vue,spring,mysql,docker,linux">
+  
+    <meta name="description" content="目录 一. 实现 App 自动检测更新的原理 1. 效果 2. 原理 二. 实现 App 自动检测更新的实践 1. 需要安装的插件 1.1 capacitor 1.2 cordova 2. 封装 app-update-main.ts（应用检查更新 - 入口） 2.1 定义应用信息的全局变量 2.2 获取服务器上最新的应用信息 2.3 获取当前设备信息 2.4 获取当前应用信息 2.5 处理版本号">
+<meta property="og:type" content="article">
+<meta property="og:title" content="匆匆过客的博客">
+<meta property="og:url" content="https://yhao521.github.io/2025/07/23/%E6%91%98%E5%BD%95/%E5%AE%9E%E7%8E%B0%20App%20%E8%87%AA%E5%8A%A8%E6%A3%80%E6%B5%8B%E6%9B%B4%E6%96%B0%EF%BC%88Vue3%20+%20Ionic%20+%20Cordova%20+%20Capacitor%EF%BC%89/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="目录 一. 实现 App 自动检测更新的原理 1. 效果 2. 原理 二. 实现 App 自动检测更新的实践 1. 需要安装的插件 1.1 capacitor 1.2 cordova 2. 封装 app-update-main.ts（应用检查更新 - 入口） 2.1 定义应用信息的全局变量 2.2 获取服务器上最新的应用信息 2.3 获取当前设备信息 2.4 获取当前应用信息 2.5 处理版本号">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/37589d3ddb14068a261fa5aee7b0f1da.png">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/638d28f9cfe84f3ff6a9db47b0d8d946.png">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/89ca6e8d5f5812884151ec5f8219734d.png">
+<meta property="og:image" content="https://i-blog.csdnimg.cn/blog_migrate/d69252864f0218e4de225d1d6bb65d07.png">
+<meta property="article:published_time" content="2025-07-23T12:01:13.000Z">
+<meta property="article:modified_time" content="2025-07-23T12:01:13.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="java,博客,vue,spring,mysql,docker,linux">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://i-blog.csdnimg.cn/blog_migrate/37589d3ddb14068a261fa5aee7b0f1da.png">
+  
+  
+  
+  <title>匆匆过客的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yhao521.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>匆匆过客的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text=""></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-07-23 20:01" pubdate>
+          2025年7月23日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          3.6k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          31 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header"></h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p><strong>目录</strong></p>
+<p><a href="#main-toc">一. 实现 App 自动检测更新的原理</a></p>
+<p><a href="#t0">1. 效果</a></p>
+<p><a href="#t1">2. 原理</a></p>
+<p><a href="#t2">二. 实现 App 自动检测更新的实践</a></p>
+<p><a href="#t3">1. 需要安装的插件</a></p>
+<p><a href="#t4">1.1 capacitor</a></p>
+<p><a href="#t5">1.2 cordova</a></p>
+<p><a href="#t6">2. 封装 app-update-main.ts（应用检查更新 - 入口）</a></p>
+<p><a href="#t7">2.1 定义应用信息的全局变量</a></p>
+<p><a href="#t8">2.2 获取服务器上最新的应用信息</a></p>
+<p><a href="#t9">2.3 获取当前设备信息</a></p>
+<p><a href="#t10">2.4 获取当前应用信息</a></p>
+<p><a href="#t11">2.5 处理版本号</a></p>
+<p><a href="#t12">2.6 根据全局信息、当前平台，判断是否更新及所需方法</a></p>
+<p><a href="#t13">2.7 添加 询问用户是否更新 的提示框</a></p>
+<p><a href="#t14">3. 封装 app-update-auxiliary.ts（应用检查更新 - 辅助）</a></p>
+<p><a href="#t15">3.1 根据文件名，判断文件媒体类型</a></p>
+<p><a href="#t16">3.2 获取 存放下载文件 的基本路径</a></p>
+<p><a href="#t17">3.3 添加下载 安装包（.apk） 的方法</a></p>
+<p><a href="#t18">3.4 计算文件下载进度</a></p>
+<p><a href="#t19">3.5 添加下载进度提示框</a></p>
+<p><a href="#t20">3.6 添加文件是否打开的提示框</a></p>
+<p><a href="#t21">3.7 添加打开 安装包（.apk）的方法</a></p>
+<p><a href="#t22">4. App 自动检查更新 方法执行的位置</a></p>
+<hr>
+<h2 id="一-实现-App-自动检测更新的原理"><a href="#一-实现-App-自动检测更新的原理" class="headerlink" title="一. 实现 App 自动检测更新的原理"></a>一. 实现 App 自动检测更新的原理</h2><h3 id="1-效果"><a href="#1-效果" class="headerlink" title="1. 效果"></a>1. 效果</h3><p>自动检测更新的场景：</p>
+<ul>
+<li>App 打开时，自动检测更新</li>
+<li>在设置中，点击版本号时，自动检测更新</li>
+</ul>
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/37589d3ddb14068a261fa5aee7b0f1da.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="2-原理"><a href="#2-原理" class="headerlink" title="2. 原理"></a>2. 原理</h3><ul>
+<li>检查当前应用信息（获取当前版本号、设备平台信息等等）</li>
+<li>获取服务器应用信息（获取服务器最新版本号、下载地址等）</li>
+<li>判断是否更新及如何更新（判断用户是否更新、判断需要下载的包、是否立即安装等）</li>
+</ul>
+<p>接口返回服务器上存储的应用信息示例（此处用 Rap2 模拟接口）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cobol">&#123;  &quot;data&quot;: &#123;    // Android 最新应用下载地址    &quot;androidUrl&quot;: &quot;https://www.xxx.com.cn/Android/others/tongfu/tongfu-prod.apk&quot;,    // Android 包名    &quot;apkName&quot;: &quot;baoan.apk&quot;,    // ios 最新应用下载地址    &quot;iosUrl&quot;: &quot;itms-services://?action=download-manifest&amp;url=https://www.xxx.com.cn/iOS/others/tongfu/tongfu-prod.plist&quot;,    // Android 最新应用版本号    &quot;verAndroid&quot;: &quot;1.0.6&quot;,    // ios 最新应用版本号    &quot;verIos&quot;: &quot;1.0.6&quot;  &#125;&#125;AI写代码<br></code></pre></td></tr></table></figure>
+
+<h3 id=""><a href="#" class="headerlink" title=""></a></h3><h2 id="二-实现-App-自动检测更新的实践"><a href="#二-实现-App-自动检测更新的实践" class="headerlink" title="二. 实现 App 自动检测更新的实践"></a>二. 实现 App 自动检测更新的实践</h2><h3 id="1-需要安装的插件"><a href="#1-需要安装的插件" class="headerlink" title="1. 需要安装的插件"></a>1. 需要安装的插件</h3><h4 id="1-1-capacitor"><a href="#1-1-capacitor" class="headerlink" title="1.1 capacitor"></a>1.1 capacitor</h4><blockquote>
+<p>&#x2F;&#x2F; @capacitor&#x2F;app<br>npm install @capacitor&#x2F;app<br>npx cap sync</p>
+<p>&#x2F;&#x2F; @capacitor&#x2F;device<br>npm install @capacitor&#x2F;device<br>npx cap sync</p>
+</blockquote>
+<h4 id="1-2-cordova"><a href="#1-2-cordova" class="headerlink" title="1.2 cordova"></a>1.2 cordova</h4><blockquote>
+<p>&#x2F;&#x2F; File<br>npm install cordova-plugin-file<br>npm install @ionic-native&#x2F;file<br>ionic cap sync</p>
+<p>&#x2F;&#x2F; File Transfer<br>npm install cordova-plugin-file-transfer<br>npm install @ionic-native&#x2F;file-transfer<br>ionic cap sync</p>
+<p>&#x2F;&#x2F; File Opener<br>npm install cordova-plugin-file-opener2<br>npm install @ionic-native&#x2F;file-opener<br>ionic cap sync</p>
+</blockquote>
+<h3 id="-1"><a href="#-1" class="headerlink" title=""></a></h3><h3 id="2-封装-app-update-main-ts（应用检查更新-入口）"><a href="#2-封装-app-update-main-ts（应用检查更新-入口）" class="headerlink" title="2. 封装 app-update-main.ts（应用检查更新 - 入口）"></a>2. 封装 app-update-main.ts（应用检查更新 - 入口）</h3><p><strong>此文件包含了 获取服务器 apk信息、获取当前 apk信息、判断是否执行 apk更新的相关方法</strong></p>
+<h4 id="2-1-定义应用信息的全局变量"><a href="#2-1-定义应用信息的全局变量" class="headerlink" title="2.1 定义应用信息的全局变量"></a>2.1 定义应用信息的全局变量</h4><p>用 <strong>const</strong> 定义 全局变量，否则 ts 会报错（比如使用 let）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cobol">// 全局变量 - 应用信息（默认）- 需要使用 const定义，否则会报错const appInfomation = &#123;  currentPlatform: &#x27;&#x27;, // 当前平台  currentVersion: &#x27;&#x27;, // 当前app版本  serverAndroidVersion: &#x27;&#x27;, // 服务器最新app版本 - Android  serverAndroidAppUpdateUrl: &#x27;&#x27;, // 服务器最新app下载地址 - Android  serverIosVersion: &#x27;&#x27;, // 服务器最新app版本 - IOS  serverIosAppUpdateUrl: &#x27;&#x27;, // 服务器最新app下载地址 - IOS  apkName: &#x27;&#x27;, // 服务器android安装包的名字&#125;;AI写代码<br></code></pre></td></tr></table></figure>
+
+<h4 id="2-2-获取服务器上最新的应用信息"><a href="#2-2-获取服务器上最新的应用信息" class="headerlink" title="2.2 获取服务器上最新的应用信息"></a>2.2 获取服务器上最新的应用信息</h4><p>此处省略了 获取服务器信息的 接口调用 过程，仅展示获取接口数据后，应该将 2.1 中的变量填充上什么信息</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cobol">// 获取服务器上的应用信息  const serverAppInfo = await getServerAppInfo();  console.log(&quot;获取服务器上的应用信息&quot;, serverAppInfo);   // 服务器上的安卓应用版本  appInfomation.serverAndroidVersion = serverAppInfo.data.verAndroid;   // 服务器上的安卓应用下载地址  appInfomation.serverAndroidAppUpdateUrl = serverAppInfo.data.androidUrl;   // 服务器上的苹果应用版本  appInfomation.serverIosVersion = serverAppInfo.data.verIos;   // 服务器上的苹果应用下载地址  appInfomation.serverIosAppUpdateUrl = serverAppInfo.data.iosUrl;   // 服务器上的应用下载名  appInfomation.apkName = serverAppInfo.data.apkName; AI写代码<br></code></pre></td></tr></table></figure>
+
+<h4 id="2-3-获取当前设备信息"><a href="#2-3-获取当前设备信息" class="headerlink" title="2.3 获取当前设备信息"></a>2.3 获取当前设备信息</h4><p>需要获取设备信息的原因：</p>
+<ul>
+<li>Android &#x2F; Ios 的下载路径、安装过程等，都不太相同，需要根据设备平台进行定制</li>
+</ul>
+<p>此处采用 capacitor 中的 <strong>Device插件</strong>，它可以返回当前设备平台是 android 还是 ios</p>
+<ul>
+<li><img src="https://i-blog.csdnimg.cn/blog_migrate/638d28f9cfe84f3ff6a9db47b0d8d946.png" srcset="/img/loading.gif" lazyload></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cobol">import &#123; Device &#125; from &#x27;@capacitor/device&#x27;; /** * 获取当前的设备所属平台 */const getDeviceInfo = async (): Promise&lt;string&gt; =&gt; &#123;  const info = await Device.getInfo();  return info.platform;&#125;;   // 填充全局变量 - 应用信息  appInfomation.currentPlatform = nowPlatform; // 当前设备平台AI写代码<br></code></pre></td></tr></table></figure>
+
+<h4 id="2-4-获取当前应用信息"><a href="#2-4-获取当前应用信息" class="headerlink" title="2.4 获取当前应用信息"></a>2.4 获取当前应用信息</h4><p>需要获取当前应用信息的原因：</p>
+<ul>
+<li>是为了获取版本号，与服务器上最新的版本号进行对比，看看是否需要更新</li>
+</ul>
+<p>此处使用 capacitor 中的 <strong>App插件</strong>，它可以返回当前应用的版本号</p>
+<ul>
+<li><img src="https://i-blog.csdnimg.cn/blog_migrate/89ca6e8d5f5812884151ec5f8219734d.png" srcset="/img/loading.gif" lazyload></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cobol">/** * 获取用户当前正在使用的app版本 */async function getCurrentAppInfo(): Promise&lt;any&gt; &#123;  // 调用获取应用信息的API  const appInfo: AppInfo = await App.getInfo();  return appInfo;&#125; // 填充全局变量 - 应用信息appInfomation.currentVersion = currentAppInfo.version; // 当前应用版本号AI写代码<br></code></pre></td></tr></table></figure>
+
+<h4 id="2-5-处理版本号"><a href="#2-5-处理版本号" class="headerlink" title="2.5 处理版本号"></a>2.5 处理版本号</h4><p>需要 处理版本号 的原因：</p>
+<ul>
+<li>为了方便比较 当前应用版本号 和 服务器最新版本号</li>
+</ul>
+<p>处理版本号的方法：</p>
+<ul>
+<li>将版本号中的 . （1.0.0）替换成 0，这样就能直接比较 1.0.0 和 1.0.6 了</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cobol">/** * 处理版本号(1.0.0处理为10000) * @param num 版本号 */function handleVersion(num: string): number &#123;    console.log(&#x27;处理后的版本号&#x27;, num.split(&#x27;.&#x27;).join(&#x27;0&#x27;));    return Number(num.split(&#x27;.&#x27;).join(&#x27;0&#x27;));&#125;AI写代码<br></code></pre></td></tr></table></figure>
+
+<h4 id="2-6-根据全局信息、当前平台，判断是否更新及所需方法"><a href="#2-6-根据全局信息、当前平台，判断是否更新及所需方法" class="headerlink" title="2.6 根据全局信息、当前平台，判断是否更新及所需方法"></a>2.6 根据全局信息、当前平台，判断是否更新及所需方法</h4><ul>
+<li><strong>如果是安卓平台更新，则需要传递服务器上的 apk包名，而 ios 不需要</strong></li>
+<li>是否更新，就是对比处理过的版本号，如果不一致，就更新</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cobol">if (appInfomation) &#123;    if (appInfomation.currentPlatform === &#x27;android&#x27;) &#123;      updateApp(appInfomation.currentVersion, appInfomation.serverAndroidVersion, appInfomation.serverAndroidAppUpdateUrl, appInfomation.currentPlatform, appInfomation.apkName);    &#125; else if (appInfomation.currentPlatform === &#x27;ios&#x27;) &#123;      updateApp(appInfomation.currentVersion, appInfomation.serverIosVersion, appInfomation.serverIosAppUpdateUrl, appInfomation.currentPlatform);    &#125; else &#123;      console.log(&#x27;获取版本信息失败!&#x27;);    &#125;  &#125; /** * 判断是否进行更新，判断使用哪种平台提示 * @param currentVersion 当前应用版本 * @param serverVersion 服务器上的应用版本 * @param serverAppUpdateUrl 服务器上的应用下载地址 * @param currentPlatform 当前设备平台 * @param apkName 服务器上 android 安装包的名字【可选】 */export function updateApp(currentVersion: string, serverVersion: string, serverAppUpdateUrl: string, currentPlatform: string, apkName?: string) &#123;  // 是否更新  let ifUpdate = false;  if (currentVersion &amp;&amp; serverVersion) &#123;    ifUpdate = handleVersion(currentVersion) &lt; handleVersion(serverVersion);  &#125;  // 如果需要进行更新  if (ifUpdate) &#123;    // this.platform.ready().then(() =&gt; &#123;    if (currentPlatform === &#x27;android&#x27;) &#123;      // 触发 Anroid 平台的提示      presentAlert(currentVersion, serverVersion, serverAppUpdateUrl, currentPlatform, apkName);    &#125; else &#123;      // 触发 Ios 平台的提示      presentAlert(currentVersion, serverVersion, serverAppUpdateUrl, currentPlatform);    &#125;  &#125;&#125;AI写代码<br></code></pre></td></tr></table></figure>
+
+<h4 id="2-7-添加-询问用户是否更新-的提示框"><a href="#2-7-添加-询问用户是否更新-的提示框" class="headerlink" title="2.7 添加 询问用户是否更新 的提示框"></a>2.7 添加 询问用户是否更新 的提示框</h4><p>提示框使用 Ionic 提供的 <strong>alertController</strong> </p>
+<p>提示框处理逻辑如下：</p>
+<ul>
+<li>下载app 及 自动打开app 的方法，需要根据 <strong>平台</strong> 及是否包含 <strong>apk包名</strong> 进行判断传参</li>
+<li>如果是更新安卓应用，是必须要使用 <strong>apkName</strong> 的哦</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cobol">import &#123; alertController &#125; from &#x27;@ionic/vue&#x27;;import &#123; apkDownloadAndOpen &#125; from &#x27;@/utils/apk-file-transfer&#x27; /** * 更新提示、判断执行下载安装包的方法 * @param currentVersion 当前应用版本 * @param serverVersion 服务器上的应用版本 * @param serverAppUpdateUrl 服务器上的应用下载地址 * @param currentPlatform 当前设备平台 * @param apkName 服务器上 android 安装包的名字【可选】 */async function presentAlert(currentVersion: string, serverVersion: string, serverAppUpdateUrl: string, currentPlatform: string, apkName?: string) &#123;  const alert = await alertController.create(&#123;    header: &#x27;发现新版本, 是否更新?&#x27;,    cssClass: &#x27;update-pop&#x27;,    message: &#x27;&lt;div class=&quot;versions&quot;&gt;当前版本号：&#x27; + currentVersion + &#x27;&lt;/div&gt;&lt;div class=&quot;versions&quot;&gt;待更新版本号：&#x27; + serverVersion + &#x27;&lt;/div&gt;&#x27;,    buttons: [      &#123;        text: &#x27;取消&#x27;,        handler: () =&gt; &#123;          console.log(&#x27;用户暂不更新应用&#x27;);        &#125;      &#125;,      &#123;        text: &#x27;立即更新&#x27;,        handler: () =&gt; &#123;          if (currentPlatform === &#x27;android&#x27; &amp;&amp; apkName) &#123;            // 下载app            console.log(&#x27;准备执行 android 下载&#x27;)            // window.open(&#x27;serverAppUpdateUrl&#x27;)            apkDownloadAndOpen(serverAppUpdateUrl, apkName, currentPlatform, false, false);            // this.fileTransferService.downloadFile(serverAppUpdateUrl, apkName, false, true);          &#125; else &#123;            console.log(&#x27;准备执行 ios/web 下载&#x27;)            // // this.browser.create(serverAppUpdateUrl);            // this.browser.create(serverAppUpdateUrl, &#x27;_system&#x27;, &#123; usewkwebview: &#x27;no&#x27; &#125;);          &#125;        &#125;      &#125;    ],  &#125;);  alert.present();&#125;AI写代码<br></code></pre></td></tr></table></figure>
+
+<h3 id="-2"><a href="#-2" class="headerlink" title=""></a></h3><h3 id="3-封装-app-update-auxiliary-ts（应用检查更新-辅助）"><a href="#3-封装-app-update-auxiliary-ts（应用检查更新-辅助）" class="headerlink" title="3. 封装 app-update-auxiliary.ts（应用检查更新 - 辅助）"></a>3. 封装 app-update-auxiliary.ts（应用检查更新 - 辅助）</h3><p><strong>此文件包含了 apk下载、计算下载进度、下载完成后打开apk文件的相关方法</strong></p>
+<h4 id="3-1-根据文件名，判断文件媒体类型"><a href="#3-1-根据文件名，判断文件媒体类型" class="headerlink" title="3.1 根据文件名，判断文件媒体类型"></a>3.1 根据文件名，判断文件媒体类型</h4><p>所谓文件名，就是之前传的 apkName（形如 baoan.apk，要根据这个后缀，判断文件媒体类型）</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs kotlin"><span class="hljs-comment">/** * 根据文件名称获取文件媒体类型 * <span class="hljs-doctag">@param</span> fileName 文件名称 */</span>export function getFileMimeType(fileName: string) &#123;  <span class="hljs-comment">// 文件名后缀  const fileSuffix = getFileSuffix(fileName);  // 文件类型  let mimeType = &#x27;&#x27;;  switch (fileSuffix) &#123;    case &#x27;txt&#x27;:      mimeType = &#x27;text/plain&#x27;;      break;    case &#x27;docx&#x27;:      mimeType = &#x27;application/vnd.openxmlformats-officedocument.wordprocessingml.document&#x27;;      break;    case &#x27;doc&#x27;:      mimeType = &#x27;application/msword&#x27;;      break;    case &#x27;pptx&#x27;:      mimeType = &#x27;application/vnd.openxmlformats-officedocument.presentationml.presentation&#x27;;      break;    case &#x27;ppt&#x27;:      mimeType = &#x27;application/vnd.ms-powerpoint&#x27;;      break;    case &#x27;xlsx&#x27;:      mimeType = &#x27;application/vnd.openxmlformats-officedocument.spreadsheetml.sheet&#x27;;      break;    case &#x27;xls&#x27;:      mimeType = &#x27;application/vnd.ms-excel&#x27;;      break;    case &#x27;zip&#x27;:      mimeType = &#x27;application/x-zip-compressed&#x27;;      break;    case &#x27;rar&#x27;:      mimeType = &#x27;application/octet-stream&#x27;;      break;    case &#x27;pdf&#x27;:      mimeType = &#x27;application/pdf&#x27;;      break;    case &#x27;jpg&#x27;:      mimeType = &#x27;image/jpeg&#x27;;      break;    case &#x27;png&#x27;:      mimeType = &#x27;image/png&#x27;;      break;    case &#x27;apk&#x27;:      mimeType = &#x27;application/vnd.android.package-archive&#x27;;      break;    default:      mimeType = &#x27;application/&#x27; + fileSuffix;      break;  &#125;  return mimeType;&#125;AI写代码</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="3-2-获取-存放下载文件-的基本路径"><a href="#3-2-获取-存放下载文件-的基本路径" class="headerlink" title="3.2 获取 存放下载文件 的基本路径"></a>3.2 获取 存放下载文件 的基本路径</h4><p>Android 和 Ios 存放文件的基本路径是不一样的</p>
+<ul>
+<li>以 Android 为例，像这样：file:&#x2F;&#x2F;&#x2F;storage&#x2F;emulated&#x2F;0&#x2F;Android&#x2F;data&#x2F;io.ionic.starter&#x2F;files&#x2F;tongfu.apk</li>
+<li><strong>注意：路径是带 .apk 的</strong></li>
+</ul>
+<p>获取基本路径需要通过 cordova 插件 —— <strong>File</strong></p>
+<ul>
+<li>注意：TypeScript 语法中，获取 cordova 提供的全局变量，需这样获取：<strong>(window as any).cordova.file</strong></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cobol">/** * 获取存放文件的基础路径 android/ios * @param currentPlatform 当前平台 */export function getFileBasePath(currentPlatform: string) &#123;  let baseUrl = &#x27;&#x27;  if (currentPlatform === &#x27;android&#x27;) &#123;    baseUrl = (window as any).cordova.file.externalDataDirectory;    // baseUrl = &#x27;files&#x27;;  &#125; else if (currentPlatform === &#x27;ios&#x27;) &#123;    baseUrl = (window as any).cordova.file.dataDirectory;    // baseUrl = &#x27;NoCloud/&#x27;;  &#125; else &#123;    return &#x27;&#x27;;  &#125;  return baseUrl;&#125;   // 获取存放文件的基础路径 - 最后拼出来的路径是带 .apk 的  const filePath = getFileBasePath(currentPlatform) + fileName;AI写代码<br></code></pre></td></tr></table></figure>
+
+<h4 id="3-3-添加下载-安装包（-apk）-的方法"><a href="#3-3-添加下载-安装包（-apk）-的方法" class="headerlink" title="3.3 添加下载 安装包（.apk） 的方法"></a>3.3 添加下载 安装包（.apk） 的方法</h4><p>下载安装包（.apk）需要通过 cordova 插件 —— <strong>FileTransfer</strong></p>
+<ul>
+<li>传入的下载路径，需要特殊编码 const url &#x3D; <strong>encodeURI</strong>(serverUrl);</li>
+<li>实例化 FileTransfer 时，得这么写：<strong>const fileTransfer &#x3D; new (window as any).FileTransfer();</strong></li>
+</ul>
+<p>下载时，报错代码（Code3）：</p>
+<ul>
+<li>理论上来讲，这是 连接失败 的报错</li>
+<li>在 Android Studio 中的 <strong>插件源码部分</strong> 打断点调试，发现在 判定白名单 这块逻辑中报错了，下载路径不在应用白名单里，无法下载</li>
+<li>因此，我把 FileTransfer 插件源码中，判断白名单的逻辑块 给注释了（…）</li>
+</ul>
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/d69252864f0218e4de225d1d6bb65d07.png" srcset="/img/loading.gif" lazyload></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cobol">/** * 下载文件 * @param fileTransfer 当前文件传输对象 * @param url 下载地址 * @param filePath 文件下载后的本地存放路径 * @param mimeType 文件媒体类型 */export function fileDownload(fileTransfer: any, url: any, filePath: string, mimeType: string): any &#123;  fileTransfer.download(url, filePath, function(entry: any) &#123;    console.log(&quot;下载完成，文件位于: &quot; + entry.toURL());    // 关闭下载进度提示框    closeProgressPop();    // 打开询问用户是否打开刚下载的应用的提示框    openFilePop(filePath, mimeType, &#x27;应用下载完成，是否立即更新？&#x27;);  &#125;, function (err: any) &#123;    console.log(&#x27;下载失败，报错信息：&#x27;, err)  &#125;, true)&#125;AI写代码<br></code></pre></td></tr></table></figure>
+
+<h4 id="3-4-计算文件下载进度"><a href="#3-4-计算文件下载进度" class="headerlink" title="3.4 计算文件下载进度"></a>3.4 计算文件下载进度</h4><p>计算文件下载进度 需要通过 cordova 插件 —— <strong>FileTransfer 中的 onprogress 属性</strong></p>
+<p>踩坑记录：</p>
+<ul>
+<li>最好按照官网的写法来，比如 onprogress 直接 &#x3D; function() {}，千万别写 () &#x3D;&gt; {} 这种回调函数，可能会因此报错，最好参数也别改【0.0】</li>
+</ul>
+<p>计算文件下载进度方法，添加在：</p>
+<ul>
+<li>FileTransfer.download() 执行之前，new FileTransfer() 初始化之后</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cobol">/** * 计算文件下载进度 */export function calProgress(fileTransfer: any) &#123;  // 下载进度  let progressValue = 0;  // 计算下载进度，不可以用回调，会失去效果  fileTransfer.onprogress = function(progressEvent: any) &#123;    if (progressEvent.lengthComputable) &#123;        progressValue = progressEvent.loaded / progressEvent.total;    &#125; else &#123;        progressValue++;    &#125;    // 将 0.01321... 这种下载进度转换为整数    const showNumber = Math.floor(progressValue * 100);    // 填充已下载文字提示信息    document.getElementsByClassName(&#x27;downed&#x27;)[0].innerHTML = `已完成：$&#123;showNumber&#125;%`;    // 填充进度条外框样式 - style会失效，因此在此处修改    document.getElementsByClassName(&#x27;progress&#x27;)[0][&#x27;style&#x27;].width = &#x27;100%&#x27;;    document.getElementsByClassName(&#x27;progress&#x27;)[0][&#x27;style&#x27;].height = &#x27;4px&#x27;;    document.getElementsByClassName(&#x27;progress&#x27;)[0][&#x27;style&#x27;].background = &#x27;#eee&#x27;;    // 填充进度条进度样式 - style会失效，因此在此处修改    document.getElementsByClassName(&#x27;blue&#x27;)[0][&#x27;style&#x27;].display = &#x27;block&#x27;;    document.getElementsByClassName(&#x27;blue&#x27;)[0][&#x27;style&#x27;].width = `$&#123;showNumber&#125;%`;    document.getElementsByClassName(&#x27;blue&#x27;)[0][&#x27;style&#x27;].height = &#x27;100%&#x27;;    document.getElementsByClassName(&#x27;blue&#x27;)[0][&#x27;style&#x27;].background = &#x27;#1890ff&#x27;;  &#125;;&#125;AI写代码<br></code></pre></td></tr></table></figure>
+
+<h4 id="3-5-添加下载进度提示框"><a href="#3-5-添加下载进度提示框" class="headerlink" title="3.5 添加下载进度提示框"></a>3.5 添加下载进度提示框</h4><p>此进度框最好写在 <strong>全局变量</strong> 里，因为用他的地方比较杂，如下：</p>
+<ul>
+<li>在 执行下载 &#x2F; 计算进度 之前，需要创造一个下载进度提示框，也就是执行 createProgressPop();</li>
+<li>在下载完成（成功）之后，需要关闭这个提示框，也就是执行 closeProgressPop();</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cobol">// 下载进度框let alertPop: any; /** * 初始化下载进度框 */export async function createProgressPop() &#123;  alertPop = await alertController.create(&#123;    message: &#x27;&lt;p class=&quot;title&quot;&gt;正在下载更新，请稍等...&lt;/p&gt;&lt;div class=&quot;progress&quot;&gt;&lt;span class=&quot;blue&quot;&gt;&lt;/span&gt;&lt;/div&gt;&lt;p class=&quot;downed&quot;&gt;已完成：0%&lt;/p&gt;&#x27;,    backdropDismiss: false  &#125;);  await alertPop.present();&#125; /** * 关闭下载进度框 */export function closeProgressPop() &#123;  if (alertPop) &#123;    alertPop.dismiss();    alertPop = null;  &#125;&#125;AI写代码<br></code></pre></td></tr></table></figure>
+
+<h4 id="3-6-添加文件是否打开的提示框"><a href="#3-6-添加文件是否打开的提示框" class="headerlink" title="3.6 添加文件是否打开的提示框"></a>3.6 添加文件是否打开的提示框</h4><p>显而易见，这个方法在下载成功之后执行</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cobol">/** * 询问是否打开文件的提示框 * @param filePath 文件本地路径 * @param fileMimeType 文件媒体类型 * @param msg 询问文本 */export async function openFilePop(filePath: string, fileMimeType: string, msg = &#x27;是否直接打开文件？&#x27;) &#123;  const alert = await alertController.create(&#123;    message: msg,    buttons: [      &#123;        text: &#x27;取消&#x27;,        role: &#x27;cancel&#x27;,        handler: () =&gt; &#123;          console.log(&#x27;用户暂不打开文件&#x27;);        &#125;      &#125;, &#123;        text: &#x27;打开&#x27;,        handler: () =&gt; &#123;          // 打开文件          openFile(filePath, fileMimeType);        &#125;      &#125;    ]  &#125;);  await alert.present();&#125;AI写代码<br></code></pre></td></tr></table></figure>
+
+<h4 id="3-7-添加打开-安装包（-apk）的方法"><a href="#3-7-添加打开-安装包（-apk）的方法" class="headerlink" title="3.7 添加打开 安装包（.apk）的方法"></a>3.7 添加打开 安装包（.apk）的方法</h4><p>打开文件 需要通过 cordova 插件 —— <strong>FileOpen2</strong></p>
+<ul>
+<li>此插件的 打开文件方法，需要传入的参数是：需要打开的文件路径、需要打开的文件媒体类型</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cobol">/** * 打开文件 * @param filePath 文件本地路径 * @param fileMimeType 文件媒体类型 */ export function openFile(filePath: string, fileMimeType: string) &#123;  (window as any).cordova.plugins.fileOpener2.open(filePath, fileMimeType).then(    () =&gt; &#123;      console.log(&#x27;文件打开成功！&#x27;);    &#125;).catch(() =&gt; &#123;      alert(&#x27;文件打开失败，请重试!&#x27;);    &#125;  );&#125;AI写代码<br></code></pre></td></tr></table></figure>
+
+<h3 id="4-App-自动检查更新-方法执行的位置"><a href="#4-App-自动检查更新-方法执行的位置" class="headerlink" title="4. App 自动检查更新 方法执行的位置"></a>4. App 自动检查更新 方法执行的位置</h3><p>Android 系统：</p>
+<ul>
+<li>在 app.vue 中引用并调用，可以在 setup() 里直接调用，也可以在 onMounted() 中调用</li>
+</ul>
+<p><del>Ios 系统：</del></p>
+<ul>
+<li><del>应该在 <strong>浏览器</strong> 中，下载并打开</del></li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div></div>
+      <div>https://yhao521.github.io/2025/07/23/摘录/实现 App 自动检测更新（Vue3 + Ionic + Cordova + Capacitor）/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>yhao521</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年7月23日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E6%91%98%E5%BD%95/vue3%E4%B8%AD%EF%BC%8Cthis.$router.push%E5%88%B7%E6%96%B0%E5%BD%93%E5%89%8D%E9%A1%B5%E9%9D%A2%EF%BC%8C%E8%AF%A5%E9%A1%B5%E9%9D%A2%E4%B8%8D%E9%87%8D%E6%96%B0%E5%8A%A0%E8%BD%BD%E9%9C%80%E8%A6%81%E6%89%8B%E5%8A%A8%E5%88%B7%E6%96%B0%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/" title="vue3中，this.$router.push刷新当前页面，该页面不重新加载需要手动刷新的解决方案">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">vue3中，this.$router.push刷新当前页面，该页面不重新加载需要手动刷新的解决方案</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E6%91%98%E5%BD%95/%E7%94%A8Element%20Plus%E6%89%93%E9%80%A0%E5%91%BD%E4%BB%A4%E5%BC%8FModal%E5%BC%B9%E7%AA%97%20-%20%E4%BB%BFArco%20Design%20Vue%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/" title="用Element Plus打造命令式Modal弹窗 - 仿Arco Design Vue最佳实践">
+                        <span class="hidden-mobile">用Element Plus打造命令式Modal弹窗 - 仿Arco Design Vue最佳实践</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>  
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

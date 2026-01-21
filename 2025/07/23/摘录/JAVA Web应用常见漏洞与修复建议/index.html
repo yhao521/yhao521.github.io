@@ -1,0 +1,1530 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="yhao521">
+  <meta name="keywords" content="java,博客,vue,spring,mysql,docker,linux">
+  
+    <meta name="description" content="最近负责的项目参与了甲方要求的代码审计，扫出来不少问题，46w+行代码扫出来81种漏洞，涉及1w+行代码，不良代码率高达2.93%，也确实反应了不少问题，这里贴出来供大家参考 目录 跨站脚本 高危：存储型XSS 高危：反射型XSS 输入验证 高危：路径遍历 高危：基于DOM的XSS 高危：重定向 中危：拒绝服务：正则表达式 中危：访问权限修饰符控制 中危：直接绑定敏感字段 低危：拒绝服务：解析Do">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JAVA Web应用常见漏洞与修复建议">
+<meta property="og:url" content="https://yhao521.github.io/2025/07/23/%E6%91%98%E5%BD%95/JAVA%20Web%E5%BA%94%E7%94%A8%E5%B8%B8%E8%A7%81%E6%BC%8F%E6%B4%9E%E4%B8%8E%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="最近负责的项目参与了甲方要求的代码审计，扫出来不少问题，46w+行代码扫出来81种漏洞，涉及1w+行代码，不良代码率高达2.93%，也确实反应了不少问题，这里贴出来供大家参考 目录 跨站脚本 高危：存储型XSS 高危：反射型XSS 输入验证 高危：路径遍历 高危：基于DOM的XSS 高危：重定向 中危：拒绝服务：正则表达式 中危：访问权限修饰符控制 中危：直接绑定敏感字段 低危：拒绝服务：解析Do">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-07-23T12:01:40.000Z">
+<meta property="article:modified_time" content="2025-02-19T17:54:23.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="java,博客,vue,spring,mysql,docker,linux">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>JAVA Web应用常见漏洞与修复建议 - 匆匆过客的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yhao521.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>匆匆过客的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="JAVA Web应用常见漏洞与修复建议"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-07-23 20:01" pubdate>
+          2025年7月23日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          21k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          176 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">JAVA Web应用常见漏洞与修复建议</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>最近负责的项目参与了甲方要求的代码审计，扫出来不少问题，46w+行代码扫出来81种漏洞，涉及1w+行代码，不良代码率高达2.93%，也确实反应了不少问题，这里贴出来供大家参考</p>
+<p><strong>目录</strong></p>
+<p><a href="#t0">跨站脚本</a></p>
+<p><a href="#t1">高危：存储型XSS</a></p>
+<p><a href="#t2">高危：反射型XSS</a></p>
+<p><a href="#t3">输入验证</a></p>
+<p><a href="#t4">高危：路径遍历</a></p>
+<p><a href="#t5">高危：基于DOM的XSS</a></p>
+<p><a href="#t6">高危：重定向</a></p>
+<p><a href="#t7">中危：拒绝服务：正则表达式</a></p>
+<p><a href="#t8">中危：访问权限修饰符控制</a></p>
+<p><a href="#t9">中危：直接绑定敏感字段</a></p>
+<p><a href="#t10">低危：拒绝服务：解析Double类型数据</a></p>
+<p><a href="#t11">低危：有风险的资源使用</a></p>
+<p><a href="#t12">低危：数据跨越信任边界</a></p>
+<p><a href="#t13">低危：文件上传</a></p>
+<p><a href="#t14">代码注入</a></p>
+<p><a href="#t15">中危：HTTP响应截断</a></p>
+<p><a href="#t16">中危：有风险的SQL查询：MyBatis</a></p>
+<p><a href="#t17">中危：公式注入</a></p>
+<p><a href="#t18">中危：资源注入</a></p>
+<p><a href="#t19">中危：HTTP响应截断</a></p>
+<p><a href="#t20">低危：有风险的反序列化</a> </p>
+<p><a href="#t21">低危：JavaScript劫持：易受攻击的框架</a> </p>
+<p><a href="#t22">API误用</a></p>
+<p><a href="#t23">中危：不安全的框架绑定</a></p>
+<p><a href="#t24">低危：忽略返回值</a></p>
+<p><a href="#t25">低危：HTTP响应完成后继续操作输出流</a></p>
+<p><a href="#t26">低危：缺少对方法返回值的null检查</a></p>
+<p><a href="#t27">密码管理</a></p>
+<p><a href="#t28">中危：不安全的随机数</a></p>
+<p><a href="#t29">中危：空密码</a></p>
+<p><a href="#t30">中危：硬编码密码</a></p>
+<p><a href="#t31">中危：弱加密</a></p>
+<p><a href="#t32">中危：配置文件中的明文密码</a></p>
+<p><a href="#t33">中危：硬编码加密密钥</a> </p>
+<p><a href="#t34">低危：注释中的密码</a></p>
+<p><a href="#t35">低危：不安全的哈希算法</a></p>
+<p><a href="#t36">低危：弱加密：不安全的块密码加密模式</a> </p>
+<p><a href="#t37">低危：不安全的随机数</a> </p>
+<p><a href="#t38">低危：注释中的密码</a></p>
+<p><a href="#t39">资源管理</a></p>
+<p><a href="#t40">中危：数据库访问控制</a></p>
+<p><a href="#t41">中危：资源未释放：流</a> </p>
+<p><a href="#t42">中危：使用不安全的target blank</a> </p>
+<p><a href="#t43">代码质量</a></p>
+<p><a href="#t44">中危：使用&#x3D;&#x3D;或!&#x3D;比较基本数据类型的包装类</a></p>
+<p><a href="#t45">中危：比较Locale相关的数据未指定适当的Locale</a></p>
+<p><a href="#t46">中危：null引用</a></p>
+<p><a href="#t47">中危：系统信息泄露：Session传递</a></p>
+<p><a href="#t48">低危：JavaEE程序：直接使用线程</a></p>
+<p><a href="#t49">低危：JavaEE程序：遗留的调试代码</a></p>
+<p><a href="#t50">低危：日志记录：使用系统输出流</a></p>
+<p><a href="#t51">低危：使用&#x3D;&#x3D;或!&#x3D;比较字符串</a></p>
+<p><a href="#t52">低危：硬编码文件分隔符</a></p>
+<p><a href="#t53">低危：使用浮点数进行精确计算</a></p>
+<p><a href="#t54">低危：系统信息泄露：内部</a></p>
+<p><a href="#t55">低危：试图重写静态方法</a></p>
+<p><a href="#t56">低危：系统信息泄露：标准错误流</a></p>
+<p><a href="#t57">低危：泛化的捕获异常</a></p>
+<p><a href="#t58">低危：泛化的抛出异常</a></p>
+<p><a href="#t59">低危：表达式永远为false</a></p>
+<p><a href="#t60">低危：表达式永远为true</a></p>
+<p><a href="#t61">低危：未使用的字段</a></p>
+<p><a href="#t62">低危：未使用的方法</a> </p>
+<p><a href="#t63">低危：冗余的初始化</a></p>
+<p><a href="#t64">低危：未使用的值</a></p>
+<p><a href="#t65">低危：冗余的null检查</a></p>
+<p><a href="#t66">低危：使用equals()来判断字符串是否为空</a></p>
+<p><a href="#t67">低危：循环中拼接字符串</a></p>
+<p><a href="#t68">低危：创建Boolean对象</a></p>
+<p><a href="#t69">低危：byte数组转String时未指定编码</a></p>
+<p><a href="#t70">低危：侵犯隐私</a> </p>
+<p><a href="#t71">低危：switch语句中缺少default语句</a></p>
+<p><a href="#t72">低危：可序列化类中存在可序列化的敏感信息</a></p>
+<p><a href="#t73">低危：空的方法</a></p>
+<p><a href="#t74">低危：空的代码块</a></p>
+<p><a href="#t75">低危：无用的分号</a></p>
+<p><a href="#t76">低危：错误的参数顺序</a></p>
+<p><a href="#t77">低危：隐藏的表单字段</a></p>
+<p><a href="#t78">低危：侵犯隐私：自动补全</a></p>
+<p><a href="#t79">低危：遗留的调试代码</a></p>
+<p><a href="#t80">异常处理</a></p>
+<p><a href="#t81">低危：捕获NullPointerException</a></p>
+<p><a href="#t82">低危：finally代码块中抛出异常</a></p>
+<p><a href="#t83">低危：空的catch代码块(1)</a></p>
+<p><a href="#t84">低危：空的catch代码块(2)</a></p>
+<p><a href="#t85">跨站脚本</a></p>
+<p><a href="#t86">低危：跨站请求伪造</a></p>
+<hr>
+<h2 id="跨站脚本"><a href="#跨站脚本" class="headerlink" title="跨站脚本"></a>跨站脚本</h2><h3 id="高危：存储型XSS"><a href="#高危：存储型XSS" class="headerlink" title="高危：存储型XSS"></a>高危：存储型XSS</h3><p>存储型XSS是指应用程序通过Web请求获取不可信赖的数据，并且在未检验数据是否存在XSS代码的情况下，将其存入数据库。当程序下一次从数据库中获取该数据时，致使页面再次执行XSS代码。存储型XSS可以持续攻击用户，在用户提交了包含XSS代码的数据存储到数据库后，每当用户在浏览网页查询对应数据库中的数据时，那些包含XSS代码的数据就会在服务器解析并加载，当浏览器读到XSS代码后，会当做正常的HTML和JS解析并执行，于是发生存储型<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=XSS%E6%94%BB%E5%87%BB&spm=1001.2101.3001.7020">XSS攻击</a>。</p>
+<p>**例如**：下面JSP代码片段的功能是根据一个已知用户雇员ID（id）从数据库中查询出该用户的地址，并显示在JSP页面上。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">&lt;%...<span class="hljs-type">Statement</span> <span class="hljs-variable">stmt</span> <span class="hljs-operator">=</span> conn.createStatement();<span class="hljs-type">ResultSet</span> <span class="hljs-variable">rs</span> <span class="hljs-operator">=</span> stmt.executeQuery(<span class="hljs-string">&quot;select * from users where id =&quot;</span> + id);<span class="hljs-type">String</span> <span class="hljs-variable">address</span> <span class="hljs-operator">=</span> <span class="hljs-literal">null</span>;<span class="hljs-keyword">if</span> (rs != <span class="hljs-literal">null</span>) &#123;    rs.next();    address = rs.getString(<span class="hljs-string">&quot;address&quot;</span>);&#125;%&gt;家庭地址: &lt;%= address %&gt;<br></code></pre></td></tr></table></figure>
+
+<p>如果address的值是由用户提供的，且存入数据库时没有进行合理的校验，那么攻击者就可以利用上面的代码进行存储型XSS攻击。</p>
+<p>修复建议</p>
+<p>为了避免存储型XSS攻击，建议采用以下方式进行防御：</p>
+<p>1.对从数据库或其它后端数据存储获取不可信赖的数据进行合理验证（如年龄只能是数字），对特殊字符（如`&lt;、&gt;、’、”`以及`<script>、javascript`等进行过滤。</p>
+<p>2.根据数据将要置于HTML上下文中的不同位置（HTML标签、HTML属性、JavaScript脚本、CSS、URL），对所有不可信数据进行恰当的输出编码。</p>
+<p>**例如**：采用OWASP ESAPI对数据输出HTML上下文中不同位置，编码方法如下。</p>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs scss"><span class="hljs-comment">//HTML encodeESAPI.encoder().encodeForHTML(inputData); //HTML attribute encodeESAPI.encoder().encodeForHTMLAttribute(inputData); //JavaScript encodeESAPI.encoder().encodeForJavaScript(inputData); //CSS encodeESAPI.encoder().encodeForCSS(inputData); //URL encodeESAPI.encoder().encodeForURL(inputData);</span><br></code></pre></td></tr></table></figure>
+
+<p>3.设置HttpOnly属性，避免攻击者利用<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=%E8%B7%A8%E7%AB%99%E8%84%9A%E6%9C%AC%E6%BC%8F%E6%B4%9E&spm=1001.2101.3001.7020">跨站脚本漏洞</a>进行Cookie劫持攻击。在Java EE中，给Cookie添加HttpOnly的代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">response.setHeader(<span class="hljs-string">&quot;Set-Cookie&quot;</span>,<span class="hljs-string">&quot;cookiename=cookievalue; path=/; Domain=domainvaule; Max-age=seconds; HttpOnly&quot;</span>);<br></code></pre></td></tr></table></figure>
+
+<p>Cookie属性 </p>
+<blockquote>
+<p>Name：Cookie名</p>
+<p>Value：Cookie值</p>
+<p>Domain：Cookie的域。如果设成.test.com，那么子域名a.test.com和b.test.com，都可以使用.test.com的Cookie。</p>
+<p>Path：Cookie的路径。如果设成/path/，则只有路径为/path/的页面可以访问该Cookie。如果设为/，则本域名下的所有页面都可以访问该Cookie。</p>
+<p>Expires / Max-Age：Cookie的超时时间。若设置其值为一个时间，那么当到达此时间后，此Cookie失效。不设置的话默认值是Session，意思是Cookie会和Session一起失效。当浏览器关闭（不是浏览器标签页，而是整个浏览器）后，此Cookie失效。</p>
+<p>Size：Cookie大小。</p>
+<p>HttpOnly：若此属性为true，则只有在http请求头中会带有此Cookie的信息，而不能通过document.cookie来访问此Cookie。</p>
+<p>Secure：设置是否只能通过https来传递此条Cookie。</p>
+<p>SameSite：用来防止 CSRF 攻击和用户追踪。可以设置三个值：Strict、Lax 和 None。<br>Strict：Strict最为严格，完全禁止第三方 Cookie，跨站点时，任何情况下都不会发送 Cookie。换言之，只有当前网页的 URL 与请求目标一致，才会带上 Cookie。<br>Lax：Lax规则稍稍放宽，大多数情况也是不发送第三方 Cookie，但是导航到目标网址的 Get 请求除外。<br>None：关闭SameSite属性，提是必须同时设置Secure属性（Cookie 只能通过 HTTPS 协议发送），否则无效。</p>
+<p>Priority：优先级。定义了三种优先级，Low/Medium/High，当Cookie数量超出时，低优先级的Cookie会被优先清除。</p>
+</blockquote>
+<h3 id="高危：反射型XSS"><a href="#高危：反射型XSS" class="headerlink" title="高危：反射型XSS"></a>高危：反射型XSS</h3><p>反射型XSS是指应用程序通过Web请求获取不可信赖的数据，并在未检验数据是否存在恶意代码的情况下，将其发送给用户。反射型XSS一般可以由攻击者构造带有恶意代码参数的URL来实现，在构造的URL地址被打开后，其中包含的恶意代码参数被浏览器解析和执行。这种攻击的特点是非持久化，必须用户点击包含恶意代码参数的链接时才会触发。</p>
+<p>**例如**：下面JSP代码片段的功能是从HTTP请求中读取输入的用户名(username)并显示到页面。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">&lt;%String name= request.getParameter(<span class="hljs-string">&quot;username&quot;</span>); %&gt; 姓名: &lt;%= name%&gt;<br></code></pre></td></tr></table></figure>
+
+<p>修复建议</p>
+<p>如果name里有包含恶意代码，那么Web浏览器就会像显示HTTP响应那样执行该代码，应用程序将受到反射型XSS攻击。</p>
+<p>为了避免反射型XSS攻击，建议采用以下方式进行防御：</p>
+<p>1.对用户的输入进行合理验证（如年龄只能是数字），对特殊字符（如`&lt;、&gt;、&#39;、&quot;`以及`<script>、javascript`等进行过滤。</p>
+<p>2.根据数据将要置于HTML上下文中的不同位置（HTML标签、HTML属性、JavaScript脚本、CSS、URL），对所有不可信数据进行恰当的输出编码。</p>
+<p>**例如**：采用OWASP ESAPI对数据输出HTML上下文中不同位置，编码方法如下。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//HTML encodeESAPI.encoder().encodeForHTML(inputData); //HTML attribute encodeESAPI.encoder().encodeForHTMLAttribute(inputData); //JavaScript encodeESAPI.encoder().encodeForJavaScript(inputData); //CSS encodeESAPI.encoder().encodeForCSS(inputData); //URL encodeESAPI.encoder().encodeForURL(inputData);</span><br></code></pre></td></tr></table></figure>
+
+<p>3.设置HttpOnly属性，避免攻击者利用跨站脚本漏洞进行Cookie劫持攻击。在Java EE中，给Cookie添加HttpOnly的代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">response.setHeader(<span class="hljs-string">&quot;Set-Cookie&quot;</span>,<span class="hljs-string">&quot;cookiename=cookievalue; path=/; Domain=domainvaule; Max-age=seconds; HttpOnly&quot;</span>);<br></code></pre></td></tr></table></figure>
+
+<p>Cookie属性 </p>
+<blockquote>
+<p>Name：Cookie名</p>
+<p>Value：Cookie值</p>
+<p>Domain：Cookie的域。如果设成.test.com，那么子域名a.test.com和b.test.com，都可以使用.test.com的Cookie。</p>
+<p>Path：Cookie的路径。如果设成/path/，则只有路径为/path/的页面可以访问该Cookie。如果设为/，则本域名下的所有页面都可以访问该Cookie。</p>
+<p>Expires / Max-Age：Cookie的超时时间。若设置其值为一个时间，那么当到达此时间后，此Cookie失效。不设置的话默认值是Session，意思是Cookie会和Session一起失效。当浏览器关闭（不是浏览器标签页，而是整个浏览器）后，此Cookie失效。</p>
+<p>Size：Cookie大小。</p>
+<p>HttpOnly：若此属性为true，则只有在http请求头中会带有此Cookie的信息，而不能通过document.cookie来访问此Cookie。</p>
+<p>Secure：设置是否只能通过https来传递此条Cookie。</p>
+<p>SameSite：用来防止 CSRF 攻击和用户追踪。可以设置三个值：Strict、Lax 和 None。<br>Strict：Strict最为严格，完全禁止第三方 Cookie，跨站点时，任何情况下都不会发送 Cookie。换言之，只有当前网页的 URL 与请求目标一致，才会带上 Cookie。<br>Lax：Lax规则稍稍放宽，大多数情况也是不发送第三方 Cookie，但是导航到目标网址的 Get 请求除外。<br>None：关闭SameSite属性，提是必须同时设置Secure属性（Cookie 只能通过 HTTPS 协议发送），否则无效。</p>
+<p>Priority：优先级。定义了三种优先级，Low/Medium/High，当Cookie数量超出时，低优先级的Cookie会被优先清除。</p>
+</blockquote>
+<h2 id="输入验证"><a href="#输入验证" class="headerlink" title="输入验证"></a>输入验证</h2><h3 id="高危：路径遍历"><a href="#高危：路径遍历" class="headerlink" title="高危：路径遍历"></a>高危：路径遍历</h3><p>应用程序对用户可控制的输入未经合理校验，就传送给一个文件API。攻击者可能会使用一些特殊的字符（如`..`和`/`）摆脱受保护的限制，访问一些受保护的文件或目录。</p>
+<p>**例如**：下面代码片段通过验证输入路径是否以`/safe_dir/`为开头，来判断是否进行创建、删除操作。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">String</span> <span class="hljs-variable">path</span> <span class="hljs-operator">=</span> getInputPath();<span class="hljs-keyword">if</span> (path.startsWith(<span class="hljs-string">&quot;/safe_dir/&quot;</span>))&#123;    <span class="hljs-type">File</span> <span class="hljs-variable">f</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">File</span>(path);    f.delete()&#125;<br></code></pre></td></tr></table></figure>
+
+<p>攻击者可能提供类似下面的输入：</p>
+<blockquote>
+<p>`/safe_dir/../important.dat`</p>
+</blockquote>
+<p>程序假定路径是有效的，因为它是以`/safe_dir/`开头的，但是`../`将导致程序删除`important.dat`文件的父目录。</p>
+<p>修复建议</p>
+<p>预防路径遍历的威胁，有以下三种方法：</p>
+<p>1. 程序对非受信的用户输入做过滤和验证，对网站用户提交的文件路径进行硬编码或统一编码，过滤非法字符。</p>
+<p>2. 对文件后缀进行白名单控制，拒绝包含了恶意的符号或空字节。</p>
+<p>3. 合理配置Web服务器的目录访问权限。</p>
+<h3 id="高危：基于DOM的XSS"><a href="#高危：基于DOM的XSS" class="headerlink" title="高危：基于DOM的XSS"></a>高危：基于DOM的XSS</h3><p>应用程序的客户端代码从</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-variable language_">document</span>.<span class="hljs-property">locationrequest</span>.<span class="hljs-property">urldocument</span>.<span class="hljs-property">URLdocument</span>.<span class="hljs-property">referrer</span><br></code></pre></td></tr></table></figure>
+
+<p>或其他任何攻击者可以修改的浏览器对象获取数据，如果未验证数据是否存在恶意代码的情况下，就将其动态更新到页面的DOM节点,应用程序将易于受到基于DOM的XSS攻击。</p>
+<p>**例如**：下面的JavaScript代码片段可从URL中读取msg信息，并将其显示给用户。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-keyword">var</span> url=<span class="hljs-variable language_">document</span>.<span class="hljs-property">URL</span>;<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">write</span>(url.<span class="hljs-title function_">substring</span>(url.<span class="hljs-title function_">indexOf</span>(<span class="hljs-string">&quot;msg=&quot;</span>)+<span class="hljs-number">4</span>,url.<span class="hljs-property">length</span>);<br></code></pre></td></tr></table></figure>
+
+<p>该段脚本解析URL，读取msg参数的值，并将其写入页面。如果攻击者设计一个恶意的URL，并以JavaScript代码作为msg参数，那么Web浏览器就会像显示HTTP响应那样执行该代码，应用程序将受到基于DOM的XSS攻击。</p>
+<p>修复建议</p>
+<p>基于DOM的XSS是将用户可控的JavaScript数据输出到HTML页面中而产生的漏洞，为了避免基于DOM的XSS攻击，避免将用户控制的数据直接输出到DOM或脚本中执行。如果不能避免，则应进行严格的过滤。</p>
+<h3 id="高危：重定向"><a href="#高危：重定向" class="headerlink" title="高危：重定向"></a>高危：重定向</h3><p>应用程序允许未验证的用户输入控制重定向中的URL,可能会导致攻击者发动钓鱼攻击。</p>
+<p>**例1**：以下JavaScript代码从用户输入表单的dest参数中读取目的URL，然后在新窗口中打开。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs javascript">dsturl = myForm.<span class="hljs-property">dsturl</span>.<span class="hljs-property">value</span>;<span class="hljs-variable language_">window</span>.<span class="hljs-title function_">open</span>(dsturl,<span class="hljs-string">&quot;newwin&quot;</span>);<br></code></pre></td></tr></table></figure>
+
+<p>假如攻击者可以控制这个表单，那么用户就有可能打开一个恶意站点。</p>
+<p>**例2**：以下是Node.js可能出现的。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-keyword">var</span> express = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;express&#x27;</span>);<span class="hljs-keyword">var</span> app = <span class="hljs-title function_">express</span>();app.<span class="hljs-title function_">get</span>(<span class="hljs-string">&#x27;/&#x27;</span>, <span class="hljs-keyword">function</span> (<span class="hljs-params">req, res</span>) &#123;    res.<span class="hljs-title function_">redirect</span>(req.<span class="hljs-property">url</span>);&#125;);<br></code></pre></td></tr></table></figure>
+
+<p>与例1一样假如攻击者控制了这个url，那么就会导致用户可能打开恶意站点。</p>
+<p>修复建议</p>
+<p>js和Node.js都要避免采用不可信数据源的数据来构造重定向的URL，如果业务逻辑需要涉及到用户输入，那么就创建一份合法URL列表，用户只能从中进行选择，进行重定向操作。</p>
+<p>**例如**：以下代码中，用户只能输入数字来选择URL。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs javascript">dst = myForm.<span class="hljs-property">dst</span>.<span class="hljs-property">value</span>;<span class="hljs-keyword">if</span>(dst == <span class="hljs-string">&quot;1&quot;</span>)&#123;    dsturl = <span class="hljs-string">&quot;http://www.1.com&quot;</span>&#125;<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(dst == <span class="hljs-string">&quot;2&quot;</span>)&#123;    dsturl = <span class="hljs-string">&quot;http://www.2.com&quot;</span>&#125;<span class="hljs-keyword">else</span>&#123;    dsturl = <span class="hljs-string">&quot;http://www.3.com&quot;</span>&#125;<span class="hljs-variable language_">window</span>.<span class="hljs-title function_">open</span>(dsturl,<span class="hljs-string">&quot;newwin&quot;</span>);<br></code></pre></td></tr></table></figure>
+
+<h3 id="中危：拒绝服务：正则表达式"><a href="#中危：拒绝服务：正则表达式" class="headerlink" title="中危：拒绝服务：正则表达式"></a>中危：拒绝服务：正则表达式</h3><p>正则表达式引擎分成两类：一类称为DFA（确定性有限状态自动机），另一类称为NFA（非确定性有限状态自动机）。Java使用的是NFA正则引擎，使用正则式和文本比较，每碰到一个字符，就把它跟正则式比较，匹配就记下来，然后接着往下比较。一旦不匹配，就会后退直到回到上一次匹配的地方。而不可信赖数据被传递至应用程序并作为正则表达式使用，可能导致线程过度使用 CPU 资源，从而导致拒绝服务攻击。</p>
+<p>**例如**：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">(e+)+([a-zA-Z]+)*(a|aa)+(a|a?)+^(a+)+$<br></code></pre></td></tr></table></figure>
+
+<p>以`^(a+)+$`为例，该正则表达式对aaaax进行匹配时需要经历2^4^次尝试失败才会确定这个字符串不符合要求，对aaaaaaaaax进行匹配时则需要经历2^10^次尝试，随着长度的增加，尝试次数并不是线性增长而是指数型的增长，当长度达到20、30时就会大量消耗cpu导致拒绝服务。目前已知的正则表达式实现方法均无法避免这种漏洞，所有平台和语言都容易受到这种攻击。</p>
+<p>Java对于正则的支持：</p>
+<blockquote>
+<p>String类中，很多方法是专门用来支持正则：</p>
+<ul>
+<li>split()</li>
+<li>replaceAll()</li>
+<li>replaceFirst()</li>
+<li>matches()</li>
+<li>……</li>
+</ul>
+</blockquote>
+<blockquote>
+<p> java.util.regex包有两个类：Pattren类、Matcher类</p>
+</blockquote>
+<p>修复建议：</p>
+<p>不要将不可信赖数据作为正则表达式使用。</p>
+<h3 id="中危：访问权限修饰符控制"><a href="#中危：访问权限修饰符控制" class="headerlink" title="中危：访问权限修饰符控制"></a>中危：访问权限修饰符控制</h3><p>AccessibleObject类是Field、Method和Constructor对象的基类，能够允许反射对象修改访问权限修饰符，绕过由Java访问修饰符提供的访问控制检查。它让程序员能够更改私有字段或调用私有方法，这在通常情况下是不允许的。</p>
+<p>**例如**：以下代码片段中，将Field将`accessible`标记设置为true。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">Class</span> <span class="hljs-variable">clazz</span> <span class="hljs-operator">=</span> User.class;<span class="hljs-type">Field</span> <span class="hljs-variable">field</span> <span class="hljs-operator">=</span> clazz.getField(<span class="hljs-string">&quot;name&quot;</span>);field.setAccessible(<span class="hljs-literal">true</span>);<br></code></pre></td></tr></table></figure>
+
+<p> 修复建议：</p>
+<p>通过有权限的类更改访问权限修饰符，并确保修改的访问权限修饰符参数不能被攻击者控制。</p>
+<h3 id="中危：直接绑定敏感字段"><a href="#中危：直接绑定敏感字段" class="headerlink" title="中危：直接绑定敏感字段"></a>中危：直接绑定敏感字段</h3><p>目前大部分WEB框架支持将HTTP请求参数与类的属性相匹配的而生成一个对象。因此，攻击者能够将值放入HTTP请求参数中从而绑定系统对象。</p>
+<p>**例如**：在以下代码片段中， Spring MVC可以将 HTTP请求参数绑定到 User属性：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RequestMapping(&quot;/login&quot; )</span><span class="hljs-keyword">public</span> String <span class="hljs-title function_">login</span><span class="hljs-params">(User user)</span> &#123; &#125;<br></code></pre></td></tr></table></figure>
+
+<p>其中，User 类定义为：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">User</span> &#123;    <span class="hljs-keyword">private</span> String username;    <span class="hljs-keyword">private</span> String address;    <span class="hljs-keyword">private</span> <span class="hljs-type">int</span> age;    <span class="hljs-keyword">private</span> <span class="hljs-type">boolean</span> admin;&#125;<br></code></pre></td></tr></table></figure>
+
+<p>当Spring MVC未配置为禁止绑定敏感属性，则攻击者可能会通过发送以下使普通用户变为管理员。</p>
+<blockquote>
+<p>name=张三&amp;address=北京&amp;age=22&amp;admin=true</p>
+</blockquote>
+<p>修复建议：</p>
+<p>当程序将非将HTTP请求参数直接绑定给对象时，应该要控制绑定到对象的属性，防止暴露敏感属性。</p>
+<p>**例1**：在以下代码片段中，在 Spring MVC(3.0版本至最新)禁止绑定敏感属性。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@InitBinderpublic</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">initBinder</span><span class="hljs-params">(WebDataBinder binder)</span> &#123;    binder.setDisallowedFields(<span class="hljs-keyword">new</span> <span class="hljs-title class_">String</span>[]&#123;<span class="hljs-string">&quot;admin&quot;</span>&#125;);&#125; <span class="hljs-meta">@RequestMapping(&quot;/login&quot; )</span><span class="hljs-keyword">public</span> String <span class="hljs-title function_">login</span><span class="hljs-params">(User user)</span> &#123; &#125;<br></code></pre></td></tr></table></figure>
+
+<p>**例2**：在 Spring MVC(2.X版本)禁止绑定敏感属性。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Overrideprotected</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">initBinder</span><span class="hljs-params">(HttpServletRequest request, ServletRequestDataBinder binder)</span> <span class="hljs-keyword">throws</span> Exception &#123;    binder.setDisallowedFields(<span class="hljs-keyword">new</span> <span class="hljs-title class_">String</span>[]&#123;<span class="hljs-string">&quot;admin&quot;</span>&#125;);&#125;<br></code></pre></td></tr></table></figure>
+
+<p>在使用`@RequestBody`注释参数的 Spring MVC应用程序中，绑定过程由`HttpMessageConverter`进行处理，这些实例使用Jackson和JAXB等库将 HTTP请求参数转换为Java对象。这些库提供了注释来控制应允许或禁止的字段。例如对于Jackson，可以使用`@JsonIgnore`注释禁止将某个字段绑定到请求。</p>
+<p>**例3**：在以下代码片段中，Jackson禁止绑定敏感属性。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RequestMapping(value=&quot;/add/user&quot;, method=RequestMethod.POST, consumes=&quot;text/html&quot;)</span><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">addEmployee</span><span class="hljs-params">(<span class="hljs-meta">@RequestBody</span> User user)</span>&#123; &#125; <span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">User</span> &#123;    <span class="hljs-keyword">private</span> String username;    <span class="hljs-keyword">private</span> String address;    <span class="hljs-meta">@JsonIgnore</span>    <span class="hljs-keyword">private</span> <span class="hljs-type">boolean</span> admin;    <span class="hljs-keyword">private</span> <span class="hljs-type">int</span> age;&#125;<br></code></pre></td></tr></table></figure>
+
+<p>同理，Jackson还可以使用`@JsonIgnoreProperties、@JsonIgnoreTyp和 @JsonInclude`等注解告诉框架忽略这些属性，使用JAXB使用`@XmlAccessorType、@XmlAttribute、@XmlElement和 @XmlTransient`等注解告诉框架忽略这些属性,然后使用`@XmlAttribute和@XmlElement`等注解选择应绑定的字段。</p>
+<p>**例4**：在以下代码片段中，Jackson使用`@XmlAttribute`选择要绑定的字段。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@XmlRootElement</span><span class="hljs-meta">@XmlAccessorType(XmlAccessType.NONE)</span><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">User</span> &#123;    <span class="hljs-keyword">private</span> String username;    <span class="hljs-keyword">private</span> String address;    <span class="hljs-meta">@JsonIgnore</span>    <span class="hljs-keyword">private</span> <span class="hljs-type">boolean</span> admin;    <span class="hljs-keyword">private</span> <span class="hljs-type">int</span> age;     <span class="hljs-meta">@XmlAttribute</span>    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">getUsername</span><span class="hljs-params">()</span> &#123;        <span class="hljs-keyword">return</span> username;    &#125;     <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setUsername</span><span class="hljs-params">(String username)</span> &#123;        <span class="hljs-built_in">this</span>.username = username;    &#125;     <span class="hljs-meta">@XmlAttribute</span>    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">getAddress</span><span class="hljs-params">()</span> &#123;        <span class="hljs-keyword">return</span> address;    &#125;     <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setAddress</span><span class="hljs-params">(String address)</span> &#123;        <span class="hljs-built_in">this</span>.address = address;    &#125;     <span class="hljs-keyword">private</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">isAdmin</span><span class="hljs-params">()</span>  &#123;        <span class="hljs-keyword">return</span> admin;    &#125;     <span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setAdmin</span><span class="hljs-params">(<span class="hljs-type">boolean</span> admin)</span>  &#123;        <span class="hljs-built_in">this</span>.admin = admin;    &#125;&#125;<br></code></pre></td></tr></table></figure>
+
+<p>**例5**：在以下代码片段中，在Struts可以将某个属性的`setter`方法设置为私有从而禁止绑定敏感属性。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">private</span> <span class="hljs-type">boolean</span> admin;<span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setAdmin</span><span class="hljs-params">(<span class="hljs-type">boolean</span> admin)</span>  &#123;    <span class="hljs-built_in">this</span>.admin = admin;&#125;<br></code></pre></td></tr></table></figure>
+
+<p>还有另一种方法是使用将 HTTP请求参数绑定到仅含有 Web表单或 API中定义的属性DTO对象中，再将其映射到User中，防止敏感字段暴露。</p>
+<h3 id="低危：拒绝服务：解析Double类型数据"><a href="#低危：拒绝服务：解析Double类型数据" class="headerlink" title="低危：拒绝服务：解析Double类型数据"></a>低危：拒绝服务：解析Double类型数据</h3><p>程序调用Double的解析方法时，可能导致线程被挂起。`java.lang.Double.parseDouble()`方法解析位于2^(-1022)^ - 2^(-1075)^到2^(-1022)^ - 2^(-1076)^范围内的任何数字时可能导致线程被挂起，攻击者可以故意触发该漏洞执行拒绝服务攻击。该漏洞在java6 update24或更高版本中进行了修复。</p>
+<p>**例如**：下面代码片段中，使用了易受攻击的方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">Double</span> <span class="hljs-variable">d</span> <span class="hljs-operator">=</span> Double.parseDouble(request.getParameter(<span class="hljs-string">&quot;d&quot;</span>));<br></code></pre></td></tr></table></figure>
+
+<p>攻击者可发送d参数值位于该范围(例如`0.0222507385850720119e-00306`）内的请求，致使程序在处理该请求时被挂起。</p>
+<p>修复建议：</p>
+<p>修复该缺陷的方式如下：</p>
+<p>1. 验证传递给parseDouble数据的合法性。</p>
+<p>2. 升级JDK版本到6 Update 24或更高版本。</p>
+<h3 id="低危：有风险的资源使用"><a href="#低危：有风险的资源使用" class="headerlink" title="低危：有风险的资源使用"></a>低危：有风险的资源使用</h3><p>拒绝服务是攻击者通过消耗应用资源，以致程序崩溃使得其他用户无法继续正常使用的一种攻击方式。</p>
+<p>**例1**：下面代码片段中，解压文件前，未检查文件大小，攻击者可以通过提供一个超大文件来占用系统的计算资源从而实施DOS攻击。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">int</span> SIZE= <span class="hljs-number">512</span>; <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">unZip</span><span class="hljs-params">(BufferedInputStream bin)</span>&#123;    BufferedOutputStream  bop= <span class="hljs-literal">null</span>;    <span class="hljs-type">ZipInputStream</span> <span class="hljs-variable">zi</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ZipInputStream</span>(bin);    ZipEntry  zentry;    <span class="hljs-keyword">while</span> ((zentry= zi.getNextEntry()) != <span class="hljs-literal">null</span>) &#123;        <span class="hljs-type">int</span> count;        <span class="hljs-type">byte</span> data[] = <span class="hljs-keyword">new</span> <span class="hljs-title class_">byte</span>[SIZE];        <span class="hljs-type">FileOutputStream</span> <span class="hljs-variable">fos</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">FileOutputStream</span>(zentry.getName());        bop= <span class="hljs-keyword">new</span> <span class="hljs-title class_">BufferedOutputStream</span>(fos, SIZE);        <span class="hljs-keyword">while</span> ((count = zi.read(data, <span class="hljs-number">0</span>, SIZE)) != -<span class="hljs-number">1</span>) &#123;            bop.write(data, <span class="hljs-number">0</span>, count);        &#125;        bop.flush();        bop.close();    &#125;    zi.close();&#125;<br></code></pre></td></tr></table></figure>
+
+<p>**例2**：下面使用了`waitFor`方法，意味着直到该进程结束才能继续执行后续代码，不正确的处理输入输出流有可能发生死锁，导致程序持续浪费资源甚至崩溃。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">process.waitFor();<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>拒绝服务攻击是一种滥用资源性的攻击。从代码角度来考虑，对于涉及到需要占用系统资源的外部数据而言，代码逻辑中应该包含严格校验，防止无限制的输入。另外，谨慎使用线程阻塞的API，防止浪费系统资源或发生系统崩溃。</p>
+<p>**例如**：下面代码片段中，对解压文件进行验证，超过50M，将抛出异常。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">int</span> MAX= <span class="hljs-number">0x3200000</span>; <span class="hljs-comment">// 50MB // write the files to the disk, but only if file is not insanely bigif (entry.getSize() &gt; MAX) &#123;    throw new IllegalStateException(&quot;File to be unzipped is huge.&quot;);&#125;if (entry.getSize() == -1) &#123;    throw new IllegalStateException(&quot;File to be unzipped might be huge.&quot;);&#125;FileOutputStream fos = new FileOutputStream(entry.getName());bop = new BufferedOutputStream(fos, SIZE);while ((count = zis.read(data, 0, SIZE)) != -1) &#123;    bop.write(data, 0, count);&#125;</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="低危：数据跨越信任边界"><a href="#低危：数据跨越信任边界" class="headerlink" title="低危：数据跨越信任边界"></a>低危：数据跨越信任边界</h3><p>数据跨越信任边界是指，数据从一个不可信赖域存储到一个可信赖域导致程序错误信赖未验证的数据。</p>
+<p>**例如**：下面代码片段中将用户输入的数据`name`存储到Http Session中。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">doPost</span><span class="hljs-params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="hljs-keyword">throws</span> ServletException, IOException &#123;    <span class="hljs-type">String</span> <span class="hljs-variable">name</span> <span class="hljs-operator">=</span> req.getParameter(<span class="hljs-string">&quot;userName&quot;</span>);    <span class="hljs-type">HttpSession</span> <span class="hljs-variable">sess</span> <span class="hljs-operator">=</span> req.getSession();    sess.setAttribute(<span class="hljs-string">&quot;user&quot;</span>, name);&#125;<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>数据跨越信任边界时需要进行合理的验证，保证信赖域中数据是安全的。</p>
+<h3 id="低危：文件上传"><a href="#低危：文件上传" class="headerlink" title="低危：文件上传"></a>低危：文件上传</h3><p>允许用户上传文件可能导致危险的文件或代码被注入，并在服务器执行。</p>
+<p>**例如**：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;file&quot;</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>- 如果应用程序不需要文件上传功能，应该禁用文件上传功能。</p>
+<p>- 如果应用程序需要文件上传功能，可以参考以下建议：</p>
+<blockquote>
+<p>1. 文件上传的目录设置为不可执行。</p>
+<p>2. 采用白名单方式判断文件类型。在判断文件类型时，可采用MIME Type、 后缀检查等方式。</p>
+<p>3. 使用随机数改写文件名和文件路径。 如果应用程序采用随机数改写了文件名和路径，可以很大程度上增加攻击的成本。</p>
+<p>4. 对于图片的处理，可以采用压缩函数或者resize函数，在处理图片的同时，破坏图片中可能包含的脚本代码。</p>
+</blockquote>
+<h2 id="代码注入"><a href="#代码注入" class="headerlink" title="代码注入"></a>代码注入</h2><h3 id="中危：HTTP响应截断"><a href="#中危：HTTP响应截断" class="headerlink" title="中危：HTTP响应截断"></a>中危：HTTP响应截断</h3><p>程序从一个不可信赖的数据源获取数据，未进行验证就置于HTTP头文件中发给用户，可能会导致HTTP响应截断攻击。</p>
+<p>**例如**：下列代码片段中，程序从HTTP请求中获取`author`的值，并将其设置到HTTP响应文件的cookie中。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">String</span> <span class="hljs-variable">author</span> <span class="hljs-operator">=</span> request.getParameter(AUTHOR_PARAM); <span class="hljs-type">Cookie</span> <span class="hljs-variable">cookie</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Cookie</span>(<span class="hljs-string">&quot;author&quot;</span>, author);cookie.setMaxAge(cookieExpiration);response.addCookie(cookie);<br></code></pre></td></tr></table></figure>
+
+<p>如果请求中提交的是一个`Jane Smith`字符串，那么包含该cookie的HTTP响应可能表现为以下形式：</p>
+<blockquote>
+<p>HTTP/1.1 200 OK</p>
+<p>...</p>
+<p>Set-Cookie: author=Jane Smith</p>
+</blockquote>
+<p>那么如果攻击者提交的是一个恶意字符串，比如</p>
+<blockquote>
+<p>`Wiley Hacker\r\nHTTP/1.1 200 OK\r\n...`</p>
+</blockquote>
+<p>那么HTTP响应就会被分割成以下形式的两个响应：</p>
+<blockquote>
+<p>HTTP/1.1 200 OK</p>
+<p>...</p>
+<p>Set-Cookie: author=Wiley Hacker</p>
+<p>HTTP/1.1 200 OK</p>
+</blockquote>
+<p>这样第二个响应已完全由攻击者控制，攻击者可以用所需的头文件和正文内容构建该响应实施攻击。</p>
+<p>修复建议</p>
+<p>防止HTTP响应截断攻击的最安全的方法是创建一份安全字符白名单，只接受完全由这些受认可的字符组成的输入出现在HTTP响应头文件中。</p>
+<p>**例如**：以下代码片段中，验证了`author`的值是否由标准的字母数字字符组成。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">String</span> <span class="hljs-variable">author</span> <span class="hljs-operator">=</span> request.getParameter(AUTHOR_PARAM);<span class="hljs-keyword">if</span> (Pattern.matches(<span class="hljs-string">&quot;[0-9A-Za-z]+&quot;</span>, author)) &#123;    <span class="hljs-type">Cookie</span> <span class="hljs-variable">cookie</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Cookie</span>(<span class="hljs-string">&quot;author&quot;</span>, author);    cookie.setMaxAge(cookieExpiration);    response.addCookie(cookie);&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="中危：有风险的SQL查询：MyBatis"><a href="#中危：有风险的SQL查询：MyBatis" class="headerlink" title="中危：有风险的SQL查询：MyBatis"></a>中危：有风险的SQL查询：MyBatis</h3><p>SQL注入是一种数据库攻击手段。攻击者通过向应用程序提交恶意代码来改变原SQL语句的含义，进而执行任意SQL命令，达到入侵数据库乃至操作系统的目的。在Mybatis Mapper Xml中，`#`变量名称创建参数化查询SQL语句,不会导致SQL注入。而`$`变量名称直接使用SQL指令，而`$`变量名称直接使用SQL指令，将会存在一定风险，当SQL指令所需的数据来源于不可信赖的数据源时，可能会导致SQL注入。</p>
+<p>**例如**：以下代码片段采用`$`变量名称动态地构造并执行了SQL查询。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs XML"><span class="hljs-comment">&lt;!--select user information by name--&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">select</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;queryByUserName&quot;</span> <span class="hljs-attr">resultMap</span>=<span class="hljs-string">&quot;userResultMap&quot;</span> <span class="hljs-attr">parameterType</span>=<span class="hljs-string">&quot;String&quot;</span>&gt;</span>    select * from db_user where user_name=$&#123;username&#125;<span class="hljs-tag">&lt;/<span class="hljs-name">select</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>如果攻击者能够替代username中的任意字符串，它们可以使用下面的关于username的字符串进行SQL注入。</p>
+<blockquote>
+<p>`validuser&#39; OR &#39;1&#39;=&#39;1`</p>
+</blockquote>
+<p>当其注入到命令时，命令就会变成：</p>
+<blockquote>
+<p>`select * from db_user where user_name =&#39;validuser&#39; OR &#39;1&#39;=&#39;1&#39;`</p>
+</blockquote>
+<p>即使所输入字符串不是来源于不可信赖的数据源，程序仍然存在着一定风险。</p>
+<p>修复建议：</p>
+<p>造成SQL注入攻击的根本原因在于攻击者可以改变SQL查询的上下文，使程序员原本要作为数据解析的数值，被篡改为命令了。防止SQL注入的方法如下：</p>
+<p>1. 正确使用参数化API进行SQL查询。</p>
+<p>2. 如果构造SQL指令时需要动态加入约束条件，可以通过创建一份合法字符串列表，使其对应于可能要加入到SQL指令中的不同元素，来避免SQL注入攻击。</p>
+<p>**例如**：以下代码片段采用`#`变量名称，创建参数化查询SQL语句。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs XML"><span class="hljs-comment">&lt;!--select user information by name--&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">select</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;queryByUserName&quot;</span> <span class="hljs-attr">resultMap</span>=<span class="hljs-string">&quot;userResultMap&quot;</span> <span class="hljs-attr">parameterType</span>=<span class="hljs-string">&quot;String&quot;</span>&gt;</span>    select * from db_user where user_name=#&#123;username&#125;<span class="hljs-tag">&lt;/<span class="hljs-name">select</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="中危：公式注入"><a href="#中危：公式注入" class="headerlink" title="中危：公式注入"></a>中危：公式注入</h3><p>微软公司的Excel或 Apache OpenOffice的Calc等电子表格都支持公式运算，如果攻击者控制了这类表格的数据，系统可能会导致任意命令执行或泄漏敏感信息。</p>
+<p>**例如**：下面代码片段中，使用未经检查的数据来生成 CSV，并通过Spring控制器响应。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RequestMapping(value = &quot;/download/count.csv&quot;)</span><span class="hljs-keyword">public</span> ResponseEntity&lt;String&gt; <span class="hljs-title function_">service</span><span class="hljs-params">(String username)</span> &#123;    <span class="hljs-type">HttpHeaders</span> <span class="hljs-variable">responseHeaders</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">HttpHeaders</span>();    responseHeaders.add(<span class="hljs-string">&quot;Content-Type&quot;</span>, <span class="hljs-string">&quot;application/csv; charset=utf-8&quot;</span>);    responseHeaders.add(<span class="hljs-string">&quot;Content-Disposition&quot;</span>, <span class="hljs-string">&quot;attachment;filename=count.csv&quot;</span>);    <span class="hljs-type">String</span> <span class="hljs-variable">data</span> <span class="hljs-operator">=</span> getCSVDataForUserName(username);    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ResponseEntity</span>&lt;&gt;(data, responseHeaders, HttpStatus.OK);&#125;<br></code></pre></td></tr></table></figure>
+
+<p>当data中被注入`：=cmd|&#39;/C calc.exe&#39;!Z0`时，当用户打开此电子表格， Windows中的计算器将在其系统上运行。</p>
+<p>修复建议</p>
+<p>防止公式注入的方法如下：</p>
+<p>1. 程序对非受信的用户输入数据进行净化，删除不安全的字符。</p>
+<p>2. 创建一份安全字符串列表，限制用户只能输入该列表中的数据。</p>
+<h3 id="中危：资源注入"><a href="#中危：资源注入" class="headerlink" title="中危：资源注入"></a>中危：资源注入</h3><p>使用用户输入控制资源标识符，借此攻击者可以访问或修改其他受保护的系统资源。当满足以下两个条件时，就会发生资源注入：</p>
+<p>1. 攻击者可以指定已使用的标识符来访问系统资源。例如：攻击者能够指定用来连接到网络资源的端口号。</p>
+<p>2. 攻击者可以通过指定特定资源来获取某种权限，而这种权限在一般情况下是不可能获得的。例如：程序可能会允许攻击者把敏感信息传输到第三方服务器。</p>
+<p>**例1**：下面的代码片段从HTTP请求获取端口号，并使用此端口号创建一个套接字，而不进行任何验证。使用代理的用户可以修改此端口并获得与服务器的直接连接。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">String</span> <span class="hljs-variable">port</span> <span class="hljs-operator">=</span> request.getParameter(<span class="hljs-string">&quot;port&quot;</span>); <span class="hljs-type">ServerSocket</span> <span class="hljs-variable">serverSocket</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ServerSocket</span>(port);<span class="hljs-type">Socket</span> <span class="hljs-variable">socket</span> <span class="hljs-operator">=</span> serverSocket.accept();<br></code></pre></td></tr></table></figure>
+
+<p>这种利用用户输入影响的资源可能存在风险。</p>
+<p>**例2**：下面的代码利用WebView的File域协议读取任意可读文件或受害应用的私有文件。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">WebView webView=(WebView) findViewById(R.id.webView);String url= getIntent().getData().toString();webView.loadUrl(url);<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>查看hosts文件：`adb shell am start -n com.mytest/.MainActivity -d file:///system/etc/hosts `</p>
+</blockquote>
+<blockquote>
+<p>查看应用私有文件：`adb shell am start -n /data/data/com.cn.test/databases/user.db`</p>
+</blockquote>
+<p>修复建议：</p>
+<p>为了避免资源注入漏洞攻击，可以采用黑名单或白名单策略。黑名单会有选择地拒绝或避免潜在的危险字符。但是，任何这样一份黑名单都不可能是完整的，而且将随着时间的推移而过时。比较好的方法是创建白名单，允许其中的字符出现在资源名称中，且只接受完全由这些被认可的字符所组成的输入。 </p>
+<h3 id="中危：HTTP响应截断-1"><a href="#中危：HTTP响应截断-1" class="headerlink" title="中危：HTTP响应截断"></a>中危：HTTP响应截断</h3><p>程序从一个不可信赖的数据源获取数据，未进行验证就置于HTTP头中发给用户，可能会导致HTTP响应截断攻击。</p>
+<p>**例如**：下列代码片段中，程序从HTTP请求中获取author的值，并将其设置到HTTP请求头的cookie中。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs javascript">insecureInfo = <span class="hljs-variable language_">document</span>.<span class="hljs-property">URL</span>;<span class="hljs-variable language_">document</span>.<span class="hljs-property">cookie</span> = <span class="hljs-string">&quot;author=&quot;</span> + insecureInfo + <span class="hljs-string">&quot;;expires=&quot;</span>+ cookieExpiration;<br></code></pre></td></tr></table></figure>
+
+<p>author是来自用户输入，未经任何处理就存入了cookie中，使应用有可能受到cookie篡改的攻击。如果服务端解析了cookie，则可以造成其他攻击。</p>
+<p>修复建议：</p>
+<p>创建一份安全字符白名单，只接受完全由这些受认可的字符组成的输入出现在HTTP头中。</p>
+<p>**例如**：以下代码片段中，验证了author的值是否由标准的字母数字字符组成。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs javascript">insecureInfo = <span class="hljs-variable language_">document</span>.<span class="hljs-property">URL</span>;<span class="hljs-keyword">var</span> exp = <span class="hljs-regexp">/[0-9A-Za-z]/</span>;<span class="hljs-keyword">var</span> objExp = <span class="hljs-keyword">new</span> <span class="hljs-title class_">RegExp</span>(exp);<span class="hljs-keyword">if</span> (objExp.<span class="hljs-title function_">test</span>(insecureInfo)==<span class="hljs-literal">true</span>) &#123;    <span class="hljs-variable language_">document</span>.<span class="hljs-property">cookie</span> = <span class="hljs-string">&quot;author=&quot;</span> + insecureInfo + <span class="hljs-string">&quot;;expires=&quot;</span>+ cookieExpiration;&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="低危：有风险的反序列化"><a href="#低危：有风险的反序列化" class="headerlink" title="低危：有风险的反序列化"></a>低危：有风险的反序列化</h3><p>某些协议如RMI和JMX会在传输层后台使用Java序列化。当远程调用这些方法时，应用程序会在服务器上对参数进行反序列化，此时攻击者可以注入恶意对象。</p>
+<p>**例1**：下列代码是public的RMI接口的示例，其包含的方法具有一个或多个参数。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">MyWebService</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Remote</span> &#123;    <span class="hljs-keyword">public</span> Object <span class="hljs-title function_">doSomething</span> <span class="hljs-params">(Object arg0)</span> <span class="hljs-keyword">throws</span> RemoteException;&#125;<br></code></pre></td></tr></table></figure>
+
+<p>**例2**：JMX MBeans也使用 Java序列化传输调用参数。在下面的示例中：MyManagedBean中的方法将会暴露给客户端。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">MBeanServer</span> <span class="hljs-variable">mBeanServer</span> <span class="hljs-operator">=</span> ManagementFactory.getPlatformMBeanServer();<span class="hljs-type">ObjectName</span> <span class="hljs-variable">name</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ObjectName</span>(<span class="hljs-string">&quot;com.example:type=MyManagedBean&quot;</span>);<span class="hljs-type">MyManagedBean</span> <span class="hljs-variable">myManagedBean</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">MyManagedBean</span>();mBeanServer.registerMBean(myManagedBean, name);<br></code></pre></td></tr></table></figure>
+
+<p>而一些类如RedisTemplate使用默认的序列化器存在着不足，攻击者可以注入恶意对象，从而使反序列化产生非预期的对象，非预期的对象有可能带来意想不到的结果。</p>
+<p>**例3**：下列代码是直接返回RedisTemplate，未对RedisTemplate设置序列化器。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> RedisTemplate&lt;Object, Object&gt; <span class="hljs-title function_">redisTemplate</span><span class="hljs-params">(RedisConnectionFactory redisConnectionFactory)</span> <span class="hljs-keyword">throws</span> UnknownHostException &#123;    RedisTemplate&lt;Object, Object&gt; template = <span class="hljs-keyword">new</span> <span class="hljs-title class_">RedisTemplate</span>&lt;Object, Object&gt;();    template.setConnectionFactory(redisConnectionFactory);    <span class="hljs-keyword">return</span> template;&#125;<br></code></pre></td></tr></table></figure>
+
+<p>修复建议： </p>
+<p>检查程序逻辑，确定是否需要使用RMI和JMX等存在反序列化问题的协议，对于一些序列化器要设定可选择策略，以避免产生Java反序列化漏洞。</p>
+<p>**例如**：以下代码对RedisTemplate设置了序列化器`Jackson2JsonRedisSerializer`。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> RedisTemplate&lt;Object, Object&gt; <span class="hljs-title function_">redisTemplate</span><span class="hljs-params">(RedisConnectionFactory redisConnectionFactory)</span> <span class="hljs-keyword">throws</span> UnknownHostException &#123;    RedisTemplate&lt;Object, Object&gt; template = <span class="hljs-keyword">new</span> <span class="hljs-title class_">RedisTemplate</span>&lt;Object, Object&gt;();    template.setConnectionFactory(redisConnectionFactory);    <span class="hljs-type">Jackson2JsonRedisSerializer</span> <span class="hljs-variable">jacksonSeial</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Jackson2JsonRedisSerializer</span>(Object.class);    <span class="hljs-type">ObjectMapper</span> <span class="hljs-variable">om</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ObjectMapper</span>();    om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);    om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);    jacksonSeial.setObjectMapper(om);    template.setValueSerializer(jacksonSeial);    template.setKeySerializer(<span class="hljs-keyword">new</span> <span class="hljs-title class_">StringRedisSerializer</span>());    template.setHashKeySerializer(<span class="hljs-keyword">new</span> <span class="hljs-title class_">StringRedisSerializer</span>());    template.setHashValueSerializer(jacksonSeial);    template.afterPropertiesSet();    <span class="hljs-keyword">return</span> template;&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="低危：JavaScript劫持：易受攻击的框架"><a href="#低危：JavaScript劫持：易受攻击的框架" class="headerlink" title="低危：JavaScript劫持：易受攻击的框架"></a>低危：JavaScript劫持：易受攻击的框架</h3><p>使用JavaScript传送敏感数据的应用程序可能会存在JavaScript劫持的漏洞，该漏洞允许未经授权的攻击者从一个易受攻击的应用程序中读取机密数据。</p>
+<p>JavaScript劫持可以简单的理解为模拟授权的用户，窃取用户在服务器上的信息。Web浏览器使用同源策略(Same Origin Policy)，以保护用户免受恶意网站的攻击。同源策略规定：如果要使用JavaScript来访问某个网页的内容的话，则JavaScript和网页必须都来源于相同的域。若不采取同源策略，恶意网站便可以使用受害者的客户端凭证来运行 JavaScript，从其他网站加载的敏感信息，并对这些信息进行处理，然后将其返回给攻击者。</p>
+<p>使用JSON传输数据的JavaScript应用更容易受到JavaScript劫持攻击。由于JSON使用JavaScript语法的子集表示对象、数组、简单值，JSON本身可以被当做JavaScript执行，且使用*eval*()函数对JSON数据结构求值早被认为是存在风险的，其可能执行恶意代码。</p>
+<p>应该注意的是，某些过时的第三方Javascript框架也可能存在上述的问题，使用它们将导致Javascript劫持。</p>
+<p>修复建议：</p>
+<p>不使用过时的有风险的Javascript框架。</p>
+<h2 id="API误用"><a href="#API误用" class="headerlink" title="API误用"></a>API误用</h2><h3 id="中危：不安全的框架绑定"><a href="#中危：不安全的框架绑定" class="headerlink" title="中危：不安全的框架绑定"></a>中危：不安全的框架绑定</h3><p>目前大部分WEB框架支持将HTTP请求参数与类的属性相匹配的而生成一个对象。因此，攻击者能够将值放入HTTP请求参数中从而绑定系统对象。</p>
+<p>**例如**：在以下代码片段中， Spring MVC可以将 HTTP请求参数绑定到User所有属性。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RequestMapping(&quot;/login&quot; )</span><span class="hljs-keyword">public</span> String <span class="hljs-title function_">login</span><span class="hljs-params">(User user)</span> &#123; &#125; 其中，User 类定义为：  <span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">User</span> &#123;    <span class="hljs-keyword">private</span> String username;    <span class="hljs-keyword">private</span> String address;    <span class="hljs-keyword">private</span> <span class="hljs-type">boolean</span> admin;    <span class="hljs-keyword">private</span> <span class="hljs-type">int</span> age;&#125;<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>当程序将非将HTTP请求参数直接绑定给对象时，应该要控制绑定到对象的属性，防止暴露所有属性。</p>
+<p>在Spring MVC中，可以配置绑定器使用`setAllowedFields`和`setDisallowedFields`方法控制属性绑定过程以控制应绑定的属性。</p>
+<p>**例1**：在以下代码片段中，在 Spring MVC(3.0版本至最新)通过`setDisallowedFields`方法禁止绑定敏感属性。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@InitBinderpublic</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">initBinder</span><span class="hljs-params">(WebDataBinder binder)</span> &#123;    binder.setDisallowedFields(<span class="hljs-keyword">new</span> <span class="hljs-title class_">String</span>[]&#123;<span class="hljs-string">&quot;admin&quot;</span>&#125;);&#125; <span class="hljs-meta">@RequestMapping(&quot;/login&quot; )</span><span class="hljs-keyword">public</span> String <span class="hljs-title function_">login</span><span class="hljs-params">(User user)</span> &#123; &#125;<br></code></pre></td></tr></table></figure>
+
+<p>**例2**：在 Spring MVC(2.X版本)通过`setDisallowedFields`方法禁止绑定敏感属性。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Overrideprotected</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">initBinder</span><span class="hljs-params">(HttpServletRequest request, ServletRequestDataBinder binder)</span> <span class="hljs-keyword">throws</span> Exception &#123;    binder.setDisallowedFields(<span class="hljs-keyword">new</span> <span class="hljs-title class_">String</span>[]&#123;<span class="hljs-string">&quot;admin&quot;</span>&#125;);&#125;<br></code></pre></td></tr></table></figure>
+
+<p>而在使用 `@RequestBody`注释参数的 Spring MVC应用程序中，绑定过程由HttpMessageConverter进行处理，这些实例使用Jackson和JAXB等库将 HTTP请求参数转换为Java对象。这些库提供了注释来控制应允许或禁止的字段。例如对于Jackson，可以使用`@JsonIgnore`注释禁止将某个字段绑定到请求。</p>
+<p>**例3**：在以下代码片段中，Jackson禁止绑定敏感属性。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RequestMapping(value=&quot;/add/user&quot;, method=RequestMethod.POST, consumes=&quot;text/html&quot;)</span><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">addEmployee</span><span class="hljs-params">(<span class="hljs-meta">@RequestBody</span> User user)</span>&#123; &#125; <span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">User</span> &#123;    <span class="hljs-keyword">private</span> String username;    <span class="hljs-keyword">private</span> String address;    <span class="hljs-meta">@JsonIgnore</span>    <span class="hljs-keyword">private</span> <span class="hljs-type">boolean</span> admin;    <span class="hljs-keyword">private</span> <span class="hljs-type">int</span> age;&#125;<br></code></pre></td></tr></table></figure>
+
+<p>同理，Jackson还可以使用`@JsonIgnoreProperties、@JsonIgnoreType和 @JsonInclude`等注解告诉框架忽略这些属性，使用JAXB使用`@XmlAccessorType、@XmlAttribute、@XmlElement和 @XmlTransient`等注解告诉框架忽略这些属性,然后使用`@XmlAttribute和@XmlElement`等注解选择应绑定的字段。</p>
+<p>**例4**：在以下代码片段中，Jackson使用`@XmlAttribute`选择要绑定的字段。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@XmlRootElement</span><span class="hljs-meta">@XmlAccessorType(XmlAccessType.NONE)</span><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">User</span> &#123;    <span class="hljs-keyword">private</span> String username;    <span class="hljs-keyword">private</span> String address;    <span class="hljs-meta">@JsonIgnore</span>    <span class="hljs-keyword">private</span> <span class="hljs-type">boolean</span> admin;    <span class="hljs-keyword">private</span> <span class="hljs-type">int</span> age;    <span class="hljs-meta">@XmlAttribute</span>    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">getUsername</span><span class="hljs-params">()</span> &#123;        <span class="hljs-keyword">return</span> username;    &#125;    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setUsername</span><span class="hljs-params">(String username)</span> &#123;        <span class="hljs-built_in">this</span>.username = username;    &#125;     <span class="hljs-meta">@XmlAttribute</span>    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">getAddress</span><span class="hljs-params">()</span> &#123;        <span class="hljs-keyword">return</span> address;    &#125;        <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setAddress</span><span class="hljs-params">(String address)</span> &#123;        <span class="hljs-built_in">this</span>.address = address;    &#125;     <span class="hljs-keyword">private</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">isAdmin</span><span class="hljs-params">()</span>  &#123;        <span class="hljs-keyword">return</span> admin;    &#125;     <span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setAdmin</span><span class="hljs-params">(<span class="hljs-type">boolean</span> admin)</span>  &#123;        <span class="hljs-built_in">this</span>.admin = admin;    &#125;&#125;<br></code></pre></td></tr></table></figure>
+
+<p>在Struts 1和 2 中，如果某个属性不应绑定到请求，则应将其 `setter`方法设置为私有即可。</p>
+<p>**例5**：在以下代码片段中，在Struts可以将某个属性的`setter`方法设置为私有从而禁止绑定敏感属性。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">private</span> <span class="hljs-type">boolean</span> admin;<span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setAdmin</span><span class="hljs-params">(<span class="hljs-type">boolean</span> admin)</span>  &#123;    <span class="hljs-built_in">this</span>.admin = admin;&#125;<br></code></pre></td></tr></table></figure>
+
+<p>还有另一种方法是使用将 HTTP请求参数绑定到仅含有Web表单或API中定义的属性DTO对象中，再将其映射到User中，防止敏感字段暴露。</p>
+<h3 id="低危：忽略返回值"><a href="#低危：忽略返回值" class="headerlink" title="低危：忽略返回值"></a>低危：忽略返回值</h3><p>一般在开发过程中，程序员凭借经验可以断言某些用户事件或条件，例如某个函数永远不会执行失败。但是，攻击者往往会故意触发一些异常情况，导致冲破了程序员的断言，给系统带来了不稳定性，利用不正确的行为触发出发程序的漏洞。**例如**：程序调用删除权限函数，但不检查返回值判断是否成功删除权限，则程序将继续以更高权限运行。</p>
+<p>**例如**：在下面的代码片段中，程序没有对`read()`返回值做判断。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">int</span> <span class="hljs-variable">bytesToRead</span> <span class="hljs-operator">=</span> <span class="hljs-number">1024</span>;<span class="hljs-type">byte</span>[] byteArray = <span class="hljs-keyword">new</span> <span class="hljs-title class_">byte</span>[bytesToRead];streamFileInput = <span class="hljs-keyword">new</span> <span class="hljs-title class_">FileInputStream</span>(<span class="hljs-string">&quot;C:\\file.txt&quot;</span>);streamFileInput.read(byteArray);<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>程序应检查方法的返回值，确保方法返回的是期望的数据，再进行下一步操作。 </p>
+<h3 id="低危：HTTP响应完成后继续操作输出流"><a href="#低危：HTTP响应完成后继续操作输出流" class="headerlink" title="低危：HTTP响应完成后继续操作输出流"></a>低危：HTTP响应完成后继续操作输出流</h3><p>转发`HttpServletRequest`、重定向`HttpServletResponse`或刷新servlet的输出流缓冲区会导致提交相关的数据流，程序后续再执行到缓冲区重置或数据流提交，将会抛出`IllegalStateException`异常。</p>
+<p>此外，servlets允许使用`ServletOutputStream`或`PrintWriter`将数据写入响应数据流。如果在调用`getOutputStream()`之后再调用`getWriter()`或者反向调用，会导致抛出`IllegalStateException`异常，使其中断响应。</p>
+<p>**例如**：在下面代码片段中，会在servlet的输出流缓冲区刷新之后进行重定向，会抛出`IllegalStateException`异常。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">doGet</span><span class="hljs-params">(HttpServletRequest request, HttpServletResponse response)</span> <span class="hljs-keyword">throws</span> ServletException, IOException &#123;    <span class="hljs-type">OutputStream</span> <span class="hljs-variable">os</span> <span class="hljs-operator">=</span> response.getOutputStream();    os.flush();    os.close();    response.sendRedirect(<span class="hljs-string">&quot;http://www.codesafe.cn&quot;</span>);&#125;<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>避免HTTP响应完成后继续操作输出流，应注意：</p>
+<p>1. 提交servlet的输出流之后，不要重置数据流缓冲区或执行重新提交该数据流。</p>
+<p>2. 避免在调用`getOutputStream()`之后调用`getWriter()`，或者在调用`getWriter()`后调用`getOutputStream()`。</p>
+<h3 id="低危：缺少对方法返回值的null检查"><a href="#低危：缺少对方法返回值的null检查" class="headerlink" title="低危：缺少对方法返回值的null检查"></a>低危：缺少对方法返回值的null检查</h3><p>程序没有对有可能返回null的方法返回值进行检查，可能会导致NullPointException。</p>
+<p>**例如**：下列代码片段中，未对`getenv()`方法的返回值data进行null检查，可能会抛出NullPointException。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">String</span> <span class="hljs-variable">data</span> <span class="hljs-operator">=</span> System.getenv(<span class="hljs-string">&quot;ADD&quot;</span>);<span class="hljs-keyword">if</span> (data.equalsIgnoreCase(<span class="hljs-string">&quot;XXX&quot;</span>) )&#123;    ...&#125;<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>程序应对可能返回null的方法的返回值进行检查，避免产生NullPointException。</p>
+<h2 id="密码管理"><a href="#密码管理" class="headerlink" title="密码管理"></a>密码管理</h2><h3 id="中危：不安全的随机数"><a href="#中危：不安全的随机数" class="headerlink" title="中危：不安全的随机数"></a>中危：不安全的随机数</h3><p>Java API中提供了`java.util.Random`类实现`PRNG()`，该PRNG是可移植和可重复的，如果两个`java.util.Random`类的实例使用相同的种子，会在所有Java实现中生成相同的数值序列。</p>
+<p>**例如**：下面代码片段中，使用了`java.util.Random`类，该类对每一个指定的种子值生成同一个序列。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">import</span> java.util.Random; <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span> <span class="hljs-params">(String args[])</span> &#123;    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">10</span>; i++) &#123;        <span class="hljs-type">Random</span> <span class="hljs-variable">random</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Random</span>(<span class="hljs-number">123456</span>);        <span class="hljs-type">int</span> <span class="hljs-variable">number</span> <span class="hljs-operator">=</span> random.nextInt(<span class="hljs-number">21</span>);    &#125;&#125;<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>在安全性要求较高的应用中，应使用更安全的随机数生成器，如`java.security.SecureRandom`类。</p>
+<p>**例如**：下面代码片段中，使用`java.security.SecureRandom`来生成更安全的随机数。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">import</span> java.security.SecureRandom;<span class="hljs-keyword">import</span> java.security.NoSuchAlgorithmException; <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span> <span class="hljs-params">(String args[])</span> &#123;    <span class="hljs-keyword">try</span> &#123;        <span class="hljs-type">SecureRandom</span> <span class="hljs-variable">random</span> <span class="hljs-operator">=</span> SecureRandom.getInstance(<span class="hljs-string">&quot;SHA1PRNG&quot;</span>);        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">10</span>; i++) &#123;            <span class="hljs-type">int</span> <span class="hljs-variable">number</span> <span class="hljs-operator">=</span> random.nextInt(<span class="hljs-number">21</span>);        &#125;    &#125; <span class="hljs-keyword">catch</span> (NoSuchAlgorithmException nsae) &#123;     &#125;&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="中危：空密码"><a href="#中危：空密码" class="headerlink" title="中危：空密码"></a>中危：空密码</h3><p>程序中使用了空的密码值，系统安全性将会受到威胁。</p>
+<p>**例如**：下列代码中采用了空的密码。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> Connection <span class="hljs-title function_">getConnection</span><span class="hljs-params">()</span>&#123;    <span class="hljs-type">String</span> <span class="hljs-variable">url</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;localhost&quot;</span>;    <span class="hljs-type">String</span> <span class="hljs-variable">name</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;admin&quot;</span>;    <span class="hljs-type">String</span> <span class="hljs-variable">password</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;&quot;</span>;&#125;<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>程序中不应使用空的密码值，程序所需密码应从配置文件中获取加密的密码值。</p>
+<p>**例如**：下列代码中从配置文件中获取经过加密的密码值并解密使用。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> Connection <span class="hljs-title function_">getConnection</span><span class="hljs-params">()</span>&#123;    <span class="hljs-type">String</span> <span class="hljs-variable">url</span> <span class="hljs-operator">=</span> EncryptUtil.decrypt(PropertiesUtil.get(<span class="hljs-string">&quot;connection.url&quot;</span>));    <span class="hljs-type">String</span> <span class="hljs-variable">name</span> <span class="hljs-operator">=</span> EncryptUtil.decrypt(PropertiesUtil.get(<span class="hljs-string">&quot;connection.username&quot;</span>));    <span class="hljs-type">String</span> <span class="hljs-variable">password</span> <span class="hljs-operator">=</span> EncryptUtil.decrypt(PropertiesUtil.get(<span class="hljs-string">&quot;connection.password&quot;</span>));&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="中危：硬编码密码"><a href="#中危：硬编码密码" class="headerlink" title="中危：硬编码密码"></a>中危：硬编码密码</h3><p>程序中采用硬编码方式处理密码，一方面会降低系统安全性，另一方面不易于程序维护。</p>
+<p>**例如**：下列代码中采用硬编码方式处理密码。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">ConnectionConfig</span>&#123;    <span class="hljs-type">String</span> <span class="hljs-variable">url</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;localhost&quot;</span>;    <span class="hljs-type">String</span> <span class="hljs-variable">name</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;admin&quot;</span>;    <span class="hljs-type">String</span> <span class="hljs-variable">password</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;123456&quot;</span>;&#125;<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>程序中不应对密码进行硬编码，可以使用配置文件或数据库存储的方式来存储系统所需的数据；并且录入数据时，还可以在对敏感数据做加密处理之后再进行数据的录入。</p>
+<p>**例如**：下列代码中从配置文件中获取经过加密的密码值并解密使用。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">ConnectionConfig</span>&#123;    <span class="hljs-type">String</span> <span class="hljs-variable">url</span> <span class="hljs-operator">=</span> EncryptUtil.decrypt(PropertiesUtil.get(<span class="hljs-string">&quot;connection.url&quot;</span>));    <span class="hljs-type">String</span> <span class="hljs-variable">name</span> <span class="hljs-operator">=</span> EncryptUtil.decrypt(PropertiesUtil.get(<span class="hljs-string">&quot;connection.username&quot;</span>));    <span class="hljs-type">String</span> <span class="hljs-variable">password</span> <span class="hljs-operator">=</span> EncryptUtil.decrypt(PropertiesUtil.get(<span class="hljs-string">&quot;connection.password&quot;</span>));&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="中危：弱加密"><a href="#中危：弱加密" class="headerlink" title="中危：弱加密"></a>中危：弱加密</h3><p>在安全性要求较高的系统中，使用不安全的加密算法（如DES、RC4、RC5等），将无法保证敏感数据的保密性。</p>
+<p>**例如**：下面代码片段中，采用DES对数据进行加密。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">BufferedReader</span> <span class="hljs-variable">bufread2</span> <span class="hljs-operator">=</span> <span class="hljs-literal">null</span>;<span class="hljs-type">InputStreamReader</span> <span class="hljs-variable">inread2</span> <span class="hljs-operator">=</span> <span class="hljs-literal">null</span>;<span class="hljs-keyword">try</span> &#123;    inread2 = <span class="hljs-keyword">new</span> <span class="hljs-title class_">InputStreamReader</span>(System.in);    bufread2 = <span class="hljs-keyword">new</span> <span class="hljs-title class_">BufferedReader</span>(inread2);    <span class="hljs-type">String</span> <span class="hljs-variable">str</span> <span class="hljs-operator">=</span> bufread2.readLine();    <span class="hljs-comment">/* FLAW: Insecure cryptographic algorithm (DES) */</span>    <span class="hljs-type">Cipher</span> <span class="hljs-variable">des</span> <span class="hljs-operator">=</span> Cipher.getInstance(<span class="hljs-string">&quot;DES&quot;</span>);    <span class="hljs-type">SecretKey</span> <span class="hljs-variable">key</span> <span class="hljs-operator">=</span> KeyGenerator.getInstance(<span class="hljs-string">&quot;DES&quot;</span>).generateKey();    des.init(Cipher.ENCRYPT_MODE, key);    <span class="hljs-type">byte</span>[] enc_str = des.doFinal(str.getBytes());    IO.writeLine(IO.toHex(enc_str));&#125; <span class="hljs-keyword">catch</span>(IOException e) &#123;    log_bsnk.warning(<span class="hljs-string">&quot;Error reading from console&quot;</span>);&#125; <span class="hljs-keyword">finally</span>&#123; &#125;<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>在安全性要求较高的系统中，建议应使用安全的加密算法（如AES、RSA)对敏感数据进行加密。</p>
+<p>**例如**：下面代码片段中，使用AES取代DES保证数据完整性。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">BufferedReader</span> <span class="hljs-variable">bufread2</span> <span class="hljs-operator">=</span> <span class="hljs-literal">null</span>;<span class="hljs-type">InputStreamReader</span> <span class="hljs-variable">inread2</span> <span class="hljs-operator">=</span> <span class="hljs-literal">null</span>;<span class="hljs-keyword">try</span> &#123;    inread2 = <span class="hljs-keyword">new</span> <span class="hljs-title class_">InputStreamReader</span>(System.in);    bufread2 = <span class="hljs-keyword">new</span> <span class="hljs-title class_">BufferedReader</span>(inread2);    <span class="hljs-type">String</span> <span class="hljs-variable">str</span> <span class="hljs-operator">=</span> bufread2.readLine();    <span class="hljs-comment">/* FIX: Secure cryptographic algorithm (AES) */</span>    <span class="hljs-type">Cipher</span> <span class="hljs-variable">aes</span> <span class="hljs-operator">=</span> Cipher.getInstance(<span class="hljs-string">&quot;AES&quot;</span>);    <span class="hljs-type">KeyGenerator</span> <span class="hljs-variable">kg</span> <span class="hljs-operator">=</span> KeyGenerator.getInstance(<span class="hljs-string">&quot;AES&quot;</span>);    kg.init(<span class="hljs-number">128</span>);    <span class="hljs-type">SecretKey</span> <span class="hljs-variable">key</span> <span class="hljs-operator">=</span> kg.generateKey();    aes.init(Cipher.ENCRYPT_MODE, key);    <span class="hljs-type">byte</span>[] enc_str = aes.doFinal(str.getBytes());    IO.writeLine(IO.toHex(enc_str));&#125; <span class="hljs-keyword">catch</span>(IOException e) &#123;    log_gsnk.warning(<span class="hljs-string">&quot;Error reading from console&quot;</span>);&#125; <span class="hljs-keyword">finally</span>&#123; &#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="中危：配置文件中的明文密码"><a href="#中危：配置文件中的明文密码" class="headerlink" title="中危：配置文件中的明文密码"></a>中危：配置文件中的明文密码</h3><p>配置文件中采用明文存储密码，所有能够访问该文件的人都能访问该密码，将会降低系统安全性。</p>
+<p>**例如**：下列配置文件中采用明文存储密码。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">jdbc.username=userjdbc.password=<span class="hljs-number">123456</span><br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>即使不能阻止应用程序被那些可以访问配置文件的攻击者入侵，也可以通过加密密码提升攻击者入侵难度，故配置文件中的密码应进行加密存储。</p>
+<p>**例如**：下列配置文件中采用jasypt加密的密码存储密码。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cobol">jdbc.username=userjdbc.password=ENC(AaDVxaWVcgnN4lZswvK46QQkaxCfD7Xa)<br></code></pre></td></tr></table></figure>
+
+<h3 id="中危：硬编码加密密钥"><a href="#中危：硬编码加密密钥" class="headerlink" title="中危：硬编码加密密钥"></a>中危：硬编码加密密钥</h3><p>当程序中使用硬编码加密密钥时，所有项目开发人员都可以查看该密钥，甚至如果攻击者可以获取到程序class文件，可以通过反编译得到密钥，硬编码加密密钥会大大降低系统安全性。</p>
+<p>**例如**：下列代码使用硬编码加密密钥执行AES加密。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-type">String</span> <span class="hljs-variable">encryptionKey</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;dfashsdsdfsdgagascv&quot;</span>;<span class="hljs-type">byte</span>[] keyBytes = encryptionKey.getBytes();<span class="hljs-type">SecretKeySpec</span> <span class="hljs-variable">key</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">SecretKeySpec</span>(keyBytes, <span class="hljs-string">&quot;AES&quot;</span>);<span class="hljs-type">Cipher</span> <span class="hljs-variable">encryptCipher</span> <span class="hljs-operator">=</span> Cipher.getInstance(<span class="hljs-string">&quot;AES&quot;</span>);encryptCipher.init(Cipher.ENCRYPT_MODE, key);<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>程序应采用不小于8个字节的随机生成的字符串作为密钥。</p>
+<p>**例如**：以下代码使用KeyGenerator来生成密钥。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">KeyGenerator</span> <span class="hljs-variable">keyGen</span> <span class="hljs-operator">=</span> KeyGenerator.getInstance(<span class="hljs-string">&quot;AES&quot;</span>);keyGen.init(<span class="hljs-number">128</span>, <span class="hljs-keyword">new</span> <span class="hljs-title class_">SecureRandom</span>(password.getBytes()));<span class="hljs-type">SecretKey</span> <span class="hljs-variable">secretKey</span> <span class="hljs-operator">=</span> kgen.generateKey();<span class="hljs-type">byte</span>[] keyBytes = secretKey.getEncoded();<span class="hljs-type">SecretKeySpec</span> <span class="hljs-variable">key</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">SecretKeySpec</span>(keyBytes, <span class="hljs-string">&quot;AES&quot;</span>);<span class="hljs-type">Cipher</span> <span class="hljs-variable">encryptCipher</span> <span class="hljs-operator">=</span> Cipher.getInstance(<span class="hljs-string">&quot;AES&quot;</span>);encryptCipher.init(Cipher.ENCRYPT_MODE, key);<br></code></pre></td></tr></table></figure>
+
+<h3 id="低危：注释中的密码"><a href="#低危：注释中的密码" class="headerlink" title="低危：注释中的密码"></a>低危：注释中的密码</h3><p>应用程序注释中保留密码等敏感信息，将使敏感信息对任何能够获取到该文件的人员可见。</p>
+<p>修复建议：</p>
+<p>应用程序注释中不应保留密码等敏感信息。</p>
+<h3 id="低危：不安全的哈希算法"><a href="#低危：不安全的哈希算法" class="headerlink" title="低危：不安全的哈希算法"></a>低危：不安全的哈希算法</h3><p>在安全性要求较高的系统中，不应使用被业界公认的不安全的哈希算法（如MD2、MD4、MD5、SHA、SHA1等)来保证数据的完整性。</p>
+<p>**例如**：下面代码片段中，采用MD5算法来保证数据的完整性。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">byte</span>[] b = str.getBytes();<span class="hljs-type">MessageDigest</span> <span class="hljs-variable">md</span> <span class="hljs-operator">=</span> <span class="hljs-literal">null</span>;<span class="hljs-keyword">try</span> &#123;    md = MessageDigest.getInstance(<span class="hljs-string">&quot;MD5&quot;</span>);    md.update(b);&#125;<span class="hljs-keyword">catch</span> (NoSuchAlgorithmException e)&#123; &#125;<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>在安全性要求较高的系统中，应采用散列值&gt;=224比特的SHA系列算法（如SHA-224、SHA-256、SHA-384和SHA-512）来保证敏感数据的完整性。</p>
+<p>**例如**：下面代码片段中，使用SHA-256算法取代MD5算法保证数据完整性。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">byte</span>[] b = str.getBytes();<span class="hljs-type">MessageDigest</span> <span class="hljs-variable">md</span> <span class="hljs-operator">=</span> <span class="hljs-literal">null</span>;<span class="hljs-keyword">try</span> &#123;    md = MessageDigest.getInstance(<span class="hljs-string">&quot;SHA-256&quot;</span>);    md.update(b);&#125; <span class="hljs-keyword">catch</span> (NoSuchAlgorithmException e) &#123;    ...&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="低危：弱加密：不安全的块密码加密模式"><a href="#低危：弱加密：不安全的块密码加密模式" class="headerlink" title="低危：弱加密：不安全的块密码加密模式"></a>低危：弱加密：不安全的块密码加密模式</h3><p>块密码又称为分组加密，一次加密明文中的一个块。将明文按一定的位长分组，明文组经过加密运算得到密文组，密文组经过解密运算（加密运算的逆运算），还原成明文组。这种加密算法共有四种操作模式用于描述如何重复地应用密码的单块操作来安全的转换大于块的数据量，分别是电子代码(ECB)、密码块链(CBC)、密码反馈(CFB)以及输出反馈（OFB）。其中ECB模式下相同的明文块总是会得到相同的密文，故不能抵挡回放攻击，而CBC模式则没有这个缺陷。</p>
+<p>**例如**：以下代码将AES密码用于ECB模式。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">Cipher</span> <span class="hljs-variable">cipher</span> <span class="hljs-operator">=</span> Cipher.getInstance(<span class="hljs-string">&quot;AES/ECB/PKCS5Padding&quot;</span>);cipher.init(Cipher.ENCRYPT_MODE, createSecretKey(seed));<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>加密大于块的数据时，应该避免使用ECB模式，因为ECB模式下相同的明文块总是会得到相同的密文，有回放攻击的风险。CBC模式可以避免回放攻击，但是其效率较低，并且在和SSL一起使用时会造成严重风险。故可以改用`CCM(Counter with CBC-MAC)`模式，如果更注重性能，在可用的情况下则使用`GCM(Galois/Counter)`模式。</p>
+<p>**例如**：以下代码将AES密码用于GCM模式。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">GCMParameterSpec</span> <span class="hljs-variable">s</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">GCMParameterSpec</span>(tLen, src);<span class="hljs-type">Cipher</span> <span class="hljs-variable">cipher</span> <span class="hljs-operator">=</span> Cipher.getInstance(<span class="hljs-string">&quot;AES/OFB8/PKCS5Padding&quot;</span>);cipher.init(Cipher.ENCRYPT_MODE, createSecretKey(seed), s);<br></code></pre></td></tr></table></figure>
+
+<h3 id="低危：不安全的随机数"><a href="#低危：不安全的随机数" class="headerlink" title="低危：不安全的随机数"></a>低危：不安全的随机数</h3><p>JavaScript的`Math.random()`实现PRNG（伪随机数序列发生器），该PRNG是可移植和可重复的，因此如果两个</p>
+<p>`Math.random()`使用相同的种子，会生成相同的数值序列。</p>
+<p>**例如**：下面的代码使用</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>()<br></code></pre></td></tr></table></figure>
+
+<p>创建的Token很容易被猜到。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-keyword">function</span> <span class="hljs-title function_">getToken</span> (<span class="hljs-params"></span>)&#123;    <span class="hljs-keyword">var</span> token = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>();    <span class="hljs-keyword">return</span> token;&#125;<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>JavaScript在安全性要求较高的环境中生成随机数，常规的建议是使用 Mozilla API 中的`window.crypto.getRandomValues()`函数，但这种方法受限于浏览器的兼容性，只在较新的版本（Chrome&gt;=11.0, Firefox&gt;=21, Edge, IE&gt;=11, Safari&gt;=3.1）可以使用。如果考虑到旧版本浏览器，则应在javascript之外处理PRNG功能。</p>
+<p>**例如**：缺陷描述中的例子可以改写为。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-keyword">function</span> <span class="hljs-title function_">getToken</span> (<span class="hljs-params"></span>)&#123;    <span class="hljs-keyword">var</span> array = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Uint32Array</span>(<span class="hljs-number">1</span>);    <span class="hljs-variable language_">window</span>.<span class="hljs-property">crypto</span>.<span class="hljs-title function_">getRandomValues</span>(array);    <span class="hljs-keyword">var</span> token = array[<span class="hljs-number">0</span>];    <span class="hljs-keyword">return</span> token;&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="低危：注释中的密码-1"><a href="#低危：注释中的密码-1" class="headerlink" title="低危：注释中的密码"></a>低危：注释中的密码</h3><p>应用程序注释中保留密码等敏感信息，将使敏感信息对任何能够获取到该文件的人员可见。</p>
+<p>**例如**：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-comment">//password:123</span><br></code></pre></td></tr></table></figure>
+
+<p>修复建议： </p>
+<p>应用程序注释中不应保留密码等敏感信息。 </p>
+<p>低危：不安全的提交</p>
+<p>使用HTTP GET的方式提交敏感信息如密码，可能造成密码被显示，记录等。</p>
+<p>**例如**：以下示例使用HTTP GET的方式提交表单中的密码。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">method</span>=<span class="hljs-string">&quot;get&quot;</span>&gt;</span>密码: <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;password&quot;</span> &gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;submit&quot;</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;提交&quot;</span> &gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>避免使用HTTP GET的方式提交敏感数据，应使用HTTP POST传输敏感数据。</p>
+<p>**例1**：以下示例通过HTTP POST的方式提交用户的密码。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">method</span>=<span class="hljs-string">&quot;post&quot;</span>&gt;</span>    密码: <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;password&quot;</span> &gt;</span>    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;submit&quot;</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;提交&quot;</span> &gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>HTML5新增了一项功能，可以将formmethod属性作为 submit 和 image 输入标签一部分的功能，并且该属性值会覆盖相应form标签中 method 属性值。</p>
+<p>**例2**：以下示例用户使用HTTP POST的方式提交密码，是由submit输入标签 formmethod 的属性值所指定。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">method</span>=<span class="hljs-string">&quot;get&quot;</span>&gt;</span>    密码: <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;password&quot;</span> &gt;</span>    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;submit&quot;</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;提交&quot;</span>  <span class="hljs-attr">formmethod</span>=<span class="hljs-string">&quot;post&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>注意，如果将formmethod的值设为get，form的method的无论为什么，都会通过HTTP GET的方式提交表单。</p>
+<h2 id="资源管理"><a href="#资源管理" class="headerlink" title="资源管理"></a>资源管理</h2><h3 id="中危：数据库访问控制"><a href="#中危：数据库访问控制" class="headerlink" title="中危：数据库访问控制"></a>中危：数据库访问控制</h3><p>程序未进行恰当的访问控制，执行了一个包含用户控制主键的SQL语句，可能会导致攻击者访问未经授权的记录。</p>
+<p>**例如**：下面代码片段中的SQL语句用于查询与指定标识符相匹配的清单。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">id = Integer.decode(request.getParameter(<span class="hljs-string">&quot;invoiceID&quot;</span>));<span class="hljs-type">String</span> <span class="hljs-variable">query</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;SELECT * FROM invoices WHERE id = ?&quot;</span>;<span class="hljs-type">PreparedStatement</span> <span class="hljs-variable">stmt</span> <span class="hljs-operator">=</span> conn.prepareStatement(query);stmt.setInt(<span class="hljs-number">1</span>, id);<span class="hljs-type">ResultSet</span> <span class="hljs-variable">results</span> <span class="hljs-operator">=</span> stmt.execute();<br></code></pre></td></tr></table></figure>
+
+<p>在上面代码中，攻击者可以通过为`invoiceID`设置不同的值，获取所需的任何清单信息。</p>
+<p>修复建议：</p>
+<p>任何情况下都不允许用户在没有取得相应权限的情况下获取或修改数据库中的记录。可以通过把当前被授权的用户名作为查询语句的一部分来实现。</p>
+<p>**例如**：下面代码片段中，通过把当前被授权的用户名作为查询语句的一部分来限制用户对清单的访问。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">userName = ctx.getAuthenticatedUserName();id = Integer.decode(request.getParameter(<span class="hljs-string">&quot;invoiceID&quot;</span>));<span class="hljs-type">String</span> <span class="hljs-variable">query</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;SELECT * FROM invoices WHERE id = ? AND user = ?&quot;</span>;<span class="hljs-type">PreparedStatement</span> <span class="hljs-variable">stmt</span> <span class="hljs-operator">=</span> conn.prepareStatement(query);stmt.setString(<span class="hljs-number">1</span>, id);stmt.setString(<span class="hljs-number">2</span>, userName);<span class="hljs-type">ResultSet</span> <span class="hljs-variable">results</span> <span class="hljs-operator">=</span> stmt.execute();<br></code></pre></td></tr></table></figure>
+
+<h3 id="中危：资源未释放：流"><a href="#中危：资源未释放：流" class="headerlink" title="中危：资源未释放：流"></a>中危：资源未释放：流</h3><p>程序创建或分配流资源后，不进行合理释放，将会降低系统性能。攻击者可能会通过耗尽资源池的方式发起拒绝服务攻击。</p>
+<p>**例如**：在下面Java方法中，创建I/O流对象后未进行合理释放，程序依靠Java虚拟机的垃圾回收机制释放I/O流资源，事实上，程序不能确定何时调用虚拟机的`finalize()`方法。在繁忙的程序环境下，可能导致Java虚拟机不能有效的使用I/O对象。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">processFile</span><span class="hljs-params">(String filePath)</span>&#123;    <span class="hljs-keyword">try</span> &#123;        <span class="hljs-type">FileInputStream</span> <span class="hljs-variable">fis</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">FileInputStream</span>(filePath);        <span class="hljs-type">InputStreamReader</span> <span class="hljs-variable">isr</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">InputStreamReader</span>(fis);        <span class="hljs-type">BufferedReader</span> <span class="hljs-variable">br</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">BufferedReader</span>(isr);        String line=<span class="hljs-string">&quot;&quot;</span>;        <span class="hljs-keyword">while</span>((line=br.readLine())!=<span class="hljs-literal">null</span>)&#123;            processLine(line);        &#125;    &#125; <span class="hljs-keyword">catch</span> (FileNotFoundException e) &#123;        log(e);    &#125; <span class="hljs-keyword">catch</span> (IOException e)&#123;        log(e);    &#125;&#125;<br></code></pre></td></tr></table></figure>
+
+<p>程序不应依赖于Java虚拟机的`finalize()`方法来自动回收流资源，而需要手动在finally代码块中进行流资源的释放。</p>
+<p>**例如**：下面代码片段中，在finally代码块中对流资源进行了合理的释放。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">processFile</span><span class="hljs-params">(String filePath)</span>&#123;    <span class="hljs-type">FileInputStream</span> <span class="hljs-variable">fis</span> <span class="hljs-operator">=</span> <span class="hljs-literal">null</span>;    <span class="hljs-type">InputStreamReader</span> <span class="hljs-variable">isr</span> <span class="hljs-operator">=</span> <span class="hljs-literal">null</span>;    <span class="hljs-type">BufferedReader</span> <span class="hljs-variable">br</span> <span class="hljs-operator">=</span> <span class="hljs-literal">null</span>;    <span class="hljs-keyword">try</span> &#123;        fis = <span class="hljs-keyword">new</span> <span class="hljs-title class_">FileInputStream</span>(filePath);        isr = <span class="hljs-keyword">new</span> <span class="hljs-title class_">InputStreamReader</span>(fis);        br = <span class="hljs-keyword">new</span> <span class="hljs-title class_">BufferedReader</span>(isr);        String line=<span class="hljs-string">&quot;&quot;</span>;        <span class="hljs-keyword">while</span>((line=br.readLine())!=<span class="hljs-literal">null</span>)&#123;            <span class="hljs-comment">//processLine(line);        &#125;    &#125; catch (FileNotFoundException e) &#123;        //log(e);    &#125; catch (IOException e)&#123;        //log(e);    &#125;finally&#123;        if(br!=null)&#123;            try &#123;                br.close();            &#125; catch (IOException e) &#123;                //log(e);            &#125;        &#125;        if(isr!=null)&#123;            try &#123;                isr.close();            &#125; catch (IOException e) &#123;                //log(e);            &#125;        &#125;        if(fis!=null)&#123;            try &#123;                fis.close();            &#125; catch (IOException e) &#123;                //log(e);            &#125;        &#125;    &#125;&#125;</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="中危：使用不安全的target-blank"><a href="#中危：使用不安全的target-blank" class="headerlink" title="中危：使用不安全的target blank"></a>中危：使用不安全的target blank</h3><p>在 `<a>`标签中使用target属性，值设置为`_blank`攻击者会针对`window.opener`API进行恶意行为的攻击，有可能导致钓鱼安全漏洞问题。</p>
+<p>**例如**：以下示例使用的`targer`属性，但是没有设置`rel`属性。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;www.example.com&quot;</span> <span class="hljs-attr">target</span>=<span class="hljs-string">&quot;_blank&quot;</span>/&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>建议使用`target=&quot;_blank&quot;`时，配合使用`rel=&quot;noopenner noreferrer&quot;`。</p>
+<p>**例如**：配合使用`rel`属性。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;www.example.com&quot;</span> <span class="hljs-attr">target</span>=<span class="hljs-string">&quot;_blank&quot;</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;noopenner noreferrer&quot;</span>/&gt;</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="代码质量"><a href="#代码质量" class="headerlink" title="代码质量"></a>代码质量</h2><h3 id="中危：使用-或-比较基本数据类型的包装类"><a href="#中危：使用-或-比较基本数据类型的包装类" class="headerlink" title="中危：使用==或!=比较基本数据类型的包装类"></a>中危：使用==或!=比较基本数据类型的包装类</h3><p>不能直接使用`==`或`!=`操作符来比较的两个基本数据类型的包装类型的值，因为这些操作符比较的是对象的引用而不是对象的值。</p>
+<p>不过由于Java的缓存机制，所以如果基本类型的包装类是一个整数且在-128和127之间，或是布尔类型true或false，或者是&#39;\u0000&#39;和&#39;\u007f&#39;之间的字符文本，可以使用`==`或`!=`进行比较。也就是说，如果使用了基本类型的包装类型（除去Boolean或Byte），则会缓存或记住一个值区间。对于值区间内的值，使用`==`或`!=`会返回正确的值，而对于值区间外的值，将返回对象地址的比较结果。</p>
+<p>**例如**：在这个不符合规范的代码示例中：使用`==`操作符来比较两个Integer对象的值。然而，这个`==`操作比较的是对象的引用，而不是对象的值。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Wrapper</span> &#123;    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span>&#123;        <span class="hljs-type">Integer</span> <span class="hljs-variable">i1</span> <span class="hljs-operator">=</span> <span class="hljs-number">100</span>;        <span class="hljs-type">Integer</span> <span class="hljs-variable">i2</span> <span class="hljs-operator">=</span> <span class="hljs-number">100</span>;        <span class="hljs-type">Integer</span> <span class="hljs-variable">i3</span> <span class="hljs-operator">=</span> <span class="hljs-number">1000</span>;        <span class="hljs-type">Integer</span> <span class="hljs-variable">i4</span> <span class="hljs-operator">=</span> <span class="hljs-number">1000</span>;        System.out.println(i1 == i2);        System.out.println(i1 != i2);        System.out.println(i3 == i4);        System.out.println(i3 != i4);    &#125;&#125;<br></code></pre></td></tr></table></figure>
+
+<p>Integer类只能保证缓存介入-128~127的整型数值，当使用相等操作符的时候，这会导致在这个范围之外的等价数值的比较是不相等的。比如，在那些不缓存任何值的JVM虚拟机中，运行程序会产生以下结果：</p>
+<p>true</p>
+<p>false</p>
+<p>false</p>
+<p>true</p>
+<p>修复建议：</p>
+<p>不能直接使用`==`或`!=`操作符来比较的两个基本数据类型的包装类的值，因为这些操作符比较的是对象的引用而不是对象的值。</p>
+<p>符合规范的方案使用`equals()`而不是`==`操作符来比较两个对象的值。这个程序在所有的平台运行时都会打印true、false、true、false的结果，这符合预期。</p>
+<p>**例如**：以下代码使用`equals()`方法比较两个Integer对象的值。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Wrapper</span> &#123;    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;        <span class="hljs-type">Integer</span> <span class="hljs-variable">i1</span> <span class="hljs-operator">=</span> <span class="hljs-number">100</span>;        <span class="hljs-type">Integer</span> <span class="hljs-variable">i2</span> <span class="hljs-operator">=</span> <span class="hljs-number">100</span>;        <span class="hljs-type">Integer</span> <span class="hljs-variable">i3</span> <span class="hljs-operator">=</span> <span class="hljs-number">1000</span>;        <span class="hljs-type">Integer</span> <span class="hljs-variable">i4</span> <span class="hljs-operator">=</span> <span class="hljs-number">1000</span>;        System.out.println(i1.equals(i2));        System.out.println(!i1.equals(i2));        System.out.println(i3.equals(i4));        System.out.println(!i3.equals(i4));    &#125;&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="中危：比较Locale相关的数据未指定适当的Locale"><a href="#中危：比较Locale相关的数据未指定适当的Locale" class="headerlink" title="中危：比较Locale相关的数据未指定适当的Locale"></a>中危：比较Locale相关的数据未指定适当的Locale</h3><p>在比较数据时，如果可能与Locale设置相关，则应指定相应的Locale。</p>
+<p>**例1**：下面代码示例中：使用了Locale相关的`String.toUpperCase()`将字符转换为大写字符。在英文Locale中，会将`title`转换为`TITLE`；在土耳其Locale中，会将`title`转换为`T?TLE`,其中的`?`是拉丁字母的`I`。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-string">&quot;title&quot;</span>.toUpperCase();<span class="hljs-string">&quot;TITLE&quot;</span>.toLowerCase();<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>在比较数据时，如果可能与Locale设置相关，则应指定相应的Locale。</p>
+<p>**例1**：下面代码示例将Locale设置为英文，从而避免产生意外的问题。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-string">&quot;title&quot;</span>.toUpperCase(Locale.ENGLISH);<span class="hljs-string">&quot;TITLE&quot;</span>.toLowerCase(Locale.ENGLISH);<br></code></pre></td></tr></table></figure>
+
+<p>**例2**：可以在对字符串处理前，将默认的Locale设置为English。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">Locale.setDefault(Locale.ENGLISH);<span class="hljs-string">&quot;title&quot;</span>.toUpperCase();<span class="hljs-string">&quot;TITLE&quot;</span>.toLowerCase();<br></code></pre></td></tr></table></figure>
+
+<h3 id="中危：null引用"><a href="#中危：null引用" class="headerlink" title="中危：null引用"></a>中危：null引用</h3><p>程序间接引用了可能为null的变量，从而引发空指针异常。</p>
+<p>**例如**：下面代码片段中，在使用变量data之前没有判断它是否为null。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">Data</span> <span class="hljs-variable">data</span> <span class="hljs-operator">=</span> nulldata.setId(id);<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>程序在间接引用可能为null的对象之前应对其进行判断。</p>
+<p>**例如**：下面代码片段中，程序data设置为null，使用之前进行判断是否为null。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">Data</span>  <span class="hljs-variable">data</span> <span class="hljs-operator">=</span> nullif(data != <span class="hljs-literal">null</span>)&#123;    data.setId(id);&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="中危：系统信息泄露：Session传递"><a href="#中危：系统信息泄露：Session传递" class="headerlink" title="中危：系统信息泄露：Session传递"></a>中危：系统信息泄露：Session传递</h3><p>在localStorage和sessionStorage之间传输值会不知不觉地暴露敏感信息。</p>
+<p>实现了Web Storage的HTML5浏览器提供了localStorage和sessionStorage两个对象用于存储数据。 localStorage和sessionStorage的区别在于存储的作用域和有效期不同。两者的作用域都限定在文档源级别，sessionStorage还被限定在窗口中。localStorage存储的数据是永久性的，除非Web应用刻意删除这些存储的数据，或者用户通过浏览器配置来删除，否则数据将一直存储在用户的电脑上。sessionStorage在当前页面实例和当前浏览器会话期间为页面提供存储，一旦窗口或者标签页被永久关闭，所有通过sessionStorage存储的数据会被删除。将数据在localStorage和sessionStorage之间传输，会将浏览器生命周期以内的数据和本地永久数据互相暴露。</p>
+<p>**例如**：以下代码中，为了免重复输入，开发人员将用户的手机号存储在sessionStorage对象中。但是，在存储用户信息到localStorage时，又错误的将手机号码一并存了进去。这样将导致敏感信息被存储到localStorage。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-variable language_">sessionStorage</span>.<span class="hljs-title function_">setItem</span>(<span class="hljs-string">&quot;phone&quot;</span>, phone_number); <span class="hljs-keyword">var</span> userInfo = &#123;&#125;;<span class="hljs-keyword">var</span> userInfo[<span class="hljs-string">&quot;phone&quot;</span>] = <span class="hljs-variable language_">sessionStorage</span>.<span class="hljs-title function_">getItem</span>(<span class="hljs-string">&quot;phone&quot;</span>);<span class="hljs-variable language_">localStorage</span>.<span class="hljs-title function_">setItem</span>(<span class="hljs-string">&quot;phone&quot;</span>, userInfo);<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>不要将敏感数据存储在localStorage和sessionStorage中。将数据从一种存储格式迁移至另一种存储格式时，需要考虑迁移对于数据的隐私性和依赖该数据的业务逻辑的影响。</p>
+<h3 id="低危：JavaEE程序：直接使用线程"><a href="#低危：JavaEE程序：直接使用线程" class="headerlink" title="低危：JavaEE程序：直接使用线程"></a>低危：JavaEE程序：直接使用线程</h3><p>JAVA EE标准禁止在某些环境下使用Web应用程序中的线程管理，因为此时使用线程管理非常容易出错。线程管理起来很困难，可能还会以不可预知的方式干扰应用程序容器。即使容器没有受到干扰，线程管理通常还会导致各种难以发现的错误，如死锁、竞争条件及其他同步错误等。</p>
+<p>**例如**：下面代码片段中，在Servlet的`doGet()`方法中，直接创建了一个线程对象。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">doGet</span><span class="hljs-params">(HttpServletRequest request, HttpServletResponse response)</span> <span class="hljs-keyword">throws</span> ServletException, IOException &#123;    <span class="hljs-comment">// Perform servlet tasks.    // Create a new thread to handle background processing.    Runnable r = new Runnable() &#123;        public void run() &#123;        // Process and store request statistics.        ...        &#125;    &#125;;    new Thread(r).start();&#125;</span><br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>建议使用框架（如EJB、Spring等）提供的线程管理功能来替代直接使用操作线程。</p>
+<h3 id="低危：JavaEE程序：遗留的调试代码"><a href="#低危：JavaEE程序：遗留的调试代码" class="headerlink" title="低危：JavaEE程序：遗留的调试代码"></a>低危：JavaEE程序：遗留的调试代码</h3><p>应用程序中的测试代码会建立一些意想不到的入口，这些入口可能会被攻击者作为“后门”进行利用</p>
+<p>**例如**：JAVA EE程序中的`main()`方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;...&#125;<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>系统在发布之前应删除测试代码。</p>
+<h3 id="低危：日志记录：使用系统输出流"><a href="#低危：日志记录：使用系统输出流" class="headerlink" title="低危：日志记录：使用系统输出流"></a>低危：日志记录：使用系统输出流</h3><p>使用`System.out`或`System.err`进行程序日志输出，会导致程序的运行状况难以监控。</p>
+<p>**例如**：下列代码中使用`System.out`进行程序日志输出</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">System.out.println(log);<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>建议使用日志记录工具代替`System.out`或`System.err`记录程序日志。</p>
+<p>**例如**：下列代码中使用Log4j工具类进行程序日志输出</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">logger.info(log);<br></code></pre></td></tr></table></figure>
+
+<h3 id="低危：使用-或-比较字符串"><a href="#低危：使用-或-比较字符串" class="headerlink" title="低危：使用==或!=比较字符串"></a>低危：使用==或!=比较字符串</h3><p>程序中使用`==`或`!=`比较两个字符串是否相等，其实比较的是两个对象在内存中的地址值，而不是字符串的值。</p>
+<p>**例如**：下面代码片段中，将request中获取的参数值与&quot;admin&quot;使用`==`做比较，`dosomething()`方法将永远不会被执行。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">String</span> <span class="hljs-variable">username</span> <span class="hljs-operator">=</span> (String)request.getAttribute(<span class="hljs-string">&quot;usernamae&quot;</span>);<span class="hljs-keyword">if</span>(username==<span class="hljs-string">&quot;admin&quot;</span>)&#123;    dosomething();&#125;<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>程序中应采用`equals()`方法来对字符串进行比较，而不是通过==或!=运算符的方式来操作。</p>
+<h3 id="低危：硬编码文件分隔符"><a href="#低危：硬编码文件分隔符" class="headerlink" title="低危：硬编码文件分隔符"></a>低危：硬编码文件分隔符</h3><p>路径分割符号问题，不同的操作系统不同。在程序中不要硬性编码与平台相关的任何常量，比如行分隔符，文件分隔符，路径分隔符等等。例如文件分隔符，Windows系统使用&quot;\&quot;或&quot;/&quot;，而UNIX系统则使用&quot;/&quot;。应用程序需要在不同的平台上运行时，使用硬编码文件分隔符会导致应用程序逻辑执行错误，并有可能导致拒绝服务。</p>
+<p>**例如**：以下代码使用硬编码文件分隔符来打开文件：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">File</span> <span class="hljs-variable">file</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">File</span>(dirName + <span class="hljs-string">&quot;\\&quot;</span> + fileName);<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>不应使用硬编码文件分隔符，而应使用语言库提供的独立于平台的API，如`java.io.File.separator`，也可以通过使用`java.lang.System.getProperty(&quot;file.separator&quot;)`来获取。</p>
+<p>**例如**：针对示例代码的修改方法是：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">File</span> <span class="hljs-variable">file</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">File</span>(dirName + File.separator + fileName);<br></code></pre></td></tr></table></figure>
+
+<h3 id="低危：使用浮点数进行精确计算"><a href="#低危：使用浮点数进行精确计算" class="headerlink" title="低危：使用浮点数进行精确计算"></a>低危：使用浮点数进行精确计算</h3><p>Java中浮点数采用的是IEEE 754标准，所以在精确计算中使用浮点类型会发生精度缺失从而产生不正确的数值。</p>
+<p>**例如**：下面代码输出为false和0.060000000000000005</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span>&#123;    <span class="hljs-type">double</span> <span class="hljs-variable">a</span> <span class="hljs-operator">=</span> <span class="hljs-number">0.05</span> + <span class="hljs-number">0.01</span>;    System.out.println(a == <span class="hljs-number">0.06</span>);    System.out.println(a);&#125;<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>程序中避免使用浮点数进行精确计算，可以考虑采用整数类型或用于精确表达小数的BigDecimal类型替代。</p>
+<h3 id="低危：系统信息泄露：内部"><a href="#低危：系统信息泄露：内部" class="headerlink" title="低危：系统信息泄露：内部"></a>低危：系统信息泄露：内部</h3><p>通过系统输出流（非标准错误流）打印或日志功能将系统数据或调试信息输出到本地文件或屏幕时，发生内部信息泄露。</p>
+<p>**例如**：下面代码片段中，通过日志对象输出异常的堆栈信息，攻击者可能会利用这些堆栈信息制定相应的攻击计划。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">try</span>&#123;    ...&#125;<span class="hljs-keyword">catch</span>(Exception e)&#123;    logger.error(<span class="hljs-string">&quot;程序发生异常:&quot;</span>, e);&#125;<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>程序不应通过系统输出流或程序日志将系统数据或调试信息输出显示。</p>
+<h3 id="低危：试图重写静态方法"><a href="#低危：试图重写静态方法" class="headerlink" title="低危：试图重写静态方法"></a>低危：试图重写静态方法</h3><p>静态方法无法覆盖，在子类中覆盖父类的静态方法，这样容易产生混淆，从而导致错误。</p>
+<p>**例如**：下面代码示例中：子类不能覆盖父类的方法，`choose(&quot;user&quot;)`和`choose(&quot;admin&quot;)`都调用了父类中的方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">class</span> <span class="hljs-title class_">GrantAccess</span> &#123;    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">displayAccountStatus</span><span class="hljs-params">()</span> &#123;        System.out.println(<span class="hljs-string">&quot;Account details for admin: XX&quot;</span>);    &#125;&#125; <span class="hljs-keyword">class</span> <span class="hljs-title class_">GrantUserAccess</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">GrantAccess</span> &#123;    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">displayAccountStatus</span><span class="hljs-params">()</span> &#123;        System.out.println(<span class="hljs-string">&quot;Account details for user: XX&quot;</span>);    &#125;&#125; <span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">StatMethod</span> &#123;    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">choose</span><span class="hljs-params">(String username)</span> &#123;        <span class="hljs-type">GrantAccess</span> <span class="hljs-variable">admin</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">GrantAccess</span>();        <span class="hljs-type">GrantAccess</span> <span class="hljs-variable">user</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">GrantUserAccess</span>();        <span class="hljs-keyword">if</span> (username.equals(<span class="hljs-string">&quot;admin&quot;</span>)) &#123;            admin.displayAccountStatus();        &#125; <span class="hljs-keyword">else</span> &#123;            user.displayAccountStatus();        &#125;    &#125;     <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;        choose(<span class="hljs-string">&quot;user&quot;</span>); <span class="hljs-comment">// Account details for admin: XX        choose(&quot;admin&quot;); // Account details for admin: XX    &#125;&#125;</span><br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>应该尽量避免静态方法的命名与超类中的命名相同，以避免产生混淆。在开发中，可以将静态方法放入单独的final类中, 因为final类不会创建子类，还可以创建私有的构造函数，以防止针对类的实例而非类来调用静态方法。</p>
+<p>**例如**：下面代码示例中：去掉了static关键字，将`displayAccountStatus()`方法声明为实例方法，`choose(&quot;user&quot;)`和`choose(&quot;admin&quot;)`调用实现了预期的程序逻辑。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">class</span> <span class="hljs-title class_">GrantAccess</span> &#123;    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">displayAccountStatus</span><span class="hljs-params">()</span> &#123;        System.out.println(<span class="hljs-string">&quot;Account details for admin: XX&quot;</span>);    &#125;&#125; <span class="hljs-keyword">class</span> <span class="hljs-title class_">GrantUserAccess</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">GrantAccess</span> &#123;     <span class="hljs-meta">@Override</span>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">displayAccountStatus</span><span class="hljs-params">()</span> &#123;        System.out.println(<span class="hljs-string">&quot;Account details for user: XX&quot;</span>);    &#125;&#125; <span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">StatMethod</span> &#123;    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">choose</span><span class="hljs-params">(String username)</span> &#123;        <span class="hljs-type">GrantAccess</span> <span class="hljs-variable">admin</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">GrantAccess</span>();        <span class="hljs-type">GrantAccess</span> <span class="hljs-variable">user</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">GrantUserAccess</span>();        <span class="hljs-keyword">if</span> (username.equals(<span class="hljs-string">&quot;admin&quot;</span>)) &#123;            admin.displayAccountStatus();        &#125; <span class="hljs-keyword">else</span> &#123;            user.displayAccountStatus();        &#125;    &#125;     <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;        choose(<span class="hljs-string">&quot;user&quot;</span>); <span class="hljs-comment">// Account details for user: XX        choose(&quot;admin&quot;); // Account details for admin: XX    &#125;&#125;</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="低危：系统信息泄露：标准错误流"><a href="#低危：系统信息泄露：标准错误流" class="headerlink" title="低危：系统信息泄露：标准错误流"></a>低危：系统信息泄露：标准错误流</h3><p>通过系统输出流（标准错误流）打印或日志功能将系统数据或调试信息输出到本地文件或屏幕时，在一些类似Eclipse的程序，为了让错误信息更加显眼，会将错误信息以红色文本的形式通过System.err输出到控制台上，更容易发生内部信息泄露。</p>
+<p>**例如**：下面代码片段中，`printStackTrace()`方法内部使用了标准错误流输出异常的堆栈信息，攻击者可能会利用这些堆栈信息制定相应的攻击计划。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">try</span>&#123;    ...&#125;<span class="hljs-keyword">catch</span>(Exception e)&#123;    e.printStackTrace();&#125;<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>程序不应通过系统输出流或程序日志将系统数据或调试信息输出程序。</p>
+<h3 id="低危：泛化的捕获异常"><a href="#低危：泛化的捕获异常" class="headerlink" title="低危：泛化的捕获异常"></a>低危：泛化的捕获异常</h3><p>使用一个catch块捕获泛化的异常类（如Exception），可能会混淆那些需要特殊处理的异常，或是捕获了不应在该程序点捕获的异常。捕获范围过大的异常与“Java的异常处理机制”是相违背的。</p>
+<p>**例如**：下面的代码片段中，程序捕获了一个泛化的Exception异常。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">try</span> &#123;    doExchange();&#125; <span class="hljs-keyword">catch</span>(Exception e)&#123;    logger.error(<span class="hljs-string">&quot;doExchange failed&quot;</span>, e);&#125;<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>不应捕获范围过大的异常类，比如Exception、SystemException或ApplicationException，除非是级别非常高的程序或线程。</p>
+<h3 id="低危：泛化的抛出异常"><a href="#低危：泛化的抛出异常" class="headerlink" title="低危：泛化的抛出异常"></a>低危：泛化的抛出异常</h3><p>Java语言通过面向对象的异常处理机制来解决运行期间的错误，可以预防错误的程序代码或系统错误所造成的不可预期的结果发生。减少编程人员的工作，增加了程序的灵活性，增加程序的可读性和健壮性。如果程序只是抛出一个泛化的过于笼统的异常，不仅违反了该系统还会使调用者很难处理和修复发生的异常。</p>
+<p>**例如**：下面代码片段中，程序抛出了一个Exception异常，而不是具体的FileNotFoundException子类型异常，这样使得调用者很难理解和处理可能发生的异常。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">doExchange</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> Exception &#123;    <span class="hljs-type">FileInputStream</span> <span class="hljs-variable">fis</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">FileInputStream</span>(<span class="hljs-string">&quot;filename.txt&quot;</span>);&#125;<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>不应泛化的抛出Exception或Throwable类型的异常。</p>
+<h3 id="低危：表达式永远为false"><a href="#低危：表达式永远为false" class="headerlink" title="低危：表达式永远为false"></a>低危：表达式永远为false</h3><p>表达式的计算结果永远为false，表明基于该表达式的代码快将永远不会被执行，是程序中的死代码或用于调试的代码，这些死代码会增加代码的阅读、理解和维护难度，甚至该段代码可能是调试过程中用来发现程序错误的，这样该代码块可能被攻击者利用。</p>
+<p>**例如**：下列代码中，if的条件表达式为false，if代码块永远都不会被执行。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">if</span> (<span class="hljs-literal">false</span>)&#123;    <span class="hljs-comment">//doSomething&#125;</span><br></code></pre></td></tr></table></figure>
+
+<p>修复建议： </p>
+<p>程序异常中断了预期中的程序流程，应恰当地进行异常处理，要么从异常中恢复，将异常重新抛出，由下一个和try语句对应的catch段来处理，要么根据catch程序段的上下文抛出另一个合适的异常。</p>
+<h3 id="低危：表达式永远为true"><a href="#低危：表达式永远为true" class="headerlink" title="低危：表达式永远为true"></a>低危：表达式永远为true</h3><p>表达式的计算结果永远为true，表明程序中基于该表达式的段代码永远被执行，因此没有必要进行条件判断。</p>
+<p>**例如**：下列代码中，if的条件表达式为true，if代码块将永远被执行。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">if</span> (<span class="hljs-literal">true</span>)&#123;    <span class="hljs-comment">//doSomething&#125;</span><br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>检查程序逻辑，修改表达式判断条件。 </p>
+<h3 id="低危：未使用的字段"><a href="#低危：未使用的字段" class="headerlink" title="低危：未使用的字段"></a>低危：未使用的字段</h3><p>未使用的变量在程序中没有起到任何作用，是程序中的死代码或者是被注释掉的调试代码。这些死代码会增加代码的阅读、理解和维护难度。</p>
+<p>**例如**：如下代码中MyClass类中的字段`userName`从未使用过</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">MyClass</span> &#123;    <span class="hljs-keyword">private</span> String userName=<span class="hljs-string">&quot;admin&quot;</span>;    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;        System.out.println(<span class="hljs-string">&quot;UnusedField&quot;</span>);    &#125;&#125;<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>检查程序逻辑，如果确定程序中的死代码没有作用，应该将其删除。</p>
+<h3 id="低危：未使用的方法"><a href="#低危：未使用的方法" class="headerlink" title="低危：未使用的方法"></a>低危：未使用的方法</h3><p>未使用的方法在程序中没有起到任何作用，是程序中的死代码或者是被注释掉的调试代码。这些死代码会增加代码的阅读、理解和维护难度。</p>
+<p>**例如**：如下代码中MyClass类中的`unusedMethod()`方法从未使用过</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">MyClass</span> &#123;    <span class="hljs-keyword">private</span> String <span class="hljs-title function_">unusedMethod</span><span class="hljs-params">()</span>&#123;        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;myclass&quot;</span>;    &#125;     <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;        System.out.println(<span class="hljs-string">&quot;UnusedMethod&quot;</span>);    &#125;&#125;<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>检查程序逻辑，如果确定程序中的死代码没有作用，应该将其删除。 </p>
+<h3 id="低危：冗余的初始化"><a href="#低危：冗余的初始化" class="headerlink" title="低危：冗余的初始化"></a>低危：冗余的初始化</h3><p>程序未使用变量的初始值，变量初始化后，被重新赋值或者转向作用域之外。</p>
+<p>**例如**：下列程序声明一个变量`total`并赋值，后续并未使用所赋的值，再次赋值。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">double</span> <span class="hljs-variable">total</span> <span class="hljs-operator">=</span> getTotal();total = getOtherTotal();<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>为了使代码易于理解和维护，删除不必要的赋值。 </p>
+<h3 id="低危：未使用的值"><a href="#低危：未使用的值" class="headerlink" title="低危：未使用的值"></a>低危：未使用的值</h3><p>变量赋值后，程序未使用该变量。</p>
+<p>**例如**：下列程序声明一个字符串并赋值，后续一直未使用</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">String</span> <span class="hljs-variable">username</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;张三&quot;</span>;<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>为了使代码易于理解和维护，删除不必要的赋值。 </p>
+<h3 id="低危：冗余的null检查"><a href="#低危：冗余的null检查" class="headerlink" title="低危：冗余的null检查"></a>低危：冗余的null检查</h3><p>程序对一个引用的变量进行了null检查，但是在这之前，程序中已经对该变量进行了null检查，或是对该变量进行了一些可能会引发null异常的操作(取值、转换)。或者程序对变量进行了null检查但是并未返回或者抛出异常，后续使用该变量仍然可能引发null异常。</p>
+<p>**例1**：如下代码先调用字符串string的`length()`方法，此时如果string如果为null就已经会抛出空指针的异常，所以之后对string是否为null的判断完全是多余的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">System.out.println(string.length());<span class="hljs-keyword">if</span>(string!=<span class="hljs-literal">null</span>)&#123;    ...&#125;<br></code></pre></td></tr></table></figure>
+
+<p>**例2**：如下代码先对string进行null校验，但是并未返回或者抛出异常。后续继续调用字符串string的`length()`方法，此时如果string如果为null就已经会抛出空指针的异常，所以之前对string是否为null的判断完全是多余的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">if</span>(string == <span class="hljs-literal">null</span>)&#123;    ...&#125;System.out.println(string.length());<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>检查程序逻辑，删除不必要的null检查代码。 </p>
+<h3 id="低危：使用equals-来判断字符串是否为空"><a href="#低危：使用equals-来判断字符串是否为空" class="headerlink" title="低危：使用equals()来判断字符串是否为空"></a>低危：使用equals()来判断字符串是否为空</h3><p>程序中使用equals方法来判断字符串是否为空，这样会降低系统性能。</p>
+<p>修复建议：</p>
+<p>使用判断字符串长度的方法，判断字符串是否为空，这样会提升系统性能。</p>
+<h3 id="低危：循环中拼接字符串"><a href="#低危：循环中拼接字符串" class="headerlink" title="低危：循环中拼接字符串"></a>低危：循环中拼接字符串</h3><p>字符串对象是不可改变的，拼接和修改字符串对象，最后都会创建一个新的字符串对象。而在循环中拼接字符串将会产生很多的对象，浪费系统运行时间和空间。</p>
+<p>**例如**：在下面代码片段中，在循环中拼接字符串。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">String</span> <span class="hljs-variable">string</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;&quot;</span><span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i &lt; <span class="hljs-number">0</span>;i &lt; <span class="hljs-number">10</span>;i++) &#123;    string = string + i;&#125;<br></code></pre></td></tr></table></figure>
+
+<p>在上面的循环中产生了10个StringBuilder对象，每次都会调用两次`append`方法分别将string和i的值追加至StringBuilder对象中，最后调用toStirng方法将StringBuilder对象内容转化为字符串并赋值给string变量。</p>
+<p>修复建议：</p>
+<p>在循环语句结构中，需要保证线程安全可以使用StringBuffer代替String进行拼接，不需要时可以使用StringBuilder代替String进行拼接。</p>
+<p>**例如**：在下面代码片段中，在循环中使用StringBuilder拼接字符串。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">StringBuilder</span> <span class="hljs-variable">stringBuilder</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StringBuilder</span>();<span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i &lt; <span class="hljs-number">0</span>;i &lt; <span class="hljs-number">10</span>;i++) &#123;    stringBuilder.append(i);&#125;<span class="hljs-type">String</span> <span class="hljs-variable">string</span> <span class="hljs-operator">=</span> stringBuilder.toString();<br></code></pre></td></tr></table></figure>
+
+<h3 id="低危：创建Boolean对象"><a href="#低危：创建Boolean对象" class="headerlink" title="低危：创建Boolean对象"></a>低危：创建Boolean对象</h3><p>程序中采用`new Boolean(boolean expression)`或`new Boolean(String expression)`创建对象，该方法产生的额外对象将占用更多空间、降低性能。</p>
+<p>修复建议：</p>
+<p>使用`Boolean.valueOf(boolean expression)`或`Boolean.valueOf(String expression)`或`Boolean.TRUE、Boolean.FALSE`代替`new Boolean`方法。</p>
+<h3 id="低危：byte数组转String时未指定编码"><a href="#低危：byte数组转String时未指定编码" class="headerlink" title="低危：byte数组转String时未指定编码"></a>低危：byte数组转String时未指定编码</h3><p>在将字节数组的数据转换为String时如果未设定转换编码，可能会导致数据丢失。</p>
+<p>**例如**：下面代码片段中，将数据转换为字符串，以便创建hash值。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">byte</span>[] byteArray = <span class="hljs-type">byte</span>[BUFSIZE];<span class="hljs-type">FileInputStream</span> <span class="hljs-variable">fileInputStream</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">FileInputStream</span>(<span class="hljs-string">&quot;fileName&quot;</span>);<span class="hljs-type">int</span> <span class="hljs-variable">count</span> <span class="hljs-operator">=</span> fileInputStream.read(byteArray);<span class="hljs-type">String</span> <span class="hljs-variable">fileString</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">String</span>(byteArray);<span class="hljs-type">String</span> <span class="hljs-variable">fileSHA256Hex</span> <span class="hljs-operator">=</span> DigestUtils.sha256Hex(fileString);<br></code></pre></td></tr></table></figure>
+
+<p>当文件的大小小于字节数组容量SIZE时，只要文件myFile中的信息已编码为与默认字符集相同，此方式正确。但是，如果使用不同的编码方式，或者为二进制文件，则信息将会丢失。进而导致生成的SHA散列值的可靠性降低。</p>
+<p>修复建议：</p>
+<p>应避免将可能包含非字符数据的byte数组转换为String对象，如果必须将byte数组转String，应对其进行编码。</p>
+<p>**例1**：下面代码片段中，避免了将可能包含非字符数据的byte数组转换为String对象。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">byte</span>[] byteArray = <span class="hljs-type">byte</span>[BUFSIZE];<span class="hljs-type">FileInputStream</span> <span class="hljs-variable">fileInputStream</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">FileInputStream</span>(<span class="hljs-string">&quot;fileName&quot;</span>);<span class="hljs-type">int</span> <span class="hljs-variable">count</span> <span class="hljs-operator">=</span> fileInputStream.read(byteArr);<span class="hljs-type">byte</span>[] fileSHA256 = DigestUtils.sha256(byteArray);<br></code></pre></td></tr></table></figure>
+
+<p>**例2**：下面代码片段中，byte数组转String时指定了编码。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">byte</span>[] byteArray = <span class="hljs-type">byte</span>[BUFSIZE];<span class="hljs-type">FileInputStream</span> <span class="hljs-variable">fileInputStream</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">FileInputStream</span>(<span class="hljs-string">&quot;fileName&quot;</span>);<span class="hljs-type">int</span> <span class="hljs-variable">count</span> <span class="hljs-operator">=</span> fileInputStream.read(byteArray);<span class="hljs-type">String</span> <span class="hljs-variable">fileString</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">String</span>(byteArray,<span class="hljs-string">&quot;utf-8&quot;</span>);<span class="hljs-type">String</span> <span class="hljs-variable">fileSHA256Hex</span> <span class="hljs-operator">=</span> DigestUtils.sha256Hex(fileString);<br></code></pre></td></tr></table></figure>
+
+<h3 id="低危：侵犯隐私"><a href="#低危：侵犯隐私" class="headerlink" title="低危：侵犯隐私"></a>低危：侵犯隐私</h3><p>程序对敏感信息（如用户密码或身份证号等个人信息）处理不当可能导致用户的个人信息泄露，这是一种非法行为。</p>
+<p>**例如**：以下代码可读取存储在Android WebView上的给定站点的用户名和密码，并广播给所有注册的接收者。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">webView.setWebViewClient(<span class="hljs-keyword">new</span> <span class="hljs-title class_">WebViewClient</span>()&#123;    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">onReceivedHttpAuthRequest</span><span class="hljs-params">(WebView view, HttpAuthHandler httphandler, String url, String field)</span> &#123;        ...        <span class="hljs-type">Intent</span> <span class="hljs-variable">intent</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Intent</span>();        String[] credentials= view.getHttpAuthUsernamePassword(url, field);        <span class="hljs-type">String</span> <span class="hljs-variable">name</span> <span class="hljs-operator">=</span> credentials[<span class="hljs-number">0</span>];        <span class="hljs-type">String</span> <span class="hljs-variable">password</span> <span class="hljs-operator">=</span> credentials[<span class="hljs-number">1</span>];        intent.putExtra(<span class="hljs-string">&quot;username&quot;</span>, name);        intent.putExtra(<span class="hljs-string">&quot;password&quot;</span>, password);        intent.setAction(<span class="hljs-string">&quot;SEND_CREDENTIALS&quot;</span>);        ...        view.getContext().sendBroadcast(intent);    &#125;&#125;);<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>当安全和隐私的需要发生矛盾时，通常应优先考虑隐私的需要。为满足这一要求，同时又保证信息安全的需要，应在退出程序前清除所有私人信息。</p>
+<p>保护私人数据的最好做法就是最大程度地减少私人数据的暴露。不应允许应用程序、流程处理以及员工访问任何私人数据，除非是出于职责以内的工作需要。正如最小授权原则一样，不应该授予访问者超出其需求的权限，对私人数据的访问权限应严格限制在尽可能小的范围内。</p>
+<p>对于移动应用程序，请确保它们从不与在设备上运行的其他应用程序进行任何敏感数据通信。存储私人数据时，通常都应加密。对于Android以及其他任何使用SQLite数据库的平台来说，SQLCipher是一个好选择——对SQLite数据库的扩展为数据库文件提供了透明的256位AES加密。因此，凭证可以存储在加密的数据库中。</p>
+<p>**例1**：以下代码演示了在将所需的二进制码和存储凭证下载到数据库文件后，将SQLCipher集成到Android应用程序中的方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">import</span> net.sqlcipher.database.SQLiteDatabase;...SQLiteDatabase.loadLibs(<span class="hljs-built_in">this</span>);<span class="hljs-type">File</span> <span class="hljs-variable">dbFile</span> <span class="hljs-operator">=</span> getDatabasePath(<span class="hljs-string">&quot;credentials.db&quot;</span>);dbFile.mkdirs();dbFile.delete();<span class="hljs-type">SQLiteDatabase</span> <span class="hljs-variable">db</span> <span class="hljs-operator">=</span> SQLiteDatabase.openOrCreateDatabase(dbFile, <span class="hljs-string">&quot;credentials&quot;</span>, <span class="hljs-literal">null</span>);db.execSQL(<span class="hljs-string">&quot;create table credentials(u, p)&quot;</span>);db.execSQL(<span class="hljs-string">&quot;insert into credentials(u, p) values(?, ?)&quot;</span>, <span class="hljs-keyword">new</span> <span class="hljs-title class_">Object</span>[]&#123;username, password&#125;);<br></code></pre></td></tr></table></figure>
+
+<p>请注意，对`android.database.sqlite.SQLiteDatabase`的引用可以使用`net.sqlcipher.database.SQLiteDatabase`代替。</p>
+<p>要在WebView存储上启用加密，需要使用sqlcipher.so库重新编译WebKit。</p>
+<p>**例2**：以下代码从Android WebView存储读取给定站点的用户名和密码，而不是将其广播到所有注册的接收器，它仅在内部广播，以便广播只能由同一应用程序的其他部分看到。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">webview.setWebViewClient(<span class="hljs-keyword">new</span> <span class="hljs-title class_">WebViewClient</span>() &#123;    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">onReceivedHttpAuthRequest</span><span class="hljs-params">(WebView view, HttpAuthHandler handler, String host, String realm)</span> &#123;        String[] credentials = view.getHttpAuthUsernamePassword(host, realm);        <span class="hljs-type">String</span> <span class="hljs-variable">username</span> <span class="hljs-operator">=</span> credentials[<span class="hljs-number">0</span>];        <span class="hljs-type">String</span> <span class="hljs-variable">password</span> <span class="hljs-operator">=</span> credentials[<span class="hljs-number">1</span>];        <span class="hljs-type">Intent</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Intent</span>();        i.setAction(<span class="hljs-string">&quot;SEND_CREDENTIALS&quot;</span>);        i.putExtra(<span class="hljs-string">&quot;username&quot;</span>, username);        i.putExtra(<span class="hljs-string">&quot;password&quot;</span>, password);        LocalBroadcastManager.getInstance(view.getContext()).sendBroadcast(i);    &#125;&#125;);<br></code></pre></td></tr></table></figure>
+
+<h3 id="低危：switch语句中缺少default语句"><a href="#低危：switch语句中缺少default语句" class="headerlink" title="低危：switch语句中缺少default语句"></a>低危：switch语句中缺少default语句</h3><p>程序中switch语句缺少default语句，而所有可能的变量值不一定都会被给定的case语句处理，导致一些情况未处理并产生问题。</p>
+<p>修复建议：</p>
+<p>检查程序逻辑，为switch语句添加所需的default语句</p>
+<h3 id="低危：可序列化类中存在可序列化的敏感信息"><a href="#低危：可序列化类中存在可序列化的敏感信息" class="headerlink" title="低危：可序列化类中存在可序列化的敏感信息"></a>低危：可序列化类中存在可序列化的敏感信息</h3><p>在可序列化类中存在敏感信息，当对象被序列化时，类中的敏感信息将会存储。攻击者可能会序列化该对象，并获取敏感信息。</p>
+<p>**例如**：下列代码中类实现了序列化，且存在敏感信息`password`。攻击者获取该对象序列化的文件后，将会获取此用户密码。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Person</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Serializable</span>&#123;    <span class="hljs-keyword">private</span> String name;    <span class="hljs-keyword">private</span> String password;    <span class="hljs-keyword">public</span> <span class="hljs-title function_">Person</span><span class="hljs-params">(String name,String password)</span> &#123;        <span class="hljs-built_in">this</span>.setName(name);        <span class="hljs-built_in">this</span>.setPassword(password);    &#125;    ...&#125;<br></code></pre></td></tr></table></figure>
+
+<p>修复建议： </p>
+<p>在存在敏感信息的可序列化类中，当序列化对象时，忽略，拒绝或者加密敏感信息。</p>
+<p>**例1**：以下代码敏感信息使用transient关键字修饰，将不会参与序列化过程：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Person</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Serializable</span>&#123;    <span class="hljs-keyword">private</span> String name;    <span class="hljs-keyword">private</span> <span class="hljs-keyword">transient</span> String password;    <span class="hljs-keyword">public</span> <span class="hljs-title function_">Person</span><span class="hljs-params">(String name,String password)</span> &#123;        <span class="hljs-built_in">this</span>.setName(name);        <span class="hljs-built_in">this</span>.setPassword(password);    &#125;    ...&#125;<br></code></pre></td></tr></table></figure>
+
+<p>**例2**：以下代码将会在序列化时拒绝序列化：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Person</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Serializable</span> &#123;    <span class="hljs-keyword">private</span> String name;    <span class="hljs-keyword">private</span> String password;    <span class="hljs-keyword">public</span> <span class="hljs-title function_">Person</span><span class="hljs-params">(String name,String password)</span> &#123;        <span class="hljs-built_in">this</span>.setName(name);        <span class="hljs-built_in">this</span>.setPassword(password);    &#125;    ...    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">writeObject</span><span class="hljs-params">(ObjectOutputStream out)</span> <span class="hljs-keyword">throws</span> IOException &#123;        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">NotSerializableException</span>();    &#125;     <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">readObject</span><span class="hljs-params">(ObjectInputStream in)</span> <span class="hljs-keyword">throws</span> IOException, ClassNotFoundException &#123;        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">NotSerializableException</span>();    &#125;     <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">readObjectNoData</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> ObjectStreamException &#123;        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">NotSerializableException</span>();    &#125;&#125;```<br></code></pre></td></tr></table></figure>
+
+<h3 id="低危：空的方法"><a href="#低危：空的方法" class="headerlink" title="低危：空的方法"></a>低危：空的方法</h3><p>程序中存在空的方法。</p>
+<p>修复建议：</p>
+<p>检测程序逻辑，是否存在未完成的代码。</p>
+<h3 id="低危：空的代码块"><a href="#低危：空的代码块" class="headerlink" title="低危：空的代码块"></a>低危：空的代码块</h3><p>程序中存在空的代码块。</p>
+<p>**例如**：下面代码片段中，程序中存在空的代码块，在程序中毫无意义。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">EmptyBlock</span>&#123;    &#123;        <span class="hljs-comment">//空的代码块    &#125;    ...    public void bad() &#123;        &#123;            //空的代码块        &#125;        ...    &#125;&#125;</span><br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>检测程序逻辑，是否存在未完成的代码。</p>
+<h3 id="低危：无用的分号"><a href="#低危：无用的分号" class="headerlink" title="低危：无用的分号"></a>低危：无用的分号</h3><p>程序中存在无用的分号</p>
+<p>修复建议：</p>
+<p>检测程序逻辑，是否需要删除无用的分号。</p>
+<h3 id="低危：错误的参数顺序"><a href="#低危：错误的参数顺序" class="headerlink" title="低危：错误的参数顺序"></a>低危：错误的参数顺序</h3><p>调用方法时，使用错误的参数顺序可能导致应用程序以意想不到的方式运行。</p>
+<p>**例如**：下面代码片段中，copy方法定义了src参数为第一个，而dest为第二个，最后调用时却将dest作为第一个参数。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> Exception &#123;    <span class="hljs-type">Object</span> <span class="hljs-variable">src</span> <span class="hljs-operator">=</span> <span class="hljs-literal">null</span>;    <span class="hljs-type">Object</span> <span class="hljs-variable">dest</span> <span class="hljs-operator">=</span> <span class="hljs-literal">null</span>;    ...    copy(dest, src);&#125; <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">copy</span><span class="hljs-params">(Object src,Object dest)</span> &#123;    ...&#125;<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>检查程序逻辑，正确的进行方法调用，明确参数顺序。</p>
+<p>低危：空的if代码块</p>
+<p>程序中存在空的if代码块，可能是程序员的逻辑出现问题。</p>
+<p>**例如**：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-keyword">if</span>(flag)&#123;&#125;<br></code></pre></td></tr></table></figure>
+
+<p>修复建议： </p>
+<p>检测程序逻辑，是否存在未完成的代码。</p>
+<h3 id="低危：隐藏的表单字段"><a href="#低危：隐藏的表单字段" class="headerlink" title="低危：隐藏的表单字段"></a>低危：隐藏的表单字段</h3><p>隐藏字段是不安全的参数，攻击者能够在一个post请求中改变隐藏字段的值。</p>
+<p>**例如**：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;hidden&quot;</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>将隐藏字段视为不可信赖的输入，不要在隐藏字段中存储敏感信息。 </p>
+<h3 id="低危：侵犯隐私：自动补全"><a href="#低危：侵犯隐私：自动补全" class="headerlink" title="低危：侵犯隐私：自动补全"></a>低危：侵犯隐私：自动补全</h3><p>在启用自动补全功能的情况下，一些浏览器会在整个会话中保留用户输入，这将允许在初始化用户之后使用计算机来查看先前提交的信息。</p>
+<p>**例如**：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;form02&quot;</span> <span class="hljs-attr">action</span>=<span class="hljs-string">&quot;&quot;</span> <span class="hljs-attr">method</span>=<span class="hljs-string">&quot;post&quot;</span> <span class="hljs-attr">autocomplete</span>=<span class="hljs-string">&quot;on&quot;</span>&gt;</span>    密码: <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;password&quot;</span> &gt;</span>    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;submit&quot;</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;提交&quot;</span> &gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>在使用HTML5时建议不要打开autocomplete属性。</p>
+<p>**例1**：在表单中，将autocomplete的属性值显示设置为off,会禁用所有的input的自动补全功能。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;form02&quot;</span> <span class="hljs-attr">action</span>=<span class="hljs-string">&quot;&quot;</span> <span class="hljs-attr">method</span>=<span class="hljs-string">&quot;post&quot;</span> <span class="hljs-attr">autocomplete</span>=<span class="hljs-string">&quot;off&quot;</span>&gt;</span>    密码: <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;password&quot;</span> &gt;</span>    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;submit&quot;</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;提交&quot;</span> &gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>**例2**：或者在相应的input标签上将autocomplete的属性值显示设置为off，禁用指定的input的自动补全功能。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;form02&quot;</span> <span class="hljs-attr">action</span>=<span class="hljs-string">&quot;&quot;</span> <span class="hljs-attr">method</span>=<span class="hljs-string">&quot;post&quot;</span>&gt;</span>    密码: <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;password&quot;</span> <span class="hljs-attr">autocomplete</span>=<span class="hljs-string">&quot;off&quot;</span>&gt;</span>    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;submit&quot;</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;提交&quot;</span> &gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="低危：遗留的调试代码"><a href="#低危：遗留的调试代码" class="headerlink" title="低危：遗留的调试代码"></a>低危：遗留的调试代码</h3><p>应用程序中的测试代码会建立一些意想不到的入口，这些入口可能会被攻击者作为“后门”进行利。有的测试代码本身并不会带来危害，但它表明了程序未进行严格的清理，攻击者很可能会查找到另外一些可利用的测试代码。</p>
+<p>**例如**：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(message);<br></code></pre></td></tr></table></figure>
+
+<p>修复建议： </p>
+<p>应用程序在发布之前应删除测试代码。</p>
+<h2 id="异常处理"><a href="#异常处理" class="headerlink" title="异常处理"></a>异常处理</h2><h3 id="低危：捕获NullPointerException"><a href="#低危：捕获NullPointerException" class="headerlink" title="低危：捕获NullPointerException"></a>低危：捕获NullPointerException</h3><p>应用程序中不应该捕获`NullPointerException`或者任何它的基类。因为捕获`NullPointerException`只可能掩盖潜在的空引用，降低应用性能，并造成难以理解和维护的代码。</p>
+<p>**例如**：如下代码对空指针异常进行了捕获</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">String name=<span class="hljs-literal">null</span>;<span class="hljs-keyword">try</span> &#123;    name=request.getParameter(<span class="hljs-string">&quot;name&quot;</span>);    <span class="hljs-keyword">if</span>(name.equals(<span class="hljs-string">&quot;admin&quot;</span>))&#123;        ...    &#125;&#125; <span class="hljs-keyword">catch</span>(NullPointerException e) &#123; <span class="hljs-comment">//程序捕获NullPointerException    ...&#125;</span><br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>检查程序逻辑，删除捕获`NullPointerException`的代码。</p>
+<h3 id="低危：finally代码块中抛出异常"><a href="#低危：finally代码块中抛出异常" class="headerlink" title="低危：finally代码块中抛出异常"></a>低危：finally代码块中抛出异常</h3><p>在finally代码块中抛出异常时会消除从try或catch程序段抛出的任何异常，并影响后续代码的执行</p>
+<p>**例如**：下面代码中在finally代码块中抛出了异常</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> doOperation <span class="hljs-keyword">throws</span> IOException&#123;    <span class="hljs-type">FileInputStream</span> <span class="hljs-variable">fis</span> <span class="hljs-operator">=</span> <span class="hljs-literal">null</span>;    <span class="hljs-keyword">try</span>&#123;        fis = <span class="hljs-keyword">new</span> <span class="hljs-title class_">FileInputStream</span>(<span class="hljs-string">&quot;Reader.txt&quot;</span>);        ...    &#125; <span class="hljs-keyword">finally</span> &#123;        fis.close();        ...    &#125;&#125;<br></code></pre></td></tr></table></figure>
+
+<p>当Reader.txt不存在，且程序并未对异常进行捕获时，程序只会抛出finally代码块中产生的`NullPointerException`，try代码块中产生的`FileNotFoundException`将不会显示，后续代码将不会执行。</p>
+<p>修复建议：</p>
+<p>不应在finally代码块中抛出异常，应直接处理掉可能发生的异常</p>
+<p>**例如**：下面代码中在finally代码块中处理了异常,其后续代码的执行不会被影响</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> doOperation <span class="hljs-keyword">throws</span> IOException&#123;    <span class="hljs-type">FileInputStream</span> <span class="hljs-variable">fis</span> <span class="hljs-operator">=</span> <span class="hljs-literal">null</span>;    <span class="hljs-keyword">try</span>&#123;        fis = <span class="hljs-keyword">new</span> <span class="hljs-title class_">FileInputStream</span>(<span class="hljs-string">&quot;Reader.txt&quot;</span>);        ...    &#125; <span class="hljs-keyword">finally</span> &#123;        <span class="hljs-keyword">if</span>(fis !=<span class="hljs-literal">null</span>) &#123;            <span class="hljs-keyword">try</span> &#123;                fis.close();            &#125; <span class="hljs-keyword">catch</span> (IOException e) &#123;            ...        &#125;        ...    &#125;    ...&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="低危：空的catch代码块-1"><a href="#低危：空的catch代码块-1" class="headerlink" title="低危：空的catch代码块(1)"></a>低危：空的catch代码块(1)</h3><p>忽略或消除程序异常会导致不一致的程序状态，**例如**：在try程序段中，不会执行在异常抛出之后的表达式或语句。</p>
+<p>**例如**：下面这段不符合规则的代码示例捕获并消除了`InterruptedException`。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Foo</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Runnable</span>&#123;    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">run</span><span class="hljs-params">()</span>&#123;        <span class="hljs-keyword">try</span>&#123;            Thread.sleep(<span class="hljs-number">1000</span>);        &#125;<span class="hljs-keyword">catch</span>(InterruptedException e)&#123;            <span class="hljs-comment">//Ignore        &#125;    &#125;&#125;</span><br></code></pre></td></tr></table></figure>
+
+<p>上面程序中，妨碍了`run()`方法的调用者判断是否发生一个中断异常。</p>
+<p>修复建议：</p>
+<p>程序异常中断了预期中的程序流程，应恰当地进行异常处理，要么从异常中恢复，将异常重新抛出，由下一个和try语句对应的catch段来处理，要么根据catch程序段的上下文抛出另一个合适的异常。</p>
+<h3 id="低危：空的catch代码块-2"><a href="#低危：空的catch代码块-2" class="headerlink" title="低危：空的catch代码块(2)"></a>低危：空的catch代码块(2)</h3><p>忽略或消除程序异常会导致不一致的程序状态，例如在try程序段中，不会执行在异常抛出之后的表达式或语句。</p>
+<p>**例如**：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-keyword">try</span>&#123;    <span class="hljs-keyword">var</span> a = <span class="hljs-number">1</span>;&#125; <span class="hljs-keyword">catch</span>(e)&#123;&#125;<br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>程序异常中断了预期中的程序流程，应恰当地进行异常处理，要么从异常中恢复，将异常重新抛出，由下一个和try语句对应的catch段来处理，要么根据catch程序段的上下文抛出另一个合适的异常。 </p>
+<h2 id="跨站脚本-1"><a href="#跨站脚本-1" class="headerlink" title="跨站脚本"></a>跨站脚本</h2><h3 id="低危：跨站请求伪造"><a href="#低危：跨站请求伪造" class="headerlink" title="低危：跨站请求伪造"></a>低危：跨站请求伪造</h3><p>跨站请求伪造(CSRF)是伪造客户端请求的一种攻击。应用程序允许用户提交不包含任何nonce（与用户Session关联的加密随机值）的请求，将可能导致CSRF攻击。</p>
+<p>**例如**：以下代码片段用于银行转账功能，对于该重要敏感的操作没有进行相应防护，将易于导致跨站请求伪造攻击。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-keyword">var</span> req = <span class="hljs-keyword">new</span> <span class="hljs-title class_">XMLHttpRequest</span>();req.<span class="hljs-title function_">open</span>(<span class="hljs-string">&quot;POST&quot;</span>, <span class="hljs-string">&quot;/transferFunds&quot;</span>, <span class="hljs-literal">true</span>);body = <span class="hljs-string">&quot;to_account=Bill&amp;amount=10000&quot;</span>;req.<span class="hljs-title function_">send</span>(body);<br></code></pre></td></tr></table></figure>
+
+<p>**例2**：下面是通过表单发送请求。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">method</span>=<span class="hljs-string">&quot;GET&quot;</span> <span class="hljs-attr">action</span>=<span class="hljs-string">&quot;/transferFunds &quot;</span>&gt;</span>    cash: <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;text&quot;</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;cash&quot;</span>&gt;</span>    to: <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot; text &quot;</span> <span class="hljs-attr">name</span>=<span class="hljs-string">“to</span>&quot;&gt;</span>    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;submit&quot;</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;action&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;TransferFunds&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>修复建议：</p>
+<p>防止跨站请求伪造攻击的方法如下：</p>
+<p>防御策略</p>
+<blockquote>
+<p>1、验证HTTP Refer字段</p>
+<p>2、在请求地址中添加token验证</p>
+<p>3、在http头中自定义属性并验证</p>
+<p>4、Chrome浏览器端启用 SameSite cookie</p>
+</blockquote>
+<p>防御手段</p>
+<blockquote>
+<p>1、尽量使用POST, 限制GET</p>
+<p>2、调整浏览器Cookie策略</p>
+<p>3、加验证码，强制用户必须与应用进行交互，才能完成最终请求。在通常情况下，验证码能很好遏制CSRF攻击。但是出于用户体验考虑，网站不能给所有的操作都加上验证码。因此验证码只能作为一种辅助手段，不能作为主要解决方案</p>
+<p>4、Referer Check在Web最常见的应用就是“防止图片盗链”。</p>
+<p>同理，Referer Check也可以被用于检查请求是否来自合法的“源”（Referer值是否是指定页面，或者网站的域），如果都不是，那么就可能是CSRF攻击</p>
+<p>5、Anti CSRF token 业界推荐</p>
+</blockquote>
+<p>Anti CSRF token</p>
+<blockquote>
+<p>1、用户访问某个表单页面。</p>
+<p>2、服务端生成一个Token，放在用户的Session中，或者浏览器的Cookie中。</p>
+<p>3、在页面表单附带上Token参数。</p>
+<p>4、用户提交请求后， 服务端验证表单中的Token是否与用户Session（或Cookies）中的Token一致，一致为合法请求，不是则非法请求。</p>
+</blockquote>
+<p>这个Token的值必须是随机的，不可预测的。由于Token的存在，攻击者无法再构造一个带有合法Token的请求实施CSRF攻击。</p>
+<p>另外使用Token时应注意Token的保密性，尽量把敏感操作由GET改为POST，以form或AJAX形式提交，避免Token泄露。</p>
+<p>**例如**：下面代码片段中，在表单中增加了一个Token。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs javascript">req.<span class="hljs-title function_">open</span>(<span class="hljs-string">&quot;POST&quot;</span>, <span class="hljs-string">&quot;/transferFunds&quot;</span>, <span class="hljs-literal">true</span>);body = <span class="hljs-string">&quot;to_account=Bill&amp;amount=10000&amp;token=&quot;</span> + token;<span class="hljs-comment">//token为与会话相关的一次性随机数。req.send(body);</span><br></code></pre></td></tr></table></figure>
+
+<p>这样，服务器端程序响应用户请求前先验证Token，判断请求的合法性。对于Token，越难被猜出攻击者攻击成功的概率就越低。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>JAVA Web应用常见漏洞与修复建议</div>
+      <div>https://yhao521.github.io/2025/07/23/摘录/JAVA Web应用常见漏洞与修复建议/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>yhao521</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年7月23日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F2/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-4/" title="设计模式-4">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">设计模式-4</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E6%91%98%E5%BD%95/flux-lora%20xy%E8%A1%A8%E5%AF%B9%E6%AF%94%E5%B7%A5%E4%BD%9C%E6%B5%81/" title="夸克网盘分享">
+                        <span class="hidden-mobile">夸克网盘分享</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>  
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

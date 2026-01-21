@@ -1,0 +1,672 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="[[Asthenian]]">
+  <meta name="keywords" content="java,博客,vue,spring,mysql,docker,linux">
+  
+    <meta name="description" content="深入SpringBoot启动流程：自动配置与Bean生命周期核心解析 一、SpringBoot启动全流程（面试回答框架） 回答结构建议： &quot;SpringBoot的启动流程可以拆解为几个核心阶段，我们可">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深入SpringBoot启动流程：自动配置与Bean生命周期核心解析">
+<meta property="og:url" content="https://yhao521.github.io/2025/10/08/%E6%91%98%E5%BD%95/%E6%B7%B1%E5%85%A5SpringBoot%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%EF%BC%9A%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E4%B8%8EBean%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E6%A0%B8%E5%BF%83%E8%A7%A3%E6%9E%90/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="深入SpringBoot启动流程：自动配置与Bean生命周期核心解析 一、SpringBoot启动全流程（面试回答框架） 回答结构建议： &quot;SpringBoot的启动流程可以拆解为几个核心阶段，我们可">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-10-08T12:32:00.954Z">
+<meta property="article:modified_time" content="2025-10-08T12:32:06.125Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="clippings">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>深入SpringBoot启动流程：自动配置与Bean生命周期核心解析 - 匆匆过客的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yhao521.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>匆匆过客的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="深入SpringBoot启动流程：自动配置与Bean生命周期核心解析"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-10-08 20:32" pubdate>
+          2025年10月8日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          900 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          8 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">深入SpringBoot启动流程：自动配置与Bean生命周期核心解析</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>![[_resources&#x2F;5748e291ac82a16d9a71a2181319849b_MD5.jpg]]![[_resources&#x2F;206b42a7c013357424f6aae87d90ca68_MD5.png]]</p>
+<h3 id="深入SpringBoot启动流程：自动配置与Bean生命周期核心解析"><a href="#深入SpringBoot启动流程：自动配置与Bean生命周期核心解析" class="headerlink" title="深入SpringBoot启动流程：自动配置与Bean生命周期核心解析"></a>深入SpringBoot启动流程：自动配置与Bean生命周期核心解析</h3><hr>
+<h4 id="一、SpringBoot启动全流程（面试回答框架）"><a href="#一、SpringBoot启动全流程（面试回答框架）" class="headerlink" title="一、SpringBoot启动全流程（面试回答框架）"></a>一、SpringBoot启动全流程（面试回答框架）</h4><p><strong>回答结构建议</strong> ：<br>“SpringBoot的启动流程可以拆解为几个核心阶段，我们可以结合源码关键类来串联整个过程。总体分为：环境准备→上下文初始化→自动装配→Bean生命周期管理。以下是具体链路（边说边画流程图效果更佳）：”</p>
+<ol>
+<li><strong>启动入口</strong> ：<br> <code>SpringApplication.run(主类, args)</code><br> → 初始化 <code>SpringApplication</code> 实例，加载 <code>META-INF/spring.factories</code> 中的 <strong>ApplicationContextInitializer</strong> 、 <strong>ApplicationListener</strong> 。</li>
+<li><strong>环境准备</strong> ：<br> → <code>prepareEnvironment()</code> 加载配置文件（application.yml&#x2F;properties）<br> → 发布 <strong>ApplicationEnvironmentPreparedEvent</strong> 事件（监听器处理Profile激活等）。</li>
+<li><strong>创建上下文</strong> ：<br> → 根据Web类型（Servlet&#x2F;Reactive）创建 <strong>AnnotationConfigServletWebServerApplicationContext</strong> （默认）<br> → 调用 <code>refreshContext(context)</code> 进入核心阶段。</li>
+<li><strong>刷新上下文（核心！）</strong> ：<br> → <code>AbstractApplicationContext.refresh()</code> 执行12个关键步骤：<br> • <strong>BeanFactory准备</strong> ： <code>obtainFreshBeanFactory()</code> 初始化Bean容器。<br> • <strong>Invoke BeanFactoryPostProcessors</strong> （ <strong>自动装配在此触发！</strong> ）：<br> → 处理 <code>@Configuration</code> 类， <strong>ConfigurationClassPostProcessor</strong> 解析 <code>@EnableAutoConfiguration</code><br> → 加载所有 <code>META-INF/spring.factories</code> 中的 <strong>AutoConfigurationImportSelector</strong> ，筛选有效配置类。<br> • <strong>注册BeanPostProcessors</strong> ：例如处理 <code>@Autowired</code> 的 <strong>AutowiredAnnotationBeanPostProcessor</strong> 。<br> • <strong>实例化单例Bean</strong> ：包括主类、Starter中的条件Bean。</li>
+<li><strong>内嵌容器启动</strong> ：<br> → 如果是Web应用， <strong>TomcatServletWebServerFactory</strong> 创建并启动Tomcat。</li>
+</ol>
+<hr>
+<h4 id="二、自动配置（Starter）加载时机"><a href="#二、自动配置（Starter）加载时机" class="headerlink" title="二、自动配置（Starter）加载时机"></a>二、自动配置（Starter）加载时机</h4><p><strong>面试聚焦点</strong> ：<br>“自动配置类的加载发生在 <code>refresh()</code> 阶段的 <code>invokeBeanFactoryPostProcessors()</code> ，由 <strong>ConfigurationClassPostProcessor</strong> 解析主类上的 <code>@SpringBootApplication</code> （隐含 <code>@EnableAutoConfiguration</code> ）。”</p>
+<p>• <strong>关键链路</strong> ：<br><code>SpringApplication.run()</code> → <code>refreshContext()</code> → <code>refresh()</code> → <code>invokeBeanFactoryPostProcessors()</code><br>→ 调用 <code>ConfigurationClassParser.parse()</code> 扫描 <code>spring.factories</code> → 过滤无效配置（通过 <code>@ConditionalOnClass</code> 等条件注解）。</p>
+<p>• <strong>示例</strong> ：<br>当引入 <code>spring-boot-starter-web</code> 时， <code>SpringBootApplication</code> 会触发加载 <strong>EmbeddedTomcatAutoConfiguration</strong> ，但仅在检测到存在 <code>Servlet.class</code> 和 <code>Tomcat.class</code> 时生效。</p>
+<hr>
+<h4 id="三、Bean生命周期与扩展点（重点！）"><a href="#三、Bean生命周期与扩展点（重点！）" class="headerlink" title="三、Bean生命周期与扩展点（重点！）"></a>三、Bean生命周期与扩展点（重点！）</h4><p><strong>回答逻辑</strong> ：<br>“Bean的生命周期由BeanFactory管理，分为实例化→属性填充→初始化→销毁，开发者可通过多种扩展点干预。”</p>
+<ol>
+<li><strong>实例化</strong> ：<br> • <strong>时机</strong> ：容器启动时（非懒加载的单例Bean）或首次 <code>getBean()</code> 调用时。<br> • <strong>底层</strong> ： <code>AbstractAutowireCapableBeanFactory.createBean()</code> → 反射调用构造器。</li>
+<li><strong>初始化</strong> ：<br> • <strong>步骤顺序</strong> ：<ol>
+<li>注入 <code>@Autowired</code> 依赖</li>
+<li>执行 <code>@PostConstruct</code> 方法</li>
+<li>实现 <code>InitializingBean.afterPropertiesSet()</code></li>
+<li>调用自定义 <code>init-method</code> （如 <code>@Bean(initMethod=&quot;xxx&quot;)</code> ）</li>
+</ol>
+</li>
+<li><strong>扩展点</strong> ：<br> • <strong>BeanPostProcessor</strong> （ <strong>最常用！</strong> ）：<br> → <code>postProcessBeforeInitialization</code> （初始化前）<br> → <code>postProcessAfterInitialization</code> （初始化后）<br> → 常见实现类： <code>AutowiredAnnotationBeanPostProcessor</code> （处理@Autowired）、 <code>CommonAnnotationBeanPostProcessor</code> （处理@PostConstruct）。<br> • <strong>BeanFactoryPostProcessor</strong> ：干预Bean定义（如修改属性值）。<br> • <strong>@PreDestroy</strong> ：销毁前回调。</li>
+</ol>
+<p><strong>面试示例</strong> ：<br>“若我们需要在某个Bean初始化后执行日志打印，可以自定义一个BeanPostProcessor，在 <code>postProcessAfterInitialization</code> 方法中判断Bean类型并添加逻辑。”</p>
+<hr>
+<h4 id="四、总结（向面试官输出亮点）"><a href="#四、总结（向面试官输出亮点）" class="headerlink" title="四、总结（向面试官输出亮点）"></a>四、总结（向面试官输出亮点）</h4><p>• <strong>主动关联知识点</strong> ：<br>“SpringBoot的启动流程本质是Spring容器的扩展，自动装配通过条件注解实现‘约定大于配置’，而Bean生命周期扩展点体现了Spring高扩展性的设计思想。”<br>• <strong>实战结合</strong> ：<br>“理解这些机制后，我们可以更高效地解决例如‘自定义Starter’、‘Bean循环依赖’、‘动态注册Bean’等高频面试问题。”</p>
+<hr>
+<p><strong>注意事项</strong> ：<br>• 回答时避免逐句背诵源码，用流程化语言表达（如：“当容器检测到@SpringBootApplication时，会触发自动配置类的条件过滤”）。<br>• 主动引导技术栈，如提到“您提到的Starter自动装配问题，其实与SpringBoot的SPI机制有关，我们可以进一步探讨”。</p>
+<p>本文收录于以下专栏</p>
+<p>SpringBoot学习</p>
+<p>SpringBoot学习</p>
+<p>19 订阅</p>
+<p>·</p>
+<p>63 篇文章</p>
+<p>评论 0</p>
+<p>暂无评论数据</p>
+<p>![[_resources&#x2F;8aa0edd6548990f443375260912fd566_MD5.svg]] 1</p>
+<p>![[_resources&#x2F;fa2f65e8e81f497181f67176f5244689_MD5.svg]] 评论</p>
+<p>![[_resources&#x2F;dad6c8314633039dd8616b47c0db6d5f_MD5.svg]] 收藏</p>
+<p>APP内打开</p>
+<p>![[_resources&#x2F;570b1d78d33410e177b1a221f5a5a501_MD5.png]]</p>
+<h2 id="登录掘金领取礼包"><a href="#登录掘金领取礼包" class="headerlink" title="登录掘金领取礼包"></a>登录掘金领取礼包</h2><p>更多登录后权益等你解锁</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/clippings/" class="print-no-link">#clippings</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>深入SpringBoot启动流程：自动配置与Bean生命周期核心解析</div>
+      <div>https://yhao521.github.io/2025/10/08/摘录/深入SpringBoot启动流程：自动配置与Bean生命周期核心解析/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>[[Asthenian]]</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年10月8日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/10/08/%E6%91%98%E5%BD%95/Spring%20Cloud%20Gateway%E9%9D%A2%E8%AF%95%E5%A4%BA%E5%91%BD%E8%BF%9E%E7%8E%AF10%E9%97%AE%EF%BC%8C%E8%BF%99%E8%B0%81%E6%89%9B%E5%BE%97%E4%BD%8F%EF%BC%9F%20-%20%E8%84%89%E8%84%89/" title="Spring Cloud Gateway面试夺命连环10问，这谁扛得住？ - 脉脉">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Spring Cloud Gateway面试夺命连环10问，这谁扛得住？ - 脉脉</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/10/08/%E6%91%98%E5%BD%95/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E8%BF%87%E7%A8%8B%E4%B8%8E%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E8%AF%A6%E8%A7%A3%EF%BC%9A%E4%BB%8E%E6%BA%90%E7%A0%81%E5%88%B0%E5%AE%9E%E7%8E%B0/" title="Spring Boot 启动过程与自动配置详解：从源码到实现">
+                        <span class="hidden-mobile">Spring Boot 启动过程与自动配置详解：从源码到实现</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>  
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

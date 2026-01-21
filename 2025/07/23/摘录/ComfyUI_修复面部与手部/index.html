@@ -1,0 +1,684 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="[[花鸣空写字的目的，是想和自己聊聊天]]">
+  <meta name="keywords" content="java,博客,vue,spring,mysql,docker,linux">
+  
+    <meta name="description" content="在 WebUI 中，有个 ADetailer 插件可修复人物面部，只需点下相应选项即可。ComfyUI 中至今没有同款插件，但有几个替代。本篇分享其中两个我使用中觉得不错的面部修复插件，以及坏手的修复方法，仅限 AI 生图，真实…">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ComfyUI_修复面部与手部">
+<meta property="og:url" content="https://yhao521.github.io/2025/07/23/%E6%91%98%E5%BD%95/ComfyUI_%E4%BF%AE%E5%A4%8D%E9%9D%A2%E9%83%A8%E4%B8%8E%E6%89%8B%E9%83%A8/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="在 WebUI 中，有个 ADetailer 插件可修复人物面部，只需点下相应选项即可。ComfyUI 中至今没有同款插件，但有几个替代。本篇分享其中两个我使用中觉得不错的面部修复插件，以及坏手的修复方法，仅限 AI 生图，真实…">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-07-23T12:01:41.000Z">
+<meta property="article:modified_time" content="2025-07-23T12:01:41.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="clippings">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>ComfyUI_修复面部与手部 - 匆匆过客的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yhao521.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>匆匆过客的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="ComfyUI_修复面部与手部"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-07-23 20:01" pubdate>
+          2025年7月23日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.6k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          14 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">ComfyUI_修复面部与手部</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>![[_resources&#x2F;74328415ceb130e3bed9a2be41ea7754_MD5.webp]]</p>
+<p>ComfyUI_修复面部与手部</p>
+<p>在 WebUI 中，有个 <a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=253706645&content_type=Article&match_order=1&q=ADetailer&zd_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ6aGlkYV9zZXJ2ZXIiLCJleHAiOjE3NDk4NjM5ODgsInEiOiJBRGV0YWlsZXIiLCJ6aGlkYV9zb3VyY2UiOiJlbnRpdHkiLCJjb250ZW50X2lkIjoyNTM3MDY2NDUsImNvbnRlbnRfdHlwZSI6IkFydGljbGUiLCJtYXRjaF9vcmRlciI6MSwiemRfdG9rZW4iOm51bGx9.R6D6JK6GTm5oP06I14wdQXqAw7i_a4il-p-N5_KYP5Y&zhida_source=entity">ADetailer</a> 插件可修复人物面部，只需点下相应选项即可。ComfyUI 中至今没有同款插件，但有几个替代。本篇分享其中两个我使用中觉得不错的面部修复插件，以及坏手的修复方法，仅限 AI 生图，真实照片的修复方法会另开一篇。</p>
+<hr>
+<p>![[_resources&#x2F;1fb3533f462c0804000868cd2511376a_MD5.jpg]]</p>
+<h2 id="Impact-Pack"><a href="#Impact-Pack" class="headerlink" title="Impact-Pack"></a>Impact-Pack</h2><p>最基础的 <a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=253706645&content_type=Article&match_order=1&q=FaceDetailer&zd_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ6aGlkYV9zZXJ2ZXIiLCJleHAiOjE3NDk4NjM5ODgsInEiOiJGYWNlRGV0YWlsZXIiLCJ6aGlkYV9zb3VyY2UiOiJlbnRpdHkiLCJjb250ZW50X2lkIjoyNTM3MDY2NDUsImNvbnRlbnRfdHlwZSI6IkFydGljbGUiLCJtYXRjaF9vcmRlciI6MSwiemRfdG9rZW4iOm51bGx9.nKp7b5Ykj9sa3xlG_BoglqltVktpzurRUmkYwkFM024&zhida_source=entity">FaceDetailer</a> 用法很简单，效果明显，能满足大多数需求。虽比不过 WebUI 的 ADetailer 那般一个选项就可以搞定，但 ComfyUI 的修复面部方法让学习者明白其工作流程，对我们更好的理解 AI 及其运作原理非常有益。</p>
+<p>另外，拥用同款节点的插件不止 Impact-Pack 这一个，但它是目前更新比较有保障的。</p>
+<p>![[_resources&#x2F;889dde82b046b4e5a4d35c91fb810342_MD5.jpg]]</p>
+<p>插件地址：<br><a target="_blank" rel="noopener" href="https://github.com/ltdrdata/ComfyUI-Impact-Pack">github.com&#x2F;ltdrdata&#x2F;Com</a></p>
+<p>但是一个插件并不够，需要安装另一个同作者的插件来读取必要模型用：<br><a target="_blank" rel="noopener" href="https://github.com/ltdrdata/ComfyUI-Impact-Subpack">github.com&#x2F;ltdrdata&#x2F;Com</a></p>
+<p>安装好插件和必要文件后，还要下载一些模型：<br><a target="_blank" rel="noopener" href="https://hf-mirror.com/Bingsu/adetailer/tree/main">hf-mirror.com&#x2F;Bingsu&#x2F;ad</a></p>
+<p>△ 将这些模型放入.\ComfyUI\models\ultralytics\bbox</p>
+<p><a target="_blank" rel="noopener" href="https://hf-mirror.com/ybelkada/segment-anything/tree/main/checkpoints">hf-mirror.com&#x2F;ybelkada&#x2F;</a></p>
+<p>△ 将这些模型放入.\ComfyUI\models\sams</p>
+<p>基础工作流下载:<br><a target="_blank" rel="noopener" href="https://www.alipan.com/s/GNUhdyuf6ux">alipan.com&#x2F;s&#x2F;GNUhdyuf6u</a><br><a target="_blank" rel="noopener" href="https://pan.quark.cn/s/84a1149ea667">pan.quark.cn&#x2F;s&#x2F;84a1149e</a></p>
+<h2 id="FaceTools"><a href="#FaceTools" class="headerlink" title="FaceTools"></a>FaceTools</h2><p>![[_resources&#x2F;817ac7ab488c30316d10cc8013d734f5_MD5.jpg]]</p>
+<p>该插件修复面部的步骤分的更详细，虽然连的节点较多，但也较完整的展现了面部修复是怎样的一个过程。</p>
+<p>FaceTools 插件文件中带有一个较为复杂的工作流，一般使用中是不会用到那么多步骤的。需要注意的是，此种复面部的方法需要使用 ControlNet，否则可能会造成重绘后的人像面部边缘融合不佳。自带工作流使用的是 Advanced-ControlNet 插件的节点，但改为 ComfyUI 自带的 ContrlNet 也一样用。</p>
+<p>插件下载：<br><a target="_blank" rel="noopener" href="https://github.com/dchatel/comfyui_facetools">github.com&#x2F;dchatel&#x2F;comf</a></p>
+<p>landmarks 模型下载：<br><a target="_blank" rel="noopener" href="https://hf-mirror.com/bluefoxcreation/FaceAlignment/tree/main">hf-mirror.com&#x2F;bluefoxcr</a><br>△ 将这些模型放入.\ComfyUI\models\landmarks</p>
+<p>bisenet 模型下载，该模型原址是谷歌网盘，我上传到阿里和 夸克 网盘：<br><a target="_blank" rel="noopener" href="https://www.alipan.com/s/j7d9LEHUqFB">alipan.com&#x2F;s&#x2F;j7d9LEHUqF</a><br><a target="_blank" rel="noopener" href="https://pan.quark.cn/s/1079203900f3">pan.quark.cn&#x2F;s&#x2F;10792039</a></p>
+<p>△ 将该模型放入.\ComfyUI\models\bisenet</p>
+<p>另外在使用 CropFaces 节点的 jonathandinu 时，需要从 huggingface 缓存模型。如果连不上 huggingface，可以查看我的另一篇文章来将 huggingface 的连接导向其在国内的镜像网。</p>
+<p>基础工作流分享：<br><a target="_blank" rel="noopener" href="https://www.alipan.com/s/GNUhdyuf6ux">alipan.com&#x2F;s&#x2F;GNUhdyuf6u</a><br><a target="_blank" rel="noopener" href="https://pan.quark.cn/s/84a1149ea667">pan.quark.cn&#x2F;s&#x2F;84a1149e</a></p>
+<p>做个 FaceDetailer 与 FaceTools 的对比图，个人感觉 FaceTools 效果要好于 FaceDetailer。例图用哩布上下的一个免费模型生成的，从我接触 SD 之初的使用经历来看，那里的很多模型跑出坏图的几率极高，非常适合做反例。</p>
+<p>![[_resources&#x2F;8fe58351fd9ebaeeb5fd495476434a8f_MD5.jpg]]</p>
+<p>另外多说几句，我是真不知道哩布上那些例图精美的模型除了在线生图外怎样才能跑出效果相近的图。好在上面的模型除了早期的几乎都要付费才能下载了，也免去了我尝试的想法，倒省了不少时间。</p>
+<hr>
+<p>![[_resources&#x2F;3e65e166afc510e8b2cd404aa5ca05f1_MD5.jpg]]</p>
+<p>目前的文生图模型中，人物手部崩坏的几率极高，甚至超过了面部崩坏。虽然有负向的 <a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=253706645&content_type=Article&match_order=1&q=Embedding&zd_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ6aGlkYV9zZXJ2ZXIiLCJleHAiOjE3NDk4NjM5ODgsInEiOiJFbWJlZGRpbmciLCJ6aGlkYV9zb3VyY2UiOiJlbnRpdHkiLCJjb250ZW50X2lkIjoyNTM3MDY2NDUsImNvbnRlbnRfdHlwZSI6IkFydGljbGUiLCJtYXRjaF9vcmRlciI6MSwiemRfdG9rZW4iOm51bGx9.e4zfNDD4L_c2qZwKMu7ppTIIy2s2ASaiqgotxpvpNlw&zhida_source=entity">Embedding</a> 可以一定程度上改善手部状况，但其效果其实并不理想。目前比较好的方法是使用 ControlNet 和手部修复类的 <a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=253706645&content_type=Article&match_order=1&q=Lora&zd_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ6aGlkYV9zZXJ2ZXIiLCJleHAiOjE3NDk4NjM5ODgsInEiOiJMb3JhIiwiemhpZGFfc291cmNlIjoiZW50aXR5IiwiY29udGVudF9pZCI6MjUzNzA2NjQ1LCJjb250ZW50X3R5cGUiOiJBcnRpY2xlIiwibWF0Y2hfb3JkZXIiOjEsInpkX3Rva2VuIjpudWxsfQ.gFCtwXijkD473lFQT-yp6sLRbSBTnOt801AUiEfsZHY&zhida_source=entity">Lora</a> ，本节来做几个演示。</p>
+<h2 id="ControlNet-HandRefiner"><a href="#ControlNet-HandRefiner" class="headerlink" title="ControlNet-HandRefiner"></a>ControlNet-HandRefiner</h2><p>此方法需要使用 ControlNet:</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/Fannovel16/comfyui_controlnet_aux">github.com&#x2F;Fannovel16&#x2F;c</a></p>
+<p>![[_resources&#x2F;0e4c7416d3b8e962dea3e74cff6f4159_MD5.jpg]]</p>
+<p>在生成图片后，通过 HandeRefiner 预处理器识别图片中的手部，并进行正确修复，之后通过 control_sd15_inpaint_depth_hand 对手部进行内部重绘。ContrlNet 的权重最好在 0.4-0.8 之间。</p>
+<p>![[_resources&#x2F;25a81f449d4732d41121988d1f655200_MD5.jpg]]</p>
+<p>在图片中手部比较明显的情况下，这种方法可以进行比较好的修复。如果原图中手部不太明显，或者崩坏的严重，就可能会识别不到。</p>
+<p>在初次使用时会自动下载预处理模型，如果你的 ComfyUI 连不上 huggingface，会导致下载失败。可以查看我的另一篇文章，讲解如何在 ComfyUI 中连接 huggingface 的镜像网。你也可以使用 huggingface 的镜像网手动下载这些预处理文件到.\ComfyUI\custom_nodes\comfyui_controlnet_aux\ckpts\hr16\ControlNet-HandRefiner-pruned 目录下。</p>
+<p>huggingface 镜像网：<br><a target="_blank" rel="noopener" href="http://www.hf-mirror.com/">www.hf-mirror.com</a></p>
+<p>![[_resources&#x2F;266cea46533d05b4c98cc11b7606b833_MD5.jpg]]</p>
+<p>另外，目前 ControlNet 插件用于对手部进行预处理的节点是有漏洞的，如果出现以下报错，则需要对相关节点的代码进行修改：</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs pgsql">cannot <span class="hljs-keyword">import</span> <span class="hljs-type">name</span> <span class="hljs-string">&#x27;BertConfig&#x27;</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;custom_mesh_graphormer.modeling.bert.modeling_bert&#x27;</span><br></code></pre></td></tr></table></figure>
+
+<p>需要修改的文件：custom_nodes&#x2F;comfyui_controlnet_aux&#x2F;src&#x2F;custom_mesh_graphormer&#x2F;modeling&#x2F;bert&#x2F;modeling_bert.py  </p>
+<p>将其内容替换并保存：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs css"># <span class="hljs-selector-tag">from</span> transformers<span class="hljs-selector-class">.models</span><span class="hljs-selector-class">.bert</span><span class="hljs-selector-class">.modeling_bert</span> import *<br><span class="hljs-selector-tag">from</span> transformers<span class="hljs-selector-class">.models</span><span class="hljs-selector-class">.bert</span> import modeling_bert<br><br>for <span class="hljs-selector-tag">symbol</span> in dir(modeling_bert):<br>    if not symbol.<span class="hljs-built_in">startswith</span>(<span class="hljs-string">&quot;_&quot;</span>):<br>        <span class="hljs-built_in">globals</span>()[symbol] = <span class="hljs-built_in">getattr</span>(modeling_bert, symbol)<br></code></pre></td></tr></table></figure>
+
+<p>此问题出现已久，插件的开发者们也知道，但似乎不太想继续维护了。</p>
+<h2 id="Lora修复手部"><a href="#Lora修复手部" class="headerlink" title="Lora修复手部"></a>Lora修复手部</h2><p>平日逛模型网站时遇到过几个修复手部的 Lora，使用下来，其效果也还过的去，相比 Embedding 好多了。</p>
+<p>![[_resources&#x2F;af7a666ecc52522f80fb5eda1855d46b_MD5.jpg]]</p>
+<p>例图中使用了 3 个修手 Lora作对比，这些 Lora 在修手的同时，或多或少的对原图造成了一些的改变。Lora 修手不如 ContrlNet 效果稳定，还要看运气，也有可能出来的图崩的更严重。</p>
+<p>需要注意的是，如果基础模型太差，那么用了这些修复手段也很难有理想效果。最好的办法就是用比较优秀的模型，比如上面的例图中，人物脸部已经很不错了，手部虽依旧不行，但其崩坏程度也易于修复。</p>
+<p>Lora 下载：<br><a target="_blank" rel="noopener" href="https://www.alipan.com/s/4evtjH5i3wL">alipan.com&#x2F;s&#x2F;4evtjH5i3w</a><br><a target="_blank" rel="noopener" href="https://pan.quark.cn/s/a51e67d34219">pan.quark.cn&#x2F;s&#x2F;a51e67d3</a></p>
+<p><strong>EnvyBetterHandsLoCon:</strong> 关键词 nicehands; 权重 1。</p>
+<p><strong>RealHands_v2:</strong> 关键词 realhands; 权重 0.4-0.7。</p>
+<p><strong>GoodHands_0.1:</strong> 关键词 good hands。</p>
+<p>上面那些方法均是针对 <a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=253706645&content_type=Article&match_order=1&q=SD1.5&zd_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ6aGlkYV9zZXJ2ZXIiLCJleHAiOjE3NDk4NjM5ODgsInEiOiJTRDEuNSIsInpoaWRhX3NvdXJjZSI6ImVudGl0eSIsImNvbnRlbnRfaWQiOjI1MzcwNjY0NSwiY29udGVudF90eXBlIjoiQXJ0aWNsZSIsIm1hdGNoX29yZGVyIjoxLCJ6ZF90b2tlbiI6bnVsbH0.gSLOyBpac277HGI-3FbJ9kVf3PmFnQTdXp2xWfKYUIw&zhida_source=entity">SD1.5</a> 的，SDXL 的图片效果已经远优于 SD1.5，如果使用的是精心训练的大模型，坏手率也会有较大的降低。ControlNet 修手方法也可以修复 SDXL 生成的图片，但要用 SD1.5 的模型，使用 ComfyUI 就是要灵活。</p>
+<p>此处也分享一个用于 SDXL 的修手 Lora，但其训练数据小，效果不能保证。无提示词，只能连接到负提示词中：<br><a target="_blank" rel="noopener" href="https://www.alipan.com/s/X58kiHjoRQW">alipan.com&#x2F;s&#x2F;X58kiHjoRQ</a><br><a target="_blank" rel="noopener" href="https://pan.quark.cn/s/d87bc7062965">pan.quark.cn&#x2F;s&#x2F;d87bc706</a></p>
+<p>发布于 2025-02-13 11:31・广东<a target="_blank" rel="noopener" href="https://www.zhihu.com/topic/27445052">comfyUI</a><a target="_blank" rel="noopener" href="https://www.zhihu.com/topic/19636088">SD</a><a target="_blank" rel="noopener" href="https://www.zhihu.com/topic/26072993">Stable Diffusion</a></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/clippings/" class="print-no-link">#clippings</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>ComfyUI_修复面部与手部</div>
+      <div>https://yhao521.github.io/2025/07/23/摘录/ComfyUI_修复面部与手部/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>[[花鸣空写字的目的，是想和自己聊聊天]]</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年7月23日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E6%91%98%E5%BD%95/%E9%9F%B3%E4%B9%90Native%20Audio/" title="音乐Native Audio">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">音乐Native Audio</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E6%91%98%E5%BD%95/Electron%E5%BA%94%E7%94%A8%E4%BB%A3%E7%A0%81%E7%AD%BE%E5%90%8D%E5%8F%8A%E6%89%93%E5%8C%85/" title="Electron应用代码签名及打包">
+                        <span class="hidden-mobile">Electron应用代码签名及打包</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>  
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

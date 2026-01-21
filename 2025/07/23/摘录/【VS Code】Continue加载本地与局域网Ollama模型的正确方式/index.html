@@ -1,0 +1,689 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="[[知乎专栏]]">
+  <meta name="keywords" content="java,博客,vue,spring,mysql,docker,linux">
+  
+    <meta name="description" content="Continue简介Continue 是一款 VS Code 和 JetBrains 的开源AI代码助手插件，旨在提高开发者的编程效率和生产力。它本身不提供 AI 模型，但它提供了多种 AI 模型的接入方式来助力编程，实现多种场景下的功能。 了解…">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【VS Code】Continue加载本地与局域网Ollama模型的正确方式">
+<meta property="og:url" content="https://yhao521.github.io/2025/07/23/%E6%91%98%E5%BD%95/%E3%80%90VS%20Code%E3%80%91Continue%E5%8A%A0%E8%BD%BD%E6%9C%AC%E5%9C%B0%E4%B8%8E%E5%B1%80%E5%9F%9F%E7%BD%91Ollama%E6%A8%A1%E5%9E%8B%E7%9A%84%E6%AD%A3%E7%A1%AE%E6%96%B9%E5%BC%8F/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="Continue简介Continue 是一款 VS Code 和 JetBrains 的开源AI代码助手插件，旨在提高开发者的编程效率和生产力。它本身不提供 AI 模型，但它提供了多种 AI 模型的接入方式来助力编程，实现多种场景下的功能。 了解…">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-07-23T12:01:24.000Z">
+<meta property="article:modified_time" content="2025-07-23T12:01:24.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="clippings">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>【VS Code】Continue加载本地与局域网Ollama模型的正确方式 - 匆匆过客的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yhao521.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>匆匆过客的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="【VS Code】Continue加载本地与局域网Ollama模型的正确方式"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-07-23 20:01" pubdate>
+          2025年7月23日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          726 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          7 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">【VS Code】Continue加载本地与局域网Ollama模型的正确方式</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>首发于 <a target="_blank" rel="noopener" href="https://www.zhihu.com/column/c_1826210253475282944">AIGC</a></p>
+<p>切换模式</p>
+<p><a target="_blank" rel="noopener" href="https://www.zhihu.com/signin">登录&#x2F;注册</a></p>
+<p>![[_resources&#x2F;f579cbfea78a355ff617cb611620564f_MD5.webp]]</p>
+<p>【VS Code】Continue加载本地与局域网Ollama模型的正确方式</p>
+<h2 id="Continue简介"><a href="#Continue简介" class="headerlink" title="Continue简介"></a>Continue简介</h2><p>Continue 是一款 VS Code 和 <a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=253831909&content_type=Article&match_order=1&q=JetBrains&zd_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ6aGlkYV9zZXJ2ZXIiLCJleHAiOjE3NDg0MzY4OTEsInEiOiJKZXRCcmFpbnMiLCJ6aGlkYV9zb3VyY2UiOiJlbnRpdHkiLCJjb250ZW50X2lkIjoyNTM4MzE5MDksImNvbnRlbnRfdHlwZSI6IkFydGljbGUiLCJtYXRjaF9vcmRlciI6MSwiemRfdG9rZW4iOm51bGx9.BJ6a67vmQOAGmOceaNiSwjK1T09m1vrThIsR4CLGhfY&zhida_source=entity">JetBrains</a> 的开源AI代码助手插件，旨在提高开发者的编程效率和生产力。它本身不提供 AI 模型，但它提供了多种 AI 模型的接入方式来助力编程，实现多种场景下的功能。</p>
+<p>了解更多详细内容可查看之前的文章： <a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU5Njg3ODUzOA==&mid=2247485739&idx=1&sn=645854a4b563b9afd24200ac9c6841c7&scene=21#wechat_redirect">【VS Code】AI代码助手Continue体验如何？</a></p>
+<h2 id="Continue安装"><a href="#Continue安装" class="headerlink" title="Continue安装"></a>Continue安装</h2><p>直接在 VS Code 的插件市场输入 continue 就可以看到，然后直接安装即可。</p>
+<p>安装完成后，点击Continue图标，可以看到Continue的初始化页面</p>
+<p>![[_resources&#x2F;0be272a2d3aeb0fa3333b8b1ba144afa_MD5.png]]</p>
+<h2 id="启动Ollama"><a href="#启动Ollama" class="headerlink" title="启动Ollama"></a>启动Ollama</h2><table>
+<thead>
+<tr>
+<th>当前Ollama版本：0.5.6</th>
+</tr>
+</thead>
+</table>
+<p>启动Ollama，启动后看到状态栏中有Ollama模型表示启动成功了</p>
+<p>![[_resources&#x2F;55848e6263512be411556f554c218038_MD5.png]]</p>
+<p>如果之前没有下载过模型，可以通过如下命令运行指定模型，想了解更多Ollama信息，可以看往期： <a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU5Njg3ODUzOA==&mid=2247485525&idx=1&sn=b76c23134c9f59663edca674377f3b7a&scene=21#wechat_redirect">【Llama】无需GPU轻松本地部署大模型</a></p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs routeros">$ ollama <span class="hljs-built_in">run</span> qwen2.5:3b<br></code></pre></td></tr></table></figure>
+
+<h2 id="Continue添加本机Ollama模型"><a href="#Continue添加本机Ollama模型" class="headerlink" title="Continue添加本机Ollama模型"></a>Continue添加本机Ollama模型</h2><p>本机运行Ollama服务可以直接默认添加使用</p>
+<p>![[_resources&#x2F;037b7bd50af8e7f8c52e64fc2d512460_MD5.jpg]]</p>
+<p>![[_resources&#x2F;8a656365762b58ea820bdbc3d41c16b2_MD5.jpg]]</p>
+<h2 id="Continue添加局域网Ollama模型"><a href="#Continue添加局域网Ollama模型" class="headerlink" title="Continue添加局域网Ollama模型"></a>Continue添加局域网Ollama模型</h2><p>Continue添加局域网Ollama模型时需要先退出应用程序启动的Ollama服务，使用命令行方式启动（当前版本通过应用程序启动的Ollama服务无法通过局域网共享）</p>
+<p>点击Ollama图标，退出Ollama</p>
+<p>![[_resources&#x2F;238b9735e092fc55ffe46329ff19d3b9_MD5.png]]</p>
+<p>设置Ollama host配置</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs routeros">$ <span class="hljs-built_in">export</span> <span class="hljs-attribute">OLLAMA_HOST</span>=0.0.0.0:11434<br></code></pre></td></tr></table></figure>
+
+<p>以命令行形式启动Ollama</p>
+<figure class="highlight gams"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs gams"><span class="hljs-comment">// 确保当前已有可用的模型，执行</span><br><span class="hljs-symbol">$</span> ollama serve <br><span class="hljs-comment">// 如果没有可用的模型,可执行如下命令</span><br><span class="hljs-symbol">$</span> ollama run qwen2<span class="hljs-number">.5</span>:<span class="hljs-number">3</span>b<br></code></pre></td></tr></table></figure>
+
+<p>在 VS Code 侧边栏点击 Continue 插件图标，然后在面板右上角点击【⚙️】图标，打开 config.json 文件</p>
+<p>手动配置模型及tab自动补全信息如下</p>
+<p>![[_resources&#x2F;ebab1f93083dadaa94b07ccaa03586f7_MD5.png]]</p>
+<p>配置完成就可以在局域网中通过IP共享使用了</p>
+<p>![[_resources&#x2F;bd09038674f2e351a3018b64ed248816_MD5.png]]</p>
+<h2 id="常见问题"><a href="#常见问题" class="headerlink" title="常见问题"></a>常见问题</h2><h3 id="局域网无法共享"><a href="#局域网无法共享" class="headerlink" title="局域网无法共享"></a>局域网无法共享</h3><p>使用 <a target="_blank" rel="noopener" href="http://127.0.0.1:11434/">127.0.0.1:11434</a> 可以正常访问Ollama服务，通过IP无法访问</p>
+<p>解决方法一：</p>
+<p>![[_resources&#x2F;b4d50bad0cb0f59316c24df905520b76_MD5.jpg]]</p>
+<p>点击Ollama图标，退出Ollama</p>
+<p>![[_resources&#x2F;238b9735e092fc55ffe46329ff19d3b9_MD5.png]]</p>
+<p>设置Ollama host配置</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs routeros">$ <span class="hljs-built_in">export</span> <span class="hljs-attribute">OLLAMA_HOST</span>=0.0.0.0:11434<br></code></pre></td></tr></table></figure>
+
+<p>以命令行形式启动Ollama</p>
+<figure class="highlight crystal"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs crystal"><span class="hljs-variable">$ </span>ollama serve<br></code></pre></td></tr></table></figure>
+
+<p>解决方法二：</p>
+<p>在终端执行命令，并点击Ollama应用程序启动</p>
+<figure class="highlight autohotkey"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs autohotkey">launchctl setenv OLLAM<span class="hljs-built_in">A_HOST</span> <span class="hljs-string">&quot;0.0.0.0:11434&quot;</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="点击配置没有打开Config-json"><a href="#点击配置没有打开Config-json" class="headerlink" title="点击配置没有打开Config.json"></a>点击配置没有打开Config.json</h3><p>新版本配置发生改变，点击⚙️后再点击【Open configuration file】</p>
+<p>![[_resources&#x2F;b2f293caafb7f22c0a653e522a4a73e7_MD5.jpg]]</p>
+<h2 id="友情提示"><a href="#友情提示" class="headerlink" title="友情提示"></a>友情提示</h2><p>见原文： <a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/IzjIXlcrpU_qj2LnnPj7AQ?token=1852346778&lang=zh_CN">【VS Code】最近Cline的几项重磅更新</a>)</p>
+<blockquote>
+<p>本文同步自微信公众号 “ <a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/IzjIXlcrpU_qj2LnnPj7AQ?token=1852346778&lang=zh_CN">程序员小溪</a> “ ，这里只是同步，想看及时消息请移步我的公众号，不定时更新我的学习经验。</p>
+</blockquote>
+<p>发布于 2025-02-16 17:46・北京<a target="_blank" rel="noopener" href="https://www.zhihu.com/topic/20017183">Visual Studio Code</a></p>
+<p>写下你的评论…</p>
+<p>还没有评论，发表第一个评论吧</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/clippings/" class="print-no-link">#clippings</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>【VS Code】Continue加载本地与局域网Ollama模型的正确方式</div>
+      <div>https://yhao521.github.io/2025/07/23/摘录/【VS Code】Continue加载本地与局域网Ollama模型的正确方式/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>[[知乎专栏]]</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年7月23日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E6%91%98%E5%BD%95/%E3%80%90Gradle-11%E3%80%91%E5%8A%A8%E6%80%81%E4%BF%AE%E6%94%B9VersionName%E5%92%8CVersionCode/" title="【Gradle-11】动态修改VersionName和VersionCode">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">【Gradle-11】动态修改VersionName和VersionCode</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/07/23/%E6%91%98%E5%BD%95/Vue3%E8%B7%AF%E7%94%B1push%E8%B7%B3%E8%BD%AC(%E8%A7%A3%E5%86%B3Vue2this.$router.push%E5%A4%B1%E6%95%88%EF%BC%89/" title="Vue3路由push跳转(解决Vue2this.$router.push失效）">
+                        <span class="hidden-mobile">Vue3路由push跳转(解决Vue2this.$router.push失效）</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>  
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

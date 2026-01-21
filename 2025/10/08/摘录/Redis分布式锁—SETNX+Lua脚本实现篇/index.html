@@ -1,0 +1,752 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="[[niceyoo]]">
+  <meta name="keywords" content="java,博客,vue,spring,mysql,docker,linux">
+  
+    <meta name="description" content="前言 平时的工作中，由于生产环境中的项目是需要部署在多台服务器中的，所以经常会面临解决分布式场景下数据一致性的问题，那么就需要引入分布式锁来解决这一问题。 针对分布式锁的实现，目前比较常用的就如下几种方案： 基于数据库实现分布式锁 基于Redis实现分布式锁 【本文】 基于Zookeeper实现分布">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis分布式锁—SETNX+Lua脚本实现篇">
+<meta property="og:url" content="https://yhao521.github.io/2025/10/08/%E6%91%98%E5%BD%95/Redis%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E2%80%94SETNX+Lua%E8%84%9A%E6%9C%AC%E5%AE%9E%E7%8E%B0%E7%AF%87/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="前言 平时的工作中，由于生产环境中的项目是需要部署在多台服务器中的，所以经常会面临解决分布式场景下数据一致性的问题，那么就需要引入分布式锁来解决这一问题。 针对分布式锁的实现，目前比较常用的就如下几种方案： 基于数据库实现分布式锁 基于Redis实现分布式锁 【本文】 基于Zookeeper实现分布">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-10-08T13:38:01.989Z">
+<meta property="article:modified_time" content="2025-10-08T13:38:07.505Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="clippings">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>Redis分布式锁—SETNX+Lua脚本实现篇 - 匆匆过客的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yhao521.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>匆匆过客的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Redis分布式锁—SETNX+Lua脚本实现篇"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-10-08 21:38" pubdate>
+          2025年10月8日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          34 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Redis分布式锁—SETNX+Lua脚本实现篇</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>平时的工作中，由于生产环境中的项目是需要部署在多台服务器中的，所以经常会面临解决分布式场景下数据一致性的问题，那么就需要引入分布式锁来解决这一问题。</p>
+<p>针对分布式锁的实现，目前比较常用的就如下几种方案：</p>
+<ol>
+<li>基于数据库实现分布式锁</li>
+<li>基于Redis实现分布式锁 【本文】</li>
+<li>基于Zookeeper实现分布式锁</li>
+</ol>
+<p>接下来这个系列文章会跟大家一块探讨这三种方案，本篇为Redis实现分布式锁篇。</p>
+<p>Redis分布式环境搭建推荐： <a target="_blank" rel="noopener" href="https://www.cnblogs.com/niceyoo/p/13011626.html">基于Docker的Redis集群搭建</a></p>
+<h3 id="Redis分布式锁一览"><a href="#Redis分布式锁一览" class="headerlink" title="Redis分布式锁一览"></a>Redis分布式锁一览</h3><p>说到 redis 锁，能搜到的，或者说常用的无非就下面这两个：</p>
+<ul>
+<li>setNX + Lua脚本 【本文】</li>
+<li>Redisson + RLock可重入锁</li>
+</ul>
+<p>接下来我们一一探索这两个的实现，本文为 setNX + Lua脚本 实现篇。</p>
+<h3 id="1、setNX"><a href="#1、setNX" class="headerlink" title="1、setNX"></a>1、setNX</h3><p>完整语法：SET key value [EX seconds|PX milliseconds] [NX|XX] [KEEPTTL]</p>
+<p>必选参数说明：</p>
+<ul>
+<li>SET：命令</li>
+<li>key：待设置的key</li>
+<li>value：设置的key的value，最好为随机字符串</li>
+</ul>
+<p>可选参数说明：</p>
+<ul>
+<li>NX：表示key不存在时才设置，如果存在则返回 null</li>
+<li>XX：表示key存在时才设置，如果不存在则返回NULL</li>
+<li>PX millseconds：设置过期时间，过期时间精确为毫秒</li>
+<li>EX seconds：设置过期时间，过期时间精确为秒</li>
+</ul>
+<blockquote>
+<p>注意：其实我们常说的通过 Redis 的 setnx 命令来实现分布式锁，并不是直接使用 Redis 的 setnx 命令，因为在老版本之前 setnx 命令语法为「setnx key value」，并不支持同时设置过期时间的操作，那么就需要再执行 expire 过期时间的命令，这样的话加锁就成了两个命令，原子性就得不到保障，所以通常需要配合 Lua 脚本使用，而从 Redis 2.6.12 版本后，set 命令开始整合了 setex 的功能，并且 set 本身就已经包含了设置过期时间，因此常说的 setnx 命令实则只用 set 命令就可以实现了，只是参数上加上了 NX 等参数。</p>
+</blockquote>
+<p>大致说一下用 setnx 命令实现分布式锁的流程：</p>
+<p>在 Redis 2.6.12 版本之后，Redis 支持原子命令加锁，我们可以通过向 Redis 发送 <code>「set key value NX 过期时间」</code> 命令，实现原子的加锁操作。比如某个客户端想要获取一个 key 为 niceyoo 的锁，此时需要执行 <code>「set niceyoo random_value NX PX 30000」</code> ，在这我们设置了 30 秒的锁自动过期时间，超过 30 秒自动释放。</p>
+<p>如果 setnx 命令返回 ok，说明拿到了锁，此时我们就可以做一些业务逻辑处理，业务处理完之后，需要释放锁，释放锁一般就是执行 Redis 的 del 删除指令，「del niceyoo」</p>
+<p>如果 setnx 命令返回 nil，说明拿锁失败，被其他线程占用，如下是模拟截图：</p>
+<p>![[_resources&#x2F;f21d404fb5be76410e87c22a82ead210_MD5.png]]</p>
+<p>注意，这里在设置值的时候，value 应该是随机字符串，比如 UUID，而不是随便用一个固定的字符串进去，为什么这样做呢？</p>
+<p>value 的值设置为随机数主要是为了更安全的释放锁，释放锁的时候需要检查 key 是否存在，且 key 对应的 value 值是否和指定的值一样，是一样的才能释放锁。</p>
+<p>感觉这样说还是不清晰，举个例子：例如进程 A，通过 setnx 指令获取锁成功（命令中设置了加锁自动过期时间30 秒），既然拿到锁了就开始执行业务吧，但是进程 A 在接下来的执行业务逻辑期间，程序响应时间竟然超过30秒了，锁自动释放了，而此时进程 B 进来了，由于进程 A 设置的过期时间一到，让进程 B 拿到锁了，然后进程 B 又开始执行业务逻辑，但是呢，这时候进程 A 突然又回来了，然后把进程 B 的锁得释放了，然后进程 C 又拿到锁，然后开始执行业务逻辑，此时进程 B 又回来了，释放了进程 C 的锁，套娃开始了…..</p>
+<p>总之，有了随机数的 value 后，可以通过判断 key 对应的 value 值是否和指定的值一样，是一样的才能释放锁。</p>
+<p>接下来我们把 setnx 命令落地到项目实例中：</p>
+<p>代码环境： <code>SpringBoot2.2.2.RELEASE</code> + <code>spring-boot-starter-data-redis</code> + <code>StringRedisTemplate</code></p>
+<p><strong>源码地址</strong> ： <a target="_blank" rel="noopener" href="https://github.com/niceyoo/redis-setnx">https://github.com/niceyoo/redis-setnx</a></p>
+<p>StringRedisTemplate 或者 RedisTemplate 下对应的 setnx 指令的 API 方法如下：</p>
+<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs perl">/**<br> * Set &#123;<span class="hljs-variable">@code</span> key&#125; to hold the string &#123;<span class="hljs-variable">@code</span> value&#125; <span class="hljs-keyword">if</span> &#123;<span class="hljs-variable">@code</span> key&#125; is absent.<br> *<br> * <span class="hljs-variable">@param</span> key must <span class="hljs-keyword">not</span> be &#123;<span class="hljs-variable">@literal</span> null&#125;.<br> * <span class="hljs-variable">@param</span> value<br> * <span class="hljs-variable">@see</span> &lt;a href=<span class="hljs-string">&quot;http://redis.io/commands/setnx&quot;</span>&gt;Redis Documentation: SETNX&lt;<span class="hljs-regexp">/a&gt;</span><br><span class="hljs-regexp"> */</span><br>Boolean setIfAbsent(K key, V value);<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>这个地方再补充一下，使用 jedis 跟使用 StringRedisTemplate 对应的 senx 命令的写法是有区别的，jedis 下就是 set 方法，而 StringRedisTemplate 下使用的是 setIfAbsent 方法 。</p>
+</blockquote>
+<h5 id="1）Maven-依赖，pom-xml"><a href="#1）Maven-依赖，pom-xml" class="headerlink" title="1）Maven 依赖，pom.xml"></a>1）Maven 依赖，pom.xml</h5><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-meta">&lt;?xml version=<span class="hljs-string">&quot;1.0&quot;</span> encoding=<span class="hljs-string">&quot;UTF-8&quot;</span>?&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">project</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">&quot;http://maven.apache.org/POM/4.0.0&quot;</span> <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span><br><span class="hljs-tag">         <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">&quot;http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd&quot;</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">modelVersion</span>&gt;</span>4.0.0<span class="hljs-tag">&lt;/<span class="hljs-name">modelVersion</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">parent</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter-parent<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>2.2.2.RELEASE<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">relativePath</span>/&gt;</span> <br>    <span class="hljs-tag">&lt;/<span class="hljs-name">parent</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.example<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>demo-redis<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>0.0.1-SNAPSHOT<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">name</span>&gt;</span>demo-redis<span class="hljs-tag">&lt;/<span class="hljs-name">name</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">description</span>&gt;</span>Demo project for Spring Boot<span class="hljs-tag">&lt;/<span class="hljs-name">description</span>&gt;</span><br><br>    <span class="hljs-tag">&lt;<span class="hljs-name">properties</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">java.version</span>&gt;</span>1.8<span class="hljs-tag">&lt;/<span class="hljs-name">java.version</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">properties</span>&gt;</span><br><br>    <span class="hljs-tag">&lt;<span class="hljs-name">dependencies</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter-web<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br><br>        <span class="hljs-comment">&lt;!-- Redis--&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter-data-redis<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br><br>        <span class="hljs-comment">&lt;!-- Lombok --&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.projectlombok<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>lombok<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>1.18.10<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br><br>        <span class="hljs-comment">&lt;!-- Gson --&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.google.code.gson<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>gson<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>2.8.6<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">dependencies</span>&gt;</span><br><br>    <span class="hljs-tag">&lt;<span class="hljs-name">build</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">plugins</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">plugin</span>&gt;</span><br>                <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>                <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-maven-plugin<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>            <span class="hljs-tag">&lt;/<span class="hljs-name">plugin</span>&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">plugins</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">build</span>&gt;</span><br><br><span class="hljs-tag">&lt;/<span class="hljs-name">project</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>这里引入了 gson、redis 依赖。</p>
+<h5 id="2）application-yml-配置文件"><a href="#2）application-yml-配置文件" class="headerlink" title="2）application.yml 配置文件"></a>2）application.yml 配置文件</h5><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">server:</span><br>  <span class="hljs-attr">port:</span> <span class="hljs-number">6666</span><br>  <span class="hljs-attr">servlet:</span><br>    <span class="hljs-attr">context-path:</span> <span class="hljs-string">/</span><br><br><span class="hljs-attr">spring:</span><br>  <span class="hljs-attr">redis:</span><br>    <span class="hljs-attr">host:</span> <span class="hljs-number">127.0</span><span class="hljs-number">.0</span><span class="hljs-number">.1</span><br>    <span class="hljs-attr">password:</span><br>    <span class="hljs-comment"># 数据库索引 默认0</span><br>    <span class="hljs-attr">database:</span> <span class="hljs-number">0</span><br>    <span class="hljs-attr">port:</span> <span class="hljs-number">6379</span><br>    <span class="hljs-comment"># 超时时间 Duration类型 3秒</span><br>    <span class="hljs-attr">timeout:</span> <span class="hljs-string">3S</span><br><br><span class="hljs-comment"># 日志</span><br><span class="hljs-attr">logging:</span><br>  <span class="hljs-comment"># 输出级别</span><br>  <span class="hljs-attr">level:</span><br>    <span class="hljs-attr">root:</span> <span class="hljs-string">info</span><br>  <span class="hljs-attr">file:</span><br>    <span class="hljs-comment"># 指定路径</span><br>    <span class="hljs-attr">path:</span> <span class="hljs-string">redis-logs</span><br>    <span class="hljs-comment"># 最大保存天数</span><br>    <span class="hljs-attr">max-history:</span> <span class="hljs-number">7</span><br>    <span class="hljs-comment"># 每个文件最大大小</span><br>    <span class="hljs-attr">max-size:</span> <span class="hljs-string">5MB</span><br></code></pre></td></tr></table></figure>
+
+<p>这里设置的服务端口为 6666，大家可以根据自己环境修改。</p>
+<h5 id="3）测试的-Controller"><a href="#3）测试的-Controller" class="headerlink" title="3）测试的 Controller"></a>3）测试的 Controller</h5><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><code class="hljs typescript"><span class="hljs-meta">@Slf4j</span><br><span class="hljs-meta">@RestController</span><br><span class="hljs-meta">@RequestMapping</span>(<span class="hljs-string">&quot;/test&quot;</span>)<br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">TestController</span> &#123;<br><br>    <span class="hljs-meta">@Resource</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-title class_">RedisTemplate</span>&lt;<span class="hljs-title class_">String</span>,<span class="hljs-title class_">Object</span>&gt; redisTemplate;<br><br>    <span class="hljs-meta">@PostMapping</span>(value = <span class="hljs-string">&quot;/addUser&quot;</span>)<br>    <span class="hljs-keyword">public</span> <span class="hljs-title class_">String</span> <span class="hljs-title function_">createOrder</span>(<span class="hljs-params"><span class="hljs-title class_">User</span> user</span>) &#123;<br><br>        <span class="hljs-title class_">String</span> key = user.<span class="hljs-title function_">getUsername</span>();<br>        <span class="hljs-comment">// 如下为使用UUID、固定字符串，固定字符串容易出现线程不安全</span><br>        <span class="hljs-title class_">String</span> value = <span class="hljs-variable constant_">UUID</span>.<span class="hljs-title function_">randomUUID</span>().<span class="hljs-title function_">toString</span>().<span class="hljs-title function_">replace</span>(<span class="hljs-string">&quot;-&quot;</span>,<span class="hljs-string">&quot;&quot;</span>);<br>        <span class="hljs-comment">// String value = &quot;123&quot;;</span><br>        <span class="hljs-comment">/*</span><br><span class="hljs-comment">         * setIfAbsent &lt;=&gt; SET key value [NX] [XX] [EX &lt;seconds&gt;] [PX [millseconds]]</span><br><span class="hljs-comment">         * set expire time 5 mins</span><br><span class="hljs-comment">         */</span><br>        <span class="hljs-title class_">Boolean</span> flag = redisTemplate.<span class="hljs-title function_">opsForValue</span>().<span class="hljs-title function_">setIfAbsent</span>(key, value, <span class="hljs-number">20000</span>, <span class="hljs-title class_">TimeUnit</span>.<span class="hljs-property">MILLISECONDS</span>);<br>        <span class="hljs-keyword">if</span> (flag) &#123;<br>            log.<span class="hljs-title function_">info</span>(<span class="hljs-string">&quot;&#123;&#125; 锁定成功，开始处理业务&quot;</span>, key);<br>            <span class="hljs-keyword">try</span> &#123;<br>                <span class="hljs-comment">/** 模拟处理业务逻辑 **/</span><br>                <span class="hljs-title class_">Thread</span>.<span class="hljs-title function_">sleep</span>(<span class="hljs-number">1000</span> * <span class="hljs-number">30</span>);<br>            &#125; <span class="hljs-keyword">catch</span> (<span class="hljs-title class_">InterruptedException</span> e) &#123;<br>                e.<span class="hljs-title function_">printStackTrace</span>();<br>            &#125;<br>            <span class="hljs-comment">/** 判断是否是key对应的value **/</span><br>            <span class="hljs-title class_">String</span> lockValue = redisTemplate.<span class="hljs-title function_">opsForValue</span>().<span class="hljs-title function_">get</span>(key);<br>            <span class="hljs-keyword">if</span> (lockValue != <span class="hljs-literal">null</span> &amp;&amp; lockValue.<span class="hljs-title function_">equals</span>(value)) &#123;<br>             redisTemplate.<span class="hljs-title function_">delete</span>(key);<br>             log.<span class="hljs-title function_">info</span>(<span class="hljs-string">&quot;&#123;&#125; 解锁成功，结束处理业务&quot;</span>, key);<br>            &#125;<br>            <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;SUCCESS&quot;</span>;<br>        &#125; <span class="hljs-keyword">else</span> &#123;<br>            log.<span class="hljs-title function_">info</span>(<span class="hljs-string">&quot;&#123;&#125; 获取锁失败&quot;</span>, key);<br>            <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;请稍后再试...&quot;</span>;<br>        &#125;<br>    &#125;<br><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>大致流程就是，通过 RedisTemplate 的 setIfAbsent() 方法获取原子锁，并设置了锁自动过期时间为 20秒，setIfAbsent() 方法返回 true，表示加锁成功，加锁成功后模拟了一段业务逻辑处理，耗时30秒，执行完逻辑之后调用 delete() 方法释放锁。</p>
+<p>问题来了，由于锁自动过期时间为 20秒，而业务逻辑耗时为 30秒，在不使用 random_value（随机字符串）下，如果有多进程操作的话就会出现前面提到的套娃骚操作……</p>
+<p>所以在删除锁之前，我们先再次通过 get 命令获取加锁 key 的 value 值，然后判断 value 跟加锁时设置的 value 是否一致，这就看出 UUID 的重要性了，如果一致，就执行 delete() 方法释放锁，否则不执行。</p>
+<p>如下是使用「固定字符串」模拟的问题截图：</p>
+<p>![[_resources&#x2F;54a1a69c9415bc2ab312006a4688b883_MD5.png]]</p>
+<p>两次加锁成功的时间间隔为11秒，不足20秒，显然不是一个进程的用户。</p>
+<p>![[_resources&#x2F;1aad8e705b190b1c6ff49bd037025329_MD5.png]]</p>
+<p>而在 value 使用 UUID 随机字符串时没有出现上述问题。</p>
+<p>但随机字符串就真的安全了吗？</p>
+<p>不安全…</p>
+<p>因为还是无法保证 <code>redisTemplate.delete(key);</code> 的原子操作，在多进程下还是会有进程安全问题。</p>
+<p>就有小伙伴可能钻牛角尖，怎么就不能原子性操作了，你在删除之前不都已经判断了吗？</p>
+<p>再举个例子，比如进程 A 执行完业务逻辑，在 <code>redisTemplate.opsForValue().get(key);</code> 获得 key 这一步执行没问题，同时也进入了 if 判断中，但是恰好这时候进程 A 的锁自动过期时间到了（别问为啥，就是这么巧），而另一个进程 B 获得锁成功，然后还没来得及执行，进程 A 就执行了 delete(key) ，释放了进程 B 的锁….</p>
+<p>我操？那你上边巴拉巴拉那么多，说啥呢？</p>
+<p>咳咳，解锁正确删除锁的方式之一：为了保障原子性，我们需要用 Lua 脚本进行完美解锁。</p>
+<h3 id="Lua脚本"><a href="#Lua脚本" class="headerlink" title="Lua脚本"></a>Lua脚本</h3><p>可能有小伙伴不熟悉 Lua，先简单介绍一下 Lua 脚本：</p>
+<p>Lua 是一种轻量小巧的脚本语言，用标准 C 语言编写并以源代码形式开放， 其设计目的是为了嵌入应用程序中，从而为应用程序提供灵活的扩展和定制功能。</p>
+<p>Lua 提供了交互式编程模式。我们可以在命令行中输入程序并立即查看效果。</p>
+<p>lua脚本优点：</p>
+<ul>
+<li>减少网络开销：原先多次请求的逻辑放在 redis 服务器上完成。使用脚本，减少了网络往返时延</li>
+<li>原子操作：Redis会将整个脚本作为一个整体执行，中间不会被其他命令插入（想象为事务）</li>
+<li>复用：客户端发送的脚本会永久存储在Redis中，意味着其他客户端可以复用这一脚本而不需要使用代码完成同样的逻辑</li>
+</ul>
+<p>先大致了解一下，后面我会单独写一篇 Lua 从入门到放弃的文章。。</p>
+<p>如下是Lua脚本，通过 Redis 的 eval&#x2F;evalsha 命令来运行：</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs lua"><span class="hljs-comment">-- lua删除锁：</span><br><span class="hljs-comment">-- KEYS和ARGV分别是以集合方式传入的参数，对应上文的Test和uuid。</span><br><span class="hljs-comment">-- 如果对应的value等于传入的uuid。</span><br><span class="hljs-keyword">if</span> redis.call(<span class="hljs-string">&#x27;get&#x27;</span>, KEYS[<span class="hljs-number">1</span>]) == ARGV[<span class="hljs-number">1</span>] <br>    <span class="hljs-keyword">then</span> <br> <span class="hljs-comment">-- 执行删除操作</span><br>        <span class="hljs-keyword">return</span> redis.call(<span class="hljs-string">&#x27;del&#x27;</span>, KEYS[<span class="hljs-number">1</span>]) <br>    <span class="hljs-keyword">else</span> <br> <span class="hljs-comment">-- 不成功，返回0</span><br>        <span class="hljs-keyword">return</span> <span class="hljs-number">0</span> <br><span class="hljs-keyword">end</span><br></code></pre></td></tr></table></figure>
+
+<p>好了，看到 Lua 脚本了，然后代码中如何使用？</p>
+<h5 id="为了让大家更清楚，我们在-SpringBoot-中使用这个-Lua-脚本"><a href="#为了让大家更清楚，我们在-SpringBoot-中使用这个-Lua-脚本" class="headerlink" title="为了让大家更清楚，我们在 SpringBoot 中使用这个 Lua 脚本"></a>为了让大家更清楚，我们在 SpringBoot 中使用这个 Lua 脚本</h5><h5 id="1）在-resources-文件下创建-niceyoo-lua-文件"><a href="#1）在-resources-文件下创建-niceyoo-lua-文件" class="headerlink" title="1）在 resources 文件下创建 niceyoo.lua 文件"></a>1）在 resources 文件下创建 niceyoo.lua 文件</h5><p>![[_resources&#x2F;ce5d8b65bf79fea676bff9d9a37fc75c_MD5.png]]</p>
+<p>文件内容如下：</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs pgsql"><span class="hljs-keyword">if</span> redis.<span class="hljs-keyword">call</span>(<span class="hljs-string">&#x27;get&#x27;</span>, KEYS[<span class="hljs-number">1</span>]) == ARGV[<span class="hljs-number">1</span>]<br>    <span class="hljs-keyword">then</span><br>        <span class="hljs-keyword">return</span> redis.<span class="hljs-keyword">call</span>(<span class="hljs-string">&#x27;del&#x27;</span>, KEYS[<span class="hljs-number">1</span>])<br>    <span class="hljs-keyword">else</span><br>        <span class="hljs-keyword">return</span> <span class="hljs-number">0</span><br><span class="hljs-keyword">end</span><br></code></pre></td></tr></table></figure>
+
+<h5 id="2）修改-TestController"><a href="#2）修改-TestController" class="headerlink" title="2）修改 TestController"></a>2）修改 TestController</h5><p>在 SpringBoot中，是使用 DefaultRedisScript 类来加载脚本的，并设置相应的数据类型来接收 Lua 脚本返回的数据，这个泛型类在使用时设置泛型是什么类型，脚本返回的结果就是用什么类型接收。</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><code class="hljs typescript"><span class="hljs-meta">@Slf4j</span><br><span class="hljs-meta">@RestController</span><br><span class="hljs-meta">@RequestMapping</span>(<span class="hljs-string">&quot;/test&quot;</span>)<br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">TestController</span> &#123;<br><br>    <span class="hljs-meta">@Resource</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-title class_">RedisTemplate</span>&lt;<span class="hljs-title class_">String</span>,<span class="hljs-title class_">Object</span>&gt; redisTemplate;<br><br>    <span class="hljs-keyword">private</span> <span class="hljs-title class_">DefaultRedisScript</span>&lt;<span class="hljs-title class_">Long</span>&gt; script;<br><br>    <span class="hljs-meta">@PostConstruct</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-built_in">void</span> <span class="hljs-title function_">init</span>(<span class="hljs-params"></span>)&#123;<br>        script = <span class="hljs-keyword">new</span> <span class="hljs-title class_">DefaultRedisScript</span>&lt;<span class="hljs-title class_">Long</span>&gt;();<br>        script.<span class="hljs-title function_">setResultType</span>(<span class="hljs-title class_">Long</span>.<span class="hljs-property">class</span>);<br>        script.<span class="hljs-title function_">setScriptSource</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">ResourceScriptSource</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">ClassPathResource</span>(<span class="hljs-string">&quot;niceyoo.lua&quot;</span>)));<br>    &#125;<br><br>    <span class="hljs-meta">@PostMapping</span>(value = <span class="hljs-string">&quot;/addUser&quot;</span>)<br>    <span class="hljs-keyword">public</span> <span class="hljs-title class_">String</span> <span class="hljs-title function_">createOrder</span>(<span class="hljs-params"><span class="hljs-title class_">User</span> user</span>) &#123;<br><br>        <span class="hljs-title class_">String</span> key = user.<span class="hljs-title function_">getUsername</span>();<br>        <span class="hljs-title class_">String</span> value = <span class="hljs-variable constant_">UUID</span>.<span class="hljs-title function_">randomUUID</span>().<span class="hljs-title function_">toString</span>().<span class="hljs-title function_">replace</span>(<span class="hljs-string">&quot;-&quot;</span>,<span class="hljs-string">&quot;&quot;</span>);<br><br>        <span class="hljs-comment">/*</span><br><span class="hljs-comment">         * setIfAbsent &lt;=&gt; SET key value [NX] [XX] [EX &lt;seconds&gt;] [PX [millseconds]]</span><br><span class="hljs-comment">         * set expire time 5 mins</span><br><span class="hljs-comment">         */</span><br>        <span class="hljs-title class_">Boolean</span> flag = redisTemplate.<span class="hljs-title function_">opsForValue</span>().<span class="hljs-title function_">setIfAbsent</span>(key, value, <span class="hljs-number">20000</span>, <span class="hljs-title class_">TimeUnit</span>.<span class="hljs-property">MILLISECONDS</span>);<br>        <span class="hljs-keyword">if</span> (flag) &#123;<br>            log.<span class="hljs-title function_">info</span>(<span class="hljs-string">&quot;&#123;&#125; 锁定成功，开始处理业务&quot;</span>, key);<br>            <span class="hljs-keyword">try</span> &#123;<br>                <span class="hljs-comment">/** 模拟处理业务逻辑 **/</span><br>                <span class="hljs-title class_">Thread</span>.<span class="hljs-title function_">sleep</span>(<span class="hljs-number">1000</span> * <span class="hljs-number">10</span>);<br><br>            &#125; <span class="hljs-keyword">catch</span> (<span class="hljs-title class_">InterruptedException</span> e) &#123;<br>                e.<span class="hljs-title function_">printStackTrace</span>();<br>            &#125;<br><br>            <span class="hljs-comment">/** 业务逻辑处理完毕，释放锁 **/</span><br>            <span class="hljs-title class_">String</span> lockValue = (<span class="hljs-title class_">String</span>) redisTemplate.<span class="hljs-title function_">opsForValue</span>().<span class="hljs-title function_">get</span>(key);<br>            <span class="hljs-keyword">if</span> (lockValue != <span class="hljs-literal">null</span> &amp;&amp; lockValue.<span class="hljs-title function_">equals</span>(value)) &#123;<br>                <span class="hljs-title class_">System</span>.<span class="hljs-property">out</span>.<span class="hljs-title function_">println</span>(<span class="hljs-string">&quot;lockValue========：&quot;</span> + lockValue);<br>                <span class="hljs-title class_">List</span>&lt;<span class="hljs-title class_">String</span>&gt; keys = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();<br>                keys.<span class="hljs-title function_">add</span>(key);<br>                <span class="hljs-title class_">Long</span> execute = redisTemplate.<span class="hljs-title function_">execute</span>(script, keys, lockValue);<br>                <span class="hljs-title class_">System</span>.<span class="hljs-property">out</span>.<span class="hljs-title function_">println</span>(<span class="hljs-string">&quot;execute执行结果，1表示执行del，0表示未执行 ===== &quot;</span> + execute);<br>                log.<span class="hljs-title function_">info</span>(<span class="hljs-string">&quot;&#123;&#125; 解锁成功，结束处理业务&quot;</span>, key);<br>            &#125;<br>            <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;SUCCESS&quot;</span>;<br>        &#125; <span class="hljs-keyword">else</span> &#123;<br>            log.<span class="hljs-title function_">info</span>(<span class="hljs-string">&quot;&#123;&#125; 获取锁失败&quot;</span>, key);<br>            <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;请稍后再试...&quot;</span>;<br>        &#125;<br>    &#125;<br><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h5 id="3）测试结果"><a href="#3）测试结果" class="headerlink" title="3）测试结果"></a>3）测试结果</h5><p>Lua 脚本替换 RedisTemplate 执行 delete() 方法，测试结果如下：</p>
+<p>![[_resources&#x2F;6e2871d53ea963cbc51ca09184469102_MD5.png]]</p>
+<h3 id="最后总结"><a href="#最后总结" class="headerlink" title="最后总结"></a>最后总结</h3><p>1、所谓的 setnx 命令来实现分布式锁，其实不是直接使用 Redis 的 setnx 命令，因为 setnx 不支持设置自动释放锁的时间（至于为什么要设置自动释放锁，是因为防止被某个进程不释放锁而造成死锁的情况），不支持设置过期时间，就得分两步命令进行操作，一步是 <code>setnx key value</code> ，一步是设置过期时间，这种情况的弊端很显然，无原子性操作。</p>
+<p>2、 Redis 2.6.12 版本后，set 命令开始整合了 setex 的功能，并且 set 本身就已经包含了设置过期时间，因此常说的 setnx 命令实则只用 set 命令就可以实现了，只是参数上加上了 NX 等参数。</p>
+<p>3、经过分析，在使用 <code>set key value nx px xxx</code> 命令时，value 最好是随机字符串，这样可以防止业务代码执行时间超过设置的锁自动过期时间，而导致再次释放锁时出现释放其他进程锁的情况（套娃）</p>
+<p>4、尽管使用随机字符串的 value，但是在释放锁时（delete方法），还是无法做到原子操作，比如进程 A 执行完业务逻辑，在准备释放锁时，恰好这时候进程 A 的锁自动过期时间到了，而另一个进程 B 获得锁成功，然后 B 还没来得及执行，进程 A 就执行了 delete(key) ，释放了进程 B 的锁…. ，因此需要配合 Lua 脚本释放锁，文章也给出了 SpringBoot 的使用示例。</p>
+<p>至此，带大家一块查看了 setnx 命令如何实现分布式锁，但是下面还是要泼一下冷水…</p>
+<p>经过测试，在单机 Redis 模式下，这种分布式锁，简直是无敌（求生欲：纯个人看法），咳咳，没错，你没看错，单机下的 Redis 无敌…</p>
+<p>所以在那些主从模式、哨兵模式、或者是 cluster 模式下，可能会出现问题，出现什么问题呢？</p>
+<h5 id="setNX-的缺陷"><a href="#setNX-的缺陷" class="headerlink" title="setNX 的缺陷"></a>setNX 的缺陷</h5><p>setnx 琐最大的缺点就是它加锁时只作用在一个 Redis 节点上，即使 Redis 通过 Sentinel(哨岗、哨兵) 保证高可用，如果这个 master 节点由于某些原因发生了主从切换，那么就会出现锁丢失的情况，下面是个例子：</p>
+<ol>
+<li>在 Redis 的 master 节点上拿到了锁；</li>
+<li>但是这个加锁的 key 还没有同步到 slave 节点；</li>
+<li>master 故障，发生故障转移，slave 节点升级为 master节点；</li>
+<li>上边 master 节点上的锁丢失。</li>
+</ol>
+<p>有的时候甚至不单单是锁丢失这么简单，新选出来的 master 节点可以重新获取同样的锁，出现一把锁被拿两次的场景。</p>
+<p>锁被拿两次，也就不能满足安全性了…</p>
+<p>缺陷看完了，怎么解决嘛~</p>
+<p>然后 Redis 的作者就提出了著名远洋的 RedLock 算法…</p>
+<p>下节讲。</p>
+<hr>
+<p>在写这篇文章过程中，本来计划将 Redis 里的 setnx、redisson、redLock 一块写出来发一篇文章；</p>
+<p>但由于文章中贴了一些代码片段，会让文章整体的节奏偏长，不适用于后面自己的复习，所以拆分成两篇文章，</p>
+<p>下一篇我们一块探索 Redisson + RedLock 的分布式锁的实现。</p>
+<h3 id="2、Redisson-RedLock"><a href="#2、Redisson-RedLock" class="headerlink" title="2、Redisson + RedLock"></a>2、Redisson + RedLock</h3><p>请跳转该链接： <a target="_blank" rel="noopener" href="https://www.cnblogs.com/niceyoo/p/13736140.html">https://www.cnblogs.com/niceyoo/p/13736140.html</a></p>
+<blockquote>
+<p>博客园持续更新，订阅关注，未来，我们一起成长。</p>
+</blockquote>
+<p>posted @ <a target="_blank" rel="noopener" href="https://www.cnblogs.com/niceyoo">niceyoo</a>   阅读(17664)  评论(1) <a target="_blank" rel="noopener" href="https://www.cnblogs.com/niceyoo/p/">收藏</a> <a target="_blank" rel="noopener" href="https://www.cnblogs.com/niceyoo/p/">举报</a></p>
+<p>[![[_resources&#x2F;0177bd8827e15cde5812d5de1090694a_MD5.jpg]]](<a target="_blank" rel="noopener" href="https://qoder.com/">https://qoder.com/</a>)</p>
+<p><a target="_blank" rel="noopener" href="https://qoder.com/">Agentic 编程平台 Qoder</a></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/clippings/" class="print-no-link">#clippings</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Redis分布式锁—SETNX+Lua脚本实现篇</div>
+      <div>https://yhao521.github.io/2025/10/08/摘录/Redis分布式锁—SETNX+Lua脚本实现篇/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>[[niceyoo]]</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年10月8日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/10/08/%E6%91%98%E5%BD%95/Redis%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E2%80%94Redisson+RLock%E5%8F%AF%E9%87%8D%E5%85%A5%E9%94%81%E5%AE%9E%E7%8E%B0%E7%AF%87/" title="Redis分布式锁—Redisson+RLock可重入锁实现篇">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Redis分布式锁—Redisson+RLock可重入锁实现篇</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/10/08/%E6%91%98%E5%BD%95/Nacos%E9%83%A8%E7%BD%B2%E5%92%8C%E4%BD%BF%E7%94%A8%EF%BC%88%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C%E4%B8%8E%E5%8F%91%E7%8E%B0%E3%80%81%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83%EF%BC%89/" title="Nacos部署和使用（服务注册与发现、配置中心）">
+                        <span class="hidden-mobile">Nacos部署和使用（服务注册与发现、配置中心）</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>  
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
