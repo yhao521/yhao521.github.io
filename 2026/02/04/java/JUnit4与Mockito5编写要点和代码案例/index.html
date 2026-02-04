@@ -1,0 +1,692 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="[[yhao521]]">
+  <meta name="keywords" content="java,博客,vue,spring,mysql,docker,linux">
+  
+    <meta name="description" content="JUnit4与Mockito5编写要点和代码案例一、环境配置与依赖Maven依赖12345678910111213141516171819202122232425&lt;dependencies&gt;    &lt;!-- JUnit4 --&gt;    &lt;dependency&gt;        &lt;groupId&gt;junit&lt;&#x2F;groupId&gt;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="匆匆过客的博客">
+<meta property="og:url" content="https://yhao521.github.io/2026/02/04/java/JUnit4%E4%B8%8EMockito5%E7%BC%96%E5%86%99%E8%A6%81%E7%82%B9%E5%92%8C%E4%BB%A3%E7%A0%81%E6%A1%88%E4%BE%8B/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="JUnit4与Mockito5编写要点和代码案例一、环境配置与依赖Maven依赖12345678910111213141516171819202122232425&lt;dependencies&gt;    &lt;!-- JUnit4 --&gt;    &lt;dependency&gt;        &lt;groupId&gt;junit&lt;&#x2F;groupId&gt;">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-02-04T07:28:37.953Z">
+<meta property="article:modified_time" content="2026-02-04T07:50:07.827Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="junit4">
+<meta property="article:tag" content="mockito5">
+<meta property="article:tag" content="教程">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>匆匆过客的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yhao521.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>匆匆过客的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text=""></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-02-04 15:28" pubdate>
+          2026年2月4日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.9k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          17 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header"></h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="JUnit4与Mockito5编写要点和代码案例"><a href="#JUnit4与Mockito5编写要点和代码案例" class="headerlink" title="JUnit4与Mockito5编写要点和代码案例"></a>JUnit4与Mockito5编写要点和代码案例</h1><h2 id="一、环境配置与依赖"><a href="#一、环境配置与依赖" class="headerlink" title="一、环境配置与依赖"></a>一、环境配置与依赖</h2><h3 id="Maven依赖"><a href="#Maven依赖" class="headerlink" title="Maven依赖"></a>Maven依赖</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">dependencies</span>&gt;</span><br>    <span class="hljs-comment">&lt;!-- JUnit4 --&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>junit<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>junit<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>4.13.2<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">scope</span>&gt;</span>test<span class="hljs-tag">&lt;/<span class="hljs-name">scope</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br>    <br>    <span class="hljs-comment">&lt;!-- Mockito Core --&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.mockito<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>mockito-core<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>5.7.0<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">scope</span>&gt;</span>test<span class="hljs-tag">&lt;/<span class="hljs-name">scope</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br>    <br>    <span class="hljs-comment">&lt;!-- Mockito Inline (用于mock final类/方法) --&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.mockito<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>mockito-inline<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>5.2.0<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">scope</span>&gt;</span>test<span class="hljs-tag">&lt;/<span class="hljs-name">scope</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependencies</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="二、核心编写要点"><a href="#二、核心编写要点" class="headerlink" title="二、核心编写要点"></a>二、核心编写要点</h2><h3 id="1-测试类结构"><a href="#1-测试类结构" class="headerlink" title="1. 测试类结构"></a>1. 测试类结构</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">import</span> org.junit.After;<br><span class="hljs-keyword">import</span> org.junit.Before;<br><span class="hljs-keyword">import</span> org.junit.Test;<br><span class="hljs-keyword">import</span> org.junit.runner.RunWith;<br><span class="hljs-keyword">import</span> org.mockito.InjectMocks;<br><span class="hljs-keyword">import</span> org.mockito.Mock;<br><span class="hljs-keyword">import</span> org.mockito.junit.MockitoJUnitRunner;<br><span class="hljs-keyword">import</span> <span class="hljs-keyword">static</span> org.mockito.Mockito.*;<br><span class="hljs-keyword">import</span> <span class="hljs-keyword">static</span> org.junit.Assert.*;<br><br><span class="hljs-comment">// 方式1：使用Runner</span><br><span class="hljs-meta">@RunWith(MockitoJUnitRunner.class)</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">UserServiceTest</span> &#123;<br>    <br>    <span class="hljs-comment">// 方式2：使用MockitoAnnotations.openMocks()</span><br>    <span class="hljs-meta">@Before</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setup</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">// MockitoAnnotations.openMocks(this);</span><br>    &#125;<br>    <br>    <span class="hljs-meta">@After</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">tearDown</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">// 可选：重置mock（谨慎使用）</span><br>        <span class="hljs-comment">// reset(mockDependency);</span><br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="2-Mock对象创建方式"><a href="#2-Mock对象创建方式" class="headerlink" title="2. Mock对象创建方式"></a>2. Mock对象创建方式</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">MockCreationTest</span> &#123;<br>    <br>    <span class="hljs-comment">// 方式1：使用注解</span><br>    <span class="hljs-meta">@Mock</span><br>    <span class="hljs-keyword">private</span> UserRepository userRepository;<br>    <br>    <span class="hljs-meta">@Mock</span><br>    <span class="hljs-keyword">private</span> EmailService emailService;<br>    <br>    <span class="hljs-comment">// 方式2：使用静态方法</span><br>    <span class="hljs-meta">@Test</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">testManualMock</span><span class="hljs-params">()</span> &#123;<br>        List&lt;String&gt; mockList = mock(List.class);<br>        <span class="hljs-type">UserRepository</span> <span class="hljs-variable">manualRepo</span> <span class="hljs-operator">=</span> mock(UserRepository.class);<br>    &#125;<br>    <br>    <span class="hljs-comment">// 方式3：使用@Spy（部分mock真实对象）</span><br>    <span class="hljs-meta">@Spy</span><br>    <span class="hljs-keyword">private</span> List&lt;String&gt; spyList = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();<br>    <br>    <span class="hljs-meta">@Test</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">testSpy</span><span class="hljs-params">()</span> &#123;<br>        spyList.add(<span class="hljs-string">&quot;real&quot;</span>);<br>        spyList.add(<span class="hljs-string">&quot;object&quot;</span>);<br>        <br>        <span class="hljs-comment">// 对某些方法进行mock</span><br>        doReturn(<span class="hljs-number">100</span>).<span class="hljs-keyword">when</span>(spyList).size();<br>        assertEquals(<span class="hljs-number">100</span>, spyList.size());<br>        <br>        <span class="hljs-comment">// 其他方法仍调用真实实现</span><br>        assertEquals(<span class="hljs-string">&quot;real&quot;</span>, spyList.get(<span class="hljs-number">0</span>));<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="3-依赖注入方式"><a href="#3-依赖注入方式" class="headerlink" title="3. 依赖注入方式"></a>3. 依赖注入方式</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 方式1：使用@InjectMocks自动注入</span><br><span class="hljs-meta">@RunWith(MockitoJUnitRunner.class)</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">InjectMocksTest</span> &#123;<br>    <br>    <span class="hljs-meta">@Mock</span><br>    <span class="hljs-keyword">private</span> UserRepository userRepository;<br>    <br>    <span class="hljs-meta">@Mock</span><br>    <span class="hljs-keyword">private</span> EmailService emailService;<br>    <br>    <span class="hljs-meta">@InjectMocks</span><br>    <span class="hljs-keyword">private</span> UserService userService; <span class="hljs-comment">// 会自动注入上面的mock对象</span><br>    <br>    <span class="hljs-meta">@Test</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">testInjectMocks</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">// userService中的依赖已被自动注入为mock对象</span><br>    &#125;<br>&#125;<br><br><span class="hljs-comment">// 方式2：手动构造注入</span><br><span class="hljs-meta">@Test</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">testManualInjection</span><span class="hljs-params">()</span> &#123;<br>    <span class="hljs-type">UserRepository</span> <span class="hljs-variable">mockRepo</span> <span class="hljs-operator">=</span> mock(UserRepository.class);<br>    <span class="hljs-type">EmailService</span> <span class="hljs-variable">mockEmail</span> <span class="hljs-operator">=</span> mock(EmailService.class);<br>    <span class="hljs-type">UserService</span> <span class="hljs-variable">userService</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">UserService</span>(mockRepo, mockEmail);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="三、常用Mockito-API示例"><a href="#三、常用Mockito-API示例" class="headerlink" title="三、常用Mockito API示例"></a>三、常用Mockito API示例</h2><h3 id="1-Stubbing（方法打桩）"><a href="#1-Stubbing（方法打桩）" class="headerlink" title="1. Stubbing（方法打桩）"></a>1. Stubbing（方法打桩）</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RunWith(MockitoJUnitRunner.class)</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">StubbingTest</span> &#123;<br>    <br>    <span class="hljs-meta">@Mock</span><br>    <span class="hljs-keyword">private</span> UserRepository userRepository;<br>    <br>    <span class="hljs-meta">@Test</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">testBasicStubbing</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">// 1. 返回值打桩</span><br>        <span class="hljs-keyword">when</span>(userRepository.findById(<span class="hljs-number">1L</span>))<br>            .thenReturn(<span class="hljs-keyword">new</span> <span class="hljs-title class_">User</span>(<span class="hljs-number">1L</span>, <span class="hljs-string">&quot;Alice&quot;</span>));<br>        <br>        <span class="hljs-comment">// 2. 连续打桩（不同调用返回不同值）</span><br>        <span class="hljs-keyword">when</span>(userRepository.findById(anyLong()))<br>            .thenReturn(<span class="hljs-keyword">new</span> <span class="hljs-title class_">User</span>(<span class="hljs-number">1L</span>, <span class="hljs-string">&quot;User1&quot;</span>))<br>            .thenReturn(<span class="hljs-keyword">new</span> <span class="hljs-title class_">User</span>(<span class="hljs-number">2L</span>, <span class="hljs-string">&quot;User2&quot;</span>))<br>            .thenThrow(<span class="hljs-keyword">new</span> <span class="hljs-title class_">RuntimeException</span>(<span class="hljs-string">&quot;User not found&quot;</span>));<br>        <br>        <span class="hljs-comment">// 3. void方法打桩</span><br>        doThrow(<span class="hljs-keyword">new</span> <span class="hljs-title class_">IllegalArgumentException</span>(<span class="hljs-string">&quot;Invalid user&quot;</span>))<br>            .<span class="hljs-keyword">when</span>(userRepository).save(<span class="hljs-literal">null</span>);<br>        <br>        doNothing().<span class="hljs-keyword">when</span>(userRepository).clearCache();<br>        <br>        <span class="hljs-comment">// 4. 参数匹配器</span><br>        <span class="hljs-keyword">when</span>(userRepository.findByEmail(anyString()))<br>            .thenReturn(<span class="hljs-keyword">new</span> <span class="hljs-title class_">User</span>());<br>            <br>        <span class="hljs-keyword">when</span>(userRepository.findByName(startsWith(<span class="hljs-string">&quot;Admin&quot;</span>)))<br>            .thenReturn(<span class="hljs-keyword">new</span> <span class="hljs-title class_">User</span>(<span class="hljs-number">999L</span>, <span class="hljs-string">&quot;Administrator&quot;</span>));<br>            <br>        <span class="hljs-keyword">when</span>(userRepository.findByAge(eq(<span class="hljs-number">25</span>)))<br>            .thenReturn(<span class="hljs-keyword">new</span> <span class="hljs-title class_">User</span>());<br>            <br>        <span class="hljs-keyword">when</span>(userRepository.findByAge(gt(<span class="hljs-number">18</span>)))<br>            .thenReturn(<span class="hljs-keyword">new</span> <span class="hljs-title class_">User</span>());<br>    &#125;<br>    <br>    <span class="hljs-meta">@Test</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">testAnswerForComplexLogic</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">// 使用Answer实现复杂逻辑</span><br>        <span class="hljs-keyword">when</span>(userRepository.save(any(User.class)))<br>            .thenAnswer(invocation -&gt; &#123;<br>                <span class="hljs-type">User</span> <span class="hljs-variable">user</span> <span class="hljs-operator">=</span> invocation.getArgument(<span class="hljs-number">0</span>);<br>                <span class="hljs-keyword">if</span> (user.getId() == <span class="hljs-literal">null</span>) &#123;<br>                    user.setId(System.currentTimeMillis());<br>                &#125;<br>                user.setCreatedAt(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>());<br>                <span class="hljs-keyword">return</span> user;<br>            &#125;);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="2-验证（Verification）"><a href="#2-验证（Verification）" class="headerlink" title="2. 验证（Verification）"></a>2. 验证（Verification）</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RunWith(MockitoJUnitRunner.class)</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">VerificationTest</span> &#123;<br>    <br>    <span class="hljs-meta">@Mock</span><br>    <span class="hljs-keyword">private</span> UserRepository userRepository;<br>    <br>    <span class="hljs-meta">@InjectMocks</span><br>    <span class="hljs-keyword">private</span> UserService userService;<br>    <br>    <span class="hljs-meta">@Test</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">testBasicVerification</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">// 调用被测试方法</span><br>        userService.updateUser(<span class="hljs-number">1L</span>, <span class="hljs-string">&quot;NewName&quot;</span>);<br>        <br>        <span class="hljs-comment">// 1. 基本验证</span><br>        verify(userRepository).findById(<span class="hljs-number">1L</span>);<br>        verify(userRepository).save(any(User.class));<br>        <br>        <span class="hljs-comment">// 2. 验证调用次数</span><br>        verify(userRepository, times(<span class="hljs-number">1</span>)).findById(<span class="hljs-number">1L</span>);<br>        verify(userRepository, atLeastOnce()).save(any(User.class));<br>        verify(userRepository, atMost(<span class="hljs-number">5</span>)).save(any(User.class));<br>        verify(userRepository, never()).delete(anyLong());<br>        <br>        <span class="hljs-comment">// 3. 验证调用顺序</span><br>        <span class="hljs-type">InOrder</span> <span class="hljs-variable">inOrder</span> <span class="hljs-operator">=</span> inOrder(userRepository);<br>        inOrder.verify(userRepository).findById(<span class="hljs-number">1L</span>);<br>        inOrder.verify(userRepository).save(any(User.class));<br>        <br>        <span class="hljs-comment">// 4. 验证超时</span><br>        verify(userRepository, timeout(<span class="hljs-number">1000</span>)).findById(<span class="hljs-number">1L</span>);<br>        <br>        <span class="hljs-comment">// 5. 验证无其他交互</span><br>        verifyNoMoreInteractions(userRepository);<br>        verifyNoInteractions(emailService); <span class="hljs-comment">// 另一个mock对象</span><br>    &#125;<br>    <br>    <span class="hljs-meta">@Test</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">testArgumentCaptor</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">// 使用ArgumentCaptor捕获调用参数</span><br>        ArgumentCaptor&lt;User&gt; userCaptor = ArgumentCaptor.forClass(User.class);<br>        <br>        userService.createUser(<span class="hljs-string">&quot;Alice&quot;</span>, <span class="hljs-string">&quot;alice@example.com&quot;</span>);<br>        <br>        verify(userRepository).save(userCaptor.capture());<br>        <span class="hljs-type">User</span> <span class="hljs-variable">savedUser</span> <span class="hljs-operator">=</span> userCaptor.getValue();<br>        <br>        assertEquals(<span class="hljs-string">&quot;Alice&quot;</span>, savedUser.getName());<br>        assertEquals(<span class="hljs-string">&quot;alice@example.com&quot;</span>, savedUser.getEmail());<br>        assertNotNull(savedUser.getCreatedAt());<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="四、完整代码案例"><a href="#四、完整代码案例" class="headerlink" title="四、完整代码案例"></a>四、完整代码案例</h2><h3 id="案例1：用户服务测试"><a href="#案例1：用户服务测试" class="headerlink" title="案例1：用户服务测试"></a>案例1：用户服务测试</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 业务类</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">User</span> &#123;<br>    <span class="hljs-keyword">private</span> Long id;<br>    <span class="hljs-keyword">private</span> String name;<br>    <span class="hljs-keyword">private</span> String email;<br>    <span class="hljs-keyword">private</span> Date createdAt;<br>    <span class="hljs-comment">// getters/setters</span><br>&#125;<br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">UserRepository</span> &#123;<br>    User <span class="hljs-title function_">findById</span><span class="hljs-params">(Long id)</span>;<br>    User <span class="hljs-title function_">save</span><span class="hljs-params">(User user)</span>;<br>    <span class="hljs-keyword">void</span> <span class="hljs-title function_">delete</span><span class="hljs-params">(Long id)</span>;<br>    List&lt;User&gt; <span class="hljs-title function_">findByEmail</span><span class="hljs-params">(String email)</span>;<br>&#125;<br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">EmailService</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">sendWelcomeEmail</span><span class="hljs-params">(String email)</span> &#123;<br>        <span class="hljs-comment">// 发送邮件逻辑</span><br>    &#125;<br>    <br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">sendPasswordResetEmail</span><span class="hljs-params">(String email)</span> &#123;<br>        <span class="hljs-comment">// 发送重置密码邮件</span><br>    &#125;<br>&#125;<br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">UserService</span> &#123;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> UserRepository userRepository;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> EmailService emailService;<br>    <br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">UserService</span><span class="hljs-params">(UserRepository userRepository, EmailService emailService)</span> &#123;<br>        <span class="hljs-built_in">this</span>.userRepository = userRepository;<br>        <span class="hljs-built_in">this</span>.emailService = emailService;<br>    &#125;<br>    <br>    <span class="hljs-keyword">public</span> User <span class="hljs-title function_">createUser</span><span class="hljs-params">(String name, String email)</span> &#123;<br>        <span class="hljs-type">User</span> <span class="hljs-variable">user</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">User</span>();<br>        user.setName(name);<br>        user.setEmail(email);<br>        user.setCreatedAt(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>());<br>        <br>        <span class="hljs-type">User</span> <span class="hljs-variable">savedUser</span> <span class="hljs-operator">=</span> userRepository.save(user);<br>        emailService.sendWelcomeEmail(email);<br>        <br>        <span class="hljs-keyword">return</span> savedUser;<br>    &#125;<br>    <br>    <span class="hljs-keyword">public</span> User <span class="hljs-title function_">updateUser</span><span class="hljs-params">(Long userId, String newName)</span> &#123;<br>        <span class="hljs-type">User</span> <span class="hljs-variable">user</span> <span class="hljs-operator">=</span> userRepository.findById(userId);<br>        <span class="hljs-keyword">if</span> (user == <span class="hljs-literal">null</span>) &#123;<br>            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">RuntimeException</span>(<span class="hljs-string">&quot;User not found&quot;</span>);<br>        &#125;<br>        <br>        user.setName(newName);<br>        <span class="hljs-keyword">return</span> userRepository.save(user);<br>    &#125;<br>    <br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">resetPassword</span><span class="hljs-params">(Long userId)</span> &#123;<br>        <span class="hljs-type">User</span> <span class="hljs-variable">user</span> <span class="hljs-operator">=</span> userRepository.findById(userId);<br>        <span class="hljs-keyword">if</span> (user != <span class="hljs-literal">null</span>) &#123;<br>            emailService.sendPasswordResetEmail(user.getEmail());<br>        &#125;<br>    &#125;<br>    <br>    <span class="hljs-keyword">public</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">isEmailRegistered</span><span class="hljs-params">(String email)</span> &#123;<br>        List&lt;User&gt; users = userRepository.findByEmail(email);<br>        <span class="hljs-keyword">return</span> !users.isEmpty();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 测试类</span><br><span class="hljs-meta">@RunWith(MockitoJUnitRunner.class)</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">UserServiceTest</span> &#123;<br>    <br>    <span class="hljs-meta">@Mock</span><br>    <span class="hljs-keyword">private</span> UserRepository userRepository;<br>    <br>    <span class="hljs-meta">@Mock</span><br>    <span class="hljs-keyword">private</span> EmailService emailService;<br>    <br>    <span class="hljs-meta">@InjectMocks</span><br>    <span class="hljs-keyword">private</span> UserService userService;<br>    <br>    <span class="hljs-meta">@Test</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">testCreateUser_Success</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">// Arrange</span><br>        <span class="hljs-type">User</span> <span class="hljs-variable">mockUser</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">User</span>();<br>        mockUser.setId(<span class="hljs-number">1L</span>);<br>        mockUser.setName(<span class="hljs-string">&quot;Alice&quot;</span>);<br>        mockUser.setEmail(<span class="hljs-string">&quot;alice@example.com&quot;</span>);<br>        <br>        <span class="hljs-keyword">when</span>(userRepository.save(any(User.class))).thenReturn(mockUser);<br>        <br>        <span class="hljs-comment">// Act</span><br>        <span class="hljs-type">User</span> <span class="hljs-variable">result</span> <span class="hljs-operator">=</span> userService.createUser(<span class="hljs-string">&quot;Alice&quot;</span>, <span class="hljs-string">&quot;alice@example.com&quot;</span>);<br>        <br>        <span class="hljs-comment">// Assert</span><br>        assertNotNull(result);<br>        assertEquals(<span class="hljs-number">1L</span>, result.getId().longValue());<br>        assertEquals(<span class="hljs-string">&quot;Alice&quot;</span>, result.getName());<br>        <br>        <span class="hljs-comment">// Verify interactions</span><br>        verify(userRepository).save(any(User.class));<br>        verify(emailService).sendWelcomeEmail(<span class="hljs-string">&quot;alice@example.com&quot;</span>);<br>    &#125;<br>    <br>    <span class="hljs-meta">@Test</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">testUpdateUser_UserNotFound</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">// Arrange</span><br>        <span class="hljs-keyword">when</span>(userRepository.findById(<span class="hljs-number">999L</span>)).thenReturn(<span class="hljs-literal">null</span>);<br>        <br>        <span class="hljs-comment">// Act &amp; Assert</span><br>        <span class="hljs-keyword">try</span> &#123;<br>            userService.updateUser(<span class="hljs-number">999L</span>, <span class="hljs-string">&quot;NewName&quot;</span>);<br>            fail(<span class="hljs-string">&quot;Should throw exception&quot;</span>);<br>        &#125; <span class="hljs-keyword">catch</span> (RuntimeException e) &#123;<br>            assertEquals(<span class="hljs-string">&quot;User not found&quot;</span>, e.getMessage());<br>        &#125;<br>        <br>        verify(userRepository).findById(<span class="hljs-number">999L</span>);<br>        verify(userRepository, never()).save(any(User.class));<br>    &#125;<br>    <br>    <span class="hljs-meta">@Test</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">testResetPassword_UserExists</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">// Arrange</span><br>        <span class="hljs-type">User</span> <span class="hljs-variable">mockUser</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">User</span>();<br>        mockUser.setId(<span class="hljs-number">1L</span>);<br>        mockUser.setEmail(<span class="hljs-string">&quot;user@example.com&quot;</span>);<br>        <br>        <span class="hljs-keyword">when</span>(userRepository.findById(<span class="hljs-number">1L</span>)).thenReturn(mockUser);<br>        <br>        <span class="hljs-comment">// Act</span><br>        userService.resetPassword(<span class="hljs-number">1L</span>);<br>        <br>        <span class="hljs-comment">// Assert</span><br>        verify(emailService).sendPasswordResetEmail(<span class="hljs-string">&quot;user@example.com&quot;</span>);<br>    &#125;<br>    <br>    <span class="hljs-meta">@Test</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">testResetPassword_UserNotExists</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">// Arrange</span><br>        <span class="hljs-keyword">when</span>(userRepository.findById(<span class="hljs-number">999L</span>)).thenReturn(<span class="hljs-literal">null</span>);<br>        <br>        <span class="hljs-comment">// Act</span><br>        userService.resetPassword(<span class="hljs-number">999L</span>);<br>        <br>        <span class="hljs-comment">// Assert</span><br>        verify(emailService, never()).sendPasswordResetEmail(anyString());<br>    &#125;<br>    <br>    <span class="hljs-meta">@Test</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">testIsEmailRegistered_EmailExists</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">// Arrange</span><br>        List&lt;User&gt; users = Arrays.asList(<span class="hljs-keyword">new</span> <span class="hljs-title class_">User</span>(), <span class="hljs-keyword">new</span> <span class="hljs-title class_">User</span>());<br>        <span class="hljs-keyword">when</span>(userRepository.findByEmail(<span class="hljs-string">&quot;existing@example.com&quot;</span>)).thenReturn(users);<br>        <br>        <span class="hljs-comment">// Act</span><br>        <span class="hljs-type">boolean</span> <span class="hljs-variable">result</span> <span class="hljs-operator">=</span> userService.isEmailRegistered(<span class="hljs-string">&quot;existing@example.com&quot;</span>);<br>        <br>        <span class="hljs-comment">// Assert</span><br>        assertTrue(result);<br>    &#125;<br>    <br>    <span class="hljs-meta">@Test</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">testIsEmailRegistered_EmailNotExists</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">// Arrange</span><br>        <span class="hljs-keyword">when</span>(userRepository.findByEmail(<span class="hljs-string">&quot;new@example.com&quot;</span>)).thenReturn(Collections.emptyList());<br>        <br>        <span class="hljs-comment">// Act</span><br>        <span class="hljs-type">boolean</span> <span class="hljs-variable">result</span> <span class="hljs-operator">=</span> userService.isEmailRegistered(<span class="hljs-string">&quot;new@example.com&quot;</span>);<br>        <br>        <span class="hljs-comment">// Assert</span><br>        assertFalse(result);<br>    &#125;<br>    <br>    <span class="hljs-meta">@Test</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">testArgumentCaptorExample</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">// Arrange</span><br>        ArgumentCaptor&lt;User&gt; userCaptor = ArgumentCaptor.forClass(User.class);<br>        <span class="hljs-type">User</span> <span class="hljs-variable">savedUser</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">User</span>();<br>        savedUser.setId(<span class="hljs-number">100L</span>);<br>        <span class="hljs-keyword">when</span>(userRepository.save(userCaptor.capture())).thenReturn(savedUser);<br>        <br>        <span class="hljs-comment">// Act</span><br>        userService.createUser(<span class="hljs-string">&quot;Bob&quot;</span>, <span class="hljs-string">&quot;bob@example.com&quot;</span>);<br>        <br>        <span class="hljs-comment">// Assert</span><br>        <span class="hljs-type">User</span> <span class="hljs-variable">capturedUser</span> <span class="hljs-operator">=</span> userCaptor.getValue();<br>        assertEquals(<span class="hljs-string">&quot;Bob&quot;</span>, capturedUser.getName());<br>        assertEquals(<span class="hljs-string">&quot;bob@example.com&quot;</span>, capturedUser.getEmail());<br>        assertNotNull(capturedUser.getCreatedAt());<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="案例2：静态方法-构造方法Mock"><a href="#案例2：静态方法-构造方法Mock" class="headerlink" title="案例2：静态方法&#x2F;构造方法Mock"></a>案例2：静态方法&#x2F;构造方法Mock</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// Mockito5支持mock静态方法和构造方法（需要mockito-inline）</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">StaticMethodTest</span> &#123;<br>    <br>    <span class="hljs-meta">@Test</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">testStaticMethodMocking</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-keyword">try</span> (MockedStatic&lt;UtilityClass&gt; mockedStatic = mockStatic(UtilityClass.class)) &#123;<br>            <span class="hljs-comment">// Arrange</span><br>            mockedStatic.<span class="hljs-keyword">when</span>(UtilityClass::getVersion).thenReturn(<span class="hljs-string">&quot;2.0.0&quot;</span>);<br>            <br>            <span class="hljs-comment">// Act</span><br>            <span class="hljs-type">String</span> <span class="hljs-variable">version</span> <span class="hljs-operator">=</span> UtilityClass.getVersion();<br>            <br>            <span class="hljs-comment">// Assert</span><br>            assertEquals(<span class="hljs-string">&quot;2.0.0&quot;</span>, version);<br>            mockedStatic.verify(UtilityClass::getVersion);<br>        &#125;<br>    &#125;<br>    <br>    <span class="hljs-meta">@Test</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">testConstructorMocking</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-keyword">try</span> (MockedConstruction&lt;DatabaseConnection&gt; mocked = mockConstruction(DatabaseConnection.class,<br>            (mock, context) -&gt; &#123;<br>                <span class="hljs-keyword">when</span>(mock.isConnected()).thenReturn(<span class="hljs-literal">true</span>);<br>                <span class="hljs-keyword">when</span>(mock.query(<span class="hljs-string">&quot;SELECT * FROM users&quot;</span>)).thenReturn(<span class="hljs-string">&quot;users_data&quot;</span>);<br>            &#125;)) &#123;<br>            <br>            <span class="hljs-comment">// 创建新实例时会使用mock</span><br>            <span class="hljs-type">DatabaseConnection</span> <span class="hljs-variable">db</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">DatabaseConnection</span>(<span class="hljs-string">&quot;localhost&quot;</span>, <span class="hljs-number">3306</span>);<br>            <br>            assertTrue(db.isConnected());<br>            assertEquals(<span class="hljs-string">&quot;users_data&quot;</span>, db.query(<span class="hljs-string">&quot;SELECT * FROM users&quot;</span>));<br>            <br>            <span class="hljs-comment">// 验证构造函数被调用</span><br>            assertEquals(<span class="hljs-number">1</span>, mocked.constructed().size());<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="五、最佳实践与常见陷阱"><a href="#五、最佳实践与常见陷阱" class="headerlink" title="五、最佳实践与常见陷阱"></a>五、最佳实践与常见陷阱</h2><h3 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h3><ol>
+<li><strong>遵循Arrange-Act-Assert模式</strong></li>
+<li><strong>每个测试只测一个功能点</strong></li>
+<li><strong>使用有意义的测试方法名称</strong></li>
+<li><strong>避免过度mock</strong></li>
+<li><strong>优先使用@InjectMocks自动注入</strong></li>
+</ol>
+<h3 id="常见陷阱"><a href="#常见陷阱" class="headerlink" title="常见陷阱"></a>常见陷阱</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">CommonPitfallsTest</span> &#123;<br>    <br>    <span class="hljs-meta">@Mock</span><br>    <span class="hljs-keyword">private</span> List&lt;String&gt; mockList;<br>    <br>    <span class="hljs-meta">@Test</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">commonMistakes</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">// 错误1：在验证之后进行打桩</span><br>        verify(mockList).add(<span class="hljs-string">&quot;test&quot;</span>);<br>        <span class="hljs-keyword">when</span>(mockList.size()).thenReturn(<span class="hljs-number">10</span>); <span class="hljs-comment">// 错误！</span><br>        <br>        <span class="hljs-comment">// 错误2：过度使用any()匹配器</span><br>        <span class="hljs-keyword">when</span>(mockList.get(anyInt())).thenReturn(<span class="hljs-string">&quot;value&quot;</span>);<br>        <span class="hljs-comment">// 更好的做法：使用具体值或eq()</span><br>        <br>        <span class="hljs-comment">// 错误3：不必要地使用verify</span><br>        <span class="hljs-comment">// 只验证真正重要的交互</span><br>        <br>        <span class="hljs-comment">// 错误4：在真实对象上使用when()</span><br>        List&lt;String&gt; realList = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();<br>        <span class="hljs-comment">// when(realList.add(&quot;test&quot;)).thenReturn(true); // 运行时错误！</span><br>        <br>        <span class="hljs-comment">// 正确：使用spy</span><br>        List&lt;String&gt; spyList = spy(<span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;());<br>        doReturn(<span class="hljs-literal">true</span>).<span class="hljs-keyword">when</span>(spyList).add(<span class="hljs-string">&quot;test&quot;</span>);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="测试生命周期"><a href="#测试生命周期" class="headerlink" title="测试生命周期"></a>测试生命周期</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RunWith(MockitoJUnitRunner.class)</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">LifecycleTest</span> &#123;<br>    <br>    <span class="hljs-meta">@Mock</span><br>    <span class="hljs-keyword">private</span> Service service;<br>    <br>    <span class="hljs-meta">@BeforeClass</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">beforeClass</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">// 在所有测试方法之前执行一次</span><br>    &#125;<br>    <br>    <span class="hljs-meta">@AfterClass</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">afterClass</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">// 在所有测试方法之后执行一次</span><br>    &#125;<br>    <br>    <span class="hljs-meta">@Before</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setUp</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">// 在每个测试方法之前执行</span><br>        Mockito.reset(service); <span class="hljs-comment">// 重置mock状态（谨慎使用）</span><br>    &#125;<br>    <br>    <span class="hljs-meta">@After</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">tearDown</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">// 在每个测试方法之后执行</span><br>    &#125;<br>    <br>    <span class="hljs-meta">@Test</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test1</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">// 测试方法1</span><br>    &#125;<br>    <br>    <span class="hljs-meta">@Test</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test2</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">// 测试方法2</span><br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="六、高级特性"><a href="#六、高级特性" class="headerlink" title="六、高级特性"></a>六、高级特性</h2><h3 id="1-自定义Answer"><a href="#1-自定义Answer" class="headerlink" title="1. 自定义Answer"></a>1. 自定义Answer</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Test</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">testCustomAnswer</span><span class="hljs-params">()</span> &#123;<br>    List&lt;String&gt; mockList = mock(List.class);<br>    <br>    <span class="hljs-keyword">when</span>(mockList.get(anyInt())).thenAnswer(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Answer</span>&lt;String&gt;() &#123;<br>        <span class="hljs-keyword">private</span> <span class="hljs-type">int</span> <span class="hljs-variable">count</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;<br>        <br>        <span class="hljs-meta">@Override</span><br>        <span class="hljs-keyword">public</span> String <span class="hljs-title function_">answer</span><span class="hljs-params">(InvocationOnMock invocation)</span> &#123;<br>            <span class="hljs-type">int</span> <span class="hljs-variable">index</span> <span class="hljs-operator">=</span> invocation.getArgument(<span class="hljs-number">0</span>);<br>            <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;Element at index &quot;</span> + index + <span class="hljs-string">&quot; called &quot;</span> + (++count) + <span class="hljs-string">&quot; times&quot;</span>;<br>        &#125;<br>    &#125;);<br>    <br>    System.out.println(mockList.get(<span class="hljs-number">0</span>)); <span class="hljs-comment">// &quot;Element at index 0 called 1 times&quot;</span><br>    System.out.println(mockList.get(<span class="hljs-number">1</span>)); <span class="hljs-comment">// &quot;Element at index 1 called 2 times&quot;</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="2-验证超时"><a href="#2-验证超时" class="headerlink" title="2. 验证超时"></a>2. 验证超时</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Test</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">testVerificationWithTimeout</span><span class="hljs-params">()</span> &#123;<br>    <span class="hljs-comment">// 模拟异步操作</span><br>    <span class="hljs-keyword">new</span> <span class="hljs-title class_">Thread</span>(() -&gt; &#123;<br>        <span class="hljs-keyword">try</span> &#123;<br>            Thread.sleep(<span class="hljs-number">500</span>);<br>        &#125; <span class="hljs-keyword">catch</span> (InterruptedException e) &#123;<br>            e.printStackTrace();<br>        &#125;<br>        mockList.add(<span class="hljs-string">&quot;async&quot;</span>);<br>    &#125;).start();<br>    <br>    <span class="hljs-comment">// 等待最多2秒，直到add方法被调用</span><br>    verify(mockList, timeout(<span class="hljs-number">2000</span>)).add(<span class="hljs-string">&quot;async&quot;</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="3-Mockito与Hamcrest结合"><a href="#3-Mockito与Hamcrest结合" class="headerlink" title="3. Mockito与Hamcrest结合"></a>3. Mockito与Hamcrest结合</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Test</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">testWithHamcrestMatchers</span><span class="hljs-params">()</span> &#123;<br>    List&lt;String&gt; list = Arrays.asList(<span class="hljs-string">&quot;one&quot;</span>, <span class="hljs-string">&quot;two&quot;</span>, <span class="hljs-string">&quot;three&quot;</span>);<br>    <br>    assertThat(list, hasSize(<span class="hljs-number">3</span>));<br>    assertThat(list, contains(<span class="hljs-string">&quot;one&quot;</span>, <span class="hljs-string">&quot;two&quot;</span>, <span class="hljs-string">&quot;three&quot;</span>));<br>    assertThat(list, hasItem(<span class="hljs-string">&quot;two&quot;</span>));<br>    <br>    <span class="hljs-comment">// 结合Mockito使用</span><br>    <span class="hljs-keyword">when</span>(mockService.process(anyString())).thenReturn(<span class="hljs-string">&quot;processed&quot;</span>);<br>    <span class="hljs-type">String</span> <span class="hljs-variable">result</span> <span class="hljs-operator">=</span> mockService.process(<span class="hljs-string">&quot;input&quot;</span>);<br>    <br>    assertThat(result, equalTo(<span class="hljs-string">&quot;processed&quot;</span>));<br>    assertThat(result, startsWith(<span class="hljs-string">&quot;proc&quot;</span>));<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这个指南涵盖了JUnit4和Mockito5的主要特性和最佳实践。在实际项目中，根据具体需求选择合适的mock策略和验证方法，确保测试代码的可维护性和可靠性。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%8D%9A%E5%AE%A2/" class="category-chain-item">博客</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Java/" class="print-no-link">#Java</a>
+      
+        <a href="/tags/junit4/" class="print-no-link">#junit4</a>
+      
+        <a href="/tags/mockito5/" class="print-no-link">#mockito5</a>
+      
+        <a href="/tags/%E6%95%99%E7%A8%8B/" class="print-no-link">#教程</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div></div>
+      <div>https://yhao521.github.io/2026/02/04/java/JUnit4与Mockito5编写要点和代码案例/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>[[yhao521]]</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年2月4日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/02/04/java/%E6%9C%AA%E5%91%BD%E5%90%8D/" title="">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile"></span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/01/23/Wails%20v3%E5%88%9D%E8%AF%86/" title="Wails v3初识">
+                        <span class="hidden-mobile">Wails v3初识</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>  
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
