@@ -1,0 +1,385 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>细到不能再细的 Spring Cloud Gateway 原理分析（内含多张图片讲解）_gateway原理-CSDN博客 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="文章浏览阅读1.5w次，点赞35次，收藏114次。本文深入探讨了SpringCloudGateway的原理，包括其作为微服务网关的基本职责，如路由转发、负载均衡。同时，解释了Gateway基于SpringWebFlux和Netty实现高性能的原因。文中还阐述了Gateway的核心组件，如Route、Predicates和Filters，以及它们在处理请求过程中的角色。此外，提到了RouteLoca">
+<meta property="og:type" content="article">
+<meta property="og:title" content="细到不能再细的 Spring Cloud Gateway 原理分析（内含多张图片讲解）_gateway原理-CSDN博客">
+<meta property="og:url" content="https://yhao521.github.io/2025/10/08/%E7%BB%86%E5%88%B0%E4%B8%8D%E8%83%BD%E5%86%8D%E7%BB%86%E7%9A%84%20Spring%20Cloud%20Gateway%20%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90%EF%BC%88%E5%86%85%E5%90%AB%E5%A4%9A%E5%BC%A0%E5%9B%BE%E7%89%87%E8%AE%B2%E8%A7%A3%EF%BC%89_gateway%E5%8E%9F%E7%90%86-CSDN%E5%8D%9A%E5%AE%A2/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="文章浏览阅读1.5w次，点赞35次，收藏114次。本文深入探讨了SpringCloudGateway的原理，包括其作为微服务网关的基本职责，如路由转发、负载均衡。同时，解释了Gateway基于SpringWebFlux和Netty实现高性能的原因。文中还阐述了Gateway的核心组件，如Route、Predicates和Filters，以及它们在处理请求过程中的角色。此外，提到了RouteLoca">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2025-10-07T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-17T16:00:00.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="java&#x2F;programming">
+<meta property="article:tag" content="web&#x2F;frontend">
+<meta property="article:tag" content="摘录">
+<meta property="article:tag" content="教程">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "细到不能再细的 Spring Cloud Gateway 原理分析（内含多张图片讲解）_gateway原理-CSDN博客",
+  "url": "https://yhao521.github.io/2025/10/08/%E7%BB%86%E5%88%B0%E4%B8%8D%E8%83%BD%E5%86%8D%E7%BB%86%E7%9A%84%20Spring%20Cloud%20Gateway%20%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90%EF%BC%88%E5%86%85%E5%90%AB%E5%A4%9A%E5%BC%A0%E5%9B%BE%E7%89%87%E8%AE%B2%E8%A7%A3%EF%BC%89_gateway%E5%8E%9F%E7%90%86-CSDN%E5%8D%9A%E5%AE%A2/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2025-10-07T16:00:00.000Z",
+  "dateModified": "2026-05-17T16:00:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2025/10/08/%E7%BB%86%E5%88%B0%E4%B8%8D%E8%83%BD%E5%86%8D%E7%BB%86%E7%9A%84%20Spring%20Cloud%20Gateway%20%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90%EF%BC%88%E5%86%85%E5%90%AB%E5%A4%9A%E5%BC%A0%E5%9B%BE%E7%89%87%E8%AE%B2%E8%A7%A3%EF%BC%89_gateway%E5%8E%9F%E7%90%86-CSDN%E5%8D%9A%E5%AE%A2/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '细到不能再细的 Spring Cloud Gateway 原理分析（内含多张图片讲解）_gateway原理-CSDN博客',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">细到不能再细的 Spring Cloud Gateway 原理分析（内含多张图片讲解）_gateway原理-CSDN博客</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">细到不能再细的 Spring Cloud Gateway 原理分析（内含多张图片讲解）_gateway原理-CSDN博客</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-10-07T16:00:00.000Z" title="发表于 2025-10-08 00:00:00">2025-10-08</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-17T16:00:00.000Z" title="更新于 2026-05-18 00:00:00">2026-05-18</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>本文深入探讨了SpringCloudGateway的原理，包括其作为微服务网关的基本职责，如路由转发、负载均衡。同时，解释了Gateway基于SpringWebFlux和Netty实现高性能的原因。文中还阐述了Gateway的核心组件，如Route、Predicates和Filters，以及它们在处理请求过程中的角色。此外，提到了RouteLocator和RouteDefinitionLocator在路由管理和定义中的作用。尽管未详述Gateway的高级特性如权限校验和流量控制，但本文为理解Gateway的基础架构提供了清晰的概述。</p>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>本文会通过图文的方式由浅入深的描述 Spring Cloud Gateway (以下简称 gateway)的基本原理。</p>
+<p>本文不涉及 gateway 的任何示例代码， 如有需要请参考官网 <a target="_blank" rel="noopener" href="https://github.com/spring-cloud/spring-cloud-gateway/tree/main/spring-cloud-gateway-sample">sample</a> 。</p>
+<p>阅读前， 需要读者提前掌握 gateway 的基本使用。至少要能读懂如下配置的含义：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">gateway:</span></span><br><span class="line">      <span class="attr">routes:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">id:</span> <span class="string">test_route</span></span><br><span class="line">        <span class="attr">uri:</span> <span class="string">lb://service-A</span></span><br><span class="line">        <span class="attr">predicates:</span></span><br><span class="line">         <span class="bullet">-</span> <span class="string">Path=/hello</span></span><br><span class="line">        <span class="attr">filters:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">SetRequestHeader=X-Request-Red,</span> <span class="string">Blue</span></span><br><span class="line"><span class="string">yaml12345678910</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h3><h4 id="一、Gateway-在微服务中的作用"><a href="#一、Gateway-在微服务中的作用" class="headerlink" title="一、Gateway 在微服务中的作用"></a>一、Gateway 在微服务中的作用</h4><p>![[_resources&#x2F;162ea787937a9b68431c4823677e1131_MD5.png]]</p>
+<ol>
+<li>当 <strong>请求方</strong> 发送一个请求到达 gateway 时，gateway 根据 <strong>配置的路由规则</strong> ，找到 <strong>对应的服务名称</strong> 。</li>
+<li>当某个服务存在多个实例时，gateway 会根据 <strong>负载均衡算法</strong> （比如：轮询）从中挑选出一个实例，然后将请求 <strong>转发</strong> 过去。</li>
+<li>服务实例返回的的响应结果会再经过 gateway 转发给请求方。</li>
+</ol>
+<p>以上便是 gateway 最基本的作用，它处理请求是逻辑是根据 <strong>配置的路由</strong> 对请求进行 <strong>预处理</strong> 和 <strong>转发</strong></p>
+<p>除此之外，还包括但不限于如下功能：</p>
+<ul>
+<li>权限校验</li>
+<li>限流熔断</li>
+<li>请求重试。</li>
+<li>监控统计</li>
+<li>灰度流量</li>
+</ul>
+<p>以上功能皆非本文讨论的重点内容，仅在此提及一下。</p>
+<h4 id="二、Gateway-的工作原理"><a href="#二、Gateway-的工作原理" class="headerlink" title="二、Gateway 的工作原理"></a>二、Gateway 的工作原理</h4><p>在讨论 gateway 工作原理之前， 我们先思考下， 如果让我们制作一个简单的网关应用， 实现方式有哪些。</p>
+<h5 id="2-1-实现一个网关的几种方式"><a href="#2-1-实现一个网关的几种方式" class="headerlink" title="2.1 实现一个网关的几种方式"></a>2.1 实现一个网关的几种方式</h5><p>根据上一章节末的描述可知， gateway 主要用于请求的转发处理。因此这里就涉及了 <a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1&spm=1001.2101.3001.7020">网络通信</a> 的知识。</p>
+<h6 id="2-1-1-基于-socket-API-实现"><a href="#2-1-1-基于-socket-API-实现" class="headerlink" title="2.1.1 基于 socket API 实现"></a>2.1.1 基于 socket API 实现</h6><p>![[_resources&#x2F;c1722df4a5c81ee7a80380824c58a3c9_MD5.png]]</p>
+<h6 id="2-1-2-基于-Netty-实现"><a href="#2-1-2-基于-Netty-实现" class="headerlink" title="2.1.2 基于 Netty 实现"></a>2.1.2 基于 Netty 实现</h6><p>![[_resources&#x2F;7586626dad7ddcd0767ca8d695a295c9_MD5.png]]</p>
+<h6 id="2-1-3-基于-Web-框架"><a href="#2-1-3-基于-Web-框架" class="headerlink" title="2.1.3 基于 Web 框架"></a>2.1.3 基于 Web 框架</h6><p>![[_resources&#x2F;bd7536a0a761a94b1575590baccff2dc_MD5.png]]</p>
+<h5 id="2-2-gateway-的底层实现原理"><a href="#2-2-gateway-的底层实现原理" class="headerlink" title="2.2 gateway 的底层实现原理"></a>2.2 gateway 的底层实现原理</h5><p>先简单 翻译 一下摘自 gateway 官网的描述：</p>
+<blockquote>
+<p>SpringCloud Gateway 是基于 Spring 5.0，Spring Boot 2.0 和 Project <a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=Reactor&spm=1001.2101.3001.7020">Reactor</a> 等技术开发的网关。为了提升网关的性能，SpringCloud Gateway 是基于 WebFlux 框架实现的，而 WebFlux 框架底层则使用了高性能的 Reactor 模式通信框架 Netty。</p>
+</blockquote>
+<p>然后我们结合 2.1 章节的分析， 可以将官网的描述成如下大白话：</p>
+<ol>
+<li>实现网关必将涉及到网络通信，众所周知 <code>Netty</code> 是一款 <strong>出色</strong> 的网络通信框架。</li>
+<li>为了提升网关的性能， gateway 使用到了响应式编程。</li>
+<li>而 WebFlux 框架底层就使用了高性能的 <code>Reactor</code> 模式通信框架 <code>Netty</code> ，所以可以直接拿来用。</li>
+</ol>
+<p><strong>PS:</strong> 至于什么是响应式编程， 为什么 gateway 基于这些技术能够实现高性能， 这些不是本文探讨的内容，感兴趣的读者可以自行去了解。</p>
+<p>那么， 如何理解 Spring <a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=WebFlux&spm=1001.2101.3001.7020">WebFlux</a> ，我们暂且就把它当做 Spring WebMVC。一个 web 框架。<br>他们之间很重要的一个区别就在于 webmvc 我们一般会基于 <code>tomcat</code> 容器去完成底层的网络通信, 而 webflux 是基于 <code>Netty</code> 。</p>
+<h5 id="2-3-gateway-是如何工作的"><a href="#2-3-gateway-是如何工作的" class="headerlink" title="2.3 gateway 是如何工作的"></a>2.3 gateway 是如何工作的</h5><p>我们先来看下官网的描述：<br>![[_resources&#x2F;da5854301b4aece9a9e92f48aa2f76f2_MD5.png]]</p>
+<ol>
+<li>客户端向 Spring Cloud Gateway 发出请求。</li>
+<li>如果 Gateway Handler Mapping 找到与请求相匹配的路由，将其发送到 Gateway Web Handler。</li>
+<li>Handler 再通过指定的 <strong>过滤器链</strong> 来将请求发送到我们实际的服务执行业务逻辑，然后返回。</li>
+<li>过滤器之间用虚线分开是因为过滤器可能会在发送代理请求之前（“pre”）或之后（“post”）执行业务逻辑。</li>
+</ol>
+<p>从图中可以看出， 在 gateway 视角里，它在处理请求时， 划分成如下三大角色：</p>
+<ul>
+<li>HandlerMapping</li>
+<li>Handler</li>
+<li>Filter Chain</li>
+</ul>
+<p>此时， 如果熟悉 Spring MVC 工作原理的可以看出，它和 Springmvc 的核心工作流程是类似的。</p>
+<h5 id="2-4-webflux-的工作原理以及-gateway-是如何基于它进行扩展"><a href="#2-4-webflux-的工作原理以及-gateway-是如何基于它进行扩展" class="headerlink" title="2.4 webflux 的工作原理以及 gateway 是如何基于它进行扩展"></a>2.4 webflux 的工作原理以及 gateway 是如何基于它进行扩展</h5><p>上面说到， gateway 底层还是基于 webflux。我们首先简单了解下 webflux 的工作原理， 然后延伸到 gateway 是如何基于 webflux 做扩展的。</p>
+<p>![[_resources&#x2F;c57d17eac04e865e96eec80303a62f2b_MD5.png]]</p>
+<p>以上是 webflux 处理请求的代码链路。我们着重看下标有颜色的类。</p>
+<ol>
+<li>接受请求的关键类是 <code>ReactorHttpHandlerAdapter</code> ，他的作用是将 netty 的请求、响应转为 http 的请求、响应， 并交给后面的类处理。</li>
+<li>标记 ① 位置的过滤器链是 webflux 自身的。</li>
+<li>标记 ③ 对应的 <code>FilteringWebHandler</code> 是 gateway 对 webflux 的扩展。</li>
+<li>标记 ②③④ 整理对应最上面的 gateway 的工作流程。</li>
+</ol>
+<p>简单总结：</p>
+<ol>
+<li>webflux 在处理请求时，会先执行自身的过滤器链</li>
+<li>然后通过 HandlerMapping 拿到对应的 Handller</li>
+<li>gateway 通过 <strong>第二步</strong> webflux 提供的扩展点， 实现了对应的接口， 最终导致 <strong>代码链路</strong> 走到了 gateway 中定义的 Handler， 此时 gateway 就可以对到来的请求 “为所欲为” 了。</li>
+<li>gateway 通过定义自己的过滤器链，从而又方便了开发者对其进行自定义扩展。</li>
+</ol>
+<p>如果没看懂， 可以看完下面的内容， 再回过头来看本章节。</p>
+<h4 id="三、Gateway-的核心组件"><a href="#三、Gateway-的核心组件" class="headerlink" title="三、Gateway 的核心组件"></a>三、Gateway 的核心组件</h4><p>Gateway 有三个比较核心的组件， 可以结合如下路由配置看一看：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">gateway:</span></span><br><span class="line">      <span class="attr">routes:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">id:</span> <span class="string">test_route</span></span><br><span class="line">        <span class="attr">uri:</span> <span class="string">lb://service-A</span></span><br><span class="line">        <span class="attr">predicates:</span></span><br><span class="line">         <span class="bullet">-</span> <span class="string">Path=/hello</span></span><br><span class="line">        <span class="attr">filters:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">SetRequestHeader=X-Request-Red,</span> <span class="string">Blue</span></span><br><span class="line"><span class="string">yaml12345678910</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>Route<br>  gateway 中可以配置多个 <code>Route</code> 。一个 <code>Route</code> 由路由 id，转发的 uri，多个 <code>Predicates</code> 以及多个 <code>Filters</code> 构成。处理请求时会按优先级排序，找到第一个满足所有 <code>Predicates</code> 的 Route。</li>
+<li><code>Predicates</code><br>  表示路由的匹配条件，可以用来匹配请求的各种属性，如请求路径、方法、header 等。一个 <code>Route</code> 可以包含多个 <code>Predicates</code> ，多个 <code>Predicates</code> 最终会合并成一个。</li>
+<li>Filter<br>  过滤器包括了处理请求和响应的逻辑，可以分为 pre 和 post 两个阶段。多个 <code>Filter</code> 在 pre 阶段会按优先级高到低顺序执行，post 阶段则是反向执行。gateway 中的 Filter 分为如下两种：<ul>
+<li>全局 Filter: 每种全局 <code>Filter</code> 在 gateway 中只会有一个实例，会对所有的 <code>Route</code> 都生效。</li>
+<li>路由 Filter: 路由 <code>Filter</code> 是针对 <code>Route</code> 进行配置的，不同的 <code>Route</code> 可以使用不同的参数，因此会创建不同的实例。</li>
+</ul>
+</li>
+</ul>
+<p>围绕上述三个组件， gateway 又衍生出了一些其他组件。</p>
+<ul>
+<li>RouteLocator</li>
+<li>RouteDefinitionLocator</li>
+<li>RoutePredicateHandlerMapping</li>
+<li>FilteringWebHandler</li>
+</ul>
+<p>具体作用我们会在下面一一说明。<br>![[_resources&#x2F;c80937659b31a16d0920b12853db028b_MD5.png]]</p>
+<p>接下来，我们通过对上图进行讲解， 来详细介绍各个组件在 gateway 中的作用。</p>
+<p>首先， gateway 本质就是一个 <code>Springboot</code> 应用， 他是通过 webflux 框架处理请求和响应，而 webflux 底层是基于 <code>Netty</code> 。</p>
+<ul>
+<li>当 gateway 启动时<ul>
+<li>Spring 会装载 <code>GatewayAutoConfiguration</code> 中配置的一些必要的组件 <code>Bean</code> 。 比如：<ul>
+<li><code>GatewayProperties</code> ， 他里面保存了 gateway 的全部配置（其中就有路由配置信息）。</li>
+<li><code>GlobalFilter</code> ， gateway 默认的一些全局过滤器。</li>
+<li><code>RouteDefinitionLocator</code> ， 通过加载路由配置(比如读取 yaml 文件)， 拿到 <code>RouteDefinition</code> ， 里面是对路由的定义。</li>
+<li><code>RouteLocator</code> ， 负责组装 <code>Route</code> 对象， <code>Route</code> 对象中保存的是路由相关的信息。后续进行路由操作都是基于此对象。（请注意和 <code>RouteDefinition</code> 区分开）</li>
+<li><code>RoutePredicateHandlerMapping</code> 和 <code>org.springframework.cloud.gateway.handler.FilteringWebHandler</code> ， 这两个类是对 <code>webflux</code> 中两个组件的扩展实现，后续会说到具体作用。</li>
+</ul>
+</li>
+<li>启动 Netty Server， 负责监听请求</li>
+</ul>
+</li>
+<li>当 gateway 接收到请求时<ul>
+<li><code>webflux</code> 经过一层层处理后，然后会去调用 <code>HandlerMapping</code> 接口，拿到对应的 <code>Handler</code> 。最后调用 <code>Handler</code> 的 <code>handle</code> 方法进行业务处理。</li>
+<li>gateway 通过实现 <code>HandlerMapping</code> 和 <code>Handler</code> 两个接口，从而把处理请求的 <strong>活儿</strong> 从 <code>webflux</code> 手中接过来。</li>
+<li>在上一步中， gateway 已经根据请求信息， 从路由集合中挑选出来了一个匹配的路由，路由信息中包含了一个过滤器链。</li>
+<li>在 <code>Handler#handle</code> 方法中，客户端发来的请求会经过上一步中过滤器链， 最终经过层层处理的请求会转发到对应服务中。</li>
+</ul>
+</li>
+</ul>
+<h4 id="四、gateway-的更多细节"><a href="#四、gateway-的更多细节" class="headerlink" title="四、gateway 的更多细节"></a>四、gateway 的更多细节</h4><h5 id="4-1-RouteDefinition-和-Route"><a href="#4-1-RouteDefinition-和-Route" class="headerlink" title="4.1 RouteDefinition 和 Route"></a>4.1 RouteDefinition 和 Route</h5><p>RouteDefinition 定义了一个路由应该包含哪些匹配条件和过滤器，以及这些匹配条件和过滤器使用的参数， 它表示的是一个名词定义。在使用时 Gateway进行路由时， 会根据 RouteDefinition 对象提供的定义构造出 Route 对象，而 Route 里面提供了很多动作。</p>
+<p>并且我们在前面提到： “一个 <code>Route</code> 可以包含多个 <code>Predicates</code> ，多个 <code>Predicates</code> 最终会合并成一个。因此我们可以看到，关于 Predicates，RouteDefinition 里面定义的是一个集合， 而 Route 中只是一个对象。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">RouteDefinition</span> &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="type">List</span>&lt;PredicateDefinition&gt; <span class="variable">predicates</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">&#125;</span><br><span class="line">java123456</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Route</span> <span class="keyword">implements</span> <span class="title class_">Ordered</span> &#123;</span><br><span class="line">    <span class="comment">// ....</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> AsyncPredicate&lt;ServerWebExchange&gt; predicate;</span><br><span class="line">&#125;</span><br><span class="line">java12345</span><br></pre></td></tr></table></figure>
+
+<h5 id="4-2-RouteLocator"><a href="#4-2-RouteLocator" class="headerlink" title="4.2 RouteLocator"></a>4.2 RouteLocator</h5><p><code>RouteLocator</code> 接口中定义了获取路由配置的方法，RouteLocator 有 不同的 实现，对应了不同的定义路由的方式。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">RouteLocator</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="type">Flux</span>&lt;Route&gt; <span class="title function_">getRoutes</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line">java12345</span><br></pre></td></tr></table></figure>
+
+<p>前文中我们提到，定义路由的其中一个方式是通过 <code>RouteLocatorBuilder</code> 提供的 API 来构建具体的 <code>Route</code> 。</p>
+<p>如下代码中定义了一个路由，其中包含了一个 path 匹配条件，以及一个添加响应 header 的 filter，请求转发的目标地址是 <code>https://blog.csdn.net</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="keyword">public</span> <span class="type">RouteLocator</span> <span class="title function_">routeLocator</span><span class="params">(RouteLocatorBuilder builder)</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> builder.routes()</span><br><span class="line">    .route(<span class="string">&quot;route-id&quot;</span>, r -&gt; r.path(<span class="string">&quot;/test&quot;</span>)</span><br><span class="line">                    .filters(f -&gt; f.addResponseHeader(<span class="string">&quot;X-TestHeader&quot;</span>, <span class="string">&quot;foobar&quot;</span>))</span><br><span class="line">                    .uri(<span class="string">&quot;https://blog.csdn.net&quot;</span>)</span><br><span class="line">                )</span><br><span class="line">    .build();</span><br><span class="line">&#125;</span><br><span class="line">java123456789</span><br></pre></td></tr></table></figure>
+
+<p>而 <code>RouteDefinitionRouteLocator</code> 是 <code>RouteLocator</code> 另一种常用的实现 。这种实现依赖于 <code>RouteDefinitionLocator</code> 来提供 <code>RouteDefinition</code> ，再由 <code>RouteDefinition</code> 构造路由。</p>
+<p><code>CompositeRouteLocator </code> 会把所有的 <code>RouteLocator</code> 的实现组合起来，再缓存到 <code>CachingRouteLocator</code> 中 。</p>
+<p>因此当我们调用 <code>getRoutes</code> 方法获取路由集合时， 就会产生如下的调用关系：</p>
+<p>![[_resources&#x2F;d571d96b8a2eada1f103c2497ce320ed_MD5.png]]</p>
+<h5 id="4-3-RouteDefinitionLocator"><a href="#4-3-RouteDefinitionLocator" class="headerlink" title="4.3 RouteDefinitionLocator"></a>4.3 RouteDefinitionLocator</h5><p><code>RouteDefinitionLocator</code> 接口定义了获取 <code>RouteDefinition</code> 的方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">RouteDefinitionLocator</span> &#123;</span><br><span class="line">    <span class="type">Flux</span>&lt;RouteDefinition&gt; <span class="title function_">getRouteDefinitions</span><span class="params">()</span>;</span><br><span class="line">&#125;</span><br><span class="line">java123</span><br></pre></td></tr></table></figure>
+
+<p>前面我们多次提到 <code>PropertiesRouteDefinitionLocator</code> 可以通过解析 gateway 的 配置文件 中的路由配置拿到 <code>RouteDefinition</code> 对象集合</p>
+<p>同上面的 <code>RouteLocator</code> 一样， 当 gateway 中有多个 <code>RouteDefinitionLocator</code> 实现时 ， 同样会被 <code>CompositeRouteDefinitionLocator</code> 组合起来。</p>
+<h5 id="4-4-Filter"><a href="#4-4-Filter" class="headerlink" title="4.4 Filter"></a>4.4 Filter</h5><p>gateway 处理请求和响应的核心逻辑就在 Filter 中。gateway 本身实现提供了基础通用的过滤器，可以直接配置使用。 比如在请求前后， 分别添加请求头和响应头<br>我们再来看几个比较有意思的全局过滤器：</p>
+<ul>
+<li><code>NettyRoutingFilter</code><br>  在这个过滤器里面， 会发送转发请求到具体的 uri。</li>
+<li><code>ReactiveLoadBalancerClientFilter</code><br>  当 gateway 接入微服务时， 如果我们请求的服务存在多个实例，会在这里面进行负载均衡的处理。</li>
+</ul>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>本文通过图文结合的方式， 介绍了 Spring Cloud Gateway 的基本工作原理。</p>
+<ul>
+<li>gateway 的本质就是基于 <code>Spring Webflux</code> 提供的扩展点，从而将请求与响应的工作转到自己手中。</li>
+<li>gateway 通过 <strong>过滤器链</strong> 进行具体逻辑处理，并且开发者也可以实现自己的过滤器，然后插入到过滤器链中的某个位置， 从而对请求和响应进行加工。</li>
+<li><code>Spring Webflux</code> 的底层是基于 <code>Netty</code> 和 <code>Reactor</code> ， 可以有效的提升网关的性能。</li>
+</ul>
+<p>另外，本文的不足之处包括但不限于如下几点：</p>
+<ol>
+<li>没有详细说明 Spring Cloud Gateway 高性能的原因是什么。</li>
+<li>没有对 gateway 如何实现用户鉴权、灰度发布等功能进行说明。</li>
+<li>没有足够的源码分析。</li>
+<li>没有说明如何对 gateway 进行扩展实现。</li>
+</ol>
+<p>当然， 后面如果有条件会对以上几点进行补充说明。</p>
+<p>登录后您可以享受以下权益：</p>
+<ul>
+<li>免费复制代码</li>
+<li>和博主大V互动</li>
+<li>下载海量资源</li>
+<li>发动态&#x2F;写文章&#x2F;加入社区<br>×</li>
+</ul>
+<p>实付 元</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/cnm10050/article/details/">使用余额支付</a></p>
+<p>点击重新获取</p>
+<p>扫码支付</p>
+<p>钱包余额 0</p>
+<p>抵扣说明：</p>
+<p>1.余额是钱包充值的虚拟货币，按照1:1的比例进行支付金额的抵扣。<br>2.余额无法直接购买下载，可以购买VIP、付费专栏及课程。</p>
+<p><a target="_blank" rel="noopener" href="https://i.csdn.net/#/wallet/balance/recharge">余额充值</a></p>
+<p>举报</p>
+<p> [![[_resources&#x2F;35c7362356adf5a11cd3cc47fd01628f_MD5.png]] 点击体验<br>DeepSeekR1满血版](<a target="_blank" rel="noopener" href="https://ai.csdn.net/?utm_source=cknow_pc_blogdetail&spm=1001.2101.3001.10583">https://ai.csdn.net/?utm_source=cknow_pc_blogdetail&amp;spm=1001.2101.3001.10583</a>) ![[_resources&#x2F;90bd0cbf3aff8fdff8bf9b011b581e20_MD5.png]]</p>
+<p>程序员都在用的中文IT技术交流社区</p>
+<p>![[_resources&#x2F;08a47e60886378fe60a3d9c8f4ae8bc6_MD5.png]]</p>
+<p>专业的中文 IT 技术社区，与千万技术人共成长</p>
+<p>![[_resources&#x2F;a51be6c085b867a5bd82d8dc1cea9b46_MD5.png]]</p>
+<p>关注【CSDN】视频号，行业资讯、技术分享精彩不断，直播好礼送不停！</p>
+<p>客服 返回顶部</p>
+<p>![[_resources&#x2F;162ea787937a9b68431c4823677e1131_MD5.png]] ![[_resources&#x2F;c1722df4a5c81ee7a80380824c58a3c9_MD5.png]] ![[_resources&#x2F;7586626dad7ddcd0767ca8d695a295c9_MD5.png]] ![[_resources&#x2F;bd7536a0a761a94b1575590baccff2dc_MD5.png]] ![[_resources&#x2F;da5854301b4aece9a9e92f48aa2f76f2_MD5.png]] ![[_resources&#x2F;c57d17eac04e865e96eec80303a62f2b_MD5.png]] ![[_resources&#x2F;c80937659b31a16d0920b12853db028b_MD5.png]] ![[_resources&#x2F;d571d96b8a2eada1f103c2497ce320ed_MD5.png]]</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2025/10/08/%E7%BB%86%E5%88%B0%E4%B8%8D%E8%83%BD%E5%86%8D%E7%BB%86%E7%9A%84%20Spring%20Cloud%20Gateway%20%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90%EF%BC%88%E5%86%85%E5%90%AB%E5%A4%9A%E5%BC%A0%E5%9B%BE%E7%89%87%E8%AE%B2%E8%A7%A3%EF%BC%89_gateway%E5%8E%9F%E7%90%86-CSDN%E5%8D%9A%E5%AE%A2/">https://yhao521.github.io/2025/10/08/%E7%BB%86%E5%88%B0%E4%B8%8D%E8%83%BD%E5%86%8D%E7%BB%86%E7%9A%84%20Spring%20Cloud%20Gateway%20%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90%EF%BC%88%E5%86%85%E5%90%AB%E5%A4%9A%E5%BC%A0%E5%9B%BE%E7%89%87%E8%AE%B2%E8%A7%A3%EF%BC%89_gateway%E5%8E%9F%E7%90%86-CSDN%E5%8D%9A%E5%AE%A2/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/web-frontend/">web/frontend</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/Java/">Java</a><a class="post-meta__tags" href="/tags/%E6%95%99%E7%A8%8B/">教程</a><a class="post-meta__tags" href="/tags/java-programming/">java/programming</a><a class="post-meta__tags" href="/tags/%E6%91%98%E5%BD%95/">摘录</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/01/23/Wails%20v3%E5%88%9D%E8%AF%86/" title="Wails v3初识"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Wails v3初识</div></div><div class="info-2"><div class="info-item-1">介绍简介与官网链接Wails 是一个用于构建桌面应用程序的框架，允许开发者使用 Go 语言编写后端逻辑，并结合前端技术（如 HTML、CSS 和 JavaScript）来创建跨平台的桌面应用。它的目标是简化桌面应用的开发流程，同时利用 Go 的高效性和现代前端技术的灵活性。 v3 官网链接 v2 官网链接 特点Wails 是一个可让您使用 Go 和 Web 技术编写桌面应用的项目。 将它看作为 Go 的快并且轻量的 Electron 替代品。 您可以使用 Go 的灵活性和强大功能，结合丰富的现代前端，轻松的构建应用程序。 快速启动模板Wails 带有许多预配置的模板，可让您快速启动和运行应用程序。 有以下框架的模板：Svelte、React、Vue、Preact、Lit 和 Vanilla。 每个模板都有 JavaScript 和 TypeScript 版本。 原生元素Wails 使用专门构建的库来处理窗口、菜单、对话框等原生元素，因此您可以构建美观、功能丰富的桌面应用程序。 It does not embed a browser, so it delivers a small ...</div></div></div></a><a class="pagination-related" href="/2025/10/08/%E6%B7%B1%E5%85%A5SpringBoot%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%EF%BC%9A%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E4%B8%8EBean%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E6%A0%B8%E5%BF%83%E8%A7%A3%E6%9E%90/" title="深入SpringBoot启动流程：自动配置与Bean生命周期核心解析"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">深入SpringBoot启动流程：自动配置与Bean生命周期核心解析</div></div><div class="info-2"><div class="info-item-1">深入SpringBoot启动流程：自动配置与Bean生命周期核心解析 一、SpringBoot启动全流程（面试回答框架）回答结构建议 ：“SpringBoot的启动流程可以拆解为几个核心阶段，我们可以结合源码关键类来串联整个过程。总体分为：环境准备→上下文初始化→自动装配→Bean生命周期管理。以下是具体链路（边说边画流程图效果更佳）：”  启动入口 ： SpringApplication.run(主类, args) → 初始化 SpringApplication 实例，加载 META-INF/spring.factories 中的 ApplicationContextInitializer 、 ApplicationListener 。 环境准备 ： → prepareEnvironment() 加载配置文件（application.yml&#x2F;properties） → 发布 ApplicationEnvironmentPreparedEvent 事件（监听器处理Profile激活等）。 创建上下文 ： → 根据Web类型（Servlet&#x2F;Reactive）创...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/08/19/shadcn%20vue%EF%BC%88%E6%89%8B%E6%8A%8A%E6%89%8B%E8%AE%B2%E8%A7%A3%EF%BC%89%20-%20%E5%BC%82%E5%B8%B8%E6%95%99%E7%A8%8B/" title="shadcn vue（手把手讲解） - 异常教程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-08-19</div><div class="info-item-2">shadcn vue（手把手讲解） - 异常教程</div></div><div class="info-2"><div class="info-item-1">shadcn vue（手把手讲解）更新时间: 在现代前端开发中，组件库作为提升开发效率的核心工具，始终占据着重要地位。无论是快速搭建界面、保证设计一致性，还是减少重复劳动，组件库都扮演着不可替代的角色。在 Vue 生态中， shadcn vue 作为一款轻量且高度可定制化的组件库，凭借其简洁的设计理念和强大的功能特性，逐渐成为开发者的新宠。本文将从基础概念、核心功能、实战案例到进阶技巧，全面解析如何利用 shadcn vue 加速 Vue 项目的开发流程，并帮助开发者构建出既美观又高效的用户界面。  一、什么是 shadcn vue？shadcn vue 是一款基于 Vue 3 的现代化组件库，其设计灵感来源于 Shadcn（一个专注于 React 生态的组件库）。它通过提供开箱即用的高质量组件（如按钮、表单、对话框等），结合对 Tailwind CSS 的深度集成，帮助开发者快速构建响应式、可访问性强的用户界面。 核心设计理念 轻量级 ：仅包含基础组件，避免冗余功能，减小项目体积。 主题可定制 ：通过 CSS 变量和 Tailwind 配置，实现灵活的主题切换。 语义化 HTM...</div></div></div></a><a class="pagination-related" href="/2025/05/29/Hygen/" title="Hygen"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-29</div><div class="info-item-2">Hygen</div></div><div class="info-2"><div class="info-item-1">[TOC] 起步安装12345npm i -g hygen或cnpm i -g hygen  初始化1234567进入项目地址cd /projects/demo初始化模板hygen init self  初始化成功后，会自动在项目根目录下生成 _templates 文件夹，并且默认生成了一个名为 generator 的生成器及其工作目录。后续会依托该生成器，派生出更多的生成器来满足需求。  注意 不要删除 _templates/generator 文件夹，否则会导致无法创建 Generator 。   提示 后续的所有命令行操作，如无特殊说明，都在项目根目录。  创建第一个生成器1hygen generator new component  执行后会生成一个生成器 component 及其工作目录，目录中默认存在一个示例文件 hello.ejs.t 。 12345678910111213141516171819---to: app/hello.js---const hello = \`\`\`Hello!This is your first hygen template.Lear...</div></div></div></a><a class="pagination-related" href="/2025/05/23/%E5%A6%82%E4%BD%95%E5%88%B6%E4%BD%9C%E4%B8%80%E4%B8%AA%E6%AF%94%E8%BE%83%E5%AE%8C%E7%BE%8E%E7%9A%84elment-pluselement-ui%E7%A6%BB%E7%BA%BF%E6%96%87%E6%A1%A3%E6%9C%AC%E5%9C%B0%E8%BF%90%E8%A1%8C%E6%89%93%E5%8C%85%E5%A5%BD%E7%9A%84html%E6%96%B9%E5%BC%8F_elementplus%E7%A6%BB%E7%BA%BF%E6%96%87%E6%A1%A3-CSDN%E5%8D%9A%E5%AE%A2/" title="如何制作一个比较完美的elment-plus&#x2F;element-ui离线文档&#x2F;本地运行打包好的html方式_elementplus离线文档-CSDN博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-23</div><div class="info-item-2">如何制作一个比较完美的elment-plus&#x2F;element-ui离线文档&#x2F;本地运行打包好的html方式_elementplus离线文档-CSDN博客</div></div><div class="info-2"><div class="info-item-1">如何制作一个比较完美的elment-plus&#x2F;element-ui离线文档&#x2F;本地运行打包好的html方式renovateF5 已于 2025-02-14 14:49:12 修改 分类专栏： 文章标签： github elementui 于 2023-01-29 10:06:14 首次发布 版权声明：本文为博主原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接和本声明。 本文链接： https://blog.csdn.net/renovateF5/article/details/128784830 版权 本文介绍了一种Element Plus组件库的离线部署方法。主要包括从GitHub下载代码、解压缩并使用VSCode配合LiveServer插件预览，或通过安装http-server实现本地服务器访问。 摘要生成于 C知道 ，由 DeepSeek-R1 满血版支持， 前往体验 &gt; 官方给的网站有时候不好用，自己制作的方法 第一步先去下面的网站下载代码，注意一定看看有没有zh-CN这个 文件夹 ， GitHub - element-p...</div></div></div></a><a class="pagination-related" href="/2023/09/03/%E8%B4%A3%E4%BB%BB%E9%93%BE%E6%A8%A1%E5%BC%8F/" title="责任链模式"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-03</div><div class="info-item-2">责任链模式</div></div><div class="info-2"><div class="info-item-1">责任链模式顾名思义，责任链模式（Chain of Responsibility Pattern）为请求创建了一个接收者对象的链。这种模式给予请求的类型，对请求的发送者和接收者进行解耦。这种类型的设计模式属于行为型模式。在这种模式中，通常每个接收者都包含对另一个接收者的引用。如果一个对象不能处理该请求，那么它会把相同的请求传给下一个接收者，依此类推。 介绍**意图：**避免请求发送者与接收者耦合在一起，让多个对象都有可能接收请求，将这些对象连接成一条链，并且沿着这条链传递请求，直到有对象处理它为止。 **主要解决：**职责链上的处理者负责处理请求，客户只需要将请求发送到职责链上即可，无须关心请求的处理细节和请求的传递，所以职责链将请求的发送者和请求的处理者解耦了。 **何时使用：**在处理消息的时候以过滤很多道。 **如何解决：**拦截的类都实现统一接口。 **关键代码：**Handler 里面聚合它自己，在 HandlerRequest 里判断是否合适，如果没达到条件则向下传递，向谁传递之前 set 进去。 应用实例：1、红楼梦中的”击鼓传花”。2、JS 中的事件冒泡。3、JAV...</div></div></div></a><a class="pagination-related" href="/2025/05/29/hygen%20%E8%87%AA%E5%8A%A8%E5%8C%96%E5%88%9B%E5%BB%BA%E6%A8%A1%E6%9D%BF%E6%96%87%E4%BB%B6%E7%A5%9E%E5%99%A8-CSDN%E5%8D%9A%E5%AE%A2/" title="hygen 自动化创建模板文件神器-CSDN博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-29</div><div class="info-item-2">hygen 自动化创建模板文件神器-CSDN博客</div></div><div class="info-2"><div class="info-item-1">hygen是什么？作者的介绍是：一个简单，快速，可扩展的代码生成器。其用途是帮助开发者自动创建模板文件的工具，旨在提高开发效率，下面就来说说怎么在项目中使用hygen。hygen官方文档 1、全局安装hygen1npm i -g hygen  2、安装成功后cd到项目目录，然后在项目中初始化hygen1hygen init self  初始化之后项目中会多一个_templates的文件夹，generator是构建器文件夹，再下一级的文件夹名是对应创建文件时的命令，ejs.t 文件则是模板文件，详细的后面会讲解。 ![[_resources&#x2F;882d1eec9937f23bdd32d7078b6ee9c8_MD5.png]] 3、构建第一个自己的构建器，我这里跟官方文档一样起名为mygen1hygen generator new mygen  执行完上面的命令后，_templates文件夹下面就会多了一个mygen的文件夹 4、使用构建器创建第一个文件new就是mygen文件夹下面的new文件夹，执行这条命令就会创建new文件夹下面的所有模板 1hygen mygen n...</div></div></div></a><a class="pagination-related" href="/2023/09/03/%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F/" title="策略模式"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-03</div><div class="info-item-2">策略模式</div></div><div class="info-2"><div class="info-item-1">策略模式在策略模式（Strategy Pattern）中，一个类的行为或其算法可以在运行时更改。这种类型的设计模式属于行为型模式。 在策略模式中，我们创建表示各种策略的对象和一个行为随着策略对象改变而改变的 context 对象。策略对象改变 context 对象的执行算法。 介绍**意图：**定义一系列的算法,把它们一个个封装起来, 并且使它们可相互替换。 **主要解决：**在有多种算法相似的情况下，使用 if…else 所带来的复杂和难以维护。 **何时使用：**一个系统有许多许多类，而区分它们的只是他们直接的行为。 **如何解决：**将这些算法封装成一个一个的类，任意地替换。 **关键代码：**实现同一个接口。 应用实例：1、诸葛亮的锦囊妙计，每一个锦囊就是一个策略。2、旅行的出游方式，选择骑自行车、坐汽车，每一种旅行方式都是一个策略。3、JAVA AWT 中的 LayoutManager。 优点：1、算法可以自由切换。2、避免使用多重条件判断。3、扩展性良好。 缺点：1、策略类会增多。2、所有策略类都需要对外暴露。 使用场景：1、如果在一个系统里面有许多类，它们之间的区别...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A3%E6%96%87"><span class="toc-number">2.</span> <span class="toc-text">正文</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E3%80%81Gateway-%E5%9C%A8%E5%BE%AE%E6%9C%8D%E5%8A%A1%E4%B8%AD%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="toc-number">2.1.</span> <span class="toc-text">一、Gateway 在微服务中的作用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C%E3%80%81Gateway-%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="toc-number">2.2.</span> <span class="toc-text">二、Gateway 的工作原理</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#2-1-%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AA%E7%BD%91%E5%85%B3%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E5%BC%8F"><span class="toc-number">2.2.1.</span> <span class="toc-text">2.1 实现一个网关的几种方式</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#2-1-1-%E5%9F%BA%E4%BA%8E-socket-API-%E5%AE%9E%E7%8E%B0"><span class="toc-number">2.2.1.1.</span> <span class="toc-text">2.1.1 基于 socket API 实现</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#2-1-2-%E5%9F%BA%E4%BA%8E-Netty-%E5%AE%9E%E7%8E%B0"><span class="toc-number">2.2.1.2.</span> <span class="toc-text">2.1.2 基于 Netty 实现</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#2-1-3-%E5%9F%BA%E4%BA%8E-Web-%E6%A1%86%E6%9E%B6"><span class="toc-number">2.2.1.3.</span> <span class="toc-text">2.1.3 基于 Web 框架</span></a></li></ol></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-2-gateway-%E7%9A%84%E5%BA%95%E5%B1%82%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="toc-number">2.2.2.</span> <span class="toc-text">2.2 gateway 的底层实现原理</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-3-gateway-%E6%98%AF%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C%E7%9A%84"><span class="toc-number">2.2.3.</span> <span class="toc-text">2.3 gateway 是如何工作的</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-4-webflux-%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A-gateway-%E6%98%AF%E5%A6%82%E4%BD%95%E5%9F%BA%E4%BA%8E%E5%AE%83%E8%BF%9B%E8%A1%8C%E6%89%A9%E5%B1%95"><span class="toc-number">2.2.4.</span> <span class="toc-text">2.4 webflux 的工作原理以及 gateway 是如何基于它进行扩展</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%89%E3%80%81Gateway-%E7%9A%84%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6"><span class="toc-number">2.3.</span> <span class="toc-text">三、Gateway 的核心组件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9B%9B%E3%80%81gateway-%E7%9A%84%E6%9B%B4%E5%A4%9A%E7%BB%86%E8%8A%82"><span class="toc-number">2.4.</span> <span class="toc-text">四、gateway 的更多细节</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#4-1-RouteDefinition-%E5%92%8C-Route"><span class="toc-number">2.4.1.</span> <span class="toc-text">4.1 RouteDefinition 和 Route</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-2-RouteLocator"><span class="toc-number">2.4.2.</span> <span class="toc-text">4.2 RouteLocator</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-3-RouteDefinitionLocator"><span class="toc-number">2.4.3.</span> <span class="toc-text">4.3 RouteDefinitionLocator</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-4-Filter"><span class="toc-number">2.4.4.</span> <span class="toc-text">4.4 Filter</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">3.</span> <span class="toc-text">总结</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

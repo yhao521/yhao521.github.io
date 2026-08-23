@@ -1,0 +1,619 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Open API 规范基础知识 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="title: Open API 规范基础知识date: 2023-09-03 20:17:08category: tag: author:  Open API 规范基础知识API 规范，比较知名的是 OpenAPI Specfication 和 Google API Design Guide 。前者针对 RESTful API 设计在细节层面给出了非常具体的规定，已经成为 RESTful API">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Open API 规范基础知识">
+<meta property="og:url" content="https://yhao521.github.io/2023/09/04/Open%20API%20%E8%A7%84%E8%8C%83%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="title: Open API 规范基础知识date: 2023-09-03 20:17:08category: tag: author:  Open API 规范基础知识API 规范，比较知名的是 OpenAPI Specfication 和 Google API Design Guide 。前者针对 RESTful API 设计在细节层面给出了非常具体的规定，已经成为 RESTful API">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2023-09-04T03:18:09.000Z">
+<meta property="article:modified_time" content="2023-09-04T03:18:27.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Open API 规范基础知识",
+  "url": "https://yhao521.github.io/2023/09/04/Open%20API%20%E8%A7%84%E8%8C%83%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2023-09-04T03:18:09.000Z",
+  "dateModified": "2023-09-04T03:18:27.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2023/09/04/Open%20API%20%E8%A7%84%E8%8C%83%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Open API 规范基础知识',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">Open API 规范基础知识</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Open API 规范基础知识</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-09-04T03:18:09.000Z" title="发表于 2023-09-04 11:18:09">2023-09-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-09-04T03:18:27.000Z" title="更新于 2023-09-04 11:18:27">2023-09-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><hr>
+<p>title: Open API 规范基础知识<br>date: 2023-09-03 20:17:08<br>category:</p>
+<p>tag:</p>
+<p>author:</p>
+<hr>
+<h1 id="Open-API-规范基础知识"><a href="#Open-API-规范基础知识" class="headerlink" title="Open API 规范基础知识"></a><a target="_blank" rel="noopener" href="https://my.oschina.net/chen1988/blog/5112895">Open API 规范基础知识</a></h1><p>API 规范，比较知名的是 OpenAPI Specfication 和 Google API Design Guide 。前者针对 RESTful API 设计在细节层面给出了非常具体的规定，已经成为 RESTful API 设计领域的事实标准，而后者则主要从云厂商的角度提出许多最佳实践性质的规范与建议，这些原则不仅仅适用于 RESTful API，也适合其他类型 API 设计。</p>
+<p>一、主要 2 种风格</p>
+<p><img src="https://oscimg.oschina.net/oscnet/up-3323e6bd7bc2ed623b7409788d2be83b670.png" alt="img"></p>
+<p>二、Restful 设计</p>
+<p>主要是理清资源模型和明确资源关系。</p>
+<p>三、RPC 设计</p>
+<p>偏向于过程化的调用，低层级及灵活一点。</p>
+<h2 id="OpenAPI-规范"><a href="#OpenAPI-规范" class="headerlink" title="OpenAPI 规范"></a>OpenAPI 规范</h2><p>本规范基于 RESTful 风格的架构设计准则，广泛参考 GitHub、Azure、Google API Design Guide、腾讯云、阿里云等公开资料，兼顾现有实际情况和未来发展做一个概括性记录总结。</p>
+<h3 id="一、协议"><a href="#一、协议" class="headerlink" title="一、协议"></a>一、协议</h3><p>API 与用户的通信协议，总是使用 HTTPS 协议。这个和 RESTful API 本身没有很大的关系，但是对于增加网站的安全是非常重要的。特别如果你提供的是公开 API，用户的信息泄露或者被攻击会严重影响网站的信誉。</p>
+<h3 id="二、版本（Version）"><a href="#二、版本（Version）" class="headerlink" title="二、版本（Version）"></a>二、版本（Version）</h3><p>关于版本的设计有 3 种形式：</p>
+<ol>
+<li>将 API 的版本号放入 URL 中，如：<code>http://api.example.com/v1</code>，这样方便和直观；</li>
+<li>将版本号记录在 url query 中，如：<code>http://api.example.com?param1=val&amp;version=1.0</code> 中的 version 参数。</li>
+<li>将版本号放在 HTTP 头信息中，基于的准则是：不同的版本，可以理解成同一种资源的不同形式，所以应该采用同一个 URL。如：<code>Accept: application/json; version=1.0</code>，可以参考 Github API Design [4] 和 Versioning REST Services [5]；</li>
+</ol>
+<p>根据现有的实际情况，如果是为了兼容已存在的服务接口，可以采用对应的形式。如果是新构建的体系结构，建议采用第三种。</p>
+<h3 id="三、Schema"><a href="#三、Schema" class="headerlink" title="三、Schema"></a>三、Schema</h3><p>URI 的格式定义如下：<code>URI = scheme &quot;://&quot; authority &quot;/&quot; path \[ &quot;?&quot; query \] \[ &quot;#&quot; fragment \]</code></p>
+<p>URL 是 URI 的一个子集 (一种具体实现)，对于 REST API 来说一个资源一般对应一个唯一的 URI（URL）。在 URL 的设计中，我们会遵循一些规则，使接口看起透明易读，方便使用者调用。</p>
+<p>“&#x2F;“ 分隔符一般用来对资源层级的划分。对于 RESTful API 来说，”&#x2F;“ 只是一个分隔符，并无其他含义。为了避免混淆，”&#x2F;“ 不应该出现在 URL 的末尾。</p>
+<p><strong>URL 中尽量使用连字符 “-“ 代替下划线 “_“ 的使用。</strong> 连字符 “-“ 一般用来分割 URL 中出现的字符串 (单词)，来提高 URL 的可读性，例如：<code>http://api.example.restapi.org/blogs/mark-masse/entries/this-is-my-first-post</code>。使用下划线 “<em>“ 来分割字符串 (单词) 可能会和链接的样式冲突重叠，而影响阅读性。但实际上，”-“ 和 “</em>“ 对 URL 中字符串的分割语意上还是有些差异的：”-“ 分割的字符串 (单词) 一般各自都具有独立的含义，可参见上面的例子。而 “_“ 一般用于对一个整体含义的字符串做了层级的分割，方便阅读，例如你想在 URL 中体现一个 IP 地址的信息：210_110_25_88 . (欢迎关注：朱小厮的博客)</p>
+<p><strong>URL 应该统一使用小写字母</strong>。</p>
+<p><strong>URL 中不要包含文件 (脚本) 的扩展名</strong>。例如 <code>.json</code> 之内的就不要出现了，对于接口来说没有任何实际的意义。如果是想对返回的数据内容格式标示的话，通过 HTTP Header 中的 Content-Type 字段更好一些。</p>
+<p>对于响应返回的格式，JSON 因为它的可读性、紧凑性以及多种语言支持等优点，成为了 HTTP API 最常用的返回格式。因此，最好采用 JSON 作为返回内容的格式。如果用户需要其他格式，比如 <code>xml</code>，应该在请求头部 <code>Accept</code> 中指定。对于不支持的格式，服务端需要返回正确的 <code>status code</code>，并给出详细的说明。</p>
+<p><strong>JSON 中的所有字段都应该用小写的蛇形命名形式，而不是采用驼峰命名。</strong></p>
+<h3 id="四、以资源为中心的-URL-设计"><a href="#四、以资源为中心的-URL-设计" class="headerlink" title="四、以资源为中心的 URL 设计"></a>四、以资源为中心的 URL 设计</h3><p>资源是 <code>Restful API</code> 的核心元素，所有的操作都是针对特定资源进行的。而资源就是 <code>URL</code>（Uniform Resoure Locator）表示的，所以简洁、清晰、结构化的 URL 设计是至关重要的。Github 可以说是这方面的典范，下面我们就拿 <code>repository</code> 来说明：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ol>
+<li></li>
+</ol>
+<p><code>/users/:username/repos</code></p>
+<ol start="2">
+<li></li>
+</ol>
+<p><code>/users/:org/repos</code></p>
+<ol start="3">
+<li></li>
+</ol>
+<p><code>/repos/:owner/:repo</code></p>
+<ol start="4">
+<li></li>
+</ol>
+<p><code>/repos/:owner/:repo/tags</code></p>
+<ol start="5">
+<li></li>
+</ol>
+<p><code>/repos/:owner/:repo/branches/:branch</code></p>
+<p>我们可以看到几个特性：</p>
+<ul>
+<li>资源分为单个文档和集合，尽量使用复数来表示资源，单个资源通过添加 id 或者 name 等来表示</li>
+<li>一个资源可以有多个不同的 URL</li>
+<li>资源可以嵌套，通过类似目录路径的方式来表示，以体现它们之间的关系</li>
+</ul>
+<p><strong>最常见的一种设计错误，就是 URL 包含动词。</strong> 因为 “资源” 表示一种实体，所以应该是名词，URL 不应该有动词，动词应该放在 HTTP Method （参考下一条）中。举例来说，某个 URL 是 <code>/users/show/1</code>，其中 <code>show</code> 是动词，这个 URL 就设计错了，正确的写法应该是 <code>/users/1</code>，然后用 HTTP GET 方法表示 show。</p>
+<p>如果某些动作是 HTTP 动词表示不了的，你可以把动作看成是一种资源。比如网上汇款，从账户 1 向账户 2 汇款 500 元，错误的 URL 是：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">POST /accounts/<span class="number">1</span>/transfer/<span class="number">500</span>/to/<span class="number">2</span></span><br></pre></td></tr></table></figure>
+
+<p>正确的写法是把动词 transfer 改成 transaction，资源不能是动词，但是可以是一种服务：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ol>
+<li></li>
+</ol>
+<p><code>POST /transactoin HTTP/1.1</code></p>
+<ol start="2">
+<li></li>
+</ol>
+<p><code>HOST: 127.0.0.1</code></p>
+<ol start="3">
+<li></li>
+<li></li>
+</ol>
+<p><code>from=1&amp;to=2&amp;amount=500</code></p>
+<h3 id="五、正确使用-HTTP-Method"><a href="#五、正确使用-HTTP-Method" class="headerlink" title="五、正确使用 HTTP Method"></a>五、正确使用 HTTP Method</h3><p>有了资源的 URI 设计，所有针对资源的操作都是使用 HTTP 方法指定的。比较常用的 HTTP&#x2F;1.1 动词有下面 5 个：</p>
+<ul>
+<li>GET：从服务器取出资源（一项或多项）。</li>
+<li>POST：在服务器新建一个资源。</li>
+<li>PUT：在服务器更新资源（客户端提供改变后的完整资源）。</li>
+<li>PATCH：在服务器更新资源（更新资源的部分属性）。</li>
+<li>DELETE：从服务器删除资源。</li>
+</ul>
+<p>还有 4 个不常用的 HTTP&#x2F;1.1 动词：</p>
+<ul>
+<li>HEAD：只获取某个资源的头部信息。比如只想了解某个文件的大小，某个资源的修改日期等</li>
+<li>OPTIONS：获取信息，关于资源的哪些属性是客户端可以改变的。</li>
+<li>TRACE：追踪路径。不建议使用。</li>
+<li>CONNECT：要求用隧道协议连接代理。不建议使用。</li>
+</ul>
+<p>举例：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ol>
+<li></li>
+</ol>
+<p><code>GET /repos/:owner/:repo/issues</code></p>
+<ol start="2">
+<li></li>
+</ol>
+<p><code>GET /repos/:owner/:repo/issues/:number</code></p>
+<ol start="3">
+<li></li>
+</ol>
+<p><code>POST /repos/:owner/:repo/issues</code></p>
+<ol start="4">
+<li></li>
+</ol>
+<p><code>PATCH /repos/:owner/:repo/issues/:number</code></p>
+<ol start="5">
+<li></li>
+</ol>
+<p><code>DELETE /repos/:owner/:repo</code></p>
+<p>这里顺带探讨一下，HTTP 协议涉及到的一种重要性质：幂等性 (Idempotence)。在 HTTP&#x2F;1.1 规范中幂等性的定义是：</p>
+<blockquote>
+<p>Methods can also have the property of “idempotence” in that (aside from error or expiration issues) the side-effects of N &gt; 0 identical requests is the same as for a single request.</p>
+</blockquote>
+<p>从定义上看，HTTP 方法的幂等性是指一次和多次请求某一个资源应该具有同样的副作用。幂等性属于语义范畴，正如编译器只能帮助检查语法错误一样，HTTP 规范也没有办法通过消息格式等语法手段来定义它，这可能是它不太受到重视的原因之一。但实际上，幂等性是分布式系统设计中十分重要的概念，而 HTTP 的分布式本质也决定了它在 HTTP 中具有重要地位。</p>
+<p>安全方法是指不修改资源的 HTTP 方法。譬如，当使用 GET 或者 HEAD 作为资源 URL，都必须不去改变资源。然而，这并不全准确。意思是：它不改变资源的表示形式。对于安全方法，它仍然可能改变服务器上的内容或资源，但这必须不导致不同的表现形式。</p>
+<table>
+<thead>
+<tr>
+<th align="left"></th>
+<th align="left">HTTP Method</th>
+<th align="left">幂等</th>
+<th align="left">安全</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">1</td>
+<td align="left">OPTIONS</td>
+<td align="left">yes</td>
+<td align="left">yes</td>
+</tr>
+<tr>
+<td align="left">2</td>
+<td align="left">GET</td>
+<td align="left">yes</td>
+<td align="left">yes</td>
+</tr>
+<tr>
+<td align="left">3</td>
+<td align="left">HEAD</td>
+<td align="left">yes</td>
+<td align="left">yes</td>
+</tr>
+<tr>
+<td align="left">4</td>
+<td align="left">PUT</td>
+<td align="left">yes</td>
+<td align="left">no</td>
+</tr>
+<tr>
+<td align="left">5</td>
+<td align="left">POST</td>
+<td align="left">no</td>
+<td align="left">no</td>
+</tr>
+<tr>
+<td align="left">6</td>
+<td align="left">DELETE</td>
+<td align="left">yes</td>
+<td align="left">no</td>
+</tr>
+<tr>
+<td align="left">7</td>
+<td align="left">PATCH</td>
+<td align="left">no</td>
+<td align="left">no</td>
+</tr>
+</tbody></table>
+<p>实际上接口的幂等或者安全与否取决于接口的实现，只是 HTTP Method 语义上我们约定俗成地认为实现的过程会参照上表所示。对于幂等的接口，客户端就可以放心地多次调用，网关层面也可以重试。</p>
+<h3 id="六、状态码-（Status-Code）"><a href="#六、状态码-（Status-Code）" class="headerlink" title="六、状态码 （Status Code）"></a>六、状态码 （Status Code）</h3><p>HTTP 应答中，需要带一个很重要的字段：<code>status code</code>。它说明了请求的大致情况，是否正常完成、需要进一步处理、出现了什么错误，对于客户端非常重要。状态码都是三位的整数，大概分成了几个区间：</p>
+<ul>
+<li><code>2XX</code>：请求正常处理并返回</li>
+<li><code>3XX</code>：重定向，请求的资源位置发生变化</li>
+<li><code>4XX</code>：客户端发送的请求有错误</li>
+<li><code>5XX</code>：服务器端错误</li>
+</ul>
+<p>在 HTTP API 设计中，经常用到的状态码以及它们的意义如下表：</p>
+<table>
+<thead>
+<tr>
+<th align="left">Status Code</th>
+<th align="left">语义</th>
+<th align="left">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">200</td>
+<td align="left">OK</td>
+<td align="left">请求已成功</td>
+</tr>
+<tr>
+<td align="left">201</td>
+<td align="left">Created</td>
+<td align="left">请求已完成，并导致了一个或者多个资源被创建，最常用在 POST 创建资源的时候</td>
+</tr>
+<tr>
+<td align="left">202</td>
+<td align="left">Accepted</td>
+<td align="left">请求已经接收并开始处理，但是处理还没有完成。一般用在异步处理的情况，响应 body 中应该告诉客户端去哪里查看任务的状态</td>
+</tr>
+<tr>
+<td align="left">204</td>
+<td align="left">No Content</td>
+<td align="left">请求已经处理完成，但是没有信息要返回，经常用在 PUT 更新资源的时候（客户端提供资源的所有属性，因此不需要服务端返回）。如果有重要的 metadata，可以放到头部返回</td>
+</tr>
+<tr>
+<td align="left">301</td>
+<td align="left">Moved Permanently</td>
+<td align="left">请求的资源已经永久性地移动到另外一个地方，后续所有的请求都应该直接访问新地址。服务端会把新地址写在 <code>Location</code> 头部字段，方便客户端使用。允许客户端把 POST 请求修改为 GET。</td>
+</tr>
+<tr>
+<td align="left">302</td>
+<td align="left">Moved Temporarily</td>
+<td align="left">临时重定向</td>
+</tr>
+<tr>
+<td align="left">304</td>
+<td align="left">Not Modified</td>
+<td align="left">请求的资源和之前的版本一样，没有发生改变。用来缓存资源，和条件性请求（conditional request）一起出现</td>
+</tr>
+<tr>
+<td align="left">307</td>
+<td align="left">Temporary Redirect</td>
+<td align="left">目标资源暂时性地移动到新的地址，客户端需要去新地址进行操作，但是 <strong>不能</strong> 修改请求的方法。</td>
+</tr>
+<tr>
+<td align="left">308</td>
+<td align="left">Permanent Redirect</td>
+<td align="left">和 301 类似，除了客户端 <strong>不能</strong> 修改原请求的方法</td>
+</tr>
+<tr>
+<td align="left">400</td>
+<td align="left">Bad Request</td>
+<td align="left">1. 语义有误，当前请求无法被服务器理解；2. 请求参数有误。</td>
+</tr>
+<tr>
+<td align="left">401</td>
+<td align="left">Unauthorized</td>
+<td align="left">当前请求需要身份验证。</td>
+</tr>
+<tr>
+<td align="left">403</td>
+<td align="left">Forbidden</td>
+<td align="left">服务器已经理解请求，但是拒绝执行它。与 401 响应不同的是，身份验证并不能提供任何帮助，而且这个请求也不应该被重复提交。如果这不是一个 HEAD 请求，而且服务器希望能够讲清楚为何请求不能被执行，那么就应该在实体内描述拒绝的原因。当然服务器也可以返回一个 404 响应，假如它不希望让客户端获得任何信息。</td>
+</tr>
+<tr>
+<td align="left">404</td>
+<td align="left">Not Found</td>
+<td align="left">请求失败，请求所希望得到的资源未被在服务器上发现。</td>
+</tr>
+<tr>
+<td align="left">405</td>
+<td align="left">Method Not Allowed</td>
+<td align="left">请求行中指定的请求方法不能被用于请求相应的资源。该响应必须返回一个 Allow 头信息用以表示出当前资源能够接受的请求方法的列表。鉴于 PUT，DELETE 方法会对服务器上的资源进行写操作，因而绝大部分的网页服务器都不支持或者在默认配置下不允许上述请求方法，对于此类请求均会返回 405 错误。</td>
+</tr>
+<tr>
+<td align="left">406</td>
+<td align="left">Not Acceptable</td>
+<td align="left">请求的资源的内容特性无法满足请求头中的条件，因而无法生成响应实体。</td>
+</tr>
+<tr>
+<td align="left">409</td>
+<td align="left">Conflict</td>
+<td align="left">由于和被请求的资源的当前状态之间存在冲突，请求无法完成。</td>
+</tr>
+<tr>
+<td align="left">429</td>
+<td align="left">Too Many Requests</td>
+<td align="left">资源配额不足或达到速率限制。</td>
+</tr>
+<tr>
+<td align="left">499</td>
+<td align="left">Client Closed Request</td>
+<td align="left">请求被客户端取消。</td>
+</tr>
+<tr>
+<td align="left">500</td>
+<td align="left">Internal Server Error</td>
+<td align="left">服务器内部错误</td>
+</tr>
+<tr>
+<td align="left">501</td>
+<td align="left">Not Implemented</td>
+<td align="left">服务器不支持当前请求所需要的某个功能。当服务器无法识别请求的方法，并且无法支持其对任何资源的请求。</td>
+</tr>
+<tr>
+<td align="left">502</td>
+<td align="left">Bad Gateway</td>
+<td align="left">作为网关或者代理工作的服务器尝试执行请求时，从上游服务器接收到无效的响应。</td>
+</tr>
+<tr>
+<td align="left">503</td>
+<td align="left">Service Unavailable</td>
+<td align="left">由于临时的服务器维护或者过载，服务器当前无法处理请求。这个状况是临时的，并且将在一段时间以后恢复。</td>
+</tr>
+<tr>
+<td align="left">504</td>
+<td align="left">Gateway Timeout</td>
+<td align="left">作为网关或者代理工作的服务器尝试执行请求时，未能及时从上游服务器（URI 标识出的服务器，例如 HTTP、FTP、LDAP）或者辅助服务器（例如 DNS）收到响应。</td>
+</tr>
+<tr>
+<td align="left">505</td>
+<td align="left">HTTP Version Not Supported</td>
+<td align="left">服务器不支持，或者拒绝支持在请求中使用的 HTTP 版本。</td>
+</tr>
+</tbody></table>
+<p>上面这些状态码覆盖了 API 设计中大部分的情况，如果对某个状态码不清楚或者希望查看更完整的列表，可以参考 HTTP Status Code [6] 、维基百科 - 状态码 [7] 或者 RFC7231 Response Status Codes [8] 的内容。</p>
+<h3 id="七、错误处理（Error-Handling）"><a href="#七、错误处理（Error-Handling）" class="headerlink" title="七、错误处理（Error Handling）"></a>七、错误处理（Error Handling）</h3><p>如果出错，应该在 response body 中通过 <code>message</code> 给出明确的错误信息（一般来说，返回的信息中将 message 作为键名，出错详情作为键值即可）。比如客户端发送的请求有错误，一般会返回 <code>4XX Bad Request</code> 结果。这个结果很模糊，给出错误 <code>message</code> 的话，能更好地让客户端知道具体哪里有问题，进行快速修改。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ol>
+<li></li>
+</ol>
+<p><code>{</code></p>
+<ol start="2">
+<li></li>
+</ol>
+<p><code> &quot;message&quot;:&quot;错误详情&quot;</code></p>
+<ol start="3">
+<li></li>
+</ol>
+<p><code>}</code></p>
+<p>错误详情应该可以帮助用户轻松快捷地理解和解决 API 错误。通常，在编写错误详情时请考虑以下准则：</p>
+<ul>
+<li>不要假设用户是您 API 的专家用户。用户可能是客户端开发人员、操作人员、IT 人员或应用的最终用户。</li>
+<li>不要假设用户了解有关服务实现的任何信息，或者熟悉错误的上下文（例如日志分析）。</li>
+<li>如果可能，应构建错误详情，以便技术用户（但不一定是 API 开发人员）可以响应错误并改正。</li>
+<li>确保错误详情内容简洁。如果需要，请提供一个链接，便于有疑问的读者提问、提供反馈或详细了解错误详情中不方便说明的信息。此外，可使用详细信息字段来提供更多信息。</li>
+</ul>
+<h3 id="八、命名规则"><a href="#八、命名规则" class="headerlink" title="八、命名规则"></a>八、命名规则</h3><p>为了能够长时间在众多 API 中为开发者提供一致的体验，API 使用的所有名称都应该具有以下特点：</p>
+<ul>
+<li>简单</li>
+<li>直观</li>
+<li>一致</li>
+</ul>
+<p>这包括接口、资源、集合、方法和消息的名称。</p>
+<p>由于很多开发者不是以英语为母语，所以这些命名惯例的目标之一是确保大多数开发者可以轻松理解 API。对于方法和资源，我们鼓励使用简单、直观和少量的词汇来命名。</p>
+<ul>
+<li>API 名称 <strong>应该</strong> 使用正确的美式英语。例如，使用美式英语的 license、color，而非英式英语的 licence、colour。</li>
+<li>为了简化命名， <strong>可以</strong> 使用已被广泛接受的简写形式或缩写。例如，API 优于 Application Programming Interface。</li>
+<li>尽量使用直观、熟悉的术语。例如，如果描述移除（和销毁）一个资源，则删除优于擦除。</li>
+<li>使用相同的名称或术语命名同样的概念，包括跨 API 共享的概念。</li>
+<li>避免名称过载。使用不同的名称命名不同的概念。</li>
+<li>避免在 API 的上下文以及更大的 API 生态系统中使用含糊不清且过于笼统的名称。这些名称可能导致对 API 概念的误解。相反，应选择能准确描述 API 概念的名称。这对定义一阶 API 元素（例如资源）的名称尤其重要。没有要避免使用的名称的明确列表，因为每个名称都必须放在其他名称的上下文中进行评估。实例、信息和服务是过去有问题的名称的示例。所选择的名称应清楚地描述 API 概念（例如：什么的实例？），并将其与其他相关概念区分开（例如：“alert” 是指规则、信号还是通知？）。</li>
+<li>仔细考虑是否使用可能与常用编程语言中的关键字相冲突的名称。您可以使用这些名称，但在 API 审核期间可能会触发额外的审查。因此应谨慎使用。</li>
+</ul>
+<h3 id="九、认证和授权（Authentication-Authorization）"><a href="#九、认证和授权（Authentication-Authorization）" class="headerlink" title="九、认证和授权（Authentication &amp; Authorization）"></a>九、认证和授权（Authentication &amp; Authorization）</h3><p>一般来说，让任何人随意访问公开的 API 是不好的做法。验证和授权是两件事情：</p>
+<ul>
+<li>验证（Authentication）是为了确定用户是其申明的身份，比如提供账户的密码。不然的话，任何人伪造成其他身份（比如其他用户或者管理员）是非常危险的</li>
+<li>授权（Authorization）是为了保证用户有对请求资源特定操作的权限。比如用户的私人信息只能自己能访问，其他人无法看到；有些特殊的操作只能管理员可以操作，其他用户有只读的权限等等</li>
+</ul>
+<p>如果没有通过验证（提供的用户名和密码不匹配，token 不正确等），需要返回 401 Unauthorized [9] 状态码，并在 body 中说明具体的错误信息；而没有被授权访问的资源操作，需要返回 403 Forbidden [10] 状态码，还有详细的错误信息。</p>
+<blockquote>
+<p>NOTES: 借鉴于 Github，它对某些用户未被授权访问的资源操作返回 404 Not Found [11]，目的是为了防止私有资源的泄露（比如黑客可以自动化试探用户的私有资源，返回 403 的话，就等于告诉黑客用户有这些私有的资源）。</p>
+</blockquote>
+<h3 id="十、限流（RateLimit）"><a href="#十、限流（RateLimit）" class="headerlink" title="十、限流（RateLimit）"></a>十、限流（RateLimit）</h3><p>如果对访问的次数不加控制，很可能会造成 API 被滥用，甚至被 DDOS 攻击 [12]。根据使用者不同的身份对其进行限流，可以防止这些情况，减少服务器的压力。</p>
+<p>对用户的请求限流之后，要有方法告诉用户它的请求使用情况，本文档推荐使用的三个相关的头部：</p>
+<ul>
+<li><code>X-RateLimit-Limit</code>: 用户每个小时允许发送请求的最大值</li>
+<li><code>X-RateLimit-Remaining</code>：当前时间窗口剩下的可用请求数目</li>
+<li><code>X-RateLimit-Rest</code>: 时间窗口重置的时候，到这个时间点可用的请求数量就会变成 <code>X-RateLimit-Limit</code> 的值</li>
+</ul>
+<p>举例：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ol>
+<li></li>
+</ol>
+<p><code>X-Ratelimit-Limit: 18000</code></p>
+<ol start="2">
+<li></li>
+</ol>
+<p><code>X-Ratelimit-Remaining: 17995</code></p>
+<ol start="3">
+<li></li>
+</ol>
+<p><code>X-Ratelimit-Reset: 1590570990</code></p>
+<p>如果允许没有登录的用户使用 API（可以让用户试用），可以把 <code>X-RateLimit-Limit</code> 的值设置得很小，比如 <code>60</code>。没有登录的用户是按照请求的 IP 来确定的，而登录的用户按照认证后的信息来确定身份。</p>
+<p>对于超过流量的请求，可以返回 429 Too many requests [13] 状态码，并附带错误信息。</p>
+<h3 id="十一、编写优秀的文档"><a href="#十一、编写优秀的文档" class="headerlink" title="十一、编写优秀的文档"></a>十一、编写优秀的文档</h3><p>API 最终是给人使用的，不管是公司内部，还是公开的 API 都是一样。即使我们遵循了上面提到的所有规范，设计的 API 非常优雅，用户还是不知道怎么使用我们的 API。最后一步，但非常重要的一步是：为你的 API 编写优秀的文档。</p>
+<p>对每个请求以及返回的参数给出说明，最好给出一个详细而完整地示例，提醒用户需要注意的地方…… 反正目标就是用户可以根据你的文档就能直接使用 API，而不是要发邮件给你，或者跑到你的座位上问你一堆问题。</p>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><p>[1]</p>
+<p>OpenAPI Specfication: <em><a target="_blank" rel="noopener" href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md">https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md</a></em></p>
+<p>[2]</p>
+<p>Google API Design Guide: <em><a target="_blank" rel="noopener" href="https://cloud.google.com/apis/design">https://cloud.google.com/apis/design</a></em></p>
+<p>[3]</p>
+<p>阿里云: <em><a target="_blank" rel="noopener" href="https://bytedance.feishu.cn/docs/doccnrP6Ud3YTavonOlxds9lzad#I1tZbK">https://bytedance.feishu.cn/docs/doccnrP6Ud3YTavonOlxds9lzad#I1tZbK</a></em></p>
+<p>[4]</p>
+<p>Github API Design: <em><a target="_blank" rel="noopener" href="https://developer.github.com/v3/#current-version">https://developer.github.com/v3/#current-version</a></em></p>
+<p>[5]</p>
+<p>Versioning REST Services: <em><a target="_blank" rel="noopener" href="https://www.informit.com/articles/article.aspx?p=1566460">https://www.informit.com/articles/article.aspx?p=1566460</a></em></p>
+<p>[6]</p>
+<p>HTTP Status Code: <em><a target="_blank" rel="noopener" href="https://httpstatuses.com/">https://httpstatuses.com/</a></em></p>
+<p>[7]</p>
+<p>维基百科 - 状态码: <em><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/HTTP%E7%8A%B6%E6%80%81%E7%A0%81">https://zh.wikipedia.org/wiki/HTTP%E7%8A%B6%E6%80%81%E7%A0%81</a></em></p>
+<p>[8]</p>
+<p>RFC7231 Response Status Codes: <em><a target="_blank" rel="noopener" href="https://tools.ietf.org/html/rfc7231#p-6">https://tools.ietf.org/html/rfc7231#p-6</a></em></p>
+<p>[9]</p>
+<p>401 Unauthorized: <em><a target="_blank" rel="noopener" href="https://httpstatuses.com/401">https://httpstatuses.com/401</a></em></p>
+<p>[10]</p>
+<p>403 Forbidden: <em><a target="_blank" rel="noopener" href="https://httpstatuses.com/403">https://httpstatuses.com/403</a></em></p>
+<p>[11]</p>
+<p>404 Not Found: <em><a target="_blank" rel="noopener" href="https://httpstatuses.com/404">https://httpstatuses.com/404</a></em></p>
+<p>[12]</p>
+<p>DDOS 攻击: <em><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Denial-of-service_attack">https://en.wikipedia.org/wiki/Denial-of-service_attack</a></em></p>
+<p>[13]</p>
+<p>429 Too many requests: <em><a target="_blank" rel="noopener" href="https://httpstatuses.com/429">https://httpstatuses.com/429</a></em></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2023/09/04/Open%20API%20%E8%A7%84%E8%8C%83%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/">https://yhao521.github.io/2023/09/04/Open%20API%20%E8%A7%84%E8%8C%83%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2023/09/04/OpenSSL%20%E5%AE%89%E5%85%A8%E5%85%AC%E5%91%8A/" title="OpenSSL 安全公告"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">OpenSSL 安全公告</div></div><div class="info-2"><div class="info-item-1"> title: OpenSSL 安全公告date: 2023-09-03 20:17:08category:  mactag: macauthor:   https://www.openssl.org/news/secadv/20160922.txt 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273747576777879808182838485868788899091929394959697989910010110210310410510610710810911011111211311411511611711811912012112212312412512612712812913013113213313413513613713813914014114214314414514614714814915015115215315415515615715815916...</div></div></div></a><a class="pagination-related" href="/2023/09/04/Mysql%E5%A4%A7%E8%A1%A8%E6%95%B0%E6%8D%AE%E6%B8%85%E7%90%86/" title="Mysql大表数据清理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Mysql大表数据清理</div></div><div class="info-2"><div class="info-item-1"> title: Mysql大表数据清理date: 2023-09-04 17:49:38permalink: &#x2F;pages&#x2F;2d270e&#x2F;category:  数据库 doc_mysqltag: doc_mysqlauthor:   Mysql大表数据清理假设大表表名：tlogdelete操作会记录mysql日志，大数据量的清理会耗费大量时间，所以一般得用其他方式。1、如果大表数据对我们来说不重要，完全可以直接清理，那么可以用truncatetruncate table tlog;truncate的操作不记录mysql日志，所以数据是不能恢复的。？2、如果需要保留部分数据创建表并直接保留需要的数据create table t_log_2019 as select * from?tlog?where create_time&gt;’2019-01-01 00:00:00’;删除数据truncate table t_log;恢复保留的数据insert into t_log select * from t_log_2019;删除临时表drop table ...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2024/06/04/nginx%20autoindex%E8%87%AA%E5%8A%A8%E7%BE%8E%E5%8C%96/" title="nginx autoindex自动美化"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-06-04</div><div class="info-item-2">nginx autoindex自动美化</div></div><div class="info-2"><div class="info-item-1">结果 方法            利用 add_after_body 添加一个美化文件（注意该文件的寻址方式是基于你的 root 的）              美化文件如下，这个一个 .html 文件，别搞错了 123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566676869707172737475767778798081828384858687888990919293949596979899100101102103104105106107108109110111112113114115116117118119120121122123124125126127128129130131132133134135136137138139140141142143144145146147148149150151152153154155156157158159160161162163164165166...</div></div></div></a><a class="pagination-related" href="/2023/09/04/docker_nginx%E5%88%B6%E4%BD%9C/" title="docker_nginx制作"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">docker_nginx制作</div></div><div class="info-2"><div class="info-item-1"> title: docker_nginx制作date: 2023-09-03 20:17:08category:  doc_dockertag: doc_dockerauthor:   Docker安装NginxDocker安装完成后，我们需要部署web应用上去，需要用到Nginx做反向代理访问Docker容器，也可以使用Jexus。本文主要介绍的是使用Docker运行Nginx及其简单配置，Jexus留待之后介绍。 1、拉取官方镜像docker pull nginx 2、运行容器 docker run -p 80:80 –name nginx -d nginx 3、第二步运行的Nginx的配置文件是在容器内部的，不方便修改，所以我们可以先把容器内的配置文件复制到宿主机 查看nginx的配置文件目录 复制代码docker exec nginx ls &#x2F;etc&#x2F;nginx conf.dfastcgi_paramskoi-utfkoi-winmime.typesmodulesnginx.confscgi_paramsuwsgi_paramswin-utf复制代码 ...</div></div></div></a><a class="pagination-related" href="/2023/09/04/ohmyzsh%E4%B8%BB%E9%A2%98%E5%AE%89%E8%A3%85%E4%B8%8E%E6%8F%92%E4%BB%B6%E6%8E%A8%E8%8D%90/" title="ohmyzsh主题安装与插件推荐"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">ohmyzsh主题安装与插件推荐</div></div><div class="info-2"><div class="info-item-1"> title: ohmyzsh主题安装与插件推荐date: 2023-09-03 20:17:08category: tag: author:  ohmyzsh主题安装与插件推荐ZSH_THEME&#x3D;”random” 前言1.安装zsh 1sudo yum install zsh  1 2.切换到zsh 1sudo chsh -s /bin/zsh  3.安装git 1sudo yum install git  ohmyzsh官网官网： https://ohmyz.sh/ 安装方法： 1sh -c &quot;$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)&quot;  主题推荐原生主题robbyrussell自带主题ys 随机主机 “random” 123456vim ~/.zshrc# ZSH_THEME=&quot;robbyrussell&quot;ZSH_THEME=&quot;ys&quot;ZSH_THEME=&quot;random&qu...</div></div></div></a><a class="pagination-related" href="/2023/09/04/Spring%20Boot%20Actuator%E5%AE%98%E7%BD%91%E6%96%87%E6%A1%A3/" title="Spring Boot Actuator官网文档"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">Spring Boot Actuator官网文档</div></div><div class="info-2"><div class="info-item-1"> title: Spring Boot Actuator官网文档date: 2023-09-03 20:17:08category:  开发语言 java springboottag: springbootauthor:   Spring Boot Actuator官网文档 Spring Boot Actuator Web API </div></div></div></a><a class="pagination-related" href="/2024/10/05/Vue3+Vite%E9%A1%B9%E7%9B%AE%E4%BB%8E%E9%9B%B6%E6%90%AD%E5%BB%BA+%E5%AE%89%E8%A3%85%E4%BE%9D%E8%B5%96+%E9%85%8D%E7%BD%AE%E6%8C%89%E9%9C%80%E5%AF%BC%E5%85%A5/" title="Vue3+Vite项目从零搭建+安装依赖+配置按需导入"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-10-05</div><div class="info-item-2">Vue3+Vite项目从零搭建+安装依赖+配置按需导入</div></div><div class="info-2"><div class="info-item-1">环境准备 Vscode&#x2F;HBuilder等任何一种前端开发工具 node.js&amp;npm本地开发环境    源代码管理：Git  技术栈 项目构建创建项目npm create vite依次运行最后三行出现，成功启动项目在浏览器输入 http://localhost:5173/ 可以显示页面   src别名的配置在开发项目的时候文件与文件关系可能很复杂，因此我们需要给src文件夹配置一个别名！！！ 123456789101112import &#123;defineConfig&#125; from &#x27;vite&#x27;import vue from &#x27;@vitejs/plugin-vue&#x27;import path from &#x27;path&#x27;export default defineConfig(&#123;    plugins: [vue()],    resolve: &#123;        alias: &#123;            &quot;@&quot;: path.resolve(&quot;....</div></div></div></a><a class="pagination-related" href="/2023/09/04/mycli/" title="mycli"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">mycli</div></div><div class="info-2"><div class="info-item-1"> title: MySQL工具mycli体验lang: en-USdate: 2023-09-04 17:49:38category:  数据库 doc_mysqltag: doc_mysqlauthor:   1. MySQL工具mycli体验安装方法很是简单： 1.1. 一、安装依赖：1yum install python-pip python-devel  1.2. 二、安装mycliwindows 有python的环境可以直接执行下面命令安装； 1pip install mycli  这样就安装完了。 1.3. 三、使用方法12345678910111213141516171819202122232425262728293031323334353637383940414243444546[root@localhost .pip]# mycli --helpUsage: mycli [OPTIONS] [DATABASE]  A MySQL terminal client with auto-completion and syntax highlighting.  Exam...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Open-API-%E8%A7%84%E8%8C%83%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86"><span class="toc-number">1.</span> <span class="toc-text">Open API 规范基础知识</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#OpenAPI-%E8%A7%84%E8%8C%83"><span class="toc-number">1.1.</span> <span class="toc-text">OpenAPI 规范</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%8D%8F%E8%AE%AE"><span class="toc-number">1.1.1.</span> <span class="toc-text">一、协议</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E7%89%88%E6%9C%AC%EF%BC%88Version%EF%BC%89"><span class="toc-number">1.1.2.</span> <span class="toc-text">二、版本（Version）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%89%E3%80%81Schema"><span class="toc-number">1.1.3.</span> <span class="toc-text">三、Schema</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E4%BB%A5%E8%B5%84%E6%BA%90%E4%B8%BA%E4%B8%AD%E5%BF%83%E7%9A%84-URL-%E8%AE%BE%E8%AE%A1"><span class="toc-number">1.1.4.</span> <span class="toc-text">四、以资源为中心的 URL 设计</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E6%AD%A3%E7%A1%AE%E4%BD%BF%E7%94%A8-HTTP-Method"><span class="toc-number">1.1.5.</span> <span class="toc-text">五、正确使用 HTTP Method</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E7%8A%B6%E6%80%81%E7%A0%81-%EF%BC%88Status-Code%EF%BC%89"><span class="toc-number">1.1.6.</span> <span class="toc-text">六、状态码 （Status Code）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86%EF%BC%88Error-Handling%EF%BC%89"><span class="toc-number">1.1.7.</span> <span class="toc-text">七、错误处理（Error Handling）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E5%91%BD%E5%90%8D%E8%A7%84%E5%88%99"><span class="toc-number">1.1.8.</span> <span class="toc-text">八、命名规则</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B9%9D%E3%80%81%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83%EF%BC%88Authentication-Authorization%EF%BC%89"><span class="toc-number">1.1.9.</span> <span class="toc-text">九、认证和授权（Authentication &amp; Authorization）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%81%E3%80%81%E9%99%90%E6%B5%81%EF%BC%88RateLimit%EF%BC%89"><span class="toc-number">1.1.10.</span> <span class="toc-text">十、限流（RateLimit）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%81%E4%B8%80%E3%80%81%E7%BC%96%E5%86%99%E4%BC%98%E7%A7%80%E7%9A%84%E6%96%87%E6%A1%A3"><span class="toc-number">1.1.11.</span> <span class="toc-text">十一、编写优秀的文档</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="toc-number">1.1.12.</span> <span class="toc-text">参考资料</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

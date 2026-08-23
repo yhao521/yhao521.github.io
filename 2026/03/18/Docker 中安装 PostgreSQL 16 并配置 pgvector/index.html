@@ -1,0 +1,371 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Docker 中安装 PostgreSQL 16 并配置 pgvector | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="一、环境准备 1. 确认 Docker 版本 2. 创建专用网络（生产环境必备） 作用： 隔离数据库流量 避免端口冲突 方便后续扩展（如连接应用容器） 二、PostgreSQL 16 容器化部署 1. 一、环境准备 1. 确认 Docker 版本docker --version Docker version">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker 中安装 PostgreSQL 16 并配置 pgvector">
+<meta property="og:url" content="https://yhao521.github.io/2026/03/18/Docker%20%E4%B8%AD%E5%AE%89%E8%A3%85%20PostgreSQL%2016%20%E5%B9%B6%E9%85%8D%E7%BD%AE%20pgvector/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="一、环境准备 1. 确认 Docker 版本 2. 创建专用网络（生产环境必备） 作用： 隔离数据库流量 避免端口冲突 方便后续扩展（如连接应用容器） 二、PostgreSQL 16 容器化部署 1. 一、环境准备 1. 确认 Docker 版本docker --version Docker version">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2026-03-17T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-17T16:00:00.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="java&#x2F;programming">
+<meta property="article:tag" content="javascript">
+<meta property="article:tag" content="js&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="pgsql">
+<meta property="article:tag" content="swift&#x2F;programming">
+<meta property="article:tag" content="摘录">
+<meta property="article:tag" content="教程">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Docker 中安装 PostgreSQL 16 并配置 pgvector",
+  "url": "https://yhao521.github.io/2026/03/18/Docker%20%E4%B8%AD%E5%AE%89%E8%A3%85%20PostgreSQL%2016%20%E5%B9%B6%E9%85%8D%E7%BD%AE%20pgvector/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2026-03-17T16:00:00.000Z",
+  "dateModified": "2026-05-17T16:00:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2026/03/18/Docker%20%E4%B8%AD%E5%AE%89%E8%A3%85%20PostgreSQL%2016%20%E5%B9%B6%E9%85%8D%E7%BD%AE%20pgvector/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Docker 中安装 PostgreSQL 16 并配置 pgvector',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">Docker 中安装 PostgreSQL 16 并配置 pgvector</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Docker 中安装 PostgreSQL 16 并配置 pgvector</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-03-17T16:00:00.000Z" title="发表于 2026-03-18 00:00:00">2026-03-18</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-17T16:00:00.000Z" title="更新于 2026-05-18 00:00:00">2026-05-18</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h4 id="一、环境准备"><a href="#一、环境准备" class="headerlink" title="一、环境准备"></a>一、环境准备</h4><h5 id="1-确认-Docker-版本"><a href="#1-确认-Docker-版本" class="headerlink" title="1. 确认 Docker 版本"></a>1. 确认 Docker 版本</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">bash docker --version</span><br><span class="line"><span class="comment"># Docker version 28.3.3, build 980b856</span></span><br><span class="line"><span class="comment"># 如版本低于27.0，请先升级</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="2-创建专用网络（生产环境必备）"><a href="#2-创建专用网络（生产环境必备）" class="headerlink" title="2. 创建专用网络（生产环境必备）"></a>2. 创建专用网络（生产环境必备）</h5><figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lua docker network <span class="built_in">create</span> pg-network</span><br></pre></td></tr></table></figure>
+
+<p><strong>作用</strong> ：</p>
+<ul>
+<li>隔离数据库流量</li>
+<li>避免端口冲突</li>
+<li>方便后续扩展（如连接应用容器）</li>
+</ul>
+<h4 id="二、PostgreSQL-16-容器化部署"><a href="#二、PostgreSQL-16-容器化部署" class="headerlink" title="二、PostgreSQL 16 容器化部署"></a>二、PostgreSQL 16 容器化部署</h4><h5 id="1-搜索镜像"><a href="#1-搜索镜像" class="headerlink" title="1. 搜索镜像"></a>1. 搜索镜像</h5><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">sql</span> docker <span class="keyword">search</span> postgres</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-拉取官方镜像（指定版本）"><a href="#2-拉取官方镜像（指定版本）" class="headerlink" title="2. 拉取官方镜像（指定版本）"></a>2. 拉取官方镜像（指定版本）</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull postgres:16</span><br></pre></td></tr></table></figure>
+
+<h5 id="3-创建持久化数据卷"><a href="#3-创建持久化数据卷" class="headerlink" title="3. 创建持久化数据卷"></a>3. 创建持久化数据卷</h5><figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lua docker volume <span class="built_in">create</span> pgdata</span><br></pre></td></tr></table></figure>
+
+<p><strong>生产环境重要性</strong> ：</p>
+<ul>
+<li>容器重启&#x2F;删除时数据不丢失</li>
+<li>独立于容器生命周期管理</li>
+<li>方便备份迁移</li>
+</ul>
+<h5 id="4-启动-PostgreSQL-容器（生产优化版）"><a href="#4-启动-PostgreSQL-容器（生产优化版）" class="headerlink" title="4. 启动 PostgreSQL 容器（生产优化版）"></a>4. 启动 PostgreSQL 容器（生产优化版）</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">ini docker run -d \</span><br><span class="line">  --name postgres \</span><br><span class="line">  --network pg-network \</span><br><span class="line">  -p 5432:5432 \</span><br><span class="line">  -e POSTGRES_PASSWORD=123456 \</span><br><span class="line">  -e POSTGRES_USER=ahjmkj \</span><br><span class="line">  -e POSTGRES_DB=openAgent \</span><br><span class="line">  -e TZ=Asia/Shanghai \</span><br><span class="line">  -e POSTGRES_INITDB_ARGS=<span class="string">&quot;--data-checksums&quot;</span> \</span><br><span class="line">  -v pgdata:/var/lib/postgresql/data \</span><br><span class="line">  -v /etc/localtime:/etc/localtime:ro \</span><br><span class="line">  --restart=unless-stopped \</span><br><span class="line">  --memory=4g \</span><br><span class="line">  --cpus=2 \</span><br><span class="line">  --health-cmd=<span class="string">&quot;pg_isready -U ahjmkj&quot;</span> \</span><br><span class="line">  --health-interval=30s \</span><br><span class="line">  --health-timeout=5s \</span><br><span class="line">  --health-retries=3 \</span><br><span class="line">  postgres:16 \</span><br><span class="line">  -c max_connections=200 \</span><br><span class="line">  -c shared_buffers=1GB</span><br></pre></td></tr></table></figure>
+
+<p>参数详解：</p>
+<p>参数 说明 生产环境重要性 –network pg-network 加入专用网络 ⭐⭐⭐⭐⭐ 网络安全隔离</p>
+<p>-e POSTGRES_PASSWORD 管理员密码 ⭐⭐⭐⭐⭐ 必须使用强密码</p>
+<p>-e TZ&#x3D;Asia&#x2F;Shanghai 设置时区 ⭐⭐⭐⭐ 避免时间相关错误</p>
+<p>-v pgdata:&#x2F;var&#x2F;… 挂载数据卷 ⭐⭐⭐⭐⭐ 数据持久化</p>
+<p>--restart&#x3D;unless-stopped 自动重启策略 ⭐⭐⭐⭐ 高可用保障</p>
+<p>--memory&#x3D;4g –cpus&#x3D;2 资源限制 ⭐⭐⭐⭐ 防止单容器耗尽资源</p>
+<p>--health-cmd 健康检查 ⭐⭐⭐ 自动故障检测</p>
+<p>-c max_connections&#x3D;200 最大连接数 ⭐⭐⭐ 根据业务需求调整</p>
+<p>-c shared_buffers&#x3D;1GB 共享内存大小 ⭐⭐⭐ 性能优化关键参数</p>
+<h4 id="三、验证与连接"><a href="#三、验证与连接" class="headerlink" title="三、验证与连接"></a>三、验证与连接</h4><h5 id="1-检查容器状态"><a href="#1-检查容器状态" class="headerlink" title="1. 检查容器状态"></a>1. 检查容器状态</h5><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">swift docker ps <span class="operator">--</span>format <span class="string">&quot;table &#123;&#123;.ID&#125;&#125;<span class="subst">\t</span>&#123;&#123;.Names&#125;&#125;<span class="subst">\t</span>&#123;&#123;.Status&#125;&#125;<span class="subst">\t</span>&#123;&#123;.Ports&#125;&#125;&quot;</span></span><br><span class="line"></span><br><span class="line">输出：</span><br><span class="line"><span class="type">CONTAINER</span> <span class="type">ID</span>  <span class="type">NAMES</span>          <span class="type">STATUS</span>                    <span class="type">PORTS</span></span><br><span class="line">a1b2c3d4e5f6  prod<span class="operator">-</span>postgres  <span class="type">Up</span> <span class="number">2</span> minutes (healthy)   <span class="number">0.0</span>.<span class="number">0.0</span>:<span class="number">5432</span>-&gt;<span class="number">5432</span><span class="operator">/</span>tcp</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-查看实时日志"><a href="#2-查看实时日志" class="headerlink" title="2. 查看实时日志"></a>2. 查看实时日志</h5><figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">arduino docker logs -f postgres</span><br><span class="line"></span><br><span class="line">输出：</span><br><span class="line">PostgreSQL init process complete; ready <span class="keyword">for</span> start up</span><br><span class="line">database system is ready to accept connections</span><br></pre></td></tr></table></figure>
+
+<h5 id="3-命令行连接测试"><a href="#3-命令行连接测试" class="headerlink" title="3. 命令行连接测试"></a>3. 命令行连接测试</h5><figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">csharp docker exec -it postgres \</span><br><span class="line">  psql -U ahjmkj -d openAgent -c <span class="string">&quot;SELECT version();&quot;</span></span><br><span class="line"></span><br><span class="line">输出：</span><br><span class="line">PostgreSQL <span class="number">16.3</span> <span class="keyword">on</span> x86_64-pc-linux-gnu, compiled <span class="keyword">by</span> gcc...</span><br></pre></td></tr></table></figure>
+
+<h5 id="4-客户端工具连接"><a href="#4-客户端工具连接" class="headerlink" title="4. 客户端工具连接"></a>4. 客户端工具连接</h5><p>使用 DBeaver&#x2F;pgAdmin 连接：</p>
+<ul>
+<li><strong>Host</strong>: 服务器IP</li>
+<li><strong>Port</strong>: 5432</li>
+<li><strong>Database</strong>: openAgent</li>
+<li><strong>Username</strong>: ahjmkj</li>
+<li><strong>Password</strong>: 123456</li>
+</ul>
+<h4 id="四、生产环境高级配置"><a href="#四、生产环境高级配置" class="headerlink" title="四、生产环境高级配置"></a>四、生产环境高级配置</h4><h5 id="1-配置文件自定义"><a href="#1-配置文件自定义" class="headerlink" title="1. 配置文件自定义"></a>1. 配置文件自定义</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">bash <span class="comment"># 创建配置目录</span></span><br><span class="line"><span class="built_in">mkdir</span> -p /docker/pg-config</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成默认配置</span></span><br><span class="line">docker run --<span class="built_in">rm</span> postgres:16 \</span><br><span class="line">  <span class="built_in">cat</span> /usr/share/postgresql/postgresql.conf.sample &gt; /docker/pg-config/postgresql.conf</span><br><span class="line"></span><br><span class="line"><span class="comment"># 编辑配置文件（优化关键参数）</span></span><br><span class="line">nano /docker/pg-config/postgresql.conf</span><br></pre></td></tr></table></figure>
+
+<p><strong>关键参数建议</strong> ：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ini listen_addresses = <span class="string">&#x27;*&#x27;</span>  <span class="comment"># 允许所有网络接口</span></span><br><span class="line">max_connections = 250   <span class="comment"># 根据实际负载调整</span></span><br><span class="line">shared_buffers = 1GB    <span class="comment"># 建议分配内存的25%</span></span><br><span class="line">work_mem = 16MB         <span class="comment"># 每个操作的内存</span></span><br><span class="line">maintenance_work_mem = 512MB  <span class="comment"># 维护操作内存</span></span><br><span class="line">synchronous_commit = off  <span class="comment"># 异步提交提升性能</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>重新启动容器</strong> ：</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">arduino docker run ... \</span><br><span class="line">  -v /docker/pg-config/postgresql.conf:/etc/postgresql/postgresql.conf \</span><br><span class="line">  postgres:<span class="number">16</span> -c <span class="string">&#x27;config_file=/etc/postgresql/postgresql.conf&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="2-定期备份方案"><a href="#2-定期备份方案" class="headerlink" title="2. 定期备份方案"></a>2. 定期备份方案</h5><p><strong>创建备份脚本</strong> (<code>pg-backup.sh</code>):</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">bash <span class="comment">#!/bin/bash</span></span><br><span class="line">BACKUP_DIR=/backups/pg</span><br><span class="line">DATE=$(<span class="built_in">date</span> +%Y%m%d_%H%M%S)</span><br><span class="line"></span><br><span class="line">docker <span class="built_in">exec</span> prod-postgres \</span><br><span class="line">  pg_dump -U ahjmkj -Fc openAgent &gt; <span class="variable">$BACKUP_DIR</span>/prod_db_<span class="variable">$DATE</span>.dump</span><br><span class="line"></span><br><span class="line"><span class="comment"># 保留最近7天备份</span></span><br><span class="line">find <span class="variable">$BACKUP_DIR</span> -mtime +7 -delete</span><br></pre></td></tr></table></figure>
+
+<p><strong>设置定时任务</strong> ： crontab -e</p>
+<h2 id="每天凌晨2点备份"><a href="#每天凌晨2点备份" class="headerlink" title="每天凌晨2点备份"></a>每天凌晨2点备份</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">javascript <span class="number">0</span> <span class="number">2</span> * * * <span class="regexp">/path/</span>to/pg-backup.<span class="property">sh</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="3-监控配置"><a href="#3-监控配置" class="headerlink" title="3. 监控配置"></a>3. 监控配置</h5><p>使用内置统计收集器：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ini ALTER SYSTEM SET track_activities = on;</span><br><span class="line">ALTER SYSTEM SET track_counts = on;</span><br><span class="line">ALTER SYSTEM SET track_io_timing = on;</span><br><span class="line">SELECT pg_reload_conf();</span><br></pre></td></tr></table></figure>
+
+<p>推荐监控工具：</p>
+<ul>
+<li>Prometheus + Grafana（配合 postgres_exporter）</li>
+<li>pgAdmin 4 监控面板</li>
+<li>Datadog &#x2F; New Relic</li>
+</ul>
+<h4 id="五、故障排查与维护"><a href="#五、故障排查与维护" class="headerlink" title="五、故障排查与维护"></a>五、故障排查与维护</h4><h5 id="1-常见问题解决"><a href="#1-常见问题解决" class="headerlink" title="1. 常见问题解决"></a>1. 常见问题解决</h5><p><strong>问题1：端口冲突</strong></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">yaml</span> <span class="comment"># 检查占用5432端口的进程</span></span><br><span class="line"><span class="string">sudo</span> <span class="string">lsof</span> <span class="string">-i</span> <span class="string">:5432</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 解决方案：改用其他端口</span></span><br><span class="line"><span class="string">docker</span> <span class="string">run</span> <span class="string">...</span> <span class="string">-p</span> <span class="number">5433</span><span class="string">:5432</span> <span class="string">...</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>问题2：忘记管理员密码</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">bash <span class="comment"># 进入容器bash</span></span><br><span class="line">docker <span class="built_in">exec</span> -it postgres bash</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以postgres用户连接</span></span><br><span class="line">psql -U postgres</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重置密码</span></span><br><span class="line">ALTER USER ahjmkj WITH PASSWORD <span class="string">&#x27;123456&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p><strong>问题3：磁盘空间不足</strong></p>
+<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">perl <span class="comment"># 查看容器磁盘使用</span></span><br><span class="line">docker <span class="keyword">system</span> df</span><br><span class="line"></span><br><span class="line"><span class="comment"># 清理无用容器/镜像</span></span><br><span class="line">docker <span class="keyword">system</span> prune -f</span><br><span class="line"></span><br><span class="line"><span class="comment"># 扩展数据卷</span></span><br><span class="line">docker volume inspect pgdata <span class="comment"># 找到实际路径</span></span><br><span class="line"><span class="comment"># 然后扩展对应磁盘分区</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="2-关键维护命令"><a href="#2-关键维护命令" class="headerlink" title="2. 关键维护命令"></a>2. 关键维护命令</h5><p><strong>查看资源使用</strong> ：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker stats postgres</span><br></pre></td></tr></table></figure>
+
+<p><strong>进入维护模式</strong> ：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">bash docker <span class="built_in">exec</span> -it postgres bash</span><br><span class="line">psql -U ahjmkj -d openAgent</span><br></pre></td></tr></table></figure>
+
+<p><strong>日志分析</strong> ：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">css docker logs --<span class="built_in">tail</span> 100 postgres | grep -i error</span><br></pre></td></tr></table></figure>
+
+<h4 id="六、安全加固建议"><a href="#六、安全加固建议" class="headerlink" title="六、安全加固建议"></a>六、安全加固建议</h4><ol>
+<li><strong>网络层安全</strong></li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ini <span class="comment"># 限制访问IP（仅允许应用服务器）</span></span><br><span class="line">docker network create --subnet=10.1.0.0/16 pg-secure-network</span><br></pre></td></tr></table></figure>
+
+<p>2. <strong>SSL加密连接</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ini <span class="comment"># 启动容器时添加SSL参数</span></span><br><span class="line">-e POSTGRES_SSL=on \</span><br><span class="line">-e POSTGRES_SSL_CERT_FILE=/etc/ssl/certs/server.crt \</span><br><span class="line">-e POSTGRES_SSL_KEY_FILE=/etc/ssl/private/server.key</span><br></pre></td></tr></table></figure>
+
+<p>3. <strong>定期轮换凭证</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">sql</span> # 每月更新密码</span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">USER</span> ahjmkj <span class="keyword">WITH</span> PASSWORD <span class="string">&#x27;NewP@ssw0rd_$(date +%Y%m)&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>4. <strong>审计日志</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ini ALTER SYSTEM SET log_statement = <span class="string">&#x27;all&#x27;</span>;</span><br><span class="line">SELECT pg_reload_conf();</span><br></pre></td></tr></table></figure>
+
+<h4 id="七、安装pgvector-扩展"><a href="#七、安装pgvector-扩展" class="headerlink" title="七、安装pgvector 扩展"></a>七、安装pgvector 扩展</h4><ol>
+<li><strong>进入容器</strong></li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bash docker <span class="built_in">exec</span> -it postgre bash</span><br></pre></td></tr></table></figure>
+
+<p>2. <strong>容器内安装依赖</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">sql</span> apt <span class="keyword">update</span></span><br><span class="line">apt install <span class="operator">-</span>y git build<span class="operator">-</span>essential postgresql<span class="operator">-</span>server<span class="operator">-</span>dev<span class="number">-16</span></span><br></pre></td></tr></table></figure>
+
+<p>3. <strong>容器内编译并安装 pgvector</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">bash <span class="built_in">cd</span> /tmp</span><br><span class="line">git <span class="built_in">clone</span> https://github.com/pgvector/pgvector.git</span><br><span class="line"><span class="built_in">cd</span> pgvector</span><br><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+
+<p>【容器环境无法连接github 网络的解决方案】：这里，我们的容器环境无法连接 github 网络，所以我们先本地PC环境手动下载 github 上的 pgvector 文件，再手动上传至服务器环境中，再通过 <code>docker cp</code> 命令将服务器上的文件拷贝至容器内。 注意：如果需要数据持久化，一定要使用Volume卷挂载的方式！！！</p>
+<p>注意：如果需要数据持久化，一定要使用Volume卷挂载的方式！！！</p>
+<ol>
+<li><strong>docker cp 不会持久化数据，如果容器被删除（docker rm），复制的文件会丢失。</strong></li>
+<li>如果需要持久化存储，应该使用 Docker Volume（卷） 或 Bind Mount（绑定挂载）：</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">bash <span class="comment"># 命令语法</span></span><br><span class="line">docker <span class="built_in">cp</span> /源文件夹 容器名或ID:/容器内/目标路径/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 这里，我们使用的命令为：</span></span><br><span class="line">docker <span class="built_in">cp</span> /Users/dashanshushu/soft/pgvector  5e2d98d35927:/tmp</span><br></pre></td></tr></table></figure>
+
+<p>其中 010f4d6fa849 为容器ID。</p>
+<p>拷贝成功后，再进入容器内的 &#x2F;tmp&#x2F;pgvector 目录， 依次运行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">bash docker <span class="built_in">exec</span> -it postgres</span><br><span class="line"><span class="built_in">cd</span> /tmp/pgvector</span><br><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+
+<p>4. <strong>检查扩展文件是否安装成功</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bash <span class="built_in">ls</span> -l /usr/share/postgresql/15/extension/vector*</span><br></pre></td></tr></table></figure>
+
+
+
+
+<ol>
+<li><strong>启用pgvector扩展</strong></li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">psql -U ahjmkj -d openAgent</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>psql：PostgreSQL 的交互式终端程序</li>
+<li>-U postgres：指定使用 postgres 用户身份连接</li>
+<li>-d postgres：指定连接到名为 postgres 的默认数据库</li>
+</ul>
+<p>连接成功后</p>
+<p>然后，使用PostgreSQL 数据库中的 SQL 命令，安装名为 vector 的扩展(extension)：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -- 在psql中执行</span></span><br><span class="line">CREATE EXTENSION vector;</span><br><span class="line"><span class="comment"># 或</span></span><br><span class="line">CREATE EXTENSION IF NOT EXISTS vector;  <span class="comment"># 仅在扩展未安装时执行</span></span><br></pre></td></tr></table></figure>
+
+<p>关于vector 扩展：</p>
+<ul>
+<li>这是 PostgreSQL 的一个扩展，用于支持向量(vector)数据类型和向量相似性搜索；</li>
+<li>常用于机器学习、AI应用，特别是需要存储和查询嵌入向量(embeddings)的场景；</li>
+<li>提供向量运算、相似度计算(如余弦相似度、欧氏距离等)功能。</li>
+</ul>
+<ol>
+<li><strong>验证安装是否成功</strong></li>
+</ol>
+<p>基于 PostgreSQL 的查询语句，检查数据库中是否已安装名为 vector 的扩展(extension)：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> pg_extension <span class="keyword">WHERE</span> extname <span class="operator">=</span> <span class="string">&#x27;vector&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>查询出结果 则成功</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2026/03/18/Docker%20%E4%B8%AD%E5%AE%89%E8%A3%85%20PostgreSQL%2016%20%E5%B9%B6%E9%85%8D%E7%BD%AE%20pgvector/">https://yhao521.github.io/2026/03/18/Docker%20%E4%B8%AD%E5%AE%89%E8%A3%85%20PostgreSQL%2016%20%E5%B9%B6%E9%85%8D%E7%BD%AE%20pgvector/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/%E6%95%99%E7%A8%8B/">教程</a><a class="post-meta__tags" href="/tags/java-programming/">java/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a><a class="post-meta__tags" href="/tags/%E6%91%98%E5%BD%95/">摘录</a><a class="post-meta__tags" href="/tags/javascript/">javascript</a><a class="post-meta__tags" href="/tags/js-programming/">js/programming</a><a class="post-meta__tags" href="/tags/swift-programming/">swift/programming</a><a class="post-meta__tags" href="/tags/pgsql/">pgsql</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/03/19/OpenClaw%20%E6%9C%AC%E5%9C%B0%E6%A8%A1%E5%9E%8B%E6%9C%80%E4%BD%B3%E6%96%B9%E6%A1%88%EF%BC%9A%E6%A8%A1%E5%9E%8B%E6%8E%A8%E8%8D%90%20+%20vLLM%20%E9%83%A8%E7%BD%B2%E4%BC%98%E5%8C%96%E5%AE%8C%E6%95%B4%E6%95%99%E7%A8%8B%EF%BC%81/" title="OpenClaw 本地模型最佳方案：模型推荐 + vLLM 部署优化完整教程！"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">OpenClaw 本地模型最佳方案：模型推荐 + vLLM 部署优化完整教程！</div></div><div class="info-2"><div class="info-item-1">OpenClaw 如何切换到本地模型？如果希望在执行自动化任务时保持流畅、不出现卡顿，同时避免频繁触发上下文长度限制，那么选择一个合适的开源模型就非常关键。 对于 OpenClaw 来说，模型不仅需要具备良好的推理能力和语言理解能力，还需要拥有稳定的 工具调用（Tool Calling）能力。因为在自动化任务中，模型需要频繁调用各种工具完成操作，因此工具调用能力往往是选择模型时最重要的指标之一。  很多人在第一次尝试本地部署模型时，往往会选择 Ollama。它的优点确实很明显：安装简单、配置方便，几乎可以做到“傻瓜式”部署。 开发工具 但在 OpenClaw 这种自动化任务场景下，Ollama 的调用方式和推理速度并不理想。实际使用中往往会遇到两个问题：  推理速度较慢 上下文长度很容易被耗尽  在连续运行多个任务后，经常会出现上下文不够用的情况。 因此，如果你希望获得更稳定、更高效的本地部署体验，就需要选择更合适的推理框架。 一般来说：  远程集群 &#x2F; 多 Agent 场景 ：推荐使用 SGLang 单卡本地部署 ：强烈推荐 vLLM  目前来看，vLLM 可以说是单...</div></div></div></a><a class="pagination-related" href="/2026/02/04/JUnit4%E4%B8%8EMockito5%E7%BC%96%E5%86%99%E8%A6%81%E7%82%B9%E5%92%8C%E4%BB%A3%E7%A0%81%E6%A1%88%E4%BE%8B/" title="JUnit4与Mockito5编写要点和代码案例"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">JUnit4与Mockito5编写要点和代码案例</div></div><div class="info-2"><div class="info-item-1">JUnit4与Mockito5编写要点和代码案例 一、环境配置与依赖Maven依赖12345678910111213141516171819202122232425&lt;dependencies&gt;    &lt;!-- JUnit4 --&gt;    &lt;dependency&gt;        &lt;groupId&gt;junit&lt;/groupId&gt;        &lt;artifactId&gt;junit&lt;/artifactId&gt;        &lt;version&gt;4.13.2&lt;/version&gt;        &lt;scope&gt;test&lt;/scope&gt;    &lt;/dependency&gt;        &lt;!-- Mockito Core --&gt;    &lt;dependency&gt;        &lt;groupId&gt;org.mockito&lt;/groupId&gt;        &lt;artifactId&gt;mockito-core&l...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/05/09/Electron%20%E5%AF%B9%20SQLite%20%E8%BF%9B%E8%A1%8C%E5%8A%A0%E5%AF%86_better-sqlite3-multiple-ciphers-CSDN%E5%8D%9A%E5%AE%A2/" title="Electron 对 SQLite 进行加密_better-sqlite3-multiple-ciphers-CSDN博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-09</div><div class="info-item-2">Electron 对 SQLite 进行加密_better-sqlite3-multiple-ciphers-CSDN博客</div></div><div class="info-2"><div class="info-item-1">Electron 对 SQLite 进行加密最新推荐文章于 2025-04-03 09:22:06 发布 hawk2014bj 于 2024-05-04 14:40:22 发布 文章标签： 前端 版权声明：本文为博主原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接和本声明。 本文链接： https://blog.csdn.net/hawk2014bj/article/details/138438661 版权 本文介绍了如何在Electron应用中使用better-sqlite3-multiple-ciphers库对SQLite数据进行加密，以保护敏感信息。同时处理了在Mac上遇到的架构不一致错误，通过重新编译解决并验证了加密效果。 摘要生成于 C知道 ，由 DeepSeek-R1 满血版支持， 前往体验 &gt; 上一篇讲了如何在 Electron 使用 SQLite，如果 SQLite 中存有敏感数据， 客户端 采用明文存储风险很高，为了保护客户数据，就需要对数据进行加密，由于 electron 对代码并不加密，所以这里排除通过逆向工程进行数据库解密。...</div></div></div></a><a class="pagination-related" href="/2025/05/29/Hygen/" title="Hygen"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-29</div><div class="info-item-2">Hygen</div></div><div class="info-2"><div class="info-item-1">[TOC] 起步安装12345npm i -g hygen或cnpm i -g hygen  初始化1234567进入项目地址cd /projects/demo初始化模板hygen init self  初始化成功后，会自动在项目根目录下生成 _templates 文件夹，并且默认生成了一个名为 generator 的生成器及其工作目录。后续会依托该生成器，派生出更多的生成器来满足需求。  注意 不要删除 _templates/generator 文件夹，否则会导致无法创建 Generator 。   提示 后续的所有命令行操作，如无特殊说明，都在项目根目录。  创建第一个生成器1hygen generator new component  执行后会生成一个生成器 component 及其工作目录，目录中默认存在一个示例文件 hello.ejs.t 。 12345678910111213141516171819---to: app/hello.js---const hello = \`\`\`Hello!This is your first hygen template.Lear...</div></div></div></a><a class="pagination-related" href="/2025/08/07/Ollama%E8%BF%9B%E9%98%B6%EF%BC%8C%E5%9C%A8Python%E3%80%81Java%E3%80%81Go%E9%A1%B9%E7%9B%AE%E4%B8%AD%E9%9B%86%E6%88%90Deepseek%E3%80%81QWQ%E5%A4%A7%E6%A8%A1%E5%9E%8B/" title="Ollama进阶，在Python、Java、Go项目中集成Deepseek、QWQ大模型"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-08-07</div><div class="info-item-2">Ollama进阶，在Python、Java、Go项目中集成Deepseek、QWQ大模型</div></div><div class="info-2"><div class="info-item-1">Ollama系列文章：Ollama入门，一键启动本地DeepSeek大模型Ollama入门，Ollama技术架构与原理Ollama进阶，在Python、Java、Go项目中集成Deepseek、QWQ大模型Ollama进阶，在Javascript(nodejs)前后端项目中集成Deepseek、QWQ大模型Ollama高手，玩转本地自定义大模型（LLM）Ollama高手，调优Ollama环境变量，提高性能与安全性Ollama高手，调优Ollama模型参数，提高模型输出质量  在“ Ollama入门，一键启动本地DeepSeek大模型 ”一文中，我们介绍了Ollama的基本使用方法，同时也推荐了ChatBox、Cherry Studio等AI智能客户端来完成文字、图片、语音等多模态输入，实现与 AI 的交互。 但是，仅仅这样常常不足以满足实际的需要，而在线版的Deepseek、ChatGPT、豆包往往可以提供更好功能，这样在本地部署DeepSeek大模型就成了geek的自娱自乐了，因此我们必须将Ollama整合到项目中去，让它与自有系统整合起来，实现更加丰富的功能。 1、如何调用O...</div></div></div></a><a class="pagination-related" href="/2025/06/06/%E4%B8%80%E6%AC%BE%E8%B6%85%E7%BA%A7%E5%BC%BA%E5%A4%A7%E7%9A%84%E6%85%A2SQL%E6%8E%92%E6%9F%A5%E5%B7%A5%E5%85%B7%EF%BC%81-%E8%85%BE%E8%AE%AF%E4%BA%91%E5%BC%80%E5%8F%91%E8%80%85%E7%A4%BE%E5%8C%BA-%E8%85%BE%E8%AE%AF%E4%BA%91/" title="一款超级强大的慢SQL排查工具！-腾讯云开发者社区-腾讯云"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-06-06</div><div class="info-item-2">一款超级强大的慢SQL排查工具！-腾讯云开发者社区-腾讯云</div></div><div class="info-2"><div class="info-item-1">开启慢查询日志在项目中我们会经常遇到慢查询，当我们遇到慢查询的时候一般都要开启慢查询日志，并且分析慢查询日志，找到慢sql，然后用explain来分析 系统变量MySQL和慢查询相关的系统变量如下    参数 含义    slow_query_log 是否启用慢查询日志， ON为启用，OFF为没有启用，默认为OFF   log_output 日志输出位置，默认为FILE，即保存为文件，若设置为TABLE，则将日志记录到mysql.show_log表中，支持设置多种格式   slow_query_log_file 指定慢查询日志文件的路径和名字   long_query_time 执行时间超过该值才记录到慢查询日志，单位为秒，默认为10   执行如下语句看是否启用慢查询日志，ON为启用，OFF为没有启用 代码语言：javascript 代码运行次数：0 运行 AI代码解释 1show variables like &quot;%slow_query_log%&quot;  ![[_resources&#x2F;ebc4491b983ccd73519e174d20342872_MD5...</div></div></div></a><a class="pagination-related" href="/2025/08/18/Wails%20V2%20%E5%A4%87%E5%BF%98%E6%B8%85%E5%8D%95%20&%20%20wails%20cheatsheet%20&%20%20Quick%20Reference/" title="Wails V2 备忘清单 &amp;  wails cheatsheet &amp;  Quick Reference"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-08-18</div><div class="info-item-2">Wails V2 备忘清单 &amp;  wails cheatsheet &amp;  Quick Reference</div></div><div class="info-2"><div class="info-item-1">项目配置核心交互与生命周期方法绑定 (Go &lt;-&gt; JS)在 Go 中定义公共方法，即可在前端直接调用。 1234567891011121314151617181920212223242526272829// app.gotype App struct &#123;    ctx context.Context&#125;func (a *App) Greet(name string) string &#123;    return fmt.Sprintf(&quot;Hello %s!&quot;, name)&#125;// main.goapp := NewApp()err := wails.Run(&amp;options.App&#123;    Title: &quot;My App&quot;,    Bind: []interface&#123;&#125;&#123;        app, // 暴露 app 实例的所有公共方法    &#125;,&#125;) 12345// frontend/main.jsimport &#123; Gree...</div></div></div></a><a class="pagination-related" href="/2025/05/13/8%E6%AC%BE%E5%BC%80%E6%BA%90%E8%87%AA%E5%8A%A8%E5%8C%96%E6%B5%8B%E8%AF%95%E6%A1%86%E6%9E%B6%20-%20%E5%B0%8F%E5%BC%BA%E6%89%BEBUG%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD/" title="8款开源自动化测试框架 - 小强找BUG - 博客园"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-13</div><div class="info-item-2">8款开源自动化测试框架 - 小强找BUG - 博客园</div></div><div class="info-2"><div class="info-item-1">[![[_resources&#x2F;92442b0eb6563aee8410c83388de292d_MD5.jpg]]](https://www.doubao.com/?channel=cnblogs&amp;source=hw_db_cnblogs&amp;type=lunt&amp;theme=bianc) 在如今开源的时代，我们就不要再闭门造车了，热烈的拥抱开源吧！本文针对性能测试、Web UI 测试、API 测试、数据库测试、接口测试、单元测试等方面，为大家整理了github或码云上优秀的自动化测试开源项目，希望能给大家带来一点帮助。 一、性能自动化测试1、项目名称：基于Jmeter实现的在线压测平台和在线管理Jmeter脚本系统 ![[_resources&#x2F;ec84e1ab1778a07ca7e9b3519408a643_MD5.png]] 项目简介：  本项目基于renren-fast Java开发平台开发，内核基于Jmeter-Api和Jmeter脚本实现在线性能压测。  具有如下特点  友好的代码结构及注释，便于阅读及二次开发 实现前后端分离，通过...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="toc-number">1.</span> <span class="toc-text">一、环境准备</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1-%E7%A1%AE%E8%AE%A4-Docker-%E7%89%88%E6%9C%AC"><span class="toc-number">1.1.</span> <span class="toc-text">1. 确认 Docker 版本</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-%E5%88%9B%E5%BB%BA%E4%B8%93%E7%94%A8%E7%BD%91%E7%BB%9C%EF%BC%88%E7%94%9F%E4%BA%A7%E7%8E%AF%E5%A2%83%E5%BF%85%E5%A4%87%EF%BC%89"><span class="toc-number">1.2.</span> <span class="toc-text">2. 创建专用网络（生产环境必备）</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C%E3%80%81PostgreSQL-16-%E5%AE%B9%E5%99%A8%E5%8C%96%E9%83%A8%E7%BD%B2"><span class="toc-number">2.</span> <span class="toc-text">二、PostgreSQL 16 容器化部署</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1-%E6%90%9C%E7%B4%A2%E9%95%9C%E5%83%8F"><span class="toc-number">2.1.</span> <span class="toc-text">1. 搜索镜像</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-%E6%8B%89%E5%8F%96%E5%AE%98%E6%96%B9%E9%95%9C%E5%83%8F%EF%BC%88%E6%8C%87%E5%AE%9A%E7%89%88%E6%9C%AC%EF%BC%89"><span class="toc-number">2.2.</span> <span class="toc-text">2. 拉取官方镜像（指定版本）</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-%E5%88%9B%E5%BB%BA%E6%8C%81%E4%B9%85%E5%8C%96%E6%95%B0%E6%8D%AE%E5%8D%B7"><span class="toc-number">2.3.</span> <span class="toc-text">3. 创建持久化数据卷</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-%E5%90%AF%E5%8A%A8-PostgreSQL-%E5%AE%B9%E5%99%A8%EF%BC%88%E7%94%9F%E4%BA%A7%E4%BC%98%E5%8C%96%E7%89%88%EF%BC%89"><span class="toc-number">2.4.</span> <span class="toc-text">4. 启动 PostgreSQL 容器（生产优化版）</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E9%AA%8C%E8%AF%81%E4%B8%8E%E8%BF%9E%E6%8E%A5"><span class="toc-number">3.</span> <span class="toc-text">三、验证与连接</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1-%E6%A3%80%E6%9F%A5%E5%AE%B9%E5%99%A8%E7%8A%B6%E6%80%81"><span class="toc-number">3.1.</span> <span class="toc-text">1. 检查容器状态</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-%E6%9F%A5%E7%9C%8B%E5%AE%9E%E6%97%B6%E6%97%A5%E5%BF%97"><span class="toc-number">3.2.</span> <span class="toc-text">2. 查看实时日志</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-%E5%91%BD%E4%BB%A4%E8%A1%8C%E8%BF%9E%E6%8E%A5%E6%B5%8B%E8%AF%95"><span class="toc-number">3.3.</span> <span class="toc-text">3. 命令行连接测试</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-%E5%AE%A2%E6%88%B7%E7%AB%AF%E5%B7%A5%E5%85%B7%E8%BF%9E%E6%8E%A5"><span class="toc-number">3.4.</span> <span class="toc-text">4. 客户端工具连接</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E7%94%9F%E4%BA%A7%E7%8E%AF%E5%A2%83%E9%AB%98%E7%BA%A7%E9%85%8D%E7%BD%AE"><span class="toc-number">4.</span> <span class="toc-text">四、生产环境高级配置</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%87%AA%E5%AE%9A%E4%B9%89"><span class="toc-number">4.1.</span> <span class="toc-text">1. 配置文件自定义</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-%E5%AE%9A%E6%9C%9F%E5%A4%87%E4%BB%BD%E6%96%B9%E6%A1%88"><span class="toc-number">4.2.</span> <span class="toc-text">2. 定期备份方案</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AF%8F%E5%A4%A9%E5%87%8C%E6%99%A82%E7%82%B9%E5%A4%87%E4%BB%BD"><span class="toc-number">5.</span> <span class="toc-text">每天凌晨2点备份</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#3-%E7%9B%91%E6%8E%A7%E9%85%8D%E7%BD%AE"><span class="toc-number">5.1.</span> <span class="toc-text">3. 监控配置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5%E4%B8%8E%E7%BB%B4%E6%8A%A4"><span class="toc-number">5.2.</span> <span class="toc-text">五、故障排查与维护</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1-%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3"><span class="toc-number">5.2.1.</span> <span class="toc-text">1. 常见问题解决</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-%E5%85%B3%E9%94%AE%E7%BB%B4%E6%8A%A4%E5%91%BD%E4%BB%A4"><span class="toc-number">5.2.2.</span> <span class="toc-text">2. 关键维护命令</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E5%AE%89%E5%85%A8%E5%8A%A0%E5%9B%BA%E5%BB%BA%E8%AE%AE"><span class="toc-number">5.3.</span> <span class="toc-text">六、安全加固建议</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E5%AE%89%E8%A3%85pgvector-%E6%89%A9%E5%B1%95"><span class="toc-number">5.4.</span> <span class="toc-text">七、安装pgvector 扩展</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

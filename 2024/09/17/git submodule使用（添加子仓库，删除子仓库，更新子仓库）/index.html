@@ -1,0 +1,250 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>git submodule使用（添加子仓库，删除子仓库，更新子仓库） | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="git submodule使用文章目录 git submodule使用  git submodule 帮助 git submodule add &lt;仓库地址&gt; &lt;路径&gt; git submodule deinit -f  git submodule update –init git submodule foreach  git submodule status 修改子模块的远程">
+<meta property="og:type" content="article">
+<meta property="og:title" content="git submodule使用（添加子仓库，删除子仓库，更新子仓库）">
+<meta property="og:url" content="https://yhao521.github.io/2024/09/17/git%20submodule%E4%BD%BF%E7%94%A8%EF%BC%88%E6%B7%BB%E5%8A%A0%E5%AD%90%E4%BB%93%E5%BA%93%EF%BC%8C%E5%88%A0%E9%99%A4%E5%AD%90%E4%BB%93%E5%BA%93%EF%BC%8C%E6%9B%B4%E6%96%B0%E5%AD%90%E4%BB%93%E5%BA%93%EF%BC%89/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="git submodule使用文章目录 git submodule使用  git submodule 帮助 git submodule add &lt;仓库地址&gt; &lt;路径&gt; git submodule deinit -f  git submodule update –init git submodule foreach  git submodule status 修改子模块的远程">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2024-09-17T04:07:16.000Z">
+<meta property="article:modified_time" content="2024-09-17T04:07:16.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "git submodule使用（添加子仓库，删除子仓库，更新子仓库）",
+  "url": "https://yhao521.github.io/2024/09/17/git%20submodule%E4%BD%BF%E7%94%A8%EF%BC%88%E6%B7%BB%E5%8A%A0%E5%AD%90%E4%BB%93%E5%BA%93%EF%BC%8C%E5%88%A0%E9%99%A4%E5%AD%90%E4%BB%93%E5%BA%93%EF%BC%8C%E6%9B%B4%E6%96%B0%E5%AD%90%E4%BB%93%E5%BA%93%EF%BC%89/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2024-09-17T04:07:16.000Z",
+  "dateModified": "2024-09-17T04:07:16.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2024/09/17/git%20submodule%E4%BD%BF%E7%94%A8%EF%BC%88%E6%B7%BB%E5%8A%A0%E5%AD%90%E4%BB%93%E5%BA%93%EF%BC%8C%E5%88%A0%E9%99%A4%E5%AD%90%E4%BB%93%E5%BA%93%EF%BC%8C%E6%9B%B4%E6%96%B0%E5%AD%90%E4%BB%93%E5%BA%93%EF%BC%89/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'git submodule使用（添加子仓库，删除子仓库，更新子仓库）',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">git submodule使用（添加子仓库，删除子仓库，更新子仓库）</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">git submodule使用（添加子仓库，删除子仓库，更新子仓库）</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-09-17T04:07:16.000Z" title="发表于 2024-09-17 12:07:16">2024-09-17</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-09-17T04:07:16.000Z" title="更新于 2024-09-17 12:07:16">2024-09-17</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h2 id="git-submodule使用"><a href="#git-submodule使用" class="headerlink" title="git submodule使用"></a><a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=git&spm=1001.2101.3001.7020">git</a> submodule使用</h2><h4 id="文章目录"><a href="#文章目录" class="headerlink" title="文章目录"></a>文章目录</h4><ul>
+<li><a href="#git_submodule_0">git submodule使用</a></li>
+<li><ul>
+<li><a href="#git_submodule__4">git submodule 帮助</a></li>
+<li><a href="#git_submodule_add___20">git submodule add &lt;仓库地址&gt; &lt;路径&gt;</a></li>
+<li><a href="#git_submodule_deinit_f_path_70">git submodule deinit -f <path></a></li>
+<li><a href="#git_submodule_update_init_114">git submodule update –init</a></li>
+<li><a href="#git_submodule_foreach_cmd_122">git submodule foreach <cmd></a></li>
+<li><a href="#git_submodule_status_126">git submodule status</a></li>
+<li><a href="#_133">修改子模块的远程路径</a></li>
+</ul>
+</li>
+</ul>
+<h3 id="git-submodule-帮助"><a href="#git-submodule-帮助" class="headerlink" title="git submodule 帮助"></a>git submodule 帮助</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">git submodule [--quiet] [--cached]</span><br><span class="line">git submodule [--quiet] add [&lt;options&gt;] [--] &lt;repository&gt; [&lt;path&gt;]</span><br><span class="line">git submodule [--quiet] status [--cached] [--recursive] [--] [&lt;path&gt;...]</span><br><span class="line">git submodule [--quiet] init [--] [&lt;path&gt;...]</span><br><span class="line">git submodule [--quiet] deinit [-f|--force] (--all|[--] &lt;path&gt;...)</span><br><span class="line">git submodule [--quiet] update [&lt;options&gt;] [--] [&lt;path&gt;...]</span><br><span class="line">git submodule [--quiet] set-branch [&lt;options&gt;] [--] &lt;path&gt;</span><br><span class="line">git submodule [--quiet] set-url [--] &lt;path&gt; &lt;newurl&gt;</span><br><span class="line">git submodule [--quiet] summary [&lt;options&gt;] [--] [&lt;path&gt;...]</span><br><span class="line">git submodule [--quiet] foreach [--recursive] &lt;command&gt;</span><br><span class="line">git submodule [--quiet] sync [--recursive] [--] [&lt;path&gt;...]</span><br><span class="line">git submodule [--quiet] absorbgitdirs [--] [&lt;path&gt;...]</span><br><span class="line">123456789101112</span><br></pre></td></tr></table></figure>
+
+<h3 id="git-submodule-add"><a href="#git-submodule-add" class="headerlink" title="git submodule add &lt;仓库地址&gt; &lt;路径&gt;"></a>git submodule add &lt;仓库地址&gt; &lt;路径&gt;</h3><p>自己的项目需要增加git子仓库，使用add命令添加到项目中</p>
+<p>git submodule add &lt;仓库地址&gt; &lt;路径&gt;</p>
+<p>在指定的路径下安装子仓库，没有路径，</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">$ git init</span><br><span class="line">Initialized empty Git repository in /mnt/g/workspace/temp/gitSubTest/.git/</span><br><span class="line">$ git submodule add https://gitee.com/scitechlabs/stl_utils.git ./modules/stl_utils    </span><br><span class="line">Cloning into &#x27;/mnt/g/workspace/temp/testgit/modules/stl_utils&#x27;...</span><br><span class="line">remote: Enumerating objects: 55, done.</span><br><span class="line">remote: Counting objects: 100% (55/55), done.</span><br><span class="line">remote: Compressing objects: 100% (55/55), done.</span><br><span class="line">remote: Total 55 (delta 17), reused 0 (delta 0), pack-reused 0</span><br><span class="line">Unpacking objects: 100% (55/55), 21.44 KiB | 46.00 KiB/s, done.</span><br><span class="line">$ ls modules/stl_utils </span><br><span class="line">README.md  src ==============&gt; 在指定的目录出现中仓库的代码</span><br><span class="line">$ cat .gitmodules</span><br><span class="line">[submodule &quot;modules/stl_utils&quot;]</span><br><span class="line">        path = modules/stl_utils  ==============&gt; 主仓库目录下生成.gitmodules分别记录路径和仓库地址</span><br><span class="line">        url = https://gitee.com/scitechlabs/stl_utils.git</span><br><span class="line">$ cat .git/config </span><br><span class="line">[core]</span><br><span class="line">        repositoryformatversion = 0</span><br><span class="line">        filemode = false</span><br><span class="line">        bare = false</span><br><span class="line">        logallrefupdates = true</span><br><span class="line">        ignorecase = true</span><br><span class="line">[submodule &quot;modules/stl_utils&quot;]  ==============&gt; 主仓库的config文件中出现子仓库的信息</span><br><span class="line">        url = https://gitee.com/scitechlabs/stl_utils.git</span><br><span class="line">        active = true</span><br><span class="line">$ cat ./modules/stl_utils/.git</span><br><span class="line">gitdir: ../../.git/modules/modules/stl_utils ==============&gt; 子仓库的.git变为文件，记录子仓库的.git地址仓库的config文件中出现子仓库的信息</span><br><span class="line">$ cat .git/modules/modules/stl_utils/config </span><br><span class="line">[core]</span><br><span class="line">        repositoryformatversion = 0</span><br><span class="line">        filemode = false</span><br><span class="line">        bare = false</span><br><span class="line">        logallrefupdates = true</span><br><span class="line">        ignorecase = true</span><br><span class="line">        worktree = ../../../../modules/stl_utils ==============&gt; 子仓库的的config中记录worktree</span><br><span class="line">[remote &quot;origin&quot;]</span><br><span class="line">        url = https://gitee.com/scitechlabs/stl_utils.git</span><br><span class="line">        fetch = +refs/heads/*:refs/remotes/origin/*</span><br><span class="line">[branch &quot;master&quot;]</span><br><span class="line">        remote = origin</span><br><span class="line">        merge = refs/heads/master</span><br><span class="line">1234567891011121314151617181920212223242526272829303132333435363738394041</span><br></pre></td></tr></table></figure>
+
+<h3 id="git-submodule-deinit-f"><a href="#git-submodule-deinit-f" class="headerlink" title="git submodule deinit -f"></a>git submodule deinit -f</h3><p>反<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=%E5%88%9D%E5%A7%8B%E5%8C%96&spm=1001.2101.3001.7020">初始化</a>submodule,可以删除主仓库的config中子模块信息，-f 同时删除子仓库数据</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">$ git submodule deinit stl_utils</span><br><span class="line">error: the following file has changes staged in the index:</span><br><span class="line">    stl_utils</span><br><span class="line">(use --cached to keep the file, or -f to force removal)</span><br><span class="line">fatal: Submodule work tree &#x27;stl_utils&#x27; contains local modifications; use &#x27;-f&#x27; to discard them</span><br><span class="line">$ git submodule deinit -f stl_utils</span><br><span class="line">Cleared directory &#x27;stl_utils&#x27;</span><br><span class="line">Submodule &#x27;stl_utils&#x27; (https://gitee.com/scitechlabs/stl_utils.git) unregistered for path &#x27;stl_utils&#x27;</span><br><span class="line">$ ls</span><br><span class="line">stl_utils</span><br><span class="line">$ cat ./.git/config</span><br><span class="line">[core]</span><br><span class="line">        repositoryformatversion = 0</span><br><span class="line">        filemode = false</span><br><span class="line">        bare = false</span><br><span class="line">        logallrefupdates = true</span><br><span class="line">        ignorecase = true</span><br><span class="line">$ cat .gitmodules </span><br><span class="line">[submodule &quot;modules/stl_utils&quot;]</span><br><span class="line">        path = modules/stl_utils</span><br><span class="line">        url = https://gitee.com/scitechlabs/stl_utils.git</span><br><span class="line">$ ls ./.git/modules</span><br><span class="line">stl_utils</span><br><span class="line">$ cat ./.git/modules/stl_utils/config</span><br><span class="line">[core]</span><br><span class="line">        repositoryformatversion = 0</span><br><span class="line">        filemode = false</span><br><span class="line">        bare = false</span><br><span class="line">        logallrefupdates = true</span><br><span class="line">        ignorecase = true</span><br><span class="line">[remote &quot;origin&quot;]</span><br><span class="line">        url = https://gitee.com/scitechlabs/stl_utils.git</span><br><span class="line">        fetch = +refs/heads/*:refs/remotes/origin/*</span><br><span class="line">[branch &quot;master&quot;]</span><br><span class="line">        remote = origin</span><br><span class="line">        merge = refs/heads/master</span><br><span class="line">123456789101112131415161718192021222324252627282930313233343536</span><br></pre></td></tr></table></figure>
+
+<p>.gitmodules 中数据需要手工删除<br>.git&#x2F;modules 中数据需要手工删除<br>modules目录需要手工删除</p>
+<h3 id="git-submodule-update-–init"><a href="#git-submodule-update-–init" class="headerlink" title="git submodule update –init"></a>git submodule update –init</h3><p>如果clone别人的仓库使用子仓库，使用update指定安装仓库</p>
+<p>git submodule update –init</p>
+<p>切换子仓库分支，提交子仓库代码等操作可以在子仓库目录中直接操作。</p>
+<p>git submodule status</p>
+<h3 id="git-submodule-foreach"><a href="#git-submodule-foreach" class="headerlink" title="git submodule foreach"></a>git submodule foreach</h3><p>git submodule foreach git pull<br>所有子仓库拉取最新版本</p>
+<h3 id="git-submodule-status"><a href="#git-submodule-status" class="headerlink" title="git submodule status"></a>git submodule status</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">git submodule status --recursive</span></span><br><span class="line"> 15009bd06aecbcef3fcc0de8e631a4c110791a68 doc (heads/master)</span><br><span class="line"> 92ae6e596c6d0e8c651fbd43c3c592019d421096 src/common (heads/arm)</span><br><span class="line">123</span><br></pre></td></tr></table></figure>
+
+<h3 id="修改子模块的远程路径"><a href="#修改子模块的远程路径" class="headerlink" title="修改子模块的远程路径"></a>修改子模块的远程路径</h3><p>确实，删除子模块然后重新添加是一个更容易理解的方法。以下是具体步骤：</p>
+<ol>
+<li><p><strong>删除子模块</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">git submodule deinit -f -- path/to/submodule</span><br><span class="line">git <span class="built_in">rm</span> -f path/to/submodule</span><br><span class="line"><span class="built_in">rm</span> -rf .git/modules/path/to/submodule</span><br><span class="line">123</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>重新添加子模块</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git submodule add [ -b &lt;branch&gt; ] &lt;新的子模块URL&gt; path/to/submodule</span><br><span class="line">git submodule update --init --recursive</span><br><span class="line">12</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>提交更改</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">git add .gitmodules</span><br><span class="line">git add path/to/submodule</span><br><span class="line">git commit -m <span class="string">&quot;Re-add submodule with new URL&quot;</span></span><br><span class="line">git push</span><br><span class="line">1234</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>通过上述步骤，你可以简单地删除并重新添加子模块，从而更新子模块的URL。</p>
+<p>微信号：yjkhtddx</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2024/09/17/git%20submodule%E4%BD%BF%E7%94%A8%EF%BC%88%E6%B7%BB%E5%8A%A0%E5%AD%90%E4%BB%93%E5%BA%93%EF%BC%8C%E5%88%A0%E9%99%A4%E5%AD%90%E4%BB%93%E5%BA%93%EF%BC%8C%E6%9B%B4%E6%96%B0%E5%AD%90%E4%BB%93%E5%BA%93%EF%BC%89/">https://yhao521.github.io/2024/09/17/git%20submodule%E4%BD%BF%E7%94%A8%EF%BC%88%E6%B7%BB%E5%8A%A0%E5%AD%90%E4%BB%93%E5%BA%93%EF%BC%8C%E5%88%A0%E9%99%A4%E5%AD%90%E4%BB%93%E5%BA%93%EF%BC%8C%E6%9B%B4%E6%96%B0%E5%AD%90%E4%BB%93%E5%BA%93%EF%BC%89/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/09/21/%E4%B8%8B%E8%BD%BDgradle%E5%8A%A0%E9%80%9F/" title="下载gradle加速"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">下载gradle加速</div></div><div class="info-2"><div class="info-item-1">下载gradle加速123456789# Fri Sep 08 23:34:50 CST 2023distributionBase=GRADLE_USER_HOMEdistributionPath=wrapper/dists# distributionUrl=https\://services.gradle.org/distributions/gradle-8.2-bin.zip# distributionUrl=https://mirrors.cloud.tencent.com/gradle/gradle-8.2-bin.zipdistributionUrl=https://mirrors.cloud.tencent.com/gradle/gradle-8.13-all.zipzipStoreBase=GRADLE_USER_HOMEzipStorePath=wrapper/dists  </div></div></div></a><a class="pagination-related" href="/2024/09/16/ANDROID%20ADB%205037%E7%AB%AF%E5%8F%A3%E8%A2%AB%E5%8D%A0%E7%94%A8%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3%E5%8A%9E%E6%B3%95%EF%BC%9A%E6%94%B9%E7%AB%AF%E5%8F%A3%E5%8F%B7/" title="ANDROID ADB 5037端口被占用问题解决办法：改端口号"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">ANDROID ADB 5037端口被占用问题解决办法：改端口号</div></div><div class="info-2"><div class="info-item-1">ANDROID ADB 5037端口被占用问题解决办法：改端口号近使用ADB时报错“error: cannot connect to daemon: No error”，发现只要运行酷狗音乐播放器就会出现。所以轻易的就想到又是端口被占了，之前酷狗kadb进程占用5037端口，我设置过禁止其运行权限，所以很长一段时间使用ADB都没出现过问题。经过探查，发现是酷狗主程序调用ADB导致的，普通方法是不行的，看来不用大招是不行了。。。好吧，5037我不用了，换个端口吧。现在电脑中大部分软件都会占用ADB，至于干什么，无非就是想往手机塞些应用罢了，但很多时候我们又不得不继续用这些软件，那么有什么办法可以解决ADB 5037端口被占用问题呢？下面分享两个个方法。  测试机型：WIN10(win8&#x2F;win7方法基本相同，xp略有差异) 方法一，找到****占用端口的程序，禁止其运行 1、首先找到占用5037端口的进程PID，命令行中输入【netstat -aon|findstr 5037】。  2、打开任务管理器，通过PID找运行的程序名称，可以强制关闭其运行，通常还会重启继续运行。...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/sqladvice%E5%AE%89%E8%A3%85&%E4%BD%BF%E7%94%A8/" title="sqladvice安装&amp;使用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">sqladvice安装&amp;使用</div></div><div class="info-2"><div class="info-item-1"> title: sqladvice安装&amp;使用date: 2023-09-03 20:17:08category:  数据库 sql优化工具tag: sql优化工具author:   sqladvice安装&amp;使用Centos7安装美团SQL优化工具SQLAdvisor(示例代码)_136.la 1. SQLAdvisor安装1.1 拉取最新代码1234# git clone https://github.com/Meituan-Dianping/SQLAdvisor.gitsudo yum install -y gitgit clone http://github.com/Meituan-Dianping/SQLAdvisor.git  1.2 安装依赖项12345678910#yum | apt-get  install   cmake libaio-devel libffi-devel glib2 glib2-devel#yum | apt-get  install  --enablerepo=Percona56 Percona-Server-shared-56...</div></div></div></a><a class="pagination-related" href="/2024/01/09/Nginx%E6%B5%8F%E8%A7%88%E7%9B%AE%E5%BD%95%E9%85%8D%E7%BD%AE%E5%8F%8A%E7%BE%8E%E5%8C%96/" title="Nginx浏览目录配置及美化"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-09</div><div class="info-item-2">Nginx浏览目录配置及美化</div></div><div class="info-2"><div class="info-item-1">在项目中有一个功能需要在浏览器页面中浏览服务器的目录。服务器使用Nginx，而Nginx提供了相应的ngx_http_autoindex_module 模块，该模块提供了我们想要的功能。 Nginx-Fancyindex-Theme这是从一个项目Fork过来，做了部分改动，并修复了少量bug后的完整的可用项目，需要的可以参考：Nginx-Fancyindex-Theme Nginx ngx_http_autoindex_module 模块该模块有以下几个命令：    命令 默认值 值域 作用域 EG    autoindex off on：开启目录浏览；     off：关闭目录浏览 http, server, location autoindex on;打开目录浏览功能     autoindex_format html html、xml、json、jsonp 分别用这几个风格展示目录 http, server, location autoindex_format html; 以网页的风格展示目录内容。该属性在1.7.9及以上适用   autoindex_exact_size ...</div></div></div></a><a class="pagination-related" href="/2023/09/04/m1%E5%AE%89%E8%A3%85centos7/" title="m1安装centos7"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">m1安装centos7</div></div><div class="info-2"><div class="info-item-1"> title: m1安装centos7date: 2023-09-03 20:17:08category:  mactag: macauthor:   m1安装centos7下载镜像阿里云盘 &#x3D;&#x3D;!!!这里是一个大坑,从官网下载的镜像,没办法使用,我下载了五六个arm镜像,全是卡在安装界面,一直在下边的页面反复横跳,然后在网上搜,发现能运行的似乎都是那一个版本的&#x3D;&#x3D; 进入install选择界面，此处选择第一个跳过测试直接安装（因为上面提到过这个镜像不是公开版本测试会报错）点击回车进入安装图形化界面  输入r  这个是因为pd自己升级后没有成功启动Xstarup的问题，需要手动文字字符安装下第一次r以后有三个感叹号 输入5  这个先选数字5 再按提示c c c，完成磁盘的选择，就是上面的  密码设置 输入8，输入root用户的密码root1234，然后输入b  安装完成  输入命令 ip a查看centos7的ip地址 使用iterm2登录 yum源配置(这个也挺坑的,M1 linux切换阿里好像只能用这一) 先安装 wget 1yum in...</div></div></div></a><a class="pagination-related" href="/2026/05/15/Android%20armeabiarm64x86%20%E4%B8%8D%E5%90%8CCPU%E6%9E%B6%E6%9E%84%E6%89%93%E5%8C%85%E9%85%8D%E7%BD%AE/" title="Android armeabiarm64x86 不同CPU架构打包配置"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-15</div><div class="info-item-2">Android armeabiarm64x86 不同CPU架构打包配置</div></div><div class="info-2"><div class="info-item-1">谷歌规定：自 2019 年 8 月 1 日起，在 Google Play 上发布的应用必须支持 64 位架构。 64 位 CPU 能够为您的用户提供更快、更丰富的体验。如何查看自己的设备和应用是32位还是64位。 一、查看自己的设备CPU架构类型手机开启USB调试后，连上电脑，在Windows CMD窗口中输入命令： 1、adb devices 查看设备是否连接上 2、adb shell getprop ro.product.cpu.abi 查看手机的CPU架构类型  总结一下，现在市面上常见的CPU架构类型如下： 1、armeabi-v7a: 第7代及以上的 32位ARM 处理器 2、arm64-v8a: ****第8代、64位ARM处理器 3、armeabi: ****第5代、第6代的32位ARM处理器，早期的手机在使用，现在基本很少了。 4、x86: Intel 32位处理器，在平板、模拟器用得比较多。 5、x86_64: Intel 64位处理器，在平板、模拟器用得比较多。 如何查看应用安装包是32位还是64位查看应用文件中是否包含相应的库文件即可。对于 ARM 架构，3...</div></div></div></a><a class="pagination-related" href="/2025/03/06/Taskfile%20-%20%E6%AF%94%20Makefile%20%E6%9B%B4%E5%A5%BD%E7%94%A8%E7%9A%84%E6%9E%84%E5%BB%BA%E5%B7%A5%E5%85%B7/" title="Taskfile - 比 Makefile 更好用的构建工具"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-06</div><div class="info-item-2">Taskfile - 比 Makefile 更好用的构建工具</div></div><div class="info-2"><div class="info-item-1"> 本文转自 bleem，原文：https://mritd.com/about/，版权归原作者所有。欢迎投稿，投稿请添加微信好友：cloud-native-yang  1. Taskfile 是什么Taskfile 通过 yaml 来描述各种执行任务, 其核心采用 go 编写; 相较于 Makefile 的 tab 分割和 bash 结合语法  Taskfile 显得更加现代化和易于使用(虽然会变成 yaml 工程师). Taskfile  内置了动态变量、操作系统等环境变量识别等高级功能都更贴合现代化的 Coding 方式。 总体来说如果你是一个对 Makefile 不太熟悉的人, 又期望通过类似 Makefile 的工具完成一些批量任务, 那么相对于 Makefile 来说 Taskfile 会更加便于入门, 学习曲线更低且速度也足够快。 2. 安装及使用安装 go-task对于 mac 用户来说官方提供了 brew 安装方式: 1$ brew install go-task/tap/go-task  对于 Linux 用户, 官方提供了部分 Linux 发行版的安装包, 但由...</div></div></div></a><a class="pagination-related" href="/2024/01/10/linux%E4%B8%8B%E7%9A%84mysql%E5%AE%89%E8%A3%85(%E4%B8%80%E4%B8%AAIP%E5%A4%9A%E7%AB%AF%E5%8F%A3)/" title="linux下的mysql安装(一个IP多端口)"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-10</div><div class="info-item-2">linux下的mysql安装(一个IP多端口)</div></div><div class="info-2"><div class="info-item-1">一、首先卸载之前的mysqlyum方式安装的MySQL 1、yum remove mysql mysql-server mysql-libs compat-mysql51 2、rm -rf &#x2F;var&#x2F;lib&#x2F;mysql 3、rm &#x2F;etc&#x2F;my.cnf 查看是否还有mysql软件：rpm -qa|grep mysql 如果存在的话，继续删除即可。 rpm方式安装的mysql a）查看系统中是否以rpm包安装的mysql： [root@localhost opt]# rpm -qa | grep -i mysqlMySQL-server-5.5.28-1.el6.x86_64.rpmMySQL-client-5.5.28-1.el6.x86_64 b)卸载mysql [root@localhost local]# rpm -e MySQL-server-5.5.28-1.el6.x86_64.rpm[root@localhost local]# rpm -e MySQL-client-5.5.28-1.el6.x86_64 c)删除...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#git-submodule%E4%BD%BF%E7%94%A8"><span class="toc-number">1.</span> <span class="toc-text">git submodule使用</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%87%E7%AB%A0%E7%9B%AE%E5%BD%95"><span class="toc-number">1.1.</span> <span class="toc-text">文章目录</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#git-submodule-%E5%B8%AE%E5%8A%A9"><span class="toc-number">1.2.</span> <span class="toc-text">git submodule 帮助</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#git-submodule-add"><span class="toc-number">1.3.</span> <span class="toc-text">git submodule add &lt;仓库地址&gt; &lt;路径&gt;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#git-submodule-deinit-f"><span class="toc-number">1.4.</span> <span class="toc-text">git submodule deinit -f</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#git-submodule-update-%E2%80%93init"><span class="toc-number">1.5.</span> <span class="toc-text">git submodule update –init</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#git-submodule-foreach"><span class="toc-number">1.6.</span> <span class="toc-text">git submodule foreach</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#git-submodule-status"><span class="toc-number">1.7.</span> <span class="toc-text">git submodule status</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9%E5%AD%90%E6%A8%A1%E5%9D%97%E7%9A%84%E8%BF%9C%E7%A8%8B%E8%B7%AF%E5%BE%84"><span class="toc-number">1.8.</span> <span class="toc-text">修改子模块的远程路径</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

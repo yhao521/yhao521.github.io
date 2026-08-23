@@ -1,0 +1,224 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>【Vue3+Ts project】pinia 实现数据持久化 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="实现pinia实现数据持久化依赖 pinia-plugin-persistedstate    1.安装      pnpm i pinia-plugin-persistedstate# ornpm i pinia-plugin-persistedstate# oryarn add pinia-plugin-persistedstate  2.在main.ts内引入 1import persist">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【Vue3+Ts project】pinia 实现数据持久化">
+<meta property="og:url" content="https://yhao521.github.io/2026/05/15/%E3%80%90Vue3+Ts%20project%E3%80%91pinia%20%E5%AE%9E%E7%8E%B0%E6%95%B0%E6%8D%AE%E6%8C%81%E4%B9%85%E5%8C%96/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="实现pinia实现数据持久化依赖 pinia-plugin-persistedstate    1.安装      pnpm i pinia-plugin-persistedstate# ornpm i pinia-plugin-persistedstate# oryarn add pinia-plugin-persistedstate  2.在main.ts内引入 1import persist">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2026-05-14T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-17T16:00:00.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="java&#x2F;programming">
+<meta property="article:tag" content="javascript">
+<meta property="article:tag" content="js&#x2F;programming">
+<meta property="article:tag" content="vue">
+<meta property="article:tag" content="web&#x2F;frontend">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "【Vue3+Ts project】pinia 实现数据持久化",
+  "url": "https://yhao521.github.io/2026/05/15/%E3%80%90Vue3+Ts%20project%E3%80%91pinia%20%E5%AE%9E%E7%8E%B0%E6%95%B0%E6%8D%AE%E6%8C%81%E4%B9%85%E5%8C%96/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2026-05-14T16:00:00.000Z",
+  "dateModified": "2026-05-17T16:00:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2026/05/15/%E3%80%90Vue3+Ts%20project%E3%80%91pinia%20%E5%AE%9E%E7%8E%B0%E6%95%B0%E6%8D%AE%E6%8C%81%E4%B9%85%E5%8C%96/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '【Vue3+Ts project】pinia 实现数据持久化',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">【Vue3+Ts project】pinia 实现数据持久化</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">【Vue3+Ts project】pinia 实现数据持久化</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-05-14T16:00:00.000Z" title="发表于 2026-05-15 00:00:00">2026-05-15</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-17T16:00:00.000Z" title="更新于 2026-05-18 00:00:00">2026-05-18</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p><strong>实现pinia实现数据持久化依赖</strong> pinia-plugin-persistedstate   </p>
+<p><strong>1.安装</strong>  
+ </p>
+<blockquote>
+<p>pnpm i pinia-plugin-persistedstate<br># or<br>npm i pinia-plugin-persistedstate<br># or<br>yarn add pinia-plugin-persistedstate</p>
+</blockquote>
+<p><strong>2.在main.ts内引入</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> persist <span class="keyword">from</span> <span class="string">&#x27;pinia-plugin-persistedstate&#x27;</span><span class="keyword">const</span> app = <span class="title function_">createApp</span>(<span class="title class_">App</span>) app.<span class="title function_">use</span>(<span class="title function_">createPinia</span>().<span class="title function_">use</span>(persist))<span class="variable constant_">AI</span>写代码</span><br></pre></td></tr></table></figure>
+
+<p><strong>3.在 defineStore</strong> <strong>内开启 , 添加 persist并设置true</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> type &#123; <span class="title class_">User</span> &#125; <span class="keyword">from</span> <span class="string">&#x27;@/types/user&#x27;</span><span class="keyword">import</span> &#123; defineStore &#125; <span class="keyword">from</span> <span class="string">&#x27;pinia&#x27;</span><span class="keyword">import</span> &#123; ref &#125; <span class="keyword">from</span> <span class="string">&#x27;vue&#x27;</span> <span class="keyword">export</span> <span class="keyword">const</span> useUserStore = <span class="title function_">defineStore</span>(  <span class="string">&#x27;cp-user&#x27;</span>,  <span class="function">() =&gt;</span> &#123;    <span class="comment">// 用户信息    const user = ref&lt;User&gt;()    // 设置用户，登录后使用    const setUser = (u: User) =&gt; &#123;      user.value = u    &#125;    // 清空用户，退出后使用    const delUser = () =&gt; &#123;      user.value = undefined    &#125;    return &#123; user, setUser, delUser &#125;  &#125;,// 注意:   &#123;    persist: true  &#125;) AI写代码</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>4. 在vue文件内使用并实现</strong>  </p>
+<p> </p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;script setup lang=<span class="string">&quot;ts&quot;</span>&gt;<span class="keyword">import</span> &#123; useUserStore &#125; <span class="keyword">from</span> <span class="string">&#x27;./stores/user&#x27;</span> <span class="keyword">const</span> store = <span class="title function_">useUserStore</span>()&lt;<span class="regexp">/script&gt; &lt;template&gt;  &lt;p&gt;&#123;&#123; store.user &#125;&#125;&lt;/</span>p&gt;  <span class="language-xml"><span class="tag">&lt;<span class="name">button</span> @<span class="attr">click</span>=<span class="string">&quot;store.setUser(&#123; id: &#x27;1&#x27;, mobile: &#x27;1&#x27;, account: &#x27;1&#x27;, avatar: &#x27;1&#x27;, token: &#x27;1&#x27; &#125;)&quot;</span>&gt;</span>    登录  <span class="tag">&lt;/<span class="name">button</span>&gt;</span></span>  <span class="language-xml"><span class="tag">&lt;<span class="name">button</span> @<span class="attr">click</span>=<span class="string">&quot;store.delUser()&quot;</span>&gt;</span>退出<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span>&lt;/template&gt;<span class="variable constant_">AI</span>写代码</span><br></pre></td></tr></table></figure></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2026/05/15/%E3%80%90Vue3+Ts%20project%E3%80%91pinia%20%E5%AE%9E%E7%8E%B0%E6%95%B0%E6%8D%AE%E6%8C%81%E4%B9%85%E5%8C%96/">https://yhao521.github.io/2026/05/15/%E3%80%90Vue3+Ts%20project%E3%80%91pinia%20%E5%AE%9E%E7%8E%B0%E6%95%B0%E6%8D%AE%E6%8C%81%E4%B9%85%E5%8C%96/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/web-frontend/">web/frontend</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/vue/">vue</a><a class="post-meta__tags" href="/tags/java-programming/">java/programming</a><a class="post-meta__tags" href="/tags/javascript/">javascript</a><a class="post-meta__tags" href="/tags/js-programming/">js/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/05/15/%E3%80%90%E7%9F%A5%E8%AF%86%E5%9B%BE%E8%B0%B1%E3%80%91Neo4j%E5%85%A5%E9%97%A8%E6%95%99%E7%A8%8B/" title="【知识图谱】Neo4j入门教程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">【知识图谱】Neo4j入门教程</div></div><div class="info-2"><div class="info-item-1">一、安装参考：Neo4j 第一篇：在Windows环境中安装Neo4j  安装照这篇教程走就可以了，注意环境路径的配置和JAVA-Neo4j版本的适配。  二、入门2.1 Neo4j浏览器 Neo4j服务器具有一个集成的浏览器，在启动neo4j服务之后，可以使用neo4j集成的浏览器管理图数据库。 在一个运行neo4j服务器主机上访问 “http://localhost:7474/”，显示以下的界面：  默认的host是bolt:&#x2F;&#x2F;localhost:7687，默认的用户是neo4j，默认的密码是：neo4j，第一次成功connect到Neo4j服务器之后，需要重置密码。 2.2 创建节点和关系 通过$ 命令行，编写Cypher脚本代码，点击Play按钮，可以在图数据库中创建节点和关系： 1234CREATE (n:Person &#123; name: &#x27;Andres&#x27;, title: &#x27;Developer&#x27; &#125;) return n;CREATE (n:Person &#123; name: &#x27;V...</div></div></div></a><a class="pagination-related" href="/2026/05/15/vue3%E4%B8%AD%E4%BD%BF%E7%94%A8echart%EF%BC%8C%E6%8C%89%E9%9C%80%E5%BC%95%E5%85%A5%E5%92%8Cvite%E6%89%93%E5%8C%85%E4%BC%98%E5%8C%96/" title="vue3中使用echart，按需引入和vite打包优化"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">vue3中使用echart，按需引入和vite打包优化</div></div><div class="info-2"><div class="info-item-1">在项目的开发中需要使用echart完成数据的可视化展示，因为只是使用到折线图和柱状图，但是在打包的时候，发现echart会全部打包进去，为减少编译后的包体积进行相关设置的配置。（当然除了设置按需引入，也可以使用cdn的方式，此篇不涉及） 12pnpm i echart --save-dev1AI写代码  在util中新建commonEchart.ts 12345678910111213141516171819202122232425262728293031323334353637// 引入 echarts 核心模块，核心模块提供了 echarts 使用必须要的接口。import * as echarts from &quot;echarts/core&quot;; /** 引入柱状图and折线图图表，图表后缀都为 Chart  */import &#123; BarChart, LineChart &#125; from &quot;echarts/charts&quot;; // 引入提示框，标题，直角坐标系，数据集，内置数据转换器组件，组件后缀都为 Componentimpo...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2024/09/10/vue%E9%A1%B9%E7%9B%AE%E6%95%B4%E5%90%88cordova/" title="vue项目整合cordova"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-09-10</div><div class="info-item-2">vue项目整合cordova</div></div><div class="info-2"><div class="info-item-1">vue项目整合cordovademo地址：https://github.com/fanlinqiang/vue-cordova-demo 使用vue-cli-plugin-cordova将Cordova集成到Vue Cli应用程序中 使用详见vue-cli-plugin-cordova  版本123cordova: 9.0.0 (cordova-lib@9.0.1)@vue/cli: 4.5.3vue: 2.6.11  可能会用到的工具1npm i -g ios-deploy --unsafe-perm=true  相关链接 cordova中文网  修改 vue.config.js添加配置调试配置123456module.exports =&#123;    // 不添加在ios上调试时会启动白屏    devServer: &#123;        https: false    &#125;&#125;  添加h5打包模式package.json中scripts中增加： 1234567&#123;   scripts: &#123;      ... ...      &q...</div></div></div></a><a class="pagination-related" href="/2024/04/14/vite%20+%20vue3%20+%20setup%20+%20pinia%20+%20ts%20%E9%A1%B9%E7%9B%AE%E5%AE%9E%E6%88%98/" title="vite + vue3 + setup + pinia + ts 项目实战"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-14</div><div class="info-item-2">vite + vue3 + setup + pinia + ts 项目实战</div></div><div class="info-2"><div class="info-item-1">介绍一个使用 vite + vue3 + pinia + ant-design-vue + typescript 完整技术路线开发的项目，秒级开发更新启动、新的vue3 composition api 结合 setup纵享丝滑般的开发体验、全新的 pinia状态管理器和优秀的设计体验（1k的size）、antd无障碍过渡使用UI组件库 ant-design-vue、安全高效的 typescript类型支持、代码规范验证、多级别的权限管理~ 前言前两天接到了一个需求，就是把原来的一个项目的主要功能模块和用户模块权限系统抽出来做一个新后台项目，并迭代新增一些新功能，看起来好像也没啥东西 拿到源码看了下项目，好家伙，原项目是个微应用项目，主应用用户模块是react技术栈，子应用模块是vue2技术栈，这直接 CV大法看样子是不行了👀，我这要做的毕竟是个单页面应用，确定一个技术路线即可，具体看下代码逻辑并跑起来看看 跑起来试了下，两个项目基本都是1分钟左右启动，看代码vue项目整个业务逻辑代码都拧在一块写了 想到之前问老大要源码的时候，说那个是老项目了，重新搭一个写应该会快点 这话没毛病...</div></div></div></a><a class="pagination-related" href="/2024/10/17/Vue-VConsole%EF%BC%88%E5%9C%A8%E7%A7%BB%E5%8A%A8%E7%AB%AF%E6%98%BE%E7%A4%BA%E6%8E%A7%E5%88%B6%E5%8F%B0%EF%BC%89/" title="Vue-VConsole（在移动端显示控制台）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-10-17</div><div class="info-item-2">Vue-VConsole（在移动端显示控制台）</div></div><div class="info-2"><div class="info-item-1">1.安装VConsole 12npm install vconsole  2.使用VCconsolemain.js 1234import VConsole from &#x27;vconsole&#x27;;const vconsole = new VConsole()Vue.use(vconsole)</div></div></div></a><a class="pagination-related" href="/2023/09/04/VUE%E7%BA%AF%E5%89%8D%E7%AB%AF%E5%AF%BC%E5%87%BAexcel%E8%A1%A8%E6%A0%BC%E5%8A%9F%E8%83%BD/" title="VUE纯前端导出excel表格功能"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">VUE纯前端导出excel表格功能</div></div><div class="info-2"><div class="info-item-1"> title: VUE纯前端导出excel表格功能date: 2023-09-03 20:17:08category:  开发语言 vuetag: vueauthor:   VUE纯前端导出excel表格功能插件：使用vue-json-excel插件实现Vue纯前端导出简单的Excel表格功能。 使用方法1.安装依赖 1npm install vue-json-excel  2.引入组件 a. 全局引入 1234import Vue from &quot;vue&quot;;import JsonExcel from &quot;vue-json-excel&quot;;Vue.component(&quot;downloadExcel&quot;, JsonExcel);  b. 局部引入 123456789import JsonExcel from &quot;vue-json-excel&quot;;export default &#123;  name: &quot;name&quot;,  components: &#123;    DownloadExcel: Jso...</div></div></div></a><a class="pagination-related" href="/2024/08/01/Vue3%E4%B9%8B%E9%9B%86%E6%88%90Highlight.js%E4%BB%A3%E7%A0%81%E8%AF%AD%E6%B3%95%E4%BA%AE%E6%98%BE%E7%A4%BA%E6%8F%92%E4%BB%B6/" title="Vue3之集成Highlight.js代码语法亮显示插件"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-01</div><div class="info-item-2">Vue3之集成Highlight.js代码语法亮显示插件</div></div><div class="info-2"><div class="info-item-1">Vue3之集成Highlight.js代码语法亮显示插件文章目录 Vue3之集成Highlight.js代码语法亮显示插件 1.Vue3中集成说明 2. 安装highlight.js与@highlightjs&#x2F;vue-plugin 3. Vue3集成与使用  1. main.ts(或main.js)中导入highlight.js 2. 各语言测试代码 3. 高亮显示vue文件 4. 显示效果   4. Highlight.js-Vue插件详细说明  1. 使用预构建的库 2. 使用 ES6 模块&#x2F;捆绑 3. 在本地使用组件 4.从源代码构建预构建库    1.Vue3中集成说明 vue中需要使用highlight.js必须借助highlightjs&#x2F;vue-plugin 插件来完成 这个插件提供了一个用于Vue.js 3应用程序的组件：highlightjs 注意：vue3中highlightjs/vue-plugin的版本必须为2.x.x, 而1.x.x为vue2的适配版本 关于highlight.js说明请查看 JavaScript之Highli...</div></div></div></a><a class="pagination-related" href="/2025/03/16/%E5%9C%A8%E6%B5%8F%E8%A7%88%E5%99%A8%E4%B8%AD%E5%BF%AB%E9%80%9F%E6%8E%A2%E6%B5%8BIP%E7%AB%AF%E5%8F%A3%E6%98%AF%E5%90%A6%E5%BC%80%E6%94%BE/" title="在浏览器中快速探测IP端口是否开放"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-16</div><div class="info-item-2">在浏览器中快速探测IP端口是否开放</div></div><div class="info-2"><div class="info-item-1">0×00 前言前两天 freebuf上的的XSS到内网的公开课很受启发，从一个页面到局域网，威力着实增强不少 公开课上检测内网 IP 实现方式用的是 img 标签，加载网站的 favicon.ico 图标，然后监听 onload 事件，看图片能不能加载成功简单易用，就是太慢了 –  0×02 分析浏览器有几秒的尝试容错时间，对于媒体资源，浏览器限制同一域名并发请求为个位数（一般为 6 个），也就是说，把图片全放到页面上，也不能同时开始检测，只能一点一点来，扫端口的时候会非常慢。 管理员在内网搭建的东西也可能没有图标。。。 探测 IP 端口开放原理就是向目标发送请求，看是否有回应。在上面的 img 中是在加载成功和失败体现出来的。img 嫌慢也可以试试别的嘛，经过一番搜索找到了这个，这个和这个。 第一个页面:1document.getElementById(&quot;testdiv&quot;).innerHTML = &#x27;&lt;img src=&quot;http://&#x27; + ip + &#x27;:&#x27; + port + &#x27;&quot; ...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

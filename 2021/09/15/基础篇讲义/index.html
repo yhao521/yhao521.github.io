@@ -1,0 +1,752 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>基础篇讲义 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="基础篇 基础篇要点：算法、数据结构、基础设计模式  1. 二分查找要求  能够用自己语言描述二分查找算法 能够手写二分查找代码 能够解答一些变化后的考法  算法描述  前提：有已排序数组 A（假设已经做好）  定义左边界 L、右边界 R，确定搜索范围，循环执行二分查找（3、4两步）  获取中间索引 M &#x3D; Floor((L+R) &#x2F;2)  中间索引的值  A[M] 与待搜索的值">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基础篇讲义">
+<meta property="og:url" content="https://yhao521.github.io/2021/09/15/%E5%9F%BA%E7%A1%80%E7%AF%87%E8%AE%B2%E4%B9%89/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="基础篇 基础篇要点：算法、数据结构、基础设计模式  1. 二分查找要求  能够用自己语言描述二分查找算法 能够手写二分查找代码 能够解答一些变化后的考法  算法描述  前提：有已排序数组 A（假设已经做好）  定义左边界 L、右边界 R，确定搜索范围，循环执行二分查找（3、4两步）  获取中间索引 M &#x3D; Floor((L+R) &#x2F;2)  中间索引的值  A[M] 与待搜索的值">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2021-09-15T01:39:33.000Z">
+<meta property="article:modified_time" content="2021-09-15T01:39:33.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="java&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "基础篇讲义",
+  "url": "https://yhao521.github.io/2021/09/15/%E5%9F%BA%E7%A1%80%E7%AF%87%E8%AE%B2%E4%B9%89/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2021-09-15T01:39:33.000Z",
+  "dateModified": "2021-09-15T01:39:33.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2021/09/15/%E5%9F%BA%E7%A1%80%E7%AF%87%E8%AE%B2%E4%B9%89/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '基础篇讲义',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">基础篇讲义</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">基础篇讲义</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-09-15T01:39:33.000Z" title="发表于 2021-09-15 09:39:33">2021-09-15</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-09-15T01:39:33.000Z" title="更新于 2021-09-15 09:39:33">2021-09-15</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="基础篇"><a href="#基础篇" class="headerlink" title="基础篇"></a>基础篇</h1><blockquote>
+<p><em><strong>基础篇要点：算法、数据结构、基础设计模式</strong></em></p>
+</blockquote>
+<h2 id="1-二分查找"><a href="#1-二分查找" class="headerlink" title="1. 二分查找"></a>1. 二分查找</h2><p><strong>要求</strong></p>
+<ul>
+<li>能够用自己语言描述二分查找算法</li>
+<li>能够手写二分查找代码</li>
+<li>能够解答一些变化后的考法</li>
+</ul>
+<p><strong>算法描述</strong></p>
+<ol>
+<li><p>前提：有已排序数组 A（假设已经做好）</p>
+</li>
+<li><p>定义左边界 L、右边界 R，确定搜索范围，循环执行二分查找（3、4两步）</p>
+</li>
+<li><p>获取中间索引 M &#x3D; Floor((L+R) &#x2F;2)</p>
+</li>
+<li><p>中间索引的值  A[M] 与待搜索的值 T 进行比较</p>
+<p>① A[M] &#x3D;&#x3D; T 表示找到，返回中间索引</p>
+<p>② A[M] &gt; T，中间值右侧的其它元素都大于 T，无需比较，中间索引左边去找，M - 1 设置为右边界，重新查找</p>
+<p>③ A[M] &lt; T，中间值左侧的其它元素都小于 T，无需比较，中间索引右边去找， M + 1 设置为左边界，重新查找</p>
+</li>
+<li><p>当 L &gt; R 时，表示没有找到，应结束循环</p>
+</li>
+</ol>
+<blockquote>
+<p><em>更形象的描述请参考：binary_search.html</em></p>
+</blockquote>
+<p><strong>算法实现</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="type">int</span> <span class="title function_">binarySearch</span><span class="params">(<span class="type">int</span>[] a, <span class="type">int</span> t)</span> &#123;</span><br><span class="line">    <span class="type">int</span> <span class="variable">l</span> <span class="operator">=</span> <span class="number">0</span>, r = a.length - <span class="number">1</span>, m;</span><br><span class="line">    <span class="keyword">while</span> (l &lt;= r) &#123;</span><br><span class="line">        m = (l + r) / <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">if</span> (a[m] == t) &#123;</span><br><span class="line">            <span class="keyword">return</span> m;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (a[m] &gt; t) &#123;</span><br><span class="line">            r = m - <span class="number">1</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            l = m + <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>测试代码</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="type">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">    <span class="type">int</span>[] <span class="variable">array</span> <span class="operator">=</span> &#123;<span class="number">1</span>, <span class="number">5</span>, <span class="number">8</span>, <span class="number">11</span>, <span class="number">19</span>, <span class="number">22</span>, <span class="number">31</span>, <span class="number">35</span>, <span class="number">40</span>, <span class="number">45</span>, <span class="number">48</span>, <span class="number">49</span>, <span class="number">50</span>&#125;;</span><br><span class="line">    <span class="type">int</span> <span class="variable">target</span> <span class="operator">=</span> <span class="number">47</span>;</span><br><span class="line">    <span class="type">int</span> <span class="variable">idx</span> <span class="operator">=</span> binarySearch(array, target);</span><br><span class="line">    System.out.println(idx);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>解决整数溢出问题</strong></p>
+<p>当 l 和 r 都较大时，<code>l + r</code> 有可能超过整数范围，造成运算错误，解决方法有两种：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="variable">m</span> <span class="operator">=</span> l + (r - l) / <span class="number">2</span>;</span><br></pre></td></tr></table></figure>
+
+<p>还有一种是：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="variable">m</span> <span class="operator">=</span> (l + r) &gt;&gt;&gt; <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+
+<p><strong>其它考法</strong></p>
+<ol>
+<li><p>有一个有序表为 1,5,8,11,19,22,31,35,40,45,48,49,50 当二分查找值为 48 的结点时，查找成功需要比较的次数 </p>
+</li>
+<li><p>使用二分法在序列 1,4,6,7,15,33,39,50,64,78,75,81,89,96 中查找元素 81 时，需要经过（   ）次比较</p>
+</li>
+<li><p>在拥有128个元素的数组中二分查找一个数，需要比较的次数最多不超过多少次</p>
+</li>
+</ol>
+<p>对于前两个题目，记得一个简要判断口诀：奇数二分取中间，偶数二分取中间靠左。对于后一道题目，需要知道公式：</p>
+<p>$$n &#x3D; log_2N &#x3D; log_{10}N&#x2F;log_{10}2$$</p>
+<p>其中 n 为查找次数，N 为元素个数</p>
+<h2 id="2-冒泡排序"><a href="#2-冒泡排序" class="headerlink" title="2. 冒泡排序"></a>2. 冒泡排序</h2><p><strong>要求</strong></p>
+<ul>
+<li>能够用自己语言描述冒泡排序算法</li>
+<li>能够手写冒泡排序代码</li>
+<li>了解一些冒泡排序的优化手段</li>
+</ul>
+<p><strong>算法描述</strong></p>
+<ol>
+<li>依次比较数组中相邻两个元素大小，若 a[j] &gt; a[j+1]，则交换两个元素，两两都比较一遍称为一轮冒泡，结果是让最大的元素排至最后</li>
+<li>重复以上步骤，直到整个数组有序</li>
+</ol>
+<blockquote>
+<p><em>更形象的描述请参考：bubble_sort.html</em></p>
+</blockquote>
+<p><strong>算法实现</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="type">void</span> <span class="title function_">bubble</span><span class="params">(<span class="type">int</span>[] a)</span> &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">j</span> <span class="operator">=</span> <span class="number">0</span>; j &lt; a.length - <span class="number">1</span>; j++) &#123;</span><br><span class="line">        <span class="comment">// 一轮冒泡</span></span><br><span class="line">        <span class="type">boolean</span> <span class="variable">swapped</span> <span class="operator">=</span> <span class="literal">false</span>; <span class="comment">// 是否发生了交换</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; a.length - <span class="number">1</span> - j; i++) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;比较次数&quot;</span> + i);</span><br><span class="line">            <span class="keyword">if</span> (a[i] &gt; a[i + <span class="number">1</span>]) &#123;</span><br><span class="line">                Utils.swap(a, i, i + <span class="number">1</span>);</span><br><span class="line">                swapped = <span class="literal">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(<span class="string">&quot;第&quot;</span> + j + <span class="string">&quot;轮冒泡&quot;</span></span><br><span class="line">                           + Arrays.toString(a));</span><br><span class="line">        <span class="keyword">if</span> (!swapped) &#123;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>优化点1：每经过一轮冒泡，内层循环就可以减少一次</li>
+<li>优化点2：如果某一轮冒泡没有发生交换，则表示所有数据有序，可以结束外层循环</li>
+</ul>
+<p><strong>进一步优化</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="type">void</span> <span class="title function_">bubble_v2</span><span class="params">(<span class="type">int</span>[] a)</span> &#123;</span><br><span class="line">    <span class="type">int</span> <span class="variable">n</span> <span class="operator">=</span> a.length - <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">last</span> <span class="operator">=</span> <span class="number">0</span>; <span class="comment">// 表示最后一次交换索引位置</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;比较次数&quot;</span> + i);</span><br><span class="line">            <span class="keyword">if</span> (a[i] &gt; a[i + <span class="number">1</span>]) &#123;</span><br><span class="line">                Utils.swap(a, i, i + <span class="number">1</span>);</span><br><span class="line">                last = i;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        n = last;</span><br><span class="line">        System.out.println(<span class="string">&quot;第轮冒泡&quot;</span></span><br><span class="line">                           + Arrays.toString(a));</span><br><span class="line">        <span class="keyword">if</span> (n == <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>每轮冒泡时，最后一次交换索引可以作为下一轮冒泡的比较次数，如果这个值为零，表示整个数组有序，直接退出外层循环即可</li>
+</ul>
+<h2 id="3-选择排序"><a href="#3-选择排序" class="headerlink" title="3. 选择排序"></a>3. 选择排序</h2><p><strong>要求</strong></p>
+<ul>
+<li>能够用自己语言描述选择排序算法</li>
+<li>能够比较选择排序与冒泡排序</li>
+<li>理解非稳定排序与稳定排序</li>
+</ul>
+<p><strong>算法描述</strong></p>
+<ol>
+<li><p>将数组分为两个子集，排序的和未排序的，每一轮从未排序的子集中选出最小的元素，放入排序子集</p>
+</li>
+<li><p>重复以上步骤，直到整个数组有序</p>
+</li>
+</ol>
+<blockquote>
+<p><em>更形象的描述请参考：selection_sort.html</em></p>
+</blockquote>
+<p><strong>算法实现</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="type">void</span> <span class="title function_">selection</span><span class="params">(<span class="type">int</span>[] a)</span> &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; a.length - <span class="number">1</span>; i++) &#123;</span><br><span class="line">        <span class="comment">// i 代表每轮选择最小元素要交换到的目标索引</span></span><br><span class="line">        <span class="type">int</span> <span class="variable">s</span> <span class="operator">=</span> i; <span class="comment">// 代表最小元素的索引</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">j</span> <span class="operator">=</span> s + <span class="number">1</span>; j &lt; a.length; j++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (a[s] &gt; a[j]) &#123; <span class="comment">// j 元素比 s 元素还要小, 更新 s</span></span><br><span class="line">                s = j;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (s != i) &#123;</span><br><span class="line">            swap(a, s, i);</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(Arrays.toString(a));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>优化点：为减少交换次数，每一轮可以先找最小的索引，在每轮最后再交换元素</li>
+</ul>
+<p><strong>与冒泡排序比较</strong></p>
+<ol>
+<li><p>二者平均时间复杂度都是 $O(n^2)$</p>
+</li>
+<li><p>选择排序一般要快于冒泡，因为其交换次数少</p>
+</li>
+<li><p>但如果集合有序度高，冒泡优于选择</p>
+</li>
+<li><p>冒泡属于稳定排序算法，而选择属于不稳定排序</p>
+<ul>
+<li>稳定排序指，按对象中不同字段进行多次排序，不会打乱同值元素的顺序</li>
+<li>不稳定排序则反之</li>
+</ul>
+</li>
+</ol>
+<p><strong>稳定排序与不稳定排序</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">System.out.println(<span class="string">&quot;=================不稳定================&quot;</span>);</span><br><span class="line"><span class="type">Card</span>[] <span class="variable">cards</span> <span class="operator">=</span> getStaticCards();</span><br><span class="line">System.out.println(Arrays.toString(cards));</span><br><span class="line">selection(cards, Comparator.comparingInt((Card a) -&gt; a.sharpOrder).reversed());</span><br><span class="line">System.out.println(Arrays.toString(cards));</span><br><span class="line">selection(cards, Comparator.comparingInt((Card a) -&gt; a.numberOrder).reversed());</span><br><span class="line">System.out.println(Arrays.toString(cards));</span><br><span class="line"></span><br><span class="line">System.out.println(<span class="string">&quot;=================稳定=================&quot;</span>);</span><br><span class="line">cards = getStaticCards();</span><br><span class="line">System.out.println(Arrays.toString(cards));</span><br><span class="line">bubble(cards, Comparator.comparingInt((Card a) -&gt; a.sharpOrder).reversed());</span><br><span class="line">System.out.println(Arrays.toString(cards));</span><br><span class="line">bubble(cards, Comparator.comparingInt((Card a) -&gt; a.numberOrder).reversed());</span><br><span class="line">System.out.println(Arrays.toString(cards));</span><br></pre></td></tr></table></figure>
+
+<p>都是先按照花色排序（♠♥♣♦），再按照数字排序（AKQJ…）</p>
+<ul>
+<li><p>不稳定排序算法按数字排序时，会打乱原本同值的花色顺序</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[[♠7], [♠2], [♠4], [♠5], [♥2], [♥5]]</span><br><span class="line">[[♠7], [♠5], [♥5], [♠4], [♥2], [♠2]]</span><br></pre></td></tr></table></figure>
+
+<p>原来 ♠2 在前 ♥2 在后，按数字再排后，他俩的位置变了</p>
+</li>
+<li><p>稳定排序算法按数字排序时，会保留原本同值的花色顺序，如下所示 ♠2 与 ♥2 的相对位置不变</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[[♠7], [♠2], [♠4], [♠5], [♥2], [♥5]]</span><br><span class="line">[[♠7], [♠5], [♥5], [♠4], [♠2], [♥2]]</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="4-插入排序"><a href="#4-插入排序" class="headerlink" title="4. 插入排序"></a>4. 插入排序</h2><p><strong>要求</strong></p>
+<ul>
+<li>能够用自己语言描述插入排序算法</li>
+<li>能够比较插入排序与选择排序</li>
+</ul>
+<p><strong>算法描述</strong></p>
+<ol>
+<li><p>将数组分为两个区域，排序区域和未排序区域，每一轮从未排序区域中取出第一个元素，插入到排序区域（需保证顺序）</p>
+</li>
+<li><p>重复以上步骤，直到整个数组有序</p>
+</li>
+</ol>
+<blockquote>
+<p><em>更形象的描述请参考：insertion_sort.html</em></p>
+</blockquote>
+<p><strong>算法实现</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 修改了代码与希尔排序一致</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="type">void</span> <span class="title function_">insert</span><span class="params">(<span class="type">int</span>[] a)</span> &#123;</span><br><span class="line">    <span class="comment">// i 代表待插入元素的索引</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">1</span>; i &lt; a.length; i++) &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">t</span> <span class="operator">=</span> a[i]; <span class="comment">// 代表待插入的元素值</span></span><br><span class="line">        <span class="type">int</span> <span class="variable">j</span> <span class="operator">=</span> i;</span><br><span class="line">        System.out.println(j);</span><br><span class="line">        <span class="keyword">while</span> (j &gt;= <span class="number">1</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (t &lt; a[j - <span class="number">1</span>]) &#123; <span class="comment">// j-1 是上一个元素索引，如果 &gt; t，后移</span></span><br><span class="line">                a[j] = a[j - <span class="number">1</span>];</span><br><span class="line">                j--;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123; <span class="comment">// 如果 j-1 已经 &lt;= t, 则 j 就是插入位置</span></span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        a[j] = t;</span><br><span class="line">        System.out.println(Arrays.toString(a) + <span class="string">&quot; &quot;</span> + j);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>与选择排序比较</strong></p>
+<ol>
+<li><p>二者平均时间复杂度都是 $O(n^2)$</p>
+</li>
+<li><p>大部分情况下，插入都略优于选择</p>
+</li>
+<li><p>有序集合插入的时间复杂度为 $O(n)$</p>
+</li>
+<li><p>插入属于稳定排序算法，而选择属于不稳定排序</p>
+</li>
+</ol>
+<p><strong>提示</strong></p>
+<blockquote>
+<p><em>插入排序通常被同学们所轻视，其实它的地位非常重要。小数据量排序，都会优先选择插入排序</em></p>
+</blockquote>
+<h2 id="5-希尔排序"><a href="#5-希尔排序" class="headerlink" title="5. 希尔排序"></a>5. 希尔排序</h2><p><strong>要求</strong></p>
+<ul>
+<li>能够用自己语言描述希尔排序算法</li>
+</ul>
+<p><strong>算法描述</strong></p>
+<ol>
+<li><p>首先选取一个间隙序列，如 (n&#x2F;2，n&#x2F;4 … 1)，n 为数组长度</p>
+</li>
+<li><p>每一轮将间隙相等的元素视为一组，对组内元素进行插入排序，目的有二</p>
+<p>① 少量元素插入排序速度很快</p>
+<p>② 让组内值较大的元素更快地移动到后方</p>
+</li>
+<li><p>当间隙逐渐减少，直至为 1 时，即可完成排序</p>
+</li>
+</ol>
+<blockquote>
+<p><em>更形象的描述请参考：shell_sort.html</em></p>
+</blockquote>
+<p><strong>算法实现</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="type">void</span> <span class="title function_">shell</span><span class="params">(<span class="type">int</span>[] a)</span> &#123;</span><br><span class="line">    <span class="type">int</span> <span class="variable">n</span> <span class="operator">=</span> a.length;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">gap</span> <span class="operator">=</span> n / <span class="number">2</span>; gap &gt; <span class="number">0</span>; gap /= <span class="number">2</span>) &#123;</span><br><span class="line">        <span class="comment">// i 代表待插入元素的索引</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> gap; i &lt; n; i++) &#123;</span><br><span class="line">            <span class="type">int</span> <span class="variable">t</span> <span class="operator">=</span> a[i]; <span class="comment">// 代表待插入的元素值</span></span><br><span class="line">            <span class="type">int</span> <span class="variable">j</span> <span class="operator">=</span> i;</span><br><span class="line">            <span class="keyword">while</span> (j &gt;= gap) &#123;</span><br><span class="line">                <span class="comment">// 每次与上一个间隙为 gap 的元素进行插入排序</span></span><br><span class="line">                <span class="keyword">if</span> (t &lt; a[j - gap]) &#123; <span class="comment">// j-gap 是上一个元素索引，如果 &gt; t，后移</span></span><br><span class="line">                    a[j] = a[j - gap];</span><br><span class="line">                    j -= gap;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123; <span class="comment">// 如果 j-1 已经 &lt;= t, 则 j 就是插入位置</span></span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            a[j] = t;</span><br><span class="line">            System.out.println(Arrays.toString(a) + <span class="string">&quot; gap:&quot;</span> + gap);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>参考资料</strong></p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Shellsort">https://en.wikipedia.org/wiki/Shellsort</a></li>
+</ul>
+<h2 id="6-快速排序"><a href="#6-快速排序" class="headerlink" title="6. 快速排序"></a>6. 快速排序</h2><p><strong>要求</strong></p>
+<ul>
+<li>能够用自己语言描述快速排序算法</li>
+<li>掌握手写单边循环、双边循环代码之一</li>
+<li>能够说明快排特点</li>
+<li>了解洛穆托与霍尔两种分区方案的性能比较</li>
+</ul>
+<p><strong>算法描述</strong></p>
+<ol>
+<li>每一轮排序选择一个基准点（pivot）进行分区<ol>
+<li>让小于基准点的元素的进入一个分区，大于基准点的元素的进入另一个分区</li>
+<li>当分区完成时，基准点元素的位置就是其最终位置</li>
+</ol>
+</li>
+<li>在子分区内重复以上过程，直至子分区元素个数少于等于 1，这体现的是分而治之的思想 （<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Divide-and-conquer_algorithm">divide-and-conquer</a>）</li>
+<li>从以上描述可以看出，一个关键在于分区算法，常见的有洛穆托分区方案、双边循环分区方案、霍尔分区方案</li>
+</ol>
+<blockquote>
+<p><em>更形象的描述请参考：quick_sort.html</em></p>
+</blockquote>
+<p><strong>单边循环快排（lomuto 洛穆托分区方案）</strong></p>
+<ol>
+<li><p>选择最右元素作为基准点元素</p>
+</li>
+<li><p>j 指针负责找到比基准点小的元素，一旦找到则与 i 进行交换</p>
+</li>
+<li><p>i 指针维护小于基准点元素的边界，也是每次交换的目标索引</p>
+</li>
+<li><p>最后基准点与 i 交换，i 即为分区位置</p>
+</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="type">void</span> <span class="title function_">quick</span><span class="params">(<span class="type">int</span>[] a, <span class="type">int</span> l, <span class="type">int</span> h)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (l &gt;= h) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">int</span> <span class="variable">p</span> <span class="operator">=</span> partition(a, l, h); <span class="comment">// p 索引值</span></span><br><span class="line">    quick(a, l, p - <span class="number">1</span>); <span class="comment">// 左边分区的范围确定</span></span><br><span class="line">    quick(a, p + <span class="number">1</span>, h); <span class="comment">// 左边分区的范围确定</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="type">int</span> <span class="title function_">partition</span><span class="params">(<span class="type">int</span>[] a, <span class="type">int</span> l, <span class="type">int</span> h)</span> &#123;</span><br><span class="line">    <span class="type">int</span> <span class="variable">pv</span> <span class="operator">=</span> a[h]; <span class="comment">// 基准点元素</span></span><br><span class="line">    <span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> l;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">j</span> <span class="operator">=</span> l; j &lt; h; j++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (a[j] &lt; pv) &#123;</span><br><span class="line">            <span class="keyword">if</span> (i != j) &#123;</span><br><span class="line">                swap(a, i, j);</span><br><span class="line">            &#125;</span><br><span class="line">            i++;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (i != h) &#123;</span><br><span class="line">        swap(a, h, i);</span><br><span class="line">    &#125;</span><br><span class="line">    System.out.println(Arrays.toString(a) + <span class="string">&quot; i=&quot;</span> + i);</span><br><span class="line">    <span class="comment">// 返回值代表了基准点元素所在的正确索引，用它确定下一轮分区的边界</span></span><br><span class="line">    <span class="keyword">return</span> i;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>双边循环快排（不完全等价于 hoare 霍尔分区方案）</strong></p>
+<ol>
+<li>选择最左元素作为基准点元素</li>
+<li>j 指针负责从右向左找比基准点小的元素，i 指针负责从左向右找比基准点大的元素，一旦找到二者交换，直至 i，j 相交</li>
+<li>最后基准点与 i（此时 i 与 j 相等）交换，i 即为分区位置</li>
+</ol>
+<p>要点</p>
+<ol>
+<li><p>基准点在左边，并且要先 j 后 i</p>
+</li>
+<li><p>while( <strong>i</strong> **&lt; j** &amp;&amp; a[j] &gt; pv ) j– </p>
+</li>
+<li><p>while ( <strong>i</strong> <strong>&lt; j</strong> &amp;&amp; a[i] <strong>&lt;&#x3D;</strong> pv ) i++</p>
+</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="type">void</span> <span class="title function_">quick</span><span class="params">(<span class="type">int</span>[] a, <span class="type">int</span> l, <span class="type">int</span> h)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (l &gt;= h) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">int</span> <span class="variable">p</span> <span class="operator">=</span> partition(a, l, h);</span><br><span class="line">    quick(a, l, p - <span class="number">1</span>);</span><br><span class="line">    quick(a, p + <span class="number">1</span>, h);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="type">int</span> <span class="title function_">partition</span><span class="params">(<span class="type">int</span>[] a, <span class="type">int</span> l, <span class="type">int</span> h)</span> &#123;</span><br><span class="line">    <span class="type">int</span> <span class="variable">pv</span> <span class="operator">=</span> a[l];</span><br><span class="line">    <span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> l;</span><br><span class="line">    <span class="type">int</span> <span class="variable">j</span> <span class="operator">=</span> h;</span><br><span class="line">    <span class="keyword">while</span> (i &lt; j) &#123;</span><br><span class="line">        <span class="comment">// j 从右找小的</span></span><br><span class="line">        <span class="keyword">while</span> (i &lt; j &amp;&amp; a[j] &gt; pv) &#123;</span><br><span class="line">            j--;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// i 从左找大的</span></span><br><span class="line">        <span class="keyword">while</span> (i &lt; j &amp;&amp; a[i] &lt;= pv) &#123;</span><br><span class="line">            i++;</span><br><span class="line">        &#125;</span><br><span class="line">        swap(a, i, j);</span><br><span class="line">    &#125;</span><br><span class="line">    swap(a, l, j);</span><br><span class="line">    System.out.println(Arrays.toString(a) + <span class="string">&quot; j=&quot;</span> + j);</span><br><span class="line">    <span class="keyword">return</span> j;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>快排特点</strong></p>
+<ol>
+<li><p>平均时间复杂度是 $O(nlog_2⁡n )$，最坏时间复杂度 $O(n^2)$</p>
+</li>
+<li><p>数据量较大时，优势非常明显</p>
+</li>
+<li><p>属于不稳定排序</p>
+</li>
+</ol>
+<p><strong>洛穆托分区方案 vs 霍尔分区方案</strong></p>
+<ul>
+<li>霍尔的移动次数平均来讲比洛穆托少3倍</li>
+<li><a target="_blank" rel="noopener" href="https://qastack.cn/cs/11458/quicksort-partitioning-hoare-vs-lomuto">https://qastack.cn/cs/11458/quicksort-partitioning-hoare-vs-lomuto</a></li>
+</ul>
+<blockquote>
+<p><em><strong>补充代码说明</strong></em></p>
+<ul>
+<li>day01.sort.QuickSort3 演示了空穴法改进的双边快排，比较次数更少</li>
+<li>day01.sort.QuickSortHoare 演示了霍尔分区的实现</li>
+<li>day01.sort.LomutoVsHoare 对四种分区实现的移动次数比较</li>
+</ul>
+</blockquote>
+<h2 id="7-ArrayList"><a href="#7-ArrayList" class="headerlink" title="7. ArrayList"></a>7. ArrayList</h2><p><strong>要求</strong></p>
+<ul>
+<li>掌握 ArrayList 扩容规则</li>
+</ul>
+<p><strong>扩容规则</strong></p>
+<ol>
+<li><p>ArrayList() 会使用长度为零的数组</p>
+</li>
+<li><p>ArrayList(int initialCapacity) 会使用指定容量的数组</p>
+</li>
+<li><p>public ArrayList(Collection&lt;? extends E&gt; c) 会使用 c 的大小作为数组容量</p>
+</li>
+<li><p>add(Object o) 首次扩容为 10，再次扩容为上次容量的 1.5 倍</p>
+</li>
+<li><p>addAll(Collection c) 没有元素时，扩容为 Math.max(10, 实际元素个数)，有元素时为 Math.max(原容量 1.5 倍, 实际元素个数)</p>
+</li>
+</ol>
+<p>其中第 4 点必须知道，其它几点视个人情况而定</p>
+<p><strong>提示</strong></p>
+<ul>
+<li>测试代码见 <code>day01.list.TestArrayList</code> ，这里不再列出</li>
+<li>要<strong>注意</strong>的是，示例中用反射方式来更直观地反映 ArrayList 的扩容特征，但从 JDK 9 由于模块化的影响，对反射做了较多限制，需要在运行测试代码时添加 VM 参数 <code>--add-opens java.base/java.util=ALL-UNNAMED</code> 方能运行通过，后面的例子都有相同问题</li>
+</ul>
+<blockquote>
+<p><em><strong>代码说明</strong></em></p>
+<ul>
+<li>day01.list.TestArrayList#arrayListGrowRule 演示了 add(Object) 方法的扩容规则，输入参数 n 代表打印多少次扩容后的数组长度</li>
+</ul>
+</blockquote>
+<h2 id="8-Iterator"><a href="#8-Iterator" class="headerlink" title="8. Iterator"></a>8. Iterator</h2><p><strong>要求</strong></p>
+<ul>
+<li>掌握什么是 Fail-Fast、什么是 Fail-Safe</li>
+</ul>
+<p>Fail-Fast 与 Fail-Safe</p>
+<ul>
+<li><p>ArrayList 是 fail-fast 的典型代表，遍历的同时不能修改，尽快失败</p>
+</li>
+<li><p>CopyOnWriteArrayList 是 fail-safe 的典型代表，遍历的同时可以修改，原理是读写分离</p>
+</li>
+</ul>
+<p><strong>提示</strong></p>
+<ul>
+<li>测试代码见 <code>day01.list.FailFastVsFailSafe</code>，这里不再列出</li>
+</ul>
+<h2 id="9-LinkedList"><a href="#9-LinkedList" class="headerlink" title="9. LinkedList"></a>9. LinkedList</h2><p><strong>要求</strong></p>
+<ul>
+<li>能够说清楚 LinkedList 对比 ArrayList 的区别，并重视纠正部分错误的认知</li>
+</ul>
+<p><strong>LinkedList</strong></p>
+<ol>
+<li>基于双向链表，无需连续内存</li>
+<li>随机访问慢（要沿着链表遍历）</li>
+<li>头尾插入删除性能高</li>
+<li>占用内存多</li>
+</ol>
+<p><strong>ArrayList</strong></p>
+<ol>
+<li>基于数组，需要连续内存</li>
+<li>随机访问快（指根据下标访问）</li>
+<li>尾部插入、删除性能可以，其它部分插入、删除都会移动数据，因此性能会低</li>
+<li>可以利用 cpu 缓存，局部性原理</li>
+</ol>
+<blockquote>
+<p><em><strong>代码说明</strong></em></p>
+<ul>
+<li>day01.list.ArrayListVsLinkedList#randomAccess 对比随机访问性能</li>
+<li>day01.list.ArrayListVsLinkedList#addMiddle 对比向中间插入性能</li>
+<li>day01.list.ArrayListVsLinkedList#addFirst 对比头部插入性能</li>
+<li>day01.list.ArrayListVsLinkedList#addLast 对比尾部插入性能</li>
+<li>day01.list.ArrayListVsLinkedList#linkedListSize 打印一个 LinkedList 占用内存</li>
+<li>day01.list.ArrayListVsLinkedList#arrayListSize 打印一个 ArrayList 占用内存</li>
+</ul>
+</blockquote>
+<h2 id="10-HashMap"><a href="#10-HashMap" class="headerlink" title="10. HashMap"></a>10. HashMap</h2><p><strong>要求</strong></p>
+<ul>
+<li>掌握 HashMap 的基本数据结构</li>
+<li>掌握树化</li>
+<li>理解索引计算方法、二次 hash 的意义、容量对索引计算的影响</li>
+<li>掌握 put 流程、扩容、扩容因子</li>
+<li>理解并发使用 HashMap 可能导致的问题</li>
+<li>理解 key 的设计</li>
+</ul>
+<h3 id="1）基本数据结构"><a href="#1）基本数据结构" class="headerlink" title="1）基本数据结构"></a>1）基本数据结构</h3><ul>
+<li>1.7 数组 + 链表</li>
+<li>1.8 数组 + （链表 | 红黑树）</li>
+</ul>
+<blockquote>
+<p>更形象的演示，见资料中的 hash-demo.jar，运行需要 jdk14 以上环境，进入 jar 包目录，执行下面命令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -jar --add-exports java.base/jdk.internal.misc=ALL-UNNAMED hash-demo.jar</span><br></pre></td></tr></table></figure></blockquote>
+<h3 id="2）树化与退化"><a href="#2）树化与退化" class="headerlink" title="2）树化与退化"></a>2）树化与退化</h3><p><strong>树化意义</strong></p>
+<ul>
+<li>红黑树用来避免 DoS 攻击，防止链表超长时性能下降，树化应当是偶然情况，是保底策略</li>
+<li>hash 表的查找，更新的时间复杂度是 $O(1)$，而红黑树的查找，更新的时间复杂度是 $O(log_2⁡n )$，TreeNode 占用空间也比普通 Node 的大，如非必要，尽量还是使用链表</li>
+<li>hash 值如果足够随机，则在 hash 表内按泊松分布，在负载因子 0.75 的情况下，长度超过 8 的链表出现概率是 0.00000006，树化阈值选择 8 就是为了让树化几率足够小</li>
+</ul>
+<p><strong>树化规则</strong></p>
+<ul>
+<li>当链表长度超过树化阈值 8 时，先尝试扩容来减少链表长度，如果数组容量已经 &gt;&#x3D;64，才会进行树化</li>
+</ul>
+<p><strong>退化规则</strong></p>
+<ul>
+<li>情况1：在扩容时如果拆分树时，树元素个数 &lt;&#x3D; 6 则会退化链表</li>
+<li>情况2：remove 树节点时，若 root、root.left、root.right、root.left.left 有一个为 null ，也会退化为链表</li>
+</ul>
+<h3 id="3）索引计算"><a href="#3）索引计算" class="headerlink" title="3）索引计算"></a>3）索引计算</h3><p><strong>索引计算方法</strong></p>
+<ul>
+<li>首先，计算对象的 hashCode()</li>
+<li>再进行调用 HashMap 的 hash() 方法进行二次哈希<ul>
+<li>二次 hash() 是为了综合高位数据，让哈希分布更为均匀</li>
+</ul>
+</li>
+<li>最后 &amp; (capacity – 1) 得到索引</li>
+</ul>
+<p><strong>数组容量为何是 2 的 n 次幂</strong></p>
+<ol>
+<li>计算索引时效率更高：如果是 2 的 n 次幂可以使用位与运算代替取模</li>
+<li>扩容时重新计算索引效率更高： hash &amp; oldCap &#x3D;&#x3D; 0 的元素留在原来位置 ，否则新位置 &#x3D; 旧位置 + oldCap</li>
+</ol>
+<p><strong>注意</strong></p>
+<ul>
+<li>二次 hash 是为了配合 <strong>容量是 2 的 n 次幂</strong> 这一设计前提，如果 hash 表的容量不是 2 的 n 次幂，则不必二次 hash</li>
+<li><strong>容量是 2 的 n 次幂</strong> 这一设计计算索引效率更好，但 hash 的分散性就不好，需要二次 hash 来作为补偿，没有采用这一设计的典型例子是 Hashtable</li>
+</ul>
+<h3 id="4）put-与扩容"><a href="#4）put-与扩容" class="headerlink" title="4）put 与扩容"></a>4）put 与扩容</h3><p><strong>put 流程</strong></p>
+<ol>
+<li>HashMap 是懒惰创建数组的，首次使用才创建数组</li>
+<li>计算索引（桶下标）</li>
+<li>如果桶下标还没人占用，创建 Node 占位返回</li>
+<li>如果桶下标已经有人占用<ol>
+<li>已经是 TreeNode 走红黑树的添加或更新逻辑</li>
+<li>是普通 Node，走链表的添加或更新逻辑，如果链表长度超过树化阈值，走树化逻辑</li>
+</ol>
+</li>
+<li>返回前检查容量是否超过阈值，一旦超过进行扩容</li>
+</ol>
+<p><strong>1.7 与 1.8 的区别</strong></p>
+<ol>
+<li><p>链表插入节点时，1.7 是头插法，1.8 是尾插法</p>
+</li>
+<li><p>1.7 是大于等于阈值且没有空位时才扩容，而 1.8 是大于阈值就扩容</p>
+</li>
+<li><p>1.8 在扩容计算 Node 索引时，会优化</p>
+</li>
+</ol>
+<p><strong>扩容（加载）因子为何默认是 0.75f</strong></p>
+<ol>
+<li>在空间占用与查询时间之间取得较好的权衡</li>
+<li>大于这个值，空间节省了，但链表就会比较长影响性能</li>
+<li>小于这个值，冲突减少了，但扩容就会更频繁，空间占用也更多</li>
+</ol>
+<h3 id="5）并发问题"><a href="#5）并发问题" class="headerlink" title="5）并发问题"></a>5）并发问题</h3><p><strong>扩容死链（1.7 会存在）</strong></p>
+<p>1.7 源码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">transfer</span><span class="params">(Entry[] newTable, <span class="type">boolean</span> rehash)</span> &#123;</span><br><span class="line">    <span class="type">int</span> <span class="variable">newCapacity</span> <span class="operator">=</span> newTable.length;</span><br><span class="line">    <span class="keyword">for</span> (Entry&lt;K,V&gt; e : table) &#123;</span><br><span class="line">        <span class="keyword">while</span>(<span class="literal">null</span> != e) &#123;</span><br><span class="line">            <span class="type">Entry</span>&lt;K,V&gt; <span class="variable">next</span> <span class="operator">=</span> e.next;</span><br><span class="line">            <span class="keyword">if</span> (rehash) &#123;</span><br><span class="line">                e.hash = <span class="literal">null</span> == e.key ? <span class="number">0</span> : hash(e.key);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> indexFor(e.hash, newCapacity);</span><br><span class="line">            e.next = newTable[i];</span><br><span class="line">            newTable[i] = e;</span><br><span class="line">            e = next;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>e 和 next 都是局部变量，用来指向当前节点和下一个节点</li>
+<li>线程1（绿色）的临时变量 e 和 next 刚引用了这俩节点，还未来得及移动节点，发生了线程切换，由线程2（蓝色）完成扩容和迁移</li>
+</ul>
+<p><img src="/img/image-20210831084325075.png" alt="image-20210831084325075"></p>
+<ul>
+<li>线程2 扩容完成，由于头插法，链表顺序颠倒。但线程1 的临时变量 e 和 next 还引用了这俩节点，还要再来一遍迁移</li>
+</ul>
+<p><img src="/img/image-20210831084723383.png" alt="image-20210831084723383"></p>
+<ul>
+<li>第一次循环<ul>
+<li>循环接着线程切换前运行，注意此时 e 指向的是节点 a，next 指向的是节点 b</li>
+<li>e 头插 a 节点，注意图中画了两份 a 节点，但事实上只有一个（为了不让箭头特别乱画了两份）</li>
+<li>当循环结束是 e 会指向 next 也就是 b 节点</li>
+</ul>
+</li>
+</ul>
+<p><img src="/img/image-20210831084855348.png" alt="image-20210831084855348"></p>
+<ul>
+<li>第二次循环<ul>
+<li>next 指向了节点 a</li>
+<li>e 头插节点 b</li>
+<li>当循环结束时，e 指向 next 也就是节点 a</li>
+</ul>
+</li>
+</ul>
+<p><img src="/img/image-20210831085329449.png" alt="image-20210831085329449"></p>
+<ul>
+<li>第三次循环<ul>
+<li>next 指向了 null</li>
+<li>e 头插节点 a，<strong>a 的 next 指向了 b</strong>（之前 a.next 一直是 null），b 的 next 指向 a，死链已成</li>
+<li>当循环结束时，e 指向 next 也就是 null，因此第四次循环时会正常退出</li>
+</ul>
+</li>
+</ul>
+<p><img src="/img/image-20210831085543224.png" alt="image-20210831085543224"></p>
+<p><strong>数据错乱（1.7，1.8 都会存在）</strong></p>
+<ul>
+<li>代码参考 <code>day01.map.HashMapMissData</code>，具体调试步骤参考视频</li>
+</ul>
+<blockquote>
+<p><em><strong>补充代码说明</strong></em></p>
+<ul>
+<li>day01.map.HashMapDistribution 演示 map 中链表长度符合泊松分布</li>
+<li>day01.map.DistributionAffectedByCapacity 演示容量及 hashCode 取值对分布的影响<ul>
+<li>day01.map.DistributionAffectedByCapacity#hashtableGrowRule 演示了 Hashtable 的扩容规律</li>
+<li>day01.sort.Utils#randomArray 如果 hashCode 足够随机，容量是否是 2 的 n 次幂影响不大</li>
+<li>day01.sort.Utils#lowSameArray 如果 hashCode 低位一样的多，容量是 2 的 n 次幂会导致分布不均匀</li>
+<li>day01.sort.Utils#evenArray 如果 hashCode 偶数的多，容量是 2 的 n 次幂会导致分布不均匀</li>
+<li>由此得出对于容量是 2 的 n 次幂的设计来讲，二次 hash 非常重要</li>
+</ul>
+</li>
+<li>day01.map.HashMapVsHashtable 演示了对于同样数量的单词字符串放入 HashMap 和 Hashtable 分布上的区别</li>
+</ul>
+</blockquote>
+<h3 id="6）key-的设计"><a href="#6）key-的设计" class="headerlink" title="6）key 的设计"></a>6）key 的设计</h3><p><strong>key 的设计要求</strong></p>
+<ol>
+<li>HashMap 的 key 可以为 null，但 Map 的其他实现则不然</li>
+<li>作为 key 的对象，必须实现 hashCode 和 equals，并且 key 的内容不能修改（不可变）</li>
+<li>key 的 hashCode 应该有良好的散列性</li>
+</ol>
+<p>如果 key 可变，例如修改了 age 会导致再次查询时查询不到</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">HashMapMutableKey</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">HashMap</span>&lt;Student, Object&gt; <span class="variable">map</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">        <span class="type">Student</span> <span class="variable">stu</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Student</span>(<span class="string">&quot;张三&quot;</span>, <span class="number">18</span>);</span><br><span class="line">        map.put(stu, <span class="keyword">new</span> <span class="title class_">Object</span>());</span><br><span class="line"></span><br><span class="line">        System.out.println(map.get(stu));</span><br><span class="line"></span><br><span class="line">        stu.age = <span class="number">19</span>;</span><br><span class="line">        System.out.println(map.get(stu));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">Student</span> &#123;</span><br><span class="line">        String name;</span><br><span class="line">        <span class="type">int</span> age;</span><br><span class="line"></span><br><span class="line">        <span class="type">public</span> <span class="title function_">Student</span><span class="params">(String name, <span class="type">int</span> age)</span> &#123;</span><br><span class="line">            <span class="built_in">this</span>.name = name;</span><br><span class="line">            <span class="built_in">this</span>.age = age;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="type">String</span> <span class="title function_">getName</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> name;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="type">void</span> <span class="title function_">setName</span><span class="params">(String name)</span> &#123;</span><br><span class="line">            <span class="built_in">this</span>.name = name;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">getAge</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> age;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="type">void</span> <span class="title function_">setAge</span><span class="params">(<span class="type">int</span> age)</span> &#123;</span><br><span class="line">            <span class="built_in">this</span>.age = age;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">equals</span><span class="params">(Object o)</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (<span class="built_in">this</span> == o) <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">            <span class="keyword">if</span> (o == <span class="literal">null</span> || getClass() != o.getClass()) <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">            <span class="type">Student</span> <span class="variable">student</span> <span class="operator">=</span> (Student) o;</span><br><span class="line">            <span class="keyword">return</span> age == student.age &amp;&amp; Objects.equals(name, student.name);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">hashCode</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> Objects.hash(name, age);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>String 对象的 hashCode() 设计</strong></p>
+<ul>
+<li>目标是达到较为均匀的散列效果，每个字符串的 hashCode 足够独特</li>
+<li>字符串中的每个字符都可以表现为一个数字，称为 $S_i$，其中 i 的范围是 0 ~ n - 1 </li>
+<li>散列公式为： $S_0∗31^{(n-1)}+ S_1∗31^{(n-2)}+ … S_i ∗ 31^{(n-1-i)}+ …S_{(n-1)}∗31^0$</li>
+<li>31 代入公式有较好的散列特性，并且 31 * h 可以被优化为 <ul>
+<li>即 $32 ∗h -h $</li>
+<li>即 $2^5  ∗h -h$</li>
+<li>即 $h≪5  -h$</li>
+</ul>
+</li>
+</ul>
+<h2 id="11-单例模式"><a href="#11-单例模式" class="headerlink" title="11. 单例模式"></a>11. 单例模式</h2><p><strong>要求</strong></p>
+<ul>
+<li>掌握五种单例模式的实现方式</li>
+<li>理解为何 DCL 实现时要使用 volatile 修饰静态变量</li>
+<li>了解 jdk 中用到单例的场景</li>
+</ul>
+<p><strong>饿汉式</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Singleton1</span> <span class="keyword">implements</span> <span class="title class_">Serializable</span> &#123;</span><br><span class="line">    <span class="type">private</span> <span class="title function_">Singleton1</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (INSTANCE != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RuntimeException</span>(<span class="string">&quot;单例对象不能重复创建&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(<span class="string">&quot;private Singleton1()&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Singleton1</span> <span class="variable">INSTANCE</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Singleton1</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">Singleton1</span> <span class="title function_">getInstance</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> INSTANCE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">void</span> <span class="title function_">otherMethod</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;otherMethod()&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="type">Object</span> <span class="title function_">readResolve</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> INSTANCE;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>构造方法抛出异常是防止反射破坏单例</li>
+<li><code>readResolve()</code> 是防止反序列化破坏单例</li>
+</ul>
+<p><strong>枚举饿汉式</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">enum</span> <span class="title class_">Singleton2</span> &#123;</span><br><span class="line">    INSTANCE;</span><br><span class="line"></span><br><span class="line">    <span class="type">private</span> <span class="title function_">Singleton2</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;private Singleton2()&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">String</span> <span class="title function_">toString</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> getClass().getName() + <span class="string">&quot;@&quot;</span> + Integer.toHexString(hashCode());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">Singleton2</span> <span class="title function_">getInstance</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> INSTANCE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">void</span> <span class="title function_">otherMethod</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;otherMethod()&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>枚举饿汉式能天然防止反射、反序列化破坏单例</li>
+</ul>
+<p><strong>懒汉式</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Singleton3</span> <span class="keyword">implements</span> <span class="title class_">Serializable</span> &#123;</span><br><span class="line">    <span class="type">private</span> <span class="title function_">Singleton3</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;private Singleton3()&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">Singleton3</span> <span class="variable">INSTANCE</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Singleton3.class</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">synchronized</span> <span class="type">Singleton3</span> <span class="title function_">getInstance</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (INSTANCE == <span class="literal">null</span>) &#123;</span><br><span class="line">            INSTANCE = <span class="keyword">new</span> <span class="title class_">Singleton3</span>();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> INSTANCE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">void</span> <span class="title function_">otherMethod</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;otherMethod()&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>其实只有首次创建单例对象时才需要同步，但该代码实际上每次调用都会同步</li>
+<li>因此有了下面的双检锁改进</li>
+</ul>
+<p><strong>双检锁懒汉式</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Singleton4</span> <span class="keyword">implements</span> <span class="title class_">Serializable</span> &#123;</span><br><span class="line">    <span class="type">private</span> <span class="title function_">Singleton4</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;private Singleton4()&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">volatile</span> <span class="type">Singleton4</span> <span class="variable">INSTANCE</span> <span class="operator">=</span> <span class="literal">null</span>; <span class="comment">// 可见性，有序性</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">Singleton4</span> <span class="title function_">getInstance</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (INSTANCE == <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (Singleton4.class) &#123;</span><br><span class="line">                <span class="keyword">if</span> (INSTANCE == <span class="literal">null</span>) &#123;</span><br><span class="line">                    INSTANCE = <span class="keyword">new</span> <span class="title class_">Singleton4</span>();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> INSTANCE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">void</span> <span class="title function_">otherMethod</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;otherMethod()&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>为何必须加 volatile：</p>
+<ul>
+<li><code>INSTANCE = new Singleton4()</code> 不是原子的，分成 3 步：创建对象、调用构造、给静态变量赋值，其中后两步可能被指令重排序优化，变成先赋值、再调用构造</li>
+<li>如果线程1 先执行了赋值，线程2 执行到第一个 <code>INSTANCE == null</code> 时发现 INSTANCE 已经不为 null，此时就会返回一个未完全构造的对象</li>
+</ul>
+<p><strong>内部类懒汉式</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Singleton5</span> <span class="keyword">implements</span> <span class="title class_">Serializable</span> &#123;</span><br><span class="line">    <span class="type">private</span> <span class="title function_">Singleton5</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;private Singleton5()&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">Holder</span> &#123;</span><br><span class="line">        <span class="keyword">static</span> <span class="type">Singleton5</span> <span class="variable">INSTANCE</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Singleton5</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">Singleton5</span> <span class="title function_">getInstance</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> Holder.INSTANCE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">void</span> <span class="title function_">otherMethod</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;otherMethod()&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>避免了双检锁的缺点</li>
+</ul>
+<p><strong>JDK 中单例的体现</strong></p>
+<ul>
+<li>Runtime 体现了饿汉式单例</li>
+<li>Console 体现了双检锁懒汉式单例</li>
+<li>Collections 中的 EmptyNavigableSet 内部类懒汉式单例</li>
+<li>ReverseComparator.REVERSE_ORDER 内部类懒汉式单例</li>
+<li>Comparators.NaturalOrderComparator.INSTANCE 枚举饿汉式单例</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2021/09/15/%E5%9F%BA%E7%A1%80%E7%AF%87%E8%AE%B2%E4%B9%89/">https://yhao521.github.io/2021/09/15/%E5%9F%BA%E7%A1%80%E7%AF%87%E8%AE%B2%E4%B9%89/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/java-programming/">java/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2021/09/15/%E5%B9%B6%E5%8F%91%E7%AF%87%E8%AE%B2%E4%B9%89/" title="并发篇讲义"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">并发篇讲义</div></div><div class="info-2"><div class="info-item-1">并发篇1. 线程状态要求  掌握 Java 线程六种状态 掌握 Java 线程状态转换 能理解五种状态与六种状态两种说法的区别  六种状态及转换 分别是  新建 当一个线程对象被创建，但还未调用 start 方法时处于新建状态 此时未与操作系统底层线程关联   可运行 调用了 start 方法，就会由新建进入可运行 此时与底层线程关联，由操作系统调度执行   终结 线程内代码已经执行完毕，由可运行进入终结 此时会取消与底层线程关联   阻塞 当获取锁失败后，由可运行进入 Monitor 的阻塞队列阻塞，此时不占用 cpu 时间 当持锁线程释放锁时，会按照一定规则唤醒阻塞队列中的阻塞线程，唤醒后的线程进入可运行状态   等待 当获取锁成功后，但由于条件不满足，调用了 wait() 方法，此时从可运行状态释放锁进入 Monitor 等待集合等待，同样不占用 cpu 时间 当其它持锁线程调用 notify() 或 notifyAll() 方法，会按照一定规则唤醒等待集合中的等待线程，恢复为可运行状态   有时限等待 当获取锁成功后，但由于条件不满足，调用了 wait(long) 方法，...</div></div></div></a><a class="pagination-related" href="/2020/12/01/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-1/" title="设计模式-1"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">设计模式-1</div></div><div class="info-2"><div class="info-item-1">1，设计模式概述1.1 软件设计模式的产生背景“设计模式”最初并不是出现在软件设计中，而是被用于建筑领域的设计中。 1977年美国著名建筑大师、加利福尼亚大学伯克利分校环境结构中心主任克里斯托夫·亚历山大（Christopher Alexander）在他的著作《建筑模式语言：城镇、建筑、构造》中描述了一些常见的建筑设计问题，并提出了 253 种关于对城镇、邻里、住宅、花园和房间等进行设计的基本模式。 1990年软件工程界开始研讨设计模式的话题，后来召开了多次关于设计模式的研讨会。直到1995 年，艾瑞克·伽马（ErichGamma）、理査德·海尔姆（Richard Helm）、拉尔夫·约翰森（Ralph Johnson）、约翰·威利斯迪斯（John Vlissides）等 4 位作者合作出版了《设计模式：可复用面向对象软件的基础》一书，在此书中收录了 23 个设计模式，这是设计模式领域里程碑的事件，导致了软件设计模式的突破。这 4 位作者在软件开发领域里也以他们的“四人组”（Gang of Four，GoF）著称。   1.2 软件设计模式的概念软件设计模式（Software D...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2024/04/19/antlr%E7%94%9F%E6%88%90%E8%A7%A3%E6%9E%90%E5%99%A8%E4%BB%A3%E7%A0%81/" title="antlr生成解析器代码"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-19</div><div class="info-item-2">antlr生成解析器代码</div></div><div class="info-2"><div class="info-item-1">antlr生成解析器代码安装123456cd ~/Applications/Developer &amp;&amp; curl -O https://www.antlr.org/download/antlr-4.13.1-complete.jarexport CLASSPATH=&quot;.:~/Applications/Developer/antlr-4.13.1-complete.jar:$CLASSPATH&quot;alias antlr4=&#x27;java -Xmx500M -cp &quot;~/Applications/Developer/antlr-4.13.1-complete.jar:$CLASSPATH&quot; org.antlr.v4.Tool&#x27;alias grun=&#x27;java -Xmx500M -cp &quot;~/Applications/Developer/antlr-4.13.1-complete.jar:$CLASSPATH&quot; org.antlr.v4.gui.TestRig&#x27;  https:/...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E5%91%BD%E4%BB%A4/" title="命令"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">命令</div></div><div class="info-2"><div class="info-item-1"> title: 命令date: 2023-09-03 20:17:08category: tag: author:  12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455CLASSPATH%JAVA_HOME%\lib\dt.jar;%JAVA_HOME%\lib\tools.jar;%JAVA_HOME%\jre\lib;mysqlbinlog  --base64-output=decode-rows -v mysql_bin.000005    &gt;   test000005.sqlmysqlbinlog -vv --base64-output=DECODE-ROWS mysql_bin.000004    &gt;   test000004.sqlcat /paas/iddbs/yanghao_ac/6.sql |grep &#x27;DROP DATABASE IF EXISTS\|^CREATE DATABASE\|^...</div></div></div></a><a class="pagination-related" href="/2025/03/16/%E5%9C%A8%E6%B5%8F%E8%A7%88%E5%99%A8%E4%B8%AD%E5%BF%AB%E9%80%9F%E6%8E%A2%E6%B5%8BIP%E7%AB%AF%E5%8F%A3%E6%98%AF%E5%90%A6%E5%BC%80%E6%94%BE/" title="在浏览器中快速探测IP端口是否开放"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-16</div><div class="info-item-2">在浏览器中快速探测IP端口是否开放</div></div><div class="info-2"><div class="info-item-1">0×00 前言前两天 freebuf上的的XSS到内网的公开课很受启发，从一个页面到局域网，威力着实增强不少 公开课上检测内网 IP 实现方式用的是 img 标签，加载网站的 favicon.ico 图标，然后监听 onload 事件，看图片能不能加载成功简单易用，就是太慢了 –  0×02 分析浏览器有几秒的尝试容错时间，对于媒体资源，浏览器限制同一域名并发请求为个位数（一般为 6 个），也就是说，把图片全放到页面上，也不能同时开始检测，只能一点一点来，扫端口的时候会非常慢。 管理员在内网搭建的东西也可能没有图标。。。 探测 IP 端口开放原理就是向目标发送请求，看是否有回应。在上面的 img 中是在加载成功和失败体现出来的。img 嫌慢也可以试试别的嘛，经过一番搜索找到了这个，这个和这个。 第一个页面:1document.getElementById(&quot;testdiv&quot;).innerHTML = &#x27;&lt;img src=&quot;http://&#x27; + ip + &#x27;:&#x27; + port + &#x27;&quot; ...</div></div></div></a><a class="pagination-related" href="/2023/09/04/nexus%E8%87%AA%E5%90%AF%E5%8A%A8/" title="nexus自启动"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">nexus自启动</div></div><div class="info-2"><div class="info-item-1"> title: nexus自启动lang: en-USdate: 2023-09-03 20:17:08category:  nexustag: nexusauthor:   1. nexus自启动1.1. 1、进入到&#x2F;etc&#x2F;init.d目录下，新建一个nexus脚本cd   &#x2F;etc&#x2F;init.d vi nexus #!/bin/bash #chkconfig:2345 20 90 #description:nexus #processname:nexus  export JAVA_HOME=/home/yhao521/centos_default_enr/jdk1.8.0_211  NEXUS3TOOLS_HOME=/home/yhao521/dockerImageMake/tools/nexus3Tools   case $1 in         start) $NEXUS3TOOLS_HOME/snexus start;;         stop)  $NEXUS3TOOLS_HOME/snexus stop;;       ...</div></div></div></a><a class="pagination-related" href="/2023/09/04/starUML%E6%BF%80%E6%B4%BB/" title="starUML激活"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">starUML激活</div></div><div class="info-2"><div class="info-item-1"> title: starUML激活date: 2023-09-03 20:17:08category:  UML类图tag: UML类图author:   StarUML（一） —— 简介和破解（一） 刀客传奇关注 0.1232022.01.03 17:34:47字数 795阅读 1,289 版本记录   版本号 时间    V1.0 2022.01.03 星期一   前言 StarUML(简称SU)，是一种创建UML类图，生成类图和其他类型的统一建模语言(UML)图表的工具。StarUML是一个开源项目之一发展快、灵活、可扩展性强。我们一般都是使用这个软件画一个时序图和软件图等，特别是软件图是我们常用的，用来反映各个模块各个类之间的关系。  简介StarUML是一款开放源码的UML开发工具，是由韩国公司主导开发出来的产品，可以直接到StarUML网站下载。可以用来创建UML类图。  可绘制9款UML图：用例图、类图、序列图、状态图、活动图、通信图、构件图、部署图以及复合结构图等。  完全免费：StarUML是一套开放源码的软件，不仅免费自由下载，连代码都免费开放。 多种格式影像...</div></div></div></a><a class="pagination-related" href="/2023/09/04/Alertmanager%E7%AF%87/" title="Alertmanager篇"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">Alertmanager篇</div></div><div class="info-2"><div class="info-item-1"> title: Alertmanager篇date: 2023-09-03 20:17:08category: tag: author:  Alertmanager篇报一直是整个监控系统中的重要组成部分，Prometheus监控系统中，采集与警报是分离的。警报规则在 Prometheus 定义，警报规则触发以后，才会将信息转发到给独立的组件 Alertmanager ，经过 Alertmanager r对警报的信息处理后，最终通过接收器发送给指定用户，另外在 Alertmanager 中没有通知组的概念，只能自己对软件重新Coding，或者使用第三方插件来实现。 注意，这个通知组不是Alertmanager中的group概念，下面会详细讲 Group ，不要混淆哦。 前面已经介绍过一些关于 Alertmanager 知识点，本章开始针通过安装 Alertmanager 组件，对配置文件做详细说明，同时介绍 Prometheus 的警报规则的定义，最后使用Email、Wechat（Robot）、Dingtalk（webhook）来接受警报通知。 Alertmanager工作机制 在...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9F%BA%E7%A1%80%E7%AF%87"><span class="toc-number">1.</span> <span class="toc-text">基础篇</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E4%BA%8C%E5%88%86%E6%9F%A5%E6%89%BE"><span class="toc-number">1.1.</span> <span class="toc-text">1. 二分查找</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E5%86%92%E6%B3%A1%E6%8E%92%E5%BA%8F"><span class="toc-number">1.2.</span> <span class="toc-text">2. 冒泡排序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E9%80%89%E6%8B%A9%E6%8E%92%E5%BA%8F"><span class="toc-number">1.3.</span> <span class="toc-text">3. 选择排序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E6%8F%92%E5%85%A5%E6%8E%92%E5%BA%8F"><span class="toc-number">1.4.</span> <span class="toc-text">4. 插入排序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E5%B8%8C%E5%B0%94%E6%8E%92%E5%BA%8F"><span class="toc-number">1.5.</span> <span class="toc-text">5. 希尔排序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F"><span class="toc-number">1.6.</span> <span class="toc-text">6. 快速排序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-ArrayList"><span class="toc-number">1.7.</span> <span class="toc-text">7. ArrayList</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-Iterator"><span class="toc-number">1.8.</span> <span class="toc-text">8. Iterator</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#9-LinkedList"><span class="toc-number">1.9.</span> <span class="toc-text">9. LinkedList</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#10-HashMap"><span class="toc-number">1.10.</span> <span class="toc-text">10. HashMap</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1%EF%BC%89%E5%9F%BA%E6%9C%AC%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-number">1.10.1.</span> <span class="toc-text">1）基本数据结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2%EF%BC%89%E6%A0%91%E5%8C%96%E4%B8%8E%E9%80%80%E5%8C%96"><span class="toc-number">1.10.2.</span> <span class="toc-text">2）树化与退化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3%EF%BC%89%E7%B4%A2%E5%BC%95%E8%AE%A1%E7%AE%97"><span class="toc-number">1.10.3.</span> <span class="toc-text">3）索引计算</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4%EF%BC%89put-%E4%B8%8E%E6%89%A9%E5%AE%B9"><span class="toc-number">1.10.4.</span> <span class="toc-text">4）put 与扩容</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5%EF%BC%89%E5%B9%B6%E5%8F%91%E9%97%AE%E9%A2%98"><span class="toc-number">1.10.5.</span> <span class="toc-text">5）并发问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6%EF%BC%89key-%E7%9A%84%E8%AE%BE%E8%AE%A1"><span class="toc-number">1.10.6.</span> <span class="toc-text">6）key 的设计</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#11-%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F"><span class="toc-number">1.11.</span> <span class="toc-text">11. 单例模式</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

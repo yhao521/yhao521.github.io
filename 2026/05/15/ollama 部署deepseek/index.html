@@ -1,0 +1,215 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>ollama 部署deepseek | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Ollama 是一款开源 macOS 应用程序（适用于 Apple Silicon），可让你通过命令行界面运行、创建和共享大型语言模型。 Ollama 已经支持 Llama 2。 要使用 Ollama CLI，请从 ollama.ai&#x2F;download 下载 macOS 应用程序。 安装完成后，就可以下载 Lllama 2，而无需注册帐户或加入任何等待名单。 在你的终端中运行： 1234">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ollama 部署deepseek">
+<meta property="og:url" content="https://yhao521.github.io/2026/05/15/ollama%20%E9%83%A8%E7%BD%B2deepseek/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="Ollama 是一款开源 macOS 应用程序（适用于 Apple Silicon），可让你通过命令行界面运行、创建和共享大型语言模型。 Ollama 已经支持 Llama 2。 要使用 Ollama CLI，请从 ollama.ai&#x2F;download 下载 macOS 应用程序。 安装完成后，就可以下载 Lllama 2，而无需注册帐户或加入任何等待名单。 在你的终端中运行： 1234">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2026-05-14T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-17T16:00:00.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="obsidian">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "ollama 部署deepseek",
+  "url": "https://yhao521.github.io/2026/05/15/ollama%20%E9%83%A8%E7%BD%B2deepseek/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2026-05-14T16:00:00.000Z",
+  "dateModified": "2026-05-17T16:00:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2026/05/15/ollama%20%E9%83%A8%E7%BD%B2deepseek/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'ollama 部署deepseek',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">ollama 部署deepseek</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">ollama 部署deepseek</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-05-14T16:00:00.000Z" title="发表于 2026-05-15 00:00:00">2026-05-15</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-17T16:00:00.000Z" title="更新于 2026-05-18 00:00:00">2026-05-18</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>Ollama 是一款开源 macOS 应用程序（适用于 Apple Silicon），可让你通过命令行界面运行、创建和共享大型语言模型。 Ollama 已经支持 Llama 2。</p>
+<p>要使用 Ollama CLI，请从 ollama.ai&#x2F;download 下载 macOS 应用程序。 安装完成后，就可以下载 Lllama 2，而无需注册帐户或加入任何等待名单。 在你的终端中运行：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># download the 7B model (3.8 GB)</span></span><br><span class="line">ollama pull llama2</span><br><span class="line"></span><br><span class="line"><span class="comment"># or the 13B model (7.3 GB)</span></span><br><span class="line">ollama pull llama2:13b</span><br></pre></td></tr></table></figure>
+
+<p>然后你可以运行模型并与它聊天：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ollama run llama2</span><br><span class="line">&gt;&gt;&gt; hi</span><br><span class="line">Hello! How can I <span class="built_in">help</span> you today?</span><br></pre></td></tr></table></figure>
+
+<p>注意：Ollama 建议至少有 8 GB RAM 来运行 3B 模型，16 GB 来运行 7B 模型，32 GB 来运行 13B 模型。<br>下载 运行 deepseek-r1</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ollama run deepseek-r1:8b</span><br><span class="line"></span><br><span class="line"><span class="comment"># ollama 配置 然后冲起ollama</span></span><br><span class="line">launchctl setenv OLLAMA_ORIGINS <span class="string">&quot;app://obsidian.md*&quot;</span></span><br><span class="line">ollama serve</span><br></pre></td></tr></table></figure>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2026/05/15/ollama%20%E9%83%A8%E7%BD%B2deepseek/">https://yhao521.github.io/2026/05/15/ollama%20%E9%83%A8%E7%BD%B2deepseek/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/obsidian/">obsidian</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/05/15/vue3%E4%B8%AD%E4%BD%BF%E7%94%A8echart%EF%BC%8C%E6%8C%89%E9%9C%80%E5%BC%95%E5%85%A5%E5%92%8Cvite%E6%89%93%E5%8C%85%E4%BC%98%E5%8C%96/" title="vue3中使用echart，按需引入和vite打包优化"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">vue3中使用echart，按需引入和vite打包优化</div></div><div class="info-2"><div class="info-item-1">在项目的开发中需要使用echart完成数据的可视化展示，因为只是使用到折线图和柱状图，但是在打包的时候，发现echart会全部打包进去，为减少编译后的包体积进行相关设置的配置。（当然除了设置按需引入，也可以使用cdn的方式，此篇不涉及） 12pnpm i echart --save-dev1AI写代码  在util中新建commonEchart.ts 12345678910111213141516171819202122232425262728293031323334353637// 引入 echarts 核心模块，核心模块提供了 echarts 使用必须要的接口。import * as echarts from &quot;echarts/core&quot;; /** 引入柱状图and折线图图表，图表后缀都为 Chart  */import &#123; BarChart, LineChart &#125; from &quot;echarts/charts&quot;; // 引入提示框，标题，直角坐标系，数据集，内置数据转换器组件，组件后缀都为 Componentimpo...</div></div></div></a><a class="pagination-related" href="/2026/05/15/obsidian%E6%8F%92%E4%BB%B6%E4%B9%8Bdataview%E5%85%A5%E9%97%A8/" title="obsidian插件之dataview入门"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">obsidian插件之dataview入门</div></div><div class="info-2"><div class="info-item-1">写在前面Dataview可谓是ob用户的必备的插件了，当你积累了10+篇自己的笔记，可以用它来生成目录。 在此之前，我想对造轮子说两句。 写笔记也好，做什么东西也好，我认为很忌讳的一点是过度设计，废了很大的功夫想要在一切开始之前造一个完美的轮子，结果造完之后极大可能你的记笔记热情已经没有了。 所以我不建议你等待，等待任何笔记流程的设计。不是有了完美工作流之后你才能开始工作，而是做着做着就根据自己的场景和需要慢慢铺就了适合你的工作流。 这也是渐进式笔记的概念。ob当时带着双链和关系图谱出现，本意就是让使用者渐进式的搭建自己的知识库。 渐进式的观点还能很好的改善完美主义。（刚看完《如何成为不完美主义》的一点小启发。） 这也就是我为什么说等你积累到10篇以上，会需要这篇文章。如果你才开始记笔记，请先放下一切问题，先记起来。 言归正传，来看看dataview的使用场景。  使用场景假设你现在积累了一众笔记，这些笔记之间除了双链还有一些关联，现在你想要一个目录，可以一目了然的聚合这些笔记。 以下是一些场景：  生成包含同样关键字的笔记的目录 生成同一个标签的笔记的目录 生成同一个作者的书目...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/05/15/obsidian%E6%8F%92%E4%BB%B6%E4%B9%8Bdataview%E5%85%A5%E9%97%A8/" title="obsidian插件之dataview入门"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-15</div><div class="info-item-2">obsidian插件之dataview入门</div></div><div class="info-2"><div class="info-item-1">写在前面Dataview可谓是ob用户的必备的插件了，当你积累了10+篇自己的笔记，可以用它来生成目录。 在此之前，我想对造轮子说两句。 写笔记也好，做什么东西也好，我认为很忌讳的一点是过度设计，废了很大的功夫想要在一切开始之前造一个完美的轮子，结果造完之后极大可能你的记笔记热情已经没有了。 所以我不建议你等待，等待任何笔记流程的设计。不是有了完美工作流之后你才能开始工作，而是做着做着就根据自己的场景和需要慢慢铺就了适合你的工作流。 这也是渐进式笔记的概念。ob当时带着双链和关系图谱出现，本意就是让使用者渐进式的搭建自己的知识库。 渐进式的观点还能很好的改善完美主义。（刚看完《如何成为不完美主义》的一点小启发。） 这也就是我为什么说等你积累到10篇以上，会需要这篇文章。如果你才开始记笔记，请先放下一切问题，先记起来。 言归正传，来看看dataview的使用场景。  使用场景假设你现在积累了一众笔记，这些笔记之间除了双链还有一些关联，现在你想要一个目录，可以一目了然的聚合这些笔记。 以下是一些场景：  生成包含同样关键字的笔记的目录 生成同一个标签的笔记的目录 生成同一个作者的书目...</div></div></div></a><a class="pagination-related" href="/2026/05/15/%E5%A6%82%E4%BD%95%E5%AE%89%E8%A3%85%E6%8F%92%E4%BB%B6%EF%BC%9F%E3%80%90%E7%8E%A9%E8%BD%ACObsidian%E7%9A%84%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%E3%80%91/" title="如何安装插件？【玩转Obsidian的保姆级教程】"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-15</div><div class="info-item-2">如何安装插件？【玩转Obsidian的保姆级教程】</div></div><div class="info-2"><div class="info-item-1">插件是个好东西，但是我们要先知道： Obsidian中的插件分为两种： 核心插件 第三方插件  今天我们侧重讲【第三方插件】的使用 如何安装[[第三方插件]]安装分为两种： ob自带安装功能，可直接在ob内安装  2. ob自带的安装功能受限（网络问题），需要自己手动安装  对于这两种方法，我们一个一个来说首先，对于ob自带的安装功能：  （目前插件的介绍都是英文）  1. 打开设置  2. 选择第三方插件（Third-party plugin），并关闭安全模式（Safe Mode）  1. 选择社区插件（Community plugins）  2. 这个时候，就会出现各种插件了(plugins)  3. 选择一个插件，点击安装（install）  4. 安装的时候，右上角会弹出显示：  5. 安装成功了还不算完成，还需要启用你的插件  ]当你的**启用**变为禁用之后，说明你的插件开始运作了  6. 仔细阅读插件的使用手则（英文有点不友好），然后按照指示就可以在自己的ob里使用插件了。  再次注意，上述方法对网络要求较高，甚至需要**魔法**（你懂的），对于魔法的使用教程，这里...</div></div></div></a><a class="pagination-related" href="/2026/05/15/H1%20is%20null/" title="H1 is null"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-15</div><div class="info-item-2">H1 is null</div></div><div class="info-2"><div class="info-item-1">核心插件漫游笔记开启这个插件后，在你的侧边栏会出现一个骰子的图标，每次点击后会随机出现你的一篇笔记，就是这么个简单的功能。  我发现众多笔记软件里，似乎只有 Obsidian 出厂自带这个功能。 私认为这个简单的功能蕴含了非常强大的生活哲学，对于用得上它的人会非常强大，平时我们做笔记的一大痛点就是，做完笔记从来不记得去常常翻阅，即使你想要去翻阅，面对这么多笔记，也不知从何下手，既然这样，不如「掷骰子」吧。 之前看过一篇博主的分享，他在使用任务管理工具 OmniFocus 时，虽然安排好了自己要做哪些事情事情，可是除非到了硬性的 deadline，自己都很抗拒主动做那些事情，相信不少人应该也有同样的困扰吧，于是他写了一点脚本，随机从所有任务中抽取一项，抽取到哪一个就必须去完成，这个简单的脚本很好地解决了他的拖延症。 第三方插件Customizable Menu &amp; ToolBar &amp; Page Header and Title BarObsidian 的功能很多，更不用说庞大的插件数量，但是屏幕上没法放这么多图标，我们也没法记住每一个的快捷键，那么折中的一个方案就是...</div></div></div></a><a class="pagination-related" href="/2026/05/15/%E6%8F%92%E4%BB%B6%E7%9F%A5%E5%A4%9A%E5%B0%91%EF%BC%9AExcalidraw%20%E5%AE%8C%E7%BE%8E%E7%9A%84%E7%BB%98%E5%9B%BE%E5%B7%A5%E5%85%B7/" title="插件知多少：Excalidraw 完美的绘图工具"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-15</div><div class="info-item-2">插件知多少：Excalidraw 完美的绘图工具</div></div><div class="info-2"><div class="info-item-1"> 本文已收录至 PKMer 网站，原作者：windilycloud，略有删改   Excalidraw  Excalidraw 插件信息插件名称：Excalidraw插件作者：Zsolt Viczian插件说明：在 Obsidian 中 使用 Excalidraw 绘图项目地址：点我访问国内下载地址：PKMer插件市场   什么是 Excalidraw？ Excalidraw 本是开源的在线协作手写软件，来自匈牙利的 Zsolt Viczian 大叔将其融合进了 Obsidian。这个融合是高度融合，目前与原项目已经大相径庭了，主要差别在于对 Obsidian 的适配，包括双链，文件拖拽，嵌入笔记并实时更新，脚本系统，图库系统，手写压感，pdf 批注和引用等。 这样强大的插件，完全可以当作一个独立的软件来学习！这个大叔倡导的是视觉化笔记，笔记方法也很值得参考。大叔在官方 Github 项目下录有数十个从入门到进阶的教程，并有分享笔记方法在 Youtube 上。本文只起到一个引导的作用，很难面面俱到 Excalidraw 插件的功能，非常强大。  Excalidraw 与 mark...</div></div></div></a><a class="pagination-related" href="/2026/05/15/%E6%83%B3%E4%B8%80%E5%B0%8F%E6%97%B6%E4%B8%8A%E6%89%8Bobsidian%EF%BC%9F%E8%BF%99%E4%B8%80%E7%AF%87%E5%B0%B1%E5%A4%9F%E4%BA%86%E3%80%82%E3%80%90%E7%8E%A9%E8%BD%ACObsidian%E7%9A%84%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%E3%80%91/" title="想一小时上手obsidian？这一篇就够了。【玩转Obsidian的保姆级教程】"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-15</div><div class="info-item-2">想一小时上手obsidian？这一篇就够了。【玩转Obsidian的保姆级教程】</div></div><div class="info-2"><div class="info-item-1">关于Obsidian的基本使用，这一篇足矣。 写在开头的话：这篇教程大多是介绍obsidian原生功能的使用方法，如果你下好obsidian，面对obsidian的界面一头雾水，建议收藏，使用的时候按照目录参考一下。如果读完仍有疑问，欢迎评论，或者私信我加我微信都可以。我建了一个qq群，会同步与文章更新一些资源和模板，如果有什么问题也欢迎来到群里讨论呀：184533202    使用前的忠告：- 不要刚下好obsidian就想着使用插件，大部分插件只是增强一些功能，建议先熟悉一下ob的基本使用功能。- 个人认为外观设置没那么重要，如果以记录为主最好不要纠结CSS怎么写！再说一遍，不要纠结CSS怎么写！- 刚开始用可以不用了解mermaid、dataview、yaml等语法，先掌握Markdown语法为重中之重。- 注重笔记内容。  如果你使用obsidian是为了搭建自己的知识管理系统，欢迎关注我最近正在更新的专题： 一. 如何下载？如果想了解ob是什么，有什么用，可以浏览我之前写过的一些文章： 或者浏览官网[Obsidian](Obsidian: A knowledge bas...</div></div></div></a><a class="pagination-related" href="/2026/05/15/Obsidian-%E6%8F%92%E4%BB%B6%E6%B1%87%E6%80%BB%EF%BC%8820240112%E6%9B%B4%E6%96%B0-%E6%8C%81%E7%BB%AD%E4%BF%AE%E6%94%B9%E5%A2%9E%E6%B7%BB%E4%B8%AD%EF%BC%89/" title="Obsidian-插件汇总（20240112更新-持续修改增添中）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-15</div><div class="info-item-2">Obsidian-插件汇总（20240112更新-持续修改增添中）</div></div><div class="info-2"><div class="info-item-1"> 个人使用的obsidian插件推荐、汇总。  持续更新。  20210726-更新-新增插件介绍  admonition  atuo link title（自动补全链接标题）  checklist（检查库中的所有清单）  collapse all（快速折叠所有文件夹层）  clear unused images（清理未链接的图片）  20211029-特别更新-界面美化-Discordian主题以及插件  20220323-更新- Better Word Count 的作者公告。  因实时预览的功能加入，该插件无法继续使用句子的计数，但其余功能可用。  20220921-更新  由于时间久远，之前压缩包内插件已大部分失效（主要是没有更新到最新版本），故更新。  发现文章的部分动图不能动了，故删除。  新增插件介绍  Periodic Notes（可以说是增强的日记插件）  Privacy Glasses（模糊你的文档界面）  20221019-Obsidian 版本大更新！耶！  众望所归的窗口堆堆乐（不是）在 v.1.0 已经实现，无需插件辅助！（如 Sliding Pane...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

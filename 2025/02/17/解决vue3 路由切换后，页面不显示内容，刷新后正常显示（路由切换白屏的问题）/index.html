@@ -1,0 +1,208 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>解决vue3 路由切换后，页面不显示内容，刷新后正常显示（路由切换白屏的问题） | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="正常使用时切换路由都可以正常地切换页面，但是页面长时间无操作就会浮现该问题。使用导航切换路由，路由可以正常跳转，地址栏有变化，但页面不显示。排查：1、控制台无报错2、切换的各级页面均有根标签节点包裹解决办法：在router-view 中给路由添加key标识。！！注意：有使用layout封装布局的，是在layout下的主页面中的 router-view 添加标识，不是在src根目录下main.vue">
+<meta property="og:type" content="article">
+<meta property="og:title" content="解决vue3 路由切换后，页面不显示内容，刷新后正常显示（路由切换白屏的问题）">
+<meta property="og:url" content="https://yhao521.github.io/2025/02/17/%E8%A7%A3%E5%86%B3vue3%20%E8%B7%AF%E7%94%B1%E5%88%87%E6%8D%A2%E5%90%8E%EF%BC%8C%E9%A1%B5%E9%9D%A2%E4%B8%8D%E6%98%BE%E7%A4%BA%E5%86%85%E5%AE%B9%EF%BC%8C%E5%88%B7%E6%96%B0%E5%90%8E%E6%AD%A3%E5%B8%B8%E6%98%BE%E7%A4%BA%EF%BC%88%E8%B7%AF%E7%94%B1%E5%88%87%E6%8D%A2%E7%99%BD%E5%B1%8F%E7%9A%84%E9%97%AE%E9%A2%98%EF%BC%89/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="正常使用时切换路由都可以正常地切换页面，但是页面长时间无操作就会浮现该问题。使用导航切换路由，路由可以正常跳转，地址栏有变化，但页面不显示。排查：1、控制台无报错2、切换的各级页面均有根标签节点包裹解决办法：在router-view 中给路由添加key标识。！！注意：有使用layout封装布局的，是在layout下的主页面中的 router-view 添加标识，不是在src根目录下main.vue">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2025-02-16T23:45:30.000Z">
+<meta property="article:modified_time" content="2025-02-16T23:50:02.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="vue">
+<meta property="article:tag" content="web&#x2F;frontend">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "解决vue3 路由切换后，页面不显示内容，刷新后正常显示（路由切换白屏的问题）",
+  "url": "https://yhao521.github.io/2025/02/17/%E8%A7%A3%E5%86%B3vue3%20%E8%B7%AF%E7%94%B1%E5%88%87%E6%8D%A2%E5%90%8E%EF%BC%8C%E9%A1%B5%E9%9D%A2%E4%B8%8D%E6%98%BE%E7%A4%BA%E5%86%85%E5%AE%B9%EF%BC%8C%E5%88%B7%E6%96%B0%E5%90%8E%E6%AD%A3%E5%B8%B8%E6%98%BE%E7%A4%BA%EF%BC%88%E8%B7%AF%E7%94%B1%E5%88%87%E6%8D%A2%E7%99%BD%E5%B1%8F%E7%9A%84%E9%97%AE%E9%A2%98%EF%BC%89/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2025-02-16T23:45:30.000Z",
+  "dateModified": "2025-02-16T23:50:02.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2025/02/17/%E8%A7%A3%E5%86%B3vue3%20%E8%B7%AF%E7%94%B1%E5%88%87%E6%8D%A2%E5%90%8E%EF%BC%8C%E9%A1%B5%E9%9D%A2%E4%B8%8D%E6%98%BE%E7%A4%BA%E5%86%85%E5%AE%B9%EF%BC%8C%E5%88%B7%E6%96%B0%E5%90%8E%E6%AD%A3%E5%B8%B8%E6%98%BE%E7%A4%BA%EF%BC%88%E8%B7%AF%E7%94%B1%E5%88%87%E6%8D%A2%E7%99%BD%E5%B1%8F%E7%9A%84%E9%97%AE%E9%A2%98%EF%BC%89/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '解决vue3 路由切换后，页面不显示内容，刷新后正常显示（路由切换白屏的问题）',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">解决vue3 路由切换后，页面不显示内容，刷新后正常显示（路由切换白屏的问题）</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">解决vue3 路由切换后，页面不显示内容，刷新后正常显示（路由切换白屏的问题）</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-02-16T23:45:30.000Z" title="发表于 2025-02-17 07:45:30">2025-02-17</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-02-16T23:50:02.000Z" title="更新于 2025-02-17 07:50:02">2025-02-17</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>正常使用时切换路由都可以正常地切换页面，但是页面长时间无操作就会浮现该问题。使用导航切换路由，路由可以正常跳转，地址栏有变化，但页面不显示。<br>排查：<br>1、控制台无报错<br>2、切换的各级页面均有根标签节点包裹<br><strong>解决办法：<br>在router-view 中给路由添加key标识。<br>！！注意：有使用layout封装布局的，是在layout下的主页面中的 router-view 添加标识，不是在src根目录下main.vue中修改（在这个文件修改会造成每次切换路由导航标签都会收起）</strong></p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">&lt;script setup lang=<span class="string">&quot;ts&quot;</span>&gt;</span><br><span class="line"><span class="keyword">import</span> &#123; useTagsViewStore &#125; <span class="keyword">from</span> <span class="string">&quot;@/store/modules/tagsView&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> &#123; useRoute&#125; <span class="keyword">from</span> <span class="string">&quot;vue-router&quot;</span>;</span><br><span class="line"><span class="keyword">const</span> tagsViewStore = <span class="title function_">useTagsViewStore</span>();</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> route = <span class="title function_">useRoute</span>();</span><br><span class="line"><span class="keyword">const</span> key = <span class="title function_">computed</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> route.<span class="property">path</span> + <span class="title class_">Math</span>.<span class="title function_">random</span>();</span><br><span class="line">&#125;);</span><br><span class="line">&lt;/script&gt;</span><br><span class="line"></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">template</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">  <span class="tag">&lt;<span class="name">section</span> <span class="attr">class</span>=<span class="string">&quot;app-main&quot;</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">    <span class="tag">&lt;<span class="name">router-view</span> <span class="attr">v-slot</span>=<span class="string">&quot;&#123; Component, route &#125;&quot;</span> <span class="attr">:key</span>=<span class="string">&quot;key&quot;</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">      <span class="tag">&lt;<span class="name">transition</span> <span class="attr">name</span>=<span class="string">&quot;router-fade&quot;</span> <span class="attr">mode</span>=<span class="string">&quot;out-in&quot;</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">        <span class="tag">&lt;<span class="name">keep-alive</span> <span class="attr">:include</span>=<span class="string">&quot;tagsViewStore.cachedViews&quot;</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">          <span class="tag">&lt;<span class="name">component</span> <span class="attr">:is</span>=<span class="string">&quot;Component&quot;</span> <span class="attr">:key</span>=<span class="string">&quot;route.fullPath&quot;</span> /&gt;</span></span></span><br><span class="line"><span class="language-xml">        <span class="tag">&lt;/<span class="name">keep-alive</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">      <span class="tag">&lt;/<span class="name">transition</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">    <span class="tag">&lt;/<span class="name">router-view</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">  <span class="tag">&lt;/<span class="name">section</span>&gt;</span></span></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;/<span class="name">template</span>&gt;</span></span></span><br></pre></td></tr></table></figure></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2025/02/17/%E8%A7%A3%E5%86%B3vue3%20%E8%B7%AF%E7%94%B1%E5%88%87%E6%8D%A2%E5%90%8E%EF%BC%8C%E9%A1%B5%E9%9D%A2%E4%B8%8D%E6%98%BE%E7%A4%BA%E5%86%85%E5%AE%B9%EF%BC%8C%E5%88%B7%E6%96%B0%E5%90%8E%E6%AD%A3%E5%B8%B8%E6%98%BE%E7%A4%BA%EF%BC%88%E8%B7%AF%E7%94%B1%E5%88%87%E6%8D%A2%E7%99%BD%E5%B1%8F%E7%9A%84%E9%97%AE%E9%A2%98%EF%BC%89/">https://yhao521.github.io/2025/02/17/%E8%A7%A3%E5%86%B3vue3%20%E8%B7%AF%E7%94%B1%E5%88%87%E6%8D%A2%E5%90%8E%EF%BC%8C%E9%A1%B5%E9%9D%A2%E4%B8%8D%E6%98%BE%E7%A4%BA%E5%86%85%E5%AE%B9%EF%BC%8C%E5%88%B7%E6%96%B0%E5%90%8E%E6%AD%A3%E5%B8%B8%E6%98%BE%E7%A4%BA%EF%BC%88%E8%B7%AF%E7%94%B1%E5%88%87%E6%8D%A2%E7%99%BD%E5%B1%8F%E7%9A%84%E9%97%AE%E9%A2%98%EF%BC%89/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/web-frontend/">web/frontend</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/vue/">vue</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/02/19/Android%E4%BD%BF%E7%94%A8Gradle%E5%91%BD%E4%BB%A4%E5%8A%A8%E6%80%81%E4%BC%A0%E5%8F%82%E5%AE%8C%E6%88%90%E6%89%93%E5%8C%85%EF%BC%8C%E4%B8%8D%E9%9C%80%E8%A6%81%E4%BF%AE%E6%94%B9%E4%BB%A3%E7%A0%81/" title="Android使用Gradle命令动态传参完成打包，不需要修改代码"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Android使用Gradle命令动态传参完成打包，不需要修改代码</div></div><div class="info-2"><div class="info-item-1">Android使用Gradle命令动态传参完成打包，不需要修改代码不得不说，Gradle很强大，有人会问Gradle是什么？这里也不细讲，在我认为他就是一个构建神器。Gradle 提供了:  一个像 Ant 一样的非常灵活的通用构建工具 一种可切换的, 像 Maven 一样的基于合约构建的框架 支持强大的多工程构建 支持强大的依赖管理(基于 ApacheIvy ) 支持已有的 Maven 和 ivy 仓库 支持传递性依赖管理, 而不需要远程仓库或者 pom.xml 或者 ivy 配置文件 基于 Groovy 的构建脚本 有丰富的领域模型来描述你的构建   build.gradle文件  首先先来说说这个文件，大家都知道Android 项目默认目录下就有两个build.gradle文件，其实也类似Maven中的pom.xml文件，一个是Project范围的，另一个是Module范围的，由于一个Project可以有多个Module，所以每个Module下都会对应一个build.gradle。  这两个文件是有区别的，Project下的build.gradle是基于整个Project的...</div></div></div></a><a class="pagination-related" href="/2025/02/16/AnythingLLM%EF%BC%9A34K%20Star%EF%BC%81%E4%B8%80%E9%94%AE%E4%B8%8A%E4%BC%A0%E6%96%87%E4%BB%B6%E8%BD%BB%E6%9D%BE%E6%89%93%E9%80%A0%E4%B8%AA%E4%BA%BA%E7%9F%A5%E8%AF%86%E5%BA%93%EF%BC%8C%E6%9E%84%E5%BB%BA%E5%8F%AA%E5%B1%9E%E4%BA%8E%E4%BD%A0%E7%9A%84AI%E5%8A%A9%E6%89%8B%EF%BC%8C%E9%99%84/" title="AnythingLLM：34K Star！一键上传文件轻松打造个人知识库，构建只属于你的AI助手，附详细部署教程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">AnythingLLM：34K Star！一键上传文件轻松打造个人知识库，构建只属于你的AI助手，附详细部署教程</div></div><div class="info-2"><div class="info-item-1">❤️ 如果你也关注 AI 的发展现状，且对 AI 应用开发非常感兴趣，我会每日分享大模型与 AI 领域的最新开源项目和应用，提供运行实例和实用教程，帮助你快速上手AI技术！  大家好，我是蚝油菜花，今天跟大家分享一下 AnythingLLM 这个能够将任何文档、资源转换为 AI 知识库，构建私人 AI 助手的强大应用。 快速阅读AnythingLLM 是一个全栈应用程序，能够将任何文档、资源转换为上下文，以便大语言模型（LLM）在聊天期间作为参考使用。1. 核心功能：支持多用户管理、多种 LLM 和向量数据库，提供智能聊天功能。2. 技术原理：通过工作区隔离不同内容，确保上下文清晰，并支持本地和云部署。 AnythingLLM 是什么 AnythingLLM 是一个全栈应用程序，旨在将任何文档、资源（如网址链接、音频、视频）或内容片段转换为上下文，以便大语言模型（LLM）在聊天期间作为参考使用。该应用程序允许用户选择使用哪个 LLM 或向量数据库，并支持多用户管理和权限设置。 通过 AnythingLLM，用户可以轻松构建一个私有 ChatGPT，不再受制于第三方平台。您可以本地...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/03/06/Vue3%E6%80%9D%E7%BB%B4%E5%AF%BC%E5%9B%BE%E7%BB%84%E4%BB%B6%E2%80%94%E2%80%94%E9%AB%98%E6%95%88%E5%8F%AF%E8%A7%86%E5%8C%96%E6%80%9D%E8%80%83%E5%B7%A5%E5%85%B7/" title="Vue3思维导图组件——高效可视化思考工具"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-06</div><div class="info-item-2">Vue3思维导图组件——高效可视化思考工具</div></div><div class="info-2"><div class="info-item-1">Vue3思维导图组件——高效可视化思考工具vue3-mindmap Mindmap component for Vue3  项目地址: https://gitcode.com/gh\_mirrors/vu/vue3-mindmap 项目基础介绍本项目名为“Vue3思维导图”，是由开发者hellowuxin贡献的一个开源项目，专为Vue 3设计。它提供了一种灵活且直观的方式以创建和管理思维导图，非常适合需要组织信息、计划项目或是进行概念分析的用户。此项目以TypeScript为主要编程语言，保证了代码的类型安全性和可维护性。 核心功能 双向数据绑定：通过v-model指令实现思维导图数据的动态渲染。 自定义布局：允许用户调整节点间的横向(x-gap)和纵向(y-gap)间隔，以及分支宽度等。 交互控制：支持缩放、拖拽、撤销&#x2F;重做等功能，增强用户体验。 国际化支持：提供简体中文、英文和葡萄牙语（巴西）界面，便于全球用户使用。 编辑与扩展性：节点可编辑，支持增加、删除节点，并预留接口方便功能扩展。  最近更新功能虽然具体最近的更新细节未直接给出，但根据开源项目的常规维护逻辑，...</div></div></div></a><a class="pagination-related" href="/2023/09/04/vuepress_dev%E7%83%AD%E5%8A%A0%E8%BD%BD/" title="vuepress_dev热加载"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">vuepress_dev热加载</div></div><div class="info-2"><div class="info-item-1"> title: vuepress_dev热加载date: 2023-09-03 20:17:08category:  开发语言 vuepresstag: vuepressauthor:   vuepress热编译浏览器不自动更新问题：本地开发模式运行Vuepress 1.x 时，浏览器不能自动更新在 package.json 中将运行命令 由 1&quot;dev&quot;: &quot;vuepress dev docs&quot;  改为 1&quot;dev&quot;: &quot;vuepress dev docs --temp .temp&quot;  即可解决  附：因为届时运行 vuepress 会生成一个临时文件夹 .temp，可以在 .gitignore 中忽略掉该文件夹：  12# vuepress temp file.temp </div></div></div></a><a class="pagination-related" href="/2024/04/14/Vue3+TypeScript%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E8%BF%9B%E9%98%B6%EF%BC%88%E4%B8%83%EF%BC%89%E2%80%94%E2%80%94%E9%A1%B9%E7%9B%AE%E5%AE%9E%E6%88%98/" title="Vue3+TypeScript从入门到进阶（七）——项目实战"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-14</div><div class="info-item-2">Vue3+TypeScript从入门到进阶（七）——项目实战</div></div><div class="info-2"><div class="info-item-1">文章目录   一、简介 二、Vue2和Vue3区别 三、Vue知识点学习 四、TypeScript知识点 五、项目实战  一. 代码规范  1.1. 集成editorconfig配置 1.2. 使用prettier工具 1.3. 使用ESLint检测 1.4. git Husky和eslint 1.5. git commit规范  1.5.1. 代码提交风格 1.5.2. 代码提交验证     二. 第三方库集成  2.1. vue.config.js配置 2.2. vue-router集成 2.3. vuex集成 2.4. element-plus集成  2.4.1. 全局引入 2.4.2. 局部引入 2.4.3 element-plus的icon引入   2.5. axios集成 2.6. VSCode配置     六、项目打包和自动化部署 七、沿途学习代码地址及案例地址  1、沿途学习代码地址 2、项目案例地址   八、知识拓展  1、ES6数组与对象的解构赋值详解  数组的解构赋值 对象的解构赋值 字符串的解构赋值   2、JavaScript的 …（展开运算符） 3、e...</div></div></div></a><a class="pagination-related" href="/2024/09/10/Vite%202%20+%20Vue%203%20%E5%BC%95%E5%85%A5%20TypeScript%20(%E5%92%8C%20JavaScript%20%E6%B7%B7%E5%90%88%E5%BC%80%E5%8F%91)/" title="Vite 2 + Vue 3 引入 TypeScript (和 JavaScript 混合开发)"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-09-10</div><div class="info-item-2">Vite 2 + Vue 3 引入 TypeScript (和 JavaScript 混合开发)</div></div><div class="info-2"><div class="info-item-1">最近在迁移一个 Vue 2 项目，弄得差不多想起还是有必要整上 TypeScript，但改的过程中并不想一下子把所有文件从.js改成.ts，那么我们可以在tsconfig.json文件的&quot;compilerOptions&quot;配置上 “allowJs”: true，”noEmit”: true。  前提是已经安装了 typescript，没有的话可以全局npm install -g typescript，或者安装在项目本地。  具体上完整干货：  cd 到项目根目录，命令行敲上tsc –init，生成tsconfig.json文件，然后修改如下(部分选项根据自己需要来)：  📃tsconfig.json 123456789101112131415161718192021222324252627282930313233&#123;  &quot;compilerOptions&quot;: &#123;    &quot;target&quot;: &quot;esnext&quot;,    &quot;useDefineForClassFields&quot;:...</div></div></div></a><a class="pagination-related" href="/2025/03/19/%E5%9F%BA%E4%BA%8Eelement-ui%E6%9E%84%E5%BB%BA%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BB%84%E4%BB%B6%E5%BA%93%EF%BC%8C%E5%8F%91%E5%B8%83%E5%88%B0npm%E5%8F%8A%E5%AE%89%E8%A3%85%E4%BD%BF%E7%94%A8%EF%BC%8C%E4%BB%A5%E5%8F%8A%E7%94%9F%E6%88%90%E7%BB%84%E4%BB%B6%E5%BA%93%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3/" title="基于element-ui构建自定义组件库，发布到npm及安装使用，以及生成组件库说明文档"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-19</div><div class="info-item-2">基于element-ui构建自定义组件库，发布到npm及安装使用，以及生成组件库说明文档</div></div><div class="info-2"><div class="info-item-1">叙述说明为了更易于多个项目使用同一套组件库，基于element-ui封装了一套常用组件的组件库。  ps：我的组件库是基于vue-cli4，element-ui 14.1版本构建的  构建自定义组件库src&#x2F;packages组件库创建1.项目目录结构介绍(1)创建组件所需要的文件夹，创建注册自定义组件文件index.js (2)在组件文件夹下创建src，安装导出文件index.js (3)将组件放入src下  整体构建项目工程示例图 1234567891011&lt;!-- 目录结构如下  --&gt;src├── packages│   ├── component1 自定义组件1│   │   ├── src│   │   │   ├── component-name.vue 组件文件│   │   └── index.js 安装导出组件文件│   └── index.js 注册自定义组件文件│   ├──  component2 自定义组件2│   └── ...└── ...  2.封装组件示例 以封装dialog组件为例，作简单说明：   src&#x2F;pa...</div></div></div></a><a class="pagination-related" href="/2023/09/04/vue%E7%A6%BB%E7%BA%BF%E4%BD%BF%E7%94%A8%E9%A1%B9%E7%9B%AE%E6%A8%A1%E7%89%88/" title="vue离线使用项目模版"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">vue离线使用项目模版</div></div><div class="info-2"><div class="info-item-1"> title: vue离线使用项目模版date: 2023-09-03 20:17:08category:  开发语言 vuetag: vueauthor:   Electron+Vue+ElementUI开发环境搭建 Node环境搭建本文假定你完成了nodejs的环境基础搭建：镜像配置（暂时只配置node包镜像源，部分包的二进制镜像源后续讨论）、全局以及缓存路径配置，全局路径加入到了环境变量 12345678910 $ node -v v12.18.1 $ npm -v 6.14.5 $ yarn -v 1.22.4 $ npm list -g --depth 0 +-- hexo@4.2.1 // 忽略Hexo，本人写博用的`-- yarn@1.22.4  vue脚手架安装为了更加便捷的创建一个vue项目，我们安装脚手架@vue&#x2F;cli和@vue&#x2F;init（vue-cli已经deprecated了）。之所以要安装@vue&#x2F;init，是因为@vue&#x2F;cli是3的版本，创建项目使用命令vue create app-name，且无法暂时无法使...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

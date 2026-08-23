@@ -1,0 +1,310 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>基于Element构建自己的ui组件库的流程 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="摘要 最近萌发要做一个自己的基于Vue的组件库的想法，尝试下自己去造一些轮子；于是翻了下业内的标杆element-ui组件库的设计，在此基础上去构建自己的ui库（站在巨人的肩膀上成功）。注：项目是基于vue-cli@3.x的；  组件库的基础工程要完成的几个目标 项目的整体结构设计 实现组件按需加载 项目文档的管理（随后将单独写一篇来介绍） 发布npm  基于element的目录设计1├─buil">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于Element构建自己的ui组件库的流程">
+<meta property="og:url" content="https://yhao521.github.io/2025/03/19/%E5%9F%BA%E4%BA%8EElement%E6%9E%84%E5%BB%BA%E8%87%AA%E5%B7%B1%E7%9A%84ui%E7%BB%84%E4%BB%B6%E5%BA%93%E7%9A%84%E6%B5%81%E7%A8%8B/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="摘要 最近萌发要做一个自己的基于Vue的组件库的想法，尝试下自己去造一些轮子；于是翻了下业内的标杆element-ui组件库的设计，在此基础上去构建自己的ui库（站在巨人的肩膀上成功）。注：项目是基于vue-cli@3.x的；  组件库的基础工程要完成的几个目标 项目的整体结构设计 实现组件按需加载 项目文档的管理（随后将单独写一篇来介绍） 发布npm  基于element的目录设计1├─buil">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2025-03-18T23:44:21.000Z">
+<meta property="article:modified_time" content="2025-03-18T23:44:21.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="php&#x2F;programming">
+<meta property="article:tag" content="vue">
+<meta property="article:tag" content="web&#x2F;frontend">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "基于Element构建自己的ui组件库的流程",
+  "url": "https://yhao521.github.io/2025/03/19/%E5%9F%BA%E4%BA%8EElement%E6%9E%84%E5%BB%BA%E8%87%AA%E5%B7%B1%E7%9A%84ui%E7%BB%84%E4%BB%B6%E5%BA%93%E7%9A%84%E6%B5%81%E7%A8%8B/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2025-03-18T23:44:21.000Z",
+  "dateModified": "2025-03-18T23:44:21.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2025/03/19/%E5%9F%BA%E4%BA%8EElement%E6%9E%84%E5%BB%BA%E8%87%AA%E5%B7%B1%E7%9A%84ui%E7%BB%84%E4%BB%B6%E5%BA%93%E7%9A%84%E6%B5%81%E7%A8%8B/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '基于Element构建自己的ui组件库的流程',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">基于Element构建自己的ui组件库的流程</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">基于Element构建自己的ui组件库的流程</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-03-18T23:44:21.000Z" title="发表于 2025-03-19 07:44:21">2025-03-19</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-03-18T23:44:21.000Z" title="更新于 2025-03-19 07:44:21">2025-03-19</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h4 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h4><blockquote>
+<p>最近萌发要做一个自己的基于<code>Vue</code>的组件库的想法，尝试下自己去造一些轮子；于是翻了下业内的标杆<code>element-ui</code>组件库的设计，在此基础上去构建自己的ui库（站在巨人的肩膀上成功）。注：项目是基于vue-<a href="mailto:&#x63;&#x6c;&#x69;&#64;&#x33;&#x2e;&#x78;">cli@3.x</a>的；</p>
+</blockquote>
+<h4 id="组件库的基础工程要完成的几个目标"><a href="#组件库的基础工程要完成的几个目标" class="headerlink" title="组件库的基础工程要完成的几个目标"></a>组件库的基础工程要完成的几个目标</h4><ul>
+<li>项目的整体结构设计</li>
+<li>实现组件按需加载</li>
+<li>项目文档的管理（随后将单独写一篇来介绍）</li>
+<li>发布npm</li>
+</ul>
+<h4 id="基于element的目录设计"><a href="#基于element的目录设计" class="headerlink" title="基于element的目录设计"></a>基于<code>element</code>的目录设计</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">├─build // 构建相关的脚本和配置├─docs // 打包后的静态文件├─examples // 用于展示Element组件的demo├─lib // 构建后生成的文件，发布到npm包├─packages // 组件代码|   ├── button|   |     ├── button.vue //组件文件|   |     └── index.js // 导出Button组件以及处理供按需加载的方法|   ├── .. 各个组件|   └── theme-chalk // 这里存放所有的组件样式.scss├─public // index.html└─package.json</span><br></pre></td></tr></table></figure>
+
+<p>注：这里的设计将组件跟样式进行了分离，这样做的目的是为了更好的去做按需加载</p>
+<h4 id="Vue组件构建"><a href="#Vue组件构建" class="headerlink" title="Vue组件构建"></a>Vue组件构建</h4><p>    我们都知道在vue中组件的安装要使用<code>Vue.use(install)</code>,<code>install</code>是向外暴漏的一个方法，里面调用<code>Vue.component(component.name, component)</code>完成组件的注册；具体的源码如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/* eslint-disable */// This file is auto gererated by build/build-entry.jsimport FeButton from &#x27;./button&#x27;import FeInput from &#x27;./input&#x27;const version = &#x27;0.0.46&#x27;const components = [  FeButton,  FeInput]const install = Vue =&gt; &#123;  components.forEach(Component =&gt; &#123;    Vue.use(Component);    // Vue.component(component.name, component) 也可使用这个进行注册  &#125;)   Vue.prototype.$message = Message&#125;;/* istanbul ignore if */if (typeof window !== &#x27;undefined&#x27; &amp;&amp; window.Vue) &#123;  install(window.Vue)&#125;export &#123;  install,  version,  FeButton,  FeInput&#125;export default &#123;  install,  version&#125;</span><br></pre></td></tr></table></figure>
+
+<p>    <code>install</code>内部之所以能够使用Vue实例是<code>Vue.use</code>中进行了Vue实例的参数的合并，有兴趣的可以去看看源码这里就提上一嘴；  </p>
+<p>    以上基本的组件构造就完成了，我们也就很好的完成了第一步可在<code>main.js</code>全局导入one-piece-ui的组件进行测试；这时候我们应该思考下如何去实现按需加载的问题啦！</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="title class_">FeUI</span> <span class="keyword">from</span> <span class="string">&#x27;../packages&#x27;</span>;<span class="keyword">import</span> <span class="string">&#x27;../packages/theme-chalk/index.css&#x27;</span>;  <span class="title class_">Vue</span>.<span class="title function_">use</span>(<span class="title class_">FeUI</span>);</span><br></pre></td></tr></table></figure>
+
+<h4 id="组件的按需加载"><a href="#组件的按需加载" class="headerlink" title="组件的按需加载"></a>组件的按需加载</h4><ul>
+<li>如何实现按需加载<br>    根据<code>element-ui</code>的介绍，借助 <code>babel-plugin-component</code>，我们可以只引入需要的组件，以达到减小项目体积的目的。</li>
+</ul>
+<p>    然后，将 .babelrc 修改为：</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;  <span class="string">&quot;presets&quot;</span>: <span class="string">[[&quot;es2015&quot;, &#123; &quot;modules&quot;: false &#125;]]</span>,  <span class="string">&quot;plugins&quot;</span>: [    [      <span class="string">&quot;component&quot;</span>,      &#123;        <span class="string">&quot;libraryName&quot;</span>: <span class="string">&quot;element-ui&quot;</span>,        <span class="string">&quot;styleLibraryName&quot;</span>: <span class="string">&quot;theme-chalk&quot;</span>      &#125;    ]  ]&#125;</span><br></pre></td></tr></table></figure>
+
+<p>    这个插件的作用是什么呢？就是将引用路径进行了变换，如下：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; <span class="title class_">Button</span> &#125; <span class="keyword">from</span> <span class="string">&#x27;one-piece-ui&#x27;</span> </span><br></pre></td></tr></table></figure>
+
+<p>    转换为：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> button = <span class="keyword">require</span>(<span class="string">&#x27;one-piece-ui/lib/button&#x27;</span>)<span class="keyword">require</span>(<span class="string">&#x27;one-piece-ui/lib/theme-chalk/button.css&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>    这样我们就精准地引入了对应 lib 下的 Button 组件的 JS 和 CSS 代码了，也就实现了按需引入 Button 组件。</p>
+<ol>
+<li><p>实现组件跟样式的分离  </p>
+<p>根据以上的分析，我们知道我们接下来的任务就是要把组件跟样式进行分离；</p>
+</li>
+</ol>
+<ul>
+<li>首先我们看下<code>element-ui</code>的<code>package.json</code>的<code>scripts</code>构建命令</li>
+</ul>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;bootstrap&quot;</span>: <span class="string">&quot;yarn || npm i&quot;</span>,<span class="string">&quot;build:file&quot;</span>: <span class="string">&quot;node build/bin/iconInit.js &amp; node build/bin/build-entry.js &amp; node build/bin/i18n.js &amp; node build/bin/version.js&quot;</span>,<span class="string">&quot;build:theme&quot;</span>: <span class="string">&quot;node build/bin/gen-cssfile &amp;&amp; gulp build --gulpfile packages/theme-chalk/gulpfile.js &amp;&amp; cp-cli packages/theme-chalk/lib lib/theme-chalk&quot;</span>,<span class="string">&quot;build:utils&quot;</span>: <span class="string">&quot;cross-env BABEL_ENV=utils babel src --out-dir lib --ignore src/index.js&quot;</span>,<span class="string">&quot;build:umd&quot;</span>: <span class="string">&quot;node build/bin/build-locale.js&quot;</span>,<span class="string">&quot;clean&quot;</span>: <span class="string">&quot;rimraf lib &amp;&amp; rimraf packages/*/lib &amp;&amp; rimraf test/**/coverage&quot;</span>,<span class="string">&quot;deploy:build&quot;</span>: <span class="string">&quot;npm run build:file &amp;&amp; cross-env NODE_ENV=production webpack --config build/webpack.demo.js &amp;&amp; echo element.eleme.io&gt;&gt;examples/element-ui/CNAME&quot;</span>,<span class="string">&quot;deploy:extension&quot;</span>: <span class="string">&quot;cross-env NODE_ENV=production webpack --config build/webpack.extension.js&quot;</span>,<span class="string">&quot;dev:extension&quot;</span>: <span class="string">&quot;rimraf examples/extension/dist &amp;&amp; cross-env NODE_ENV=development webpack --watch --config build/webpack.extension.js&quot;</span>,<span class="string">&quot;dev&quot;</span>: <span class="string">&quot;npm run bootstrap &amp;&amp; npm run build:file &amp;&amp; cross-env NODE_ENV=development webpack-dev-server --config build/webpack.demo.js &amp; node build/bin/template.js&quot;</span>,<span class="string">&quot;dev:play&quot;</span>: <span class="string">&quot;npm run build:file &amp;&amp; cross-env NODE_ENV=development PLAY_ENV=true webpack-dev-server --config build/webpack.demo.js&quot;</span>,<span class="string">&quot;dist&quot;</span>: <span class="string">&quot;npm run clean &amp;&amp; npm run build:file &amp;&amp; webpack --config build/webpack.conf.js &amp;&amp; webpack --config build/webpack.common.js &amp;&amp; webpack --config build/webpack.component.js &amp;&amp; npm run build:utils &amp;&amp; npm run build:umd &amp;&amp; npm run build:theme&quot;</span>,<span class="string">&quot;i18n&quot;</span>: <span class="string">&quot;node build/bin/i18n.js&quot;</span>,<span class="string">&quot;lint&quot;</span>: <span class="string">&quot;eslint src/**/* test/**/* packages/**/* build/**/* --quiet&quot;</span>,<span class="string">&quot;pub&quot;</span>: <span class="string">&quot;npm run bootstrap &amp;&amp; sh build/git-release.sh &amp;&amp; sh build/release.sh &amp;&amp; node build/bin/gen-indices.js &amp;&amp; sh build/deploy-faas.sh&quot;</span>,<span class="string">&quot;test&quot;</span>: <span class="string">&quot;npm run lint &amp;&amp; npm run build:theme &amp;&amp; cross-env CI_ENV=/dev/ BABEL_ENV=test karma start test/unit/karma.conf.js --single-run&quot;</span>,<span class="string">&quot;test:watch&quot;</span>: <span class="string">&quot;npm run build:theme &amp;&amp; cross-env BABEL_ENV=test karma start test/unit/karma.conf.js&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>    是不是有点懵逼，这都是啥咋这么多？？？ 我的内心其实也是很这啥都啥…  </p>
+<p>    我对其中的一些命令进行了删除保留了一些 暂时我们能用到的，如下：</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;init&quot;</span>: <span class="string">&quot;npm install commitizen -g &amp;&amp; commitizen init cz-conventional-changelog --save-dev --save-exact &amp;&amp; npm run bootstrap&quot;</span>,<span class="string">&quot;bootstrap&quot;</span>: <span class="string">&quot;npm install &amp;&amp; cd ./packages/theme-chalk &amp;&amp; npm install&quot;</span>,<span class="string">&quot;build:style&quot;</span>: <span class="string">&quot;gulp build --gulpfile packages/theme-chalk/gulpfile.js &amp;&amp; cp-cli packages/theme-chalk/lib lib/theme-chalk&quot;</span>,<span class="string">&quot;build:docs&quot;</span>: <span class="string">&quot;vue-cli-service build&quot;</span>,<span class="string">&quot;build:lib&quot;</span>: <span class="string">&quot;node build/build-lib.js&quot;</span>,<span class="string">&quot;build:entry&quot;</span>: <span class="string">&quot;node build/build-entry.js &quot;</span>,<span class="string">&quot;serve&quot;</span>: <span class="string">&quot;vue-cli-service serve&quot;</span>,<span class="string">&quot;clean&quot;</span>: <span class="string">&quot;rimraf lib &amp;&amp; rimraf packages/*/lib&quot;</span>,<span class="string">&quot;deploy&quot;</span>: <span class="string">&quot;sh build/deploy.sh&quot;</span>,<span class="string">&quot;lint&quot;</span>: <span class="string">&quot;vue-cli-service lint&quot;</span>,<span class="string">&quot;lib&quot;</span>: <span class="string">&quot;vue-cli-service build --target lib --name feui --dest lib packages/index.js &amp;&amp; webpack --config ./build/webpack.component.js&quot;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>组件样式的分离</li>
+</ul>
+<ol>
+<li><p>首先解释一下<code>npm run init</code>做的那几件事：</p>
+<ol>
+<li>安装了两个有关<code>git commit</code>的相关规范插件，主要是在功能提交上做一些规定</li>
+<li>启动了第二个命令<code>npm run bootstrap</code></li>
+</ol>
+</li>
+<li><p><code>npm run bootstrap</code>做的几件事：</p>
+<ol>
+<li>安装所有的依赖</li>
+<li><code>cd ./packages/theme-chalk</code>目录下，安装gulp相关的依赖；</li>
+</ol>
+</li>
+</ol>
+<blockquote>
+<p>注：<code>element-ui</code>采用了gulp对<code>scss</code>文件进行打包；个人觉得还是挺好的，gulp比较简单不像webpack的配置那么复杂，能够很简单的处理<code>scss</code></p>
+</blockquote>
+<ol>
+<li><code>build:style</code>做的几件事：<ol>
+<li>对组件样式进行打包到当前<code>lib</code>目录下</li>
+<li>利用<code>cp-cli</code>插件将打包好的<code>lib</code>文件夹内容复制到<code>lib/theme-chalk</code>目录下</li>
+</ol>
+</li>
+</ol>
+<blockquote>
+<p>到此我们就完成了样式的打包及输出到指定的目录啦，此处有掌声…</p>
+</blockquote>
+<ul>
+<li>接下来我们介绍一下将组件js单独抽离：</li>
+</ul>
+<ol>
+<li>如果你运行<code>npm run lib</code>命令时候，你会发现组件的js都被单独打包出来了，那这是如何实现的呢？我们看下这条命令<code>webpack --config ./build/webpack.component.js</code>,对，就是他了；源码如下：</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">const path = require(&#x27;path&#x27;);const ProgressBarPlugin = require(&#x27;progress-bar-webpack-plugin&#x27;);const VueLoaderPlugin = require(&#x27;vue-loader/lib/plugin&#x27;); const Components = require(&#x27;./get-components&#x27;)();const entry = &#123;&#125;;Components.forEach(c =&gt; &#123;  entry[c] = `./packages/$&#123;c&#125;/index.js`;&#125;);const webpackConfig = &#123;  mode: &#x27;production&#x27;,  entry: entry,  output: &#123;    path: path.resolve(process.cwd(), &#x27;./lib&#x27;),    filename: &#x27;[name].js&#x27;,    chunkFilename: &#x27;[id].js&#x27;,    libraryTarget: &#x27;umd&#x27;  &#125;,  resolve: &#123;    extensions: [&#x27;.js&#x27;, &#x27;.vue&#x27;, &#x27;.json&#x27;]  &#125;,  performance: &#123;    hints: false  &#125;,  stats: &#x27;none&#x27;,    module: &#123;    rules: [&#123;      test: /\.js$/,      loader: &#x27;babel-loader&#x27;,      exclude: /node_modules/    &#125;, &#123;      test: /\.vue$/,      loader: &#x27;vue-loader&#x27;    &#125;]  &#125;,  plugins: [    new ProgressBarPlugin(),    new VueLoaderPlugin()  ]&#125;; module.exports = webpackConfig;</span><br></pre></td></tr></table></figure>
+
+<p>    很熟悉是吧，对！就是你想的那样—多文件入口打包；这里里面有个<code>get-components</code>工具方法就是返回所有的<code>packages</code>下的组件文件名称;这样我们就可以通过命令自动注入组件的js文件啦～</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">const fs = require(&#x27;fs&#x27;);const path = require(&#x27;path&#x27;); const excludes = [  &#x27;index.js&#x27;,  &#x27;theme-chalk&#x27;,  &#x27;mixins&#x27;,  &#x27;utils&#x27;,  &#x27;fonts&#x27;,  &#x27;.DS_Store&#x27;]; module.exports = function () &#123;  const dirs = fs.readdirSync(path.resolve(__dirname, &#x27;../packages&#x27;));  return dirs.filter(dirName =&gt; excludes.indexOf(dirName) === -1);&#125;;</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>再来说一下<code>npm run build:entry</code> 这里会执行<code>build/build-entry.js</code>,源码如下:</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">const fs = require(&#x27;fs-extra&#x27;);const path = require(&#x27;path&#x27;);const uppercamelize = require(&#x27;uppercamelcase&#x27;); const Components = require(&#x27;./get-components&#x27;)();const packageJson = require(&#x27;../package.json&#x27;); const version = process.env.VERSION || packageJson.version;const tips = `/* eslint-disable */// This file is auto gererated by build/build-entry.js`; function buildPackagesEntry() &#123;  const uninstallComponents = [&#x27;Message&#x27;];  const importList = Components.map(    name =&gt; `import $&#123;uppercamelize(name)&#125; from &#x27;./$&#123;name&#125;&#x27;`  );   const exportList = Components.map(name =&gt; `$&#123;uppercamelize(name)&#125;`);   const installList = exportList.filter(    name =&gt; !~uninstallComponents.indexOf(`$&#123;uppercamelize(name)&#125;`)  );   const content = `$&#123;tips&#125;    $&#123;importList.join(&#x27;\n&#x27;)&#125;    const version = &#x27;$&#123;version&#125;&#x27;    const components = [      $&#123;installList.join(&#x27;,\n  &#x27;)&#125;    ]    const install = Vue =&gt; &#123;      components.forEach(Component =&gt; &#123;        Vue.use(Component)      &#125;)       Vue.prototype.$message = Message    &#125;;    /* istanbul ignore if */    if (typeof window !== &#x27;undefined&#x27; &amp;&amp; window.Vue) &#123;      install(window.Vue)    &#125;    export &#123;      install,      version,      $&#123;exportList.join(&#x27;,\n  &#x27;)&#125;    &#125;    export default &#123;      install,      version    &#125;  `;  fs.writeFileSync(path.join(__dirname, &#x27;../packages/index.js&#x27;), content);&#125; buildPackagesEntry(); </span><br></pre></td></tr></table></figure>
+
+<p>    不难发现，这里给我们自动化生成了一个<code>packages/index.js</code>文件，是不是感觉技术减少人力? 心里：”卧槽…”  </p>
+<p>3. <code>npm run build:lib</code>，通过上面的学习，到此这个命令其实也就不神秘啦，里面也就是做了一件汇总的事情：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/** * Build npm lib */const shell = require(&#x27;shelljs&#x27;);const signale = require(&#x27;signale&#x27;); const &#123; Signale &#125; = signale;const tasks = [  &#x27;bootstrap&#x27;,  &#x27;lint&#x27;,  &#x27;clean&#x27;,  &#x27;build:entry&#x27;,  &#x27;lib&#x27;,  &#x27;build:style&#x27;]; tasks.forEach(task =&gt; &#123;  signale.start(task);  const interactive = new Signale(&#123; interactive: true &#125;);  interactive.pending(task);  shell.exec(`npm run $&#123;task&#125; --silent`);  interactive.success(task);&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>    好了，基本的组件js分离功能也就完成了；</p>
+<h4 id="发布npm以及跟新到GitHub-Pages"><a href="#发布npm以及跟新到GitHub-Pages" class="headerlink" title="发布npm以及跟新到GitHub Pages"></a>发布npm以及跟新到<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=GitHub&spm=1001.2101.3001.7020">GitHub</a> Pages</h4><p>    这里就不介绍了，具体请戳<a target="_blank" rel="noopener" href="https://juejin.im/post/5d2708e26fb9a07f06559812">项目如何发布到NPM</a>;<br><a target="_blank" rel="noopener" href="https://juejin.im/post/5b14b2f06fb9a01e5e3d3121">静态页面如何发布到GithubPages</a></p>
+<ul>
+<li>最后附上本项目的地址,如果喜欢就给个star✨吧<br><a target="_blank" rel="noopener" href="https://github.com/774848686/fe-ui#readme">项目地址</a></li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2025/03/19/%E5%9F%BA%E4%BA%8EElement%E6%9E%84%E5%BB%BA%E8%87%AA%E5%B7%B1%E7%9A%84ui%E7%BB%84%E4%BB%B6%E5%BA%93%E7%9A%84%E6%B5%81%E7%A8%8B/">https://yhao521.github.io/2025/03/19/%E5%9F%BA%E4%BA%8EElement%E6%9E%84%E5%BB%BA%E8%87%AA%E5%B7%B1%E7%9A%84ui%E7%BB%84%E4%BB%B6%E5%BA%93%E7%9A%84%E6%B5%81%E7%A8%8B/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/web-frontend/">web/frontend</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/vue/">vue</a><a class="post-meta__tags" href="/tags/linux/">linux</a><a class="post-meta__tags" href="/tags/php-programming/">php/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/03/21/vue%E8%8E%B7%E5%8F%96%E7%94%A8%E6%88%B7%E6%9C%AC%E6%9C%BAip%E6%96%B9%E6%B3%95/" title="vue获取用户本机ip方法"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">vue获取用户本机ip方法</div></div><div class="info-2"><div class="info-item-1">记录vue获取用户本机ip方法12345678910111213141516171819202122232425262728293031323334353637383940414243&lt;script setup&gt;import &#123; reactive, toRefs ,onMounted&#125; from &quot;vue&quot;const state = reactive(&#123;  ip:&#x27;&#x27;,&#125;)onMounted(()=&gt;&#123;  //获取ip   getUserIP((ip) =&gt; &#123;    state.ip=ip      console.log(ip)      console.log(state.ip)  &#125;);&#125;)//获取用户本地ip的方法const getUserIP= (onNewIP)=&gt; &#123;  let MyPeerConnection = window.RTCPeerConnection || window.mozRTCPeerC...</div></div></div></a><a class="pagination-related" href="/2025/03/19/%E7%94%A8Element%20Plus%E6%89%93%E9%80%A0%E5%91%BD%E4%BB%A4%E5%BC%8FModal%E5%BC%B9%E7%AA%97%20-%20%E4%BB%BFArco%20Design%20Vue%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/" title="用Element Plus打造命令式Modal弹窗 - 仿Arco Design Vue最佳实践"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">用Element Plus打造命令式Modal弹窗 - 仿Arco Design Vue最佳实践</div></div><div class="info-2"><div class="info-item-1">在开发管理后台时，我们常遇到需要快速调用确认框的场景。Element Plus默认的ElDialog采用声明式写法，需要维护v-model状态，而Arco Design Vue的命令式调用方式（如Modal.open()）明显更高效 由于公司的项目是Element Plus，在开发过程中，为了提高开发效率和维护，封装了一个仿Arco Design Vue的Modal命令弹窗，实现函数调用 Arco Design Vue的Modal命令式弹窗个人觉得设计很不错，下面展示下Arco组件库Modal的一些使用示例：   虽然目前Element Plus也可以使用ElMessageBox来实现命令式弹窗，但是无法自定义底部插槽，也无法全屏等等，最好办法是基于el-dialog实现命令式弹窗  下面是基于Element Plus的el-dialog封装的命令式弹窗组件 index.ts  DialogFooter.vue  使用示例  演示效果  源码 index.ts 123456789101112131415161718192021222324252627282930313233343...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/vscode%E4%BD%BF%E7%94%A8/" title="vscode使用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">vscode使用</div></div><div class="info-2"><div class="info-item-1"> title: vscode的使用lang: en-USdate: 2023-09-03 20:17:08category:  vscodetag: vscodeauthor:   1. vscode的使用1.1. 插件位置更改参考：https://blog.csdn.net/zhaojunwei08/article/details/86021665 https://blog.csdn.net/u011127019/article/details/86737308#comments mklink使用 https://www.icoa.cn/a/910.html set oldDir&#x3D;%UserProfile%.vscode\extensions mklink &#x2F;D “%oldDir%” “E:\eclipse-hao\HTML\extensions” 确保有 这个 .vscode 空目录  bat方式： 123456789@echo offif &quot;%1&quot; == &quot;h&quot; goto beginmshta vbscript:c...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E5%89%8D%E7%AB%AF%E5%85%A5%E9%97%A8%E6%89%8B%E5%86%8C/" title="前端入门手册"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">前端入门手册</div></div><div class="info-2"><div class="info-item-1"> title: 前端入门手册date: 2023-09-03 20:17:08category:  开发语言tag: 开发语言author:   前端入门手册blossom html css JavaScript程序员入门的时候整理的一份学习笔记,见证了我的成长备份 HTML视频音频标签带控制器的视频标签, 不同浏览器有不同的文件格式要求所以用 2 个 source 标签指定不同的视频格式 1234&lt;video width=&quot;300&quot; height=&quot;200&quot; controls=&quot;controls&quot;&gt;  &lt;source src=&quot;movie.mp4&quot; /&gt;  &lt;source src=&quot;movie.ogv&quot; /&gt;&lt;/video&gt;  带控制器的音频标签, 不同浏览器有不同的文件格式要求所以用 2 个 source 标签指定不同的音频格式 1234&lt;audio id=&quot;id-audio-player&quot; contro...</div></div></div></a><a class="pagination-related" href="/2026/05/15/SUPPORT-Haoyun-Music/" title="SUPPORT-Haoyun-Music"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-15</div><div class="info-item-2">SUPPORT-Haoyun-Music</div></div><div class="info-2"><div class="info-item-1">☕ 支持 Haoyun Music Player 开发Haoyun Music Player 是一个开源免费的音乐播放器，如果您觉得它对您有帮助，欢迎通过以下方式支持开发者继续改进！  💳 捐赠方式💙 支付宝扫描下方二维码即可捐赠：  💚 微信支付扫描下方二维码即可捐赠：   🙏 感谢您的支持每一份支持都是对我们最大的鼓励！您的捐赠将用于：  ✨ 持续功能开发和优化 🐛 Bug 修复和性能提升 🎨 更好的用户体验设计   📝 关于项目Haoyun Music Player 基于以下技术构建：  Go 1.25 - 高性能后端 Wails v3 - 跨平台桌面应用框架 Vue 3 - 现代化前端框架 Oto v3 - 音频播放库 FFmpeg - 多媒体处理    💝 Haoyun Music Player | Made with ❤️ for music lovers   📊 项目信息 版本: 0.0.X 许可证: 开源免费 技术支持: Go + Wails3 + Vue 3 平台: macOS &#x2F; Windows &#x2F; Linux   感谢您...</div></div></div></a><a class="pagination-related" href="/2024/04/14/Vue3+TypeScript%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E8%BF%9B%E9%98%B6%EF%BC%88%E4%BA%94%EF%BC%89%E2%80%94%E2%80%94Vue3%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%82%B9%EF%BC%88%E4%B8%8B%EF%BC%89/" title="Vue3+TypeScript从入门到进阶（五）——Vue3基础知识点（下）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-14</div><div class="info-item-2">Vue3+TypeScript从入门到进阶（五）——Vue3基础知识点（下）</div></div><div class="info-2"><div class="info-item-1">文章目录   一、简介 二、Vue2和Vue3区别 三、Vue知识点学习  九、Composition API  1、Mixin和extends 2、Composition API 3、Reactive API、Ref API和readonly 4、toRefs、toRef和ref其他的API 5、computed、watch和watchEffect 6、生命周期钩子 7、Provide函数和Inject函数 8、compositionAPI练习 9、h函数 10、jsx 11、自定义指令 12、Teleport 13、Vue插件   十、Vue3源码学习  1、真实DOM和虚拟DOM 2、Vue三大核心系统 3、实现Mini-Vue 4、源码阅读   十一、VueRouter路由使用  1、认识前端路由 2、vue-router   十二、Vuex的状态管理  1、Vuex介绍和安装 2、Store 3、mapState 4、getters 5、Mutation 6、actions 7、module     四、TypeScript知识点 五、项目实战 六、项目打包和自动化部署...</div></div></div></a><a class="pagination-related" href="/2026/03/19/OpenClaw%20%E6%9C%AC%E5%9C%B0%E6%A8%A1%E5%9E%8B%E6%9C%80%E4%BD%B3%E6%96%B9%E6%A1%88%EF%BC%9A%E6%A8%A1%E5%9E%8B%E6%8E%A8%E8%8D%90%20+%20vLLM%20%E9%83%A8%E7%BD%B2%E4%BC%98%E5%8C%96%E5%AE%8C%E6%95%B4%E6%95%99%E7%A8%8B%EF%BC%81/" title="OpenClaw 本地模型最佳方案：模型推荐 + vLLM 部署优化完整教程！"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-19</div><div class="info-item-2">OpenClaw 本地模型最佳方案：模型推荐 + vLLM 部署优化完整教程！</div></div><div class="info-2"><div class="info-item-1">OpenClaw 如何切换到本地模型？如果希望在执行自动化任务时保持流畅、不出现卡顿，同时避免频繁触发上下文长度限制，那么选择一个合适的开源模型就非常关键。 对于 OpenClaw 来说，模型不仅需要具备良好的推理能力和语言理解能力，还需要拥有稳定的 工具调用（Tool Calling）能力。因为在自动化任务中，模型需要频繁调用各种工具完成操作，因此工具调用能力往往是选择模型时最重要的指标之一。  很多人在第一次尝试本地部署模型时，往往会选择 Ollama。它的优点确实很明显：安装简单、配置方便，几乎可以做到“傻瓜式”部署。 开发工具 但在 OpenClaw 这种自动化任务场景下，Ollama 的调用方式和推理速度并不理想。实际使用中往往会遇到两个问题：  推理速度较慢 上下文长度很容易被耗尽  在连续运行多个任务后，经常会出现上下文不够用的情况。 因此，如果你希望获得更稳定、更高效的本地部署体验，就需要选择更合适的推理框架。 一般来说：  远程集群 &#x2F; 多 Agent 场景 ：推荐使用 SGLang 单卡本地部署 ：强烈推荐 vLLM  目前来看，vLLM 可以说是单...</div></div></div></a><a class="pagination-related" href="/2023/09/04/vue%E5%AF%BC%E5%87%BAexcel/" title="vue导出excel"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">vue导出excel</div></div><div class="info-2"><div class="info-item-1"> title: vue导出exceldate: 2023-09-03 20:17:08category:  开发语言 doc_nodejstag: doc_nodejsauthor:   vue导出excel安装依赖1234npm install file-saver -Snpm install xlsx -Snpm install -D script-loadernpm i xlsx-style -S  导入两个文件在src目录下新建一个vendor(可以是别的名字,但是导入时需注意,没事别改,大神请忽略)目录,目录下放新建两个文件Blob.js和Export2Excel.js Blob.js1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465666768697071727374757677787980818283848586878889909192939495969798991001011...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%91%98%E8%A6%81"><span class="toc-number">1.</span> <span class="toc-text">摘要</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%84%E4%BB%B6%E5%BA%93%E7%9A%84%E5%9F%BA%E7%A1%80%E5%B7%A5%E7%A8%8B%E8%A6%81%E5%AE%8C%E6%88%90%E7%9A%84%E5%87%A0%E4%B8%AA%E7%9B%AE%E6%A0%87"><span class="toc-number">2.</span> <span class="toc-text">组件库的基础工程要完成的几个目标</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8Eelement%E7%9A%84%E7%9B%AE%E5%BD%95%E8%AE%BE%E8%AE%A1"><span class="toc-number">3.</span> <span class="toc-text">基于element的目录设计</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Vue%E7%BB%84%E4%BB%B6%E6%9E%84%E5%BB%BA"><span class="toc-number">4.</span> <span class="toc-text">Vue组件构建</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%84%E4%BB%B6%E7%9A%84%E6%8C%89%E9%9C%80%E5%8A%A0%E8%BD%BD"><span class="toc-number">5.</span> <span class="toc-text">组件的按需加载</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%91%E5%B8%83npm%E4%BB%A5%E5%8F%8A%E8%B7%9F%E6%96%B0%E5%88%B0GitHub-Pages"><span class="toc-number">6.</span> <span class="toc-text">发布npm以及跟新到GitHub Pages</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

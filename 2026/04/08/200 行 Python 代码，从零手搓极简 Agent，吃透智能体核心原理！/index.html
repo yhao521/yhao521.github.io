@@ -1,0 +1,306 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>200 行 Python 代码，从零手搓极简 Agent，吃透智能体核心原理！ | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="不到 200 行 Python 代码，从零手搓一个完整可运行的极简 Agent，逐行拆解核心模块，新手复制粘贴就能直接跑通，具备核心要素：短期记忆、工具调用、上下文管理、长期记忆 RAG。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="200 行 Python 代码，从零手搓极简 Agent，吃透智能体核心原理！">
+<meta property="og:url" content="https://yhao521.github.io/2026/04/08/200%20%E8%A1%8C%20Python%20%E4%BB%A3%E7%A0%81%EF%BC%8C%E4%BB%8E%E9%9B%B6%E6%89%8B%E6%90%93%E6%9E%81%E7%AE%80%20Agent%EF%BC%8C%E5%90%83%E9%80%8F%E6%99%BA%E8%83%BD%E4%BD%93%E6%A0%B8%E5%BF%83%E5%8E%9F%E7%90%86%EF%BC%81/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="不到 200 行 Python 代码，从零手搓一个完整可运行的极简 Agent，逐行拆解核心模块，新手复制粘贴就能直接跑通，具备核心要素：短期记忆、工具调用、上下文管理、长期记忆 RAG。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2026-04-07T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-17T16:00:00.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="python&#x2F;programming">
+<meta property="article:tag" content="web&#x2F;frontend">
+<meta property="article:tag" content="摘录">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "200 行 Python 代码，从零手搓极简 Agent，吃透智能体核心原理！",
+  "url": "https://yhao521.github.io/2026/04/08/200%20%E8%A1%8C%20Python%20%E4%BB%A3%E7%A0%81%EF%BC%8C%E4%BB%8E%E9%9B%B6%E6%89%8B%E6%90%93%E6%9E%81%E7%AE%80%20Agent%EF%BC%8C%E5%90%83%E9%80%8F%E6%99%BA%E8%83%BD%E4%BD%93%E6%A0%B8%E5%BF%83%E5%8E%9F%E7%90%86%EF%BC%81/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2026-04-07T16:00:00.000Z",
+  "dateModified": "2026-05-17T16:00:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2026/04/08/200%20%E8%A1%8C%20Python%20%E4%BB%A3%E7%A0%81%EF%BC%8C%E4%BB%8E%E9%9B%B6%E6%89%8B%E6%90%93%E6%9E%81%E7%AE%80%20Agent%EF%BC%8C%E5%90%83%E9%80%8F%E6%99%BA%E8%83%BD%E4%BD%93%E6%A0%B8%E5%BF%83%E5%8E%9F%E7%90%86%EF%BC%81/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '200 行 Python 代码，从零手搓极简 Agent，吃透智能体核心原理！',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">200 行 Python 代码，从零手搓极简 Agent，吃透智能体核心原理！</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">200 行 Python 代码，从零手搓极简 Agent，吃透智能体核心原理！</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-04-07T16:00:00.000Z" title="发表于 2026-04-08 00:00:00">2026-04-08</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-17T16:00:00.000Z" title="更新于 2026-05-18 00:00:00">2026-05-18</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>原创 一枫说码 <em>2026年4月1日 20:02</em></p>
+<p>现在市面上关于 <strong><em>AI Agent（智能体</em> ）</strong> 的讨论越来越多，但大多停留在概念层面：自主思考、任务拆解、多智能体协同…… 听起来很高大上，却很少有人告诉你： <strong>AI Agent 的本质，到底是什么？</strong></p>
+<p>对于开发者来说，与其听一堆虚无缥缈的名词，不如亲手写一个。</p>
+<p><strong>今天我们不聊复杂理论，不套 LangChain、LlamaIndex 等框架，直接扒开 AI Agent 最底层的运行逻辑。</strong></p>
+<p>仅用不到 200 行 Python 代码，从零手搓一个完整可运行的极简 Agent，逐行拆解核心模块，新手复制粘贴就能直接跑通。</p>
+<p>最终你到手的这个 Agent，具备四大核心能力：</p>
+<ol>
+<li><strong>短期记忆对话</strong> ：维护上下文，让无状态的 LLM 记住当前对话内容。</li>
+<li><strong>Function Calling 工具调用</strong> ：给 LLM 装上 『手脚』，可读写文件、执行操作。</li>
+<li><strong>智能上下文管理</strong> ：手动清空 &#x2F; 压缩 + 自动压缩上下文，彻底解决 token 溢出问题。</li>
+<li><strong>长期记忆 + 极简 RAG</strong> ：跨会话记住用户偏好，程序重启也不丢失，语义检索只给模型最相关的记忆。<br>[[_resources&#x2F;3875d35335473b1340c93296f09f48a7_MD5.jpeg|Open: image.png]]<br>![[_resources&#x2F;3875d35335473b1340c93296f09f48a7_MD5.jpeg]]<br>吃透这套极简实现，你就能轻松举一反三：扩展技能（Skill）、多智能体（Multi-Agent）、自主规划等复杂能力，本质都是在这套底层逻辑上扩展。</li>
+</ol>
+<p><em><strong>Talk is cheap, show me the code！</strong></em> 文末附完整可运行 Python 源码！</p>
+<hr>
+<p>1. 核心 LLM  </p>
+<p>很多人对大模型有个核心误区：觉得对话时它能记住上一句话，是模型本身有记忆能力。</p>
+<p>但事实是， <strong>所有大模型天生都是无状态的</strong> —— 你上一轮和它说过什么，它本身根本不会留存。</p>
+<p>那我们平时用的对话机器人，为什么能连贯对话？</p>
+<p>答案非常简单： <strong>所谓的「短期记忆」，本质就是我们在代码里维护一个 messages 列表，把每一轮的对话历史，完整地传给大模型。</strong></p>
+<p>再套一个 <code>while True</code> 循环让程序持续运行，就是一个最简单的 Agent 雏形了。话不多说，直接上代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">from openai import OpenAI</span><br><span class="line"></span><br><span class="line">client = OpenAI(base_url=&#x27;http://localhost:11434/v1/&#x27;, api_key=&#x27;ollama-local&#x27;)  # 大家按需修改为自己的大模型</span><br><span class="line">MODEL =&quot;qwen3.5:4b&quot;</span><br><span class="line"></span><br><span class="line"># 对话主循环</span><br><span class="line">def chat_loop():</span><br><span class="line">    # 维护对话上下文，实现短期记忆</span><br><span class="line"> messages = []</span><br><span class="line">    print(&quot;=== 极简Agent启动成功，输入/quit退出 ===&quot;)</span><br><span class="line">    whileTrue:</span><br><span class="line">        user_input = input(&quot;\n你：&quot;).strip()</span><br><span class="line">        # 退出指令</span><br><span class="line">        if user_input == &quot;/quit&quot;:</span><br><span class="line">            print(&quot;Agent：再见！&quot;)</span><br><span class="line">            break</span><br><span class="line">        # 加入用户输入到上下文</span><br><span class="line">        messages.append(&#123;&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: user_input&#125;)</span><br><span class="line">        # 调用大模型</span><br><span class="line">        response = client.chat.completions.create(model=MODEL, messages=messages)</span><br><span class="line">        reply = response.choices[0].message.content</span><br><span class="line">        # 加入模型回复到上下文，完成记忆闭环</span><br><span class="line">        messages.append(&#123;&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: reply&#125;)</span><br><span class="line">        print(f&quot;Agent：&#123;reply&#125;&quot;)</span><br><span class="line"></span><br><span class="line">if __name__ == &quot;__main__&quot;:</span><br><span class="line">    chat_loop()</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p>2. Function Calling 工具调用  </p>
+<p>LLM 只会动口（具有极强的意图识别能力），但不会动手（没法读取本地文件、没法获取实时数据、没法执行代码…）。</p>
+<p>Function Calling 就是给 LLM 装上手脚，思路非常简单：</p>
+<ol>
+<li>我们提前定义好能实现具体功能的工具函数（读文件、写文件等）；</li>
+<li>把工具的「使用说明书」（名称、功能、参数要求），整理成大模型能理解的格式，和用户指令一起传给 LLM；</li>
+<li>LLM 收到需求后，自主决策：要不要调用工具？调用哪个？传什么参数？</li>
+<li>代码收到 LLM 的调用指令后，执行对应的工具函数，拿到执行结果；</li>
+<li>把执行结果再返回给 LLM，让它基于真实结果生成最终回答。<br>[[_resources&#x2F;8b40e505a4244d8f21368d95d9d7dd58_MD5.jpeg|Open: image.png]]<br>![[_resources&#x2F;8b40e505a4244d8f21368d95d9d7dd58_MD5.jpeg]]<br>这里有个关键细节：很多复杂需求，大模型很可能需要连续调用多次工具。</li>
+</ol>
+<p>比如你让它「把本地 a.txt 的内容整理成 markdown 格式，保存成 b.md」，它就需要先调用「读文件」拿内容，再调用「写文件」保存整理后的结果。</p>
+<p>所以，我们要在主循环里，再加一层 <strong>内层的 ReAct 循环</strong> ，让它能反复调用工具，直到不需要再执行操作，再给你最终回复。</p>
+<h2 id="（1）定义工具"><a href="#（1）定义工具" class="headerlink" title="（1）定义工具"></a>（1）定义工具</h2><p>先给 Agent 写两个最基础的工具：读文件、写文件，这就是它能直接用的「手脚」。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">import json</span><br><span class="line"></span><br><span class="line">def read_file(file_path: str) -&gt; str:</span><br><span class="line">    &quot;&quot;&quot;读取本地文件&quot;&quot;&quot;</span><br><span class="line">    try:</span><br><span class="line">        with open(file_path, &quot;r&quot;, encoding=&quot;utf-8&quot;) as f:</span><br><span class="line">            return f.read()</span><br><span class="line">    except Exception as e:</span><br><span class="line">        returnf&quot;读取失败：&#123;str(e)&#125;&quot;</span><br><span class="line"></span><br><span class="line">def write_file(file_path: str, content: str) -&gt; str:</span><br><span class="line">    &quot;&quot;&quot;写入本地文件&quot;&quot;&quot;</span><br><span class="line">    try:</span><br><span class="line">        with open(file_path, &quot;w&quot;, encoding=&quot;utf-8&quot;) as f:</span><br><span class="line">            f.write(content)</span><br><span class="line">        returnf&quot;写入成功：&#123;file_path&#125;&quot;</span><br><span class="line">    except Exception as e:</span><br><span class="line">        return f&quot;写入失败：&#123;str(e)&#125;&quot;</span><br></pre></td></tr></table></figure>
+
+<h2 id="（2）给-LLM-的工具描述"><a href="#（2）给-LLM-的工具描述" class="headerlink" title="（2）给 LLM 的工具描述"></a>（2）给 LLM 的工具描述</h2><p>大模型不会凭空知道怎么调用工具，我们需要把工具的信息，整理成它能识别的标准格式，同时做一个函数名到实际函数的映射，方便后续执行。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">TOOLS = [</span><br><span class="line">    &#123;</span><br><span class="line">        &quot;type&quot;: &quot;function&quot;,</span><br><span class="line">        &quot;function&quot;: &#123;</span><br><span class="line">            &quot;name&quot;: &quot;read_file&quot;,</span><br><span class="line">            &quot;description&quot;: &quot;读取本地文件内容&quot;,</span><br><span class="line">            &quot;parameters&quot;: &#123;&quot;type&quot;: &quot;object&quot;, &quot;properties&quot;: &#123;&quot;file_path&quot;: &#123;&quot;type&quot;: &quot;string&quot;, &quot;description&quot;: &quot;要读取的文件路径&quot;&#125;&#125;, &quot;required&quot;: [&quot;file_path&quot;]&#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">        &quot;type&quot;: &quot;function&quot;,</span><br><span class="line">        &quot;function&quot;: &#123;</span><br><span class="line">            &quot;name&quot;: &quot;write_file&quot;,</span><br><span class="line">            &quot;description&quot;: &quot;写入内容到本地文件&quot;,</span><br><span class="line">            &quot;parameters&quot;: &#123;&quot;type&quot;: &quot;object&quot;, &quot;properties&quot;: &#123;&quot;file_path&quot;: &#123;&quot;type&quot;: &quot;string&quot;, &quot;description&quot;: &quot;要写入的文件路径&quot;&#125;, &quot;content&quot;: &#123;&quot;type&quot;: &quot;string&quot;, &quot;description&quot;: &quot;要写入的内容&quot;&#125;&#125;, &quot;required&quot;: [&quot;file_path&quot;, &quot;content&quot;]&#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line"># 工具执行映射</span><br><span class="line">TOOL_MAP = &#123;</span><br><span class="line">    &quot;read_file&quot;: read_file,</span><br><span class="line">    &quot;write_file&quot;: write_file</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="（3）加入内层工具循环"><a href="#（3）加入内层工具循环" class="headerlink" title="（3）加入内层工具循环"></a>（3）加入内层工具循环</h2><p>我们修改之前的 <code>chat_loop</code> 函数，加入内层循环，支持多轮连续工具调用：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">def chat_loop():</span><br><span class="line">    print(&quot;=== 极简Agent启动成功，输入/quit退出 ===&quot;)</span><br><span class="line">    # 维护对话上下文，实现短期记忆</span><br><span class="line">    messages = []</span><br><span class="line">    whileTrue:</span><br><span class="line">        user_input = input(&quot;\n你：&quot;).strip()</span><br><span class="line">        # 退出指令</span><br><span class="line">        if user_input == &quot;/quit&quot;:</span><br><span class="line">            print(&quot;Agent：再见！&quot;)</span><br><span class="line">            break</span><br><span class="line">        # 加入用户输入到上下文</span><br><span class="line">        messages.append(&#123;&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: user_input&#125;)</span><br><span class="line">        # 🔥 内层循环：支持多轮工具调用</span><br><span class="line">        whileTrue:</span><br><span class="line">            # 调用大模型，判断是否需要调用工具</span><br><span class="line">            response = client.chat.completions.create(model=MODEL, messages=messages, tools=TOOLS, tool_choice=&quot;auto&quot;)</span><br><span class="line">            message = response.choices[0].message</span><br><span class="line">            # 如果有工具调用，执行工具</span><br><span class="line">            if hasattr(message, &#x27;tool_calls&#x27;) and message.tool_calls:</span><br><span class="line">                messages.append(message)</span><br><span class="line">                # 遍历执行所有工具调用</span><br><span class="line">                for tool_call in message.tool_calls:</span><br><span class="line">                    tool_name = tool_call.function.name</span><br><span class="line">                    tool_args = json.loads(tool_call.function.arguments)</span><br><span class="line">                    # 执行工具</span><br><span class="line">                    tool_result = TOOL_MAP[tool_name](**tool_args)</span><br><span class="line">                    # 把工具结果返回给LLM，开启下一次循环</span><br><span class="line">                    messages.append(&#123;&quot;role&quot;: &quot;tool&quot;, &quot;tool_call_id&quot;: tool_call.id, &quot;name&quot;: tool_name, &quot;content&quot;: tool_result&#125;)</span><br><span class="line">                    print(f&quot;Agent：调用工具&#123;tool_name&#125;(&#123;tool_args&#125;) -&gt; &#123;tool_result&#125;&quot;)</span><br><span class="line">            else:</span><br><span class="line">                # 无工具调用，直接取回复</span><br><span class="line">                reply = message.content</span><br><span class="line">                break</span><br><span class="line">        # 加入模型回复到上下文，完成记忆闭环</span><br><span class="line">        messages.append(&#123;&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: reply&#125;)</span><br><span class="line">        print(f&quot;Agent：&#123;reply&#125;&quot;)</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p>3. 上下文管理  </p>
+<p>随着对话轮次越来越多， <code>messages</code> 列表会越来越长，很快就会撑爆大模型的上下文窗口，导致 token 溢出、程序报错。</p>
+<p>为了彻底解决这个问题，我们给 Agent 加上 3 个核心的上下文管理能力：</p>
+<ol>
+<li><code>/clear</code> ：手动清空所有短期记忆，从头开始对话</li>
+<li><code>/compact</code> ：手动压缩当前上下文，只保留核心信息，大幅减少 token 占用。</li>
+<li>自动压缩 ：对话长度超过阈值时，自动触发压缩，从根源避免溢出。</li>
+</ol>
+<h2 id="（1）实现上下文压缩函数"><a href="#（1）实现上下文压缩函数" class="headerlink" title="（1）实现上下文压缩函数"></a>（1）实现上下文压缩函数</h2><p>压缩的核心逻辑不是直接删掉历史，而是让大模型把长对话历史，压缩成一段精简摘要，保留核心事实，去掉冗余内容（比如工具调用的过程细节），既保留记忆，又大幅减少 token 量。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># 压缩上下文</span><br><span class="line">def compact_context(messages : list):</span><br><span class="line">    message_json = json.dumps(messages, ensure_ascii=False)</span><br><span class="line">    if len(message_json) &lt;= 10000:</span><br><span class="line">        return messages</span><br><span class="line">    compact_prompt = f&quot;将以下对话历史压缩为精简摘要，保留核心信息和关键事实，去除冗余（比如调用工具过程），压缩后不能超过100个字符：\n&#123;message_json&#125;&quot;</span><br><span class="line">    compact_response = client.chat.completions.create(model=MODEL, messages=[&#123;&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: compact_prompt&#125;])</span><br><span class="line">    return [&#123;&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: f&quot;【历史对话摘要】&#123;compact_response.choices[0].message.content&#125;&quot;&#125;]</span><br></pre></td></tr></table></figure>
+
+<h2 id="（2）把上下文管理能力集成到主循环"><a href="#（2）把上下文管理能力集成到主循环" class="headerlink" title="（2）把上下文管理能力集成到主循环"></a>（2）把上下文管理能力集成到主循环</h2><p>我们在主循环里加入手动指令的判断，同时加上自动压缩的触发逻辑：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"># 对话主循环</span><br><span class="line">def chat_loop():</span><br><span class="line">    print(&quot;=== 极简Agent启动成功，输入/quit退出, 输入/compact压缩上下文, 输入/clear清空上下文 ===&quot;)</span><br><span class="line">    # 维护对话上下文，实现短期记忆</span><br><span class="line">    messages = []</span><br><span class="line">    whileTrue:</span><br><span class="line">        user_input = input(&quot;\n你：&quot;).strip()</span><br><span class="line">        if user_input == &quot;/compact&quot;:</span><br><span class="line">            messages = compact_context(messages)</span><br><span class="line">            print(&quot;Agent：上下文压缩完成！&quot;)</span><br><span class="line">            continue</span><br><span class="line">        if user_input == &quot;/clear&quot;:</span><br><span class="line">            messages = []</span><br><span class="line">            print(&quot;Agent：上下文已清空！&quot;)</span><br><span class="line">            continue</span><br><span class="line">        # 调用大模型，判断是否需要自动压缩上下文</span><br><span class="line">        messages = compact_context(messages)</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p>4. 长期记忆  </p>
+<p>到这里，我们的 Agent 已经有了短期记忆、能干活、还能避免 token 溢出，但它的记忆还是「一次性」的 ，一旦关掉程序，重启之后所有对话记忆就全清零了。</p>
+<p>我们想要的，是一个能真正「记住你」的 Agent：你的名字、习惯、偏好、定的规则，哪怕重启程序，它也依然记得。这就是 <strong>长期记忆</strong> 。</p>
+<p>最直接的想法，是把所有记忆都存到本地文件，每次启动都加载进来塞给大模型。但这个方法有个致命问题：记忆会越来越多，很快就撑爆上下文窗口，而且大部分记忆和当前问题无关，塞给模型反而会干扰判断。</p>
+<p>所以，我们需要一个更聪明的方案： <strong>用向量检索（RAG）实现长期记忆，只把和当前用户问题最相关的记忆，召回给大模型，既不浪费 token，又能精准匹配需求。</strong></p>
+<p>我们的实现方案也很简单：封装两个工具函数 —— 保存记忆、检索记忆，让大模型可以自主调用。</p>
+<h2 id="（1）实现长期记忆的工具"><a href="#（1）实现长期记忆的工具" class="headerlink" title="（1）实现长期记忆的工具"></a>（1）实现长期记忆的工具</h2><p>我们用轻量级向量化模型实现语义检索，用 json 文件做持久化存储。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">from sentence_transformers import SentenceTransformer, util</span><br><span class="line">import numpy as np</span><br><span class="line"></span><br><span class="line"># 长期记忆向量库</span><br><span class="line">LONG_MEMORY_DB = &quot;long_memory_db.json&quot;</span><br><span class="line"># 向量化模型（轻量级，CPU可跑）</span><br><span class="line">embedding_model = SentenceTransformer(&#x27;all-MiniLM-L6-v2&#x27;)</span><br><span class="line"></span><br><span class="line"># 加载记忆库</span><br><span class="line">def load_memory_db():</span><br><span class="line">    try:</span><br><span class="line">        with open(LONG_MEMORY_DB, &quot;r&quot;, encoding=&quot;utf-8&quot;) as f:</span><br><span class="line">            return json.load(f)</span><br><span class="line">    except:</span><br><span class="line">        return &#123;&quot;docs&quot;: [], &quot;embeddings&quot;: []&#125;</span><br><span class="line"></span><br><span class="line"># 保存记忆库</span><br><span class="line">def save_memory_db(data):</span><br><span class="line">    with open(LONG_MEMORY_DB, &quot;w&quot;, encoding=&quot;utf-8&quot;) as f:</span><br><span class="line">        json.dump(data, f, ensure_ascii=False, indent=2)</span><br><span class="line"></span><br><span class="line"># 工具1：保存长期记忆（LLM自主调用）</span><br><span class="line">def save_long_memory(content: str) -&gt; str:</span><br><span class="line">    data = load_memory_db()</span><br><span class="line">    data[&quot;docs&quot;].append(content)</span><br><span class="line">    data[&quot;embeddings&quot;].append(embedding_model.encode(content).astype(np.float32).tolist())</span><br><span class="line">    save_memory_db(data)</span><br><span class="line">    returnf&quot;✅ 记忆已保存：&#123;content[:30]&#125;...&quot;</span><br><span class="line"></span><br><span class="line"># 工具2：检索相关记忆（LLM自主调用）</span><br><span class="line">def query_long_memory(query: str, top_k=2) -&gt; str:</span><br><span class="line">    data = load_memory_db()</span><br><span class="line">    docs = data[&quot;docs&quot;]</span><br><span class="line">    embs = data[&quot;embeddings&quot;]</span><br><span class="line">    ifnot docs:</span><br><span class="line">        return&quot;暂无长期记忆&quot;</span><br><span class="line">    q_emb = embedding_model.encode(query).astype(np.float32)</span><br><span class="line">    db_embs = np.array(embs, dtype=np.float32)</span><br><span class="line">    scores = np.dot(q_emb, db_embs.T) / (np.linalg.norm(q_emb) * np.linalg.norm(db_embs, axis=1) + 1e-8)</span><br><span class="line">    print(scores)</span><br><span class="line">    top_idx = np.argsort(scores)[::-1][:top_k]</span><br><span class="line">    memories = [docs[i] for i in top_idx if scores[i] &gt; 0.5]</span><br><span class="line">    ifnot memories:</span><br><span class="line">        return&quot;未找到相关记忆&quot;</span><br><span class="line">    return&quot;📌 相关记忆：\n&quot; + &quot;\n&quot;.join(memories)</span><br></pre></td></tr></table></figure>
+
+<h2 id="（2）将记忆工具注册到-Agent-中"><a href="#（2）将记忆工具注册到-Agent-中" class="headerlink" title="（2）将记忆工具注册到 Agent 中"></a>（2）将记忆工具注册到 Agent 中</h2><p>我们把这两个记忆工具，加入到之前的 <code>TOOLS</code> 和 <code>TOOL_MAP</code> 里，让大模型可以自主调用：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"># 工具注册：LLM需要的函数描述格式</span><br><span class="line">TOOLS = [</span><br><span class="line">    ...</span><br><span class="line">    &#123;</span><br><span class="line">        &quot;type&quot;: &quot;function&quot;,</span><br><span class="line">        &quot;function&quot;: &#123;</span><br><span class="line">            &quot;name&quot;: &quot;save_long_memory&quot;,</span><br><span class="line">            &quot;description&quot;: &quot;当用户提到重要偏好、习惯、规则、秘密等需要长期记住的内容时，自动保存&quot;,</span><br><span class="line">            &quot;parameters&quot;: &#123;</span><br><span class="line">                &quot;type&quot;: &quot;object&quot;,</span><br><span class="line">                &quot;properties&quot;: &#123;&quot;content&quot;: &#123;&quot;type&quot;: &quot;string&quot;, &quot;description&quot;: &quot;要记住的内容&quot;&#125;&#125;,</span><br><span class="line">                &quot;required&quot;: [&quot;content&quot;]</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">        &quot;type&quot;: &quot;function&quot;,</span><br><span class="line">        &quot;function&quot;: &#123;</span><br><span class="line">            &quot;name&quot;: &quot;query_long_memory&quot;,</span><br><span class="line">            &quot;description&quot;: &quot;当回答用户问题需要历史偏好、习惯、规则时，先检索记忆&quot;,</span><br><span class="line">            &quot;parameters&quot;: &#123;</span><br><span class="line">                &quot;type&quot;: &quot;object&quot;,</span><br><span class="line">                &quot;properties&quot;: &#123;&quot;query&quot;: &#123;&quot;type&quot;: &quot;string&quot;, &quot;description&quot;: &quot;检索关键词&quot;&#125;&#125;,</span><br><span class="line">                &quot;required&quot;: [&quot;query&quot;]</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line"># 工具执行映射</span><br><span class="line">TOOL_MAP = &#123;</span><br><span class="line"> ...</span><br><span class="line">    &quot;save_long_memory&quot;: save_long_memory,</span><br><span class="line">    &quot;query_long_memory&quot;: query_long_memory</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>到这里，你的 Agent 就真正拥有了「长期记忆」能力。你可以和它说「我叫一枫，以后你都叫我枫哥」，它会自动保存记忆；哪怕你重启程序，再问它「我叫什么」，它也会自动检索记忆，准确回应你。</p>
+<hr>
+<p>5. 能力扩展  </p>
+<p>当你理解这套底层逻辑后，会发现 <strong>几乎所有高级 Agent 能力，都可以基于「工具模式」 扩展</strong> ：</p>
+<p>Q：如何实现 Skill（技能）系统？</p>
+<p>A：读取项目下所有 skill 文件的名称和元信息，封装成工具描述传给大模型，让大模型自主判断是否需要加载对应技能。如果需要，直接通过文件路径，用我们已经实现的读文件工具，就能加载技能的完整内容。</p>
+<p>Q：如何实现 Multi-Agent（多智能体）？</p>
+<p>A：把我们当前这个极简 Agent 直接封装成一个工具，父 Agent 需要时调用子 Agent，执行完成后回收结果即可。把代码里 “顺序调用工具” 的逻辑改成 “并行工具调用”，就能实现多智能体并行执行。</p>
+<hr>
+<p>6. 总结  </p>
+<p>到这里，我们没有用任何复杂的重型框架，只用了不到 200 行的核心代码，就实现了一个完整可用、能落地干活的 AI Agent，它具备以下核心要素：短期记忆、工具调用、上下文管理、长期记忆 RAG。</p>
+<p>而所谓的 AI Agent，从来都不是什么玄之又玄的黑科技，它的本质，其实就是三句话：</p>
+<p><strong>用大模型做大脑决策，用 messages 列表做记忆存储，用工具函数做执行手脚，用循环做持续思考。</strong></p>
+<p>所有你能看到的复杂 Agent 方案，不管是 LangChain、AutoGPT，还是各种各样的多智能体框架，本质都是在这套最核心的逻辑上，做了封装、扩展和优化。</p>
+<p>🚀 我已经把完整的、可直接运行的源码整理好了，关注我的公众号【一枫说码】，后台回复【Agent 源码】，就能直接拿到完整代码，复制粘贴就能跑通。</p>
+<p>你还想给 Agent 加什么能力？欢迎在评论区留言讨论。👇</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzI2OTg0MjI2Nw==&mid=2247486171&idx=1&sn=9dd2a170021d3c77e34f9aaf9ec0f926&scene=21#wechat_redirect">AI 工程化实战：不学算法也能用好的 LLM 指南</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzI2OTg0MjI2Nw==&mid=2247486200&idx=1&sn=f02cc658ffd4c175e5df7f2082d97abd&scene=21#wechat_redirect">AI 工程化实战：拒绝“开盲盒”，像写代码一样搞定提示词工程！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzI2OTg0MjI2Nw==&mid=2247486224&idx=1&sn=c3f2f47a89ccc762b37cc907234baa95&scene=21#wechat_redirect">AI 工程化实战：拒绝“胡说八道”，用 RAG 给大模型外挂私有大脑！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzI2OTg0MjI2Nw==&mid=2247486240&idx=1&sn=83cebf020b969c766e06e7c3f0198ff2&scene=21#wechat_redirect">AI 工程化实战：5分钟带你快速掌握 Function Calling！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzI2OTg0MjI2Nw==&mid=2247486306&idx=1&sn=bcdb76416521ec1190852fdded8e4380&scene=21#wechat_redirect">AI 工程化实战：从零手搓代码，这一次彻底搞懂MCP！</a></li>
+</ul>
+<p>作者提示: 内容由AI生成</p>
+<p>继续滑动看下一个</p>
+<p>一枫说码</p>
+<p>向上滑动看下一个</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2026/04/08/200%20%E8%A1%8C%20Python%20%E4%BB%A3%E7%A0%81%EF%BC%8C%E4%BB%8E%E9%9B%B6%E6%89%8B%E6%90%93%E6%9E%81%E7%AE%80%20Agent%EF%BC%8C%E5%90%83%E9%80%8F%E6%99%BA%E8%83%BD%E4%BD%93%E6%A0%B8%E5%BF%83%E5%8E%9F%E7%90%86%EF%BC%81/">https://yhao521.github.io/2026/04/08/200%20%E8%A1%8C%20Python%20%E4%BB%A3%E7%A0%81%EF%BC%8C%E4%BB%8E%E9%9B%B6%E6%89%8B%E6%90%93%E6%9E%81%E7%AE%80%20Agent%EF%BC%8C%E5%90%83%E9%80%8F%E6%99%BA%E8%83%BD%E4%BD%93%E6%A0%B8%E5%BF%83%E5%8E%9F%E7%90%86%EF%BC%81/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/web-frontend/">web/frontend</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/%E6%91%98%E5%BD%95/">摘录</a><a class="post-meta__tags" href="/tags/python-programming/">python/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/05/14/Spring%20Boot%E9%9D%A2%E8%AF%95%E9%A2%98%E8%A7%A3/" title="Spring Boot面试题解"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Spring Boot面试题解</div></div><div class="info-2"><div class="info-item-1">Spring Boot 的面试通常从基础概念、核心特性，到进阶原理和微服务实战，层层递进。以下整理了一份高频面试题及答案，希望能帮到你： 一、基础概念篇1. 什么是 Spring Boot？它和 Spring 有什么区别？  回答要点：Spring Boot 是基于 Spring 框架的微服务级框架，它并非替代品，而是对 Spring 的自动配置和简化封装。 核心优势： 简化依赖：通过spring-boot-starter-*启动器，将常用依赖打包，开发者无需再为版本冲突头疼。 自动配置：基于添加的 Jar 依赖，自动配置 Spring 应用，例如添加了spring-boot-starter-web，它会自动配置 Tomcat 和 DispatcherServlet。 嵌入式服务器：直接嵌入 Tomcat、Jetty 等，无需打包成 WAR 部署，通过main方法即可运行。 生产就绪：提供指标（Metrics）、健康检查（Health Check）、外部化配置等监控能力。    2. Spring Boot 的核心注解是什么？  核心注解：@SpringBootApplicati...</div></div></div></a><a class="pagination-related" href="/2026/03/19/OpenClaw%20%E6%9C%AC%E5%9C%B0%E6%A8%A1%E5%9E%8B%E6%9C%80%E4%BD%B3%E6%96%B9%E6%A1%88%EF%BC%9A%E6%A8%A1%E5%9E%8B%E6%8E%A8%E8%8D%90%20+%20vLLM%20%E9%83%A8%E7%BD%B2%E4%BC%98%E5%8C%96%E5%AE%8C%E6%95%B4%E6%95%99%E7%A8%8B%EF%BC%81/" title="OpenClaw 本地模型最佳方案：模型推荐 + vLLM 部署优化完整教程！"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">OpenClaw 本地模型最佳方案：模型推荐 + vLLM 部署优化完整教程！</div></div><div class="info-2"><div class="info-item-1">OpenClaw 如何切换到本地模型？如果希望在执行自动化任务时保持流畅、不出现卡顿，同时避免频繁触发上下文长度限制，那么选择一个合适的开源模型就非常关键。 对于 OpenClaw 来说，模型不仅需要具备良好的推理能力和语言理解能力，还需要拥有稳定的 工具调用（Tool Calling）能力。因为在自动化任务中，模型需要频繁调用各种工具完成操作，因此工具调用能力往往是选择模型时最重要的指标之一。  很多人在第一次尝试本地部署模型时，往往会选择 Ollama。它的优点确实很明显：安装简单、配置方便，几乎可以做到“傻瓜式”部署。 开发工具 但在 OpenClaw 这种自动化任务场景下，Ollama 的调用方式和推理速度并不理想。实际使用中往往会遇到两个问题：  推理速度较慢 上下文长度很容易被耗尽  在连续运行多个任务后，经常会出现上下文不够用的情况。 因此，如果你希望获得更稳定、更高效的本地部署体验，就需要选择更合适的推理框架。 一般来说：  远程集群 &#x2F; 多 Agent 场景 ：推荐使用 SGLang 单卡本地部署 ：强烈推荐 vLLM  目前来看，vLLM 可以说是单...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/05/13/8%E6%AC%BE%E5%BC%80%E6%BA%90%E8%87%AA%E5%8A%A8%E5%8C%96%E6%B5%8B%E8%AF%95%E6%A1%86%E6%9E%B6%20-%20%E5%B0%8F%E5%BC%BA%E6%89%BEBUG%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD/" title="8款开源自动化测试框架 - 小强找BUG - 博客园"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-13</div><div class="info-item-2">8款开源自动化测试框架 - 小强找BUG - 博客园</div></div><div class="info-2"><div class="info-item-1">[![[_resources&#x2F;92442b0eb6563aee8410c83388de292d_MD5.jpg]]](https://www.doubao.com/?channel=cnblogs&amp;source=hw_db_cnblogs&amp;type=lunt&amp;theme=bianc) 在如今开源的时代，我们就不要再闭门造车了，热烈的拥抱开源吧！本文针对性能测试、Web UI 测试、API 测试、数据库测试、接口测试、单元测试等方面，为大家整理了github或码云上优秀的自动化测试开源项目，希望能给大家带来一点帮助。 一、性能自动化测试1、项目名称：基于Jmeter实现的在线压测平台和在线管理Jmeter脚本系统 ![[_resources&#x2F;ec84e1ab1778a07ca7e9b3519408a643_MD5.png]] 项目简介：  本项目基于renren-fast Java开发平台开发，内核基于Jmeter-Api和Jmeter脚本实现在线性能压测。  具有如下特点  友好的代码结构及注释，便于阅读及二次开发 实现前后端分离，通过...</div></div></div></a><a class="pagination-related" href="/2026/03/19/OpenClaw%20%E6%9C%AC%E5%9C%B0%E6%A8%A1%E5%9E%8B%E6%9C%80%E4%BD%B3%E6%96%B9%E6%A1%88%EF%BC%9A%E6%A8%A1%E5%9E%8B%E6%8E%A8%E8%8D%90%20+%20vLLM%20%E9%83%A8%E7%BD%B2%E4%BC%98%E5%8C%96%E5%AE%8C%E6%95%B4%E6%95%99%E7%A8%8B%EF%BC%81/" title="OpenClaw 本地模型最佳方案：模型推荐 + vLLM 部署优化完整教程！"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-19</div><div class="info-item-2">OpenClaw 本地模型最佳方案：模型推荐 + vLLM 部署优化完整教程！</div></div><div class="info-2"><div class="info-item-1">OpenClaw 如何切换到本地模型？如果希望在执行自动化任务时保持流畅、不出现卡顿，同时避免频繁触发上下文长度限制，那么选择一个合适的开源模型就非常关键。 对于 OpenClaw 来说，模型不仅需要具备良好的推理能力和语言理解能力，还需要拥有稳定的 工具调用（Tool Calling）能力。因为在自动化任务中，模型需要频繁调用各种工具完成操作，因此工具调用能力往往是选择模型时最重要的指标之一。  很多人在第一次尝试本地部署模型时，往往会选择 Ollama。它的优点确实很明显：安装简单、配置方便，几乎可以做到“傻瓜式”部署。 开发工具 但在 OpenClaw 这种自动化任务场景下，Ollama 的调用方式和推理速度并不理想。实际使用中往往会遇到两个问题：  推理速度较慢 上下文长度很容易被耗尽  在连续运行多个任务后，经常会出现上下文不够用的情况。 因此，如果你希望获得更稳定、更高效的本地部署体验，就需要选择更合适的推理框架。 一般来说：  远程集群 &#x2F; 多 Agent 场景 ：推荐使用 SGLang 单卡本地部署 ：强烈推荐 vLLM  目前来看，vLLM 可以说是单...</div></div></div></a><a class="pagination-related" href="/2025/05/29/Hygen/" title="Hygen"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-29</div><div class="info-item-2">Hygen</div></div><div class="info-2"><div class="info-item-1">[TOC] 起步安装12345npm i -g hygen或cnpm i -g hygen  初始化1234567进入项目地址cd /projects/demo初始化模板hygen init self  初始化成功后，会自动在项目根目录下生成 _templates 文件夹，并且默认生成了一个名为 generator 的生成器及其工作目录。后续会依托该生成器，派生出更多的生成器来满足需求。  注意 不要删除 _templates/generator 文件夹，否则会导致无法创建 Generator 。   提示 后续的所有命令行操作，如无特殊说明，都在项目根目录。  创建第一个生成器1hygen generator new component  执行后会生成一个生成器 component 及其工作目录，目录中默认存在一个示例文件 hello.ejs.t 。 12345678910111213141516171819---to: app/hello.js---const hello = \`\`\`Hello!This is your first hygen template.Lear...</div></div></div></a><a class="pagination-related" href="/2025/10/01/%E5%AE%89%E5%8D%93%E5%BC%80%E5%8F%91%E8%80%85%E5%BF%85%E5%A4%87%E4%B9%8B%E5%A6%82%E4%BD%95%E5%85%8D%E8%B4%B9%E7%94%B3%E8%AF%B7%E8%BD%AF%E4%BB%B6%E8%91%97%E4%BD%9C%E6%9D%83/" title="安卓开发者必备之如何免费申请软件著作权"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-10-01</div><div class="info-item-2">安卓开发者必备之如何免费申请软件著作权</div></div><div class="info-2"><div class="info-item-1">![[_resources&#x2F;5748e291ac82a16d9a71a2181319849b_MD5.jpg]]![[_resources&#x2F;206b42a7c013357424f6aae87d90ca68_MD5.png]] 1. 背景目前，在国内的安卓应用市场上架一个App，必须有软件著作权作为支持。因此，每一个软件开发者想要在国内合规地上架一款app，都绕不过申请软件著作权这个坎。 下图为华为的AppGallery Connect在提交版本时出现的提示：![[_resources&#x2F;0c9cdf72ea773792c3ec2b7b0dd6cb3b_MD5.webp]] 除了花钱交给代理商来协助我们或全部包办，我们自己也可以全程免费地完成软件著作权的申请。![[_resources&#x2F;3e1d9bc05a83b94cde205475d4589923_MD5.webp]]![[_resources&#x2F;2ea4726b6043f3fe86744538d84f17bf_MD5.webp]] 2. 工作和时间评估需要准备的材料、设备或软件： ...</div></div></div></a><a class="pagination-related" href="/2025/05/29/hygen%20%E8%87%AA%E5%8A%A8%E5%8C%96%E5%88%9B%E5%BB%BA%E6%A8%A1%E6%9D%BF%E6%96%87%E4%BB%B6%E7%A5%9E%E5%99%A8-CSDN%E5%8D%9A%E5%AE%A2/" title="hygen 自动化创建模板文件神器-CSDN博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-29</div><div class="info-item-2">hygen 自动化创建模板文件神器-CSDN博客</div></div><div class="info-2"><div class="info-item-1">hygen是什么？作者的介绍是：一个简单，快速，可扩展的代码生成器。其用途是帮助开发者自动创建模板文件的工具，旨在提高开发效率，下面就来说说怎么在项目中使用hygen。hygen官方文档 1、全局安装hygen1npm i -g hygen  2、安装成功后cd到项目目录，然后在项目中初始化hygen1hygen init self  初始化之后项目中会多一个_templates的文件夹，generator是构建器文件夹，再下一级的文件夹名是对应创建文件时的命令，ejs.t 文件则是模板文件，详细的后面会讲解。 ![[_resources&#x2F;882d1eec9937f23bdd32d7078b6ee9c8_MD5.png]] 3、构建第一个自己的构建器，我这里跟官方文档一样起名为mygen1hygen generator new mygen  执行完上面的命令后，_templates文件夹下面就会多了一个mygen的文件夹 4、使用构建器创建第一个文件new就是mygen文件夹下面的new文件夹，执行这条命令就会创建new文件夹下面的所有模板 1hygen mygen n...</div></div></div></a><a class="pagination-related" href="/2025/06/23/%E3%80%90anaconda%E3%80%91conda%E5%88%9B%E5%BB%BA%E3%80%81%E6%9F%A5%E7%9C%8B%E3%80%81%E5%88%A0%E9%99%A4%E8%99%9A%E6%8B%9F%E7%8E%AF%E5%A2%83%EF%BC%88anaconda%E5%91%BD%E4%BB%A4%E9%9B%86%EF%BC%89_conda%20%E5%88%9B%E5%BB%BA%E7%8E%AF%E5%A2%83-CSDN%E5%8D%9A%E5%AE%A2/" title="【anaconda】conda创建、查看、删除虚拟环境（anaconda命令集）_conda 创建环境-CSDN博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-06-23</div><div class="info-item-2">【anaconda】conda创建、查看、删除虚拟环境（anaconda命令集）_conda 创建环境-CSDN博客</div></div><div class="info-2"><div class="info-item-1">源12豆瓣(douban) http://pypi.douban.com/simple/python1  一、管理conda：（1）检查conda版本 conda --version  （2）获取版本号 conda --version 或 conda -V  （3）列出所有的环境 conda env list conda list 命令用于查看conda下的包，而 conda env list 命令可以用来查看conda创建的所有虚拟环境。  （4）查看环境管理的全部命令帮助 conda env -h  （5）conda升级我们可以在命令行中或者 anaconda prompt中执行命令进行操作。  conda update conda 升级conda conda update anaconda 升级anaconda前要先升级conda conda update --all 升级所有包  （6）conda升级后释放空间在升级完成之后，我们可以使用命令来清理一些无用的包以释放一些空间：  conda clean -p 删除没有用的包 conda clean -t 删除保存下来的压缩...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%EF%BC%881%EF%BC%89%E5%AE%9A%E4%B9%89%E5%B7%A5%E5%85%B7"><span class="toc-number">1.</span> <span class="toc-text">（1）定义工具</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%EF%BC%882%EF%BC%89%E7%BB%99-LLM-%E7%9A%84%E5%B7%A5%E5%85%B7%E6%8F%8F%E8%BF%B0"><span class="toc-number">2.</span> <span class="toc-text">（2）给 LLM 的工具描述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%EF%BC%883%EF%BC%89%E5%8A%A0%E5%85%A5%E5%86%85%E5%B1%82%E5%B7%A5%E5%85%B7%E5%BE%AA%E7%8E%AF"><span class="toc-number">3.</span> <span class="toc-text">（3）加入内层工具循环</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%EF%BC%881%EF%BC%89%E5%AE%9E%E7%8E%B0%E4%B8%8A%E4%B8%8B%E6%96%87%E5%8E%8B%E7%BC%A9%E5%87%BD%E6%95%B0"><span class="toc-number">4.</span> <span class="toc-text">（1）实现上下文压缩函数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%EF%BC%882%EF%BC%89%E6%8A%8A%E4%B8%8A%E4%B8%8B%E6%96%87%E7%AE%A1%E7%90%86%E8%83%BD%E5%8A%9B%E9%9B%86%E6%88%90%E5%88%B0%E4%B8%BB%E5%BE%AA%E7%8E%AF"><span class="toc-number">5.</span> <span class="toc-text">（2）把上下文管理能力集成到主循环</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%EF%BC%881%EF%BC%89%E5%AE%9E%E7%8E%B0%E9%95%BF%E6%9C%9F%E8%AE%B0%E5%BF%86%E7%9A%84%E5%B7%A5%E5%85%B7"><span class="toc-number">6.</span> <span class="toc-text">（1）实现长期记忆的工具</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%EF%BC%882%EF%BC%89%E5%B0%86%E8%AE%B0%E5%BF%86%E5%B7%A5%E5%85%B7%E6%B3%A8%E5%86%8C%E5%88%B0-Agent-%E4%B8%AD"><span class="toc-number">7.</span> <span class="toc-text">（2）将记忆工具注册到 Agent 中</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

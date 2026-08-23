@@ -1,0 +1,306 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>nginx设置IP白名单 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="title: nginx设置IP白名单lang: en-USdate: 2023-09-03 20:17:08category:  nginxtag: nginxauthor:   nginx 访问控制https:&#x2F;&#x2F;www.cnblogs.com&#x2F;crazymagic&#x2F;p&#x2F;11012991.html https:&#x2F;&#x2F;www.cnblogs.com&#x2F;zhongyehai&#x2F;p&#x2F;10493475.h">
+<meta property="og:type" content="article">
+<meta property="og:title" content="nginx设置IP白名单">
+<meta property="og:url" content="https://yhao521.github.io/2023/09/04/nginx%E8%AE%BE%E7%BD%AEIP%E7%99%BD%E5%90%8D%E5%8D%95/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="title: nginx设置IP白名单lang: en-USdate: 2023-09-03 20:17:08category:  nginxtag: nginxauthor:   nginx 访问控制https:&#x2F;&#x2F;www.cnblogs.com&#x2F;crazymagic&#x2F;p&#x2F;11012991.html https:&#x2F;&#x2F;www.cnblogs.com&#x2F;zhongyehai&#x2F;p&#x2F;10493475.h">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2023-09-04T03:18:09.000Z">
+<meta property="article:modified_time" content="2023-09-04T03:18:27.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "nginx设置IP白名单",
+  "url": "https://yhao521.github.io/2023/09/04/nginx%E8%AE%BE%E7%BD%AEIP%E7%99%BD%E5%90%8D%E5%8D%95/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2023-09-04T03:18:09.000Z",
+  "dateModified": "2023-09-04T03:18:27.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2023/09/04/nginx%E8%AE%BE%E7%BD%AEIP%E7%99%BD%E5%90%8D%E5%8D%95/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'nginx设置IP白名单',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">nginx设置IP白名单</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">nginx设置IP白名单</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-09-04T03:18:09.000Z" title="发表于 2023-09-04 11:18:09">2023-09-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-09-04T03:18:27.000Z" title="更新于 2023-09-04 11:18:27">2023-09-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><hr>
+<p>title: nginx设置IP白名单<br>lang: en-US<br>date: 2023-09-03 20:17:08<br>category:</p>
+<ul>
+<li>nginx<br>tag:</li>
+<li>nginx<br>author:</li>
+</ul>
+<hr>
+<p>nginx 访问控制<br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/crazymagic/p/11012991.html">https://www.cnblogs.com/crazymagic/p/11012991.html</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/zhongyehai/p/10493475.html">https://www.cnblogs.com/zhongyehai/p/10493475.html</a></p>
+<p>HTTP X-Forwarded-For 介绍：<a target="_blank" rel="noopener" href="https://www.runoob.com/w3cnote/http-x-forwarded-for.html">https://www.runoob.com/w3cnote/http-x-forwarded-for.html</a></p>
+<h1 id="设置ip白名单，需用到nginx-geo-与-nginx-map"><a href="#设置ip白名单，需用到nginx-geo-与-nginx-map" class="headerlink" title="设置ip白名单，需用到nginx geo 与 nginx map"></a>设置ip白名单，需用到nginx geo 与 nginx map</h1><p>在没有人为删除的情况下（–without-http_geo_module或–without-http_map_module），nginx默认加载了ngx-http-geo-module和ngx-http-map-module相关内容；</p>
+<p>ngx-http-geo-module可以用来创建变量，变量值依赖于客户端 ip 地址;</p>
+<p>ngx-http-map-module可以基于其他变量及变量值进行变量创建，其允许分类，或者映射多个变量到不同值并存储在一个变量中；</p>
+<p>Nginx geo 格式说明</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Syntax ( 语法格式 ): geo [$address] $variable &#123; ... &#125;</span><br><span class="line">Default ( 默认 ): -</span><br><span class="line">Content ( 配置段位 ): http</span><br><span class="line">Nginx map 格式说明</span><br><span class="line">Syntax ( 语法格式 ): map String $variable &#123; ... &#125;</span><br><span class="line">Default ( 默认 )：-</span><br><span class="line">Content ( 配置段位 ): http</span><br></pre></td></tr></table></figure>
+
+<p>白名单配置示例</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line">http&#123;</span><br><span class="line"><span class="meta prompt_">   # </span><span class="language-bash">... 其他配置内容</span></span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">定义白名单ip列表变量</span></span><br><span class="line">   geo $whiteiplist &#123;</span><br><span class="line">     default 1 ;</span><br><span class="line">     127.0.0.1/32 0;</span><br><span class="line">     64.223.160.0/19 0;</span><br><span class="line">   &#125;</span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">使用map指令映射将白名单列表中客户端请求ip为空串</span></span><br><span class="line">   map $whiteiplist $limit&#123;</span><br><span class="line">     1 $binary_remote_addr ;</span><br><span class="line">     0 &quot;&quot;;</span><br><span class="line">   &#125;</span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">配置请求限制内容</span></span><br><span class="line">   limit_conn_zone $limit zone=conn:10m;</span><br><span class="line">   limit_req_zone $limit zone=allips:10m rate=20r/s;</span><br><span class="line">   server&#123;</span><br><span class="line">     location /yourApplicationName &#123;</span><br><span class="line">       proxy_pass http://192.168.1.111:8095/app;</span><br><span class="line">       limit_conn conn 50;</span><br><span class="line">       limit_rate 500k;</span><br><span class="line">       limit_req zone=allips burst=5 nodelay;</span><br><span class="line">     &#125;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line">白名单配置可用于对合作客户，搜索引擎等请求过滤限制</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">（特殊情况处理）</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">如果想仅限制指定的请求，如：只限制Post请求，则：</span></span><br><span class="line">http&#123;</span><br><span class="line"><span class="meta prompt_">   # </span><span class="language-bash">其他请求..</span></span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">请求地址map映射</span></span><br><span class="line">   map $request_method $limit &#123;</span><br><span class="line">     default &quot;&quot;;</span><br><span class="line">     POST $binary_remote_addr;</span><br><span class="line">   &#125;</span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">限制定义</span></span><br><span class="line">   limit_req_zone $limit zone=reqlimit:20m rate=10r/s;</span><br><span class="line">   server&#123;</span><br><span class="line">     ... #与普通限制一致</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">在此基础上，想进行指定方法的白名单限制处理，则：</span></span><br><span class="line">http&#123;</span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">...</span></span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">定义白名单列表</span></span><br><span class="line">   map $whiteiplist $limitips&#123;</span><br><span class="line">     1 $binary_remote_addr;</span><br><span class="line">     0 &quot;&quot;;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">基于白名单列表，定义指定方法请求限制</span></span><br><span class="line">   map $request_method $limit &#123;</span><br><span class="line">     default &quot;&quot;;</span><br><span class="line">     # POST $binary_remote_addr;</span><br><span class="line">     POST $limitips;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">对请求进行引用</span></span><br><span class="line">   limit_req_zone $limit zone=reqlimit:20m rate=10r/s;</span><br><span class="line"></span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">在server中进行引用</span></span><br><span class="line">   server&#123;</span><br><span class="line">     #... 与普通限制相同</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="nginx访问控制"><a href="#nginx访问控制" class="headerlink" title="nginx访问控制"></a>nginx访问控制</h1><p>nginx的访问控制主要分为两类：</p>
+<ul>
+<li>基于IP的访问控制 http_access_module</li>
+<li>基于用户的信任登录 http_auth_basic_module</li>
+</ul>
+<h2 id="对于http-access-module模块："><a href="#对于http-access-module模块：" class="headerlink" title="对于http_access_module模块："></a><strong>对于http_access_module模块：</strong></h2><p>模块允许限制访问某些客户端地址。访问也可以通过密码子请求结果或JWT来限制满足控制地址和密码的同时访问限制。</p>
+<p>配置语法：</p>
+<ul>
+<li><code>Syntax: allow address | CIDR | unix: | all;</code></li>
+<li><code>Default: —</code></li>
+<li><code>Context: http, server, location, limit_except</code></li>
+<li><code>Syntax: deny address | CIDR | unix: | all;</code></li>
+<li><code>Default: —</code></li>
+<li><code>Context: http, server, location, limit_except</code></li>
+</ul>
+<p>语法中address表示地址，CIDR表示网段。unix:指定了特殊值，则允许访问所有UNIX域套接字。all表示所有的。</p>
+<p>实例：配置访问控制<br>首先我们查看没有限制的时候进行的输出</p>
+<p><img src="/img/1256425-20190613225428148-368895171.png" alt="img"></p>
+<p>编辑配置文件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">location ~ ^/admin.html &#123;``    ``root  /opt/app/code;``    ``deny 192.168.1.6;``    ``allow all;``    ``index index.html index.htm;``  ``&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中 ~ 表示对请求路径URL模式匹配，表示跟目下以1.html开头的家目录设置在&#x2F;opt&#x2F;app&#x2F;code。</p>
+<p>然后检查配置重启</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nginx -tc /etc/nginx/nginx.conf``systemctl reload nginx</span><br></pre></td></tr></table></figure>
+
+<p>重新访问我们的页面　　</p>
+<p><img src="/img/1256425-20190613225950100-149834804.png" alt="img"></p>
+<p>现在配置只有本机可以访问</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">location ~ ^/admin.html &#123;``  ``root  /opt/app/code;``  ``allow 192.168.1.0/24;``  ``deny all;``  ``index index.html index.htm;``&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后检查配置重启　</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nginx -tc /etc/nginx/nginx.conf``systemctl reload nginx</span><br></pre></td></tr></table></figure>
+
+<p>　　</p>
+<p>重新访问我们的页面　</p>
+<p><img src="/img/1256425-20190613230447959-1510161580.png" alt="img"></p>
+<p>http_access_module模块的局限性：</p>
+<p><img src="/img/1256425-20190613224156228-1377075193.png" alt="img"></p>
+<p>nginx的访问控制限制是针对客户端的IP来进行限制的，但是nginx并不确定真正的客户端是哪个，凡是和nginx进行交互的都被当做是客户端。（remote_addr是直接和nginx通信的IP）如果我们访问不是直接访问到服务端而是由中间代理进行（如上图），访问控制这时就会失效。</p>
+<p>局限性解决方法总结：</p>
+<p>方法一： 采用http头信息控制访问，如HTTP_X_FORWARD_FOR<br>方法二： 结合geo模块<br>方法三： 通过HTTP自定义变量传递</p>
+<p>http_x_forwarded_for头信息控制访问 会更好的解决该问题,它要求访问时必须带上所有用到的ip的地址信息<br>我们看一下http_x_forwarded_for记录过程：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http_x_forwarded_for = Client IP, Proxy(1)IP, Proxy(2)IP,...</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/1256425-20190613224223207-1867568354.png" alt="img"></p>
+<h2 id="http-auth-basic-module模块"><a href="#http-auth-basic-module模块" class="headerlink" title="http_auth_basic_module模块"></a><strong>http_auth_basic_module模块</strong></h2><p>配置语法</p>
+<ul>
+<li><code>Syntax: auth_basic string | off;</code></li>
+<li><code>Default: auth_basic off;</code></li>
+<li><code>Context: http, server, location, limit_except</code></li>
+<li><code>Syntax: auth_basic_user_file file;</code></li>
+<li><code>Default: —</code></li>
+<li><code>Context: http, server, location, limit_except</code></li>
+</ul>
+<p>语法讲解：<br>auth_basic 默认关闭，开启的话输入一段字符串即可。<br>auth_basic_user_file 该文件存储用户账号密码。</p>
+<p>我们看一下官网的文件格式</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># comment``name1:password1``name2:password2:comment``name3:password3</span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://link.jianshu.com/?t=http://nginx.org/en/docs/http/ngx_http_auth_basic_module.html">详细官方链接</a></p>
+<p>密码加密方式有多中这里我们使用htpasswd　　</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">can be generated using the “htpasswd” utility from the Apache HTTP Server distribution or the “openssl passwd” command</span><br><span class="line">想要使用该方式，首先要装对应的包</span><br><span class="line">yum -y install httpd-tools</span><br></pre></td></tr></table></figure>
+
+<p>接下来创建对应的use_file文件　　</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">htpasswd -c ./auth_conf zhangbiao</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://img2018.cnblogs.com/blog/1256425/201906/1256425-20190613230643420-1425367196.png" alt="img"></p>
+<p>编辑配置文件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">location ~ ^/admin.html &#123;``  ``root  /opt/app/code;``auth_basic ``&quot;Auth access test! input your password!&quot;``;``auth_basic_user_file /etc/nginx/auth_conf;``  ``index index.html index.htm;``&#125;</span><br></pre></td></tr></table></figure>
+
+<p>　　</p>
+<p>进行语法检查</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nginx -tc /etc/nginx/nginx.conf``systemctl reload nginx</span><br></pre></td></tr></table></figure>
+
+<p>现在我们再次访问页面的时候就需要输入用户名密码　　</p>
+<p>输入刚才的账号密码就可以正常访问了。</p>
+<p><img src="/img/1256425-20190613230843211-963949091.png" alt="img"></p>
+<p>局限性：</p>
+<p>一： 用户信息依赖文件<br>二： 操作管理机械，效率低</p>
+<p>解决方式：</p>
+<p>一： nginx结合LUA实现高效验证<br>二： nginx配合LDAP打通，利用nginx-auth-ldap模块</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2023/09/04/nginx%E8%AE%BE%E7%BD%AEIP%E7%99%BD%E5%90%8D%E5%8D%95/">https://yhao521.github.io/2023/09/04/nginx%E8%AE%BE%E7%BD%AEIP%E7%99%BD%E5%90%8D%E5%8D%95/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2023/09/04/nginx%E8%AE%BF%E9%97%AE%E5%87%BA%E7%8E%B0504%20Gateway%20Time-out/" title="nginx访问出现504 Gateway Time-out"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">nginx访问出现504 Gateway Time-out</div></div><div class="info-2"><div class="info-item-1"> title: nginx访问出现504 Gateway Time-outdate: 2023-09-03 20:17:08category:  nginxtag: nginxauthor:   nginx访问出现504 Gateway Time-outnginx访问出现504 Gateway Time-out，一般是由于程序执行时间过长导致响应超时，例如导入一批大数据导致前端等待很长时间，这样就会出现超时。 通常修改nginx以下配置可以解决问题nginx.conf中，设置以下几个参数，增加超时时间 123456789http &#123;undefined    ...    fastcgi_connect_timeout 3000;    fastcgi_send_timeout 3000;    fastcgi_read_timeout 3000;    ...&#125;  fastcgi_connect_timeoutfastcgi连接超时时间，默认60秒 fastcgi_send_timeoutnginx 进程向 fastcgi 进程发送请求过程的超时时间，默认值6...</div></div></div></a><a class="pagination-related" href="/2023/09/04/nginx%E7%BC%96%E8%AF%91%E6%8A%A5%E9%94%99/" title="nginx编译报错"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">nginx编译报错</div></div><div class="info-2"><div class="info-item-1"> title: nginx编译报错date: 2023-09-03 20:17:08category:  nginxtag: nginxauthor:   nginx编译报错 error: C compiler cc is not found安装gcc-c++包,命令： 1yum -y install gcc-c++  error: SSL modules require the OpenSSL library.CentOS 12$ yum -y install openssl openssl-devel  Ubuntu 12$ apt -y install openssl openssl-devel </div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/github%E8%AE%BF%E9%97%AE%E5%8A%A0%E9%80%9F/" title="github访问加速"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">github访问加速</div></div><div class="info-2"><div class="info-item-1"> title: github访问加速date: 2023-09-03 20:17:08category: tag: author:  github访问加速 使用镜像网站 使用代理网站下载 cdn加速 转入gitee加速  概括: 如果是下载比较大的项目,比如耗时5min往上,大小30mb往上,十分推荐使用代理网站下载,或者转入gitee的方式下载. 如果仅仅是下载比较小的项目,类似代码性质,文档性质的项目,使用cdn加速,提升到100多KB&#x2F;s也就够用了 github加速神器https://github.com/dotnetcore/FastGithub 一.使用镜像网站使用github的镜像网站 https://hub.fastgit.org/ 进行搜索 二. 使用代理网站下载对于github release中下载的大文件 使用https://toolwa.com/github/来下载，速度起飞,无需注册，亲测有效。  三. cdn加速通过修改系统hosts文件的办法，绕过国内dns解析，直接访问GitHub的CDN节点，从而达到github访问加速的目的。不需要海外...</div></div></div></a><a class="pagination-related" href="/2023/09/04/MySQL%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" title="MySQL常用命令"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">MySQL常用命令</div></div><div class="info-2"><div class="info-item-1"> title: MySql常用命令总结lang: en-USdate: 2023-09-04 17:49:38category:  数据库 doc_mysqltag: doc_mysqlauthor:   [[_resources&#x2F;eca4f5f3d74b0ad7ab1fbb33df942a2e_MD5.sh|Open: mysql_createuser.sh]]![[_resources&#x2F;eca4f5f3d74b0ad7ab1fbb33df942a2e_MD5.sh]] 1. MySql常用命令总结1.1. 创建主从同步用户123GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* to repl@&#x27;%&#x27; IDENTIFIED BY &#x27;repl&#x27;CHANGE MASTER TO MASTER_HOST=&#x27;172.18.231.120&#x27;,MASTER_PORT=3306,MASTER_USER=&#x27;repl&#x27;,MASTER_PASSWO...</div></div></div></a><a class="pagination-related" href="/2023/09/04/centos_svn%E5%AE%89%E8%A3%85/" title="centos_svn安装"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">centos_svn安装</div></div><div class="info-2"><div class="info-item-1"> title: centos_svn安装date: 2023-09-03 20:17:08category:  linux centos svntag: svnauthor:   CentOS下搭建SVN服务器一，介绍SVN SVN是Subversion的简称，是一个开放源代码的版本控制系统，相较于RCS、CVS，它采用了分支管理系统，它的设计目标就是取代CVS。互联网上很多版本控制服务已从CVS迁移到Subversion。说得简单一点SVN就是用于多个人共同开发同一个项目，共用资源的目的。 —-百度百科 二，安装SV 官网下载： http://subversion.apache.org/packages.html SVN客户端TortoiseSVN :https://tortoisesvn.net/downloads.html 1,yum install subversion安装 1[root@localhost conf]# yum install subversion  2，新建一个目录用于存储SVN目录 1[root@localhost]mkdir /svn  3,新建一...</div></div></div></a><a class="pagination-related" href="/2024/07/02/golang%20exec%20%E6%89%A7%E8%A1%8C%20shell%20%E5%A6%82%E4%BD%95%E5%90%8C%E6%AD%A5%E8%BE%93%E5%87%BA_%E5%BE%97%E5%88%B0%E6%89%A7%E8%A1%8C%E7%BB%93%E6%9E%9C/" title="golang exec 执行 shell 如何同步输出_得到执行结果"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-02</div><div class="info-item-2">golang exec 执行 shell 如何同步输出_得到执行结果</div></div><div class="info-2"><div class="info-item-1">背景项目中需要执行shell命令，虽然exec包提供了CombinedOutput()方法，在shell运行结束会返回shell执行的输出，但是用户在发起一次任务时，可能在不停的刷新log，想达到同步查看log的目的，但是CombinedOutput()方法只能在命令完全执行结束才返回整个shell的输出，所以肯定达不到效果，所以，需要寻找其它方法达到命令一边执行log一边输出的目的。 1. 使用重定向如果你的shell比较简单，并且log的文件路径也很容易确定，那么直接对shell执行的命令添加重定向最简单不过了，程序参考如下 12345678910111213141516171819202122232425262728package mainimport (	&quot;fmt&quot;	&quot;os/exec&quot;)func main() &#123;	//定义一个每秒1次输出的shell	cmdStr := `#!/bin/bashfor var in &#123;1..10&#125;do	sleep 1     echo &quot;Hello, Welc...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E8%87%AA%E5%8A%A8%E6%93%8D%E4%BD%9C/" title="自动操作"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">自动操作</div></div><div class="info-2"><div class="info-item-1"> title: 自动操作date: 2023-09-03 20:17:08category:  mactag: macauthor:   mac自动操作https://www.zhihu.com/question/27298758/answer/989217966 我黑苹果使用的是10.14.6，win下我用的是autohotkey，mac网上搜了一圈也没找到方便的，推荐的一些工具都是付费的，我没钱买Alfred的powerpack，也不想搞盗版。 系统把玩了几天，看到“服务”这个项是在每个程序都有的，而且在键盘的快捷键的设置中也找到关于服务的快捷键，配合系统自带的自动操作，找到个方法： 快速输入时间字符串 打开自动操作，新建一个快速操作   2.设置该自动操作：  a.“没有输入”，“任何应用程序”，“用输出内容替换所选文本” b.左边栏挑选“运行shell脚本”插入，内容如下，选项设置“忽略此操作的输入” 1date &quot;+%Y-%m-%d %H:%M:%S&quot; #定义你自己的时间戳格式，自行参考man date  c.关闭并保存为TimeStamp &#x2...</div></div></div></a><a class="pagination-related" href="/2024/01/20/SkyWalking/" title="SkyWalking"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-20</div><div class="info-item-2">SkyWalking</div></div><div class="info-2"><div class="info-item-1">1. SkyWalking是什么？skywalking 是一个国产开源框架，2015年由个人吴晟（华为开发者）开源 ， 2017年加入Apache孵化器，skywalking是分布式系统的应用程序性能监视工具，专为微服务、云原生架构和基于容器（Docker、K8s、Mesos）架构而设计。SkyWalking 是观察性分析平台和应用性能管理系统。提供分布式追踪、服务网格遥测分析、度量聚合和可视化一体化解决方案 官网：Apache SkyWalking 下载：Downloads Github: https://github.com/apache/skywalking 文档：Welcome 1.2 链路追踪框架对比​ 1.Zipkin是Twitter开源的调用链分析工具，目前基于springcloud sleuth得到了广泛的使用，特点是轻量，使用部署简单。 ​ 2.Pinpoint是韩国人开源的基于字节码注入的调用链分析，以及应用监控分析工具，特点是支持多种插件，UI功能强大，接入端无代码侵入。 ​ 3.SkyWalking是本土开源的基于字节码注入的调用链分析，以及应用监控分析工...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%AE%BE%E7%BD%AEip%E7%99%BD%E5%90%8D%E5%8D%95%EF%BC%8C%E9%9C%80%E7%94%A8%E5%88%B0nginx-geo-%E4%B8%8E-nginx-map"><span class="toc-number">1.</span> <span class="toc-text">设置ip白名单，需用到nginx geo 与 nginx map</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#nginx%E8%AE%BF%E9%97%AE%E6%8E%A7%E5%88%B6"><span class="toc-number">2.</span> <span class="toc-text">nginx访问控制</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%B9%E4%BA%8Ehttp-access-module%E6%A8%A1%E5%9D%97%EF%BC%9A"><span class="toc-number">2.1.</span> <span class="toc-text">对于http_access_module模块：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#http-auth-basic-module%E6%A8%A1%E5%9D%97"><span class="toc-number">2.2.</span> <span class="toc-text">http_auth_basic_module模块</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

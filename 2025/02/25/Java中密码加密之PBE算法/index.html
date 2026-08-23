@@ -1,0 +1,487 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Java中密码加密之PBE算法 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="一、简述   PBE算法（Password Base Encryption，基于口令加密）算法是一种基于口令的加密算法。特点在于口令由用户自己掌握，采用随机数（我们这里叫做 盐）杂凑多重加密等方法保证数据的安全性。   PBE算法没有密钥的概念，把口令当做密钥了。因为密钥长短影响算法安全性，还不方便记忆，这里我们直接换成我们自己常用的口令就大大不同了，便于我们的记忆。但是单纯的口令很容易被字典法给">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java中密码加密之PBE算法">
+<meta property="og:url" content="https://yhao521.github.io/2025/02/25/Java%E4%B8%AD%E5%AF%86%E7%A0%81%E5%8A%A0%E5%AF%86%E4%B9%8BPBE%E7%AE%97%E6%B3%95/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="一、简述   PBE算法（Password Base Encryption，基于口令加密）算法是一种基于口令的加密算法。特点在于口令由用户自己掌握，采用随机数（我们这里叫做 盐）杂凑多重加密等方法保证数据的安全性。   PBE算法没有密钥的概念，把口令当做密钥了。因为密钥长短影响算法安全性，还不方便记忆，这里我们直接换成我们自己常用的口令就大大不同了，便于我们的记忆。但是单纯的口令很容易被字典法给">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2025-02-25T01:35:24.000Z">
+<meta property="article:modified_time" content="2025-02-25T01:35:24.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="java&#x2F;programming">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Java中密码加密之PBE算法",
+  "url": "https://yhao521.github.io/2025/02/25/Java%E4%B8%AD%E5%AF%86%E7%A0%81%E5%8A%A0%E5%AF%86%E4%B9%8BPBE%E7%AE%97%E6%B3%95/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2025-02-25T01:35:24.000Z",
+  "dateModified": "2025-02-25T01:35:24.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2025/02/25/Java%E4%B8%AD%E5%AF%86%E7%A0%81%E5%8A%A0%E5%AF%86%E4%B9%8BPBE%E7%AE%97%E6%B3%95/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Java中密码加密之PBE算法',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">Java中密码加密之PBE算法</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Java中密码加密之PBE算法</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-02-25T01:35:24.000Z" title="发表于 2025-02-25 09:35:24">2025-02-25</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-02-25T01:35:24.000Z" title="更新于 2025-02-25 09:35:24">2025-02-25</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>一、简述</p>
+<p>  PBE算法（Password Base Encryption，基于口令加密）算法是一种基于口令的加密算法。特点在于口令由用户自己掌握，采用随机数（我们这里叫做 盐）杂凑多重加密等方法保证数据的安全性。</p>
+<p>  PBE算法没有密钥的概念，把口令当做密钥了。因为密钥长短影响算法安全性，还不方便记忆，这里我们直接换成我们自己常用的口令就大大不同了，便于我们的记忆。但是单纯的口令很容易被字典法给穷举出来，所以我们这里给口令加了点“盐”，这个盐和口令组合，想破解就难了。</p>
+<p>同时我们将盐和口令合并后用消息摘要算法进行迭代很多次来构建密钥初始化向量的基本材料，使破译更加难了。</p>
+<p>  PBE算法没构建新的加密算法，就是用了我们常用的对称加密算法，例如AES,DES等算法。</p>
+<p>二、模型分析</p>
+<p>这里我们还是假设甲乙双发要传递消息，需要口令和盐还有算法</p>
+<p>传统的对称加密算法就是，构建密钥，指定算法，然后发送数据前用密钥加密数据，密钥和加密后的数据一起发送给对方，对方拿着密钥对数据进行解密。</p>
+<p> 现在是密钥没有了，我们就用“口令+盐”构造出一个密钥，然后对数据进行加密</p>
+<p> 这里“口令”我们可以随便设置，都可以设置成我们开自己电脑的密码</p>
+<p> 这里“盐”的设置可以采用随机数，可以是甲乙双方约定的数据</p>
+<p> 最终我们的口令和盐都要公布给双方</p>
+<p>1、消息传递双方约定口令，这里甲方构建口令</p>
+<p>2、甲方构建口令后，公布给乙方</p>
+<p>3、由口令构建方（甲方）构建本次消息传递使用的盐，其实也可以双方约定一个数据，例如硬盘号，今天的日期等等，不一定非要写个安全算法计算出来，只要双方一致就行</p>
+<p>4、甲方使用口令、盐对数据加密</p>
+<p>5、甲方将盐、加密数据发送给消息接收者（乙方）</p>
+<p>6、乙方用收到的口令、盐（可以是约定的数据）对数据进行解密</p>
+<p>总体看来口令和盐两边都需要知道。消息传递过程还是需要指定双方的统一算法进行。而这些算法其实还是用的那些常见的对称加密算法</p>
+<p>三、java6和bouncycastle支持的算法列表</p>
+<table border="0" cellspacing="0" cellpadding="0" style="color:rgb(0,0,0); font-family:Arial; font-size:14px; line-height:26px; width:784px"><colgroup><col width="268" style="width:201pt"><col width="72" style="width:54pt"><col width="117" style="width:88pt"><col width="92" style="width:69pt"><col width="139" style="width:104pt"><col width="96" style="width:72pt"></colgroup><tbody><tr height="18" style="height:13.5pt"><td class="xl63" width="268" height="18" style="height:13.5pt; width:201pt">算法</td><td class="xl63" width="72" style="width:54pt">密钥长度</td><td class="xl63" width="117" style="width:88pt">密钥长度默认值</td><td class="xl63" width="92" style="width:69pt">工作模式</td><td class="xl63" width="139" style="width:104pt">填充方式</td><td class="xl63" width="96" style="width:72pt">备注</td></tr><tr height="27" style="height:20.25pt"><td class="xl63" width="268" height="27" style="height:20.25pt; width:201pt">PBEWithMD5AndDES</td><td class="xl63" width="72" style="width:54pt">56</td><td class="xl63" width="117" style="width:88pt">56</td><td class="xl63" width="92" style="width:69pt">CBC</td><td class="xl63" width="139" style="width:104pt">PKCS5Padding</td><td class="xl63" width="96" style="width:72pt">java6实现</td></tr><tr height="18" style="height:13.5pt"><td class="xl63" width="268" height="18" style="height:13.5pt; width:201pt">PBEWithMD5AndTripeDES</td><td class="xl63" width="72" style="width:54pt">112、168</td><td class="xl63" width="117" style="width:88pt">168</td><td class="xl63" width="92" style="width:69pt">CBC</td><td class="xl63" width="139" style="width:104pt">PKCS6Padding</td><td class="xl63" width="96" style="width:72pt">java7实现</td></tr><tr height="18" style="height:13.5pt"><td class="xl63" width="268" height="18" style="height:13.5pt; width:201pt">PBEWithSHA1AndDESede</td><td class="xl63" width="72" style="width:54pt">112、168</td><td class="xl63" width="117" style="width:88pt">168</td><td class="xl63" width="92" style="width:69pt">CBC</td><td class="xl63" width="139" style="width:104pt">PKCS7Padding</td><td class="xl63" width="96" style="width:72pt">java8实现</td></tr><tr height="18" style="height:13.5pt"><td class="xl63" width="268" height="18" style="height:13.5pt; width:201pt">PBEWithSHA1AndRC2_40</td><td class="xl63" width="72" style="width:54pt">40至1024</td><td class="xl63" width="117" style="width:88pt">128</td><td class="xl63" width="92" style="width:69pt">CBC</td><td class="xl63" width="139" style="width:104pt">PKCS8Padding</td><td class="xl63" width="96" style="width:72pt">java9实现</td></tr><tr height="18" style="height:13.5pt"><td class="xl63" width="268" height="18" style="height:13.5pt; width:201pt">&nbsp;</td><td class="xl63" width="72" style="width:54pt">&nbsp;</td><td class="xl63" width="117" style="width:88pt">&nbsp;</td><td class="xl63" width="92" style="width:69pt">&nbsp;</td><td class="xl63" width="139" style="width:104pt">&nbsp;</td><td class="xl63" width="96" style="width:72pt">&nbsp;</td></tr><tr height="72" style="height:54pt"><td class="xl63" width="268" height="72" style="height:54pt; width:201pt">PBEWithMD5AndDES</td><td class="xl63" width="72" style="width:54pt">64</td><td class="xl63" width="117" style="width:88pt">64</td><td class="xl63" width="92" style="width:69pt">CBC</td><td class="xl63" width="139" style="width:104pt">PKCS5Padding/PKCS7Padding/ISO10126Padding/ZeroBytePadding</td><td class="xl63" width="96" style="width:72pt">BouncyCastle实现</td></tr><tr height="72" style="height:54pt"><td class="xl63" width="268" height="72" style="height:54pt; width:201pt">PBEWithMD5AndRC2</td><td class="xl63" width="72" style="width:54pt">128</td><td class="xl63" width="117" style="width:88pt">128</td><td class="xl63" width="92" style="width:69pt">CBC</td><td class="xl63" width="139" style="width:104pt">PKCS5Padding/PKCS7Padding/ISO10127Padding/ZeroBytePadding</td><td class="xl63" width="96" style="width:72pt">BouncyCastle实现</td></tr><tr height="72" style="height:54pt"><td class="xl63" width="268" height="72" style="height:54pt; width:201pt">PBEWithSHA1AndDES</td><td class="xl63" width="72" style="width:54pt">64</td><td class="xl63" width="117" style="width:88pt">64</td><td class="xl63" width="92" style="width:69pt">CBC</td><td class="xl63" width="139" style="width:104pt">PKCS5Padding/PKCS7Padding/ISO10128Padding/ZeroBytePadding</td><td class="xl63" width="96" style="width:72pt">BouncyCastle实现</td></tr><tr height="72" style="height:54pt"><td class="xl63" width="268" height="72" style="height:54pt; width:201pt">PBEWithSHA1AndRC2</td><td class="xl63" width="72" style="width:54pt">128</td><td class="xl63" width="117" style="width:88pt">128</td><td class="xl63" width="92" style="width:69pt">CBC</td><td class="xl63" width="139" style="width:104pt">PKCS5Padding/PKCS7Padding/ISO10129Padding/ZeroBytePadding</td><td class="xl63" width="96" style="width:72pt">BouncyCastle实现</td></tr><tr height="72" style="height:54pt"><td class="xl63" width="268" height="72" style="height:54pt; width:201pt">PBEWithSHAAndIDEA-CBC</td><td class="xl63" width="72" style="width:54pt">128</td><td class="xl63" width="117" style="width:88pt">128</td><td class="xl63" width="92" style="width:69pt">CBC</td><td class="xl63" width="139" style="width:104pt">PKCS5Padding/PKCS7Padding/ISO10130Padding/ZeroBytePadding</td><td class="xl63" width="96" style="width:72pt">BouncyCastle实现</td></tr><tr height="72" style="height:54pt"><td class="xl63" width="268" height="72" style="height:54pt; width:201pt">PBEWithSHAAnd2-KeyTripleDES-CBC</td><td class="xl63" width="72" style="width:54pt">128</td><td class="xl63" width="117" style="width:88pt">128</td><td class="xl63" width="92" style="width:69pt">CBC</td><td class="xl63" width="139" style="width:104pt">PKCS5Padding/PKCS7Padding/ISO10131Padding/ZeroBytePadding</td><td class="xl63" width="96" style="width:72pt">BouncyCastle实现</td></tr><tr height="72" style="height:54pt"><td class="xl63" width="268" height="72" style="height:54pt; width:201pt">PBEWithSHAAnd3-KeyTripleDES-CBC</td><td class="xl63" width="72" style="width:54pt">192</td><td class="xl63" width="117" style="width:88pt">192</td><td class="xl63" width="92" style="width:69pt">CBC</td><td class="xl63" width="139" style="width:104pt">PKCS5Padding/PKCS7Padding/ISO10132Padding/ZeroBytePadding</td><td class="xl63" width="96" style="width:72pt">BouncyCastle实现</td></tr><tr height="72" style="height:54pt"><td class="xl63" width="268" height="72" style="height:54pt; width:201pt">PBEWithSHAAnd128BitRC2-CBC</td><td class="xl63" width="72" style="width:54pt">128</td><td class="xl63" width="117" style="width:88pt">128</td><td class="xl63" width="92" style="width:69pt">CBC</td><td class="xl63" width="139" style="width:104pt">PKCS5Padding/PKCS7Padding/ISO10133Padding/ZeroBytePadding</td><td class="xl63" width="96" style="width:72pt">BouncyCastle实现</td></tr><tr height="72" style="height:54pt"><td class="xl63" width="268" height="72" style="height:54pt; width:201pt">PBEWithSHAAnd40BitRC2-CBC</td><td class="xl63" width="72" style="width:54pt">40</td><td class="xl63" width="117" style="width:88pt">40</td><td class="xl63" width="92" style="width:69pt">CBC</td><td class="xl63" width="139" style="width:104pt">PKCS5Padding/PKCS7Padding/ISO10134Padding/ZeroBytePadding</td><td class="xl63" width="96" style="width:72pt">BouncyCastle实现</td></tr><tr height="72" style="height:54pt"><td class="xl63" width="268" height="72" style="height:54pt; width:201pt">PBEWithSHAAnd128BitRC4</td><td class="xl63" width="72" style="width:54pt">128</td><td class="xl63" width="117" style="width:88pt">128</td><td class="xl63" width="92" style="width:69pt">CBC</td><td class="xl63" width="139" style="width:104pt">PKCS5Padding/PKCS7Padding/ISO10135Padding/ZeroBytePadding</td><td class="xl63" width="96" style="width:72pt">BouncyCastle实现</td></tr><tr height="72" style="height:54pt"><td class="xl63" width="268" height="72" style="height:54pt; width:201pt">PBEWithSHAAnd40BitRC4</td><td class="xl63" width="72" style="width:54pt">40</td><td class="xl63" width="117" style="width:88pt">40</td><td class="xl63" width="92" style="width:69pt">CBC</td><td class="xl63" width="139" style="width:104pt">PKCS5Padding/PKCS7Padding/ISO10136Padding/ZeroBytePadding</td><td class="xl63" width="96" style="width:72pt">BouncyCastle实现</td></tr><tr height="72" style="height:54pt"><td class="xl63" width="268" height="72" style="height:54pt; width:201pt">PBEWithSHAAndTwofish-CBC</td><td class="xl63" width="72" style="width:54pt">256</td><td class="xl63" width="117" style="width:88pt">256</td><td class="xl63" width="92" style="width:69pt">CBC</td><td class="xl63" width="139" style="width:104pt">PKCS5Padding/PKCS7Padding/ISO10137Padding/ZeroBytePadding</td><td class="xl63" width="96" style="width:72pt">BouncyCastle实现</td></tr></tbody></table>
+
+<p>四、程序展示</p>
+<p><strong>[java]</strong>  <a target="_blank" rel="noopener" href="http://blog.csdn.net/kongqz/article/details/6290206#" title="view plain">view plain</a> <a target="_blank" rel="noopener" href="http://blog.csdn.net/kongqz/article/details/6290206#" title="copy">copy</a></p>
+<ol>
+<li><p>package com.ca.test;  </p>
+</li>
+<li><p>import java.security.Key;  </p>
+</li>
+<li><p>import java.security.SecureRandom;  </p>
+</li>
+<li><p>import javax.crypto.Cipher;  </p>
+</li>
+<li><p>import javax.crypto.SecretKey;  </p>
+</li>
+<li><p>import javax.crypto.SecretKeyFactory;  </p>
+</li>
+<li><p>import javax.crypto.spec.PBEKeySpec;  </p>
+</li>
+<li><p>import javax.crypto.spec.PBEParameterSpec;  </p>
+</li>
+<li><p>import org.apache.commons.codec.binary.Base64;  </p>
+</li>
+<li><p>&#x2F;** </p>
+</li>
+<li><p> * 对称加密算法：基于口令加密-PBE算法实现 </p>
+</li>
+<li><p> * 使用java6提供的PBEWITHMD5andDES算法进行展示 </p>
+</li>
+<li><p> * @author kongqz </p>
+</li>
+<li><p> * *&#x2F;  </p>
+</li>
+<li><p>public class PBECoder {  </p>
+</li>
+<li><p>    &#x2F;** </p>
+</li>
+<li><p>     * JAVA6支持以下任意一种算法 </p>
+</li>
+<li><p>     * PBEWITHMD5ANDDES </p>
+</li>
+<li><p>     * PBEWITHMD5ANDTRIPLEDES </p>
+</li>
+<li><p>     * PBEWITHSHAANDDESEDE </p>
+</li>
+<li><p>     * PBEWITHSHA1ANDRC2_40 </p>
+</li>
+<li><p>     * PBKDF2WITHHMACSHA1 </p>
+</li>
+<li><p>     * *&#x2F;  </p>
+</li>
+<li><p>    public static final String ALGORITHM&#x3D;”PBEWITHMD5andDES”;  </p>
+</li>
+<li><p>    &#x2F;** </p>
+</li>
+<li><p>     * 迭代次数 </p>
+</li>
+<li><p>     * *&#x2F;  </p>
+</li>
+<li><p>    public static final int ITERATION_COUNT&#x3D;100;  </p>
+</li>
+<li><p>    &#x2F;** </p>
+</li>
+<li><p>     * 盐初始化 </p>
+</li>
+<li><p>     * 盐长度必须为8字节 </p>
+</li>
+<li><p>     * @return byte[] 盐 </p>
+</li>
+<li><p>     * *&#x2F;  </p>
+</li>
+<li><p>    public static byte[] initSalt() throws Exception{  </p>
+</li>
+<li><p>        &#x2F;&#x2F;实例化安全随机数  </p>
+</li>
+<li><p>        SecureRandom random&#x3D;new SecureRandom();  </p>
+</li>
+<li><p>        &#x2F;&#x2F;产出盐  </p>
+</li>
+<li><p>        return random.generateSeed(8);  </p>
+</li>
+<li><p>    }  </p>
+</li>
+<li><p>    &#x2F;** </p>
+</li>
+<li><p>     * 转换密钥 </p>
+</li>
+<li><p>     * @param password 密码 </p>
+</li>
+<li><p>     * @return Key 密钥 </p>
+</li>
+<li><p>     * *&#x2F;  </p>
+</li>
+<li><p>    private static Key toKey(String password) throws Exception{  </p>
+</li>
+<li><p>        &#x2F;&#x2F;密钥彩礼转换  </p>
+</li>
+<li><p>        PBEKeySpec keySpec&#x3D;new PBEKeySpec(password.toCharArray());  </p>
+</li>
+<li><p>        &#x2F;&#x2F;实例化  </p>
+</li>
+<li><p>        SecretKeyFactory keyFactory&#x3D;SecretKeyFactory.getInstance(ALGORITHM);  </p>
+</li>
+<li><p>        &#x2F;&#x2F;生成密钥  </p>
+</li>
+<li><p>        SecretKey secretKey&#x3D;keyFactory.generateSecret(keySpec);  </p>
+</li>
+<li><p>        return secretKey;  </p>
+</li>
+<li><p>    }  </p>
+</li>
+<li><p>    &#x2F;** </p>
+</li>
+<li><p>     * 加密 </p>
+</li>
+<li><p>     * @param data 待加密数据 </p>
+</li>
+<li><p>     * @param password 密码 </p>
+</li>
+<li><p>     * @param salt 盐 </p>
+</li>
+<li><p>     * @return byte[] 加密数据 </p>
+</li>
+<li><p>     *  </p>
+</li>
+<li><p>     * *&#x2F;  </p>
+</li>
+<li><p>    public static byte[] encrypt(byte[] data,String password,byte[] salt) throws Exception{  </p>
+</li>
+<li><p>        &#x2F;&#x2F;转换密钥  </p>
+</li>
+<li><p>        Key key&#x3D;toKey(password);  </p>
+</li>
+<li><p>        &#x2F;&#x2F;实例化PBE参数材料  </p>
+</li>
+<li><p>        PBEParameterSpec paramSpec&#x3D;new PBEParameterSpec(salt,ITERATION_COUNT);  </p>
+</li>
+<li><p>        &#x2F;&#x2F;实例化  </p>
+</li>
+<li><p>        Cipher cipher&#x3D;Cipher.getInstance(ALGORITHM);  </p>
+</li>
+<li><p>        &#x2F;&#x2F;初始化  </p>
+</li>
+<li><p>        cipher.init(Cipher.ENCRYPT_MODE, key,paramSpec);  </p>
+</li>
+<li><p>        &#x2F;&#x2F;执行操作  </p>
+</li>
+<li><p>        return cipher.doFinal(data);  </p>
+</li>
+<li><p>    }  </p>
+</li>
+<li><p>    &#x2F;** </p>
+</li>
+<li><p>     * 解密 </p>
+</li>
+<li><p>     * @param data 待解密数据 </p>
+</li>
+<li><p>     * @param password 密码 </p>
+</li>
+<li><p>     * @param salt 盐 </p>
+</li>
+<li><p>     * @return byte[] 解密数据 </p>
+</li>
+<li><p>     *  </p>
+</li>
+<li><p>     * *&#x2F;  </p>
+</li>
+<li><p>    public static byte[] decrypt(byte[] data,String password,byte[] salt) throws Exception{  </p>
+</li>
+<li><p>        &#x2F;&#x2F;转换密钥  </p>
+</li>
+<li><p>        Key key&#x3D;toKey(password);  </p>
+</li>
+<li><p>        &#x2F;&#x2F;实例化PBE参数材料  </p>
+</li>
+<li><p>        PBEParameterSpec paramSpec&#x3D;new PBEParameterSpec(salt,ITERATION_COUNT);  </p>
+</li>
+<li><p>        &#x2F;&#x2F;实例化  </p>
+</li>
+<li><p>        Cipher cipher&#x3D;Cipher.getInstance(ALGORITHM);  </p>
+</li>
+<li><p>        &#x2F;&#x2F;初始化  </p>
+</li>
+<li><p>        cipher.init(Cipher.DECRYPT_MODE, key,paramSpec);  </p>
+</li>
+<li><p>        &#x2F;&#x2F;执行操作  </p>
+</li>
+<li><p>        return cipher.doFinal(data);  </p>
+</li>
+<li><p>    }  </p>
+</li>
+<li><p>    &#x2F;** </p>
+</li>
+<li><p>     * 使用PBE算法对数据进行加解密 </p>
+</li>
+<li><p>     * @throws Exception  </p>
+</li>
+<li><p>     *  </p>
+</li>
+<li><p>     *&#x2F;  </p>
+</li>
+<li><p>    public static void main(String[] args) throws Exception {  </p>
+</li>
+<li><p>        &#x2F;&#x2F;待加密数据  </p>
+</li>
+<li><p>        String str&#x3D;”PBE”;  </p>
+</li>
+<li><p>        &#x2F;&#x2F;设定的口令密码  </p>
+</li>
+<li><p>        String password&#x3D;”azsxdc”;  </p>
+</li>
+<li><p>        System.out.println(“原文：&#x2F;t”+str);  </p>
+</li>
+<li><p>        System.out.println(“密码：&#x2F;t”+password);  </p>
+</li>
+<li><p>        &#x2F;&#x2F;初始化盐  </p>
+</li>
+<li><p>        byte[] salt&#x3D;PBECoder.initSalt();  </p>
+</li>
+<li><p>        System.out.println(“盐：&#x2F;t”+Base64.encodeBase64String(salt));  </p>
+</li>
+<li><p>        &#x2F;&#x2F;加密数据  </p>
+</li>
+<li><p>        byte[] data&#x3D;PBECoder.encrypt(str.getBytes(), password, salt);  </p>
+</li>
+<li><p>        System.out.println(“加密后：&#x2F;t”+Base64.encodeBase64String(data));  </p>
+</li>
+<li><p>        &#x2F;&#x2F;解密数据  </p>
+</li>
+<li><p>        data&#x3D;PBECoder.decrypt(data, password, salt);  </p>
+</li>
+<li><p>        System.out.println(“解密后：”+new String(data));  </p>
+</li>
+<li><p>    }  </p>
+</li>
+<li><p>}  </p>
+</li>
+<li><p>控制台结果输出：  </p>
+</li>
+<li><p>原文： PBE  </p>
+</li>
+<li><p>密码： azsxdc  </p>
+</li>
+<li><p>盐：  VeEQqRzOw2Y&#x3D;  </p>
+</li>
+<li><p>加密后：    7bQTon5WD04&#x3D;  </p>
+</li>
+<li><p>解密后：PBE</p>
+</li>
+</ol>
+<p>  </p>
+<p>五、总结</p>
+<p>PBE不是一个新构建的算法，就是将密钥的概念转成 “口令+盐” 的方式，将不便于记忆的密钥转成便于记忆的口令</p>
+<p>算法还是用的基本的对称加密算法，从上边的支持表中就能看到。</p>
+<p>这个是不是和我们到银行开的U盾有些像呢？</p>
+<p>就拿民生银行的U盾来说，我们插上U盾，还需要我们去输入口令。然后才能到网上银行去登陆操作，付款的时候还是需要我们去输入口令。</p>
+<p>1、U盾的盐从何来？：应该是那个闪盘的序列编号经过一定的处理得出的一个值，因为我们想要U盾生效，在民生的大厅中需要找一个机器激活的。那个激活的动作应该是将我们U盾这个闪盘中的数据写入到我们个人的账户中，相当于做了一次盐的公布</p>
+<p>2、口令何来？：就是我们设定的登陆密码呀。这个在窗口办理的时候需要我们设定U盾的密码。并且我们在激活的时候可以改我们的密码</p>
+<p>有了上边两个，我们再进行操作，就可以进行我们的身份发送数据的安全性了。网银的数据交换真的安全了…</p>
+<p>-—例如:项目中真正使用的Util</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.jeecgframework.core.util; <span class="keyword">import</span> java.security.Key;<span class="keyword">import</span> java.security.SecureRandom;<span class="keyword">import</span> javax.crypto.Cipher;<span class="keyword">import</span> javax.crypto.SecretKey;<span class="keyword">import</span> javax.crypto.SecretKeyFactory;<span class="keyword">import</span> javax.crypto.spec.PBEKeySpec;<span class="keyword">import</span> javax.crypto.spec.PBEParameterSpec;<span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">PasswordUtil</span> &#123; 	<span class="comment">/**	 * JAVA6支持以下任意一种算法 PBEWITHMD5ANDDES PBEWITHMD5ANDTRIPLEDES	 * PBEWITHSHAANDDESEDE PBEWITHSHA1ANDRC2_40 PBKDF2WITHHMACSHA1	 * */</span> 	<span class="comment">/**	 * 定义使用的算法为:PBEWITHMD5andDES算法	 */</span>	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">ALGORITHM</span> <span class="operator">=</span> <span class="string">&quot;PBEWithMD5AndDES&quot;</span>;<span class="comment">//加密算法	public static final String Salt = &quot;63293188&quot;;//密钥 	/**	 * 定义迭代次数为1000次	 */	private static final int ITERATIONCOUNT = 1000; 	/**	 * 获取加密算法中使用的盐值,解密中使用的盐值必须与加密中使用的相同才能完成操作. 盐长度必须为8字节	 * 	 * @return byte[] 盐值	 * */	public static byte[] getSalt() throws Exception &#123;		// 实例化安全随机数		SecureRandom random = new SecureRandom();		// 产出盐		return random.generateSeed(8);	&#125; 	public static byte[] getStaticSalt() &#123;		// 产出盐		return Salt.getBytes();	&#125; 	/**	 * 根据PBE密码生成一把密钥	 * 	 * @param password	 *            生成密钥时所使用的密码	 * @return Key PBE算法密钥	 * */	private static Key getPBEKey(String password) &#123;		// 实例化使用的算法		SecretKeyFactory keyFactory;		SecretKey secretKey = null;		try &#123;			keyFactory = SecretKeyFactory.getInstance(ALGORITHM);			// 设置PBE密钥参数			PBEKeySpec keySpec = new PBEKeySpec(password.toCharArray());			// 生成密钥			secretKey = keyFactory.generateSecret(keySpec);		&#125; catch (Exception e) &#123;			// TODO Auto-generated catch block			e.printStackTrace();		&#125; 		return secretKey;	&#125; 	/**	 * 加密明文字符串	 * 	 * @param plaintext	 *            待加密的明文字符串	 * @param password	 *            生成密钥时所使用的密码	 * @param salt	 *            盐值	 * @return 加密后的密文字符串	 * @throws Exception	 */	public static String encrypt(String plaintext, String password, byte[] salt) &#123; 		Key key = getPBEKey(password);		byte[] encipheredData = null;		PBEParameterSpec parameterSpec = new PBEParameterSpec(salt, ITERATIONCOUNT);		try &#123;			Cipher cipher = Cipher.getInstance(ALGORITHM); 			cipher.init(Cipher.ENCRYPT_MODE, key, parameterSpec); 			encipheredData = cipher.doFinal(plaintext.getBytes());		&#125; catch (Exception e) &#123;		&#125;		return bytesToHexString(encipheredData);	&#125; 	/**	 * 解密密文字符串	 * 	 * @param ciphertext	 *            待解密的密文字符串	 * @param password	 *            生成密钥时所使用的密码(如需解密,该参数需要与加密时使用的一致)	 * @param salt	 *            盐值(如需解密,该参数需要与加密时使用的一致)	 * @return 解密后的明文字符串	 * @throws Exception	 */	public static String decrypt(String ciphertext, String password, byte[] salt) &#123; 		Key key = getPBEKey(password);		byte[] passDec = null;		PBEParameterSpec parameterSpec = new PBEParameterSpec(getStaticSalt(), ITERATIONCOUNT);		try &#123;			Cipher cipher = Cipher.getInstance(ALGORITHM); 			cipher.init(Cipher.DECRYPT_MODE, key, parameterSpec); 			passDec = cipher.doFinal(hexStringToBytes(ciphertext));		&#125; 		catch (Exception e) &#123;			// <span class="doctag">TODO:</span> handle exception		&#125;		return new String(passDec);	&#125; 	/**	 * 将字节数组转换为十六进制字符串	 * 	 * @param src	 *            字节数组	 * @return	 */	public static String bytesToHexString(byte[] src) &#123;		StringBuilder stringBuilder = new StringBuilder(&quot;&quot;);		if (src == null || src.length &lt;= 0) &#123;			return null;		&#125;		for (int i = 0; i &lt; src.length; i++) &#123;			int v = src[i] &amp; 0xFF;			String hv = Integer.toHexString(v);			if (hv.length() &lt; 2) &#123;				stringBuilder.append(0);			&#125;			stringBuilder.append(hv);		&#125;		return stringBuilder.toString();	&#125; 	/**	 * 将十六进制字符串转换为字节数组	 * 	 * @param hexString	 *            十六进制字符串	 * @return	 */	public static byte[] hexStringToBytes(String hexString) &#123;		if (hexString == null || hexString.equals(&quot;&quot;)) &#123;			return null;		&#125;		hexString = hexString.toUpperCase();		int length = hexString.length() / 2;		char[] hexChars = hexString.toCharArray();		byte[] d = new byte[length];		for (int i = 0; i &lt; length; i++) &#123;			int pos = i * 2;			d[i] = (byte) (charToByte(hexChars[pos]) &lt;&lt; 4 | charToByte(hexChars[pos + 1]));		&#125;		return d;	&#125; 	private static byte charToByte(char c) &#123;		return (byte) &quot;0123456789ABCDEF&quot;.indexOf(c);	&#125; 	public static void main(String[] args) &#123;		int i=10;		for (int j = 0; j &lt; i; j++) &#123;			if((j)%3==0)&#123;				System.out.print(&quot;&lt;br&gt;&quot;);			&#125;else &#123;				System.out.print(j);			&#125;		&#125;		System.out.print(-1%2==0);		String str = &quot;admin&quot;;		String password = &quot;123456&quot;; 		org.jeecgframework.core.util.LogUtil.info(&quot;明文:&quot; + str);		org.jeecgframework.core.util.LogUtil.info(&quot;密码:&quot; + password); 		try &#123;			byte[] salt = PasswordUtil.getStaticSalt();			//加密			String ciphertext = PasswordUtil.encrypt(str, password, salt);			org.jeecgframework.core.util.LogUtil.info(&quot;密文:&quot; + ciphertext);			//解密			String plaintext = PasswordUtil.decrypt(ciphertext, password, salt);			org.jeecgframework.core.util.LogUtil.info(&quot;明文:&quot; + plaintext);		&#125; catch (Exception e) &#123;			e.printStackTrace();		&#125;	&#125;&#125;</span></span><br></pre></td></tr></table></figure></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2025/02/25/Java%E4%B8%AD%E5%AF%86%E7%A0%81%E5%8A%A0%E5%AF%86%E4%B9%8BPBE%E7%AE%97%E6%B3%95/">https://yhao521.github.io/2025/02/25/Java%E4%B8%AD%E5%AF%86%E7%A0%81%E5%8A%A0%E5%AF%86%E4%B9%8BPBE%E7%AE%97%E6%B3%95/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/java-programming/">java/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/03/03/MQ%E9%A1%BA%E5%BA%8F%E6%B6%88%E8%B4%B9%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/" title="MQ顺序消费解决方案"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">MQ顺序消费解决方案</div></div><div class="info-2"><div class="info-item-1">一、MQ的顺序问题 1.顺序错乱的常见原因 ： 消息发送：多线程并行发送，有顺序的消息被写入到不同的分区，异常重试。  消息消费：多消费者并行消费，或消费者内部启用多线程消费。异常重试。  2.为什么要保证消息的顺序 ： 如果业务上通过消息发送的数据是有前后顺序关系时，则必须保证消息的顺序。  例如：通过MQ同步数据时，如果增、改、删的顺序在同步时变为删、改、增，数据将不被删除。    二、常见解决方案 三、解决方案1、RocketMQ的顺序消息  1.RocketMQ中的顺序消息分为：全局顺序消息和分区顺序消息。  2.全局顺序消息：所有消息存在同一个topic的同一个分区下，消费时同一时刻只有一个消费者消费。  3.分区顺序消息：消息按分片键拆分到不同分区上，消费时，同一分区，同一时刻只有一个消费者。   2、利用版本号保证顺序  1.消息的顺序需要选定一个分组键，消息的顺序基于此分组键来进行分组排序。  2.消息发送时，附加上消息的版本号或顺序号。 3.消息消费时，查询消息所在分组当前的版本号，并与当前消息的版本号比对。  4.如果当前消息的版本号&lt;&#x3D;分组的...</div></div></div></a><a class="pagination-related" href="/2025/02/20/JAVA%20Web%E5%BA%94%E7%94%A8%E5%B8%B8%E8%A7%81%E6%BC%8F%E6%B4%9E%E4%B8%8E%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE/" title="JAVA Web应用常见漏洞与修复建议"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">JAVA Web应用常见漏洞与修复建议</div></div><div class="info-2"><div class="info-item-1">最近负责的项目参与了甲方要求的代码审计，扫出来不少问题，46w+行代码扫出来81种漏洞，涉及1w+行代码，不良代码率高达2.93%，也确实反应了不少问题，这里贴出来供大家参考 目录 跨站脚本 高危：存储型XSS 高危：反射型XSS 输入验证 高危：路径遍历 高危：基于DOM的XSS 高危：重定向 中危：拒绝服务：正则表达式 中危：访问权限修饰符控制 中危：直接绑定敏感字段 低危：拒绝服务：解析Double类型数据 低危：有风险的资源使用 低危：数据跨越信任边界 低危：文件上传 代码注入 中危：HTTP响应截断 中危：有风险的SQL查询：MyBatis 中危：公式注入 中危：资源注入 中危：HTTP响应截断 低危：有风险的反序列化  低危：JavaScript劫持：易受攻击的框架  API误用 中危：不安全的框架绑定 低危：忽略返回值 低危：HTTP响应完成后继续操作输出流 低危：缺少对方法返回值的null检查 密码管理 中危：不安全的随机数 中危：空密码 中危：硬编码密码 中危：弱加密 中危：配置文件中的明文密码 中危：硬编码加密密钥  低危：注释中的密码 低危：不安全的哈希算法...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2024/10/05/Vite%202%20+%20Vue%203%20%E5%BC%95%E5%85%A5%20TypeScript%20(%E5%92%8C%20JavaScript%20%E6%B7%B7%E5%90%88%E5%BC%80%E5%8F%91)-1/" title="Vite 2 + Vue 3 引入 TypeScript (和 JavaScript 混合开发)-1"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-10-05</div><div class="info-item-2">Vite 2 + Vue 3 引入 TypeScript (和 JavaScript 混合开发)-1</div></div><div class="info-2"><div class="info-item-1">最近在迁移一个 Vue 2 项目，弄得差不多想起还是有必要整上 TypeScript，但改的过程中并不想一下子把所有文件从.js改成.ts，那么我们可以在tsconfig.json文件的&quot;compilerOptions&quot;配置上 “allowJs”: true，”noEmit”: true。  前提是已经安装了 typescript，没有的话可以全局npm install -g typescript，或者安装在项目本地。  具体上完整干货：  cd 到项目根目录，命令行敲上tsc –init，生成tsconfig.json文件，然后修改如下(部分选项根据自己需要来)：  📃tsconfig.json 123456789101112131415161718192021222324252627282930313233&#123;  &quot;compilerOptions&quot;: &#123;    &quot;target&quot;: &quot;esnext&quot;,    &quot;useDefineForClassFields&quot;:...</div></div></div></a><a class="pagination-related" href="/2024/01/04/JAVA%E9%9D%A2%E8%AF%95%E5%AE%9D%E5%85%B8%EF%BC%88%E9%9D%9E%E5%B8%B8%E8%AF%A6%E7%BB%86%EF%BC%8C%E4%BA%B2%E8%BA%AB%E7%BB%8F%E9%AA%8C%E6%80%BB%E7%BB%93%EF%BC%89/" title="JAVA面试宝典（非常详细，亲身经验总结）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-04</div><div class="info-item-2">JAVA面试宝典（非常详细，亲身经验总结）</div></div><div class="info-2"><div class="info-item-1">一、 Java基础 1.Java 基础 知识 2.集合(必会) 3. 多线程(必会) 4.线程池 6. Jvm 二、 Web 1.网络通讯部分 2.cookie和session的区别？（必会） 3.Jsp和Servlet（了解） 4.Ajax的介绍（必会） 三、 数据库 1.连接查询（必会） 2.聚合函数（必会） 3.SQL关键字(必会) 4. SQL Select 语句完整的执行顺序: (必会) 5. 数据库三范式(必会) 6. 存储引擎 （高薪常问） 1.MyISAM存储引擎 2.InnoDB存储引擎 7.数据库事务（必会） 8.索引 9.数据库锁(高薪常问) 1.行锁和表锁 2.悲观锁和乐观锁 10.MySql优化(高薪常问) 1) 定位执行效率慢的sql语句.(了解) 2) 优化索引(高薪) 3) Sql语句调优(高薪) 4) 合理的数据库设计(了解) 四. 框架 1. Mybatis框架 2. Spring框架 3.SpringMVC框架 4. Dubbo 5. Zookeeper 6.SpringBoot 7. SpringCloud 五.技术点 1. Redis 2...</div></div></div></a><a class="pagination-related" href="/2023/09/04/IntelliJ%20IDEA%20%E6%9C%80%E5%B8%B8%E7%94%A8%E9%85%8D%E7%BD%AE%E8%AF%A6%E7%BB%86%E5%9B%BE%E8%A7%A3/" title="IntelliJ IDEA 最常用配置详细图解"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">IntelliJ IDEA 最常用配置详细图解</div></div><div class="info-2"><div class="info-item-1"> title: IntelliJ IDEA 最常用配置详细图解date: 2023-09-03 20:17:08category:  ideatag: ideaauthor:   IntelliJ IDEA 最常用配置详细图解刚刚使用IntelliJ IDEA 编辑器的时候，会有很多设置，会方便以后的开发，磨刀不误砍柴工。 比如：设置文件字体大小，代码自动完成提示，版本管理，本地代码历史，自动导入包，修改注释，修改tab的显示的数量和行数，打开项目方式，等等一大堆东西。 总结一下，免得下次换了系统，还得再找一遍配置。 设置外观和字体大小  这个呢是设置一下外观。和字体大小。放在第一个没问题。 设置编辑器的快捷键，也就是keymap  这个是修改咱习惯的快捷键映射表，因为我是从eclipse转来的，估计大部分都和我差不多啦，那就可以在这配置成eclipse的快捷键映射表，那么就没有必要再去记一套快捷键映射了，比如我们常用的删除一行 Ctrl d，复制一行Ctrl + alt + 下方向。注释一行，Ctrl + &#x2F; 这都是我们常用的。也是我们习惯的，这个也是极好的设置啊。点...</div></div></div></a><a class="pagination-related" href="/2023/09/04/vscode%E4%BD%BF%E7%94%A8/" title="vscode使用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">vscode使用</div></div><div class="info-2"><div class="info-item-1"> title: vscode的使用lang: en-USdate: 2023-09-03 20:17:08category:  vscodetag: vscodeauthor:   1. vscode的使用1.1. 插件位置更改参考：https://blog.csdn.net/zhaojunwei08/article/details/86021665 https://blog.csdn.net/u011127019/article/details/86737308#comments mklink使用 https://www.icoa.cn/a/910.html set oldDir&#x3D;%UserProfile%.vscode\extensions mklink &#x2F;D “%oldDir%” “E:\eclipse-hao\HTML\extensions” 确保有 这个 .vscode 空目录  bat方式： 123456789@echo offif &quot;%1&quot; == &quot;h&quot; goto beginmshta vbscript:c...</div></div></div></a><a class="pagination-related" href="/2023/09/04/Prometheus%E7%89%B9%E7%82%B9%EF%BC%8C%E6%9E%B6%E6%9E%84%EF%BC%8C%E7%BB%84%E4%BB%B6%EF%BC%8C%E5%B1%80%E9%99%90%E4%BB%8B%E7%BB%8D/" title="Prometheus特点，架构，组件，局限介绍"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">Prometheus特点，架构，组件，局限介绍</div></div><div class="info-2"><div class="info-item-1"> title: Prometheus特点，架构，组件，局限介绍date: 2023-09-03 20:17:08category: tag: author:  Prometheus特点，架构，组件，局限介绍https://baijiahao.baidu.com/s?id=1705607085545361413&amp;wfr=spider&amp;for=pc Prometheus的主要特点Prometheus官网上的自述是：“From metrics to insight.Power your metrics and alerting with a leading open-source monitoring solution.”翻译过来就是：从指标到洞察力，Prometheus通过领先的开源监控解决方案为用户的指标和告警提供强大的支持。 Prometheus的特点 通过PromQL实现多维度数据模型的灵活查询。 定义了开放指标数据的标准，自定义探针（如Exporter等），编写简单方便。 PushGateway组件让这款监控系统可以接收监控数据。 提供了VM和容器化的版本。 ...</div></div></div></a><a class="pagination-related" href="/2025/02/19/app%E5%BC%80%E5%8F%91--Android%E5%B9%B3%E5%8F%B0%E7%AD%BE%E5%90%8D%E8%AF%81%E4%B9%A6(.keystore%20.jks)%E7%94%9F%E6%88%90%E5%92%8C%E5%B8%B8%E8%A7%81%E9%94%99%E8%AF%AF%E6%80%BB%E7%BB%93/" title="app开发--Android平台签名证书(.keystore .jks)生成和常见错误总结"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-02-19</div><div class="info-item-2">app开发--Android平台签名证书(.keystore .jks)生成和常见错误总结</div></div><div class="info-2"><div class="info-item-1">app开发后，最后需要打包发布。在Android平台打包发布apk应用，需要使用数字证书（.keystore文件）进行签名，用于表明开发者身份。下面总结一下。 一：环境安装安装JRE环境，如已安装可跳过。这里简单说一下步骤就行，不会就自行必应或者百度一下。1.下载JRE安装程序：打开Oracle官方网站（https://www.oracle.com/java/technologies/javase-jre8-downloads.html）或其他可信的Java软件分发站点。2.运行安装程序：下载完成后，双击安装程序运行。根据安装程序的指示，选择您希望安装Java JRE的位置和其他选项。通常情况下，您可以选择默认的安装选项。3.验证安装：安装完成后，您可以验证Java JRE是否成功安装。打开命令提示符（Windows用户可以按下Win + R，然后输入”cmd”并按下Enter键）。输入”java -version”命令并按下Enter键。如果您看到Java JRE的版本信息，则表示安装成功。4.配置环境变量打开“我的电脑”，右键点击“属性”，然后点击“高级系统设置”。点击“环境...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

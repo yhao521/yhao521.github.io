@@ -1,0 +1,377 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>nexus | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="title: nexus简要说明lang: en-USdate: 2023-09-03 20:17:08category:  nexustag: nexusauthor:   1. 简要说明：搭建maven私服主要是为了方便在一个团队中使用maven中央仓库没有的jar包，这些非中央仓库的jar包可能是自己团队开发的公共依赖jar包，可能是第三方私有的认证相关jar包，特殊的还有oracle的驱">
+<meta property="og:type" content="article">
+<meta property="og:title" content="nexus">
+<meta property="og:url" content="https://yhao521.github.io/2023/09/04/nexus/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="title: nexus简要说明lang: en-USdate: 2023-09-03 20:17:08category:  nexustag: nexusauthor:   1. 简要说明：搭建maven私服主要是为了方便在一个团队中使用maven中央仓库没有的jar包，这些非中央仓库的jar包可能是自己团队开发的公共依赖jar包，可能是第三方私有的认证相关jar包，特殊的还有oracle的驱">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2023-09-04T03:18:09.000Z">
+<meta property="article:modified_time" content="2023-09-04T03:18:27.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="java&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "nexus",
+  "url": "https://yhao521.github.io/2023/09/04/nexus/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2023-09-04T03:18:09.000Z",
+  "dateModified": "2023-09-04T03:18:27.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2023/09/04/nexus/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'nexus',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">nexus</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">nexus</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-09-04T03:18:09.000Z" title="发表于 2023-09-04 11:18:09">2023-09-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-09-04T03:18:27.000Z" title="更新于 2023-09-04 11:18:27">2023-09-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><hr>
+<p>title: nexus简要说明<br>lang: en-US<br>date: 2023-09-03 20:17:08<br>category:</p>
+<ul>
+<li>nexus<br>tag:</li>
+<li>nexus<br>author:</li>
+</ul>
+<hr>
+<h1 id="1-简要说明："><a href="#1-简要说明：" class="headerlink" title="1. 简要说明："></a>1. 简要说明：</h1><p>搭建maven私服主要是为了方便在一个团队中使用maven中央仓库没有的jar包，这些非中央仓库的jar包可能是自己团队开发的公共依赖jar包，可能是第三方私有的认证相关jar包，特殊的还有oracle的驱动jar包，下面是使用Nexus搭建maven私服及私服使用</p>
+<p>nexus3.现在可以作为docker的镜像仓库</p>
+<h2 id="1-1-Nexus3-x安装及配置"><a href="#1-1-Nexus3-x安装及配置" class="headerlink" title="1.1. Nexus3.x安装及配置"></a>1.1. Nexus3.x安装及配置</h2><p>前置条件要求存在jdk1.8的环境</p>
+<h3 id="1-1-1-下载"><a href="#1-1-1-下载" class="headerlink" title="1.1.1. 下载"></a>1.1.1. 下载</h3><p>官方下载页：</p>
+<p><a target="_blank" rel="noopener" href="https://www.sonatype.com/download-oss-sonatype" title="nexus官网">https://www.sonatype.com/download-oss-sonatype</a></p>
+<p>linux资源地址</p>
+<pre><code>wget https://sonatype-download.global.ssl.fastly.net/repository/repositoryManager/3/nexus-3.15.2-01-unix.tar.gz
+</code></pre>
+<h3 id="1-1-2-安装及配置"><a href="#1-1-2-安装及配置" class="headerlink" title="1.1.2. 安装及配置"></a>1.1.2. 安装及配置</h3><pre><code>#解压
+ tar -zvxf nexus-3.15.2-01-unix.tar.gz
+#解压的文件夹移到nexus(自动创建)，可不移动
+mv nexus-3.15.2-01/ /usr/local/nexus
+
+#防火墙开启8081端口，该端口是nexus的默认端口(在/usr/local/nexus/etc/nexus-default.properties文件中)
+vi  /etc/sysconfig/iptables
+# 在打开的文件中加入如下内容
+-A INPUT -p tcp -m state --state NEW -m tcp --dport 8081 -j ACCEPT
+
+#启动 进入安装目录
+cd nexus-3.15.2-01/bin/
+./nexus start
+./nexus run &amp;
+</code></pre>
+<p>​<br>​ 启动成功会有如下信息<br>​ WARNING: *<strong>*******</strong>*****<strong>*******</strong>*****<strong>*******</strong>*****<strong>*******</strong><br>​ WARNING: Detected execution as “root” user. This is NOT recommended!<br>​ WARNING: *<strong>*******</strong>*****<strong>*******</strong>*****<strong>*******</strong>*****<strong>*******</strong><br>​ Starting nexus<br>上面启动成功后会警告不要使用root用户启动，这里可以新建一个用户，也可以指定root用户启动，使他不出现警告，下面配置指定root用户启动(建议 创建专用启动nexus的用户)</p>
+<pre><code>#该文件在bin目录下和启动程序nexus同级
+vi nexus.rc
+run_as_user=root
+</code></pre>
+<h3 id="1-1-3-手动更新索引-可选"><a href="#1-1-3-手动更新索引-可选" class="headerlink" title="1.1.3. 手动更新索引(可选)"></a>1.1.3. 手动更新索引(可选)</h3><p>我这里没有下载索引，以前配置过nenus2.x时下载过全部索引，很大很慢，下载了一晚上，不下载索引并不影响使用，这里会同步当前项目使用的依赖到私服的索引中，有新的依赖从私服中获取也会更新对应的索引，下面介绍一种离线安装的方式</p>
+<p>前往maven中央仓库下载 indexer-cli-5.1.1.jar 解压工具包</p>
+<p>下载离线索引文件 <a target="_blank" rel="noopener" href="http://repo.maven.apache.org/maven2/.index/" title="索引文件列表">索引文件列表</a></p>
+<pre><code>nexus-maven-repository-index.gz nexus-maven-repository-index.properties
+</code></pre>
+<p>将3个文件放在同一目录下解压</p>
+<pre><code>java -jar indexer-cli-5.1.1.jar -u nexus-maven-repository-index.gz -d indexer
+</code></pre>
+<p>拷贝索引<br>nexus2.x拷贝到{nexus-home}&#x2F;sonatype-work&#x2F;nexus&#x2F;indexer&#x2F;central-ctx<br>nexus3.x拷贝到&#x2F;sonatype-work&#x2F;nexus3&#x2F;blobs&#x2F;default&#x2F;.index&#x2F;</p>
+<h3 id="1-1-4-web界面"><a href="#1-1-4-web界面" class="headerlink" title="1.1.4. web界面"></a>1.1.4. web界面</h3><p>访问web界面，使用默认管理账号admin&#x2F;admin123登录<br><a target="_blank" rel="noopener" href="http://ip:8081/">http://ip:8081/</a><br>仓库浏览在左侧菜单栏Browse,这里有多种仓库，相比于nexus2.x精简了很多仓库</p>
+<pre><code>nexus仓库类型
+Group：这是一个仓库聚合的概念，用户仓库地址选择Group的地址，即可访问Group中配置的
+所有仓库资源，访问顺序取决于配置顺序3.x默认Releases，Snapshots，Central，可在web页面配置
+在web界面点开
+
+Hosted:私有仓库，专门用来存储我们自己生成的jar文件
+3rd party：未发布到公网的第三方jar (3.x去除了)
+Snapshots：本地项目的快照仓库
+Releases： 本地项目发布的正式版本
+
+Proxy:公网上发布的jar 例如：spring
+Central：中央仓库
+Apache Snapshots：Apache专用快照仓库(3.x去除了)
+</code></pre>
+<p>配置Releases版本可重复上传</p>
+<p>点击图片画框部分配置Releases: Deployment pollcy –&gt; Allow redeploy</p>
+<h3 id="1-1-5-使用nenus本地maven配置"><a href="#1-1-5-使用nenus本地maven配置" class="headerlink" title="1.1.5. 使用nenus本地maven配置"></a>1.1.5. 使用nenus本地maven配置</h3><hr>
+<p><strong>全局配置下载依赖(即项目pom无需配置)</strong></p>
+<p>在maven的setting.xml文件中配置私服配置，这种方式配置后所有本地使用该配置的maven项目的pom文件都无需配置私服下载相关配置</p>
+<pre><code>&lt;profiles&gt;
+  &lt;profile&gt;
+ &lt;id&gt;mycof&lt;/id&gt;
+    &lt;repositories&gt;
+    &lt;!-- 私有库地址--&gt;
+      &lt;repository&gt;
+      &lt;id&gt;nexus&lt;/id&gt;
+      &lt;url&gt;http://192.168.16.30:8081/repository/maven-public/&lt;/url&gt;
+      &lt;releases&gt;
+        &lt;enabled&gt;true&lt;/enabled&gt;
+      &lt;/releases&gt;
+      &lt;snapshots&gt;
+        &lt;enabled&gt;true&lt;/enabled&gt;
+      &lt;/snapshots&gt;
+    &lt;/repository&gt;
+  &lt;/repositories&gt;
+  &lt;pluginRepositories&gt;
+    &lt;!--插件库地址--&gt;
+    &lt;pluginRepository&gt;
+      &lt;id&gt;nexus&lt;/id&gt;
+      &lt;url&gt;http://192.168.16.30:8081/repository/maven-public/&lt;/url&gt;
+      &lt;releases&gt;
+        &lt;enabled&gt;true&lt;/enabled&gt;
+      &lt;/releases&gt;
+      &lt;snapshots&gt;
+        &lt;enabled&gt;true&lt;/enabled&gt;
+       &lt;/snapshots&gt;
+    &lt;/pluginRepository&gt;
+  &lt;/pluginRepositories&gt;
+&lt;/profile&gt;
+</code></pre>
+<p>激活使用上面的配置</p>
+<pre><code>&lt;!--激活profile--&gt;
+&lt;activeProfiles&gt;
+  &lt;activeProfile&gt;mycof&lt;/activeProfile&gt;
+&lt;/activeProfiles&gt;
+</code></pre>
+<p>指定镜像代理为我们的私服</p>
+<pre><code>	&lt;mirrors&gt;
+	&lt;mirror&gt;
+		&lt;id&gt;nexus-central&lt;/id&gt;
+		&lt;name&gt;Nexus Central&lt;/name&gt;
+		&lt;url&gt;http://192.168.222.244:8081/repository/maven-public/&lt;/url&gt;
+		&lt;mirrorOf&gt;*&lt;/mirrorOf&gt;
+ 	&lt;!-- *指的是访问任何仓库都使用我们的私服--&gt;
+	&lt;/mirror&gt;
+	&lt;!-- &lt;mirror&gt;
+		&lt;id&gt;alimaven&lt;/id&gt;
+		&lt;name&gt;aliyun maven&lt;/name&gt;
+		&lt;url&gt;http://maven.aliyun.com/nexus/content/groups/public/&lt;/url&gt;
+		&lt;mirrorOf&gt;central&lt;/mirrorOf&gt;
+	&lt;/mirror&gt; --&gt;
+&lt;/mirrors&gt;
+</code></pre>
+<h3 id="1-1-6-单独项目下载依赖-即项目pom文件中配置"><a href="#1-1-6-单独项目下载依赖-即项目pom文件中配置" class="headerlink" title="1.1.6. 单独项目下载依赖(即项目pom文件中配置)"></a>1.1.6. 单独项目下载依赖(即项目pom文件中配置)</h3><p>这种配置是修改单个项目的pom文件，无需修改maven的setting配置</p>
+<pre><code>&lt;repositories&gt;
+  &lt;repository&gt;
+    &lt;id&gt;nexus&lt;/id&gt;
+    &lt;url&gt;http://192.168.16.30:8081/repository/maven-public/&lt;/url&gt;
+    &lt;releases&gt;
+      &lt;enabled&gt;true&lt;/enabled&gt;
+    &lt;/releases&gt;
+    &lt;snapshots&gt;
+    &lt;enabled&gt;true&lt;/enabled&gt;
+    &lt;/snapshots&gt;
+  &lt;/repository&gt;
+&lt;/repositories&gt;
+</code></pre>
+<p>建议使用全局的setting配置，一个项目组共用一个maven的setting配置，项目中就无需配置下载相关的私服仓库配置</p>
+<p>如果要发布自己的jar到私服，就需要修改工程的 pom.xml ，添加如下内容，否则什么都不用做：</p>
+<pre><code>&lt;distributionManagement&gt;
+    &lt;repository&gt;
+        &lt;id&gt;releases&lt;/id&gt;
+        &lt;name&gt;Releases&lt;/name&gt;
+        &lt;url&gt;http://192.168.16.30:8081/repository/maven-releases/&lt;/url&gt;
+    &lt;/repository&gt;
+    &lt;snapshotRepository&gt;
+        &lt;id&gt;snapshots&lt;/id&gt;
+        &lt;name&gt;Snapshot&lt;/name&gt;
+        &lt;url&gt;http://192.168.16.30:8081/repository/maven-snapshots/&lt;/url&gt;
+    &lt;/snapshotRepository&gt;
+&lt;/distributionManagement&gt;
+</code></pre>
+<h3 id="1-1-7-批量导入本地库到nexus3私服中"><a href="#1-1-7-批量导入本地库到nexus3私服中" class="headerlink" title="1.1.7. 批量导入本地库到nexus3私服中"></a>1.1.7. 批量导入本地库到nexus3私服中</h3><p>nexus新建仓库 hosts类</p>
+<p>linux 新建目录：<br>mkdir -p mavenRepo</p>
+<p>上传 本地仓库 所有目录和文件</p>
+<p>新建脚本mavenimport.sh</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">copy and run this script to the root of the repository directory containing files</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">this script attempts to exclude uploading itself explicitly so the script name is important</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Get <span class="built_in">command</span> line params</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">use: <span class="built_in">chown</span> +x    ./mavenimport.sh ;./mavenimport.sh  -u admin -p admin123 -r http://192.168.9.49:8081/repository/maven-myRepo/</span></span><br><span class="line">while getopts &quot;:r:u:p:&quot; opt; do</span><br><span class="line">		case $opt in</span><br><span class="line">				r) REPO_URL=&quot;$OPTARG&quot;</span><br><span class="line">				;;</span><br><span class="line">				u) USERNAME=&quot;$OPTARG&quot;</span><br><span class="line">				;;</span><br><span class="line">				p) PASSWORD=&quot;$OPTARG&quot;</span><br><span class="line">				;;</span><br><span class="line">		esac</span><br><span class="line">done</span><br><span class="line"></span><br><span class="line">find . -type f -not -path &#x27;./mavenimport\.sh*&#x27; -not -path &#x27;*/\.*&#x27; -not -path &#x27;*/\^archetype\-catalog\.xml*&#x27; -not -path &#x27;*/\^maven\-metadata\-local*\.xml&#x27; -not -path &#x27;*/\^maven\-metadata\-deployment*\.xml&#x27; | sed &quot;s|^\./||&quot; | xargs -I &#x27;&#123;&#125;&#x27; curl -u &quot;$USERNAME:$PASSWORD&quot; -X PUT -v -T &#123;&#125; $&#123;REPO_URL&#125;/&#123;&#125; ;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>执行脚本，会导入nexus3新建的仓库中</p>
+<h3 id="1-1-8-maven的settings-xml配置文件完整配置"><a href="#1-1-8-maven的settings-xml配置文件完整配置" class="headerlink" title="1.1.8. maven的settings.xml配置文件完整配置"></a>1.1.8. maven的settings.xml配置文件完整配置</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">settings</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://maven.apache.org/SETTINGS/1.0.0&quot;</span></span></span><br><span class="line"><span class="tag"><span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag"><span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd&quot;</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- localRepository | The path to the local repository maven will use to</span></span><br><span class="line"><span class="comment">	store artifacts. | | Default: $&#123;user.home&#125;/.m2/repository &lt;localRepository&gt;/path/to/local/repo&lt;/localRepository&gt; --&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">localRepository</span>&gt;</span>自定义路径\repository<span class="tag">&lt;/<span class="name">localRepository</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">mirrors</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">mirror</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">id</span>&gt;</span>nexus-central<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">name</span>&gt;</span>Nexus Central<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">url</span>&gt;</span>http://192.168.222.244:8081/repository/maven-public/<span class="tag">&lt;/<span class="name">url</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">mirrorOf</span>&gt;</span>*<span class="tag">&lt;/<span class="name">mirrorOf</span>&gt;</span> <span class="comment">&lt;!--*指的是访问任何仓库都使用我们的私服 --&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">mirror</span>&gt;</span></span><br><span class="line">		<span class="comment">&lt;!-- &lt;mirror&gt; &lt;id&gt;alimaven&lt;/id&gt; &lt;name&gt;aliyun maven&lt;/name&gt; &lt;url&gt;http://maven.aliyun.com/nexus/content/groups/public/&lt;/url&gt;</span></span><br><span class="line"><span class="comment">			&lt;mirrorOf&gt;central&lt;/mirrorOf&gt; &lt;/mirror&gt; --&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">mirrors</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">profiles</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">profile</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">id</span>&gt;</span>dev<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">repositories</span>&gt;</span></span><br><span class="line">				<span class="comment">&lt;!-- 私有库地址 --&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">repository</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">id</span>&gt;</span>nexus<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">url</span>&gt;</span>http://192.168.222.244:8081/repository/maven-public/<span class="tag">&lt;/<span class="name">url</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">releases</span>&gt;</span></span><br><span class="line">						<span class="tag">&lt;<span class="name">enabled</span>&gt;</span>true<span class="tag">&lt;/<span class="name">enabled</span>&gt;</span></span><br><span class="line">						<span class="tag">&lt;<span class="name">updatePolicy</span>&gt;</span><span class="tag">&lt;/<span class="name">updatePolicy</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;/<span class="name">releases</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">snapshots</span>&gt;</span></span><br><span class="line">						<span class="tag">&lt;<span class="name">enabled</span>&gt;</span>true<span class="tag">&lt;/<span class="name">enabled</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;/<span class="name">snapshots</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;/<span class="name">repository</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;/<span class="name">repositories</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">pluginRepositories</span>&gt;</span></span><br><span class="line">				<span class="comment">&lt;!--插件库地址 --&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">pluginRepository</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">id</span>&gt;</span>nexus<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">url</span>&gt;</span>http://192.168.222.244:8081/repository/maven-public/<span class="tag">&lt;/<span class="name">url</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">releases</span>&gt;</span></span><br><span class="line">						<span class="tag">&lt;<span class="name">enabled</span>&gt;</span>true<span class="tag">&lt;/<span class="name">enabled</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;/<span class="name">releases</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">snapshots</span>&gt;</span></span><br><span class="line">						<span class="tag">&lt;<span class="name">enabled</span>&gt;</span>true<span class="tag">&lt;/<span class="name">enabled</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;/<span class="name">snapshots</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;/<span class="name">pluginRepository</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;/<span class="name">pluginRepositories</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">profile</span>&gt;</span></span><br><span class="line">		<span class="comment">&lt;!-- &lt;profile&gt; &lt;id&gt;jdk-1.8&lt;/id&gt; &lt;activation&gt; &lt;activeByDefault&gt;true&lt;/activeByDefault&gt;</span></span><br><span class="line"><span class="comment">			&lt;jdk&gt;1.8&lt;/jdk&gt; &lt;/activation&gt; &lt;properties&gt; &lt;maven.compiler.source&gt;1.8&lt;/maven.compiler.source&gt;</span></span><br><span class="line"><span class="comment">			&lt;maven.compiler.target&gt;1.8&lt;/maven.compiler.target&gt; &lt;maven.compiler.compilerVersion&gt;1.8&lt;/maven.compiler.compilerVersion&gt;</span></span><br><span class="line"><span class="comment">			&lt;/properties&gt; &lt;/profile&gt; --&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">profiles</span>&gt;</span></span><br><span class="line">	<span class="comment">&lt;!--激活profile --&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">activeProfiles</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">activeProfile</span>&gt;</span>dev<span class="tag">&lt;/<span class="name">activeProfile</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">activeProfiles</span>&gt;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	<span class="tag">&lt;<span class="name">servers</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">server</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">id</span>&gt;</span>nexus-releases<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">username</span>&gt;</span>admin<span class="tag">&lt;/<span class="name">username</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">password</span>&gt;</span>admin123<span class="tag">&lt;/<span class="name">password</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">server</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">server</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">id</span>&gt;</span>nexus-snapshots<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">username</span>&gt;</span>admin<span class="tag">&lt;/<span class="name">username</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">password</span>&gt;</span>admin123<span class="tag">&lt;/<span class="name">password</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">server</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">servers</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">settings</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="运行nexus问题及解决"><a href="#运行nexus问题及解决" class="headerlink" title="运行nexus问题及解决"></a>运行nexus问题及解决</h2><p>运行的时候，提示找不到org.apache.felix.framework，最后才发现，用解压工具，解压出来的文件名变了！变了！变了！<code>org.apache.felix.framework-5.6.2.jar</code>变成了<code>org.apache.felix.framework-</code>，能不能这么坑！</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ nexus run</span><br><span class="line">Could not resolve mvn:org.apache.felix/org.apache.felix.framework/5.6.2</span><br></pre></td></tr></table></figure>
+
+<p>老老实实用命令行解压，再执行就可以了</p>
+<p>作者：亦猿非猿<br>链接：<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/48cff792715b">https://www.jianshu.com/p/48cff792715b</a><br>来源：简书<br>著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。</p>
+<ol>
+<li>如果出现异常Could not resolve mvn:org.apache.felix&#x2F;org.apache.felix.framework&#x2F;5.6.2</li>
+</ol>
+<p>请尝试重新解压文件（一般情况是因为文件丢失造成的）</p>
+<ol start="2">
+<li>如果出现 Please define INSTALL4J_JAVA_HOME to point to a suitable JVM.</li>
+</ol>
+<p>请安装java运行环境（jre 1.8 或以上）<br>————————————————<br>版权声明：本文为CSDN博主「master336」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。<br>原文链接：<a target="_blank" rel="noopener" href="https://blog.csdn.net/master336/article/details/103975829">https://blog.csdn.net/master336/article/details/103975829</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2023/09/04/nexus/">https://yhao521.github.io/2023/09/04/nexus/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/java-programming/">java/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2023/09/04/nexus3%E6%90%AD%E5%BB%BA%E7%A7%81%E6%9C%89Docker%E4%BB%93%E5%BA%93/" title="nexus3搭建私有Docker仓库"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">nexus3搭建私有Docker仓库</div></div><div class="info-2"><div class="info-item-1"> title: nexus3搭建私有Docker仓库date: 2023-09-03 20:17:08category:  nexustag: nexusauthor:   nexus3搭建私有Docker仓库Nexus3：123456789101112version: &quot;3&quot;services:  nexus:    image: sonatype/nexus3:3.33.0    volumes:      - /home/nexus-data:/nexus-data    restart: always    ports:      - &quot;8081:8081&quot;      # 这两个个端口给docker私有仓库使用，在创建仓库时指定，并且在Dockers中需要添加配置 &quot;insecure-registries&quot;: [&quot;172.18.0.1:8082&quot;]      - &quot;5000:5000&quot;      - &quot;8082:8082&quot;  启动Nexus31docker...</div></div></div></a><a class="pagination-related" href="/2023/09/04/nexus-docker%E4%B8%8B%E8%BD%BD%E4%BD%BF%E7%94%A8/" title="nexus-docker下载使用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">nexus-docker下载使用</div></div><div class="info-2"><div class="info-item-1"> title: nexus下载使用date: 2023-09-03 20:17:08category:  nexustag: nexusauthor:   nexus-docker下载使用参考官网的打包git clone https://github.com/sonatype/docker-nexus3.git docker-compose.yml 1234567891011121314151617181920212223# nexus# docker pull sonatype/nexus3# http://localhost:9011# admin/admin123# docker pull sonatype/nexus3:3.52.0version: &#x27;3&#x27;services:  nexus3:    build: ./build    image: yanghao52/nexus3:3.63.0# 需要拷贝docker-nexus3.git下的rh-docker目录和Dockerfile.rh.centos 到 ./build_centos目录下#   ...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/MySQL%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" title="MySQL常用命令"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">MySQL常用命令</div></div><div class="info-2"><div class="info-item-1"> title: MySql常用命令总结lang: en-USdate: 2023-09-04 17:49:38category:  数据库 doc_mysqltag: doc_mysqlauthor:   [[_resources&#x2F;eca4f5f3d74b0ad7ab1fbb33df942a2e_MD5.sh|Open: mysql_createuser.sh]]![[_resources&#x2F;eca4f5f3d74b0ad7ab1fbb33df942a2e_MD5.sh]] 1. MySql常用命令总结1.1. 创建主从同步用户123GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* to repl@&#x27;%&#x27; IDENTIFIED BY &#x27;repl&#x27;CHANGE MASTER TO MASTER_HOST=&#x27;172.18.231.120&#x27;,MASTER_PORT=3306,MASTER_USER=&#x27;repl&#x27;,MASTER_PASSWO...</div></div></div></a><a class="pagination-related" href="/2023/09/11/Android%E6%9C%80%E5%85%A8UI%E5%BA%93%E5%90%88%E9%9B%86/" title="Android最全UI库合集"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-11</div><div class="info-item-2">Android最全UI库合集</div></div><div class="info-2"><div class="info-item-1">推荐一个GitHub上面超级强的ui库 android_ui这个库几乎涵盖了Android所有优秀的库，而且配有gif动图。google官方推荐的一个动画库使用起来很方便，里面还有gif动图。Android UI Library目录索引 抽屉菜单 ListView WebView SwitchButton 按钮 点赞按钮 进度条 TabLayout 图标 下拉刷新 ViewPager 图表(Chart) 菜单(Menu) 浮动菜单 对话框 空白页 滑动删除 手势操作 RecyclerView Card Color Drawable Spinner 布局 模糊效果 TabBar AppBar 选择器(Picker) 跑马灯 日历时间 主题样式 ImageView 通知 聊天视图 Header 引导图(Intro) 图片 徽章(Badge) RatingView 滚动效果(Scroll) 时间轴 TreeView SearchView TagView TextView EditText Sliding 表单 分段控件 轮播图 文件操作 启动页 MD BottomNavigation ...</div></div></div></a><a class="pagination-related" href="/2023/09/04/nexus-docker%E4%B8%8B%E8%BD%BD%E4%BD%BF%E7%94%A8/" title="nexus-docker下载使用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">nexus-docker下载使用</div></div><div class="info-2"><div class="info-item-1"> title: nexus下载使用date: 2023-09-03 20:17:08category:  nexustag: nexusauthor:   nexus-docker下载使用参考官网的打包git clone https://github.com/sonatype/docker-nexus3.git docker-compose.yml 1234567891011121314151617181920212223# nexus# docker pull sonatype/nexus3# http://localhost:9011# admin/admin123# docker pull sonatype/nexus3:3.52.0version: &#x27;3&#x27;services:  nexus3:    build: ./build    image: yanghao52/nexus3:3.63.0# 需要拷贝docker-nexus3.git下的rh-docker目录和Dockerfile.rh.centos 到 ./build_centos目录下#   ...</div></div></div></a><a class="pagination-related" href="/2024/12/09/%E5%88%9B%E5%BB%BAVue%E9%A1%B9%E7%9B%AE%E8%AF%A6%E7%BB%86%E6%95%99%E7%A8%8B%20(%E5%BC%95%E5%85%A5Element-plus%20%E5%92%8C%20ArcoDesign)/" title="创建Vue项目详细教程 (引入Element-plus 和 ArcoDesign)"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-12-09</div><div class="info-item-2">创建Vue项目详细教程 (引入Element-plus 和 ArcoDesign)</div></div><div class="info-2"><div class="info-item-1">目录 Vue简介 1 在cmd窗口创建VUE工程 1.前期环境搭建 2.配置npm源 3.安装VUE CLI 4.创建VUE CLI工程 2 在IDEA中创建VUE工程 1 IDEA创建-启动-停止VUE工程步骤 2 可能出现的问题与解决方案 2.1 浏览器显示无法访问或拒绝访问 2.2 vue&#x2F;cli 安装失败，让你升级到npm 10.2.3 2.3 启动项目时满屏 npm ERR! 2.4 ‘vue-cli-service’ 不是内部或外部命令，也不是可运行的程序或批处理文件。 2.5 IDEA的Terminal终端没办法敲命令 3 关于VUE Cli 4 修改项目启动端口号 4 安装Vue.js插件 5 VUE Cli 热部署测试 3 VUE的使用 1 “搭积木”的开发体验 2 App.vue代码讲解 3 HomeView.vue代码讲解 4 index.js代码讲解 5 新view.vue 的创建方式 引入Element Plus 安装使用Element Plus 安装element提示插件 进行elementplus图标全局注册 引入ArcoDesign组件库...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E8%80%81vue%E9%A1%B9%E7%9B%AEwebpack3%E5%8D%87%E7%BA%A7%E5%88%B0webpack5%E5%85%A8%E8%BF%87%E7%A8%8B%E8%AE%B0%E5%BD%95/" title="老vue项目webpack3升级到webpack5全过程记录"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">老vue项目webpack3升级到webpack5全过程记录</div></div><div class="info-2"><div class="info-item-1"> title: 老vue项目webpack3升级到webpack5全过程记录date: 2023-09-03 20:17:08category:  mactag: macauthor:   老vue项目webpack3升级到webpack5全过程记录一、升级过程记录背景19年新建的vue项目，使用的是webpack3，随着项目的积累，组件的增多导致本地构建，线上打包等操作速度极慢，非常影响开发效率和部署效率，基于此问题，本次对webpack及相关插件进行了优化和升级。本博文分为2篇，第 1 篇 会直接附上可运行的代码（去除了一些业务代码配置），直接粘贴复制即可使用（注意是基于vue2.0项目原配置基础上的修改哦，在网上找了一堆都是升级过程的各种坑说明，不如直接粘贴复制运行来的爽丫~~~），第 2 篇也会对相关的修改和遇到的坑进行描述说明。 升级效果1、本地构建第一次构建 5分钟 缩短至 1.5分钟左右， 构建时间提升近 4 倍；更新构建 由 5-10s 缩短至 1-5s ，构建提升 2 倍；2、线上打包执行npm run build 由10-15分钟 缩短至 3-5分钟，构建时间...</div></div></div></a><a class="pagination-related" href="/2024/04/19/antlr%E7%94%9F%E6%88%90%E8%A7%A3%E6%9E%90%E5%99%A8%E4%BB%A3%E7%A0%81/" title="antlr生成解析器代码"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-19</div><div class="info-item-2">antlr生成解析器代码</div></div><div class="info-2"><div class="info-item-1">antlr生成解析器代码安装123456cd ~/Applications/Developer &amp;&amp; curl -O https://www.antlr.org/download/antlr-4.13.1-complete.jarexport CLASSPATH=&quot;.:~/Applications/Developer/antlr-4.13.1-complete.jar:$CLASSPATH&quot;alias antlr4=&#x27;java -Xmx500M -cp &quot;~/Applications/Developer/antlr-4.13.1-complete.jar:$CLASSPATH&quot; org.antlr.v4.Tool&#x27;alias grun=&#x27;java -Xmx500M -cp &quot;~/Applications/Developer/antlr-4.13.1-complete.jar:$CLASSPATH&quot; org.antlr.v4.gui.TestRig&#x27;  https:/...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E7%AE%80%E8%A6%81%E8%AF%B4%E6%98%8E%EF%BC%9A"><span class="toc-number">1.</span> <span class="toc-text">1. 简要说明：</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-Nexus3-x%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE"><span class="toc-number">1.1.</span> <span class="toc-text">1.1. Nexus3.x安装及配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-1-%E4%B8%8B%E8%BD%BD"><span class="toc-number">1.1.1.</span> <span class="toc-text">1.1.1. 下载</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-2-%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE"><span class="toc-number">1.1.2.</span> <span class="toc-text">1.1.2. 安装及配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-3-%E6%89%8B%E5%8A%A8%E6%9B%B4%E6%96%B0%E7%B4%A2%E5%BC%95-%E5%8F%AF%E9%80%89"><span class="toc-number">1.1.3.</span> <span class="toc-text">1.1.3. 手动更新索引(可选)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-4-web%E7%95%8C%E9%9D%A2"><span class="toc-number">1.1.4.</span> <span class="toc-text">1.1.4. web界面</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-5-%E4%BD%BF%E7%94%A8nenus%E6%9C%AC%E5%9C%B0maven%E9%85%8D%E7%BD%AE"><span class="toc-number">1.1.5.</span> <span class="toc-text">1.1.5. 使用nenus本地maven配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-6-%E5%8D%95%E7%8B%AC%E9%A1%B9%E7%9B%AE%E4%B8%8B%E8%BD%BD%E4%BE%9D%E8%B5%96-%E5%8D%B3%E9%A1%B9%E7%9B%AEpom%E6%96%87%E4%BB%B6%E4%B8%AD%E9%85%8D%E7%BD%AE"><span class="toc-number">1.1.6.</span> <span class="toc-text">1.1.6. 单独项目下载依赖(即项目pom文件中配置)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-7-%E6%89%B9%E9%87%8F%E5%AF%BC%E5%85%A5%E6%9C%AC%E5%9C%B0%E5%BA%93%E5%88%B0nexus3%E7%A7%81%E6%9C%8D%E4%B8%AD"><span class="toc-number">1.1.7.</span> <span class="toc-text">1.1.7. 批量导入本地库到nexus3私服中</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-8-maven%E7%9A%84settings-xml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E5%AE%8C%E6%95%B4%E9%85%8D%E7%BD%AE"><span class="toc-number">1.1.8.</span> <span class="toc-text">1.1.8. maven的settings.xml配置文件完整配置</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%90%E8%A1%8Cnexus%E9%97%AE%E9%A2%98%E5%8F%8A%E8%A7%A3%E5%86%B3"><span class="toc-number">1.2.</span> <span class="toc-text">运行nexus问题及解决</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

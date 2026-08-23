@@ -1,0 +1,429 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>LocalSend跨设备传输文件传输协议 v2 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="LocalSend仓库地址：GitHub - localsend&#x2F;localsend: An open-source cross-platform alternative to AirDropLocalSend 协议 v2English | 简体中文 主要为了实现一个不依赖于任何外部服务器的简单 REST 协议。 因为计算机网络比较复杂，因此我们不能假设每种方法都可用。某些设备可能不支持">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LocalSend跨设备传输文件传输协议 v2">
+<meta property="og:url" content="https://yhao521.github.io/2025/02/05/LocalSend%E8%B7%A8%E8%AE%BE%E5%A4%87%E4%BC%A0%E8%BE%93%E6%96%87%E4%BB%B6%E4%BC%A0%E8%BE%93%E5%8D%8F%E8%AE%AE%20v2/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="LocalSend仓库地址：GitHub - localsend&#x2F;localsend: An open-source cross-platform alternative to AirDropLocalSend 协议 v2English | 简体中文 主要为了实现一个不依赖于任何外部服务器的简单 REST 协议。 因为计算机网络比较复杂，因此我们不能假设每种方法都可用。某些设备可能不支持">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2025-02-05T01:34:23.000Z">
+<meta property="article:modified_time" content="2025-02-05T01:34:23.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="java&#x2F;programming">
+<meta property="article:tag" content="javascript">
+<meta property="article:tag" content="js&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "LocalSend跨设备传输文件传输协议 v2",
+  "url": "https://yhao521.github.io/2025/02/05/LocalSend%E8%B7%A8%E8%AE%BE%E5%A4%87%E4%BC%A0%E8%BE%93%E6%96%87%E4%BB%B6%E4%BC%A0%E8%BE%93%E5%8D%8F%E8%AE%AE%20v2/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2025-02-05T01:34:23.000Z",
+  "dateModified": "2025-02-05T01:34:23.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2025/02/05/LocalSend%E8%B7%A8%E8%AE%BE%E5%A4%87%E4%BC%A0%E8%BE%93%E6%96%87%E4%BB%B6%E4%BC%A0%E8%BE%93%E5%8D%8F%E8%AE%AE%20v2/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'LocalSend跨设备传输文件传输协议 v2',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">LocalSend跨设备传输文件传输协议 v2</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">LocalSend跨设备传输文件传输协议 v2</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-02-05T01:34:23.000Z" title="发表于 2025-02-05 09:34:23">2025-02-05</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-02-05T01:34:23.000Z" title="更新于 2025-02-05 09:34:23">2025-02-05</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h2 id="LocalSend仓库地址：GitHub-localsend-localsend-An-open-source-cross-platform-alternative-to-AirDrop"><a href="#LocalSend仓库地址：GitHub-localsend-localsend-An-open-source-cross-platform-alternative-to-AirDrop" class="headerlink" title="LocalSend仓库地址：GitHub - localsend&#x2F;localsend: An open-source cross-platform alternative to AirDrop"></a><a target="_blank" rel="noopener" href="https://github.com/localsend/localsend" title="LocalSend仓库地址：GitHub - localsend&#x2F;localsend: An open-source cross-platform alternative to AirDrop">LocalSend仓库地址：GitHub - localsend&#x2F;localsend: An open-source cross-platform alternative to AirDrop</a></h2><h2 id=""><a href="#" class="headerlink" title=""></a><img src="https://i-blog.csdnimg.cn/blog_migrate/87ee4a97d15342ad396d562a0c953545.png"></h2><h2 id="LocalSend-协议-v2"><a href="#LocalSend-协议-v2" class="headerlink" title="LocalSend 协议 v2"></a>LocalSend 协议 v2</h2><p><a target="_blank" rel="noopener" href="https://github.com/localsend/protocol/blob/main/README-zh-CN.md" title="English">English</a> | <strong>简体中文</strong></p>
+<p>主要为了实现一个不依赖于任何外部服务器的简单 REST 协议。</p>
+<p>因为计算机网络比较复杂，因此我们不能假设每种方法都可用。某些设备可能不支持多点广播或不能运行 <a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=HTTP%20%E6%9C%8D%E5%8A%A1%E5%99%A8&spm=1001.2101.3001.7020">HTTP 服务器</a>。</p>
+<p>就是这个原因，所以这协议尝试用多种方式去发现其他 LocalSend 成员，从而执行发送文件。</p>
+<p>该协议只需要一方建立 HTTP 服务器即可运行。</p>
+<h3 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/localsend/protocol/blob/main/README-zh-CN.md#localsend-%E5%8D%8F%E8%AE%AE-v2" title="LocalSend 协议 v2">LocalSend 协议 v2</a><ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/localsend/protocol/blob/main/README-zh-CN.md#%E7%9B%AE%E5%BD%95" title="目录">目录</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/localsend/protocol/blob/main/README-zh-CN.md#1-%E9%BB%98%E8%AE%A4%E9%85%8D%E7%BD%AE" title="1. 默认配置">1. 默认配置</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/localsend/protocol/blob/main/README-zh-CN.md#2-%E6%8C%87%E7%BA%B9" title="2. 指纹">2. 指纹</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/localsend/protocol/blob/main/README-zh-CN.md#3-%E6%90%9C%E5%AF%BB%E5%8F%91%E7%8E%B0" title="3. 搜寻发现">3. 搜寻发现</a><ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/localsend/protocol/blob/main/README-zh-CN.md#31-udp-%E5%B9%BF%E6%92%AD" title="3.1 UDP 广播">3.1 UDP 广播</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/localsend/protocol/blob/main/README-zh-CN.md#32-http-%E4%BC%A0%E7%BB%9F%E6%A8%A1%E5%BC%8F" title="3.2 HTTP (传统模式)">3.2 HTTP (传统模式)</a></li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/localsend/protocol/blob/main/README-zh-CN.md#4-%E6%96%87%E4%BB%B6%E4%BC%A0%E8%BE%93-http" title="4. 文件传输 (HTTP)">4. 文件传输 (HTTP)</a><ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/localsend/protocol/blob/main/README-zh-CN.md#41-%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C-%E4%BB%85%E5%85%83%E6%95%B0%E6%8D%AE" title="4.1 准备工作 (仅元数据)">4.1 准备工作 (仅元数据)</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/localsend/protocol/blob/main/README-zh-CN.md#42-%E5%8F%91%E9%80%81%E6%96%87%E4%BB%B6" title="4.2 发送文件">4.2 发送文件</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/localsend/protocol/blob/main/README-zh-CN.md#43-%E5%8F%96%E6%B6%88" title="4.3 取消">4.3 取消</a></li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/localsend/protocol/blob/main/README-zh-CN.md#5-%E5%8F%8D%E5%90%91%E6%96%87%E4%BB%B6%E4%BC%A0%E8%BE%93-http" title="5. 反向文件传输 (HTTP)">5. 反向文件传输 (HTTP)</a><ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/localsend/protocol/blob/main/README-zh-CN.md#51-%E6%B5%8F%E8%A7%88%E5%99%A8-url" title="5.1 浏览器 URL">5.1 浏览器 URL</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/localsend/protocol/blob/main/README-zh-CN.md#52-%E6%8E%A5%E6%94%B6%E8%AF%B7%E6%B1%82" title="5.2 接收请求">5.2 接收请求</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/localsend/protocol/blob/main/README-zh-CN.md#53-%E6%8E%A5%E6%94%B6%E6%96%87%E4%BB%B6" title="5.3 接收文件">5.3 接收文件</a></li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/localsend/protocol/blob/main/README-zh-CN.md#6-%E5%85%B6%E4%BB%96-api" title="6. 其他 API">6. 其他 API</a><ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/localsend/protocol/blob/main/README-zh-CN.md#61-%E4%BF%A1%E6%81%AF" title="6.1 信息">6.1 信息</a></li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/localsend/protocol/blob/main/README-zh-CN.md#7-%E6%9E%9A%E4%B8%BE" title="7. 枚举">7. 枚举</a><ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/localsend/protocol/blob/main/README-zh-CN.md#71-%E8%AE%BE%E5%A4%87%E7%B1%BB%E5%9E%8B" title="7.1 设备类型">7.1 设备类型</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="1-默认配置"><a href="#1-默认配置" class="headerlink" title="1. 默认配置"></a>1. 默认配置</h3><p>LocalSend 不需要特定的端口或广播地址，而是提供默认配置。</p>
+<p>如果端口&#x2F;地址不可用，可以在应用程序中修改配置。</p>
+<p>默认广播地址是 224.0.0.0&#x2F;24，因为某些 Android 设备禁止其他广播组。</p>
+<p><strong>UDP广播</strong></p>
+<ul>
+<li>端口: 53317</li>
+<li>地址: 224.0.0.167</li>
+</ul>
+<p><strong>HTTP (TCP)</strong></p>
+<ul>
+<li>端口: 53317</li>
+</ul>
+<h3 id="2-指纹"><a href="#2-指纹" class="headerlink" title="2. 指纹"></a>2. 指纹</h3><p>指纹用于区分设备。</p>
+<p>使用 HTTPS 加密时，证书的 SHA-256 哈希值作为指纹。</p>
+<p>当关闭 HTTP 加密时，用随机字符串作为指纹。</p>
+<h3 id="3-搜寻发现"><a href="#3-搜寻发现" class="headerlink" title="3. 搜寻发现"></a>3. 搜寻发现</h3><h4 id="3-1-UDP-广播"><a href="#3-1-UDP-广播" class="headerlink" title="3.1 UDP 广播"></a>3.1 UDP 广播</h4><p><strong>通知</strong></p>
+<p>在应用程序启动时，会发送以下消息到广播地址：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;  &quot;alias&quot;: &quot;Nice Orange&quot;,  &quot;version&quot;: &quot;2.0&quot;, // 协议版本（major.minor）  &quot;deviceModel&quot;: &quot;Samsung&quot;, // nullable  &quot;deviceType&quot;: &quot;mobile&quot;, // mobile | desktop | web | headless | server, nullable  &quot;fingerprint&quot;: &quot;随机字符串&quot;,  &quot;port&quot;: 53317,  &quot;protocol&quot;: &quot;https&quot;, // http | https  &quot;download&quot;: true, // 下载 API（5.2 和 5.3）是否激活（可选，默认为 false）  &quot;announce&quot;: true&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>返回</strong></p>
+<p>其他 LocalSend 成员会收到到此消息并回复各自的设备信息。</p>
+<p>首先，向原设备发送 HTTP&#x2F;TCP 请求：</p>
+<p><code>POST /api/localsend/v2/register</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;  &quot;alias&quot;: &quot;Secret Banana&quot;,  &quot;version&quot;: &quot;2.0&quot;,  &quot;deviceModel&quot;: &quot;Windows&quot;,  &quot;deviceType&quot;: &quot;desktop&quot;,  &quot;fingerprint&quot;: &quot;随机字符串&quot;, // 在 HTTPS 模式下被忽略  &quot;port&quot;: 53317,  &quot;protocol&quot;: &quot;https&quot;,  &quot;download&quot;: true, // 下载 API（5.2 和 5.3）是否激活（可选，默认为 false）&#125;</span><br></pre></td></tr></table></figure>
+
+<p>另外，成员还可以使用 UDP 广播消息进行响应。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;  &quot;alias&quot;: &quot;Secret Banana&quot;,  &quot;version&quot;: &quot;2.0&quot;,  &quot;deviceModel&quot;: &quot;Windows&quot;,  &quot;deviceType&quot;: &quot;desktop&quot;,  &quot;fingerprint&quot;: &quot;随机字符串&quot;,  &quot;port&quot;: 53317,  &quot;protocol&quot;: &quot;https&quot;,  &quot;download&quot;: true,  &quot;announce&quot;: false,&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>fingerprint</code> 仅用于区分自身设备。</p>
+<p>只有当 <code>announce</code> 为 <code>true</code> 时，才会触发响应。</p>
+<h4 id="3-2-HTTP-传统模式"><a href="#3-2-HTTP-传统模式" class="headerlink" title="3.2 HTTP (传统模式)"></a>3.2 HTTP (传统模式)</h4><p>当广播不成功时应使用此方法。</p>
+<p>向本地所有 IP 地址发送此请求来发现设备。</p>
+<p><code>POST /api/localsend/v2/register</code></p>
+<p>请求：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;  <span class="string">&quot;alias&quot;</span>: <span class="string">&quot;Secret Banana&quot;</span>,  <span class="string">&quot;version&quot;</span>: <span class="string">&quot;2.0&quot;</span>, <span class="comment">// 协议版本（major.minor）  &quot;deviceModel&quot;: &quot;Windows&quot;,  &quot;deviceType&quot;: &quot;desktop&quot;,  &quot;fingerprint&quot;: &quot;随机字符串&quot;, // 在 HTTPS 模式下被忽略  &quot;port&quot;: 53317,  &quot;protocol&quot;: &quot;https&quot;, // http | https  &quot;download&quot;: true, // 下载 API（5.2 和 5.3）是否激活（可选，默认为 false）&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>返回：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;  <span class="string">&quot;alias&quot;</span>: <span class="string">&quot;Nice Orange&quot;</span>,  <span class="string">&quot;version&quot;</span>: <span class="string">&quot;2.0&quot;</span>,  <span class="string">&quot;deviceModel&quot;</span>: <span class="string">&quot;Samsung&quot;</span>,  <span class="string">&quot;deviceType&quot;</span>: <span class="string">&quot;mobile&quot;</span>,  <span class="string">&quot;fingerprint&quot;</span>: <span class="string">&quot;随机字符串&quot;</span>, <span class="comment">// 在 HTTPS 模式下被忽略  &quot;download&quot;: true, // 下载 API（5.2 和 5.3）是否激活（可选，默认为 false）&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="4-文件传输-HTTP"><a href="#4-文件传输-HTTP" class="headerlink" title="4. 文件传输 (HTTP)"></a>4. 文件传输 (HTTP)</h3><p>HTTP传输是默认方式。</p>
+<p>接收方作为 HTTP 服务器。</p>
+<p>发送方（即 HTTP 客户端）将文件发送到 HTTP 服务器。</p>
+<h4 id="4-1-准备工作-仅元数据"><a href="#4-1-准备工作-仅元数据" class="headerlink" title="4.1 准备工作 (仅元数据)"></a>4.1 准备工作 (仅元数据)</h4><p>仅将元数据发送给接收方。</p>
+<p>接收方将决定该请求是否被接受、部分接受或拒绝。</p>
+<p><code>POST /api/localsend/v2/prepare-upload</code></p>
+<p>请求：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;  <span class="string">&quot;info&quot;</span>: &#123;    <span class="string">&quot;alias&quot;</span>: <span class="string">&quot;Nice Orange&quot;</span>,    <span class="string">&quot;version&quot;</span>: <span class="string">&quot;2.0&quot;</span>, <span class="comment">// 协议版本 (major.minor)    &quot;deviceModel&quot;: &quot;Samsung&quot;, // 可为空    &quot;deviceType&quot;: &quot;mobile&quot;, // mobile | desktop | web | headless | server, 可为空    &quot;fingerprint&quot;: &quot;随机字符串&quot;, // 在 HTTPS 模式下被忽略    &quot;port&quot;: 53317,    &quot;protocol&quot;: &quot;https&quot;, // http | https    &quot;download&quot;: true, // 下载 API (5.2 和 5.3) 是否激活 (可选，默认为 false)  &#125;,  &quot;files&quot;: &#123;    &quot;文件ID&quot;: &#123;      &quot;id&quot;: &quot;文件ID&quot;,      &quot;fileName&quot;: &quot;我的图片.png&quot;,      &quot;size&quot;: 324242, // bytes      &quot;fileType&quot;: &quot;image/jpeg&quot;,      &quot;sha256&quot;: &quot;*sha256哈希值*&quot;, // 可为空      &quot;preview&quot;: &quot;*预览数据*&quot; // 可为空    &#125;,    &quot;另一个文件ID&quot;: &#123;      &quot;id&quot;: &quot;另一个文件ID&quot;,      &quot;fileName&quot;: &quot;另一个图片.jpg&quot;,      &quot;size&quot;: 1234,      &quot;fileType&quot;: &quot;image/jpeg&quot;,      &quot;sha256&quot;: &quot;*sha256哈希值*&quot;,      &quot;preview&quot;: &quot;*预览数据*&quot;    &#125;  &#125;&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>返回：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;  <span class="string">&quot;sessionId&quot;</span>: <span class="string">&quot;我的会话ID&quot;</span>,  <span class="string">&quot;files&quot;</span>: &#123;    <span class="string">&quot;文件ID&quot;</span>: <span class="string">&quot;文件Token&quot;</span>,    <span class="string">&quot;另一个文件ID&quot;</span>: <span class="string">&quot;另一个文件Token&quot;</span>  &#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Errors 错误代码</p>
+<table>
+<thead>
+<tr>
+<th>HTTP 代码</th>
+<th>信息</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>204</td>
+<td>完成 (无需传输文件)</td>
+</tr>
+<tr>
+<td>400</td>
+<td>无效请求体</td>
+</tr>
+<tr>
+<td>403</td>
+<td>拒绝</td>
+</tr>
+<tr>
+<td>500</td>
+<td>接收器未知错误</td>
+</tr>
+</tbody></table>
+<h4 id="4-2-发送文件"><a href="#4-2-发送文件" class="headerlink" title="4.2 发送文件"></a>4.2 发送文件</h4><p>文件传输。</p>
+<p>使用来自 <code>/prepare-upload</code> 的 <code>sessionId</code>、<code>fileId</code> 及其特定于文件的 <code>token</code>。</p>
+<p>这请求路径可以同时调用。</p>
+<p><code>POST /api/localsend/v2/upload?sessionId=我的会话ID&amp;fileId=文件ID&amp;token=文件Token</code></p>
+<p>请求：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">二进制数据</span><br></pre></td></tr></table></figure>
+
+<p>返回：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">无响应体</span><br></pre></td></tr></table></figure>
+
+<p>Errors 错误代码</p>
+<table>
+<thead>
+<tr>
+<th>HTTP 代码</th>
+<th>信息</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>400</td>
+<td>参数缺失</td>
+</tr>
+<tr>
+<td>403</td>
+<td>无效令牌或 IP 地址</td>
+</tr>
+<tr>
+<td>409</td>
+<td>被其他会话阻止</td>
+</tr>
+<tr>
+<td>500</td>
+<td>接收器未知错误</td>
+</tr>
+</tbody></table>
+<h4 id="4-3-取消"><a href="#4-3-取消" class="headerlink" title="4.3 取消"></a>4.3 取消</h4><p>当发送方希望取消会话时，可用此请求路径。</p>
+<p>使用 <code>/send-request</code> 中的 <code>sessionId</code>。</p>
+<p><code>POST /api/localsend/v2/cancel?sessionId=我的会话ID</code></p>
+<p>返回：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">无响应体</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-反向文件传输-HTTP"><a href="#5-反向文件传输-HTTP" class="headerlink" title="5. 反向文件传输 (HTTP)"></a>5. 反向文件传输 (HTTP)</h3><p>HTTP方式是当接收方无法使用 LocalSend 时应使用的备用方法。</p>
+<p>发送方设置一个 HTTP 服务器，通过提供 URL 将文件发送给其他成员。</p>
+<p>然后接收方使用给定的 URL 打开浏览器并下载文件。</p>
+<p>需要注意的是，由于浏览器拒绝自签名证书，因此使用未加密的 HTTP 协议。</p>
+<h4 id="5-1-浏览器-URL"><a href="#5-1-浏览器-URL" class="headerlink" title="5.1 浏览器 URL"></a>5.1 浏览器 URL</h4><p>接收方可以在浏览器中打开以下网址来下载文件。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://&lt;发送者ip&gt;:&lt;发送者端口&gt;</span><br></pre></td></tr></table></figure>
+
+<h4 id="5-2-接收请求"><a href="#5-2-接收请求" class="headerlink" title="5.2 接收请求"></a>5.2 接收请求</h4><p>向发送方发送请求以获取文件元数据列表。</p>
+<p>下载方可以添加 <code>?sessionId=我的会话ID</code>。此时，如果是同一个会话，则接受该请求。</p>
+<p>如果用户刷新浏览器页面，则需要这样操作。</p>
+<p><code>POST /api/localsend/v2/prepare-download</code></p>
+<p>请求：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">无请求体</span><br></pre></td></tr></table></figure>
+
+<p>返回：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;  <span class="string">&quot;info&quot;</span>: &#123;    <span class="string">&quot;alias&quot;</span>: <span class="string">&quot;Nice Orange&quot;</span>,    <span class="string">&quot;version&quot;</span>: <span class="string">&quot;2.0&quot;</span>,    <span class="string">&quot;deviceModel&quot;</span>: <span class="string">&quot;Samsung&quot;</span>, <span class="comment">// 可为空    &quot;deviceType&quot;: &quot;mobile&quot;, // mobile | desktop | web | headless | server, 可为空    &quot;fingerprint&quot;: &quot;随机字符串&quot;, //  在 HTTPS 模式下被忽略    &quot;download&quot;: true, // 下载 API (5.2 和 5.3) 是否激活 (可选，默认为 false)  &#125;,  &quot;sessionId&quot;: &quot;mySessionId&quot;,  &quot;files&quot;: &#123;    &quot;文件ID&quot;: &#123;      &quot;id&quot;: &quot;文件ID&quot;,      &quot;fileName&quot;: &quot;我的图片.png&quot;,      &quot;size&quot;: 324242, // bytes      &quot;fileType&quot;: &quot;image/jpeg&quot;,      &quot;sha256&quot;: &quot;*sha256哈希值*&quot;, // 可为空      &quot;preview&quot;: &quot;*预览数据*&quot; // 可为空    &#125;,    &quot;另一个文件ID&quot;: &#123;      &quot;id&quot;: &quot;另一个文件ID&quot;,      &quot;fileName&quot;: &quot;另一个图片.jpg&quot;,      &quot;size&quot;: 1234,      &quot;fileType&quot;: &quot;image/jpeg&quot;,      &quot;sha256&quot;: &quot;*sha256哈希值*&quot;,      &quot;preview&quot;: &quot;*预览数据*&quot;    &#125;  &#125;&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="5-3-接收文件"><a href="#5-3-接收文件" class="headerlink" title="5.3 接收文件"></a>5.3 接收文件</h4><p>文件传输。</p>
+<p>使用 <code>/receive-request</code> 中的 <code>sessionId</code> 和 <code>fileId</code>。</p>
+<p>这请求路径可以同时调用。</p>
+<p><code>GET /api/localsend/v2/download?sessionId=我的会话ID&amp;fileId=文件ID</code></p>
+<p>请求：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">无请求体</span><br></pre></td></tr></table></figure>
+
+<p>返回：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">二进制数据</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-其他-API"><a href="#6-其他-API" class="headerlink" title="6. 其他 API"></a>6. 其他 API</h3><h4 id="6-1-信息"><a href="#6-1-信息" class="headerlink" title="6.1 信息"></a>6.1 信息</h4><p>这是一条以前用于发现的旧连接。 它已被替换为“&#x2F;register”，这是一种双向发现。</p>
+<p>现在该路由应该仅用于调试。</p>
+<p><code>GET /api/localsend/v2/info</code></p>
+<p>返回：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;  <span class="string">&quot;alias&quot;</span>: <span class="string">&quot;Nice Orange&quot;</span>,  <span class="string">&quot;version&quot;</span>: <span class="string">&quot;2.0&quot;</span>,  <span class="string">&quot;deviceModel&quot;</span>: <span class="string">&quot;Samsung&quot;</span>, <span class="comment">// 可为空  &quot;deviceType&quot;: &quot;mobile&quot;, // mobile | desktop | web | headless | server, 可为空  &quot;fingerprint&quot;: &quot;随机字符串&quot;,  &quot;download&quot;: true, // 下载 API (5.2 和 5.3) 是否激活 (可选，默认为 false)&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="7-枚举"><a href="#7-枚举" class="headerlink" title="7. 枚举"></a>7. 枚举</h3><p>在这项目中，枚举用于定义某些字段的可能值。</p>
+<h4 id="7-1-设备类型"><a href="#7-1-设备类型" class="headerlink" title="7.1 设备类型"></a>7.1 设备类型</h4><p>设备类型仅用于 UI 使用，例如显示图标。</p>
+<p>各种设备类型的协议都一样。</p>
+<table>
+<thead>
+<tr>
+<th>值</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>mobile</td>
+<td>移动设备 (Android, iOS, FireOS)</td>
+</tr>
+<tr>
+<td>desktop</td>
+<td>桌面 (Windows, macOS, Linux)</td>
+</tr>
+<tr>
+<td>web</td>
+<td>网页浏览器 (Firefox, Chrome)</td>
+</tr>
+<tr>
+<td>headless</td>
+<td>在终端运行的无图形用户界面程序</td>
+</tr>
+<tr>
+<td>server</td>
+<td>全天候运行的（自托管）云服务</td>
+</tr>
+</tbody></table>
+<p>如有枚举外的值，都返回 <code>desktop</code> 类型。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2025/02/05/LocalSend%E8%B7%A8%E8%AE%BE%E5%A4%87%E4%BC%A0%E8%BE%93%E6%96%87%E4%BB%B6%E4%BC%A0%E8%BE%93%E5%8D%8F%E8%AE%AE%20v2/">https://yhao521.github.io/2025/02/05/LocalSend%E8%B7%A8%E8%AE%BE%E5%A4%87%E4%BC%A0%E8%BE%93%E6%96%87%E4%BB%B6%E4%BC%A0%E8%BE%93%E5%8D%8F%E8%AE%AE%20v2/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/java-programming/">java/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a><a class="post-meta__tags" href="/tags/javascript/">javascript</a><a class="post-meta__tags" href="/tags/js-programming/">js/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/02/10/Ionic2%E5%A6%82%E4%BD%95%E4%B8%8B%E6%8B%89%E5%88%B7%E6%96%B0%E5%92%8C%E4%B8%8A%E6%8B%89%E5%8A%A0%E8%BD%BD/" title="Ionic2如何下拉刷新和上拉加载"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Ionic2如何下拉刷新和上拉加载</div></div><div class="info-2"><div class="info-item-1">上拉刷新&#x3D;&#x3D;&gt; Html: 1234&lt;ion-content style=&quot;background-color:white&quot;&gt;     &lt;ion-refresher (ionRefresh)=&quot;doRefresh($event)&quot;&gt;          &lt;ion-refresher-content pullingIcon=&quot;arrow-dropdown&quot;  pullingText=&quot;Pull to refresh&quot;  refreshingSpinner=&quot;circles&quot;  refreshingText=&quot;Refreshing...&quot;&gt;         &lt;/ion-refresher-content&gt;     &lt;/ion-refresher&gt;  TypeScript: 12345678910111213141516171819202122232425      //下拉刷新    ...</div></div></div></a><a class="pagination-related" href="/2025/01/26/vue3%E4%B8%AD%EF%BC%8Cthis.$router.push%E5%88%B7%E6%96%B0%E5%BD%93%E5%89%8D%E9%A1%B5%E9%9D%A2%EF%BC%8C%E8%AF%A5%E9%A1%B5%E9%9D%A2%E4%B8%8D%E9%87%8D%E6%96%B0%E5%8A%A0%E8%BD%BD%E9%9C%80%E8%A6%81%E6%89%8B%E5%8A%A8%E5%88%B7%E6%96%B0%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/" title="vue3中，this.$router.push刷新当前页面，该页面不重新加载需要手动刷新的解决方案"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">vue3中，this.$router.push刷新当前页面，该页面不重新加载需要手动刷新的解决方案</div></div><div class="info-2"><div class="info-item-1">12345678910111213141516171819202122232425262728293031323334353637383940414243// 1-demo.vue在this.$router.push(&#x27;/demo&#x27;)后，demo.vue没有刷新也没有重新加载，但是路由地址已经变了，只是需要手动刷新// 2-解决  监听一下当前路由watch: &#123;  $route (to, from) &#123;  	// to表示要跳转的路由，from表示从哪儿跳的路由   to.path    this.$router.go(0)  &#125;,&#125;,// 以上是我目前可以解决我的问题的方法// 以下记录百度搜到的，为了防止以后上述方法失效// 第一种// 1-demo.vue  在当前需要刷新的页面demo.vue中，引入router，就是我们写的路由文件import router from &#x27;@/router/index&#x27;console.log(router)    // 可以打印一下这个router看看// ...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/vscode%E4%BD%BF%E7%94%A8/" title="vscode使用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">vscode使用</div></div><div class="info-2"><div class="info-item-1"> title: vscode的使用lang: en-USdate: 2023-09-03 20:17:08category:  vscodetag: vscodeauthor:   1. vscode的使用1.1. 插件位置更改参考：https://blog.csdn.net/zhaojunwei08/article/details/86021665 https://blog.csdn.net/u011127019/article/details/86737308#comments mklink使用 https://www.icoa.cn/a/910.html set oldDir&#x3D;%UserProfile%.vscode\extensions mklink &#x2F;D “%oldDir%” “E:\eclipse-hao\HTML\extensions” 确保有 这个 .vscode 空目录  bat方式： 123456789@echo offif &quot;%1&quot; == &quot;h&quot; goto beginmshta vbscript:c...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E6%89%8B%E6%8A%8A%E6%89%8B%E6%95%99%E4%BD%A0%E4%BD%BF%E7%94%A8Electron5+vue-cli3%E5%BC%80%E5%8F%91%E8%B7%A8%E5%B9%B3%E5%8F%B0%E6%A1%8C%E9%9D%A2%E5%BA%94%E7%94%A8/" title="手把手教你使用Electron5+vue-cli3开发跨平台桌面应用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">手把手教你使用Electron5+vue-cli3开发跨平台桌面应用</div></div><div class="info-2"><div class="info-item-1"> title: 手把手教你使用Electron5+vue-cli3开发跨平台桌面应用date: 2023-09-03 20:17:08category:  mactag: macauthor:   手把手教你使用Electron5+vue-cli3开发跨平台桌面应用Electron是一个基于Chromium和 Node.js，可以使用 HTML、CSS和JavaScript构建跨平台应用的技术框架，兼容 Mac、Windows 和 Linux。虽然B&#x2F;S是目前开发的主流，但是C&#x2F;S仍然有很大的市场需求。受限于浏览器的沙盒限制，网页应用无法满足某些场景下的使用需求，而桌面应用可以读写本地文件、调用更多系统资源，再加上Web开发的低成本、高效率的优势，这种方式越来越受到开发者的喜爱。 本文一步一步教你如何使用Electron5和vue-cli3，在完全保留vue开发web应用的习惯下，搭建桌面应用。 本文不涉及Electron和vue的开发教程，仅以实现两者结合为目的，如深入学习Electron和vue，请访问官方： Electron: https://elect...</div></div></div></a><a class="pagination-related" href="/2024/04/14/Vue3+TypeScript%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E8%BF%9B%E9%98%B6%EF%BC%88%E4%B8%83%EF%BC%89%E2%80%94%E2%80%94%E9%A1%B9%E7%9B%AE%E5%AE%9E%E6%88%98/" title="Vue3+TypeScript从入门到进阶（七）——项目实战"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-14</div><div class="info-item-2">Vue3+TypeScript从入门到进阶（七）——项目实战</div></div><div class="info-2"><div class="info-item-1">文章目录   一、简介 二、Vue2和Vue3区别 三、Vue知识点学习 四、TypeScript知识点 五、项目实战  一. 代码规范  1.1. 集成editorconfig配置 1.2. 使用prettier工具 1.3. 使用ESLint检测 1.4. git Husky和eslint 1.5. git commit规范  1.5.1. 代码提交风格 1.5.2. 代码提交验证     二. 第三方库集成  2.1. vue.config.js配置 2.2. vue-router集成 2.3. vuex集成 2.4. element-plus集成  2.4.1. 全局引入 2.4.2. 局部引入 2.4.3 element-plus的icon引入   2.5. axios集成 2.6. VSCode配置     六、项目打包和自动化部署 七、沿途学习代码地址及案例地址  1、沿途学习代码地址 2、项目案例地址   八、知识拓展  1、ES6数组与对象的解构赋值详解  数组的解构赋值 对象的解构赋值 字符串的解构赋值   2、JavaScript的 …（展开运算符） 3、e...</div></div></div></a><a class="pagination-related" href="/2023/09/04/npm&yarn/" title="npm&amp;yarn"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">npm&amp;yarn</div></div><div class="info-2"><div class="info-item-1"> title: npm&amp;yarnlang: en-USdate: 2023-09-03 20:17:08category:  开发语言 doc_nodejstag: doc_nodejsauthor:   1. centos7 npm安装——CentOS7常用软件官网下载npm安装包， https://nodejs.org/en/ ，左边是稳定版右边是最新版。  推荐个 https://npm.taobao.org/mirrors/可以下载想要的node版本 2. 首先安装必要的环境(推荐方式一安装)yum install gcc gcc-c++  3. 一、方式一wget https://npm.taobao.org/mirrors/node/v12.8.0/node-v12.8.0-linux-x64.tar.gz  然后执行下面命令 tar -zxvf node-v12.8.0-linux-x64.tar.gz mv node-v12.8.0-linux-x64 node  配置环境变量 vim /etc/profile vi .bash_profile  在文件中...</div></div></div></a><a class="pagination-related" href="/2024/08/01/Vue3%E4%B9%8B%E9%9B%86%E6%88%90Highlight.js%E4%BB%A3%E7%A0%81%E8%AF%AD%E6%B3%95%E4%BA%AE%E6%98%BE%E7%A4%BA%E6%8F%92%E4%BB%B6/" title="Vue3之集成Highlight.js代码语法亮显示插件"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-01</div><div class="info-item-2">Vue3之集成Highlight.js代码语法亮显示插件</div></div><div class="info-2"><div class="info-item-1">Vue3之集成Highlight.js代码语法亮显示插件文章目录 Vue3之集成Highlight.js代码语法亮显示插件 1.Vue3中集成说明 2. 安装highlight.js与@highlightjs&#x2F;vue-plugin 3. Vue3集成与使用  1. main.ts(或main.js)中导入highlight.js 2. 各语言测试代码 3. 高亮显示vue文件 4. 显示效果   4. Highlight.js-Vue插件详细说明  1. 使用预构建的库 2. 使用 ES6 模块&#x2F;捆绑 3. 在本地使用组件 4.从源代码构建预构建库    1.Vue3中集成说明 vue中需要使用highlight.js必须借助highlightjs&#x2F;vue-plugin 插件来完成 这个插件提供了一个用于Vue.js 3应用程序的组件：highlightjs 注意：vue3中highlightjs/vue-plugin的版本必须为2.x.x, 而1.x.x为vue2的适配版本 关于highlight.js说明请查看 JavaScript之Highli...</div></div></div></a><a class="pagination-related" href="/2024/10/20/Ionic%E6%96%87%E4%BB%B6%E9%80%89%E6%8B%A9%E6%8F%92%E4%BB%B6filechooser%E9%80%89%E6%8B%A9%E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0%E7%9A%84%E9%97%AE%E9%A2%98/" title="Ionic文件选择插件filechooser选择图片上传的问题"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-10-20</div><div class="info-item-2">Ionic文件选择插件filechooser选择图片上传的问题</div></div><div class="info-2"><div class="info-item-1">Ionic3&#x2F;4文件选择插件filechooser选择图片上传的问题  插件安装 文件选择 filechooser 获取文件的实际路径 读取选择的图片     选择图库中的文件上传请看另一文章  在移动项目开发中，使用的是Ionic框架，当中涉及到文件上传。 开发思路：  使用文件选择插件获取路径 使用路径上传文件  开发流程涉及到的组件有(Ionic官方文档)  文件选择 https://ionicframework.com/docs/native/file-chooser 文件打开 https://ionicframework.com/docs/native/file-opener （在已上传的文件列表中可能你会使用上） 文件路径 https://ionicframework.com/docs/native/file-path  插件安装下面只列举文件选择的插件安装方法。文件打开和文件路径安装方式同理，文档有具体描述，文件选择插件有版本的注意事项 Ionic3.x 123$ ionic cordova plugin add cordova-plugin-filech...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#LocalSend%E4%BB%93%E5%BA%93%E5%9C%B0%E5%9D%80%EF%BC%9AGitHub-localsend-localsend-An-open-source-cross-platform-alternative-to-AirDrop"><span class="toc-number">1.</span> <span class="toc-text">LocalSend仓库地址：GitHub - localsend&#x2F;localsend: An open-source cross-platform alternative to AirDrop</span></a></li><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-number">2.</span> <span class="toc-text"></span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#LocalSend-%E5%8D%8F%E8%AE%AE-v2"><span class="toc-number">3.</span> <span class="toc-text">LocalSend 协议 v2</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%AE%E5%BD%95"><span class="toc-number">3.1.</span> <span class="toc-text">目录</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E9%BB%98%E8%AE%A4%E9%85%8D%E7%BD%AE"><span class="toc-number">3.2.</span> <span class="toc-text">1. 默认配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E6%8C%87%E7%BA%B9"><span class="toc-number">3.3.</span> <span class="toc-text">2. 指纹</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E6%90%9C%E5%AF%BB%E5%8F%91%E7%8E%B0"><span class="toc-number">3.4.</span> <span class="toc-text">3. 搜寻发现</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-UDP-%E5%B9%BF%E6%92%AD"><span class="toc-number">3.4.1.</span> <span class="toc-text">3.1 UDP 广播</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-HTTP-%E4%BC%A0%E7%BB%9F%E6%A8%A1%E5%BC%8F"><span class="toc-number">3.4.2.</span> <span class="toc-text">3.2 HTTP (传统模式)</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E6%96%87%E4%BB%B6%E4%BC%A0%E8%BE%93-HTTP"><span class="toc-number">3.5.</span> <span class="toc-text">4. 文件传输 (HTTP)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-1-%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C-%E4%BB%85%E5%85%83%E6%95%B0%E6%8D%AE"><span class="toc-number">3.5.1.</span> <span class="toc-text">4.1 准备工作 (仅元数据)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-2-%E5%8F%91%E9%80%81%E6%96%87%E4%BB%B6"><span class="toc-number">3.5.2.</span> <span class="toc-text">4.2 发送文件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-%E5%8F%96%E6%B6%88"><span class="toc-number">3.5.3.</span> <span class="toc-text">4.3 取消</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-%E5%8F%8D%E5%90%91%E6%96%87%E4%BB%B6%E4%BC%A0%E8%BE%93-HTTP"><span class="toc-number">3.6.</span> <span class="toc-text">5. 反向文件传输 (HTTP)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#5-1-%E6%B5%8F%E8%A7%88%E5%99%A8-URL"><span class="toc-number">3.6.1.</span> <span class="toc-text">5.1 浏览器 URL</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-2-%E6%8E%A5%E6%94%B6%E8%AF%B7%E6%B1%82"><span class="toc-number">3.6.2.</span> <span class="toc-text">5.2 接收请求</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-3-%E6%8E%A5%E6%94%B6%E6%96%87%E4%BB%B6"><span class="toc-number">3.6.3.</span> <span class="toc-text">5.3 接收文件</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-%E5%85%B6%E4%BB%96-API"><span class="toc-number">3.7.</span> <span class="toc-text">6. 其他 API</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#6-1-%E4%BF%A1%E6%81%AF"><span class="toc-number">3.7.1.</span> <span class="toc-text">6.1 信息</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-%E6%9E%9A%E4%B8%BE"><span class="toc-number">3.8.</span> <span class="toc-text">7. 枚举</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#7-1-%E8%AE%BE%E5%A4%87%E7%B1%BB%E5%9E%8B"><span class="toc-number">3.8.1.</span> <span class="toc-text">7.1 设备类型</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

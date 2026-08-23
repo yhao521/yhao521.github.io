@@ -1,0 +1,235 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>F-Droid添加国内源和存储库 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Matrix 首页推荐Matrix 是少数派的写作社区，我们主张分享真实的产品体验，有实用价值的经验与思考。我们会不定期挑选 Matrix 最优质的文章，展示来自用户的最真实的体验和观点。 文章代表作者个人观点，少数派仅对标题和排版略作修改。  F-Droid 是一款专门收录各类自由软件的 Android 应用商店。刚刚度过十岁生日的它，仍然只流行于自由软件爱好者圈子内，这多多少少埋没了其中数以百">
+<meta property="og:type" content="article">
+<meta property="og:title" content="F-Droid添加国内源和存储库">
+<meta property="og:url" content="https://yhao521.github.io/2023/12/21/F-Droid%E6%B7%BB%E5%8A%A0%E5%9B%BD%E5%86%85%E6%BA%90%E5%92%8C%E5%AD%98%E5%82%A8%E5%BA%93/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="Matrix 首页推荐Matrix 是少数派的写作社区，我们主张分享真实的产品体验，有实用价值的经验与思考。我们会不定期挑选 Matrix 最优质的文章，展示来自用户的最真实的体验和观点。 文章代表作者个人观点，少数派仅对标题和排版略作修改。  F-Droid 是一款专门收录各类自由软件的 Android 应用商店。刚刚度过十岁生日的它，仍然只流行于自由软件爱好者圈子内，这多多少少埋没了其中数以百">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2023-12-21T06:01:34.000Z">
+<meta property="article:modified_time" content="2023-12-21T06:01:34.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "F-Droid添加国内源和存储库",
+  "url": "https://yhao521.github.io/2023/12/21/F-Droid%E6%B7%BB%E5%8A%A0%E5%9B%BD%E5%86%85%E6%BA%90%E5%92%8C%E5%AD%98%E5%82%A8%E5%BA%93/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2023-12-21T06:01:34.000Z",
+  "dateModified": "2023-12-21T06:01:34.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2023/12/21/F-Droid%E6%B7%BB%E5%8A%A0%E5%9B%BD%E5%86%85%E6%BA%90%E5%92%8C%E5%AD%98%E5%82%A8%E5%BA%93/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'F-Droid添加国内源和存储库',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">F-Droid添加国内源和存储库</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">F-Droid添加国内源和存储库</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-12-21T06:01:34.000Z" title="发表于 2023-12-21 14:01:34">2023-12-21</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-12-21T06:01:34.000Z" title="更新于 2023-12-21 14:01:34">2023-12-21</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h3 id="Matrix-首页推荐"><a href="#Matrix-首页推荐" class="headerlink" title="Matrix 首页推荐"></a>Matrix 首页推荐</h3><p><a target="_blank" rel="noopener" href="https://sspai.com/matrix">Matrix</a> 是少数派的写作社区，我们主张分享真实的产品体验，有实用价值的经验与思考。我们会不定期挑选 Matrix 最优质的文章，展示来自用户的最真实的体验和观点。</p>
+<p>文章代表作者个人观点，少数派仅对标题和排版略作修改。</p>
+<hr>
+<p>F-Droid 是一款专门收录各类自由软件的 Android 应用商店。刚刚度过十岁生日的它，仍然只流行于自由软件爱好者圈子内，这多多少少埋没了其中数以百计的优质应用。事实上，相较于境外的许多应用商店，F-Droid 不仅在国内更易访问，而且更加安全。虽然不能开箱即用，F-Droid 的使用配置并不复杂。</p>
+<h2 id="一、添加国内源和存储库"><a href="#一、添加国内源和存储库" class="headerlink" title="一、添加国内源和存储库"></a>一、添加国内源和存储库</h2><p>从<a href="https://sspai.com/link?target=https://f-droid.org/">官网</a>处下载 F-Droid 并打开后，首先需要调整存储库设置。F-Droid 管理应用的方式类似于各大 Linux 发行版。存储库是一系列应用的列表和安装包的集合，由开发者或者机构维护。同一存储库在世界各地分设服务器供用户就近下载，可以理解为源。F-Droid 默认使用一个收录应用最多的、和软件同名的库，其访问与下载速度通常相当缓慢。所幸目前已经有了 F-Droid 的国内源，添加后可大幅度改善境内的访问和下载体验。</p>
+<p><strong>手机访问</strong><a href="https://sspai.com/link?target=https://mirrors.tuna.tsinghua.edu.cn/help/fdroid/">清华大学开源软件镜像站</a>，使用 F-Droid 打开第一行的长链接，在弹出界面中点击添加镜像。也可以复制长链接，在应用⚙设置 - 存储库中，点击右上角的加号手动添加。添加完成后，还需要选择存储库中的第二个 F-Droid 库，只保留刚才添加的用户镜像，其他镜像悉数关闭，保证软件只从国内镜像站获取更新。</p>
+<p><img src="https://cdn.sspai.com/2020/11/17/d818e4752c05c7d256d7e6781930b829.jpg?imageView2/2/w/1120/q/90/interlace/1/ignore-error/1"></p>
+<p>这一步完成后，境内用户即可通过商店方便地下载和更新应用。初次使用，许多用户都会疑惑为何在其中搜索不到 Firefox 等「自由软件」。这是由于 F-Droid 官方库对收录软件的要求非常严格，Firefox 等含有一些专有代码的应用并不被认定为自由开源。此外，也有一些诸如 Bitwarden 的开源软件尚未被官方收录。这些问题可以通过添加第三方存储库解决。<a href="https://sspai.com/link?target=https://forum.f-droid.org/t/known-repositories/721">官方论坛中的此贴</a>列出了大部分已知的第三方库。添加存储库的方式和前述添加国内源的方式基本一致，推荐添加 <a href="https://sspai.com/link?target=https://android.izzysoft.de/repo/info">IzzyOnDroid</a>，<a href="https://sspai.com/link?target=https://gitlab.com/rakshazi/fdroid">Rakshazi F-Droid</a>。这些第三方库并无国内源，所以下载速度不及官方库。</p>
+<h2 id="二、选择更美观的客户端"><a href="#二、选择更美观的客户端" class="headerlink" title="二、选择更美观的客户端"></a>二、选择更美观的客户端</h2><p>F-Droid 官方客户端设计并不美观，各类功能也只能说差强人意，但是得益于自由软件的开放特性，F-Droid 拥有众多的第三方客户端，并且都能通过 F-Droid 官方客户端下载。相较于官方，这些第三方客户端往往更加漂亮，有的还提供了一些有用的功能。如果你并不在乎是否有中文界面，那么我更加推荐两个下面客户端。</p>
+<p><a href="https://sspai.com/link?target=https://f-droid.org/en/packages/nya.kitsunyan.foxydroid">Foxy Droid</a>，官方客户端主页是大图标式排列应用，而图标大大小小，应用介绍挤在不多的空隙中，很难称得上优雅。而 Foxy Droid 将排列模式改成了列表，删除了诸如离线传输等不常用功能，整个设计显得更加简约合理。它还给每一个应用单独设置了是否更新的选项，用户可以选择永久忽略某一应用的更新。缺点是没有中文界面，不可以用中文搜索。</p>
+<p><img src="https://cdn.sspai.com/2020/11/17/745c4624931446b6349e478776c8580a.png?imageView2/2/w/1120/q/90/interlace/1/ignore-error/1"></p>
+<p><a href="https://sspai.com/link?target=https://f-droid.org/en/packages/com.aurora.adroid">Aurora Droid</a>：Aurora Store 的姊妹应用。界面类似于 Google Play，Material Design，颜值力压众多竞品。功能也较为完善，提供了收藏，黑名单。客户端还默认列出了许多第三方库，不需要去官网一个个添加，只需要在库设置中启用即可。由于是 Aurora 系列应用，可以通过安装 Aurora Services 的方式实现静默安装。同样没有中文界面。</p>
+<p><img src="https://cdn.sspai.com/2020/11/17/40691b101ce2a7a9349b04e0c86d6689.jpg?imageView2/2/w/1120/q/90/interlace/1/ignore-error/1"></p>
+<h2 id="三、应用的搜索和下载"><a href="#三、应用的搜索和下载" class="headerlink" title="三、应用的搜索和下载"></a>三、应用的搜索和下载</h2><p>前面提到，F-Droid 官方库只收录自由软件。在收录的自由软件中，官方特别标示了一些带有垃圾特性（anti-feature）的应用，默认无法被搜索到。需要在⚙设置 - 应用兼容性 - 包括带有 anti-feature 的应用中调整。所谓垃圾特性，并不意味着被标志的应用必然有害，而是指对用户会造成潜在危害的功能，例如应用中含有推广，非完全自由，有需要用户刻意关闭的数据上传服务等。以 Telegram 为例，尽管客户端是自由软件，但由于上游服务器并不开源以及含有推广服务，被认定为带有垃圾特性。普通用户并不需要在意这些问题。</p>
+<p><img src="https://cdn.sspai.com/2020/11/17/6715c453aab865e6ffb80aaa52b455ba.jpg?imageView2/2/w/1120/q/90/interlace/1/ignore-error/1"></p>
+<p>尽管官方客户端有中文界面，但应用的搜索对中文支持并不好。这大概是因为 F-Droid 收录的鲜有中文软件，软件的介绍大多也是英文。如果中文无法搜索到内容，建议改用英语。此外，软件搜索范围是应用包名和介绍，并且没有主流应用商店那样的模糊搜索功能，如果某软件的功能介绍比较隐晦，你可能很难从搜索中发现它。Firefox 的自由软件版本 Fennec 就是这样。</p>
+<p><img src="https://cdn.sspai.com/2020/11/17/835b6a193880891a69b4833e08e3c870.jpg?imageView2/2/w/1120/q/40/interlace/1/ignore-error/1"></p>
+<p>克服这些小毛病后，F-Droid 的种种好处逐渐显露出来。软件商店中的应用包绝大部分直接从源码编译而来，商店在应用介绍中注明了该软件采用的许可证和源码的获取方法，用户在安全和隐私方面无需担心。一些开发者还会为 F-Droid 单独发布一个分支，不同于发布在 Google Play 等处的版本，F-Droid 中的应用包没有来自 Google 跟踪，也没有内购和收费。摆脱了 Google 条约的束缚，开发者们还可以在 F-Droid 上发布类似无广告的 YouTube 前端，广告拦截软件等无法在 Play 商店上架的应用。</p>
+<p><img src="https://cdn.sspai.com/2020/11/17/f848d88339ff848397559099bd09fb20.jpg?imageView2/2/w/1120/q/40/interlace/1/ignore-error/1"></p>
+<p>Nextcloud 在 Play 商店中收费</p>
+<h2 id="四、发现-F-Droid-的优质应用"><a href="#四、发现-F-Droid-的优质应用" class="headerlink" title="四、发现 F-Droid 的优质应用"></a>四、发现 F-Droid 的优质应用</h2><p>对于并不标榜 No-Google 和自由软件精神的用户来说，F-Droid 最有用的一类应用就是主流服务的第三方客户端。Aurora Store 是无需登录 Google 帐号和服务的 Play Store，NewPipe 是功能齐全的 YouTube 开源前端，Slide 是轻量的 Reddit 客户端。对于希望摆脱 Google 的自由软件爱好者而言，F-Droid 也有许多不需要 Google 服务即可运行的应用，例如无需 Google 也能正常运行的二次验证软件 FreeOTP。</p>
+<p>除此以外，F-Droid 收录的几千个软件中有很多是未被国内用户发掘的优质应用。倘若喜爱尝试新应用，下面这些帖子或列表也许值得一看：</p>
+<ul>
+<li>GitHub：<a href="https://sspai.com/link?target=https://github.com/offa/android-foss">Android Foss</a>（并不全是 F-Droid 应用）</li>
+<li>小众软件：<a href="https://sspai.com/link?target=https://meta.appinn.net/t/topic/15095">F-Droid 软件推荐</a></li>
+</ul>
+<p>&gt; 下载少数派 <a target="_blank" rel="noopener" href="https://sspai.com/page/client">客户端</a> 、关注 <a target="_blank" rel="noopener" href="https://sspai.com/s/J71e">少数派公众号</a> ，了解更妙的数字生活 🍃</p>
+<p>&gt; 想申请成为少数派作者？<a target="_blank" rel="noopener" href="https://sspai.com/apply/writing">冲！</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2023/12/21/F-Droid%E6%B7%BB%E5%8A%A0%E5%9B%BD%E5%86%85%E6%BA%90%E5%92%8C%E5%AD%98%E5%82%A8%E5%BA%93/">https://yhao521.github.io/2023/12/21/F-Droid%E6%B7%BB%E5%8A%A0%E5%9B%BD%E5%86%85%E6%BA%90%E5%92%8C%E5%AD%98%E5%82%A8%E5%BA%93/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/01/03/EasyPhoto%EF%BC%9A%E5%9F%BA%E4%BA%8E%20SD%20WebUI%20%E7%9A%84%E8%89%BA%E6%9C%AF%E7%85%A7%E7%94%9F%E6%88%90%E6%8F%92%E4%BB%B6%E6%9D%A5%E5%95%A6%EF%BC%81/" title="EasyPhoto：基于 SD WebUI 的艺术照生成插件来啦！"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">EasyPhoto：基于 SD WebUI 的艺术照生成插件来啦！</div></div><div class="info-2"><div class="info-item-1">EasyPhoto 是一个基于 SD WebUI 的艺术照生成插件。支持低代码操作、自定义风格，让更多开发者灵活地开发自己的风格化艺术照生成应用。  项目地址： https://github.com/aigc-apps/sd-webui-EasyPhoto  背景介绍最近，基于生成式AI技术批量产出真&#x2F;像&#x2F;美的个人写真应用非常受欢迎。同时，随着 Stable Diffusion 领域开源社区的快速发展，社区也涌现了类似 FaceChain 的开源项目，帮助开发者开发个性化的真人写真生成应用。越来越多开发者对这个方向投来关注，希望得到更多灵活的开发方式。 EasyPhoto项目介绍作为FaceChain-Inpaint功能的开发团队，我们快速上线了一款基于 SD WebUI 插件生态的个性化写真生成开源插件 EasyPhoto。这款插件允许用户通过上传几张同一个人的照片，快速训练Lora模型，然后结合用户自定义的模板图片，生成 真&#x2F;像&#x2F;美的写真图片。  图1  项目地址： https://github.com/aigc-apps/sd-web...</div></div></div></a><a class="pagination-related" href="/2023/11/15/stable-diffusion-webui%E8%BF%90%E8%A1%8C/" title="stable-diffusion-webui运行"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">stable-diffusion-webui运行</div></div><div class="info-2"><div class="info-item-1">安装1234567891011121314151617181920212223242526272829303132333435363738394041424344conda create -n SD_WEB_UI python=3.10conda activate SD_WEB_UI# 官方pip config set global.index-url  https://pypi.org/simple# 清华源pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple# 阿里源pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/# 腾讯源pip config set global.index-url http://mirrors.cloud.tencent.com/pypi/simple# 豆瓣源pip config set global.index-url http://pypi.douban.com/s...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/03/17/%E5%AE%89%E8%A3%85ffmpeg%EF%BC%8C%E6%94%AF%E6%8C%81x265/" title="安装ffmpeg，支持x265"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-17</div><div class="info-item-2">安装ffmpeg，支持x265</div></div><div class="info-2"><div class="info-item-1">centos 安装ffmpegCentOS下yum安装FFmpegLinux—centos编译安装ffmpeg  Ubuntu#  12export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig注意看pkgconfig目录下的.pc文件的prefix，这个将决定你编译的引导路径  【1】安装cmake【2】安装x264 123456安装x264$git clone git://git.videolan.org/x264.git$cd x264$./configure --enable-static --disable-opencl --disable-avs  --disable-cli --disable-ffms --disable-gpac --disable-lavf --disable-swscale$make$make install  【3】安装x265_2.4 123456789# ubuntu packages:$ sudo apt-get install mercurial cmake cmake-curses-gui bu...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E5%AE%89%E8%A3%85mysql%E6%8A%A5%E9%94%99%E9%97%AE%E9%A2%98/" title="安装mysql报错问题"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">安装mysql报错问题</div></div><div class="info-2"><div class="info-item-1"> title: 安装mysql报错问题date: 2023-09-03 20:17:08category: tag: author:  安装mysql报错问题1.问题： 123456789[root@localhost lcl]# rpm -ivh MySQL-server-5.5.23-1.linux2.6.i386.rpmPreparing... ########################################### [100%]ls: /var/lib/mysql/*.err: 没有那个文件或目录ls: /var/lib/mysql/*.err: 没有那个文件或目录1:MySQL-server ########################################### [100%]  解决： 之前或系统自带的文件或目录没有卸载干净，卸载干净后，重新安装就好了。 2.问题： 远程连接：主机连接虚拟机的mysql1.问题： 123456789[root@localhost lcl]# rpm -ivh MySQL-server-5.5.23-1.li...</div></div></div></a><a class="pagination-related" href="/2023/09/04/oh-my-zsh%E5%9B%BD%E5%86%85%E9%95%9C%E5%83%8F/" title="oh-my-zsh国内镜像"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">oh-my-zsh国内镜像</div></div><div class="info-2"><div class="info-item-1"> title: oh-my-zsh国内镜像date: 2023-09-03 20:17:08category:  mactag: macauthor:   oh-my-zsh国内镜像安装依赖 git zsh  安装gitCentOS 升级安装最新版git 下载码云安装包sh 1wget https://gitee.com/mirrors/oh-my-zsh/raw/master/tools/install.sh  编辑install.sh找到以下部分 sh 12345# Default settingsZSH=$&#123;ZSH:-~/.oh-my-zsh&#125;REPO=$&#123;REPO:-ohmyzsh/ohmyzsh&#125;REMOTE=$&#123;REMOTE:-https://github.com/$&#123;REPO&#125;.git&#125;BRANCH=$&#123;BRANCH:-master&#125;  把 sh 12REPO=$&#123;REPO:-ohmyzsh/ohmyzsh&#125;REMOTE=$&#123;REMOTE...</div></div></div></a><a class="pagination-related" href="/2023/09/04/docker/" title="docker"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">docker</div></div><div class="info-2"><div class="info-item-1"> title: dockerdate: 2023-09-03 20:17:08category:  doc_dockertag: doc_dockerauthor:   Docker创建镜像、怎么修改、上传镜像等详细介绍: https://www.jb51.net/article/100942.htm centos7 安装docker使用 yum 安装Docker 要求 CentOS 系统的内核版本高于 3.10 ，查看本页面的前提条件来验证你的CentOS 版本是否支持 Docker 。通过 uname -r 命令查看你当前的内核版本 $ uname -r 3.10.0-957.5.1.el7.x86_64  安装 Docker从 2017 年 3 月开始 docker 在原来的基础上分为两个分支版本: Docker CE 和 Docker EE。Docker CE 即社区免费版，Docker EE 即企业版，强调安全，但需付费使用。 仅介绍 Docker CE 的安装使用。移除旧的版本 sudo yum remove -y docker \               doc...</div></div></div></a><a class="pagination-related" href="/2023/09/04/doc2html&md/" title="doc2html&amp;md"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">doc2html&amp;md</div></div><div class="info-2"><div class="info-item-1"> title: doc2html&amp;mddate: 2023-09-03 20:17:08category:  linuxtag: linuxauthor:   yum -y install unoconv yum -y install pandoc 执行word转html命令：unoconv -f html -o doc.html doc.docx  若执行报Error: Unable to connect or start own listener. Aborting. 这个错误，重新执行一遍即可。 执行html转markerdown命令：pandoc -f html -t markdown -o doc.md doc.html #############################################################################################################################################################################...</div></div></div></a><a class="pagination-related" href="/2023/09/04/nginx%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85/" title="nginx编译安装"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">nginx编译安装</div></div><div class="info-2"><div class="info-item-1"> title: nginx编译安装date: 2023-09-03 20:17:08category:  nginxtag: nginxauthor:   nginx编译安装[]: nginx.sh [[_resources&#x2F;4fd211c2eed24c20f48e08d12fe5ea95_MD5.sh|Open: nginx.sh]]![[_resources&#x2F;4fd211c2eed24c20f48e08d12fe5ea95_MD5.sh]] 前提： 安装编译环境，执行 yum -y install make zlib zlib-devel gcc-c++ libtool openssl openssl-devel pcre-devel 1.下载nginx http://nginx.org/download/nginx-1.22.0.tar.gz 2.上传到nginx.sh所在同级目录soft下 4.执行 sh app.sh stop_ui 停止 5.进入平台安装目录下，如果存在，清理已存在目录，执行 rm -r nginx &amp;&amp; rm -r...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Matrix-%E9%A6%96%E9%A1%B5%E6%8E%A8%E8%8D%90"><span class="toc-number">1.</span> <span class="toc-text">Matrix 首页推荐</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E6%B7%BB%E5%8A%A0%E5%9B%BD%E5%86%85%E6%BA%90%E5%92%8C%E5%AD%98%E5%82%A8%E5%BA%93"><span class="toc-number">2.</span> <span class="toc-text">一、添加国内源和存储库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E9%80%89%E6%8B%A9%E6%9B%B4%E7%BE%8E%E8%A7%82%E7%9A%84%E5%AE%A2%E6%88%B7%E7%AB%AF"><span class="toc-number">3.</span> <span class="toc-text">二、选择更美观的客户端</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%BA%94%E7%94%A8%E7%9A%84%E6%90%9C%E7%B4%A2%E5%92%8C%E4%B8%8B%E8%BD%BD"><span class="toc-number">4.</span> <span class="toc-text">三、应用的搜索和下载</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E5%8F%91%E7%8E%B0-F-Droid-%E7%9A%84%E4%BC%98%E8%B4%A8%E5%BA%94%E7%94%A8"><span class="toc-number">5.</span> <span class="toc-text">四、发现 F-Droid 的优质应用</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

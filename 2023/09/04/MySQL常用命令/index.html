@@ -1,0 +1,548 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>MySQL常用命令 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="title: MySql常用命令总结lang: en-USdate: 2023-09-04 17:49:38category:  数据库 doc_mysqltag: doc_mysqlauthor:   [[_resources&#x2F;eca4f5f3d74b0ad7ab1fbb33df942a2e_MD5.sh|Open: mysql_createuser.sh]]![[_resource">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL常用命令">
+<meta property="og:url" content="https://yhao521.github.io/2023/09/04/MySQL%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="title: MySql常用命令总结lang: en-USdate: 2023-09-04 17:49:38category:  数据库 doc_mysqltag: doc_mysqlauthor:   [[_resources&#x2F;eca4f5f3d74b0ad7ab1fbb33df942a2e_MD5.sh|Open: mysql_createuser.sh]]![[_resource">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2023-09-04T03:18:09.000Z">
+<meta property="article:modified_time" content="2023-09-04T03:18:27.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="java&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "MySQL常用命令",
+  "url": "https://yhao521.github.io/2023/09/04/MySQL%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2023-09-04T03:18:09.000Z",
+  "dateModified": "2023-09-04T03:18:27.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2023/09/04/MySQL%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'MySQL常用命令',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">MySQL常用命令</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">MySQL常用命令</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-09-04T03:18:09.000Z" title="发表于 2023-09-04 11:18:09">2023-09-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-09-04T03:18:27.000Z" title="更新于 2023-09-04 11:18:27">2023-09-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><hr>
+<p>title: MySql常用命令总结<br>lang: en-US<br>date: 2023-09-04 17:49:38<br>category:</p>
+<ul>
+<li>数据库</li>
+<li>doc_mysql<br>tag:</li>
+<li>doc_mysql<br>author:</li>
+</ul>
+<hr>
+<p>[[_resources&#x2F;eca4f5f3d74b0ad7ab1fbb33df942a2e_MD5.sh|Open: mysql_createuser.sh]]<br>![[_resources&#x2F;eca4f5f3d74b0ad7ab1fbb33df942a2e_MD5.sh]]</p>
+<h2 id="1-MySql常用命令总结"><a href="#1-MySql常用命令总结" class="headerlink" title="1. MySql常用命令总结"></a>1. MySql常用命令总结</h2><h3 id="1-1-创建主从同步用户"><a href="#1-1-创建主从同步用户" class="headerlink" title="1.1. 创建主从同步用户"></a>1.1. 创建主从同步用户</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">GRANT</span> REPLICATION SLAVE, REPLICATION CLIENT <span class="keyword">ON</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">to</span> repl@<span class="string">&#x27;%&#x27;</span> IDENTIFIED <span class="keyword">BY</span> <span class="string">&#x27;repl&#x27;</span></span><br><span class="line">CHANGE MASTER <span class="keyword">TO</span> MASTER_HOST<span class="operator">=</span><span class="string">&#x27;172.18.231.120&#x27;</span>,MASTER_PORT<span class="operator">=</span><span class="number">3306</span>,MASTER_USER<span class="operator">=</span><span class="string">&#x27;repl&#x27;</span>,MASTER_PASSWORD<span class="operator">=</span><span class="string">&#x27;repl&#x27;</span>,MASTER_LOG_FILE<span class="operator">=</span><span class="string">&#x27;mysql_bin.000003&#x27;</span>,MASTER_LOG_POS<span class="operator">=</span><span class="number">1595194</span>;</span><br><span class="line"><span class="keyword">start</span> slave;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"> mysql<span class="operator">&gt;</span> CHANGE MASTER <span class="keyword">TO</span> MASTER_HOST<span class="operator">=</span><span class="string">&#x27;172.18.231.120&#x27;</span>,MASTER_PORT<span class="operator">=</span><span class="number">3306</span>,MASTER_USER<span class="operator">=</span><span class="string">&#x27;repl&#x27;</span>,MASTER_PASSWORD<span class="operator">=</span><span class="string">&#x27;repl&#x27;</span>,MASTER_LOG_FILE<span class="operator">=</span><span class="string">&#x27;mysql_bin.000006&#x27;</span>,MASTER_LOG_POS<span class="operator">=</span><span class="number">840273</span>;</span><br><span class="line">ERROR <span class="number">1776</span> (HY000): Parameters MASTER_LOG_FILE, MASTER_LOG_POS, RELAY_LOG_FILE <span class="keyword">and</span> RELAY_LOG_POS cannot be <span class="keyword">set</span> <span class="keyword">when</span> MASTER_AUTO_POSITION <span class="keyword">is</span> active.</span><br></pre></td></tr></table></figure>
+
+<p>由于之前用的master_auto_position&#x3D;1，现在改回0，重新用pos方法change就可以了。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">root@localhost :(none)02:49:41&gt;change master to master_auto_position=0;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">检查主机上mysql</span></span><br><span class="line">ps -ef|grep &#x27;mysql&#x27; |grep &#x27;port&#x27;|awk &#x27;&#123;print $9&#125;&#x27;</span><br><span class="line">ps -ef|grep &#x27;mysql&#x27; |grep &#x27;port&#x27;|awk &#x27;&#123;print $11&#125;&#x27;</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-2-只查看当前连接数-Threads就是连接数"><a href="#1-2-只查看当前连接数-Threads就是连接数" class="headerlink" title="1.2. 只查看当前连接数(Threads就是连接数):"></a>1.2. 只查看当前连接数(Threads就是连接数):</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mysqladmin -umysql -pmysql  --socket=/paas/iddbs/yanghao_ac/mysql/mysql_13307/mysql.sock   status</span><br><span class="line">Uptime: 1983036  Threads: 88  Questions: 51722533  Slow queries: 0  Opens: 10909  Flush tables: 4  Open tables: 3482  Queries per second avg: 26.082</span><br><span class="line"></span><br><span class="line">mysqladmin -umysql -pmysql  --socket=/paas/iddbs/yanghao_ac/mysql/mysql_13307/mysql.sock   status | awk <span class="string">&#x27;&#123;print $4&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>其他mysql命令 <a href="">E:\HELP\mysql</a></p>
+<h3 id="1-3-升级-mysql实例数据字典："><a href="#1-3-升级-mysql实例数据字典：" class="headerlink" title="1.3. 升级.mysql实例数据字典："></a>1.3. 升级.mysql实例数据字典：</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./bin/mysql_upgrade -uroot -proot  -S/data/db/mysql.sock</span><br></pre></td></tr></table></figure>
+
+<p>#################### 1.3.1.</p>
+<h3 id="1-4-查看mysql数据库大小的四种办法，分别有以下四种："><a href="#1-4-查看mysql数据库大小的四种办法，分别有以下四种：" class="headerlink" title="1.4. 查看mysql数据库大小的四种办法，分别有以下四种："></a>1.4. 查看mysql数据库大小的四种办法，分别有以下四种：</h3><p>第一种：进去指定schema 数据库（存放了其他的数据库的信息）</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">use information_schema</span><br></pre></td></tr></table></figure>
+
+<p>第二种：查询所有数据的大小</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> concat(round(<span class="built_in">sum</span>(DATA_LENGTH<span class="operator">/</span><span class="number">1024</span><span class="operator">/</span><span class="number">1024</span>),<span class="number">2</span>),<span class="string">&#x27;MB&#x27;</span>) <span class="keyword">as</span> data <span class="keyword">from</span> TABLES;</span><br></pre></td></tr></table></figure>
+
+<p>第三种：查看指定数据库的大小，比如说：数据库apoyl</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> concat(round(<span class="built_in">sum</span>(DATA_LENGTH<span class="operator">/</span><span class="number">1024</span><span class="operator">/</span><span class="number">1024</span>),<span class="number">2</span>),<span class="string">&#x27;MB&#x27;</span>) <span class="keyword">as</span> data <span class="keyword">from</span> TABLES <span class="keyword">where</span> table_schema<span class="operator">=</span><span class="string">&#x27;apoyl&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>第四种：查看指定数据库的表的大小，比如说：数据库apoyl 中apoyl_test表</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> concat(round(<span class="built_in">sum</span>(DATA_LENGTH<span class="operator">/</span><span class="number">1024</span><span class="operator">/</span><span class="number">1024</span>),<span class="number">2</span>),<span class="string">&#x27;MB&#x27;</span>) <span class="keyword">as</span> data <span class="keyword">from</span> TABLES <span class="keyword">where</span> table_schema<span class="operator">=</span><span class="string">&#x27;apoyl&#x27;</span> <span class="keyword">and</span> table_name<span class="operator">=</span><span class="string">&#x27;apoyl_test&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-5-添加表过滤"><a href="#1-5-添加表过滤" class="headerlink" title="1.5. 添加表过滤"></a>1.5. 添加表过滤</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CHANGE REPLICATION <span class="keyword">FILTER</span> Replicate_Wild_Ignore_Table <span class="operator">=</span> (<span class="string">&#x27;%.p_int_ifentry_5_calc&#x27;</span>);</span><br><span class="line">CHANGE REPLICATION <span class="keyword">FILTER</span> Replicate_Wild_Do_Table <span class="operator">=</span>(<span class="string">&#x27;db1&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-6-mysql重新生成主键，使之连续。"><a href="#1-6-mysql重新生成主键，使之连续。" class="headerlink" title="1.6. mysql重新生成主键，使之连续。"></a>1.6. mysql重新生成主键，使之连续。</h3><p>让mysql表主键重新从1开始，保留原有数据。</p>
+<p>sql如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">alter table</span> yourTableName <span class="keyword">drop</span> yourPrimaryKeyName;</span><br><span class="line"><span class="keyword">alter table</span> yourTableName <span class="keyword">add</span> yourPrimaryKeyName <span class="type">int</span> <span class="keyword">not null</span> <span class="keyword">primary key</span> auto_increment <span class="keyword">first</span>;</span><br></pre></td></tr></table></figure>
+
+<p>第一句是删掉那一列，第二句是重新添加那一列，并设置相关属性。例如：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">alter table</span> tb_crds_monitor_switchs <span class="keyword">drop</span> id;</span><br><span class="line"><span class="keyword">alter table</span> tb_crds_monitor_switchs <span class="keyword">add</span> id <span class="type">int</span> <span class="keyword">not null</span> <span class="keyword">primary key</span> auto_increment <span class="keyword">FIRST</span>;</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-MySql常用命令总结2"><a href="#2-MySql常用命令总结2" class="headerlink" title="2. MySql常用命令总结2"></a>2. MySql常用命令总结2</h2><p>1:使用SHOW语句找出在服务器上当前存在什么数据库：</p>
+<p>mysql&gt; SHOW DATABASES;</p>
+<p>2:创建一个数据库 MYSQLDATA</p>
+<p>mysql&gt; CREATE DATABASE if not exists MYSQLDATA DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;</p>
+<p>3:选择你所创建的数据库</p>
+<p>mysql&gt; USE MYSQLDATA; (按回车键出现Database changed 时说明操作成功！)</p>
+<p>4:查看现在的数据库中存在什么表</p>
+<p>mysql&gt; SHOW TABLES;</p>
+<p>5:创建一个数据库表</p>
+<p>mysql&gt; CREATE TABLE MYTABLE (name VARCHAR(20), sex CHAR(1));</p>
+<p>6:显示表的结构：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">DESCRIBE</span> MYTABLE;</span><br><span class="line"><span class="keyword">show</span> <span class="keyword">create table</span> `TABLENAME`</span><br></pre></td></tr></table></figure>
+
+<p>7:往表中加入记录</p>
+<p>mysql&gt; insert into MYTABLE values (”hyq”,”M”);</p>
+<p>8:用文本方式将数据装入数据库表中（例如D:&#x2F;mysql.txt）</p>
+<p>mysql&gt; LOAD DATA LOCAL INFILE “D:&#x2F;mysql.txt” INTO TABLE MYTABLE;</p>
+<p>9:导入.sql文件命令（例如D:&#x2F;mysql.sql）</p>
+<p>mysql&gt;use database;<br>mysql&gt;source d:&#x2F;mysql.sql;</p>
+<p>10:删除表</p>
+<p>mysql&gt;drop TABLE MYTABLE;</p>
+<p>11:清空表</p>
+<p>mysql&gt;delete from MYTABLE;</p>
+<p>12:更新表中数据</p>
+<p>mysql&gt;update MYTABLE set sex&#x3D;”f” where name&#x3D;’hyq’;</p>
+<p>13:权限给mysql用户赋权</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">grant</span> <span class="keyword">all</span> PRIVILEGES <span class="keyword">on</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">to</span> <span class="string">&#x27;root&#x27;</span>@<span class="string">&#x27;%&#x27;</span> identified <span class="keyword">by</span> &quot;root&quot;  <span class="keyword">with</span> <span class="keyword">GRANT</span> option ;</span><br><span class="line"></span><br><span class="line"><span class="keyword">grant</span> <span class="keyword">all</span> PRIVILEGES <span class="keyword">on</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">to</span> <span class="string">&#x27;mysql&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span> identified <span class="keyword">by</span> &quot;mysql&quot;  <span class="keyword">with</span> <span class="keyword">GRANT</span> option ;</span><br><span class="line"><span class="keyword">grant</span> <span class="keyword">all</span> PRIVILEGES <span class="keyword">on</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">to</span> <span class="string">&#x27;mysql&#x27;</span>@<span class="string">&#x27;%&#x27;</span> identified <span class="keyword">by</span> &quot;mysql&quot;  <span class="keyword">with</span> <span class="keyword">GRANT</span> option ;</span><br><span class="line">flush privileges;</span><br></pre></td></tr></table></figure>
+
+<p>撤销权限：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">revoke</span>  <span class="keyword">all</span> PRIVILEGES <span class="keyword">on</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">from</span> <span class="string">&#x27;mysql&#x27;</span>@<span class="string">&#x27;%&#x27;</span>;</span><br><span class="line">flush privileges;</span><br></pre></td></tr></table></figure>
+
+<p>查询权限:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> u.`<span class="keyword">user</span>`,u.`Host`,CONCAT(u.Select_priv,u.Insert_priv,u.Update_priv,u.Delete_priv,u.Create_priv,u.Drop_priv,u.Reload_priv,u.Shutdown_priv,u.Process_priv,u.File_priv,u.Grant_priv,u.References_priv,u.Index_priv,u.Alter_priv,u.Show_db_priv,u.Super_priv,u.Create_tmp_table_priv,u.Lock_tables_priv,u.Execute_priv,u.Repl_slave_priv,u.Repl_client_priv,u.Create_view_priv,u.Show_view_priv,u.Create_routine_priv,u.Alter_routine_priv,u.Create_user_priv,u.Event_priv,u.Trigger_priv,u.Create_tablespace_priv) <span class="keyword">AS</span> priv1,CONCAT(IFNULL(db.Db,<span class="string">&#x27;*&#x27;</span>),<span class="string">&#x27;.&#x27;</span>,IFNULL(tb.Table_name,<span class="string">&#x27;*&#x27;</span>)) <span class="keyword">AS</span> priv2 <span class="keyword">FROM</span> mysql.USER u <span class="keyword">LEFT</span> <span class="keyword">JOIN</span> mysql.db db <span class="keyword">ON</span> db.`Host`<span class="operator">=</span>u.`Host` <span class="keyword">AND</span> db.`<span class="keyword">User</span>`<span class="operator">=</span>u.`<span class="keyword">user</span>` <span class="keyword">LEFT</span> <span class="keyword">JOIN</span> mysql.tables_priv tb <span class="keyword">ON</span> tb.`Host`<span class="operator">=</span>u.`Host` <span class="keyword">AND</span> tb.`<span class="keyword">User</span>`<span class="operator">=</span>u.`<span class="keyword">user</span>`;</span><br></pre></td></tr></table></figure>
+
+<p>###########<br>mysql8.0版本命令<br>###########<br>先创建一个用户</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">user</span> <span class="string">&#x27;mysql_test&#x27;</span>@<span class="string">&#x27;132.%&#x27;</span> identified <span class="keyword">WITH</span> mysql_native_password <span class="keyword">by</span> <span class="string">&#x27;mysql_test&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>再进行授权</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">grant all privileges on *.* to &#x27;mysql_test&#x27;@&#x27;132.%&#x27; with grant option;</span><br><span class="line">flush privileges;</span><br></pre></td></tr></table></figure>
+
+<p>修改加密规则</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ALTER USER &#x27;root&#x27;@&#x27;localhost&#x27; IDENTIFIED BY &#x27;password&#x27; PASSWORD EXPIRE NEVER;</span><br><span class="line">password 为你当前密码。</span><br></pre></td></tr></table></figure>
+
+<p>更新 root 用户密码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ALTER USER &#x27;root&#x27;@&#x27;%&#x27; IDENTIFIED WITH mysql_native_password BY &#x27;password&#x27;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="14-启动mysql命令和停止mysql命令"><a href="#14-启动mysql命令和停止mysql命令" class="headerlink" title="14.启动mysql命令和停止mysql命令"></a>14.启动mysql命令和停止mysql命令</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">/paas/iddbs/yanghao_ac/mysql/mysql_13307/bin/mysqld  --defaults-file=/paas/iddbs/yanghao_ac/mysql/mysql_13307/etc/my.cnf --initialize --user=iddbs --basedir=/paas/iddbs/yanghao_ac/mysql/mysql_13307 --datadir=/paas/iddbs/yanghao_ac/mysql/data_13307  --innodb_undo_tablespaces=3 --explicit_defaults_for_timestamp</span><br><span class="line">/paas/iddbs/yanghao_ac/mysql/mysql_13307/bin/mysqld_safe --defaults-file=/paas/iddbs/yanghao_ac/mysql/mysql_13307/etc/my.cnf   &amp;</span><br><span class="line">/paas/iddbs/yanghao_ac/mysql/mysql_13307/bin/mysqladmin --defaults-file=/paas/iddbs/yanghao_ac/mysql/mysql_13307/etc/my.cnf -umysql -pmysql shutdown</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">cd /soft/mysql;./bin/mysqld_safe --defaults-file=/soft/mysql/etc/my.cnf  &amp;</span><br><span class="line">cd /soft/mysql;./bin/mysqladmin --defaults-file=/soft/mysql/etc/my.cnf -umysql -pmysql shutdown</span><br></pre></td></tr></table></figure>
+
+<h3 id="15：导出-sql文件"><a href="#15：导出-sql文件" class="headerlink" title="15：导出.sql文件"></a>15：导出.sql文件</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bin/mysqldump  --single-transaction --set-charset  --master-data=2 --all-databases     --all-tablespaces -h172.21.3.60  -umysql  -pmysql  -P3311 &gt; test.sql;</span><br></pre></td></tr></table></figure>
+
+<h3 id="16：设置指定用户的密码"><a href="#16：设置指定用户的密码" class="headerlink" title="16：设置指定用户的密码"></a>16：设置指定用户的密码</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">SET PASSWORD for &#x27;root&#x27;@&#x27;%&#x27; =PASSWORD(&#x27;root&#x27;);</span><br><span class="line">flush privileges;</span><br><span class="line">SET PASSWORD for &#x27;root&#x27; =PASSWORD(&#x27;root&#x27;);</span><br><span class="line">flush privileges;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ERROR 1820 (HY000): You must reset your password using ALTER USER statement before executing this statement.</span><br></pre></td></tr></table></figure>
+
+<p>安装完mysql 之后，登陆以后，不管运行任何命令，总是提示这个</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">step 1: SET PASSWORD = PASSWORD(&#x27;root&#x27;);</span><br><span class="line">step 2: ALTER USER &#x27;root&#x27;@&#x27;localhost&#x27; PASSWORD EXPIRE NEVER;</span><br><span class="line">step 3: flush privileges;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql -hlocalhost -P33306 -uroot -p    --socket=/e3base/iddbs/yanghao_ac/mysql/mysql33306.sock</span><br><span class="line">mysqladmin -hlocalhost -P33306  -uroot  --socket=/e3base/iddbs/yanghao_ac/mysql/mysql33306.sock  -p&#x27;rjeGl&amp;8Wbq.e&#x27; password root</span><br></pre></td></tr></table></figure>
+
+<p>查询mysql自动提交功能是否打开</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">show</span> variables <span class="keyword">like</span> <span class="string">&#x27;%autocommit%&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>设置mysql为自动提交</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">set</span> <span class="keyword">global</span> autocommit<span class="operator">=</span><span class="keyword">on</span>;</span><br></pre></td></tr></table></figure>
+
+<h6 id=""><a href="#" class="headerlink" title=""></a></h6><p>报错<br>ERROR 1820 (HY000): You must reset your password using ALTER USER statement before executing this statement.<br>1、 修改用户密码<br>mysql&gt; alter user ‘root‘@’localhost’ identified by ‘root’;</p>
+<p>或者</p>
+<p>mysql&gt; set password&#x3D;password(“root”);</p>
+<h3 id="17、刷新权限"><a href="#17、刷新权限" class="headerlink" title="17、刷新权限"></a>17、刷新权限</h3><p>mysql&gt; flush privileges;</p>
+<p>mysql查一张表有哪些索引<br>show index from table_name;</p>
+<p>查看mysql的sql模式</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> @<span class="variable">@sql_mode</span>;</span><br><span class="line">sql_mode<span class="operator">=</span>ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION</span><br></pre></td></tr></table></figure>
+
+<p><a href="">E:\HELP\mysql主从同步权限.docx</a></p>
+<h3 id="mysql主从异步同步复制"><a href="#mysql主从异步同步复制" class="headerlink" title="mysql主从异步同步复制"></a>mysql主从异步同步复制</h3><p>清理主从同步</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">stop slave;</span><br><span class="line">reset slave <span class="keyword">all</span>;</span><br></pre></td></tr></table></figure>
+
+<p>开启日志：<br>show master status;获取日志名，指针</p>
+<p>change master to master_Host&#x3D;’172.21.3.60’,master_port&#x3D;3308,master_user&#x3D;’repl’,master_password&#x3D;’repl’,master_log_file&#x3D;’mysql-bin.000098’,master_log_pos&#x3D;8064 ;</p>
+<h4 id="-1"><a href="#-1" class="headerlink" title=""></a></h4><p>mysql -h[ip] -P[port] -u[user] -p[password] -D[database] –local-infile<br>再执行 mysql&gt; LOAD DATA LOCAL INFILE …………<br>执行 load data 文件为空的问题<br>本地调试<br>LOAD DATA LOCAL INFILE ‘F:&#x2F;dqcinfo.txt’ IGNORE INTO TABLE dqccheckpool CHARACTER SET ‘utf8’ COLUMNS TERMINATED BY ‘|’ LINES TERMINATED BY ‘<br>‘ (CONTACT_ID, RECORD_ID, OBJECT_TYPE_ID, STAFFNO, EVTERNO, CHECK_FLAG, CHECK_TYPE, CREATE_TIME, CHECK_TIME, bak, DEAL_COMPANY_CODE, DEAL_COMPANY_NAME, DEAL_SKILLGRP_CODE, DEAL_SKILLGRP_NAME, PLAN_NAME);</p>
+<h3 id="修改字段长度"><a href="#修改字段长度" class="headerlink" title="修改字段长度"></a>修改字段长度</h3><p>alter table 表名 modify column 字段名 类型;<br>如：news 表里的title 字段 原来长度是 100个字符，现长度要改成130个字符<br>alter table news modify column title varchar(130);</p>
+<h3 id="用触发器的办法把alter、drop、truncate限制了"><a href="#用触发器的办法把alter、drop、truncate限制了" class="headerlink" title="用触发器的办法把alter、drop、truncate限制了"></a>用触发器的办法把alter、drop、truncate限制了</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">OR</span> REPLACE <span class="keyword">TRIGGER</span> SYS.TRIGGER_ALTER</span><br><span class="line">BEFORE <span class="keyword">ALTER</span></span><br><span class="line"><span class="keyword">ON</span> DATABASE</span><br><span class="line"><span class="keyword">begin</span></span><br><span class="line">if ora_login_user <span class="keyword">not</span> <span class="keyword">in</span> (<span class="string">&#x27;SYS&#x27;</span>,<span class="string">&#x27;SYSTEM&#x27;</span>) <span class="keyword">THEN</span></span><br><span class="line">Raise_application_error (<span class="number">-20001</span>,<span class="string">&#x27;Please not do ALTER!&#x27;</span>);</span><br><span class="line"><span class="keyword">end</span> if;</span><br><span class="line"><span class="keyword">end</span>;</span><br><span class="line"><span class="operator">/</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">OR</span> REPLACE <span class="keyword">TRIGGER</span> SYS.TRIGGER_DROP</span><br><span class="line">BEFORE <span class="keyword">DROP</span></span><br><span class="line"><span class="keyword">ON</span> DATABASE</span><br><span class="line"><span class="keyword">begin</span></span><br><span class="line">if ora_login_user <span class="keyword">not</span> <span class="keyword">in</span> (<span class="string">&#x27;SYS&#x27;</span>,<span class="string">&#x27;SYSTEM&#x27;</span>) <span class="keyword">THEN</span></span><br><span class="line">Raise_application_error (<span class="number">-20001</span>,<span class="string">&#x27;Please not do DROP!&#x27;</span>);</span><br><span class="line"><span class="keyword">end</span> if;</span><br><span class="line"><span class="keyword">end</span>;</span><br><span class="line"><span class="operator">/</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">OR</span> REPLACE <span class="keyword">TRIGGER</span> SYS.TRIGGER_truncate</span><br><span class="line">BEFORE <span class="keyword">truncate</span></span><br><span class="line"><span class="keyword">ON</span> DATABASE</span><br><span class="line"><span class="keyword">begin</span></span><br><span class="line">if ora_login_user <span class="keyword">not</span> <span class="keyword">in</span> (<span class="string">&#x27;SYS&#x27;</span>,<span class="string">&#x27;SYSTEM&#x27;</span>) <span class="keyword">THEN</span></span><br><span class="line">Raise_application_error (<span class="number">-20001</span>,<span class="string">&#x27;Please not do TRUNCATE!&#x27;</span>);</span><br><span class="line"><span class="keyword">end</span> if;</span><br><span class="line"><span class="keyword">end</span>;</span><br><span class="line"><span class="operator">/</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="mysql权限-start"><a href="#mysql权限-start" class="headerlink" title="mysql权限 start"></a>mysql权限 start</h3><p>MySQL 赋予用户权限命令的简单格式可概括为：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">grant</span> 权限 <span class="keyword">on</span> 数据库对象 <span class="keyword">to</span> 用户</span><br><span class="line"><span class="keyword">grant</span> 权限 <span class="keyword">on</span> 数据库对象 <span class="keyword">to</span> 用户</span><br></pre></td></tr></table></figure>
+
+<p>一、grant 普通数据用户，查询、插入、更新、删除 数据库中所有表数据的权利</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">grant</span> <span class="keyword">select</span> <span class="keyword">on</span> testdb.<span class="operator">*</span> <span class="keyword">to</span> common_user@<span class="string">&#x27;%&#x27;</span></span><br><span class="line"><span class="keyword">grant</span> <span class="keyword">insert</span> <span class="keyword">on</span> testdb.<span class="operator">*</span> <span class="keyword">to</span> common_user@<span class="string">&#x27;%&#x27;</span></span><br><span class="line"><span class="keyword">grant</span> <span class="keyword">update</span> <span class="keyword">on</span> testdb.<span class="operator">*</span> <span class="keyword">to</span> common_user@<span class="string">&#x27;%&#x27;</span></span><br><span class="line"><span class="keyword">grant</span> <span class="keyword">delete</span> <span class="keyword">on</span> testdb.<span class="operator">*</span> <span class="keyword">to</span> common_user@<span class="string">&#x27;%&#x27;</span></span><br><span class="line"><span class="keyword">grant</span> <span class="keyword">select</span> <span class="keyword">on</span> testdb.<span class="operator">*</span> <span class="keyword">to</span> common_user@<span class="string">&#x27;%&#x27;</span><span class="keyword">grant</span> <span class="keyword">insert</span> <span class="keyword">on</span> testdb.<span class="operator">*</span> <span class="keyword">to</span> common_user@<span class="string">&#x27;%&#x27;</span><span class="keyword">grant</span> <span class="keyword">update</span> <span class="keyword">on</span> testdb.<span class="operator">*</span> <span class="keyword">to</span> common_user@<span class="string">&#x27;%&#x27;</span><span class="keyword">grant</span> <span class="keyword">delete</span> <span class="keyword">on</span> testdb.<span class="operator">*</span> <span class="keyword">to</span> common_user@<span class="string">&#x27;%&#x27;</span></span><br><span class="line">或者，用一条 MySQL 命令来替代：</span><br><span class="line"><span class="keyword">grant</span> <span class="keyword">select</span>, <span class="keyword">insert</span>, <span class="keyword">update</span>, <span class="keyword">delete</span> <span class="keyword">on</span> testdb.<span class="operator">*</span> <span class="keyword">to</span> common_user@<span class="string">&#x27;%&#x27;</span></span><br><span class="line"><span class="keyword">grant</span> <span class="keyword">select</span>, <span class="keyword">insert</span>, <span class="keyword">update</span>, <span class="keyword">delete</span> <span class="keyword">on</span> testdb.<span class="operator">*</span> <span class="keyword">to</span> common_user@<span class="string">&#x27;%&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>二、grant 数据库开发人员，创建表、索引、视图、存储过程、函数等权限</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">grant</span> 创建、修改、删除 MySQL 数据表结构权限。</span><br><span class="line"><span class="keyword">grant</span> <span class="keyword">create</span> <span class="keyword">on</span> testdb.<span class="operator">*</span> <span class="keyword">to</span> developer@<span class="string">&#x27;192.168.0.%&#x27;</span>;</span><br><span class="line"><span class="keyword">grant</span> <span class="keyword">alter</span> <span class="keyword">on</span> testdb.<span class="operator">*</span> <span class="keyword">to</span> developer@<span class="string">&#x27;192.168.0.%&#x27;</span>;</span><br><span class="line"><span class="keyword">grant</span> <span class="keyword">drop</span> <span class="keyword">on</span> testdb.<span class="operator">*</span> <span class="keyword">to</span> developer@<span class="string">&#x27;192.168.0.%&#x27;</span>;</span><br><span class="line"><span class="keyword">grant</span> <span class="keyword">create</span> <span class="keyword">on</span> testdb.<span class="operator">*</span> <span class="keyword">to</span> developer@<span class="string">&#x27;192.168.0.%&#x27;</span>;<span class="keyword">grant</span> <span class="keyword">alter</span>  <span class="keyword">on</span> testdb.<span class="operator">*</span> <span class="keyword">to</span> developer@<span class="string">&#x27;192.168.0.%&#x27;</span>;<span class="keyword">grant</span> <span class="keyword">drop</span>   <span class="keyword">on</span> testdb.<span class="operator">*</span> <span class="keyword">to</span> developer@<span class="string">&#x27;192.168.0.%&#x27;</span>;</span><br><span class="line"><span class="keyword">grant</span> 操作 MySQL 外键权限：</span><br><span class="line"><span class="keyword">grant</span> <span class="keyword">references</span> <span class="keyword">on</span> testdb.<span class="operator">*</span> <span class="keyword">to</span> developer@<span class="string">&#x27;192.168.0.%&#x27;</span>;</span><br><span class="line"><span class="keyword">grant</span> <span class="keyword">references</span> <span class="keyword">on</span> testdb.<span class="operator">*</span> <span class="keyword">to</span> developer@<span class="string">&#x27;192.168.0.%&#x27;</span>;</span><br><span class="line"><span class="keyword">grant</span> 操作 MySQL 临时表权限：</span><br><span class="line"><span class="keyword">grant</span> <span class="keyword">create</span> temporary tables <span class="keyword">on</span> testdb.<span class="operator">*</span> <span class="keyword">to</span> developer@<span class="string">&#x27;192.168.0.%&#x27;</span>;</span><br><span class="line"><span class="keyword">grant</span> <span class="keyword">create</span> temporary tables <span class="keyword">on</span> testdb.<span class="operator">*</span> <span class="keyword">to</span> developer@<span class="string">&#x27;192.168.0.%&#x27;</span>;</span><br><span class="line"><span class="keyword">grant</span> 操作 MySQL 索引权限：</span><br><span class="line"><span class="keyword">grant</span> index <span class="keyword">on</span> testdb.<span class="operator">*</span> <span class="keyword">to</span> developer@<span class="string">&#x27;192.168.0.%&#x27;</span>;</span><br><span class="line"><span class="keyword">grant</span> index <span class="keyword">on</span> testdb.<span class="operator">*</span> <span class="keyword">to</span> developer@<span class="string">&#x27;192.168.0.%&#x27;</span>;</span><br><span class="line"><span class="keyword">grant</span> 操作 MySQL 视图、查看视图源代码权限：</span><br><span class="line"><span class="keyword">grant</span> <span class="keyword">create</span> <span class="keyword">view</span> <span class="keyword">on</span> testdb.<span class="operator">*</span> <span class="keyword">to</span> developer@<span class="string">&#x27;192.168.0.%&#x27;</span>;</span><br><span class="line"><span class="keyword">grant</span> <span class="keyword">show</span> <span class="keyword">view</span> <span class="keyword">on</span> testdb.<span class="operator">*</span> <span class="keyword">to</span> developer@<span class="string">&#x27;192.168.0.%&#x27;</span>;</span><br><span class="line"><span class="keyword">grant</span> <span class="keyword">create</span> <span class="keyword">view</span> <span class="keyword">on</span> testdb.<span class="operator">*</span> <span class="keyword">to</span> developer@<span class="string">&#x27;192.168.0.%&#x27;</span>;<span class="keyword">grant</span> <span class="keyword">show</span>   <span class="keyword">view</span> <span class="keyword">on</span> testdb.<span class="operator">*</span> <span class="keyword">to</span> developer@<span class="string">&#x27;192.168.0.%&#x27;</span>;</span><br><span class="line"><span class="keyword">grant</span> 操作 MySQL 存储过程、函数权限：</span><br><span class="line"><span class="keyword">grant</span> <span class="keyword">create</span> routine <span class="keyword">on</span> testdb.<span class="operator">*</span> <span class="keyword">to</span> developer@<span class="string">&#x27;192.168.0.%&#x27;</span>; <span class="comment">-- now, can show procedure status</span></span><br><span class="line"><span class="keyword">grant</span> <span class="keyword">alter</span> routine <span class="keyword">on</span> testdb.<span class="operator">*</span> <span class="keyword">to</span> developer@<span class="string">&#x27;192.168.0.%&#x27;</span>; <span class="comment">-- now, you can drop a procedure</span></span><br><span class="line"><span class="keyword">grant</span> <span class="keyword">execute</span> <span class="keyword">on</span> testdb.<span class="operator">*</span> <span class="keyword">to</span> developer@<span class="string">&#x27;192.168.0.%&#x27;</span>;</span><br><span class="line"><span class="keyword">grant</span> <span class="keyword">create</span> routine <span class="keyword">on</span> testdb.<span class="operator">*</span> <span class="keyword">to</span> developer@<span class="string">&#x27;192.168.0.%&#x27;</span>; <span class="comment">-- now, can show procedure statusgrant alter  routine on testdb.* to developer@&#x27;192.168.0.%&#x27;; -- now, you can drop a proceduregrant execute        on testdb.* to developer@&#x27;192.168.0.%&#x27;;</span></span><br></pre></td></tr></table></figure>
+
+<p>三、grant 普通 DBA 管理某个 MySQL 数据库的权限</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">grant</span> <span class="keyword">all</span> privileges <span class="keyword">on</span> testdb <span class="keyword">to</span> dba@<span class="string">&#x27;localhost&#x27;</span></span><br><span class="line"><span class="keyword">grant</span> <span class="keyword">all</span> privileges <span class="keyword">on</span> testdb <span class="keyword">to</span> dba@<span class="string">&#x27;localhost&#x27;</span></span><br><span class="line">其中，关键字 “privileges” 可以省略。</span><br></pre></td></tr></table></figure>
+
+<p>四、grant 高级 DBA 管理 MySQL 中所有数据库的权限：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">grant</span> <span class="keyword">all</span> <span class="keyword">on</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">to</span> dba@<span class="string">&#x27;localhost&#x27;</span></span><br><span class="line"><span class="keyword">grant</span> <span class="keyword">all</span> <span class="keyword">on</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">to</span> dba@<span class="string">&#x27;localhost&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>五、MySQL grant 权限，分别可以作用在多个层次上</p>
+<ol>
+<li>grant 作用在整个 MySQL 服务器上：<br>grant select on <em>.</em> to dba@localhost; – dba 可以查询 MySQL 中所有数据库中的表。<br>grant all on <em>.</em> to dba@localhost; – dba 可以管理 MySQL 中的所有数据库<br>grant select on <em>.</em> to dba@localhost; – dba 可以查询 MySQL 中所有数据库中的表。grant all on <em>.</em> to dba@localhost; – dba 可以管理 MySQL 中的所有数据库</li>
+<li>grant 作用在单个数据库上：<br>grant select on testdb._ to dba@localhost; – dba 可以查询 testdb 中的表。<br>grant select on testdb._ to dba@localhost; – dba 可以查询 testdb 中的表。</li>
+<li>grant 作用在单个数据表上：<br>grant select, insert, update, delete on testdb.orders to dba@localhost;<br>grant select, insert, update, delete on testdb.orders to dba@localhost;<br>这里在给一个用户授权多张表时，可以多次执行以上语句。例如：<br>grant select(user_id,username) on smp.users to mo_user@’%’ identified by ‘123345’;<br>grant select on smp.mo_sms to mo_user@’%’ identified by ‘123345’;<br>grant select(user_id,username) on smp.users to mo_user@’%’ identified by ‘123345’;grant select on smp.mo_sms to mo_user@’%’ identified by ‘123345’;</li>
+<li>grant 作用在表中的列上：<br>grant select(id, se, rank) on testdb.apache_log to dba@localhost;<br>grant select(id, se, rank) on testdb.apache_log to dba@localhost;</li>
+<li>grant 作用在存储过程、函数上：<br>grant execute on procedure testdb.pr_add to ‘dba‘@’localhost’<br>grant execute on function testdb.fn_add to ‘dba‘@’localhost’<br>grant execute on procedure testdb.pr_add to ‘dba‘@’localhost’grant execute on function testdb.fn_add to ‘dba‘@’localhost’</li>
+</ol>
+<p>六、查看 MySQL 用户权限<br>查看当前用户（自己）权限：<br>show grants;<br>show grants;<br>查看其他 MySQL 用户权限：<br>show grants for dba@localhost;<br>show grants for dba@localhost;</p>
+<p>七、撤销已经赋予给 MySQL 用户权限的权限。<br>revoke 跟 grant 的语法差不多，只需要把关键字 “to” 换成 “from” 即可：<br>grant all on <em>.</em> to dba@localhost;<br>revoke all on <em>.</em> from dba@localhost;<br>grant all on <em>.</em> to dba@localhost;revoke all on <em>.</em> from dba@localhost;</p>
+<p>八、MySQL grant、revoke 用户权限注意事项</p>
+<ol>
+<li>grant, revoke 用户权限后，该用户只有重新连接 MySQL 数据库，权限才能生效。</li>
+<li>如果想让授权的用户，也可以将这些权限 grant 给其他用户，需要选项 “grant option“<br>grant select on testdb._ to dba@localhost with grant option;<br>grant select on testdb._ to dba@localhost with grant option;<br>这个特性一般用不到。实际中，数据库权限最好由 DBA 来统一管理。</li>
+</ol>
+<p>补充：<br>mysql授权表共有5个表：user、db、host、tables_priv和columns_priv。<br>授权表的内容有如下用途：<br>user表<br>user表列出可以连接服务器的用户及其口令，并且它指定他们有哪种全局（超级用户）权限。在user表启用的任何权限均是全局权限，并适用于所有数据库。例如，如果你启用了DELETE权限，在这里列出的用户可以从任何表中删除记录，所以在你这样做之前要认真考虑。<br>db表<br>db表列出数据库，而用户有权限访问它们。在这里指定的权限适用于一个数据库中的所有表。<br>host表<br>host表与db表结合使用在一个较好层次上控制特定主机对数据库的访问权限，这可能比单独使用db好些。这个表不受GRANT和REVOKE语句的影响，所以，你可能发觉你根本不是用它。<br>tables_priv表<br>tables_priv表指定表级权限，在这里指定的一个权限适用于一个表的所有列。<br>columns_priv表<br>columns_priv表指定列级权限。这里指定的权限适用于一个表的特定列。<br>########################################## mysql权限 end #####################################################</p>
+<p>以下是无意中在网络看到的使用MySql的管理心得,<br>在windows中MySql以服务形式存在，在使用前应确保此服务已经启动，未启动可用net start mysql命令启动。而Linux中启动时可用“&#x2F;etc&#x2F;rc.d&#x2F;init.d&#x2F;mysqld start”命令，注意启动者应具有管理员权限。<br>刚安装好的MySql包含一个含空密码的root帐户和一个匿名帐户，这是很大的安全隐患，对于一些重要的应用我们应将安全性尽可能提高，在这里应把匿名帐户删除、 root帐户设置密码，可用如下命令进行：<br>use mysql;<br>delete from User where User&#x3D;””;<br>update User set Password&#x3D;PASSWORD(’newpassword’) where User&#x3D;’root’;<br>如果要对用户所用的登录终端进行限制，可以更新User表中相应用户的Host字段，在进行了以上更改后应重新启动数据库服务，此时登录时可用如下类似命令：<br>mysql -uroot -p;<br>mysql -uroot -pnewpassword;<br>mysql mydb -uroot -p;<br>mysql mydb -uroot -pnewpassword;<br>上面命令参数是常用参数的一部分，详细情况可参考文档。此处的mydb是要登录的数据库的名称。<br>在 进行开发和实际应用中，用户不应该只用root用户进行连接数据库，虽然使用root用户进行测试时很方便，但会给系统带来重大安全隐患，也不利于管理技 术的提高。我们给一个应用中使用的用户赋予最恰当的数据库权限。如一个只进行数据插入的用户不应赋予其删除数据的权限。MySql的用户管理是通过 User表来实现的，添加新用户常用的方法有两个，一是在User表插入相应的数据行，同时设置相应的权限；二是通过GRANT命令创建具有某种权限的用 户。其中GRANT的常用用法如下：<br>grant all on mydb._ to NewUserName@HostName identified by “password” ;<br>grant usage on <em>.</em> to NewUserName@HostName identified by “password”;<br>grant select,insert,update on mydb._ to NewUserName@HostName identified by “password”;<br>grant update,delete on mydb.TestTable to NewUserName@HostName identified by “password”;<br>若 要给此用户赋予他在相应对象上的权限的管理能力，可在GRANT后面添加WITH GRANT OPTION选项。而对于用插入User表添加的用户，Password字段应用PASSWORD 函数进行更新加密，以防不轨之人窃看密码。对于那些已经不用的用户应给予清除，权限过界的用户应及时回收权限，回收权限可以通过更新User表相应字段， 也可以使用REVOKE操作。<br>下面给出本人从其它资料(<a href="http://www.cn-java.com)获得的对常用权限的解释：">www.cn-java.com)获得的对常用权限的解释：</a><br>全局管理权限：<br>FILE: 在MySQL服务器上读写文件。<br>PROCESS: 显示或杀死属于其它用户的服务线程。<br>RELOAD: 重载访问控制表，刷新日志等。<br>SHUTDOWN: 关闭MySQL服务。<br>数据库&#x2F;数据表&#x2F;数据列权限：<br>ALTER: 修改已存在的数据表(例如增加&#x2F;删除列)和索引。<br>CREATE: 建立新的数据库或数据表。<br>DELETE: 删除表的记录。<br>DROP: 删除数据表或数据库。<br>INDEX: 建立或删除索引。<br>INSERT: 增加表的记录。<br>SELECT: 显示&#x2F;搜索表的记录。<br>UPDATE: 修改表中已存在的记录。<br>特别的权限：<br>ALL: 允许做任何事(和root一样)。<br>USAGE: 只允许登录–其它什么也不允许做。</p>
+<h3 id="导入导出数据"><a href="#导入导出数据" class="headerlink" title="导入导出数据"></a>导入导出数据</h3><p>恢复&#x2F;导入大的gzip数据库到MySQL</p>
+<p>gunzip &lt; dbname.gz | mysql -u Username -p dbname</p>
+<p>mysqldump -hhostname -uusername -ppassword databasename | gzip &gt; backupfile.sql.gz</p>
+<p>gunzip &lt; backupfile.sql.gz | mysql -uusername -ppassword databasename</p>
+<p>导出指定库的 数据和表结构<br>mysqldump -h172.21.3.61 -P13307 -umysql -pmysql –databases db_test1 db_test2 db_test3 demo_idea iddbs41_init_export iddbs41_xiongll_test iddbs41_yanghao_cloud iddbs41_yanghao_local iddbs45_yanghao_test iddbs_chongqing mycat-web test testdb &gt; all_database.sql</p>
+<p>mysql -h172.18.231.117 -P13307 -umysql -pmysql &lt; all_database.sql</p>
+<p>排除某些库的备份<br>mysql -h172.21.3.60 -P3306 -umysql -pmysql -e “show databases;”| grep -Ev “Database|information_schema|mysql|test|performance_schema|sys” | xargs mysqldump -h172.21.3.60 -P3306 -umysql -pmysql –databases &gt; mysql_dump_60_3306.sql<br>mysql -h172.21.3.60 -P3307 -umysql -pmysql -e “show databases;”| grep -Ev “Database|information_schema|mysql|test|performance_schema|sys” | xargs mysqldump -h172.21.3.60 -P3307 -umysql -pmysql –databases &gt; mysql_dump_60_3307.sql</p>
+<p>导出单库多表<br>mysqldump -h132.77.52.17 -P3346 -udbproxy_web -pdbproxy_web dbproxy_web tb_iddbs_resource_cluster tb_iddbs_resource_host tb_iddbs_resource_dbproxy tb_iddbs_resource_mysql &gt; mysql_dump_3346.sql</p>
+<p>#########################################################################<br>使用mysqlbinlog从二进制日志文件中查询mysql执行过的sql语句</p>
+<p>1、查询时间段内日志的执行内容</p>
+<p>mysqlbinlog –start-datetime&#x3D;’2018-01-08 02:01:00’ –stop-datetime&#x3D;’2018-01-08 02:30:10’ -d test &#x2F;var&#x2F;lib&#x2F;mysql&#x2F;mysql-bin.000170 -v</p>
+<p>2、查询时间段内日志中执行的删除语句</p>
+<p>mysqlbinlog –start-datetime&#x3D;’2018-01-08 02:01:00’ –stop-datetime&#x3D;’2018-01-08 02:30:10’ -d test &#x2F;var&#x2F;lib&#x2F;mysql&#x2F;mysql-bin.000170 -v|grep DELETE -A 5</p>
+<p>3、统计时间段内日志中执行的删除语句</p>
+<p>mysqlbinlog –start-datetime&#x3D;’2018-01-08 02:01:00’ –stop-datetime&#x3D;’2018-01-08 02:30:10’ -d test &#x2F;var&#x2F;lib&#x2F;mysql&#x2F;mysql-bin.000170 -v|grep DELETE |wc -l</p>
+<p>######################################<br>binlog日志记录原生sql：（在线修改不生效，需要修改配置文件，并重启mysql）<br>binlog-rows-query-log_events&#x3D;1</p>
+<p>set global binlog_rows_query_log_events&#x3D;on;<br>show global VARIABLES like ‘%binlog_rows_query_log_events%’;</p>
+<h3 id="mysql主从复制-master和slave配置的参数大全"><a href="#mysql主从复制-master和slave配置的参数大全" class="headerlink" title="mysql主从复制 master和slave配置的参数大全"></a>mysql主从复制 master和slave配置的参数大全</h3><p>master所有参数<br>1 log-bin&#x3D;mysql-bin<br>1、控制master的是否开启binlog记录功能；<br>2、二进制文件最好放在单独的目录下，这不但方便优化、更方便维护。<br>3、重新命名二进制日志很简单，只需要修改[mysqld]里的log_bin选项，<br>如下例子：要重新调整logbin的路径为“&#x2F;home&#x2F;mysql&#x2F;binlog”<br>[mysqld]<br>log_bin&#x3D;&#x2F;home&#x2F;mysql&#x2F;binlog&#x2F;binlog.log</p>
+<p>ll &#x2F;home&#x2F;mysql&#x2F;binlog<br>-rw-rw—- 1 mysql mysql 98 Mar 7 17:24 binlog.000001<br>-rw-rw—- 1 mysql mysql 33 Mar 7 17:24 binlog.index</p>
+<p>需要注意：指定目录时候一定要以*.log结尾，即不能仅仅指定到文件夹的级别，否则在重启mysql时会报错。</p>
+<ol start="2">
+<li><p>server-id&#x3D;1<br>每个server服务的标识，在master&#x2F;slave环境中，此变量一定要不一样</p>
+</li>
+<li><p>expire_logs_days&#x3D;15<br>通过此来实现master自动删除binlog</p>
+</li>
+<li><p>innodb_flush_log_at_trx_commit&#x3D;1<br>此参数表示在事务提交时，处理重做日志的方式；此变量有三个可选值0，1，2：<br>0：当事务提交时，并不将事务的重做日志写入日志文件，而是等待每秒刷新一次<br>1：当事务提交时，将重做日志缓存的内容同步写到磁盘日志文件，为了保证数据一致性，在replication环境中使用此值。<br>2：当事务提交时，将重做日志缓存的内容异步写到磁盘日志文件（写到文件系统缓存中）<br>建议必须设置innodb_flush_log_at_trx_commit&#x3D;1</p>
+</li>
+</ol>
+<p>5.sync_binlog&#x3D;1<br>1、此参数表示每写缓冲多少次就同步到磁盘；<br>2、sync_binlog&#x3D;1表示同步写缓冲和磁盘二进制日志文件，不使用文件系统缓存<br>在使用innodb事务引擎时，在复制环境中，为了保证最大的可用性，都设置为“1”，但会对影响io的性能。<br>3、即使设置为“1”，也会有问题发生：<br>假如当二进制日志写入磁盘，但事务还没有commit，这个时候宕机，<br>当服务再次起来的恢复的时候，无法回滚以及记录到二进制日志的未提交的内容；<br>这个时候就会造成master和slave数据不一致<br>解决方案：<br>需要参数innodb_support_xa&#x3D;1来保证。建议必须设置</p>
+<p>6 .innodb_support_xa&#x3D;1<br>此参数与XA事务有关，它保证了二进制日志和innodb数据文件的同步，保证复制环境中数据一致性。建议必须设置</p>
+<p>7.binlog-do-db&#x3D;skate_db<br>只记录指定数据库的更新到二进制日志中</p>
+<ol start="8">
+<li><p>binlog-do-table&#x3D;skate_tab<br>只记录指定表的更新到二进制日志中</p>
+</li>
+<li><p>binlog-ignore-db&#x3D;skate_db<br>忽略指定数据库的更新到二进制日志中</p>
+<p>10.log_slave_updates&#x3D;1<br>此参数控制slave数据库是否把从master接受到的log并在本slave执行的内容记录到slave的二进制日志中<br>在级联复制环境中（包括双master环境），这个参数是必须的</p>
+<p>11.binlog_format&#x3D;statement|row|mixed<br>控制以什么格式记录二进制日志的内容，默认是mixed</p>
+</li>
+<li><p>max_binlog_size<br>master的每个二进制日志文件的大小，默认1G</p>
+</li>
+</ol>
+<p>13.binlog_cache_size<br>1、所有未提交的事务都会被记录到一个缓存或临时文件中，待提交时，统一同步到二进制日志中，<br>2、此变量是基于session的，每个会话开启一个binlog_cache_size大小的缓存。<br>3、通过变量“Binlog_cache_disk_use”和“Binlog_cache_use”来设置binlog_cache_size的大小。<br>说明：<br>Binlog_cache_disk_use： 使用临时文件写二进制日志的次数<br>Binlog_cache_use： 使用缓冲记写二进制的次数</p>
+<p>14.auto_increment_increment&#x3D;2 &#x2F;&#x2F;增长的步长<br>auto_increment_offset&#x3D;1 &#x2F;&#x2F;起始位置<br>在双master环境下可以防止键值冲突</p>
+<p>slave所用参数<br>1.server-id&#x3D;2<br>和master的含义一样，服务标识</p>
+<p>2.log-bin&#x3D;mysql-bin<br>和master的含义一样，开启二进制</p>
+<p>3.relay-log&#x3D;relay-bin<br>中继日志文件的路径名称</p>
+<ol start="4">
+<li><p>relay-log-index&#x3D;relay-bin<br>中继日志索引文件的路径名称</p>
+</li>
+<li><p>log_slave_updates&#x3D;1<br>和master的含义一样，如上</p>
+</li>
+</ol>
+<p>6.read_only&#x3D;1<br>1、使数据库只读，此参数在slave的复制环境和具有super权限的用户不起作用，<br>2、对于复制环境设置read_only&#x3D;1非常有用，它可以保证slave只接受master的更新，而不接受client的更新。<br>3、客户端设置：<br>mysq&gt; set global read_only&#x3D;1</p>
+<ol start="7">
+<li>skip_slave_start<br>使slave在mysql启动时不启动复制进程，mysql起来之后使用 start slave启动，建议必须</li>
+</ol>
+<p>8.replicate-do-db<br>只复制指定db</p>
+<p>9.replicate-do-table<br>只复制指定表</p>
+<ol start="10">
+<li><p>replicate-ingore-table<br>忽略指定表</p>
+</li>
+<li><p>replicate_wild_do_table&#x3D;skatedb.%<br>模糊匹配复制指定db</p>
+</li>
+<li><p>auto_increment_increment&#x3D;2<br>auto_increment_offset&#x3D;1<br>和master含义一样，参考如上</p>
+</li>
+<li><p>log_slow_slave_statements<br>在slave上开启慢查询日志，在query的时间大于long_query_time时，记录在慢查询日志里</p>
+</li>
+<li><p>max_relay_log_size<br>slave上的relay log的大小，默认是1G</p>
+</li>
+</ol>
+<p>15.relay_log_info_file<br>中继日志状态信息文件的路径名称</p>
+<ol start="16">
+<li>relay_log_purge<br>当relay log不被需要时就删除，默认是on<br>SET GLOBAL relay_log_purge&#x3D;1</li>
+</ol>
+<p>17.replicate-rewrite-db&#x3D;from_name-&gt;to_name<br>数据库的重定向，可以把分库汇总到主库便于统计分析</p>
+<p>##########主从 同步 参数 ###########</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line">show slave status\G</span><br><span class="line">*************************** 1. row ***************************</span><br><span class="line">               Slave_IO_State:                      这个是指slave 连接到master的状态。</span><br><span class="line">                  Master_Host: 132.77.52.21</span><br><span class="line">                  Master_User: repl      	这个是master上面的一个用户。用来负责主从复制的用户 ，创建主从复制的时候建立的（具有reolication slave权限）。</span><br><span class="line">                  Master_Port: 3339               master服务器的端口</span><br><span class="line">                Connect_Retry: 60        master-connect-retry选项的当前值,对应于在中继日志中的(Relay_Log_File,Relay_Log_Pos)。</span><br><span class="line">              Master_Log_File: mysql_bin.001873       I/O线程当前正在读取的主服务器二进制日志文件的名称。</span><br><span class="line">          Read_Master_Log_Pos: 46473981 				在当前的主服务器二进制日志中，I/O线程已经读取的位置。</span><br><span class="line">               Relay_Log_File: relay_bin.005568      slave的SQL线程当前正在读取和执行的中继日志文件的名称。</span><br><span class="line">                Relay_Log_Pos: 4          			在当前的中继日志中，slave的SQL线程已读取和执行的位置。</span><br><span class="line">        Relay_Master_Log_File: mysql_bin.001873               由SQL线程执行的包含多数近期事件的主服务器二进制日志文件的名称。</span><br><span class="line">             Slave_IO_Running: No 					I/O线程是否被启动并成功地连接到主服务器上。</span><br><span class="line">            Slave_SQL_Running: No                   SQL线程是否被启动。</span><br><span class="line">              Replicate_Do_DB:</span><br><span class="line">          Replicate_Ignore_DB:</span><br><span class="line">           Replicate_Do_Table:</span><br><span class="line">       Replicate_Ignore_Table:</span><br><span class="line">      Replicate_Wild_Do_Table:</span><br><span class="line">  Replicate_Wild_Ignore_Table:</span><br><span class="line">                   Last_Errno: 0              slave的SQL线程读取日志参数的的错误数量。错误数量为0并且消息为空字符串表示没有错误；</span><br><span class="line">                   Last_Error: 	    slave的SQL线程读取日志参数的的错误消息。如果Last_Error值不是空值，它也会在从属服务器的错误日志中作为消息显示。</span><br><span class="line">                 Skip_Counter: 0                    最近被使用的用于SQL_SLAVE_SKIP_COUNTER的值。</span><br><span class="line">          Exec_Master_Log_Pos: 46473981</span><br><span class="line">              Relay_Log_Space: 46474773</span><br><span class="line">              Until_Condition: None</span><br><span class="line">               Until_Log_File:</span><br><span class="line">                Until_Log_Pos: 0</span><br><span class="line">           Master_SSL_Allowed: No</span><br><span class="line">           Master_SSL_CA_File:</span><br><span class="line">           Master_SSL_CA_Path:</span><br><span class="line">              Master_SSL_Cert:</span><br><span class="line">            Master_SSL_Cipher:</span><br><span class="line">               Master_SSL_Key:</span><br><span class="line">        Seconds_Behind_Master: NULL</span><br><span class="line">Master_SSL_Verify_Server_Cert: No</span><br><span class="line">                Last_IO_Errno: 0</span><br><span class="line">                Last_IO_Error:</span><br><span class="line">               Last_SQL_Errno: 0</span><br><span class="line">               Last_SQL_Error:</span><br><span class="line">  Replicate_Ignore_Server_Ids:</span><br><span class="line">             Master_Server_Id: 0</span><br><span class="line">                  Master_UUID: 0a6d0e64-d6f8-11e6-b9d7-1866da77d1fe</span><br><span class="line">             Master_Info_File: mysql.slave_master_info</span><br><span class="line">                    SQL_Delay: 0</span><br><span class="line">          SQL_Remaining_Delay: NULL</span><br><span class="line">      Slave_SQL_Running_State:</span><br><span class="line">           Master_Retry_Count: 86400</span><br><span class="line">                  Master_Bind:</span><br><span class="line">      Last_IO_Error_Timestamp:</span><br><span class="line">     Last_SQL_Error_Timestamp:</span><br><span class="line">               Master_SSL_Crl:</span><br><span class="line">           Master_SSL_Crlpath:</span><br><span class="line">           Retrieved_Gtid_Set:</span><br><span class="line">            Executed_Gtid_Set:</span><br><span class="line">                Auto_Position: 0</span><br><span class="line">         Replicate_Rewrite_DB:</span><br><span class="line">                 Channel_Name:</span><br><span class="line">           Master_TLS_Version:</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>Slave_IO_State<br>这个是指slave 连接到master的状态。</li>
+</ol>
+<p>2.Master_User<br>?这个是master上面的一个用户。用来负责主从复制的用户 ，创建主从复制的时候建立的（具有reolication slave权限）。</p>
+<p>3.Master_Port<br>master服务器的端口? 一般是3306</p>
+<p>4.Connect_Retry<br>? master-connect-retry选项的当前值,对应于在中继日志中的(Relay_Log_File,Relay_Log_Pos)。</p>
+<ol start="5">
+<li><p>Master_Log_File<br>I&#x2F;O线程当前正在读取的主服务器二进制日志文件的名称。</p>
+</li>
+<li><p>Read_Master_Log_Pos<br>在当前的主服务器二进制日志中，I&#x2F;O线程已经读取的位置。</p>
+</li>
+<li><p>Relay_Log_File<br>slave的SQL线程当前正在读取和执行的中继日志文件的名称。</p>
+</li>
+<li><p>Relay_Log_Pos<br>在当前的中继日志中，slave的SQL线程已读取和执行的位置。</p>
+</li>
+<li><p>Relay_Master_Log_File<br>由SQL线程执行的包含多数近期事件的主服务器二进制日志文件的名称。</p>
+</li>
+<li><p>Slave_IO_Running<br>I&#x2F;O线程是否被启动并成功地连接到主服务器上。</p>
+</li>
+<li><p>Slave_SQL_Running<br>SQL线程是否被启动。</p>
+</li>
+<li><p>Replicate_Do_DB,</p>
+</li>
+</ol>
+<p>13.Replicate_Ignore_DB</p>
+<p>14.Replicate_Do_Table<br>15.Replicate_Ignore_Table</p>
+<p>16.Replicate_Wild_Do_Table</p>
+<p>17.Replicate_Wild_Ignore_Table</p>
+<p>12到17 这些参数都是为了用来指明哪些库 或者表在复制的时候 不要同步到备库<br>但是这些参数用的时候要小心 因为 当跨库使用的时候 可能会出现问题。<br>一般情况下 ，限制的时候都用17(Replicate_Wild_Ignore_Table)这个参数。</p>
+<ol start="18">
+<li><p>Last_Errno,Last_Error<br>slave的SQL线程读取日志参数的的错误数量和错误消息。错误数量为0并且消息为空字符串表示没有错误；<br>如果Last_Error值不是空值，它也会在从属服务器的错误日志中作为消息显示。</p>
+</li>
+<li><p>Skip_Counter<br>最近被使用的用于SQL_SLAVE_SKIP_COUNTER的值。</p>
+</li>
+</ol>
+<p>20 Exec_Master_Log_Pos</p>
+<p>来自主服务器的二进制日志的由SQL线程执行的上一个时间的位置（Relay_Master_Log_File）。在主服务器的二进制日志中的(Relay_Master_Log_File, Exec_Master_Log_Pos)对应于在中继日志中的(Relay_Log_File,Relay_Log_Pos)。</p>
+<p>21.Relay_Log_Space</p>
+<p>所有原有的中继日志结合起来的总大小。</p>
+<ol start="22">
+<li>Until_Condition,Until_Log_File,Until_Log_Pos</li>
+</ol>
+<p>在START SLAVE语句的UNTIL子句中指定的值。</p>
+<p>Until_Condition具有以下值：</p>
+<p>o 如果没有指定UNTIL子句，则没有值</p>
+<p>o 如果从属服务器正在读取，直到达到主服务器的二进制日志的给定位置为止，则值为Master</p>
+<p>o 如果从属服务器正在读取，直到达到其中继日志的给定位置为止，则值为Relay</p>
+<p>Until_Log_File和Until_Log_Pos用于指示日志文件名和位置值。日志文件名和位置值定义了SQL线程在哪个点中止执行。</p>
+<p>23 Master_SSL_Allowed,Master_SSL_CA_File,Master_SSL_CA_Path,Master_SSL_Cert,Master_SSL_Cipher,Master_SSL_Key</p>
+<p>这些字段显示了被从属服务器使用的参数。这些参数用于连接主服务器。</p>
+<p>Master_SSL_Allowed具有以下值：</p>
+<p>o 如果允许对主服务器进行SSL连接，则值为Yes</p>
+<p>o 如果不允许对主服务器进行SSL连接，则值为No</p>
+<p>o 如果允许SSL连接，但是从属服务器没有让SSL支持被启用，则值为Ignored。</p>
+<p>与SSL有关的字段的值对应于–master-ca,–master-capath,–master-cert,–master-cipher和–master-key选项的值。</p>
+<p>24 Seconds_Behind_Master</p>
+<p>表示主从之间的时间差 是数字的时候表示相差多少秒? null表示未知数，一般主从复制出问题了会出现null的情况。</p>
+<p>查询事务<br>select * from information_schema.INNODB_TRX\G</p>
+<p>查看是否有locks信息<br>select _ from information_schema.INNODB_LOCKS\G<br>select _ from information_schema.INNODB_LOCK_WAITS\G</p>
+<p>mysql上的慢sql检查；<br>select _ from information_schema.<code>PROCESSLIST</code>;<br>select _ from information_schema.<code>PROCESSLIST</code> where time&gt;10 and command&#x3D;’query’;</p>
+<p>select * from information_schema.processlist order by id limit 2;</p>
+<h3 id="自定义函数"><a href="#自定义函数" class="headerlink" title="自定义函数"></a>自定义函数</h3><p>参考 <a target="_blank" rel="noopener" href="https://blog.csdn.net/xiaodingdou/article/details/53286503">https://blog.csdn.net/xiaodingdou/article/details/53286503</a></p>
+<p>在Oracle中我们知道有一个Hierarchical Queries可以通过CONNECT BY来查询，但是，在MySQL中还没有对应的函数!!!<br>下面是sql脚本，想要运行的直接赋值粘贴进数据库即可。</p>
+<p>创建表treenodes（可以根据需要进行更改）</p>
+<p>DROP TABLE IF EXISTS <code>treenodes</code>;<br>CREATE TABLE <code>treenodes</code> (<br><code>id</code> int(11) NOT NULL,<br><code>nodename</code> varchar(20) DEFAULT NULL,<br><code>pid</code> int(11) DEFAULT NULL,<br>PRIMARY KEY (<code>id</code>)<br>) ENGINE&#x3D;InnoDB DEFAULT CHARSET&#x3D;UTF-8;</p>
+<p>把下面的语句直接粘贴进命令行执行即可（注意修改传入的参数，默认rootId，表明默认treenodes）</p>
+<p>根据传入id查询所有父节点的id</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">delimiter <span class="operator">/</span><span class="operator">/</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">FUNCTION</span> `getParentList`(rootId <span class="type">INT</span>)</span><br><span class="line"><span class="keyword">RETURNS</span> <span class="type">varchar</span>(<span class="number">1000</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">BEGIN</span></span><br><span class="line">	<span class="keyword">DECLARE</span> sTemp <span class="type">VARCHAR</span>(<span class="number">1000</span>);</span><br><span class="line">	<span class="keyword">DECLARE</span> sTempPar <span class="type">VARCHAR</span>(<span class="number">1000</span>);</span><br><span class="line">	<span class="keyword">SET</span> sTemp <span class="operator">=</span> <span class="string">&#x27;&#x27;</span>;</span><br><span class="line">	<span class="keyword">SET</span> sTempPar <span class="operator">=</span>rootId;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	#循环递归</span><br><span class="line">	WHILE sTempPar <span class="keyword">is</span> <span class="keyword">not null</span> DO</span><br><span class="line">		#判断是否是第一个，不加的话第一个会为空</span><br><span class="line">		IF sTemp <span class="operator">!=</span> <span class="string">&#x27;&#x27;</span> <span class="keyword">THEN</span></span><br><span class="line">			<span class="keyword">SET</span> sTemp <span class="operator">=</span> concat(sTemp,<span class="string">&#x27;,&#x27;</span>,sTempPar);</span><br><span class="line">		<span class="keyword">ELSE</span></span><br><span class="line">			<span class="keyword">SET</span> sTemp <span class="operator">=</span> sTempPar;</span><br><span class="line">		<span class="keyword">END</span> IF;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">SET</span> sTemp <span class="operator">=</span> concat(sTemp,<span class="string">&#x27;,&#x27;</span>,sTempPar);</span><br><span class="line">		<span class="keyword">SELECT</span> group_concat(pid) <span class="keyword">INTO</span> sTempPar <span class="keyword">FROM</span> treenodes <span class="keyword">where</span> pid<span class="operator">&lt;&gt;</span>id <span class="keyword">and</span> FIND_IN_SET(id,sTempPar)<span class="operator">&gt;</span><span class="number">0</span>;</span><br><span class="line">	<span class="keyword">END</span> WHILE;</span><br><span class="line"></span><br><span class="line"><span class="keyword">RETURN</span> sTemp;</span><br><span class="line"><span class="keyword">END</span></span><br><span class="line"><span class="operator">/</span><span class="operator">/</span></span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> treenodes <span class="keyword">where</span> FIND_IN_SET(id,getParentList(<span class="number">15</span>));</span><br></pre></td></tr></table></figure>
+
+<p>根据传入id查询所有子节点的id</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">delimiter <span class="operator">/</span><span class="operator">/</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">FUNCTION</span> `getChildList`(rootId <span class="type">INT</span>)</span><br><span class="line"><span class="keyword">RETURNS</span> <span class="type">varchar</span>(<span class="number">1000</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">BEGIN</span></span><br><span class="line">	<span class="keyword">DECLARE</span> sTemp <span class="type">VARCHAR</span>(<span class="number">1000</span>);</span><br><span class="line">    <span class="keyword">DECLARE</span> sTempChd <span class="type">VARCHAR</span>(<span class="number">1000</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">SET</span> sTemp <span class="operator">=</span> <span class="string">&#x27;$&#x27;</span>;</span><br><span class="line">    <span class="keyword">SET</span> sTempChd <span class="operator">=</span><span class="built_in">cast</span>(rootId <span class="keyword">as</span> <span class="type">CHAR</span>);</span><br><span class="line"></span><br><span class="line">    WHILE sTempChd <span class="keyword">is</span> <span class="keyword">not null</span> DO</span><br><span class="line">    	<span class="keyword">SET</span> sTemp <span class="operator">=</span> concat(sTemp,<span class="string">&#x27;,&#x27;</span>,sTempChd);</span><br><span class="line">        <span class="keyword">SELECT</span> group_concat(id) <span class="keyword">INTO</span> sTempChd <span class="keyword">FROM</span>  treeNodes <span class="keyword">where</span> FIND_IN_SET(pid,sTempChd)<span class="operator">&gt;</span><span class="number">0</span>;</span><br><span class="line">    <span class="keyword">END</span> WHILE;</span><br><span class="line">    <span class="keyword">RETURN</span> sTemp;</span><br><span class="line"></span><br><span class="line"><span class="keyword">END</span></span><br><span class="line"><span class="operator">/</span><span class="operator">/</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> treenodes <span class="keyword">where</span> FIND_IN_SET(id,getChildList(<span class="number">7</span>));</span><br></pre></td></tr></table></figure>
+
+<h3 id="系统参数status-含义"><a href="#系统参数status-含义" class="headerlink" title="系统参数status 含义"></a>系统参数status 含义</h3><p>–查看MySQL本次启动后的运行时间(单位：秒)<br>show status like ‘uptime’;</p>
+<p>–查看select语句的执行数<br>show [global] status like ‘com_select’;</p>
+<p>–查看insert语句的执行数<br>show [global] status like ‘com_insert’;</p>
+<p>–查看update语句的执行数<br>show [global] status like ‘com_update’;</p>
+<p>–查看delete语句的执行数<br>show [global] status like ‘com_delete’;</p>
+<p>–查看试图连接到MySQL(不管是否连接成功)的连接数<br>show status like ‘connections’;</p>
+<p>–查看线程缓存内的线程的数量。<br>show status like ‘threads_cached’;</p>
+<p>–查看当前打开的连接的数量。<br>show status like ‘threads_connected’;</p>
+<p>–查看当前打开的连接的数量。<br>show status like ‘threads_connected’;</p>
+<p>–查看创建用来处理连接的线程数。如果Threads_created较大，你可能要增加thread_cache_size值。<br>show status like ‘threads_created’;</p>
+<p>–查看激活的(非睡眠状态)线程数。<br>show status like ‘threads_running’;</p>
+<p>–查看立即获得的表的锁的次数。<br>show status like ‘table_locks_immediate’;</p>
+<p>–查看不能立即获得的表的锁的次数。如果该值较高，并且有性能问题，你应首先优化查询，然后拆分表或使用复制。<br>show status like ‘table_locks_waited’;</p>
+<p>–查看创建时间超过slow_launch_time秒的线程数。<br>show status like ‘slow_launch_threads’;</p>
+<p>–查看查询时间超过long_query_time秒的查询的个数。<br>show status like ‘slow_queries’;</p>
+<h2 id="mysql-的jdbc连接错误："><a href="#mysql-的jdbc连接错误：" class="headerlink" title="mysql 的jdbc连接错误："></a>mysql 的jdbc连接错误：</h2><h3 id="consider-upgrading-MySQL-client"><a href="#consider-upgrading-MySQL-client" class="headerlink" title="consider upgrading MySQL client"></a>consider upgrading MySQL client</h3><p>1.太平湖mysql资源添加失败：检测jdbc连接时，连接报错：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[2018-10-31 14:13:31 INFO ] [http-bio-8080-exec-6] &#123;com.sitech.iddbs.resource.service.impl.MysqlInfoServiceImpl:205&#125;-mysql检测信息：[<span class="built_in">id</span>:0; mysql@132.90.165.166:3307] mysql_2017</span><br><span class="line">[2018-10-31 14:13:31 ERROR] [http-bio-8080-exec-6] &#123;com.sitech.iddbs.resource.service.impl.MysqlUtilService:32&#125;-Client does not support authentication protocol requested by server; consider upgrading MySQL client</span><br><span class="line">com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException: Client does not support authentication protocol requested by server; consider upgrading MySQL client</span><br><span class="line">at java.sql.DriverManager.getConnection(DriverManager.java:571)</span><br><span class="line">        at java.sql.DriverManager.getConnection(DriverManager.java:215)</span><br><span class="line">        at com.sitech.iddbs.resource.service.impl.MysqlUtilService.getConnection(MysqlUtilService.java:30)</span><br><span class="line">        at com.sitech.iddbs.resource.service.impl.MysqlInfoServiceImpl.addMysqlInfo(MysqlInfoServiceImpl.java:207)</span><br><span class="line">        at com.sitech.iddbs.resource.service.impl.MysqlInfoServiceImpl$$FastClassByCGLIB$<span class="variable">$fb985743</span>.invoke(&lt;generated&gt;)</span><br></pre></td></tr></table></figure>
+
+<p>解决方案：参考：<a target="_blank" rel="noopener" href="https://blog.csdn.net/u013700358/article/details/80306560">https://blog.csdn.net/u013700358/article/details/80306560</a></p>
+<p>Client does not support authentication protocol requested by server; consider upgrading MySQL client<br>网上找了如下方法：</p>
+<p>其一:</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SET PASSWORD FOR</span><br><span class="line">     -&gt; <span class="string">&#x27;some_user&#x27;</span>@<span class="string">&#x27;some_host&#x27;</span> = OLD_PASSWORD(<span class="string">&#x27;newpwd&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>其二:</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; UPDATE mysql.user SET Password = OLD_PASSWORD(<span class="string">&#x27;newpwd&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    -&gt; WHERE Host = <span class="string">&#x27;some_host&#x27;</span> AND User = <span class="string">&#x27;some_user&#x27;</span>;</span><br><span class="line"></span><br><span class="line">mysql&gt; FLUSH PRIVILEGES;</span><br></pre></td></tr></table></figure>
+
+<p>上面some_user、some_host、newpwd按自己实际情况修改</p>
+<p>但是自己尝试了之后依旧有错误提示，最后尝试了如下方法恢复正常：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">USE mysql;</span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">USER</span> <span class="string">&#x27;root&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span> IDENTIFIED <span class="keyword">WITH</span> mysql_native_password <span class="keyword">BY</span> <span class="string">&#x27;831015&#x27;</span>;</span><br><span class="line">FLUSH PRIVILEGES;</span><br></pre></td></tr></table></figure>
+
+<p>root是用户名，localhost是ip地址127.0.0.1都是特指本机，mysql_native_password是旧的密码验证机制，831015是密码，最后别忘了分号；</p>
+<p>最后问题解决</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2023/09/04/MySQL%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">https://yhao521.github.io/2023/09/04/MySQL%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/java-programming/">java/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2023/09/04/Mysql_online_DDL/" title="Mysql_online_DDL"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Mysql_online_DDL</div></div><div class="info-2"><div class="info-item-1"> title: Mysql_online_DDLdate: 2023-09-03 20:17:08category:  数据库 MySQL监控和运维tag: MySQL监控和运维author:   参考： https://www.cnblogs.com/mysql-dba/p/6192897.html 建议： 1、尽量不要在业务高峰期间进行DDL，即使是online DDL; 2、对于大表（G级别）DDL，最好在测试库上做一遍，预估下时间，不至于到线上执行时心慌手乱；（线上和测试环境数据量差不多） </div></div></div></a><a class="pagination-related" href="/2023/09/04/MySQL%E9%94%81%E6%9C%BA%E5%88%B6/" title="MySQL锁机制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">MySQL锁机制</div></div><div class="info-2"><div class="info-item-1"> title: MySQL锁机制date: 2023-09-04 17:49:38permalink: &#x2F;pages&#x2F;e92ec0&#x2F;category:  数据库 doc_mysqltag: doc_mysqlauthor:   MySQL锁机制MySQL主要有表锁，行锁和页锁，页锁用得少，本文主要介绍表锁和行锁。 一、锁的分类从对数据的操作类型来分，可以分为读锁和写锁；从对数据操作粒度来分，可分为表锁和行锁。  读锁(共享锁)：针对同一份数据，多个读操作可以同时进行而不会互相影响； 写锁(排他锁)：当前写操作没有完成前，会阻断其他写锁和读锁； 表锁：锁住被操作的整张表； 行锁：锁住被操作表中的被操作行，其他行不受影响。  二、表锁1. 介绍： 表锁偏向MyISAM存储引擎，开销小，加锁快，无死锁，粒度大，并发性差。下面建表演示表锁的用法。 12345678910create table mylock (    id int not null primary key auto_increment,    name varchar(20)) engine...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/vscode%E4%BD%BF%E7%94%A8/" title="vscode使用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">vscode使用</div></div><div class="info-2"><div class="info-item-1"> title: vscode的使用lang: en-USdate: 2023-09-03 20:17:08category:  vscodetag: vscodeauthor:   1. vscode的使用1.1. 插件位置更改参考：https://blog.csdn.net/zhaojunwei08/article/details/86021665 https://blog.csdn.net/u011127019/article/details/86737308#comments mklink使用 https://www.icoa.cn/a/910.html set oldDir&#x3D;%UserProfile%.vscode\extensions mklink &#x2F;D “%oldDir%” “E:\eclipse-hao\HTML\extensions” 确保有 这个 .vscode 空目录  bat方式： 123456789@echo offif &quot;%1&quot; == &quot;h&quot; goto beginmshta vbscript:c...</div></div></div></a><a class="pagination-related" href="/2023/09/04/starUML%E6%BF%80%E6%B4%BB/" title="starUML激活"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">starUML激活</div></div><div class="info-2"><div class="info-item-1"> title: starUML激活date: 2023-09-03 20:17:08category:  UML类图tag: UML类图author:   StarUML（一） —— 简介和破解（一） 刀客传奇关注 0.1232022.01.03 17:34:47字数 795阅读 1,289 版本记录   版本号 时间    V1.0 2022.01.03 星期一   前言 StarUML(简称SU)，是一种创建UML类图，生成类图和其他类型的统一建模语言(UML)图表的工具。StarUML是一个开源项目之一发展快、灵活、可扩展性强。我们一般都是使用这个软件画一个时序图和软件图等，特别是软件图是我们常用的，用来反映各个模块各个类之间的关系。  简介StarUML是一款开放源码的UML开发工具，是由韩国公司主导开发出来的产品，可以直接到StarUML网站下载。可以用来创建UML类图。  可绘制9款UML图：用例图、类图、序列图、状态图、活动图、通信图、构件图、部署图以及复合结构图等。  完全免费：StarUML是一套开放源码的软件，不仅免费自由下载，连代码都免费开放。 多种格式影像...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E6%89%8B%E6%8A%8A%E6%89%8B%E6%95%99%E4%BD%A0%E4%BD%BF%E7%94%A8Electron5+vue-cli3%E5%BC%80%E5%8F%91%E8%B7%A8%E5%B9%B3%E5%8F%B0%E6%A1%8C%E9%9D%A2%E5%BA%94%E7%94%A8/" title="手把手教你使用Electron5+vue-cli3开发跨平台桌面应用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">手把手教你使用Electron5+vue-cli3开发跨平台桌面应用</div></div><div class="info-2"><div class="info-item-1"> title: 手把手教你使用Electron5+vue-cli3开发跨平台桌面应用date: 2023-09-03 20:17:08category:  mactag: macauthor:   手把手教你使用Electron5+vue-cli3开发跨平台桌面应用Electron是一个基于Chromium和 Node.js，可以使用 HTML、CSS和JavaScript构建跨平台应用的技术框架，兼容 Mac、Windows 和 Linux。虽然B&#x2F;S是目前开发的主流，但是C&#x2F;S仍然有很大的市场需求。受限于浏览器的沙盒限制，网页应用无法满足某些场景下的使用需求，而桌面应用可以读写本地文件、调用更多系统资源，再加上Web开发的低成本、高效率的优势，这种方式越来越受到开发者的喜爱。 本文一步一步教你如何使用Electron5和vue-cli3，在完全保留vue开发web应用的习惯下，搭建桌面应用。 本文不涉及Electron和vue的开发教程，仅以实现两者结合为目的，如深入学习Electron和vue，请访问官方： Electron: https://elect...</div></div></div></a><a class="pagination-related" href="/2025/02/20/JAVA%20Web%E5%BA%94%E7%94%A8%E5%B8%B8%E8%A7%81%E6%BC%8F%E6%B4%9E%E4%B8%8E%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE/" title="JAVA Web应用常见漏洞与修复建议"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-02-20</div><div class="info-item-2">JAVA Web应用常见漏洞与修复建议</div></div><div class="info-2"><div class="info-item-1">最近负责的项目参与了甲方要求的代码审计，扫出来不少问题，46w+行代码扫出来81种漏洞，涉及1w+行代码，不良代码率高达2.93%，也确实反应了不少问题，这里贴出来供大家参考 目录 跨站脚本 高危：存储型XSS 高危：反射型XSS 输入验证 高危：路径遍历 高危：基于DOM的XSS 高危：重定向 中危：拒绝服务：正则表达式 中危：访问权限修饰符控制 中危：直接绑定敏感字段 低危：拒绝服务：解析Double类型数据 低危：有风险的资源使用 低危：数据跨越信任边界 低危：文件上传 代码注入 中危：HTTP响应截断 中危：有风险的SQL查询：MyBatis 中危：公式注入 中危：资源注入 中危：HTTP响应截断 低危：有风险的反序列化  低危：JavaScript劫持：易受攻击的框架  API误用 中危：不安全的框架绑定 低危：忽略返回值 低危：HTTP响应完成后继续操作输出流 低危：缺少对方法返回值的null检查 密码管理 中危：不安全的随机数 中危：空密码 中危：硬编码密码 中危：弱加密 中危：配置文件中的明文密码 中危：硬编码加密密钥  低危：注释中的密码 低危：不安全的哈希算法...</div></div></div></a><a class="pagination-related" href="/2023/09/04/jenkins/" title="jenkins"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">jenkins</div></div><div class="info-2"><div class="info-item-1"> title: jenkinsdate: 2023-09-03 20:17:08category:  doc_jenkinstag: doc_jenkinsauthor:   [TOC]   1. Jekins的使用1.1. 构建发布release版本 1234crds_version=$( mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression=project.version -q -DforceStdout)VERSION=$(echo $&#123;crds_version//-SNAPSHOT/&#125; )mvn versions:set -DnewVersion=$&#123;VERSION&#125;  -DgenerateBackupPoms=false  1.2. Jenkins内置环境变量的使用https://www.cnblogs.com/puresoul/p/4828913.html https://blog.csdn.net/zbj18314469395/ar...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E5%AE%98%E7%BD%91%E5%AF%BC%E8%88%AA/" title="官网导航"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">官网导航</div></div><div class="info-2"><div class="info-item-1"> title: 官网导航date: 2023-09-03 20:17:08category: tag: author:  官网导航 前端   VuePress中文网 VuePress官网 Vue.js v1版本插件 v2主题 reco主题官网 Echarts官网 element-plus element   数据库   influxdata介绍 influxdb下载链接 influxdb集群 Grafana基础知识 SQL 审核查询平台-github SQLAdvisor快速   linux   centos-mac镜像下载 centos下载 nodejs下载 jdk-7下载   刷题   力扣官网 牛客网   javaFx   gluonhq打包javafx   markdown   milkdown管网   其他   SpringBoot下实现Shutdown Hook的几种方式 在自己的应用里集成grafana iTerm2配色教程 mac-Homebrew Electron5+vue-cli3开发跨平台桌面应用  oracle-jdk下载地址 本机git服务 本机nexu...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-MySql%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E6%80%BB%E7%BB%93"><span class="toc-number">1.</span> <span class="toc-text">1. MySql常用命令总结</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E5%88%9B%E5%BB%BA%E4%B8%BB%E4%BB%8E%E5%90%8C%E6%AD%A5%E7%94%A8%E6%88%B7"><span class="toc-number">1.1.</span> <span class="toc-text">1.1. 创建主从同步用户</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E5%8F%AA%E6%9F%A5%E7%9C%8B%E5%BD%93%E5%89%8D%E8%BF%9E%E6%8E%A5%E6%95%B0-Threads%E5%B0%B1%E6%98%AF%E8%BF%9E%E6%8E%A5%E6%95%B0"><span class="toc-number">1.2.</span> <span class="toc-text">1.2. 只查看当前连接数(Threads就是连接数):</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-%E5%8D%87%E7%BA%A7-mysql%E5%AE%9E%E4%BE%8B%E6%95%B0%E6%8D%AE%E5%AD%97%E5%85%B8%EF%BC%9A"><span class="toc-number">1.3.</span> <span class="toc-text">1.3. 升级.mysql实例数据字典：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-4-%E6%9F%A5%E7%9C%8Bmysql%E6%95%B0%E6%8D%AE%E5%BA%93%E5%A4%A7%E5%B0%8F%E7%9A%84%E5%9B%9B%E7%A7%8D%E5%8A%9E%E6%B3%95%EF%BC%8C%E5%88%86%E5%88%AB%E6%9C%89%E4%BB%A5%E4%B8%8B%E5%9B%9B%E7%A7%8D%EF%BC%9A"><span class="toc-number">1.4.</span> <span class="toc-text">1.4. 查看mysql数据库大小的四种办法，分别有以下四种：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-5-%E6%B7%BB%E5%8A%A0%E8%A1%A8%E8%BF%87%E6%BB%A4"><span class="toc-number">1.5.</span> <span class="toc-text">1.5. 添加表过滤</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-6-mysql%E9%87%8D%E6%96%B0%E7%94%9F%E6%88%90%E4%B8%BB%E9%94%AE%EF%BC%8C%E4%BD%BF%E4%B9%8B%E8%BF%9E%E7%BB%AD%E3%80%82"><span class="toc-number">1.6.</span> <span class="toc-text">1.6. mysql重新生成主键，使之连续。</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-MySql%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E6%80%BB%E7%BB%932"><span class="toc-number">2.</span> <span class="toc-text">2. MySql常用命令总结2</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#14-%E5%90%AF%E5%8A%A8mysql%E5%91%BD%E4%BB%A4%E5%92%8C%E5%81%9C%E6%AD%A2mysql%E5%91%BD%E4%BB%A4"><span class="toc-number">2.1.</span> <span class="toc-text">14.启动mysql命令和停止mysql命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#15%EF%BC%9A%E5%AF%BC%E5%87%BA-sql%E6%96%87%E4%BB%B6"><span class="toc-number">2.2.</span> <span class="toc-text">15：导出.sql文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#16%EF%BC%9A%E8%AE%BE%E7%BD%AE%E6%8C%87%E5%AE%9A%E7%94%A8%E6%88%B7%E7%9A%84%E5%AF%86%E7%A0%81"><span class="toc-number">2.3.</span> <span class="toc-text">16：设置指定用户的密码</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link"><span class="toc-number">2.3.1.</span> <span class="toc-text"></span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#17%E3%80%81%E5%88%B7%E6%96%B0%E6%9D%83%E9%99%90"><span class="toc-number">2.4.</span> <span class="toc-text">17、刷新权限</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mysql%E4%B8%BB%E4%BB%8E%E5%BC%82%E6%AD%A5%E5%90%8C%E6%AD%A5%E5%A4%8D%E5%88%B6"><span class="toc-number">2.5.</span> <span class="toc-text">mysql主从异步同步复制</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#-1"><span class="toc-number">2.5.1.</span> <span class="toc-text"></span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9%E5%AD%97%E6%AE%B5%E9%95%BF%E5%BA%A6"><span class="toc-number">2.6.</span> <span class="toc-text">修改字段长度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8%E8%A7%A6%E5%8F%91%E5%99%A8%E7%9A%84%E5%8A%9E%E6%B3%95%E6%8A%8Aalter%E3%80%81drop%E3%80%81truncate%E9%99%90%E5%88%B6%E4%BA%86"><span class="toc-number">2.7.</span> <span class="toc-text">用触发器的办法把alter、drop、truncate限制了</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mysql%E6%9D%83%E9%99%90-start"><span class="toc-number">2.8.</span> <span class="toc-text">mysql权限 start</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%BC%E5%85%A5%E5%AF%BC%E5%87%BA%E6%95%B0%E6%8D%AE"><span class="toc-number">2.9.</span> <span class="toc-text">导入导出数据</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mysql%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6-master%E5%92%8Cslave%E9%85%8D%E7%BD%AE%E7%9A%84%E5%8F%82%E6%95%B0%E5%A4%A7%E5%85%A8"><span class="toc-number">2.10.</span> <span class="toc-text">mysql主从复制 master和slave配置的参数大全</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%87%BD%E6%95%B0"><span class="toc-number">2.11.</span> <span class="toc-text">自定义函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E5%8F%82%E6%95%B0status-%E5%90%AB%E4%B9%89"><span class="toc-number">2.12.</span> <span class="toc-text">系统参数status 含义</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#mysql-%E7%9A%84jdbc%E8%BF%9E%E6%8E%A5%E9%94%99%E8%AF%AF%EF%BC%9A"><span class="toc-number">3.</span> <span class="toc-text">mysql 的jdbc连接错误：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#consider-upgrading-MySQL-client"><span class="toc-number">3.1.</span> <span class="toc-text">consider upgrading MySQL client</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

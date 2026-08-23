@@ -1,0 +1,241 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Android平台签名证书(.keystore)生成指南 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Android平台打包发布apk应用，需要使用数字证书（.keystore文件）进行签名，用于表明开发者身份。 Android证书的生成是自助和免费的，不需要审批或付费。 可以使用JRE环境中的keytool命令生成。以下是windows平台生成证书的方法： 安装JRE环境（推荐使用JRE8环境，如已有可跳过）在控制台输入cmd 输入java查询版本号 可从Oracle官方下载jre安装包：htt">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android平台签名证书(.keystore)生成指南">
+<meta property="og:url" content="https://yhao521.github.io/2025/02/19/Android%E5%B9%B3%E5%8F%B0%E7%AD%BE%E5%90%8D%E8%AF%81%E4%B9%A6(.keystore)%E7%94%9F%E6%88%90%E6%8C%87%E5%8D%97/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="Android平台打包发布apk应用，需要使用数字证书（.keystore文件）进行签名，用于表明开发者身份。 Android证书的生成是自助和免费的，不需要审批或付费。 可以使用JRE环境中的keytool命令生成。以下是windows平台生成证书的方法： 安装JRE环境（推荐使用JRE8环境，如已有可跳过）在控制台输入cmd 输入java查询版本号 可从Oracle官方下载jre安装包：htt">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2025-02-19T07:02:04.000Z">
+<meta property="article:modified_time" content="2025-02-19T07:02:04.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="java&#x2F;programming">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Android平台签名证书(.keystore)生成指南",
+  "url": "https://yhao521.github.io/2025/02/19/Android%E5%B9%B3%E5%8F%B0%E7%AD%BE%E5%90%8D%E8%AF%81%E4%B9%A6(.keystore)%E7%94%9F%E6%88%90%E6%8C%87%E5%8D%97/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2025-02-19T07:02:04.000Z",
+  "dateModified": "2025-02-19T07:02:04.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2025/02/19/Android%E5%B9%B3%E5%8F%B0%E7%AD%BE%E5%90%8D%E8%AF%81%E4%B9%A6(.keystore)%E7%94%9F%E6%88%90%E6%8C%87%E5%8D%97/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Android平台签名证书(.keystore)生成指南',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">Android平台签名证书(.keystore)生成指南</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Android平台签名证书(.keystore)生成指南</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-02-19T07:02:04.000Z" title="发表于 2025-02-19 15:02:04">2025-02-19</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-02-19T07:02:04.000Z" title="更新于 2025-02-19 15:02:04">2025-02-19</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>Android平台打包发布apk应用，需要使用数字证书（.keystore文件）进行签名，用于表明开发者身份。</p>
+<p>Android证书的生成是自助和免费的，不需要审批或付费。</p>
+<p>可以使用JRE环境中的keytool命令生成。以下是windows平台生成证书的方法：</p>
+<p>安装JRE环境（推荐使用JRE8环境，如已有可跳过）<br>在控制台输入cmd 输入java查询版本号<br><img src="https://i-blog.csdnimg.cn/blog_migrate/4f4cf00e7b981e75b999c0c8e5cd4def.png" alt="在这里插入图片描述|720x24"></p>
+<p>可从Oracle官方下载jre安装包：<a target="_blank" rel="noopener" href="https://www.oracle.com/technetwork/java/[javase](https://so.csdn.net/so/search?q=javase&spm=1001.2101.3001.7020)/downloads/index.html">https://www.oracle.com/technetwork/java/[javase](https://so.csdn.net/so/search?q=javase&amp;spm=1001.2101.3001.7020)/downloads/index.html</a><br><img src="https://i-blog.csdnimg.cn/blog_migrate/27ef1e0740f880a3615d42498cdbfd21.png" alt="在这里插入图片描述|720x24"></p>
+<p>下面以Windows平台，jre安装目录为“C:\Program Files\Java\jdk1.8.0_301”为例，实际操作时请修改为自己安装目录<br>建议将JRE安装路径添加到系统环境变量，已配置可跳过此章节<br><strong>打开命令行（cmd），输入以下命令：</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">d:  </span><br><span class="line"><span class="keyword">set</span> PATH<span class="operator">=</span><span class="operator">%</span>PATH<span class="operator">%</span>;&quot;C:\Program Files\Java\jdk1.8.0_301\bin&quot;</span><br><span class="line"><span class="number">12</span></span><br></pre></td></tr></table></figure>
+
+<p>第一行：切换工作目录到D:路径，生成的证书也会保存这个目录下<br>第二行：将jre命令添加到临时环境变量中</p>
+<p>因为是临时环境，当你退出重新进入，如果没有配置过环境，也需要配置临时环境再输入keytool相关操作</p>
+<h3 id="生成签名证书"><a href="#生成签名证书" class="headerlink" title="生成签名证书"></a>生成签名证书</h3><p>使用keytool -genkey命令生成证书：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">keytool <span class="operator">-</span>genkey <span class="operator">-</span>alias testalias <span class="operator">-</span>keyalg RSA <span class="operator">-</span>keysize <span class="number">2048</span> <span class="operator">-</span>validity <span class="number">36500</span> <span class="operator">-</span>keystore test.keystore</span><br><span class="line"><span class="operator">/</span><span class="operator">/</span>test.keystore为证书名，我这里建立的是一个案例</span><br><span class="line"><span class="number">12</span></span><br></pre></td></tr></table></figure>
+
+<p>testalias是证书别名，可修改为自己想设置的字符，建议使用英文字母和数字<br>test.keystore是证书文件名称，可修改为自己想设置的文件名称，也可以指定完整文件路径<br>36500是证书的有效期，表示100年有效期，单位天，建议时间设置长一点，避免证书过期<br>回车后会提示：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">Enter keystore password:  <span class="operator">/</span><span class="operator">/</span>输入证书文件密码，输入完成回车  </span><br><span class="line">Re<span class="operator">-</span>enter <span class="keyword">new</span> password:   <span class="operator">/</span><span class="operator">/</span>再次输入证书文件密码，输入完成回车  </span><br><span class="line">What <span class="keyword">is</span> your <span class="keyword">first</span> <span class="keyword">and</span> <span class="keyword">last</span> name?  </span><br><span class="line">  [<span class="literal">Unknown</span>]:  <span class="operator">/</span><span class="operator">/</span>输入名字和姓氏，输入完成回车  </span><br><span class="line">What <span class="keyword">is</span> the name <span class="keyword">of</span> your organizational unit?  </span><br><span class="line">  [<span class="literal">Unknown</span>]:  <span class="operator">/</span><span class="operator">/</span>输入组织单位名称，输入完成回车  </span><br><span class="line">What <span class="keyword">is</span> the name <span class="keyword">of</span> your organization?  </span><br><span class="line">  [<span class="literal">Unknown</span>]:  <span class="operator">/</span><span class="operator">/</span>输入组织名称，输入完成回车  </span><br><span class="line">What <span class="keyword">is</span> the name <span class="keyword">of</span> your City <span class="keyword">or</span> Locality?  </span><br><span class="line">  [<span class="literal">Unknown</span>]:  <span class="operator">/</span><span class="operator">/</span>输入城市或区域名称，输入完成回车  </span><br><span class="line">What <span class="keyword">is</span> the name <span class="keyword">of</span> your State <span class="keyword">or</span> Province?  </span><br><span class="line">  [<span class="literal">Unknown</span>]:  <span class="operator">/</span><span class="operator">/</span>输入省<span class="operator">/</span>市<span class="operator">/</span>自治区名称，输入完成回车  </span><br><span class="line">What <span class="keyword">is</span> the two<span class="operator">-</span>letter country code <span class="keyword">for</span> this unit?  </span><br><span class="line">  [<span class="literal">Unknown</span>]:  <span class="operator">/</span><span class="operator">/</span>输入国家<span class="operator">/</span>地区代号（两个字母），中国为CN，输入完成回车  </span><br><span class="line"><span class="keyword">Is</span> CN<span class="operator">=</span>XX, OU<span class="operator">=</span>XX, O<span class="operator">=</span>XX, L<span class="operator">=</span>XX, ST<span class="operator">=</span>XX, C<span class="operator">=</span>XX correct?  </span><br><span class="line">  [<span class="keyword">no</span>]:  <span class="operator">/</span><span class="operator">/</span>确认上面输入的内容是否正确，输入y，回车  </span><br><span class="line"></span><br><span class="line">Enter key password <span class="keyword">for</span> <span class="operator">&lt;</span>testalias<span class="operator">&gt;</span>  </span><br><span class="line">        (<span class="keyword">RETURN</span> if same <span class="keyword">as</span> keystore password):  <span class="operator">/</span><span class="operator">/</span>确认证书密码与证书文件密码一样（HBuilder<span class="operator">|</span>HBuilderX要求这两个密码一致），直接回车就可以</span><br><span class="line"><span class="number">12345678910111213141516171819</span></span><br></pre></td></tr></table></figure>
+
+<p>中文版本：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\panda<span class="operator">-</span>tu<span class="operator">&gt;</span>keytool <span class="operator">-</span>genkey <span class="operator">-</span>alias testalias <span class="operator">-</span>keyalg RSA <span class="operator">-</span>keysize <span class="number">2048</span> <span class="operator">-</span>validity <span class="number">36500</span> <span class="operator">-</span>keystore panda.keystore</span><br><span class="line">输入密钥库口令: <span class="operator">/</span><span class="operator">/</span>不可见形式，输入不可见，但是系统记录了</span><br><span class="line">再次输入新口令:<span class="operator">/</span><span class="operator">/</span>不可见形式，输入不可见，但是系统记录了</span><br><span class="line">您的名字与姓氏是什么?</span><br><span class="line">  [<span class="literal">Unknown</span>]:  panda</span><br><span class="line">您的组织单位名称是什么?</span><br><span class="line">  [<span class="literal">Unknown</span>]:  APE</span><br><span class="line">您的组织名称是什么?</span><br><span class="line">  [<span class="literal">Unknown</span>]:  APE</span><br><span class="line">您所在的城市或区域名称是什么?</span><br><span class="line">  [<span class="literal">Unknown</span>]:  QingYuan</span><br><span class="line">您所在的省<span class="operator">/</span>市<span class="operator">/</span>自治区名称是什么?</span><br><span class="line">  [<span class="literal">Unknown</span>]:  guangdong</span><br><span class="line">该单位的双字母国家<span class="operator">/</span>地区代码是什么?</span><br><span class="line">  [<span class="literal">Unknown</span>]:  CN</span><br><span class="line">CN<span class="operator">=</span>panda, OU<span class="operator">=</span>APE, O<span class="operator">=</span>APE, L<span class="operator">=</span>QingYuan, ST<span class="operator">=</span>guangdong, C<span class="operator">=</span>CN是否正确?</span><br><span class="line">  [否]:  Y</span><br><span class="line"><span class="number">1234567891011121314151617</span></span><br></pre></td></tr></table></figure>
+
+<p>上命令运行完成后就会生成证书，路径为“D:\test.keystore” 上面步骤切换的工作路径里</p>
+<p>注意：上述信息填写要规范，乱填有可能会影响应用上架应用市场。</p>
+<h3 id="查看证书信息"><a href="#查看证书信息" class="headerlink" title="查看证书信息"></a>查看证书信息</h3><p>可以使用以下命令查看：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">keytool <span class="operator">-</span>list <span class="operator">-</span>v <span class="operator">-</span>keystore test.keystore  </span><br><span class="line"><span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<p>会输出以下信息</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">输入密钥库口令:</span><br><span class="line">密钥库类型: PKCS12</span><br><span class="line">密钥库提供方: SUN</span><br><span class="line"></span><br><span class="line">您的密钥库包含 <span class="number">1</span> 个条目</span><br><span class="line"></span><br><span class="line">别名: testalias</span><br><span class="line">创建日期: <span class="number">2021</span>年<span class="number">7</span>月<span class="number">14</span>日</span><br><span class="line">条目类型: PrivateKeyEntry</span><br><span class="line">证书链长度: <span class="number">1</span></span><br><span class="line">证书[<span class="number">1</span>]:</span><br><span class="line">所有者: CN<span class="operator">=</span>panda, OU<span class="operator">=</span>APE, O<span class="operator">=</span>apache, L<span class="operator">=</span>qingcheng, ST<span class="operator">=</span>qingyuan, C<span class="operator">=</span>CN</span><br><span class="line">发布者: CN<span class="operator">=</span>panda, OU<span class="operator">=</span>APE, O<span class="operator">=</span>apache, L<span class="operator">=</span>qingcheng, ST<span class="operator">=</span>qingyuan, C<span class="operator">=</span>CN</span><br><span class="line">序列号: <span class="number">32</span>c4c4831891d686</span><br><span class="line">生效时间: Wed Jul <span class="number">14</span> <span class="number">09</span>:<span class="number">00</span>:<span class="number">17</span> CST <span class="number">2021</span>, 失效时间: Fri Jun <span class="number">20</span> <span class="number">09</span>:<span class="number">00</span>:<span class="number">17</span> CST <span class="number">2121</span></span><br><span class="line">证书指纹:</span><br><span class="line">         SHA1: BA:<span class="number">1</span>F:F0:<span class="number">46</span>:F6:AE:<span class="number">5</span>E:BF:<span class="number">4</span>E:E5:<span class="number">14</span>:<span class="number">70</span>:A3:B0:<span class="number">5</span>B:EC:<span class="number">8</span>D:<span class="number">74</span>:<span class="number">51</span>:F7</span><br><span class="line">         SHA256: <span class="number">24</span>:<span class="number">2</span>F:<span class="number">48</span>:<span class="number">28</span>:<span class="number">45</span>:<span class="number">97</span>:<span class="number">46</span>:C2:<span class="number">58</span>:<span class="number">28</span>:<span class="number">30</span>:C2:<span class="number">4</span>E:A2:<span class="number">4</span>F:<span class="number">96</span>:<span class="number">8</span>E:<span class="number">7</span>B:B1:<span class="number">24</span>:<span class="number">28</span>:F1:FA:<span class="number">31</span>:BF:D3:<span class="number">70</span>:BB:<span class="number">9</span>A:<span class="number">61</span>:<span class="number">2</span>F:CB</span><br><span class="line">签名算法名称: SHA256withRSA</span><br><span class="line">主体公共密钥算法: <span class="number">2048</span> 位 RSA 密钥</span><br><span class="line">版本: <span class="number">3</span></span><br><span class="line"><span class="number">123456789101112131415161718192021</span></span><br></pre></td></tr></table></figure>
+
+<p>当查看时，出现以下情况时，说明jdk的环境没配置好</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\panda<span class="operator">-</span>tu<span class="operator">&gt;</span>keytool <span class="operator">-</span>list <span class="operator">-</span>v <span class="operator">-</span>keystore test.keystore</span><br><span class="line"><span class="string">&#x27;keytool&#x27;</span> 不是内部或外部命令，也不是可运行的程序</span><br><span class="line">或批处理文件。</span><br><span class="line"><span class="number">123</span></span><br></pre></td></tr></table></figure>
+
+<p>可以用上面的方法，在工作目录下创建临时的环境</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\panda<span class="operator">-</span>tu<span class="operator">&gt;</span><span class="keyword">set</span> PATH<span class="operator">=</span><span class="operator">%</span>PATH<span class="operator">%</span>;&quot;C:\Program Files\Java\jdk1.8.0_301\bin&quot;</span><br><span class="line"><span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<p>继续操作即可</p>
+<p>参考：<a target="_blank" rel="noopener" href="https://ask.dcloud.net.cn/article/35777">https://ask.dcloud.net.cn/article/35777</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2025/02/19/Android%E5%B9%B3%E5%8F%B0%E7%AD%BE%E5%90%8D%E8%AF%81%E4%B9%A6(.keystore)%E7%94%9F%E6%88%90%E6%8C%87%E5%8D%97/">https://yhao521.github.io/2025/02/19/Android%E5%B9%B3%E5%8F%B0%E7%AD%BE%E5%90%8D%E8%AF%81%E4%B9%A6(.keystore)%E7%94%9F%E6%88%90%E6%8C%87%E5%8D%97/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/java-programming/">java/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/02/19/app%E5%BC%80%E5%8F%91--Android%E5%B9%B3%E5%8F%B0%E7%AD%BE%E5%90%8D%E8%AF%81%E4%B9%A6(.keystore%20.jks)%E7%94%9F%E6%88%90%E5%92%8C%E5%B8%B8%E8%A7%81%E9%94%99%E8%AF%AF%E6%80%BB%E7%BB%93/" title="app开发--Android平台签名证书(.keystore .jks)生成和常见错误总结"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">app开发--Android平台签名证书(.keystore .jks)生成和常见错误总结</div></div><div class="info-2"><div class="info-item-1">app开发后，最后需要打包发布。在Android平台打包发布apk应用，需要使用数字证书（.keystore文件）进行签名，用于表明开发者身份。下面总结一下。 一：环境安装安装JRE环境，如已安装可跳过。这里简单说一下步骤就行，不会就自行必应或者百度一下。1.下载JRE安装程序：打开Oracle官方网站（https://www.oracle.com/java/technologies/javase-jre8-downloads.html）或其他可信的Java软件分发站点。2.运行安装程序：下载完成后，双击安装程序运行。根据安装程序的指示，选择您希望安装Java JRE的位置和其他选项。通常情况下，您可以选择默认的安装选项。3.验证安装：安装完成后，您可以验证Java JRE是否成功安装。打开命令提示符（Windows用户可以按下Win + R，然后输入”cmd”并按下Enter键）。输入”java -version”命令并按下Enter键。如果您看到Java JRE的版本信息，则表示安装成功。4.配置环境变量打开“我的电脑”，右键点击“属性”，然后点击“高级系统设置”。点击“环境...</div></div></div></a><a class="pagination-related" href="/2025/02/19/Android%E4%BD%BF%E7%94%A8Gradle%E5%91%BD%E4%BB%A4%E5%8A%A8%E6%80%81%E4%BC%A0%E5%8F%82%E5%AE%8C%E6%88%90%E6%89%93%E5%8C%85%EF%BC%8C%E4%B8%8D%E9%9C%80%E8%A6%81%E4%BF%AE%E6%94%B9%E4%BB%A3%E7%A0%81/" title="Android使用Gradle命令动态传参完成打包，不需要修改代码"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Android使用Gradle命令动态传参完成打包，不需要修改代码</div></div><div class="info-2"><div class="info-item-1">Android使用Gradle命令动态传参完成打包，不需要修改代码不得不说，Gradle很强大，有人会问Gradle是什么？这里也不细讲，在我认为他就是一个构建神器。Gradle 提供了:  一个像 Ant 一样的非常灵活的通用构建工具 一种可切换的, 像 Maven 一样的基于合约构建的框架 支持强大的多工程构建 支持强大的依赖管理(基于 ApacheIvy ) 支持已有的 Maven 和 ivy 仓库 支持传递性依赖管理, 而不需要远程仓库或者 pom.xml 或者 ivy 配置文件 基于 Groovy 的构建脚本 有丰富的领域模型来描述你的构建   build.gradle文件  首先先来说说这个文件，大家都知道Android 项目默认目录下就有两个build.gradle文件，其实也类似Maven中的pom.xml文件，一个是Project范围的，另一个是Module范围的，由于一个Project可以有多个Module，所以每个Module下都会对应一个build.gradle。  这两个文件是有区别的，Project下的build.gradle是基于整个Project的...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2024/03/09/%E5%9B%BE%E8%A7%A3Java%E4%B8%AD%E9%82%A318%20%E6%8A%8A%E9%94%81/" title="图解Java中那18 把锁"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-09</div><div class="info-item-2">图解Java中那18 把锁</div></div><div class="info-2"><div class="info-item-1"> 本文首发我的微信公众号『爱笑的架构师』，欢迎大家关注。   乐观锁和悲观锁 独占锁和共享锁 互斥锁和读写锁 公平锁和非公平锁 可重入锁 自旋锁 分段锁 锁升级（无锁|偏向锁|轻量级锁|重量级锁） 锁优化技术（锁粗化、锁消除）  乐观锁和悲观锁悲观锁 悲观锁对应于生活中悲观的人，悲观的人总是想着事情往坏的方向发展。 举个生活中的例子，假设厕所只有一个坑位了，悲观锁上厕所会第一时间把门反锁上，这样其他人上厕所只能在门外等候，这种状态就是「阻塞」了。 回到代码世界中，一个共享数据加了悲观锁，那线程每次想操作这个数据前都会假设其他线程也可能会操作这个数据，所以每次操作前都会上锁，这样其他线程想操作这个数据拿不到锁只能阻塞了。   在 Java 语言中 synchronized 和 ReentrantLock等就是典型的悲观锁，还有一些使用了 synchronized 关键字的容器类如 HashTable 等也是悲观锁的应用。 乐观锁 乐观锁 对应于生活中乐观的人，乐观的人总是想着事情往好的方向发展。 举个生活中的例子，假设厕所只有一个坑位了，乐观锁认为：这荒郊野外的，又没有什么人，不会...</div></div></div></a><a class="pagination-related" href="/2026/05/15/Spring%20AI%20Redis%E5%90%91%E9%87%8F%E5%AD%98%E5%82%A8%E4%BE%9D%E8%B5%96%E8%A7%A3%E6%9E%90/" title="Spring AI Redis向量存储依赖解析"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-15</div><div class="info-item-2">Spring AI Redis向量存储依赖解析</div></div><div class="info-2"><div class="info-item-1">该依赖 spring-ai-starter-vector-store-redis 是 Spring AI 项目为 Redis 提供的向量存储（Vector Store）启动器，用于在 Spring Boot 应用中快速集成 Redis 作为向量数据库，实现语义搜索、推荐系统等基于向量相似度的功能。 1. 什么是 Spring AI Vector Store？Spring AI 是 Spring 生态系统中的 AI 工程化框架，它抽象了与 AI 模型（如 OpenAI、Hugging Face）和向量数据库的交互。Vector Store（向量存储）是其中用于存储和检索嵌入向量（Embeddings）的组件。通常流程：  将文本、图片等数据通过嵌入模型转换为向量。 将向量存入 Vector Store。 运行时将查询文本转为向量，并在 Vector Store 中进行相似性搜索，找到最相关的记录。  2. Redis 作为向量存储Redis 从 6.x 版本开始，通过 RediSearch 模块支持向量搜索功能。Spring AI 对 Redis 的支持依赖 Redis Stack...</div></div></div></a><a class="pagination-related" href="/2025/01/15/java%20bcprov%20%E5%9B%BD%E5%AF%86%20%E4%BE%9D%E8%B5%96%20jar%E5%8C%85%20%E7%89%88%E6%9C%AC%20%E5%8D%87%E7%BA%A7%20%E9%99%8D%E7%BA%A7%20%E6%95%99%E7%A8%8B/" title="java bcprov 国密 依赖 jar包 版本 升级 降级 教程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-01-15</div><div class="info-item-2">java bcprov 国密 依赖 jar包 版本 升级 降级 教程</div></div><div class="info-2"><div class="info-item-1">java bcprov 国密 依赖 jar包 版本 升级 降级 教程 更新记录 前言 一、org.bouncycastle下面的bcprov版本有哪些？ 二、升级降级说明  1、基线版本  （1）引入依赖 （2）关键代码  Cipher SM2 SM2Utils     2、版本区间1.48-1.59  （1）引入依赖 （2）关键代码  Cipher SM2 SM2Utils     3、版本区间1.38-1.47  （1）引入依赖 （2）关键代码  Cipher SM2 SM2Utils     4、版本区间1.50-1.63  （1）引入依赖 （2）关键代码  Cipher SM2 SM2Utils     5、版本区间1.64-1.75  （1）引入依赖 （2）关键代码  Cipher SM2 SM2Utils       总结   更新记录2023-05-221、调整1.64-1.72区间代码，SM2和SM2Utils类，之前这个区间的代码贴成1.50-1.63区间的了，很抱歉。  2023-06-271、“版本1.64-1.72区间”调整为”版本1.64-1.75区间”...</div></div></div></a><a class="pagination-related" href="/2023/09/04/windows%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E8%AE%BE%E7%BD%AE/" title="windows环境变量设置"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">windows环境变量设置</div></div><div class="info-2"><div class="info-item-1"> title: windows环境变量设置date: 2023-09-03 20:17:08category:  wintag: winauthor:   windows环境变量设置nodejs npm 环境变量解压安装；node-v12.8.0-win-x64.zip 123【NODE_HOME】=【D:\Develop\node-v12.8.0-win-x64\node_global】【NODE_PATH】=【%NODE_HOME%\node_modules】【Path】增加【%NODE_HOME%】  测试 命令行执行 12npm -vnode -v  JDK环境变量123【JAVA_HOME】=【E:\jdk\jdk1.7.0_80】【Path】增加【%JAVA_HOME%\bin;%JAVA_HOME%\jre\bin】【CLASSPATH】=【%JAVA_HOME%\lib\dt.jar;%JAVA_HOME%\lib\tools.jar】  测试 命令行执行 1java --version  linux 配置jdk环境变量vim &#x2F;etc&#x2F;pro...</div></div></div></a><a class="pagination-related" href="/2023/09/04/mac%E5%8D%B8%E8%BD%BD&%E5%AE%89%E8%A3%85jdk/" title="mac卸载&amp;安装jdk"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">mac卸载&amp;安装jdk</div></div><div class="info-2"><div class="info-item-1"> title: mac卸载&amp;安装jdkdate: 2023-09-03 20:17:08category:  mactag: macauthor:   mac卸载jdk1234567891011# 卸载家目录下的jdksudo rm -fr ~/Library/Application\ Support/Java# 卸载系统位置的jdksudo rm -rf /Library/Java/JavaVirtualMachines/jdk*.jdksudo rm -rf /Library/PreferencePanes/JavaControlPanel.prefPanesudo rm -fr /Library/PreferencesPanes/JavaControlPanel.prefpanesudo rm -rf /Library/Internet\ Plug-Ins/JavaAppletPlugin.pluginsudo rm -rf /Library/LaunchAgents/com.oracle.java.Java-Updater.plistsudo rm -rf /Li...</div></div></div></a><a class="pagination-related" href="/2024/10/21/%E5%85%B3%E4%BA%8ETypeScript%20%E6%89%A9%E5%B1%95%E5%85%A8%E5%B1%80%20Window%20%E6%97%B6%E6%8A%A5%E9%94%99%E3%80%8C%E7%B1%BB%E5%9E%8B%E2%80%9CWindow%20&%20typeof%20gl/" title="关于TypeScript 扩展全局 Window 时报错「类型“Window &amp; typeof globalThis”上不存在属性“xx”」的解决方案【TS+已解决】"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-10-21</div><div class="info-item-2">关于TypeScript 扩展全局 Window 时报错「类型“Window &amp; typeof globalThis”上不存在属性“xx”」的解决方案【TS+已解决】</div></div><div class="info-2"><div class="info-item-1">目录  问题描述 原因分析 问题解决 总结     问题描述在做 React + TypeScript 开发过程，给window对象添加属性并赋值时，发生报错，如下： 12类型“Window &amp; typeof globalThis”上不存在属性“_czc”。ts(2339)1    原因分析由于 TypeScript 需要开发者做到先声明后使用。 这就导致开发者在调用很多原生接口（浏览器window、Node.js）或者第三方模块的时候，因为某些全局变量或者对象的方法并没有声明过，导致编译器的类型检查失败。 通常情况下，我们给window对象赋值，只需要window.propoerty = &#39;xxx&#39;，但是在此处编译器或者检查器，并不认识window是什么，所以给出了错误提示。 需要将自定义变量扩展到全局 window 上，可通过在项目中添加类型文件或正常的 .ts 文件，只要在 tsconfig.json 配置范围内能找到即可。  问题解决只需要在某个 *.d.ts （TypeScript Declaration File）声明下即可 1234decla...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%9F%E6%88%90%E7%AD%BE%E5%90%8D%E8%AF%81%E4%B9%A6"><span class="toc-number">1.</span> <span class="toc-text">生成签名证书</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E8%AF%81%E4%B9%A6%E4%BF%A1%E6%81%AF"><span class="toc-number">2.</span> <span class="toc-text">查看证书信息</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

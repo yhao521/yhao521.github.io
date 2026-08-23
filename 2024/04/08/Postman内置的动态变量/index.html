@@ -1,0 +1,1188 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Postman内置的动态变量 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Postman使用faker library来生成动态数据。您可以生成随机姓名，地址，电子邮件地址等。您可以多次使用这些预定义的变量来为每个请求返回不同的值。 您可以像在Postman中使用任何其他变量一样使用这些变量。它们的值在执行时生成，并且它们的名称以$符号开头，例如$guid，$timestamp等等。 以下是动态变量的列表，其动态值在请求&#x2F;收集运行期间随机生成。  要在预请求或">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Postman内置的动态变量">
+<meta property="og:url" content="https://yhao521.github.io/2024/04/08/Postman%E5%86%85%E7%BD%AE%E7%9A%84%E5%8A%A8%E6%80%81%E5%8F%98%E9%87%8F/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="Postman使用faker library来生成动态数据。您可以生成随机姓名，地址，电子邮件地址等。您可以多次使用这些预定义的变量来为每个请求返回不同的值。 您可以像在Postman中使用任何其他变量一样使用这些变量。它们的值在执行时生成，并且它们的名称以$符号开头，例如$guid，$timestamp等等。 以下是动态变量的列表，其动态值在请求&#x2F;收集运行期间随机生成。  要在预请求或">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2024-04-07T23:14:32.000Z">
+<meta property="article:modified_time" content="2024-04-07T23:14:32.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="rust&#x2F;programming">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Postman内置的动态变量",
+  "url": "https://yhao521.github.io/2024/04/08/Postman%E5%86%85%E7%BD%AE%E7%9A%84%E5%8A%A8%E6%80%81%E5%8F%98%E9%87%8F/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2024-04-07T23:14:32.000Z",
+  "dateModified": "2024-04-07T23:14:32.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2024/04/08/Postman%E5%86%85%E7%BD%AE%E7%9A%84%E5%8A%A8%E6%80%81%E5%8F%98%E9%87%8F/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Postman内置的动态变量',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">Postman内置的动态变量</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Postman内置的动态变量</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-04-07T23:14:32.000Z" title="发表于 2024-04-08 07:14:32">2024-04-08</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-04-07T23:14:32.000Z" title="更新于 2024-04-08 07:14:32">2024-04-08</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>Postman使用<a target="_blank" rel="noopener" href="https://links.jianshu.com/go?to=https://www.npmjs.com/package/faker">faker library</a>来生成动态数据。您可以生成随机姓名，地址，电子邮件地址等。您可以多次使用这些预定义的变量来为每个请求返回不同的值。</p>
+<p>您可以像在Postman中使用任何其他变量一样使用这些变量。它们的值在执行时生成，并且它们的名称以<code>$</code>符号开头，例如<code>$guid</code>，<code>$timestamp</code>等等。</p>
+<p>以下是动态变量的列表，其动态值在请求&#x2F;收集运行期间随机生成。</p>
+<blockquote>
+<p>要在预请求或测试脚本中使用动态变量，您需要使用<code>pm.variables.replaceIn()</code>，例如<code>pm.variables.replaceIn(&#39;&#123;&#123;$randomFirstName&#125;&#125;&#39;)</code>。</p>
+</blockquote>
+<h3 id="常用"><a href="#常用" class="headerlink" title="常用"></a>常用</h3><table>
+<thead>
+<tr>
+<th><strong>变量名称</strong></th>
+<th><strong>描述</strong></th>
+<th><strong>例子</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>$guid</code></strong></td>
+<td>一个<code>uuid-v4</code>风格GUID</td>
+<td><code>&quot;611c2e81-2ccb-42d8-9ddc-2d0bfa65c1b4&quot;</code></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>&quot;3a721b7f-7dc9-4c45-9777-516942b98e0d&quot;</code></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>&quot;22eca807-006b-47df-9511-e92e37f5071a&quot;</code></td>
+</tr>
+<tr>
+<td><strong><code>$timestamp</code></strong></td>
+<td>当前UNIX时间戳（以秒为单位）</td>
+<td><code>1562757107</code>，<code>1562757108</code>，<code>1562757109</code></td>
+</tr>
+<tr>
+<td><strong><code>$isoTimestamp</code></strong></td>
+<td>当前ISO时间戳（UTC为零）</td>
+<td><code>2020-06-09T21:10:36.177Z</code></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>2019-10-21T06:05:50.000Z</code></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>2019-07-29T18:29:00.000Z</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomUUID</code></strong></td>
+<td>随机的36个字符的UUID</td>
+<td><code>&quot;6929bb52-3ab2-448a-9796-d6480ecad36b&quot;</code></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>&quot;53151b27-034f-45a0-9f0a-d7b6075b67d0&quot;</code></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>&quot;727131a2-2717-44ad-ab02-006587e947dc&quot;</code></td>
+</tr>
+</tbody></table>
+<h3 id="文字，数字和颜色"><a href="#文字，数字和颜色" class="headerlink" title="文字，数字和颜色"></a>文字，数字和颜色</h3><table>
+<thead>
+<tr>
+<th><strong>变量名称</strong></th>
+<th><strong>描述</strong></th>
+<th><strong>例子</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>$randomAlphaNumeric</code></strong></td>
+<td>随机字母数字字符</td>
+<td><code>6</code>，<code>&quot;y&quot;</code>，<code>&quot;z&quot;</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomBoolean</code></strong></td>
+<td>随机布尔值（真&#x2F;假）</td>
+<td><code>true</code>，<code>false</code>，<code>false</code>，<code>true</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomInt</code></strong></td>
+<td>1至1000之间的随机整数</td>
+<td><code>802</code>，<code>494</code>，<code>200</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomColor</code></strong></td>
+<td>随机颜色</td>
+<td><code>&quot;red&quot;</code>，<code>&quot;fuchsia&quot;</code>，<code>&quot;grey&quot;</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomHexColor</code></strong></td>
+<td>随机十六进制值</td>
+<td><code>&quot;#47594a&quot;</code>，<code>&quot;#431e48&quot;</code>，<code>&quot;#106f21&quot;</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomAbbreviation</code></strong></td>
+<td>随机缩写</td>
+<td><code>SQL</code>，<code>PCI</code>，<code>JSON</code></td>
+</tr>
+</tbody></table>
+<h3 id="互联网和IP地址"><a href="#互联网和IP地址" class="headerlink" title="互联网和IP地址"></a>互联网和IP地址</h3><table>
+<thead>
+<tr>
+<th><strong>变量名称</strong></th>
+<th><strong>描述</strong></th>
+<th><strong>例子</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>$randomIP</code></strong></td>
+<td>随机的IPv4地址</td>
+<td><code>241.102.234.100</code>， <code>216.7.27.38</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomIPV6</code></strong></td>
+<td>随机的IPv6地址</td>
+<td><code>dbe2:7ae6:119b:c161:1560:6dda:3a9b:90a9</code></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>c482:23a4:ce4c:a668:7736:6cc5:b0b6:cc37</code></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>c791:18d1:fbba:87d8:d929:22aa:5a0a:ac3d</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomMACAddress</code></strong></td>
+<td>随机MAC地址</td>
+<td><code>33:d4:68:5f:b4:c7</code>， <code>1f:6e:db:3d:ed:fa</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomPassword</code></strong></td>
+<td>随机的15个字符的字母数字密码</td>
+<td><code>t9iXe7COoDKv8k3</code>， <code>QAzNFQtvR9cg2rq</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomLocale</code></strong></td>
+<td>随机的两个字母的语言代码（ISO 639-1）</td>
+<td><code>&quot;ny&quot;</code>，<code>&quot;sr&quot;</code>，<code>&quot;si&quot;</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomUserAgent</code></strong></td>
+<td>随机用户代理</td>
+<td><code>Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.9.8; rv:15.6) Gecko/20100101 Firefox/15.6.6</code></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>Opera/10.27 (Windows NT 5.3; U; AB Presto/2.9.177 Version/10.00)</code></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>Mozilla/5.0 (Windows NT 6.2; rv:13.5) Gecko/20100101 Firefox/13.5.6</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomProtocol</code></strong></td>
+<td>随机互联网协议</td>
+<td><code>&quot;http&quot;</code>， <code>&quot;https&quot;</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomSemver</code></strong></td>
+<td>随机语义版本号</td>
+<td><code>7.0.5</code>，<code>2.5.8</code>，<code>6.4.9</code></td>
+</tr>
+</tbody></table>
+<h3 id="姓名"><a href="#姓名" class="headerlink" title="姓名"></a>姓名</h3><table>
+<thead>
+<tr>
+<th><strong>变量名称</strong></th>
+<th><strong>描述</strong></th>
+<th><strong>例子</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>$randomFirstName</code></strong></td>
+<td>随机名字</td>
+<td><code>Ethan</code>，<code>Chandler</code>，<code>Megane</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomLastName</code></strong></td>
+<td>随机姓氏</td>
+<td><code>Schaden</code>，<code>Schneider</code>，<code>Willms</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomFullName</code></strong></td>
+<td>随机的名字和姓氏</td>
+<td><code>Connie Runolfsdottir</code>，<code>Sylvan Fay</code>，<code>Jonathon Kunze</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomNamePrefix</code></strong></td>
+<td>随机名称前缀</td>
+<td><code>Dr.</code>，<code>Ms.</code>，<code>Mr.</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomNameSuffix</code></strong></td>
+<td>随机名称后缀</td>
+<td><code>I</code>，<code>MD</code>，<code>DDS</code></td>
+</tr>
+</tbody></table>
+<h3 id="职业"><a href="#职业" class="headerlink" title="职业"></a>职业</h3><table>
+<thead>
+<tr>
+<th><strong>变量名称</strong></th>
+<th><strong>描述</strong></th>
+<th><strong>例子</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>$randomJobArea</code></strong></td>
+<td>随机工作区</td>
+<td><code>Mobility</code>，<code>Intranet</code>，<code>Configuration</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomJobDescriptor</code></strong></td>
+<td>随机作业描述符</td>
+<td><code>Forward</code>，<code>Corporate</code>，<code>Senior</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomJobTitle</code></strong></td>
+<td>随机职位</td>
+<td><code>International Creative Liaison</code>，</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>Product Factors Officer</code>，</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>Future Interactions Executive</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomJobType</code></strong></td>
+<td>随机工作类型</td>
+<td><code>Supervisor</code>，<code>Manager</code>，<code>Coordinator</code></td>
+</tr>
+</tbody></table>
+<h3 id="电话，地址和位置"><a href="#电话，地址和位置" class="headerlink" title="电话，地址和位置"></a>电话，地址和位置</h3><table>
+<thead>
+<tr>
+<th><strong>变量名称</strong></th>
+<th><strong>描述</strong></th>
+<th><strong>例子</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>$randomPhoneNumber</code></strong></td>
+<td>随机的10位数电话号码</td>
+<td><code>700-008-5275</code>，<code>494-261-3424</code>，<code>662-302-7817</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomPhoneNumberExt</code></strong></td>
+<td>带扩展名的随机电话号码（12位数字）</td>
+<td><code>27-199-983-3864</code>， <code>99-841-448-2775</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomCity</code></strong></td>
+<td>随机城市名称</td>
+<td><code>Spinkahaven</code>，<code>Korbinburgh</code>，<code>Lefflerport</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomStreetName</code></strong></td>
+<td>随机的街道名称</td>
+<td><code>Kuhic Island</code>，<code>General Street</code>，<code>Kendrick Springs</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomStreetAddress</code></strong></td>
+<td>随机街道地址</td>
+<td><code>5742 Harvey Streets</code>， <code>47906 Wilmer Orchard</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomCountry</code></strong></td>
+<td>随机国家</td>
+<td><code>Lao People&#39;s Democratic Republic</code>，<code>Kazakhstan</code>，<code>Austria</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomCountryCode</code></strong></td>
+<td>随机的2个字母的国家&#x2F;地区代码（ISO 3166-1 alpha-2）</td>
+<td><code>CV</code>，<code>MD</code>，<code>TD</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomLatitude</code></strong></td>
+<td>随机纬度坐标</td>
+<td><code>55.2099</code>，<code>27.3644</code>，<code>-84.7514</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomLongitude</code></strong></td>
+<td>随机经度坐标</td>
+<td><code>40.6609</code>，<code>171.7139</code>，<code>-159.9757</code></td>
+</tr>
+</tbody></table>
+<h3 id="图片"><a href="#图片" class="headerlink" title="图片"></a>图片</h3><table>
+<thead>
+<tr>
+<th><strong>变量名称</strong></th>
+<th><strong>描述</strong></th>
+<th><strong>例子</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>$randomImage</code></strong></td>
+<td>随机图像</td>
+<td><code>http://lorempixel.com/640/480/technics</code></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>http://lorempixel.com/640/480/food</code></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>http://lorempixel.com/640/480/business</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomAvatarImage</code></strong></td>
+<td>随机头像</td>
+<td><code>https://s3.amazonaws.com/uifaces/faces/twitter/johnsmithagency/128.jpg</code></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>https://s3.amazonaws.com/uifaces/faces/twitter/xadhix/128.jpg</code></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>https://s3.amazonaws.com/uifaces/faces/twitter/martip07/128.jpg</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomImageUrl</code></strong></td>
+<td>随机图片的网址</td>
+<td><code>http://lorempixel.com/640/480</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomAbstractImage</code></strong></td>
+<td>随机抽象图片的网址</td>
+<td><code>http://lorempixel.com/640/480/abstract</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomAnimalsImage</code></strong></td>
+<td>随机动物图片的网址</td>
+<td><code>http://lorempixel.com/640/480/animals</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomBusinessImage</code></strong></td>
+<td>随机库存企业图片的网址</td>
+<td><code>http://lorempixel.com/640/480/business</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomCatsImage</code></strong></td>
+<td>随机猫图像的URL</td>
+<td><code>http://lorempixel.com/640/480/cats</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomCityImage</code></strong></td>
+<td>随机城市图片的网址</td>
+<td><code>http://lorempixel.com/640/480/city</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomFoodImage</code></strong></td>
+<td>随机食物图片的网址</td>
+<td><code>http://lorempixel.com/640/480/food</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomNightlifeImage</code></strong></td>
+<td>随机夜生活图片的网址</td>
+<td><code>http://lorempixel.com/640/480/nightlife</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomFashionImage</code></strong></td>
+<td>随机时尚图片的网址</td>
+<td><code>http://lorempixel.com/640/480/fashion</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomPeopleImage</code></strong></td>
+<td>一个人的随机图像的URL</td>
+<td><code>http://lorempixel.com/640/480/people</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomNatureImage</code></strong></td>
+<td>随机自然图像的URL</td>
+<td><code>http://lorempixel.com/640/480/nature</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomSportsImage</code></strong></td>
+<td>随机运动图像的URL</td>
+<td><code>http://lorempixel.com/640/480/sports</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomTechnicsImage</code></strong></td>
+<td>随机技术图片的网址</td>
+<td><code>http://lorempixel.com/640/480/technics</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomTransportImage</code></strong></td>
+<td>随机交通图片的网址</td>
+<td><code>http://lorempixel.com/640/480/transport</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomImageDataUri</code></strong></td>
+<td>随机图像数据URI</td>
+<td></td>
+</tr>
+</tbody></table>
+<h3 id="金融"><a href="#金融" class="headerlink" title="金融"></a>金融</h3><table>
+<thead>
+<tr>
+<th><strong>变量名称</strong></th>
+<th><strong>描述</strong></th>
+<th><strong>例子</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>$randomBankAccount</code></strong></td>
+<td>随机的8位数字银行帐号</td>
+<td><code>09454073</code>，<code>65653440</code>，<code>75728757</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomBankAccountName</code></strong></td>
+<td>随机的银行帐户名称（例如，储蓄帐户，支票帐户）</td>
+<td><code>Home Loan Account</code>，<code>Checking Account</code>，<code>Auto Loan Account</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomCreditCardMask</code></strong></td>
+<td>随机屏蔽的信用卡号</td>
+<td><code>3622</code>，<code>5815</code>，<code>6257</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomBankAccountBic</code></strong></td>
+<td>随机BIC（银行识别码）</td>
+<td><code>EZIAUGJ1</code>，<code>KXCUTVJ1</code>，<code>DIVIPLL1</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomBankAccountIban</code></strong></td>
+<td>15-31个字符的随机IBAN（国际银行帐号）</td>
+<td><code>MU20ZPUN3039684000618086155TKZ</code></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>BR7580569810060080800805730W2</code></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>XK241602002200395017</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomTransactionType</code></strong></td>
+<td>随机交易类型（例如发票，付款，存款）</td>
+<td><code>invoice</code>，<code>payment</code>，<code>deposit</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomCurrencyCode</code></strong></td>
+<td>随机的3个字母的货币代码（ISO-4217）</td>
+<td><code>CDF</code>，<code>ZMK</code>，<code>GNF</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomCurrencyName</code></strong></td>
+<td>随机货币名称</td>
+<td><code>CFP Franc</code>，<code>Cordoba Oro</code>，<code>Pound Sterling</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomCurrencySymbol</code></strong></td>
+<td>随机货币符号</td>
+<td><code>$</code>， <code>£</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomBitcoin</code></strong></td>
+<td>随机比特币地址</td>
+<td><code>3VB8JGT7Y4Z63U68KGGKDXMLLH5</code></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>1GY5TL5NEX3D1EA0TCWPLGVPQF5EAF</code></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>14IIEXV2AKZAHSCY2KNYP213VRLD</code></td>
+</tr>
+</tbody></table>
+<h3 id="商业"><a href="#商业" class="headerlink" title="商业"></a>商业</h3><table>
+<thead>
+<tr>
+<th><strong>变量名称</strong></th>
+<th><strong>描述</strong></th>
+<th><strong>例子</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>$randomCompanyName</code></strong></td>
+<td>随机公司名称</td>
+<td><code>Johns - Kassulke</code>， <code>Grady LLC</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomCompanySuffix</code></strong></td>
+<td>随机的公司后缀（例如，Inc，LLC，Group）</td>
+<td><code>Inc</code>，<code>LLC</code>，<code>Group</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomBs</code></strong></td>
+<td>商务说话的随机短语</td>
+<td><code>killer leverage schemas</code>，</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>bricks-and-clicks deploy markets</code>，</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>world-class unleash platforms</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomBsAdjective</code></strong></td>
+<td>随机的商务口语形容词</td>
+<td><code>viral</code>，<code>24/7</code>，<code>24/365</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomBsBuzz</code></strong></td>
+<td>随机企业说流行语</td>
+<td><code>repurpose</code>，<code>harness</code>，<code>transition</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomBsNoun</code></strong></td>
+<td>随机说话</td>
+<td><code>e-services</code>，<code>markets</code>，<code>interfaces</code></td>
+</tr>
+</tbody></table>
+<h3 id="标语（警句）"><a href="#标语（警句）" class="headerlink" title="标语（警句）"></a>标语（警句）</h3><table>
+<thead>
+<tr>
+<th><strong>变量名称</strong></th>
+<th><strong>描述</strong></th>
+<th><strong>例子</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>$randomCatchPhrase</code></strong></td>
+<td>随机的流行语</td>
+<td><code>Future-proofed heuristic open architecture</code>，</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>Quality-focused executive toolset</code>，</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>Grass-roots real-time definition</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomCatchPhraseAdjective</code></strong></td>
+<td>随机的流行语形容词</td>
+<td><code>Self-enabling</code>，<code>Business-focused</code>，<code>Down-sized</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomCatchPhraseDescriptor</code></strong></td>
+<td>随机标语描述符</td>
+<td><code>bandwidth-monitored</code>，<code>needs-based</code>，<code>homogeneous</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomCatchPhraseNoun</code></strong></td>
+<td>随机生成一个流行短语</td>
+<td><code>secured line</code>，<code>superstructure</code>，<code>installation</code></td>
+</tr>
+</tbody></table>
+<h3 id="数据库"><a href="#数据库" class="headerlink" title="数据库"></a>数据库</h3><table>
+<thead>
+<tr>
+<th><strong>变量名称</strong></th>
+<th><strong>描述</strong></th>
+<th><strong>例子</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>$randomDatabaseColumn</code></strong></td>
+<td>随机数据库列名称</td>
+<td><code>updatedAt</code>，<code>token</code>，<code>group</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomDatabaseType</code></strong></td>
+<td>随机数据库类型</td>
+<td><code>tinyint</code>， <code>text</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomDatabaseCollation</code></strong></td>
+<td>随机数据库排序规则</td>
+<td><code>cp1250_bin</code>，<code>utf8_general_ci</code>，<code>cp1250_general_ci</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomDatabaseEngine</code></strong></td>
+<td>随机数据库引擎</td>
+<td><code>MyISAM</code>，<code>InnoDB</code>，<code>Memory</code></td>
+</tr>
+</tbody></table>
+<h3 id="日期"><a href="#日期" class="headerlink" title="日期"></a>日期</h3><table>
+<thead>
+<tr>
+<th><strong>变量名称</strong></th>
+<th><strong>描述</strong></th>
+<th><strong>例子</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>$randomDateFuture</code></strong></td>
+<td>未来的随机日期时间</td>
+<td><code>Tue Mar 17 2020 13:11:50 GMT+0530 (India Standard Time)</code>，</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>Fri Sep 20 2019 23:51:18 GMT+0530 (India Standard Time)</code>，</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>Thu Nov 07 2019 19:20:06 GMT+0530 (India Standard Time)</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomDatePast</code></strong></td>
+<td>随机过去的日期时间</td>
+<td><code>Sat Mar 02 2019 09:09:26 GMT+0530 (India Standard Time)</code>，</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>Sat Feb 02 2019 00:12:17 GMT+0530 (India Standard Time)</code>，</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>Thu Jun 13 2019 03:08:43 GMT+0530 (India Standard Time)</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomDateRecent</code></strong></td>
+<td>最近的随机日期时间</td>
+<td><code>Tue Jul 09 2019 23:12:37 GMT+0530 (India Standard Time)</code>，</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>Wed Jul 10 2019 15:27:11 GMT+0530 (India Standard Time)</code>，</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>Wed Jul 10 2019 01:28:31 GMT+0530 (India Standard Time)</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomWeekday</code></strong></td>
+<td>随机工作日</td>
+<td><code>Thursday</code>，<code>Friday</code>，<code>Monday</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomMonth</code></strong></td>
+<td>随机月份</td>
+<td><code>February</code>，<code>May</code>，<code>January</code></td>
+</tr>
+</tbody></table>
+<h3 id="域，电子邮件和用户名"><a href="#域，电子邮件和用户名" class="headerlink" title="域，电子邮件和用户名"></a>域，电子邮件和用户名</h3><table>
+<thead>
+<tr>
+<th><strong>变量名称</strong></th>
+<th><strong>描述</strong></th>
+<th><strong>例子</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>$randomDomainName</code></strong></td>
+<td>随机域名</td>
+<td><code>gracie.biz</code>，<code>armando.biz</code>，<code>trevor.info</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomDomainSuffix</code></strong></td>
+<td>随机域后缀</td>
+<td><code>org</code>，<code>net</code>，<code>com</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomDomainWord</code></strong></td>
+<td>随机的不合格域名</td>
+<td><code>gwen</code>，<code>jaden</code>，<code>donnell</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomEmail</code></strong></td>
+<td>随机电子邮件地址</td>
+<td><code>Pablo62@gmail.com</code>，<code>Ruthe42@hotmail.com</code>，<code>Iva.Kovacek61@hotmail.com</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomExampleEmail</code></strong></td>
+<td>来自“示例”域的随机电子邮件地址</td>
+<td><code>Talon28@example.com</code>，<code>Quinten_Kerluke45@example.net</code>，<code>Casey81@example.net</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomUserName</code></strong></td>
+<td>随机用户名</td>
+<td><code>Jarrell.Gutkowski</code>，<code>Lottie.Smitham24</code>，<code>Alia99</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomUrl</code></strong></td>
+<td>随机网址</td>
+<td><code>https://anais.net</code>，<code>https://tristin.net</code>，<code>http://jakob.name</code></td>
+</tr>
+</tbody></table>
+<h3 id="文件和目录"><a href="#文件和目录" class="headerlink" title="文件和目录"></a>文件和目录</h3><table>
+<thead>
+<tr>
+<th><strong>变量名称</strong></th>
+<th><strong>描述</strong></th>
+<th><strong>例子</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>$randomFileName</code></strong></td>
+<td>随机文件名（包括不常见的扩展名）</td>
+<td><code>neural_sri_lanka_rupee_gloves.gdoc</code>，</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>plastic_awesome_garden.tif</code>，</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>incredible_ivory_agent.lzh</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomFileType</code></strong></td>
+<td>随机文件类型（包括不常见的文件类型）</td>
+<td><code>model</code>，<code>application</code>，<code>video</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomFileExt</code></strong></td>
+<td>随机文件扩展名（包括不常见的扩展名）</td>
+<td><code>war</code>，<code>book</code>，<code>fsc</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomCommonFileName</code></strong></td>
+<td>随机文件名</td>
+<td><code>well_modulated.mpg4</code>，</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>rustic_plastic_tuna.gif</code>，</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>checking_account_end_to_end_robust.wav</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomCommonFileType</code></strong></td>
+<td>随机的常见文件类型</td>
+<td><code>application</code>， <code>audio</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomCommonFileExt</code></strong></td>
+<td>随机的通用文件扩展名</td>
+<td><code>m2v</code>，<code>wav</code>，<code>png</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomFilePath</code></strong></td>
+<td>随机文件路径</td>
+<td><code>/home/programming_chicken.cpio</code>，</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>/usr/obj/fresh_bandwidth_monitored_beauty.onetoc</code>，</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>/dev/css_rustic.pm</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomDirectoryPath</code></strong></td>
+<td>随机目录路径</td>
+<td><code>/usr/bin</code>，<code>/root</code>，<code>/usr/local/bin</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomMimeType</code></strong></td>
+<td>随机MIME类型</td>
+<td><code>audio/vnd.vmx.cvsd</code>，</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>application/vnd.groove-identity-message</code>，</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>application/vnd.oasis.opendocument.graphics-template</code></td>
+</tr>
+</tbody></table>
+<h3 id="商店"><a href="#商店" class="headerlink" title="商店"></a>商店</h3><table>
+<thead>
+<tr>
+<th><strong>变量名称</strong></th>
+<th><strong>描述</strong></th>
+<th><strong>例子</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>$randomPrice</code></strong></td>
+<td>100.00至999.00之间的随机价格</td>
+<td><code>531.55</code>，<code>488.76</code>，<code>511.56</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomProduct</code></strong></td>
+<td>随机产品</td>
+<td><code>Towels</code>，<code>Pizza</code>，<code>Pants</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomProductAdjective</code></strong></td>
+<td>随机产品形容词</td>
+<td><code>Unbranded</code>，<code>Incredible</code>，<code>Tasty</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomProductMaterial</code></strong></td>
+<td>随机产品材料</td>
+<td><code>Steel</code>，<code>Plastic</code>，<code>Frozen</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomProductName</code></strong></td>
+<td>随机产品名称</td>
+<td><code>Handmade Concrete Tuna</code>， <code>Refined Rubber Hat</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomDepartment</code></strong></td>
+<td>随机贸易类别</td>
+<td><code>Tools</code>，<code>Movies</code>，<code>Electronics</code></td>
+</tr>
+</tbody></table>
+<h3 id="英语语法"><a href="#英语语法" class="headerlink" title="英语语法"></a>英语语法</h3><table>
+<thead>
+<tr>
+<th><strong>变量名称</strong></th>
+<th><strong>描述</strong></th>
+<th><strong>例子</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>$randomNoun</code></strong></td>
+<td>随机名词</td>
+<td><code>matrix</code>，<code>bus</code>，<code>bandwidth</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomVerb</code></strong></td>
+<td>随机动词</td>
+<td><code>parse</code>，<code>quantify</code>，<code>navigate</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomIngverb</code></strong></td>
+<td>以“ -ing”结尾的随机动词</td>
+<td><code>synthesizing</code>，<code>navigating</code>，<code>backing up</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomAdjective</code></strong></td>
+<td>随机形容词</td>
+<td><code>auxiliary</code>，<code>multi-byte</code>，<code>back-end</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomWord</code></strong></td>
+<td>随机词</td>
+<td><code>withdrawal</code>，<code>infrastructures</code>，<code>IB</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomWords</code></strong></td>
+<td>一些随机的单词</td>
+<td><code>Samoa Synergistic sticky copying Grocery</code>，</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>Corporate Springs</code>，</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>Christmas Island Ghana Quality</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomPhrase</code></strong></td>
+<td>随机短语</td>
+<td><code>You can&#39;t program the monitor without navigating the mobile XML program!</code>，</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>overriding the capacitor won&#39;t do anything, we need to compress the optical SMS transmitter!</code>，</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>I&#39;ll generate the virtual AI program, that should microchip the RAM monitor!</code></td>
+</tr>
+</tbody></table>
+<h3 id="文本内容（乱数假文）"><a href="#文本内容（乱数假文）" class="headerlink" title="文本内容（乱数假文）"></a>文本内容（乱数假文）</h3><table>
+<thead>
+<tr>
+<th><strong>变量名称</strong></th>
+<th><strong>描述</strong></th>
+<th><strong>例子</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>$randomLoremWord</code></strong></td>
+<td>文本的随机单词</td>
+<td><code>est</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomLoremWords</code></strong></td>
+<td>文本的一些随机词</td>
+<td><code>vel repellat nobis</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomLoremSentence</code></strong></td>
+<td>文本的随机句子</td>
+<td><code>Molestias consequuntur nisi non quod.</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomLoremSentences</code></strong></td>
+<td>文本的2-6个随机句子</td>
+<td><code>Et sint voluptas similique iure amet perspiciatis vero sequi atque. Ut porro sit et hic. Neque aspernatur vitae fugiat ut dolore et veritatis. Ab iusto ex delectus animi. Voluptates nisi iusto. Impedit quod quae voluptate qui.</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomLoremParagraph</code></strong></td>
+<td>文本的随机段落</td>
+<td><code>Ab aliquid odio iste quo voluptas voluptatem dignissimos velit. Recusandae facilis qui commodi ea magnam enim nostrum quia quis. Nihil est suscipit assumenda ut voluptatem sed. Esse ab voluptas odit qui molestiae. Rem est nesciunt est quis ipsam expedita consequuntur.</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomLoremParagraphs</code></strong></td>
+<td>文本的3个随机段落</td>
+<td><code>Voluptatem rem magnam aliquam ab id aut quaerat. Placeat provident possimus voluptatibus dicta velit non aut quasi. Mollitia et aliquam expedita sunt dolores nam consequuntur. Nam dolorum delectus ipsam repudiandae et ipsam ut voluptatum totam. Nobis labore labore recusandae ipsam quo.</code></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>Voluptatem occaecati omnis debitis eum libero. Veniam et cum unde. Nisi facere repudiandae error aperiam expedita optio quae consequatur qui. Vel ut sit aliquid omnis. Est placeat ducimus. Libero voluptatem eius occaecati ad sint voluptatibus laborum provident iure.</code></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>Autem est sequi ut tenetur omnis enim. Fuga nisi dolor expedita. Ea dolore ut et a nostrum quae ut reprehenderit iste. Numquam optio magnam omnis architecto non. Est cumque laboriosam quibusdam eos voluptatibus velit omnis. Voluptatem officiis nulla omnis ratione excepturi.</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomLoremText</code></strong></td>
+<td>随机数量的文本</td>
+<td><code>Quisquam asperiores exercitationem ut ipsum. Aut eius nesciunt. Et reiciendis aut alias eaque. Nihil amet laboriosam pariatur eligendi. Sunt ullam ut sint natus ducimus. Voluptas harum aspernatur soluta rem nam.</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomLoremSlug</code></strong></td>
+<td>随机 URL段</td>
+<td><code>eos-aperiam-accusamus</code>，<code>beatae-id-molestiae</code>，<code>qui-est-repellat</code></td>
+</tr>
+<tr>
+<td><strong><code>$randomLoremLines</code></strong></td>
+<td>1-5随机行</td>
+<td><code>Ducimus in ut mollitia.\nA itaque non.\nHarum temporibus nihil voluptas.\nIste in sed et nesciunt in quaerat sed.</code></td>
+</tr>
+</tbody></table>
+<p>官方原文：</p>
+<p><a target="_blank" rel="noopener" href="https://links.jianshu.com/go?to=https://learning.postman.com/docs/writing-scripts/script-references/variables-list/">https://learning.postman.com/docs/writing-scripts/script-references/variables-list/</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2024/04/08/Postman%E5%86%85%E7%BD%AE%E7%9A%84%E5%8A%A8%E6%80%81%E5%8F%98%E9%87%8F/">https://yhao521.github.io/2024/04/08/Postman%E5%86%85%E7%BD%AE%E7%9A%84%E5%8A%A8%E6%80%81%E5%8F%98%E9%87%8F/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a><a class="post-meta__tags" href="/tags/rust-programming/">rust/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/04/10/%E5%9C%A8Vue%E4%B8%AD%E6%80%8E%E4%B9%88%E4%BD%BF%E7%94%A8cookie%20%E4%B9%8B%20vue-cookies/" title="在Vue中怎么使用cookie 之 vue-cookies"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">在Vue中怎么使用cookie 之 vue-cookies</div></div><div class="info-2"><div class="info-item-1">cookie 在工作中比较常用, 可以自行封装一些 添加&#x2F;删除&#x2F;获取cookie的方法, 可参考这个在Vue中有个很好用的插件 vue-cookiesgithub地址：https://github.com/cmp-cc/vue-cookies 我们具体来看下怎么使用这个插件的使用 第一步：安装vue-cookie1npm install vue-cookie --save   (a). 默认值设置 1$cookies.config(expireTimes[,path[, domain[, secure[, sameSite]]])  默认: expireTimes &#x3D; 1d, path &#x3D; ‘&#x2F;‘, domain &#x3D; ‘’, secure &#x3D; ‘’, sameSite &#x3D; ‘’  expireTimes: 有效期 默认1d path: cookie 存放的路径 默认 ‘&#x2F;‘ domain: cookie所在的域，默认为请求地址 secure: cookie只能用https协议发送给服务器 s...</div></div></div></a><a class="pagination-related" href="/2024/04/07/HTML%20%E5%AD%97%E7%AC%A6%E5%AE%9E%E4%BD%93%20%EF%BC%9C(&amp;lt%EF%BC%9B)%E3%80%81%EF%BC%9E(&amp;gt%EF%BC%9B)%E7%AD%89/" title="HTML 字符实体 ＜(&amp;lt；)、＞(&amp;gt；)等"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">HTML 字符实体 ＜(&lt；)、＞(&gt；)等</div></div><div class="info-2"><div class="info-item-1">一、概述在 HTML 中，某些字符是预留的。 在 HTML 中不能使用小于号（&lt;）和大于号（&gt;），这是因为浏览器会误认为它们是标签。 如果希望正确地显示预留字符，我们必须在 HTML 源代码中使用字符实体（character entities）。字符实体类似如下：  &amp;entity_name;或者&amp;#entity_number;  如需显示小于号，我们必须这样写：&amp;lt; 或 &amp;#60; 注意：使用实体名而不是数字的好处是，名称易于记忆。不过坏处是，浏览器也许并不支持所有实体名称(对实体数字的支持却很好)。 二、不间断空格(non-breaking space)HTML 中的常用字符实体是不间断空格( )。 浏览器总是会截短 HTML 页面中的空格。如果在文本中写 10 个空格，在显示该页面之前，浏览器会删除它们中的 9 个。如需在页面中增加空格的数量，需要使用   字符实体。 HTML 中有用的字符实体：  三、sql 中大于等于小于的写法1️⃣小于等于 a&lt;&#x3D;ba &lt;&#x3D; ba &lt;![CDATA[...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/05/15/Gradle%E2%80%94%E2%80%94%E6%9E%84%E5%BB%BA%E8%84%9A%E6%9C%AC%E5%9F%BA%E7%A1%80/" title="Gradle——构建脚本基础"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-15</div><div class="info-item-2">Gradle——构建脚本基础</div></div><div class="info-2"><div class="info-item-1">1、项目（project）和任务（task） Gradle中的任何事都基于两个基本概念：项目（project）和任务（task） 每一个构建（build）都是由一个或多个项目组成的。一个项目代表什么取决于你使用Gradle做什么。例如，一个项目也许代表一个库或者一个web应用程序，它也许代表一个由其他项目产生的JAR文件组成的ZIP。一个工程不一定代表一件要去构建的事，它也许代表一件要去做的事情，例如将你的应用程序部署到工作台或者生产环境。现在看来，这些概念似乎有一点模糊，不过别担心，Gradle的基于约定的构建会对一个项目是什么有更具体的定义。 每一个项目由一个或多个任务（task）组成，一个任务代表一些执行构建工作的最小工作单元。它也许编译一些类，创建一个JAR，生成Javadoc文档，或者向库发布一些文档。一个build包含多个project，一个project包含多个task 现在，我们将在一个项目中定义一些简单的任务，后面的章节将会使用多个项目，并且还有更多关于使用项目和任务的知识。 2、Hello World 你可以使用gradle命令运行Gradle的构建。grad...</div></div></div></a><a class="pagination-related" href="/2023/09/04/mac%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7/" title="mac命令行工具"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">mac命令行工具</div></div><div class="info-2"><div class="info-item-1"> title: mac命令行工具date: 2023-09-03 20:17:08category:  mactag: macauthor:   8个不可不知的Mac OS X专用命令行工具OS X的终端下通用很多Unix的工具和脚本。如果从Linux迁移到OS X会发现很多熟悉的命令和脚本工具，其实并没有任何区别。 但是OS X也提供了很多其他系统所没有的特别的命令行工具。我们推荐8个这类的工具，希望有助于提高在Mac的命令行环境下的效率。 1. openopen命令用于打开文件、目录或执行程序。就等同于在命令行模式下，重复图形界面“双击”的动作。例如这个命令与在Finder中双击Safari是一样的： 1$ open /Applications/Safari.app/  如果open一个文件，则会使用关联的程序打开之。例如open screenshot.png会在Preview中查看图片。 可以使用-a选项要求自行选择打开的程序，或使用-e强制在TextEdit中编辑此文件。 open一个目录会在Finder窗口中打开此目录。一个很有用的技巧是open .打开当前目录。 Fi...</div></div></div></a><a class="pagination-related" href="/2024/04/14/Vue3+TypeScript%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E8%BF%9B%E9%98%B6%EF%BC%88%E4%B8%83%EF%BC%89%E2%80%94%E2%80%94%E9%A1%B9%E7%9B%AE%E5%AE%9E%E6%88%98/" title="Vue3+TypeScript从入门到进阶（七）——项目实战"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-14</div><div class="info-item-2">Vue3+TypeScript从入门到进阶（七）——项目实战</div></div><div class="info-2"><div class="info-item-1">文章目录   一、简介 二、Vue2和Vue3区别 三、Vue知识点学习 四、TypeScript知识点 五、项目实战  一. 代码规范  1.1. 集成editorconfig配置 1.2. 使用prettier工具 1.3. 使用ESLint检测 1.4. git Husky和eslint 1.5. git commit规范  1.5.1. 代码提交风格 1.5.2. 代码提交验证     二. 第三方库集成  2.1. vue.config.js配置 2.2. vue-router集成 2.3. vuex集成 2.4. element-plus集成  2.4.1. 全局引入 2.4.2. 局部引入 2.4.3 element-plus的icon引入   2.5. axios集成 2.6. VSCode配置     六、项目打包和自动化部署 七、沿途学习代码地址及案例地址  1、沿途学习代码地址 2、项目案例地址   八、知识拓展  1、ES6数组与对象的解构赋值详解  数组的解构赋值 对象的解构赋值 字符串的解构赋值   2、JavaScript的 …（展开运算符） 3、e...</div></div></div></a><a class="pagination-related" href="/2026/05/15/SUPPORT-Haoyun-Music/" title="SUPPORT-Haoyun-Music"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-15</div><div class="info-item-2">SUPPORT-Haoyun-Music</div></div><div class="info-2"><div class="info-item-1">☕ 支持 Haoyun Music Player 开发Haoyun Music Player 是一个开源免费的音乐播放器，如果您觉得它对您有帮助，欢迎通过以下方式支持开发者继续改进！  💳 捐赠方式💙 支付宝扫描下方二维码即可捐赠：  💚 微信支付扫描下方二维码即可捐赠：   🙏 感谢您的支持每一份支持都是对我们最大的鼓励！您的捐赠将用于：  ✨ 持续功能开发和优化 🐛 Bug 修复和性能提升 🎨 更好的用户体验设计   📝 关于项目Haoyun Music Player 基于以下技术构建：  Go 1.25 - 高性能后端 Wails v3 - 跨平台桌面应用框架 Vue 3 - 现代化前端框架 Oto v3 - 音频播放库 FFmpeg - 多媒体处理    💝 Haoyun Music Player | Made with ❤️ for music lovers   📊 项目信息 版本: 0.0.X 许可证: 开源免费 技术支持: Go + Wails3 + Vue 3 平台: macOS &#x2F; Windows &#x2F; Linux   感谢您...</div></div></div></a><a class="pagination-related" href="/2023/09/04/ARM%E6%9E%B6%E6%9E%84%E4%B8%8BKubernetes%E9%9B%86%E7%BE%A4%E7%9A%84%E6%90%AD%E5%BB%BA/" title="ARM架构下Kubernetes集群的搭建"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">ARM架构下Kubernetes集群的搭建</div></div><div class="info-2"><div class="info-item-1"> title: ARM架构下Kubernetes集群的搭建date: 2023-09-03 20:17:08category:  doc_dockertag: doc_dockerauthor:   ARM架构下Kubernetes集群的搭建机器信息：三台linux&#x2F;arm64架构系统版本：centos7.6版本    主机名称 IP地址 说明 软件    Master01 192.168.100.21 master节点 kube-apiserver、kube-controller-manager、kube-scheduler、etcd、 kubelet、kube-proxy   Node01 192.168.100.22 node节点 kubelet、kube-proxy   Node02 192.168.100.23 node节点 kubelet、kube-proxy   安装配置环境设置主机名 123hostnamectl set-hostname k8s-master01hostnamectl set-hostname k8s-node01hostnamectl...</div></div></div></a><a class="pagination-related" href="/2023/09/04/openssl%E5%8D%87%E7%BA%A7%E5%92%8C%E5%9B%9E%E6%BB%9A/" title="openssl升级和回滚"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">openssl升级和回滚</div></div><div class="info-2"><div class="info-item-1"> title: openssl升级和回滚date: 2023-09-03 20:17:08category:  mactag: macauthor:   CentOS系统下的OpenSSL版本升级操作记录需要部署nginx的https环境，之前是yum安装的openssl，版本比较低，如下：12345678910[root@nginx ~]# yum install -y pcre pcre-devel openssl openssl-devel gcc[root@nginx ~]# openssl version -aOpenSSL 1.0.1e-fips 11 Feb 2013built on: Wed Mar 22 21:43:28 UTC 2017platform: linux-x86_64options:  bn(64,64) md2(int) rc4(16x,int) des(idx,cisc,16,int) idea(int) blowfish(idx)compiler: gcc -fPIC -DOPENSSL_PIC -DZLIB -DOPENSSL_THREAD...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B8%B8%E7%94%A8"><span class="toc-number">1.</span> <span class="toc-text">常用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%87%E5%AD%97%EF%BC%8C%E6%95%B0%E5%AD%97%E5%92%8C%E9%A2%9C%E8%89%B2"><span class="toc-number">2.</span> <span class="toc-text">文字，数字和颜色</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%92%E8%81%94%E7%BD%91%E5%92%8CIP%E5%9C%B0%E5%9D%80"><span class="toc-number">3.</span> <span class="toc-text">互联网和IP地址</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A7%93%E5%90%8D"><span class="toc-number">4.</span> <span class="toc-text">姓名</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%81%8C%E4%B8%9A"><span class="toc-number">5.</span> <span class="toc-text">职业</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%B5%E8%AF%9D%EF%BC%8C%E5%9C%B0%E5%9D%80%E5%92%8C%E4%BD%8D%E7%BD%AE"><span class="toc-number">6.</span> <span class="toc-text">电话，地址和位置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%BE%E7%89%87"><span class="toc-number">7.</span> <span class="toc-text">图片</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%87%91%E8%9E%8D"><span class="toc-number">8.</span> <span class="toc-text">金融</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%95%86%E4%B8%9A"><span class="toc-number">9.</span> <span class="toc-text">商业</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%87%E8%AF%AD%EF%BC%88%E8%AD%A6%E5%8F%A5%EF%BC%89"><span class="toc-number">10.</span> <span class="toc-text">标语（警句）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="toc-number">11.</span> <span class="toc-text">数据库</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%97%A5%E6%9C%9F"><span class="toc-number">12.</span> <span class="toc-text">日期</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%9F%EF%BC%8C%E7%94%B5%E5%AD%90%E9%82%AE%E4%BB%B6%E5%92%8C%E7%94%A8%E6%88%B7%E5%90%8D"><span class="toc-number">13.</span> <span class="toc-text">域，电子邮件和用户名</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E5%92%8C%E7%9B%AE%E5%BD%95"><span class="toc-number">14.</span> <span class="toc-text">文件和目录</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%95%86%E5%BA%97"><span class="toc-number">15.</span> <span class="toc-text">商店</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%8B%B1%E8%AF%AD%E8%AF%AD%E6%B3%95"><span class="toc-number">16.</span> <span class="toc-text">英语语法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%87%E6%9C%AC%E5%86%85%E5%AE%B9%EF%BC%88%E4%B9%B1%E6%95%B0%E5%81%87%E6%96%87%EF%BC%89"><span class="toc-number">17.</span> <span class="toc-text">文本内容（乱数假文）</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

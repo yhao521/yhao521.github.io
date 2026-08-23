@@ -1,0 +1,232 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Git删除分支&amp;恢复分支 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="title: Git删除分支&amp;恢复分支date: 2023-09-03 20:17:08category:  gittag: gitauthor:   Git删除分支&#x2F;恢复分支  • 删除一个已被终止的分支 如果需要删除的分支不是当前正在打开的分支，使用branch -d直接删除 git branch -d  • 删除一个正打开的分支 如果我们在试图删除一个分支时自己还没转移到">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Git删除分支&amp;恢复分支">
+<meta property="og:url" content="https://yhao521.github.io/2023/09/04/Git%E5%88%A0%E9%99%A4%E5%88%86%E6%94%AF&%E6%81%A2%E5%A4%8D%E5%88%86%E6%94%AF/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="title: Git删除分支&amp;恢复分支date: 2023-09-03 20:17:08category:  gittag: gitauthor:   Git删除分支&#x2F;恢复分支  • 删除一个已被终止的分支 如果需要删除的分支不是当前正在打开的分支，使用branch -d直接删除 git branch -d  • 删除一个正打开的分支 如果我们在试图删除一个分支时自己还没转移到">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2023-09-04T03:18:09.000Z">
+<meta property="article:modified_time" content="2023-09-04T03:18:27.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Git删除分支&恢复分支",
+  "url": "https://yhao521.github.io/2023/09/04/Git%E5%88%A0%E9%99%A4%E5%88%86%E6%94%AF&%E6%81%A2%E5%A4%8D%E5%88%86%E6%94%AF/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2023-09-04T03:18:09.000Z",
+  "dateModified": "2023-09-04T03:18:27.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2023/09/04/Git%E5%88%A0%E9%99%A4%E5%88%86%E6%94%AF&amp;%E6%81%A2%E5%A4%8D%E5%88%86%E6%94%AF/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Git删除分支&恢复分支',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">Git删除分支&amp;恢复分支</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Git删除分支&amp;恢复分支</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-09-04T03:18:09.000Z" title="发表于 2023-09-04 11:18:09">2023-09-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-09-04T03:18:27.000Z" title="更新于 2023-09-04 11:18:27">2023-09-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><hr>
+<p>title: Git删除分支&amp;恢复分支<br>date: 2023-09-03 20:17:08<br>category:</p>
+<ul>
+<li>git<br>tag:</li>
+<li>git<br>author:</li>
+</ul>
+<hr>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/utank/p/7880441.html">Git删除分支&#x2F;恢复分支</a></p>
+<p> <strong>• 删除一个已被终止的分支</strong></p>
+<p>如果需要删除的分支不是当前正在打开的分支，使用branch -d直接删除</p>
+<p>git branch -d <branch_name></p>
+<p><strong>• 删除一个正打开的分支</strong></p>
+<p>如果我们在试图删除一个分支时自己还没转移到另外的分支上，Git就会给出一个警告，并拒绝该删除操作。</p>
+<p>如果坚持要删除该分支的话，就需要在命令中使用-D选项。</p>
+<p>git branch -D <branch_name></p>
+<p><strong>• 恢复被删除的分支</strong></p>
+<p>Git会自行负责分支的管理，所以当我们删除一个分支时，Git只是删除了指向相关提交的指针，但该提交对象依然会留在版本库中。</p>
+<p>因此，如果我们知道删除分支时的散列值，就可以将某个删除的分支恢复过来。在已知提交的散列值的情况下恢复某个分支：</p>
+<p>git branch <branch_name> <hash_val></p>
+<p>如果我们不知道想要恢复的分支的散列值，可以用reflog命令将它找出来。如：</p>
+<p><img src="https://images2017.cnblogs.com/blog/333765/201711/333765-20171122174127727-218732455.jpg"><br><img src="/img/16396252221256.jpg"></p>
+<p><strong>reflog命令</strong>：</p>
+<p>显示整个本地仓储的commit，包括所有branch的commit，甚至包括已经撤销的commit。</p>
+<p>只要HEAD发生了变化， 就会在reflog里面看得到。</p>
+<p>这时恢复分支a_branch分支如下：</p>
+<p>git branch <branch_name> HEAD@{4}</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2023/09/04/Git%E5%88%A0%E9%99%A4%E5%88%86%E6%94%AF&amp;%E6%81%A2%E5%A4%8D%E5%88%86%E6%94%AF/">https://yhao521.github.io/2023/09/04/Git%E5%88%A0%E9%99%A4%E5%88%86%E6%94%AF&amp;%E6%81%A2%E5%A4%8D%E5%88%86%E6%94%AF/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2023/09/04/Homebrew%E5%8D%B8%E8%BD%BD%E8%BD%AF%E4%BB%B6%E5%8F%8A%E5%85%B6%E4%BE%9D%E8%B5%96%E5%8C%85/" title="Homebrew卸载软件及其依赖包"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Homebrew卸载软件及其依赖包</div></div><div class="info-2"><div class="info-item-1"> title: Homebrew卸载软件及其依赖包date: 2023-09-03 20:17:08category:  mactag: macauthor:   Homebrew卸载软件及其依赖包brew uninstall xxx卸载软件只会卸载软件本身而不会同时卸载其依赖包 使用以下命令可完全卸载，并且不会影响到其他软件 1brew rmtree xxx  需要安装以下工具 123brew tap beeftornado/rmtreebrew install brew-rmtree  说明：在核心仓库找不到brew-rmtree，brew tap用来安装第三方的仓库进一步安装所需要的软件 卸载 使用以下命令可完全卸载maven以及安装maven时所依赖的其它软件 1brew rmtree maven  卸载过程如图所示  </div></div></div></a><a class="pagination-related" href="/2023/09/04/Docker%20Desktop%E8%87%AA%E5%B8%A6k8s%E5%AE%89%E8%A3%85/" title="Docker Desktop自带k8s安装"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Docker Desktop自带k8s安装</div></div><div class="info-2"><div class="info-item-1"> title: Docker Desktop自带k8s安装date: 2023-09-03 20:17:08category:  doc_dockertag: doc_dockerauthor:   Docker Desktop自带k8s安装安装一个k8s还是一个比较复杂的事情，但是Docker Desktop已经自带了一个简易版的k8s，可以基本满足正常的学习使用安装Docker对于Mac用户，请点击Docker Desktop 对于Windows10用户，请点击Docker Desktop。其他平台的用户就使用Minkube。 配置docker的国内镜像国内的网络下载可能比较慢，建议使用下面的镜像 1234567891011&#123;  &quot;registry-mirrors&quot;: [    &quot;https://dockerhub.azk8s.cn&quot;,    &quot;https://registry.docker-cn.com&quot;,    &quot;https://docker.mirrors.ustc.edu.cn&quot;...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/05/15/%E6%8F%92%E4%BB%B6%E7%9F%A5%E5%A4%9A%E5%B0%91%EF%BC%9AExcalidraw%20%E5%AE%8C%E7%BE%8E%E7%9A%84%E7%BB%98%E5%9B%BE%E5%B7%A5%E5%85%B7/" title="插件知多少：Excalidraw 完美的绘图工具"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-15</div><div class="info-item-2">插件知多少：Excalidraw 完美的绘图工具</div></div><div class="info-2"><div class="info-item-1"> 本文已收录至 PKMer 网站，原作者：windilycloud，略有删改   Excalidraw  Excalidraw 插件信息插件名称：Excalidraw插件作者：Zsolt Viczian插件说明：在 Obsidian 中 使用 Excalidraw 绘图项目地址：点我访问国内下载地址：PKMer插件市场   什么是 Excalidraw？ Excalidraw 本是开源的在线协作手写软件，来自匈牙利的 Zsolt Viczian 大叔将其融合进了 Obsidian。这个融合是高度融合，目前与原项目已经大相径庭了，主要差别在于对 Obsidian 的适配，包括双链，文件拖拽，嵌入笔记并实时更新，脚本系统，图库系统，手写压感，pdf 批注和引用等。 这样强大的插件，完全可以当作一个独立的软件来学习！这个大叔倡导的是视觉化笔记，笔记方法也很值得参考。大叔在官方 Github 项目下录有数十个从入门到进阶的教程，并有分享笔记方法在 Youtube 上。本文只起到一个引导的作用，很难面面俱到 Excalidraw 插件的功能，非常强大。  Excalidraw 与 mark...</div></div></div></a><a class="pagination-related" href="/2023/09/04/js%E6%96%87%E4%BB%B6%E7%94%9F%E6%88%90d.ts/" title="js文件生成d.ts"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">js文件生成d.ts</div></div><div class="info-2"><div class="info-item-1"> title: tsdate: 2023-09-03 20:17:08category: tag: author:  js文件生成d.ts npm i dtsmake -g npm i tern –save-dev dtsmake -s fileame.js  详情：http://npm.taobao.org/package/dtsmake 第二种方法：tsc1234# 全局安装typescriptnpm install typescript -g# 测试安装是否成功tsc --version  使用： 1234# 后缀名改为.tscp ./path-to/my-file.js ./my-file.ts# 从.ts生成d.tstsc --declaration my-file.ts </div></div></div></a><a class="pagination-related" href="/2023/09/04/mysql%E5%87%BA%E7%8E%B0ERROR%20%20(2006,%20%E2%80%98MySQL%20server%20has%20gone%20away%E2%80%98)/" title="mysql出现ERROR  (2006, ‘MySQL server has gone away‘)"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">mysql出现ERROR  (2006, ‘MySQL server has gone away‘)</div></div><div class="info-2"><div class="info-item-1"> title: mysql出现ERROR (2006, ‘MySQL server has gone away‘)date: 2023-09-04 17:49:38permalink: &#x2F;pages&#x2F;a04f1d&#x2F;category:  数据库 doc_mysqltag: doc_mysqlauthor:   mysql出现ERROR(2006, ‘MySQL server has gone away‘)一、问题分析：    mysql出现ERROR : (2006, &#39;MySQL server has gone away&#39;) 的问题意思就是指client和MySQL server之间的链接断开了。  二、原因：     造成这样的原因，最常见的就是采集或者新旧数据转化：  一般说sql操作的时间过长，或者是传送的数据太大(例如使用insert … values的语句过长， 这种情况可以通过修改max_allowed_packed的配置参数来避免，也可以在程序中将数据分批插入(使用mysql limit进行分页，循环分批处理数据))； ...</div></div></div></a><a class="pagination-related" href="/2023/09/04/npm%20%E4%B8%8B%E8%BD%BD%E4%BE%9D%E8%B5%96%E5%A4%B1%E8%B4%A5/" title="npm 下载依赖失败"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">npm 下载依赖失败</div></div><div class="info-2"><div class="info-item-1"> title: npm 下载依赖失败date: 2023-09-03 20:17:08category:  开发语言 doc_nodejstag: doc_nodejsauthor:   npm 下载依赖失败npm ERR Error while executing npm ERR npm ERR! Error while executing:npm ERR! d:\Program Files\Git\cmd\git.EXE ls-remote -h -t https://github.com/nhn/raphael.gitnpm ERR!npm ERR! fatal: unable to access ‘https://github.com/nhn/raphael.git/‘: OpenSSL SSL_read: Connection was reset, errno 10054npm ERR!npm ERR! exited with error code: 128  执行：git config –global url.”https:&#x2F;&#x2F;“.insteadO...</div></div></div></a><a class="pagination-related" href="/2025/03/18/Cypress%20vs%20Playwright%E2%80%94%E2%80%94%E5%93%AA%E4%B8%AA%20JavaScript%20%E6%B5%8B%E8%AF%95%E6%A1%86%E6%9E%B6%E6%9B%B4%E5%A5%BD%EF%BC%9F/" title="Cypress vs Playwright——哪个 JavaScript 测试框架更好？"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-18</div><div class="info-item-2">Cypress vs Playwright——哪个 JavaScript 测试框架更好？</div></div><div class="info-2"><div class="info-item-1"> 10 年前，自动化测试人员如果要编写 E2E 测试，主要使用 Selenium。每个有机会使用该解决方案的人都应该会记得设置、编写和调试是多么不愉快。在此过程中还创建了一些更有趣的自动化工具，例如 Webdriver.io、TestCafe、Nightwatch.js 和 Puppeteer。但是我们今天不会关注那些，因为我想谈谈Cypress和Playwright中测试自动化的几个问题。Cypress 和 Playwright是目前为测试实现创建理想工具的顶级框架。 两个框架，相似……  Cypress 是一种基于 JavaScript 的前端测试工具。设计为对开发人员友好，它直接在浏览器中运行。 Cypress 的第一个版本于 2015 年发布，并于 2018 年开始真正流行，并于 2020 年筹集了 4000 万美元的 B 轮融资。他们以开源为荣，他们相信这将帮助他们在竞争中取得领先。Playwright（微软），于2020年发布。它是一个用于端到端测试的跨浏览器自动化库，也是开源的。它最初是一个 JavaScript 库，但现在已经扩展到还支持 Python、NET 和...</div></div></div></a><a class="pagination-related" href="/2024/05/08/Unsupported%20Java.%20Your%20build%20is%20currently%20configur/" title="Unsupported Java. Your build is currently configured to use Java 17.0.6 and Gradle 6.8.3."><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-05-08</div><div class="info-item-2">Unsupported Java. Your build is currently configured to use Java 17.0.6 and Gradle 6.8.3.</div></div><div class="info-2"><div class="info-item-1">Unsupported Java. Your build is currently configured to use Java 17.0.6 and Gradle 6.8.3. 翻译： 不支持的 Java。您的构建当前配置为使用 Java 17.0.6 和 Gradle 6.8.3。 这个翻译害死人，其实要表达的意思就是 gradle 版本和 java 版本不匹配，导致无法编译成功 知道版本不匹配，那就简单了 那么现在就有两个选择：  改 java 版本 改 gradle 版本  我们改哪个呢？ 首先是，一般出现这种情况多数是导入别人的项目，如果是团队合作，你选择改gradle版本的话，代码一旦提交，就面临着团队所有人都需要跟着升级的情况，如果别人本地的java环境不支持还得再更新java环境 所以这里选择使用第一种方案，更改本地的 java 环境版本 那具体应该更换成哪个版本的 java 呢？这里提供一个对应关系 在android开发环境中，gradle 版本和 java 版本的对应关系    Gradle 版本 所支持的 JDK 版本    6.x JDK 8、JDK 11...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

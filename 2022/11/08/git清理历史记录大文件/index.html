@@ -1,0 +1,211 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>git清理历史记录大文件 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="#1.找出大文件的前5个   git verify-pack -v .git&#x2F;objects&#x2F;pack&#x2F;pack-*.idx | sort -k 3 -g | tail -5#2.找出大文件的文件名   git rev-list –objects –all | grep 8f10eff91bb6aa2de1f5d096ee2e1687b0eab007#3.根据HSA值">
+<meta property="og:type" content="article">
+<meta property="og:title" content="git清理历史记录大文件">
+<meta property="og:url" content="https://yhao521.github.io/2022/11/08/git%E6%B8%85%E7%90%86%E5%8E%86%E5%8F%B2%E8%AE%B0%E5%BD%95%E5%A4%A7%E6%96%87%E4%BB%B6/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="#1.找出大文件的前5个   git verify-pack -v .git&#x2F;objects&#x2F;pack&#x2F;pack-*.idx | sort -k 3 -g | tail -5#2.找出大文件的文件名   git rev-list –objects –all | grep 8f10eff91bb6aa2de1f5d096ee2e1687b0eab007#3.根据HSA值">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2022-11-07T20:40:43.000Z">
+<meta property="article:modified_time" content="2022-11-07T20:40:43.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "git清理历史记录大文件",
+  "url": "https://yhao521.github.io/2022/11/08/git%E6%B8%85%E7%90%86%E5%8E%86%E5%8F%B2%E8%AE%B0%E5%BD%95%E5%A4%A7%E6%96%87%E4%BB%B6/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2022-11-07T20:40:43.000Z",
+  "dateModified": "2022-11-07T20:40:43.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2022/11/08/git%E6%B8%85%E7%90%86%E5%8E%86%E5%8F%B2%E8%AE%B0%E5%BD%95%E5%A4%A7%E6%96%87%E4%BB%B6/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'git清理历史记录大文件',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">git清理历史记录大文件</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">git清理历史记录大文件</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-11-07T20:40:43.000Z" title="发表于 2022-11-08 04:40:43">2022-11-08</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-11-07T20:40:43.000Z" title="更新于 2022-11-08 04:40:43">2022-11-08</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>#1.找出大文件的前5个<br>   git verify-pack -v .git&#x2F;objects&#x2F;pack&#x2F;pack-*.idx | sort -k 3 -g | tail -5<br>#2.找出大文件的文件名<br>   git rev-list –objects –all | grep 8f10eff91bb6aa2de1f5d096ee2e1687b0eab007<br>#3.根据HSA值找到对应文件名<br>   git rev-list –objects –all | grep 1ada5755215275b7b8c8cfad079bf1edc1322ff2<br>#4.清除该文件的所有历史记录并强制刷新到所有分支(慎重,需要管理员权限,否则报错)<br>   git filter-branch –index-filter ‘git rm –cached –ignore-unmatch <your-file-name>‘<br>   rm -rf .git&#x2F;refs&#x2F;original&#x2F;<br>   git reflog expire –expire&#x3D;now –all<br>   git fsck –full –unreachable<br>   git repack -A -d<br>   git gc –aggressive –prune&#x3D;now<br>   git push –force [remote] master</p>
+<p> git push origin –force –all<br> git push origin –force –tags</p>
+<p>win10 ghost制作教程： <a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_35057426/article/details/83015516">https://blog.csdn.net/qq_35057426/article/details/83015516</a></p>
+<p> 本地GC<br>等待一小段时间(1分钟左右)，就可以执行本地gc了</p>
+<p>git for-each-ref –format&#x3D;”delete %(refname)” refs&#x2F;original | git update-ref –stdin<br>git reflog expire –expire&#x3D;now –all<br>git gc –prune&#x3D;now</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2022/11/08/git%E6%B8%85%E7%90%86%E5%8E%86%E5%8F%B2%E8%AE%B0%E5%BD%95%E5%A4%A7%E6%96%87%E4%BB%B6/">https://yhao521.github.io/2022/11/08/git%E6%B8%85%E7%90%86%E5%8E%86%E5%8F%B2%E8%AE%B0%E5%BD%95%E5%A4%A7%E6%96%87%E4%BB%B6/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2022/11/08/gp/" title="gp"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">gp</div></div><div class="info-2"><div class="info-item-1">Microsoft-Windows-GroupPolicy-ClientTools-Package31bf3856ad364e35amd64zh-CN10.0.19041.1237.mumMicrosoft-Windows-GroupPolicy-ClientTools-Package31bf3856ad364e35amd64~~10.0.19041.1237.mum </div></div></div></a><a class="pagination-related" href="/2022/11/08/Mac%E4%B8%8B%E6%9F%A5%E7%9C%8B%E5%B7%B2%E5%AE%89%E8%A3%85%E7%9A%84jdk%E7%89%88%E6%9C%AC%E5%8F%8A%E5%85%B6%E5%AE%89%E8%A3%85%E8%B7%AF%E5%BE%84/" title="Mac下查看已安装的jdk版本及其安装路径"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Mac下查看已安装的jdk版本及其安装路径</div></div><div class="info-2"><div class="info-item-1">Mac下查看已安装的jdk版本及其安装路径 向左向右向前 2018-11-13 21:45:22   6617   收藏 6文章标签： Mac上java开发jdk相关版权1、打开终端，输入：&#x2F;usr&#x2F;libexec&#x2F;java_home -V  注意：输入命令参数区分大小写(-v是不对的，必须是大写-V)  如图：终端框内依次为：输入命令； 当前Mac已安装jdk目录； Mac默认使用的jdk版本； &#x2F;usr&#x2F;libexec&#x2F;java_home -VMatching Java Virtual Machines (2):    1.8.311.11 (x86_64) “Oracle Corporation” - “Java” &#x2F;Library&#x2F;Internet Plug-Ins&#x2F;JavaAppletPlugin.plugin&#x2F;Contents&#x2F;Home    1.8.0_311 (x86_64) “Oracle Corporation” - “Java SE 8” &#x2F...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2024/01/09/Nginx%E6%B5%8F%E8%A7%88%E7%9B%AE%E5%BD%95%E9%85%8D%E7%BD%AE%E5%8F%8A%E7%BE%8E%E5%8C%96/" title="Nginx浏览目录配置及美化"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-09</div><div class="info-item-2">Nginx浏览目录配置及美化</div></div><div class="info-2"><div class="info-item-1">在项目中有一个功能需要在浏览器页面中浏览服务器的目录。服务器使用Nginx，而Nginx提供了相应的ngx_http_autoindex_module 模块，该模块提供了我们想要的功能。 Nginx-Fancyindex-Theme这是从一个项目Fork过来，做了部分改动，并修复了少量bug后的完整的可用项目，需要的可以参考：Nginx-Fancyindex-Theme Nginx ngx_http_autoindex_module 模块该模块有以下几个命令：    命令 默认值 值域 作用域 EG    autoindex off on：开启目录浏览；     off：关闭目录浏览 http, server, location autoindex on;打开目录浏览功能     autoindex_format html html、xml、json、jsonp 分别用这几个风格展示目录 http, server, location autoindex_format html; 以网页的风格展示目录内容。该属性在1.7.9及以上适用   autoindex_exact_size ...</div></div></div></a><a class="pagination-related" href="/2022/05/30/%E7%AE%A1%E6%8E%A7%E5%B9%B3%E5%8F%B0@Fastjson%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%E4%BF%AE%E5%A4%8D@20220530/" title="管控平台@Fastjson反序列化漏洞修复@20220530"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2022-05-30</div><div class="info-item-2">管控平台@Fastjson反序列化漏洞修复@20220530</div></div><div class="info-2"><div class="info-item-1">管控平台@Fastjson反序列化漏洞修复@20220530关于Fastjson反序列化漏洞的安全通告Fastjson是阿里巴巴公司的一个开源java库，可用于将Java对象转换为其JSON表示，还可用于将JSON字符串转换为等效的Java对象，其性能从未被其他Java实现的JSON库超越。近日，Fastjson官方发布了安全公告，解决了在Fastjson中存在的一个反序列化漏洞，请受影响用户尽快安装更新补丁，避免受到影响。 一、 漏洞详情该漏洞是由于Fastjson在1.2.80及以下版本中使用黑白名单用于防御反序列化漏洞，但是该防御策略在特定条件下可绕过默认 autoType。恶意攻击者通过发送特制的反序列化数据至服务器，能够在目标系统上执行任意代码。 二、 影响范围Fastjson &lt;&#x3D; 1.2.80 三、 漏洞等级高危 四、 修复建议漏洞检测 相关用户可使用以下命令检测当前使用的Fastjson版本：lsof | grep fastjson 官方补丁 目前官方已发布更新补丁，请受影响用户及时关注并尽快更新，官方链接：https://github.com/a...</div></div></div></a><a class="pagination-related" href="/2024/07/03/%E9%9D%A2%E8%AF%95%E5%AE%98%EF%BC%9A%E8%AF%B4%E8%AF%B4MySQL%E4%B8%8EPostgreSQL%E4%B9%8B%E9%97%B4%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%8C%E8%AF%A5%E5%A6%82%E4%BD%95%E6%8A%80%E6%9C%AF%E9%80%89%E5%9E%8B%EF%BC%9F/" title="面试官：说说MySQL与PostgreSQL之间的区别，该如何技术选型？"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-03</div><div class="info-item-2">面试官：说说MySQL与PostgreSQL之间的区别，该如何技术选型？</div></div><div class="info-2"><div class="info-item-1">面试官：说说MySQL与PostgreSQL之间的区别，该如何技术选型？发布于 2021-03-03 10:51:37 8.9K1 举报 文章被收录于专栏：业余草 你知道的越多，不知道的就越多，业余的像一棵小草！你来，我们一起精进！你不来，我和你的竞争对手一起精进！ 编辑：业余草blog.csdn.net&#x2F;u012414189&#x2F;article&#x2F;details&#x2F;84064146推荐：https://www.xttblog.com/?p=5155如果你稍微有一点工作经验，那么技术选型，技术比较就是面试中必问的知识点之一了。最近就有粉丝在面试中被问到了MySQL与PostgreSQL之间技术选型与比较的问题，下面是一些总结，希望能对大家有所帮助！ 1.问题如果打算为项目选择一款免费、开源的数据库，那么你可能会在MySQL与PostgreSQL之间犹豫不定。MySQL与PostgreSQL都是免费、开源、强大、且功能丰富的数据库。你主要的问题可能是：哪一个才是最好的开源数据库，MySQL还是PostgreSQL呢？该选择哪一个开源数据库呢？ 在选择...</div></div></div></a><a class="pagination-related" href="/2023/09/04/Alertmanager%E7%AF%87/" title="Alertmanager篇"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">Alertmanager篇</div></div><div class="info-2"><div class="info-item-1"> title: Alertmanager篇date: 2023-09-03 20:17:08category: tag: author:  Alertmanager篇报一直是整个监控系统中的重要组成部分，Prometheus监控系统中，采集与警报是分离的。警报规则在 Prometheus 定义，警报规则触发以后，才会将信息转发到给独立的组件 Alertmanager ，经过 Alertmanager r对警报的信息处理后，最终通过接收器发送给指定用户，另外在 Alertmanager 中没有通知组的概念，只能自己对软件重新Coding，或者使用第三方插件来实现。 注意，这个通知组不是Alertmanager中的group概念，下面会详细讲 Group ，不要混淆哦。 前面已经介绍过一些关于 Alertmanager 知识点，本章开始针通过安装 Alertmanager 组件，对配置文件做详细说明，同时介绍 Prometheus 的警报规则的定义，最后使用Email、Wechat（Robot）、Dingtalk（webhook）来接受警报通知。 Alertmanager工作机制 在...</div></div></div></a><a class="pagination-related" href="/2023/09/04/idea%20%E6%8F%92%E4%BB%B6%E4%BD%BF%E7%94%A8/" title="idea 插件使用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">idea 插件使用</div></div><div class="info-2"><div class="info-item-1"> title: idea 插件使用date: 2023-09-03 20:17:08category:  ideatag: ideaauthor:   idea插件使用一、前言今年Idea对盗版软件打击力度加大，朋友们会发现，旗舰版自己激活使用，过几天就会失效，需要重新激活，有的小伙伴就会选择去淘宝花钱买个教育邮箱注册，这个方法我使用过，过了两三个月就不能用了，着实让人头疼。如何解决呢？我想到了Idea社区版本，下载一个使用，将我的Spring boot项目导入，启动下试试，不出所料，报错了。好啦！步入正题。 社区版Idea相比旗舰版少了很多功能，包括Java开发最重要的Web开发能力！Spring项目没有Tomcat插件，不能在Idea启动。Spring Boot项目没有相应提示。 可是这难不倒强大的社区，我想到了Idea提供了插件机制，或许会有大神做出来了好用的Tomcat插件。 二、IDEA 插件安装在使用插件之前，你需要了解 IDEA 的插件安装方式，安装 IDEA 插件是非常方便的，你只要知道插件的名字就可以直接安装， IDEA 插件安装有两种方式： 1、在线安装在 I...</div></div></div></a><a class="pagination-related" href="/2023/09/04/nginx%E7%BC%96%E8%AF%91%E6%8A%A5%E9%94%99/" title="nginx编译报错"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">nginx编译报错</div></div><div class="info-2"><div class="info-item-1"> title: nginx编译报错date: 2023-09-03 20:17:08category:  nginxtag: nginxauthor:   nginx编译报错 error: C compiler cc is not found安装gcc-c++包,命令： 1yum -y install gcc-c++  error: SSL modules require the OpenSSL library.CentOS 12$ yum -y install openssl openssl-devel  Ubuntu 12$ apt -y install openssl openssl-devel </div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

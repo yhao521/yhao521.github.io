@@ -1,0 +1,237 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>如何利用ollama和Obsidian构建本地AI写作助手   - WMW | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="ollama与Obsidian的结合可以有效读取Obsidian中的所有文档，实现本地知识库的问答以及与大型模型的对话。这种方式相较于我之前介绍的ollama+MaxKB，构建本地AI知识库而言，无需进行额外的部署和上传文档到其他平台。这种组合对于像我这样使用Obsidian作为写作工具的文字工作者">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何利用ollama和Obsidian构建本地AI写作助手   - WMW">
+<meta property="og:url" content="https://yhao521.github.io/2025/06/16/%E5%A6%82%E4%BD%95%E5%88%A9%E7%94%A8ollama%E5%92%8CObsidian%E6%9E%84%E5%BB%BA%E6%9C%AC%E5%9C%B0AI%E5%86%99%E4%BD%9C%E5%8A%A9%E6%89%8B%20%20%20-%20WMW/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="ollama与Obsidian的结合可以有效读取Obsidian中的所有文档，实现本地知识库的问答以及与大型模型的对话。这种方式相较于我之前介绍的ollama+MaxKB，构建本地AI知识库而言，无需进行额外的部署和上传文档到其他平台。这种组合对于像我这样使用Obsidian作为写作工具的文字工作者">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2025-06-15T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-17T16:00:00.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="obsidian">
+<meta property="article:tag" content="reading">
+<meta property="article:tag" content="摘录">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "如何利用ollama和Obsidian构建本地AI写作助手   - WMW",
+  "url": "https://yhao521.github.io/2025/06/16/%E5%A6%82%E4%BD%95%E5%88%A9%E7%94%A8ollama%E5%92%8CObsidian%E6%9E%84%E5%BB%BA%E6%9C%AC%E5%9C%B0AI%E5%86%99%E4%BD%9C%E5%8A%A9%E6%89%8B%20%20%20-%20WMW/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2025-06-15T16:00:00.000Z",
+  "dateModified": "2026-05-17T16:00:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2025/06/16/%E5%A6%82%E4%BD%95%E5%88%A9%E7%94%A8ollama%E5%92%8CObsidian%E6%9E%84%E5%BB%BA%E6%9C%AC%E5%9C%B0AI%E5%86%99%E4%BD%9C%E5%8A%A9%E6%89%8B%20%20%20-%20WMW/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '如何利用ollama和Obsidian构建本地AI写作助手   - WMW',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">如何利用ollama和Obsidian构建本地AI写作助手   - WMW</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">如何利用ollama和Obsidian构建本地AI写作助手   - WMW</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-06-15T16:00:00.000Z" title="发表于 2025-06-16 00:00:00">2025-06-16</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-17T16:00:00.000Z" title="更新于 2026-05-18 00:00:00">2026-05-18</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>Published on 2024-09-15 &#x2F; 626 Visits</p>
+<h2 id="如何利用ollama和Obsidian构建本地AI写作助手"><a href="#如何利用ollama和Obsidian构建本地AI写作助手" class="headerlink" title="如何利用ollama和Obsidian构建本地AI写作助手"></a>如何利用ollama和Obsidian构建本地AI写作助手</h2><p>ollama与Obsidian的结合可以有效读取Obsidian中的所有文档，实现本地知识库的问答以及与大型模型的对话。这种方式相较于我之前介绍的 <a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzkwNDMxNjA5MQ==&mid=2247484172&idx=1&sn=2bf4ea193776485fc1c1e28c22a703b4&chksm=c08996d8f7fe1fcec7aeee5adefb6c71dd8815eb7d2e9175916765dd73dddc89b4aa1af144c5&scene=21#wechat_redirect">ollama+MaxKB，构建本地AI知识库</a> 而言，无需进行额外的部署和上传文档到其他平台。这种组合对于像我这样使用Obsidian作为写作工具的文字工作者尤为实用。在撰写 <a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzkwNDMxNjA5MQ==&mid=2247484159&idx=1&sn=daef3b0902973ddca1ad92a40b9111ff&chksm=c089972bf7fe1e3d37a2bafc793f6c297308ec91b195710b07b28686caf49e9a5b21d3da0e56&scene=21#wechat_redirect">Macbook Pro M2 Max 96G 8TB性能测试，成功运行Llama 70B和Mistral 8x7B（4位量化）</a> 时，我下载了ollama及其4位量化的Llama 70B模型，该模型仅占30G内存，并且运行速度极快。ollama的配置可以在官方页面找到下载教程。首先下载应用程序，然后在终端运行 <code>ollama run llama3:70b</code> 。不同模型的内容质量有所差异，作为示例，这里使用ollama。如果中文笔记数量较多，建议寻找一个开源的中文LLM，如最近表现较好的Qwen，详情见下图。</p>
+<p>![[_resources&#x2F;b2b7b93436689f49f10d1b7be893a3a2_MD5.webp]]</p>
+<p>ollama下载完成模型后，打开应用程序，在Obsidian中搜索插件“Smart Second Brain”，安装后在配置中选择聊天模型，根据已下载的模型进行选择，向量模型embedding model可随便选择，稍后会解释如何下载ollama base URL，默认的base URL可以不更改。exclude field用于设置不希望大型模型访问的文档。</p>
+<p>![[_resources&#x2F;6c660e8e9f50b1558981eb72db4ebda9_MD5.webp]]</p>
+<p>设置完成后，返回到写作页面，在左侧点击对话气泡框，出现Smart Second Brain的窗口后，按照步骤操作即可。</p>
+<p>![[_resources&#x2F;c63267ad933710d8f4b086fdf8d10616_MD5.webp]]</p>
+<p>在第8个步骤时，您需要设置向量模型。直接点击，系统会自动下载ollama的向量模型，默认是nomic-embed-text。据ollama官方表示，在长短文本的表现上，nomic-embed-text超过了OpenAI的text-embedding-ada-002和text-embedding-3-small的性能。</p>
+<blockquote>
+<p>“nomic-embed-text is a large context length text encoder that surpasses OpenAI text-embedding-ada-002 and text-embedding-3-small performance on short and long context tasks.”</p>
+</blockquote>
+<p>模型大小为300M，下载时间不会太长，下载完成后会自动开始对Obsidian中的Markdown文档进行向量嵌入，40篇2000字的文档大约需要30秒。您可以设置creativity，数值越大，回答内容越发散，适合初期文稿写作，让AI提供选题和主旨等需要创造性思维的用途。similarity则用来设置LLM检索的文档内容与用户问题的匹配度，数值越大，LLM检索的内容与用户问题的相关性越高。我用英文测试了RAG水平，使用Llama 3:70B之前测试了中文，发现容易出现英文偏向，因此这次用英文测试，正好最近阅读完《Bresson on Bresson Interviews 1943-1983》整理了一些要点，询问Llama 3:70B关于罗伯特·布列松对待50mm镜头的态度。然而，Llama并没有根据左侧的笔记文档知识库提供回答，反而是在终端直接询问的Llama 3:70B的回答质量更高。</p>
+<p>![[_resources&#x2F;582eb2531de540b5d956a45889a0b1ca_MD5.webp]]</p>
+<p>这也难怪Llama 3:70B在排名上表现优异，训练数据的内容比我写的更加丰富。对于不需要实时网络搜索和知识库问答的AI辅助写作，它能够提供灵感和素材，实际运用中非常方便。在笔记的右侧进行对话即可，无需切换到其他平台，并且不需要联网，所有运行和数据处理均在本地进行。若我需要写读书笔记，完全可以利用Obsidian中的ollama，下图展示了ollama使用Llama 3:70B生成的读书笔记。</p>
+<p>![[_resources&#x2F;45bb9e79498468f98e81d4d973cbafdf_MD5.webp]]</p>
+<p>尽管向量解析所有文档以进行知识库问答时的回答质量相对较低，但可以就单篇文章进行提问，使用Obsidian自带的语法 <code>[[ ]]</code> 便可连接到文档，仍然可以基于文章内容进行回答。</p>
+<p>![[_resources&#x2F;20e6ce4502be91494ad11584df684255_MD5.webp]]</p>
+<p>如果想要连接互联网的LLM以提供更多素材，可以考虑国内的kimi和秘塔API（需付费）。我曾经使用过LLM Red Team的免费API，但在几天后账号就被kimi封禁，无法再次登录。这两家模型本身具备实时网络搜索能力，能返回真实存在的链接。然而，目前Obsidian中许多与LLM相关的插件不支持国产商用模型，支持的大多是开源模型，或像ollama和LM studio这样的本地大型模型集合工具以及国外的商用模型如GPT、Gemini、Claude等。Obsidian中的LLM插件包括前面提到的Second Smart Brain、Copilot、BMO ChatBot等。其中，BMO ChatBot支持的模型更为广泛，包括商用模型和开源模型，并且可以直接在Obsidian中编写模型的prompt。</p>
+<p>![[_resources&#x2F;20c3f85685db2988d2a356eecae9b4d3_MD5.webp]]</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>总的来说，将LLM接入Obsidian为写作的用户带来了至少三个好处：</p>
+<ol>
+<li>LLM能够提供写作思路、灵感、素材和标题参考。</li>
+<li>LLM有助于优化句子表达。</li>
+<li>LLM可以生成配图。</li>
+</ol>
+<p>这些能力的有效性取决于所使用的大模型的内置能力。有些大模型自带了AI画图能力，而有些则没有，因此需要根据自身需求找到适合的大模型来提升写作效果。</p>
+<ol>
+<li>尝试将Obsidian与具备联网功能的大模型API（如kimi、metaso）对接，或者让大模型能够进行工具调用，连接搜索插件。</li>
+<li>RAG技术应对现有文档进行知识库问答，因为问答的质量最好是基于问答对的形式，而非随意的文档，这样问答效果会更好。缺少一个高质量检索文档内容的模型将影响问答效果。</li>
+</ol>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2025/06/16/%E5%A6%82%E4%BD%95%E5%88%A9%E7%94%A8ollama%E5%92%8CObsidian%E6%9E%84%E5%BB%BA%E6%9C%AC%E5%9C%B0AI%E5%86%99%E4%BD%9C%E5%8A%A9%E6%89%8B%20%20%20-%20WMW/">https://yhao521.github.io/2025/06/16/%E5%A6%82%E4%BD%95%E5%88%A9%E7%94%A8ollama%E5%92%8CObsidian%E6%9E%84%E5%BB%BA%E6%9C%AC%E5%9C%B0AI%E5%86%99%E4%BD%9C%E5%8A%A9%E6%89%8B%20%20%20-%20WMW/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/%E6%91%98%E5%BD%95/">摘录</a><a class="post-meta__tags" href="/tags/obsidian/">obsidian</a><a class="post-meta__tags" href="/tags/reading/">reading</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/06/18/Activiti%208.x%20%E5%B7%A5%E4%BD%9C%E6%B5%81%E5%85%A5%E9%97%A8%EF%BC%88%E5%90%ABdemo%EF%BC%89/" title="Activiti 8.x 工作流入门（含demo）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Activiti 8.x 工作流入门（含demo）</div></div><div class="info-2"><div class="info-item-1">目录 1. 简介 2. BPMN2.0 3. SpringBoot集成Activiti8 3.1. 关键依赖 3.2. 完整pom文件 3.3. 关键配置 3.4. 配置SpringSecurity 3.5. 表解读 3.5.1. 全局通用表 3.5.2. 历史数据表 3.5.3. 静态资源表 3.5.4. 运行时数据表 4. 基本操作 4.1. 流程部署 4.1.1. 部署流程 4.1.2. 查询流程定义 4.2. 流程实例 4.2.1. 发起流程实例 4.2.2. 查询流程实例 4.2.3. 流程实例的挂起与激活 4.2.4. 删除流程实例 4.3. 任务管理 4.3.1. 查询任务 4.3.2. 执行任务 4.3.3. 添加批注 4.3.4. 任务的拾取与归还 4.3.5. 任务的交办&#x2F;转办 4.3.6. 任务的委派 4.4. 历史记录 4.5. UEL表达式 4.6. BPMN2.0网关 4.6.1. 并行网关（Parallel Gateway） 4.6.2. 排他网关（Exclusive gateway） 1. 简介Activiti 是一个 工作流引擎 ，它可...</div></div></div></a><a class="pagination-related" href="/2025/06/12/ComfyUI_%E4%BF%AE%E5%A4%8D%E9%9D%A2%E9%83%A8%E4%B8%8E%E6%89%8B%E9%83%A8/" title="ComfyUI_修复面部与手部"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">ComfyUI_修复面部与手部</div></div><div class="info-2"><div class="info-item-1">![[_resources&#x2F;74328415ceb130e3bed9a2be41ea7754_MD5.webp]] ComfyUI_修复面部与手部 在 WebUI 中，有个 ADetailer 插件可修复人物面部，只需点下相应选项即可。ComfyUI 中至今没有同款插件，但有几个替代。本篇分享其中两个我使用中觉得不错的面部修复插件，以及坏手的修复方法，仅限 AI 生图，真实照片的修复方法会另开一篇。  ![[_resources&#x2F;1fb3533f462c0804000868cd2511376a_MD5.jpg]] Impact-Pack最基础的 FaceDetailer 用法很简单，效果明显，能满足大多数需求。虽比不过 WebUI 的 ADetailer 那般一个选项就可以搞定，但 ComfyUI 的修复面部方法让学习者明白其工作流程，对我们更好的理解 AI 及其运作原理非常有益。 另外，拥用同款节点的插件不止 Impact-Pack 这一个，但它是目前更新比较有保障的。 ![[_resources&#x2F;889dde82b046b4e5a4d35c91f...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/07/23/%E5%A6%82%E4%BD%95%E7%8E%A9%E8%BD%ACObsidian%EF%BC%9F%E6%88%91%E7%9A%84%E5%85%8D%E8%B4%B9%E5%90%8C%E6%AD%A5%E6%96%B9%E6%A1%88+%E6%87%92%E4%BA%BA%E6%95%B4%E7%90%86%E6%9C%AF/" title="如何玩转Obsidian？我的免费同步方案+懒人整理术"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-07-23</div><div class="info-item-2">如何玩转Obsidian？我的免费同步方案+懒人整理术</div></div><div class="info-2"><div class="info-item-1">今天想和大家聊聊我用得比较爽的笔记工具——Obsidian。 它不是什么新鲜玩意儿，也不是我的“生产力神器”，但就像一张越用越顺手的草稿纸，陪我写日记、整理灵感、甚至规划生活。最关键的是，我一分钱没花，还摸索出了一套适合自己的“野生用法”。如果你也喜欢折腾工具但预算有限，或许我的经验能给你一点启发。  一、为什么选择Obsidian？我是个“工具控”，但更是个“实用主义者”。试用过有道云、石墨、MarkEditor2、Notion、Evernote、OneNote，最后留在电脑里的还是Obsidian。原因很简单：  1. 数据完全属于我：所有笔记都以Markdown文件存在本地，不用担心服务商倒闭或涨价； 2. 极简却灵活：没有花哨界面，但插件和自定义功能深不见底； 3. 强迫症友好：文件夹结构清晰，找笔记像翻实体笔记本一样顺手。  不过，真正让我离不开它的，是下面这两个“私房功能”。  二、我的“零成本”同步方案Obsidian官方同步服务要8美元&#x2F;月，而我……选择自己动手。 最初用谷歌云同步（我相信任何网盘都可以），但偶尔遇到手机和电脑内容冲突，或者丢失。我后来发...</div></div></div></a><a class="pagination-related" href="/2025/05/28/%E6%88%91%E7%9A%84%20Obsidian%20%E5%B7%A5%E4%BD%9C%E6%B5%81%EF%BC%9A%E6%A8%A1%E6%9D%BF+QuickAdd+Dataview%20%E5%BF%AB%E9%80%9F%E5%88%9B%E5%BB%BA%E5%92%8C%E8%87%AA%E5%8A%A8%E7%B4%A2%E5%BC%95%20-%20%E5%B0%91%E6%95%B0%E6%B4%BE/" title="我的 Obsidian 工作流：模板+QuickAdd+Dataview 快速创建和自动索引 - 少数派"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-28</div><div class="info-item-2">我的 Obsidian 工作流：模板+QuickAdd+Dataview 快速创建和自动索引 - 少数派</div></div><div class="info-2"><div class="info-item-1">你可以想象到的最优雅的输入方式嗨，大家！ 不知不觉，使用Obsidian已经一年了，从一开始无从下手，到在日记（Obsidian的核心插件）中写一元笔记，从写写流水帐，到它几乎承包了我所有的笔记场景。而我也从一个笔记爱好者成为了一名写作者。 我的笔记场景经过一轮更新重组，变为了以下这些：  闪念笔记：随时记录闪念，到当天日记。如果有需要展开的闪念，则在时间充裕时单独做一张卡片。 文献笔记：即阅读和观影笔记。阅读产生的思考会在阅读完之后拆分到新的卡片。 项目笔记：为写作而服务，分为灵感提案、写作中的文章和已完成的文章。  当我的文章多起来以后，我发现要找到它们开始变得困难。我会想知道我有哪些灵感是还没有写的，这样我接下来可以构思新文章；哪些是正在写作的，方便我继续写；哪些是已经发布的；哪些只发布了一个平台，另一个平台还在等待发布。 怎么解决呢？我想到了Dataview插件，它根据不同的条件生成文件目录。于是我设计了一些属性，用于提案笔记和输出笔记，让他们可以被Dataview识别，自动帮我归好类。 整理之后果然非常清晰明了，打开项目索引笔记，我就可以看到现在进行中的项目，灵感库还有...</div></div></div></a><a class="pagination-related" href="/2025/06/08/%E4%BD%A0%E8%AF%BB%E5%BE%97%E6%87%82%E7%9A%84%20Dataview%20%E6%95%99%E7%A8%8B%20-%20Zji/" title="你读得懂的 Dataview 教程 - Zji"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-06-08</div><div class="info-item-2">你读得懂的 Dataview 教程 - Zji</div></div><div class="info-2"><div class="info-item-1">你读得懂的 Dataview 教程前言尽可能用普通用户能听得懂的方式讲述 Obsidian 神级插件 Dataview 的使用方法。仅入门。 Dataview 是什么就是查询，直白点，搜索—— 从笔记中搜索，并将结果呈现出来 。 它有两种查询语言，一种是 DQL，就是 Dataview 自己的查询语言，这个比较简单。书写时把代码放进 dataview 代码块中。另一种是 JavaScript，这种对于有 JS 基础的人来说更加简单，因为可以无需学习而直接上手，书写时把代码放进 dataviewjs 代码块中。另外还有行内代码模式，但都是基于这两种语言的。 为什么封神之所以封神，因为可以运行 JS，也就可以做到几乎所有 JS 可以做到的事情。这时候简直没有了局限性，也就不再止步于搜索这一个功能。所以， 想要真正发挥 Dataview 的潜力，学习 JS 是最佳捷径 。确实这条路投入成本很高，但是这项技能可以应用的场景也不仅仅限于这一个插件，总体上投入与回报是对等的。 搜索做了什么三件事情：  从哪里找（来源） 查找什么（过滤） 如何呈现（呈现）  比如在所有笔记里查找今天创建的笔记...</div></div></div></a><a class="pagination-related" href="/2025/04/28/%E5%A4%9A%E7%A7%8D%E6%96%B9%E6%B3%95%EF%BC%8C%E5%B8%AE%E4%BD%A0%E5%89%AA%E8%97%8F%E7%BD%91%E9%A1%B5%E6%96%87%E7%AB%A0%E5%88%B0obsidian%E4%B8%AD/" title="多种方法，帮你剪藏网页文章到obsidian中"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-04-28</div><div class="info-item-2">多种方法，帮你剪藏网页文章到obsidian中</div></div><div class="info-2"><div class="info-item-1">首发于 从零开始用第二大脑Obsidian 切换模式 登录&#x2F;注册 ![[_resources&#x2F;0cbf5c6958d65923ae032c8d7712efc6_MD5.png]] 多种方法，帮你剪藏网页文章到obsidian中 这是我在「思考者们」 第一期交流会中的分享主题。 小提示：全文约1000字 这里的剪藏，专门指的是对网络上的文章进行本地存储。 剪藏到 OB，就是将网络上值得收藏的文章放在 obsidian 的笔记库中，等待后续回看（稍后读），以及与自己过往思维进行链接。 除此以外，还能避免类似网站关停、文章删除、图片失效等问题…… 剪藏文章到 Obsidian 有多种方式，我将从简单到复杂一级一级介绍。 1 复制到 Obsidian 编辑器通过直接复制网页内容，在 obsidian 的编辑器中将自动转化为 markdown 格式。 最新的版本更新 1.3.3 还强化了复制表格的能力，使得 ob 在复制网页上的简单表格时，自动转化为 markdown 语法的表格。 ![[_resources&#x2F;96bec08b8457e2c9ab19f53df...</div></div></div></a><a class="pagination-related" href="/2025/06/18/%E5%9C%A8%20Obsidian%20%E4%B8%AD%E9%AB%98%E6%95%88%E6%95%B4%E5%90%88%20DeepSeek%20%E7%9A%84%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97%EF%BC%9ASmart%20Composer%20%E5%8A%A9%E4%BD%A0%E7%AC%94%E8%AE%B0%E8%B5%B7%E9%A3%9E%EF%BC%81/" title="在 Obsidian 中高效整合 DeepSeek 的完整指南：Smart Composer 助你笔记起飞！"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-06-18</div><div class="info-item-2">在 Obsidian 中高效整合 DeepSeek 的完整指南：Smart Composer 助你笔记起飞！</div></div><div class="info-2"><div class="info-item-1">![[_resources&#x2F;3c725d236377de45db5cab8d8e185cfe_MD5.png]] 在 Obsidian 中高效整合 DeepSeek 的完整指南：Smart Composer 助你笔记起飞！ 大家好，我是小明同学。 想让你的 Obsidian 笔记拥有更强大的 AI 创作能力？ Smart Composer 插件，结合 DeepSeek 大模型，将为你带来前所未有的写作体验！ 本文将手把手教你如何在 Obsidian 中配置和使用 Smart Composer，让 DeepSeek 成为你的专属写作助手。 项目地址： github.com&#x2F;glowingjade&#x2F; ![[_resources&#x2F;d6afd05bf932ca6eefc11e90b0f12cc4_MD5.jpg]] 什么是 Smart Composer？Smart Composer 是一款专为 Obsidian 用户设计的插件，灵感来自于 Cursor 的 Composer 。这款插件的目标是通过 AI 的力量，帮助用户快速生成文档，优化写作过程。...</div></div></div></a><a class="pagination-related" href="/2025/09/14/Java%20%20Android%20%E8%8E%B7%E5%8F%96%E6%9C%AC%E6%9C%BA%E5%BC%80%E5%90%AF%E7%83%AD%E7%82%B9%E3%80%81%E8%BF%9E%E6%8E%A5%20WIFI%20%E6%97%B6%E7%9A%84%20IP_%E5%AE%89%E5%8D%93%E8%8E%B7%E5%8F%96%E7%83%AD%E7%82%B9ip-CSDN%E5%8D%9A%E5%AE%A2/" title="Java &#x2F; Android 获取本机开启热点、连接 WIFI 时的 IP_安卓获取热点ip-CSDN博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-09-14</div><div class="info-item-2">Java &#x2F; Android 获取本机开启热点、连接 WIFI 时的 IP_安卓获取热点ip-CSDN博客</div></div><div class="info-2"><div class="info-item-1">文章讲述了如何在Android中获取通过WIFI连接的局域网IP以及在手机热点模式下找到可用的无线网络接口获取IP地址。作者提供了遍历网络接口并过滤LinkLocalAddress的示例代码。 最近在做一个 Android 关于的无线局域网项目，需要获取本机在所连接局域网上的IP地址。手机可以通过WIFI连接已知的局域网，也可通过打开手机热点去组建一个局域网。 在通过WIFI连接 局域网 时，本机的 IP 地址可以通过 “ WifiManager ” 和“ WifiInfo ”获得，如下： 123456789101112131415161718192021222324public static String getIP(Context context) &#123;        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);        if (wifiManager.isWifiEnabled()) &#123;            // 若已经...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%88%A9%E7%94%A8ollama%E5%92%8CObsidian%E6%9E%84%E5%BB%BA%E6%9C%AC%E5%9C%B0AI%E5%86%99%E4%BD%9C%E5%8A%A9%E6%89%8B"><span class="toc-number">1.</span> <span class="toc-text">如何利用ollama和Obsidian构建本地AI写作助手</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">2.</span> <span class="toc-text">总结</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

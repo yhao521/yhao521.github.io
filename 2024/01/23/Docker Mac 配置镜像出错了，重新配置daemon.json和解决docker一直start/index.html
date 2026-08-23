@@ -1,0 +1,224 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Docker Mac 配置镜像出错了，重新配置daemon.json和解决docker一直starting的问题 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="编辑daemon.json执行以下命令: 123cd ~&#x2F;.dockerls12  会出现以下文件 12345application-template certs.d              config.json          daemon.json          machine1234  接着看下daemon.json的内容 123456789&#123;  &quot;debug&amp;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker Mac 配置镜像出错了，重新配置daemon.json和解决docker一直starting的问题">
+<meta property="og:url" content="https://yhao521.github.io/2024/01/23/Docker%20Mac%20%E9%85%8D%E7%BD%AE%E9%95%9C%E5%83%8F%E5%87%BA%E9%94%99%E4%BA%86%EF%BC%8C%E9%87%8D%E6%96%B0%E9%85%8D%E7%BD%AEdaemon.json%E5%92%8C%E8%A7%A3%E5%86%B3docker%E4%B8%80%E7%9B%B4start/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="编辑daemon.json执行以下命令: 123cd ~&#x2F;.dockerls12  会出现以下文件 12345application-template certs.d              config.json          daemon.json          machine1234  接着看下daemon.json的内容 123456789&#123;  &quot;debug&amp;">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2024-01-22T20:21:50.000Z">
+<meta property="article:modified_time" content="2024-01-22T20:21:50.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Docker Mac 配置镜像出错了，重新配置daemon.json和解决docker一直starting的问题",
+  "url": "https://yhao521.github.io/2024/01/23/Docker%20Mac%20%E9%85%8D%E7%BD%AE%E9%95%9C%E5%83%8F%E5%87%BA%E9%94%99%E4%BA%86%EF%BC%8C%E9%87%8D%E6%96%B0%E9%85%8D%E7%BD%AEdaemon.json%E5%92%8C%E8%A7%A3%E5%86%B3docker%E4%B8%80%E7%9B%B4start/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2024-01-22T20:21:50.000Z",
+  "dateModified": "2024-01-22T20:21:50.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2024/01/23/Docker%20Mac%20%E9%85%8D%E7%BD%AE%E9%95%9C%E5%83%8F%E5%87%BA%E9%94%99%E4%BA%86%EF%BC%8C%E9%87%8D%E6%96%B0%E9%85%8D%E7%BD%AEdaemon.json%E5%92%8C%E8%A7%A3%E5%86%B3docker%E4%B8%80%E7%9B%B4start/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Docker Mac 配置镜像出错了，重新配置daemon.json和解决docker一直starting的问题',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">Docker Mac 配置镜像出错了，重新配置daemon.json和解决docker一直starting的问题</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Docker Mac 配置镜像出错了，重新配置daemon.json和解决docker一直starting的问题</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-01-22T20:21:50.000Z" title="发表于 2024-01-23 04:21:50">2024-01-23</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-01-22T20:21:50.000Z" title="更新于 2024-01-23 04:21:50">2024-01-23</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>编辑daemon.json<br>执行以下命令:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd ~/.docker</span><br><span class="line">ls</span><br><span class="line">12</span><br></pre></td></tr></table></figure>
+
+<p>会出现以下文件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">application-template certs.d              </span><br><span class="line">config.json          </span><br><span class="line">daemon.json          </span><br><span class="line">machine</span><br><span class="line">1234</span><br></pre></td></tr></table></figure>
+
+<p>接着看下daemon.json的内容</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;debug&quot; : true,</span><br><span class="line">  &quot;experimental&quot; : true,</span><br><span class="line">  &quot;registry-mirrors&quot; : [</span><br><span class="line">  ],</span><br><span class="line">  &quot;insecure-registries&quot;: [</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br><span class="line">12345678</span><br></pre></td></tr></table></figure>
+
+<p>接着编辑daemon.json为以下内容</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;debug&quot; : true,</span><br><span class="line">  &quot;experimental&quot; : true,</span><br><span class="line">  &quot;registry-mirrors&quot; : [</span><br><span class="line">    &quot;http://f1361db2.m.daocloud.io&quot;,</span><br><span class="line">    &quot;https://docker.mirrors.ustc.edu.cn&quot;,</span><br><span class="line">    &quot;https://registry.docker-cn.com&quot;</span><br><span class="line">  ],</span><br><span class="line">  &quot;insecure-registries&quot;: [</span><br><span class="line">    &quot;152.136.134.140:8080&quot;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br><span class="line">123456789101112</span><br></pre></td></tr></table></figure>
+
+<p>大功告成<br>改完后，如果发现还是打开不了docker客户端，那就需要删除一些文件了。</p>
+<p>MAC彻底<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=%E5%88%A0%E9%99%A4docker&spm=1001.2101.3001.7020">删除docker</a>。解决docker一直starting的问题</p>
+<p><a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=%E5%AE%89%E8%A3%85docker&spm=1001.2101.3001.7020">安装docker</a> for mac之后，直接在应用程序将docker卸载了，再次安装的时候发现docker启动不了，一直处于“docker is starting”状态，这时候需要彻底卸载docker。</p>
+<p>如果使用<code>docker.dmg</code>或者<code>brew cask install docker</code>安装的docker，需要删除<code>/usr/local/bin/docker</code>文件夹下docker的组件：</p>
+<p>命令：<code>rm -rf /usr/local/bin/docker*</code> （谨慎使用）</p>
+<p>或者手动进入<code>/usr/local/bin/</code>文件夹下删除相关文件（推荐）。</p>
+<p>再次安装docker就启动就正常了。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2024/01/23/Docker%20Mac%20%E9%85%8D%E7%BD%AE%E9%95%9C%E5%83%8F%E5%87%BA%E9%94%99%E4%BA%86%EF%BC%8C%E9%87%8D%E6%96%B0%E9%85%8D%E7%BD%AEdaemon.json%E5%92%8C%E8%A7%A3%E5%86%B3docker%E4%B8%80%E7%9B%B4start/">https://yhao521.github.io/2024/01/23/Docker%20Mac%20%E9%85%8D%E7%BD%AE%E9%95%9C%E5%83%8F%E5%87%BA%E9%94%99%E4%BA%86%EF%BC%8C%E9%87%8D%E6%96%B0%E9%85%8D%E7%BD%AEdaemon.json%E5%92%8C%E8%A7%A3%E5%86%B3docker%E4%B8%80%E7%9B%B4start/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/01/23/%E7%90%86%E8%A7%A3Nexus%20%E5%8C%BF%E5%90%8D%E7%99%BB%E9%99%86%EF%BC%8C%20%E8%A7%A3%E5%86%B3Nexus%20%E6%90%AD%E5%BB%BA%E7%9A%84docker%20hub%20%E7%A7%81%E6%9C%89%E6%9C%8D%E5%8A%A1%E5%99%A8%EF%BC%8C%E4%B8%8D%E8%83%BD%E5%8C%BF%E5%90%8D%E8%AE%BF%E9%97%AE%E7%9A%84%E9%97%AE/" title="理解Nexus 匿名登陆， 解决Nexus 搭建的docker hub 私有服务器，不能匿名访问的问题"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">理解Nexus 匿名登陆， 解决Nexus 搭建的docker hub 私有服务器，不能匿名访问的问题</div></div><div class="info-2"><div class="info-item-1">理解Nexus 匿名登陆， 解决Nexus 搭建的docker hub 私有服务器，不能匿名访问的问题问题：使用Nexus搭建了一个docker私有仓库 推送拉取镜像的时候用的是admin，都没有问题，但是今天同事反映没有办法拉取镜像，经过检查发现，Nexus默认要登陆账号授权才可以拉取镜像。 1$ docker pull ros-kineticUsing default tag: latestError response from daemon: unauthorized: authentication required  Nexus的匿名登陆功能， 1. 创建一个角色打开Roles选项卡，点击 Create role  创建docker-pull角色，主要用于赋予特定用户具体的权限,  _关键点：_这2个权限，是允许docker pull 的关键。  创建guest角色，暂且让其直接继承于Nexus 提供的默认角色nx-anonymous  2. 创建一个用户 3. 设置匿名访问 选择Anonymous Access​​​​ 将guest用户设置成为Anonymous访问，也...</div></div></div></a><a class="pagination-related" href="/2024/01/20/SkyWalking/" title="SkyWalking"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">SkyWalking</div></div><div class="info-2"><div class="info-item-1">1. SkyWalking是什么？skywalking 是一个国产开源框架，2015年由个人吴晟（华为开发者）开源 ， 2017年加入Apache孵化器，skywalking是分布式系统的应用程序性能监视工具，专为微服务、云原生架构和基于容器（Docker、K8s、Mesos）架构而设计。SkyWalking 是观察性分析平台和应用性能管理系统。提供分布式追踪、服务网格遥测分析、度量聚合和可视化一体化解决方案 官网：Apache SkyWalking 下载：Downloads Github: https://github.com/apache/skywalking 文档：Welcome 1.2 链路追踪框架对比​ 1.Zipkin是Twitter开源的调用链分析工具，目前基于springcloud sleuth得到了广泛的使用，特点是轻量，使用部署简单。 ​ 2.Pinpoint是韩国人开源的基于字节码注入的调用链分析，以及应用监控分析工具，特点是支持多种插件，UI功能强大，接入端无代码侵入。 ​ 3.SkyWalking是本土开源的基于字节码注入的调用链分析，以及应用监控分析工...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2024/09/08/%E5%9C%A8%20cordova%20%E9%A1%B9%E7%9B%AE%E4%B8%AD%E4%BD%BF%E7%94%A8%20sqlite/" title="在 cordova 项目中使用 sqlite"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-09-08</div><div class="info-item-2">在 cordova 项目中使用 sqlite</div></div><div class="info-2"><div class="info-item-1">websql-orm 框架，支持 typescript angular cordova chrome 的sqlite数据库读写。 开始websql-orm 使用 TypeScript 语言编写，使用之前需在 tsconfig.json 添加装饰器配置项以启用装饰器特性. 123456&#123;    &quot;compilerOptions&quot;: &#123;        &quot;experimentalDecorators&quot;: true    &#125;&#125;12345  安装npm install websql-orm@latest  提示：不要安装2.1.0之前的版本，2.1.0之前的版本是调试阶段的版本，无法使用  cordova plugin add cordova-sqlite-storage  若在 cordova项目中，则需要安装cordova插件  1234import &#123; EnvConfig &#125; from &#x27;websql-orm&#x27;;EnvConfig.useCordovaSqliteS...</div></div></div></a><a class="pagination-related" href="/2024/09/21/%E4%B8%8B%E8%BD%BDgradle%E5%8A%A0%E9%80%9F/" title="下载gradle加速"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-09-21</div><div class="info-item-2">下载gradle加速</div></div><div class="info-2"><div class="info-item-1">下载gradle加速123456789# Fri Sep 08 23:34:50 CST 2023distributionBase=GRADLE_USER_HOMEdistributionPath=wrapper/dists# distributionUrl=https\://services.gradle.org/distributions/gradle-8.2-bin.zip# distributionUrl=https://mirrors.cloud.tencent.com/gradle/gradle-8.2-bin.zipdistributionUrl=https://mirrors.cloud.tencent.com/gradle/gradle-8.13-all.zipzipStoreBase=GRADLE_USER_HOMEzipStorePath=wrapper/dists  </div></div></div></a><a class="pagination-related" href="/2024/04/17/Mac%E5%88%87%E6%8D%A2XCode%E7%89%88%E6%9C%AC%EF%BC%8C%E6%9B%B4%E6%94%B9%E9%BB%98%E8%AE%A4XCode%20%E7%89%88%E6%9C%AC/" title="Mac切换XCode版本，更改默认XCode 版本"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-17</div><div class="info-item-2">Mac切换XCode版本，更改默认XCode 版本</div></div><div class="info-2"><div class="info-item-1">因开发需要，有时需要在Mac上切换XCode版本，或更改默认XCode 版本。 我用的XCode版本为Version 12.4对应的手机系统版本为iOS14，而目前用的越狱手机的系统版本为V 12.4.9对应的XCode版本应该为Version10，而iOS14版本生成的dumpdecrypted.dylib不支持低版本的iOS12 也就是说 Mac电脑上默认的XCode版本为高版本，现在需要在终端使用命令行在低版本XCode的环境下生成一些文件。 那么就需要在Mac上切换XCode默认版本。 方法如下： 1、下载一个XCode版本10.32、终端命令 12sudo xcode-select -s /Users/yhao521/Applications/Developer/Xcode.app/Contents/Developer1  3、最后恢复原来的XCode配置 12sudo xcode-select -s /Applications/Xcode.app/Contents/Developer1  最后总结即如下 1234567//先下载低版本XCode后运行如下命令sudo ...</div></div></div></a><a class="pagination-related" href="/2023/09/04/vue%E4%B8%AD%E5%A6%82%E4%BD%95%E5%B0%86%E6%8C%89%E9%92%AE%E8%AE%BE%E7%BD%AE%E4%B8%BA%E9%97%B4%E9%9A%94%E4%B8%80%E6%AE%B5%E6%97%B6%E9%97%B4%E5%8F%AA%E8%83%BD%E7%82%B9%E5%87%BB%E4%B8%80%E6%AC%A1/" title="vue中如何将按钮设置为间隔一段时间只能点击一次"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">vue中如何将按钮设置为间隔一段时间只能点击一次</div></div><div class="info-2"><div class="info-item-1"> title: vue中如何将按钮设置为间隔一段时间只能点击一次date: 2023-09-03 20:17:08category:  开发语言 vuetag: vueauthor:   vue 中如何将按钮设置为间隔一段时间只能点击一次vue 中如何将按钮设置为间隔一段时间只能点击一次clickOnceAtime 1 建立新 js 文件写入代码6000 表示禁止 6 秒 1234567891011121314151617export default &#123;  install(Vue) &#123;    // 防止重复点击    Vue.directive(&quot;preventClick&quot;, &#123;      inserted(el, binding) &#123;        el.addEventListener(&quot;click&quot;, () =&gt; &#123;          if (!el.disabled) &#123;            el.disabled = true;            setTim...</div></div></div></a><a class="pagination-related" href="/2023/09/04/go%E8%AF%AD%E8%A8%80/" title="go语言"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">go语言</div></div><div class="info-2"><div class="info-item-1"> title: go语言date: 2023-09-03 20:17:08category:  开发语言 gotag: goauthor:   go 常用指令常用指令：    命令 说明    go build -a -x -v 构建 强制重新 打印信息   go clean 清理构建包   go run main.go 运行有main的文件   go env 查看环境变量   go build -ldflags -w 压缩   go mod dowload 下载依赖   go mod vendor vendor 文件夹就缓存了依赖包，然后直接在代码中使用。   set GOOS&#x3D;windows windows主机设置go编译、运行环境为windows   ​ go build -ldflags -w 压缩构建包 https://blog.justwe.site/post/go-build-compress/ 压缩可执行文件(终极压缩)我们使用第三方的压缩工具https://github.com/upx/upx/releases 构建或下载依赖失败dial tcp 17...</div></div></div></a><a class="pagination-related" href="/2024/01/09/%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/" title="内网穿透"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-09</div><div class="info-item-2">内网穿透</div></div><div class="info-2"><div class="info-item-1">什么是内网穿透？简单的说，内网穿透就是使用一台具有公网 IP 地址的电脑（服务器）作为“中间人”来与没有公网 IP 的设备建立连接，实现数据连通。 现实中，我们一般并没有公网 IP，要想实现内网穿透我提供了下面两种可行的方案：  购买别人提供的内网穿透服务。如花生壳提供的 ddns 动态域名解析服务，好处就是方便不折腾，费用相对也够亲民。对于一部分只想不花钱的小伙伴，这里推荐的是另一种穿透方案 Sakura Frp——花费 1 元 实名认证后可获得两条免费的隧道。（免费版的带宽速度上限10 M，流量一个月 10 GB） 如果想拥有更好的体验那么就需要花费一定的价钱购买一台具有公网 IP 的云主机部署内网穿透服务，像这种通过自建服务实现内网穿透的方案好处就是有更多的自定义空间，不受服务商的约束。缺点同样也是比较明显的，资费更高同时也受限于云服务器的带宽。  两种常用的内网穿透方案简单的说了一下，具体怎么去实现我也会在下文配上图文教程，此教程是我写的第一篇教程系列文章，因为缺乏经验会有很多的不足，希望读者朋友能够理并给予指正。 本教程不涉及内网穿透的底层实现方法，如果想要了解内网穿透...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

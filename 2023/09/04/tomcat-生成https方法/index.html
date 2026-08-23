@@ -1,0 +1,312 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>tomcat-生成https方法 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="title: tomcat配置https方法lang: en-USdate: 2022-11-04 00:00:00sidebar: autocategories: tags:  tomcatcategory: tag: author:    tomcat配置https方法利用tomcat服务器配置https双向认证 步骤 1、为服务器生成证书进入控制台，切换到%JAVA_HOME%&#x2F;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="tomcat-生成https方法">
+<meta property="og:url" content="https://yhao521.github.io/2023/09/04/tomcat-%E7%94%9F%E6%88%90https%E6%96%B9%E6%B3%95/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="title: tomcat配置https方法lang: en-USdate: 2022-11-04 00:00:00sidebar: autocategories: tags:  tomcatcategory: tag: author:    tomcat配置https方法利用tomcat服务器配置https双向认证 步骤 1、为服务器生成证书进入控制台，切换到%JAVA_HOME%&#x2F;">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2023-09-04T03:18:09.000Z">
+<meta property="article:modified_time" content="2023-09-04T03:18:27.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="java&#x2F;programming">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "tomcat-生成https方法",
+  "url": "https://yhao521.github.io/2023/09/04/tomcat-%E7%94%9F%E6%88%90https%E6%96%B9%E6%B3%95/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2023-09-04T03:18:09.000Z",
+  "dateModified": "2023-09-04T03:18:27.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2023/09/04/tomcat-%E7%94%9F%E6%88%90https%E6%96%B9%E6%B3%95/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'tomcat-生成https方法',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">tomcat-生成https方法</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">tomcat-生成https方法</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-09-04T03:18:09.000Z" title="发表于 2023-09-04 11:18:09">2023-09-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-09-04T03:18:27.000Z" title="更新于 2023-09-04 11:18:27">2023-09-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><hr>
+<p>title: tomcat配置https方法<br>lang: en-US<br>date: 2022-11-04 00:00:00<br>sidebar: auto<br>categories:</p>
+<p>tags:</p>
+<ul>
+<li><p>tomcat<br>category:</p>
+<p>tag:</p>
+<p>author:</p>
+</li>
+</ul>
+<hr>
+<h1 id="tomcat配置https方法"><a href="#tomcat配置https方法" class="headerlink" title="tomcat配置https方法"></a><a target="_blank" rel="noopener" href="https://www.cnblogs.com/luchangyou/p/6028067.html">tomcat配置https方法</a></h1><p>利用tomcat服务器配置https双向认证</p>
+<p>步骤</p>
+<h2 id="1、为服务器生成证书"><a href="#1、为服务器生成证书" class="headerlink" title="1、为服务器生成证书"></a>1、为服务器生成证书</h2><p>进入控制台，切换到%JAVA_HOME%&#x2F;bin目录，具体操作略。</p>
+<p>使用keytool为Tomcat生成证书，假定目标机器的域名是“localhost”，keystore文件想要存放在“D:\home\tomcat.keystore”，口令为“password”，使用如下命令生成：</p>
+<pre><code>keytool -genkey -v -alias tomcat -keyalg RSA -keystore D:\tomcat.keystore -validity 36500
+
+keytool -genkey -v -alias tomcat -keyalg RSA -keystore ~/myhost-tomcat.keystore -validity 36500
+</code></pre>
+<p>(参数简要说明：“D:\home\tomcat.keystore”含义是将证书文件的保存路径，证书文件名称是tomcat.keystore ；“-validity 36500”含义是证书有效期，36500表示100年，默认值是90天 “tomcat”为自定义证书名称)。</p>
+<p>在命令行填写必要参数：</p>
+<p>A、 输入keystore密码：此处需要输入大于6个字符的字符串。</p>
+<p>B、 “您的名字与姓氏是什么？”这是必填项，并且必须是TOMCAT部署主机的域名或者IP[如：gbcom.com 或者 10.1.25.251]（就是你将来要在浏览器中输入的访问地址），否则浏览器会弹出警告窗口，提示用户证书与所在域不匹配。在本地做开发测试时，应填入“localhost”。</p>
+<p>C、 你的组织单位名称是什么？”、“您的组织名称是什么？”、“您所在城市或区域名称是什么？”、“您所在的州或者省份名称是什么？”、“该单位的两字母国家代码是什么？”可以按照需要填写也可以不填写直接回车，在系统询问“正确吗？”时，对照输入信息，如果符合要求则使用键盘输入字母“y”，否则输入“n”重新填写上面的信息。</p>
+<p>D、 输入[tomcat&gt;的主密码，这项较为重要，会在tomcat配置文件中使用，建议输入与keystore的密码一致，设置其它密码也可以，完成上述输入后，直接回车则在你在第二步中定义的位置找到生成的文件。</p>
+<h2 id="2、为客户端生成证书"><a href="#2、为客户端生成证书" class="headerlink" title="2、为客户端生成证书"></a>2、为客户端生成证书</h2><p>为浏览器生成证书，以便让服务器来验证它。为了能将证书顺利导入至IE和Firefox，证书格式应该是PKCS12，因此，使用如下命令生成：</p>
+<pre><code>keytool -genkey -v -alias mykey -keyalg RSA -storetype PKCS12 -keystore D:\mykey.p12
+
+keytool -genkey -v -alias mykey -keyalg RSA -storetype PKCS12 -keystore ~/myhost-key.p12
+</code></pre>
+<p>（mykey为自定义）。</p>
+<p>对应的证书库存放在“D:\home\mykey.p12”，客户端的CN可以是任意值。双击mykey.p12文件，即可将证书导入至浏览器（客户端）。</p>
+<h2 id="3、让服务器信任客户端证书"><a href="#3、让服务器信任客户端证书" class="headerlink" title="3、让服务器信任客户端证书"></a>3、让服务器信任客户端证书</h2><p>由于是双向SSL认证，服务器必须要信任客户端证书，因此，必须把客户端证书添加为服务器的信任认证。由于不能直接将PKCS12格式的证书库导入，必须先把客户端证书导出为一个单独的CER文件，使用如下命令：</p>
+<pre><code>keytool -export -alias mykey -keystore D:\mykey.p12 -storetype PKCS12 -storepass password -rfc -file D:\mykey.cer
+
+keytool -export -alias mykey -keystore ~/myhost-key.p12 -storetype PKCS12 -storepass myhost-tomcat -rfc -file ~/myhost-key.cer
+</code></pre>
+<p>(mykey为自定义与客户端定义的mykey要一致，password是你设置的密码)。通过以上命令，客户端证书就被我们导出到“D:\home\mykey.cer”文件了。</p>
+<p>下一步，是将该文件导入到服务器的证书库，添加为一个信任证书使用命令如下：</p>
+<pre><code>keytool -import -v -file D:\mykey.cer -keystore D:\tomcat.keystore
+
+keytool -import -v -file ~/myhost-key.cer   -keystore ~/myhost-tomcat.keystore
+</code></pre>
+<p>通过list命令查看服务器的证书库，可以看到两个证书，一个是服务器证书，一个是受信任的客户端证书：</p>
+<pre><code>keytool -list -keystore D:\tomcat.keystore
+
+keytool -list -keystore ~/myhost-tomcat.keystore
+</code></pre>
+<p>(tomcat为你设置服务器端的证书名)。</p>
+<h2 id="4、让客户端信任服务器证书"><a href="#4、让客户端信任服务器证书" class="headerlink" title="4、让客户端信任服务器证书"></a>4、让客户端信任服务器证书</h2><p>由于是双向SSL认证，客户端也要验证服务器证书，因此，必须把服务器证书添加到浏览的“受信任的根证书颁发机构”。由于不能直接将keystore格式的证书库导入，必须先把服务器证书导出为一个单独的CER文件，使用如下命令：</p>
+<pre><code>keytool -keystore D:\tomcat.keystore -export -alias tomcat -file D:\tomcat.cer
+
+keytool -keystore ~/myhost-tomcat.keystore -export -alias tomcat -file ~/myhost-tomcat.cer
+</code></pre>
+<p>(tomcat为你设置服务器端的证书名)。</p>
+<p>通过以上命令，服务器证书就被我们导出到“D:\tomcat.cer”文件了。双击tomcat.cer文件，按照提示安装证书，将证书填入到“受信任的根证书颁发机构”。</p>
+<h2 id="5、配置Tomcat服务器"><a href="#5、配置Tomcat服务器" class="headerlink" title="5、配置Tomcat服务器"></a>5、配置Tomcat服务器</h2><p>a、打开tomcat配置文件，如：D:&#x2F;apache-tomcat-6.0.29&#x2F;conf&#x2F;server.xml，修改如下，</p>
+<pre><code>&lt;Connector port=&quot;8080&quot; protocol=&quot;HTTP/1.1&quot;
+               connectionTimeout=&quot;20000&quot;
+               redirectPort=&quot;8443&quot; /&gt;
+</code></pre>
+<p>修改参数&#x3D;&gt;</p>
+<pre><code>&lt;Connector port=&quot;8080&quot; protocol=&quot;HTTP/1.1&quot;
+               connectionTimeout=&quot;20000&quot;
+               redirectPort=&quot;443&quot; /&gt;
+
+
+
+&lt;!--
+&lt;Connector port=&quot;8443&quot; protocol=&quot;HTTP/1.1&quot; SSLEnabled=&quot;true&quot;
+              maxThreads=&quot;150&quot; scheme=&quot;https&quot; secure=&quot;true&quot;
+              clientAuth=&quot;false&quot; sslProtocol=&quot;TLS&quot;/&gt;
+ --&gt;
+</code></pre>
+<p>去掉注释且修改参数&#x3D;&gt;</p>
+<pre><code>&lt;Connector port=&quot;443&quot; protocol=&quot;HTTP/1.1&quot; SSLEnabled=&quot;true&quot;
+               maxThreads=&quot;150&quot; scheme=&quot;https&quot; secure=&quot;true&quot;
+               clientAuth=&quot;false&quot; sslProtocol=&quot;TLS&quot; keystoreFile=&quot;E:/tomcat.keystore&quot; keystorePass=&quot;123456789&quot;/&gt;
+</code></pre>
+<p>注释：<br>keystoreFile、keystorePass 两个参数，分别是证书文件的位置和[tomcat&gt;的主密码，在证书文件生成过程中做了设置</p>
+<pre><code>&lt;!--
+   &lt;Connector port=&quot;8009&quot; enableLookups=&quot;false&quot; protocol=&quot;AJP/1.3&quot; redirectPort=&quot;8443&quot; /&gt;
+--&gt;
+</code></pre>
+<p>修改参数&#x3D;&gt;</p>
+<pre><code>&lt;Connector port=&quot;8009&quot; enableLookups=&quot;false&quot; protocol=&quot;AJP/1.3&quot; redirectPort=&quot;443&quot; /&gt;
+</code></pre>
+<p>b、打开D:&#x2F;apache-tomcat-6.0.29&#x2F;conf&#x2F;web.xml，在该文件<code>&lt;/welcome-file-list&gt;</code>后面加上这样一段：</p>
+<pre><code>&lt;login-config&gt;
+&lt;!-- Authorization setting for SSL --&gt;
+&lt;auth-method&gt;CLIENT-CERT&lt;/auth-method&gt;
+&lt;realm-name&gt;Client Cert Users-only Area&lt;/realm-name&gt;
+&lt;/login-config&gt;
+&lt;security-constraint&gt;
+&lt;!-- Authorization setting for SSL --&gt;
+&lt;web-resource-collection &gt;
+&lt;web-resource-name &gt;SSL&lt;/web-resource-name&gt;
+&lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+&lt;/web-resource-collection&gt;
+&lt;user-data-constraint&gt;
+&lt;transport-guarantee&gt;CONFIDENTIAL&lt;/transport-guarantee&gt;
+&lt;/user-data-constraint&gt;
+&lt;/security-constraint&gt;
+</code></pre>
+<p>测试</p>
+<p>在浏览器中输入:<a target="_blank" rel="noopener" href="https://localhost/%EF%BC%8C%E4%BC%9A%E5%BC%B9%E5%87%BA%E9%80%89%E6%8B%A9%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%AF%81%E4%B9%A6%E7%95%8C%E9%9D%A2%EF%BC%8C%E7%82%B9%E5%87%BB%E2%80%9C%E7%A1%AE%E5%AE%9A%E2%80%9D%EF%BC%8C%E4%BC%9A%E8%BF%9B%E5%85%A5tomcat%E4%B8%BB%E9%A1%B5%EF%BC%8C%E5%9C%B0%E5%9D%80%E6%A0%8F%E5%90%8E%E4%BC%9A%E6%9C%89%E2%80%9C%E9%94%81%E2%80%9D%E5%9B%BE%E6%A0%87%EF%BC%8C%E8%A1%A8%E7%A4%BA%E6%9C%AC%E6%AC%A1%E4%BC%9A%E8%AF%9D%E5%B7%B2%E7%BB%8F%E9%80%9A%E8%BF%87HTTPS%E5%8F%8C%E5%90%91%E9%AA%8C%E8%AF%81%EF%BC%8C%E6%8E%A5%E4%B8%8B%E6%9D%A5%E7%9A%84%E4%BC%9A%E8%AF%9D%E8%BF%87%E7%A8%8B%E4%B8%AD%E6%89%80%E4%BC%A0%E8%BE%93%E7%9A%84%E4%BF%A1%E6%81%AF%E9%83%BD%E5%B7%B2%E7%BB%8F%E8%BF%87SSL%E4%BF%A1%E6%81%AF%E5%8A%A0%E5%AF%86%E3%80%82">https://localhost:443/，会弹出选择客户端证书界面，点击“确定”，会进入tomcat主页，地址栏后会有“锁”图标，表示本次会话已经通过HTTPS双向验证，接下来的会话过程中所传输的信息都已经过SSL信息加密。</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2023/09/04/tomcat-%E7%94%9F%E6%88%90https%E6%96%B9%E6%B3%95/">https://yhao521.github.io/2023/09/04/tomcat-%E7%94%9F%E6%88%90https%E6%96%B9%E6%B3%95/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/java-programming/">java/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2023/09/04/ulimit%E5%91%BD%E4%BB%A4/" title="ulimit命令"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">ulimit命令</div></div><div class="info-2"><div class="info-item-1"> title: ulimit命令date: 2023-09-03 20:17:08category: tag: author:  ulimit 命令。ulimit用于shell启动进程所占用的资源. 12345678910111213141516-H 设置硬资源限制.-S 设置软资源限制.-a 显示当前所有的资源限制.-c size:设置core文件的最大值.单位:blocks-d size:设置数据段的最大值.单位:kbytes-f size:设置创建文件的最大值.单位:blocks-l size:设置在内存中锁定进程的最大值.单位:kbytes-m size:设置可以使用的常驻内存的最大值.单位:kbytes-n size:设置内核可以同时打开的文件描述符的最大值.单位:n-p size:设置管道缓冲区的最大值.单位:kbytes-s size:设置堆栈的最大值.单位:kbytes-t size:设置CPU使用时间的最大上限.单位:seconds-v size:设置虚拟内存的最大值.单位:kbytes-u &lt;程序数目&gt; 　用户最多可开启的程序数目  ulimit ...</div></div></div></a><a class="pagination-related" href="/2023/09/04/tomcat%E5%8D%A0%E7%94%A8cpu%E6%AF%94%E8%BE%83%E5%A4%9A/" title="tomcat占用cpu比较多"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">tomcat占用cpu比较多</div></div><div class="info-2"><div class="info-item-1"> title: tomcat占用cpu比较多lang: en-USdate: 2022-11-04 00:00:00sidebar: autocategories: tags:  tomcatcategory: tag: author:    https://blog.csdn.net/qq_20545159/article/details/77775122 tomcat占用cpu比较多在Linux中当Tomcat启动后，我们只是去查看应用是否能够正常访问来判断Tomcat启动是否正常。一般情况下这样看是没有问题的，但是有时候我们会发现当Tomcat使用了一段时间后，开始出现CPU或者内存飙升。此时，查看Tomcat日志也许无法看到有效信息，因此有必要了解一下Linux和jdk给我们提供的相关工具。 1、查看内存和CPU使用较高的进程信息输入top，我们可以看到下面的信息 2、如果我们想查看PID为3583的进程信息，则可以执行top -H -p 3582 说明：3582为进程ID，一个进程可以有多个线程。这个基础知识科普给刚入门的小伙伴。 此时，我们可以看到进程3582下面的相...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/%E6%97%B6%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6%E7%A9%BA%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6/" title="时间复杂度空间复杂度"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">时间复杂度空间复杂度</div></div><div class="info-2"><div class="info-item-1"> title: 时间复杂度空间复杂度date: 2023-09-03 20:17:08category:  开发语言tag: 开发语言author:   时间复杂度&#x2F;空间复杂度原文链接：https://blog.csdn.net/xueguchen/article/details/108449337 1.名词解析O(x):表示算法时空（时间&#x2F;空间）的复杂度O括号里的函数 x 表示：某个算法的耗时&#x2F;耗空间与数据增长量之间的关系。其中O(n),O(n^2)等的 n 表示输入数据的量 2.O(1)O(1)，即是最低的时空复杂度。即，耗时&#x2F;耗空间与输入数据大小无关，无论输入数据增大多少倍，耗时&#x2F;耗空间都不变例：哈希算法，无论数据规模多大，都可以在一次计算后找到目标（不考虑冲突的话） 3.O(n)时间复杂度为O(n)，就代表数据量增大几倍，耗时也增大几倍例：遍历算法，找数组里最大或最小的值，需要把数组的 n 元素遍历一次，操作 n 次 4.O(n^2)时间复杂度O(n^2)，就代表数据量增大n倍时，耗时增大n的平方倍例：冒泡排序，双重for...</div></div></div></a><a class="pagination-related" href="/2023/09/04/mavan%E4%BD%BF%E7%94%A8/" title="mavan使用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">mavan使用</div></div><div class="info-2"><div class="info-item-1"> title: mavan使用date: 2023-09-03 20:17:08category:  doc_maventag: doc_mavenauthor:   maven使用命令提取设置为正式版本1234crds_version=$( mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression=project.version -q -DforceStdout)VERSION=$(echo $&#123;crds_version//-SNAPSHOT/&#125; )mvn versions:set -DnewVersion=$&#123;VERSION&#125;  -DgenerateBackupPoms=false  设置&amp;更新所有子模块版本号12mvn versions:set -DnewVersion=3.0.3-SNAPSHOTmvn -N versions:update-child-modules  maven自动发布，更新项目版本在实际开发过程中，特别是现在推崇...</div></div></div></a><a class="pagination-related" href="/2024/03/13/%E6%9C%80%E4%BE%BF%E6%8D%B7docker%E5%AE%89%E8%A3%85rocketmq%E9%98%9F%E5%88%97/" title="最便捷docker安装rocketmq队列"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-13</div><div class="info-item-2">最便捷docker安装rocketmq队列</div></div><div class="info-2"><div class="info-item-1">最便捷 docker 安装 rocketmq 队列如果想搭建一个本地玩的 rocketmq，可以继续向下看，绝对让你体会“傻瓜式”点点点安装 文章中的内容皆是作者 “踩屎”无数，总结出来的绝对精髓 能够来看 rocketmq 的安装，证明已经了解基本概念，也就不在这班门弄斧了 rocketmq 有两个非常重要的概念，nameserver 和 broker，文章也是围绕这两个点进行安装，提供 便捷版本 &amp; 可靠版本 两种方式  文章大纲如下：  安装 nameserver 便捷版安装 nameserver 可靠版安装 nameserver   安装 broker server 便捷版安装 broker server 可靠版安装 broker server   安装 rocketmq 控制台 创建 topic 控制台创建 命令行创建   结言   安装 nameserver 首先，通过 docker search 命令查看，准备拉取 rocketmq 的镜像 因为没有官方制作的镜像，所以我们选择一款名称为 foxiswho&#x2F;rocketmq 的镜像，大家也可以使用 ...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E5%B8%B8%E7%94%A8%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" title="常用正则表达式"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">常用正则表达式</div></div><div class="info-2"><div class="info-item-1"> title: 常用正则表达式date: 2023-09-03 20:17:08category:  开发语言 正则tag: 正则author:   如果激活 UNIX_LINES 模式，则新行符是唯一识别的行结束符。 如果未指定 DOTALL 标志，则正则表达式 . 可以与任何字符（行结束符除外）匹配。 默认情况下，正则表达式 ^ 和 $ 忽略行结束符，仅分别与整个输入序列的开头和结尾匹配。如果激活 MULTILINE 模式，则 ^ 在输入的开头和行结束符之后（输入的结尾）才发生匹配。处于 MULTILINE 模式中时，$ 仅在行结束符之前或输入序列的结尾处匹配。 12345678// . 匹配除换行符以外的任意字符// \w 匹配字母或数字或下划线或汉字 等价于 &#x27;[^A-Za-z0-9_]&#x27;。// \s 匹配任意的空白符// \d 匹配数字// \b 匹配单词的开始或结束// ^ 匹配字符串的开始// $ 匹配字符串的结束// \w能不能匹配汉字要视你的操作系统和你的应用环境而定  一、校验数字的表达式 1234567891011121314151617...</div></div></div></a><a class="pagination-related" href="/2023/09/04/Java8Stream/" title="Java8Stream"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">Java8Stream</div></div><div class="info-2"><div class="info-item-1"> title: Java8Streamdate: 2023-09-03 20:17:08category:  开发语言 javatag: javaauthor:   Java8 Stream：2万字20个实例，玩转集合的筛选、归约、分组、聚合https://www.csdn.net/tags/NtTaggzsNTczMjgtYmxvZwO0O0OO0O0O.html Java8-Stream 1 Stream概述 2 Stream的创建 3 Stream的使用  案例使用的员工类 3.1 遍历&#x2F;匹配（foreach&#x2F;find&#x2F;match） 3.2 筛选（filter） 3.3 聚合（max&#x2F;min&#x2F;count) 3.4 映射(map&#x2F;flatMap) 3.5 归约(reduce) 3.6 收集(collect)  3.6.1 归集(toList&#x2F;toSet&#x2F;toMap) 3.6.2 统计(count&#x2F;averaging) 3.6.3 分组(partitioningBy&#x2F;groupi...</div></div></div></a><a class="pagination-related" href="/2024/04/14/Vue3+TypeScript%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E8%BF%9B%E9%98%B6%EF%BC%88%E4%B8%80%EF%BC%89%E2%80%94%E2%80%94Vue3%E7%AE%80%E4%BB%8B%E5%8F%8A%E4%BB%8B%E7%BB%8D/" title="Vue3+TypeScript从入门到进阶（一）——Vue3简介及介绍"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-14</div><div class="info-item-2">Vue3+TypeScript从入门到进阶（一）——Vue3简介及介绍</div></div><div class="info-2"><div class="info-item-1">Vue3+TypeScript从入门到进阶（一）——Vue3简介及介绍——附沿途学习案例及项目实战代码一、简介1、认识VueVue (读音 &#x2F;vjuː&#x2F;，类似于 view) 是一套用于构建用户界面的渐进式框架。  全程是Vue.js或者Vuejs；  什么是渐进式框架呢？表示我们可以在项目中一点点来引入和使用Vue，而不一定需要全部使用Vue来开发整个项目；    渐进式: (自底向上逐层的应用) (1) 简单应用: 只需要一个轻量小巧的核心库 (2) 复杂应用: 可以引用各种vue插件 这里说的渐进式框架其实是与Spring类似的分层架构，Vue由5个模块组成：声明式渲染&#x2F;组件系统（vue.js）、客户端路由（vue-router）、大规模状态管理（vuex&#x2F;pinia）、构建工具（vue-loader&#x2F;webpack&#x2F;vue-cli&#x2F;vite）、数据持久化（涉及到后端，没有具体方案）  目前Vue在前端处于什么地位？ 目前前端最流行的是三大框架：Vue、React、Angular。  2、前端框架数据对比框...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#tomcat%E9%85%8D%E7%BD%AEhttps%E6%96%B9%E6%B3%95"><span class="toc-number">1.</span> <span class="toc-text">tomcat配置https方法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1%E3%80%81%E4%B8%BA%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%94%9F%E6%88%90%E8%AF%81%E4%B9%A6"><span class="toc-number">1.1.</span> <span class="toc-text">1、为服务器生成证书</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2%E3%80%81%E4%B8%BA%E5%AE%A2%E6%88%B7%E7%AB%AF%E7%94%9F%E6%88%90%E8%AF%81%E4%B9%A6"><span class="toc-number">1.2.</span> <span class="toc-text">2、为客户端生成证书</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3%E3%80%81%E8%AE%A9%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%BF%A1%E4%BB%BB%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%AF%81%E4%B9%A6"><span class="toc-number">1.3.</span> <span class="toc-text">3、让服务器信任客户端证书</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4%E3%80%81%E8%AE%A9%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BF%A1%E4%BB%BB%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%AF%81%E4%B9%A6"><span class="toc-number">1.4.</span> <span class="toc-text">4、让客户端信任服务器证书</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5%E3%80%81%E9%85%8D%E7%BD%AETomcat%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="toc-number">1.5.</span> <span class="toc-text">5、配置Tomcat服务器</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

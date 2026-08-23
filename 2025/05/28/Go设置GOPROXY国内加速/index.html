@@ -1,0 +1,237 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Go设置GOPROXY国内加速 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="在 Linux 或 macOS 上面 需要运行下面命令（或者，可以把以下命令写到 .bashrc 或 .bash_profile 文件中）： # 启用 Go Modules 功能 go env -w GO111MODULE&#x3D;on # 配置 GOPROXY 环境变量，以下三选一 # 1. 七牛 CDN">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go设置GOPROXY国内加速">
+<meta property="og:url" content="https://yhao521.github.io/2025/05/28/Go%E8%AE%BE%E7%BD%AEGOPROXY%E5%9B%BD%E5%86%85%E5%8A%A0%E9%80%9F/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="在 Linux 或 macOS 上面 需要运行下面命令（或者，可以把以下命令写到 .bashrc 或 .bash_profile 文件中）： # 启用 Go Modules 功能 go env -w GO111MODULE&#x3D;on # 配置 GOPROXY 环境变量，以下三选一 # 1. 七牛 CDN">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2025-05-27T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-17T16:00:00.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="摘录">
+<meta property="article:tag" content="教程">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Go设置GOPROXY国内加速",
+  "url": "https://yhao521.github.io/2025/05/28/Go%E8%AE%BE%E7%BD%AEGOPROXY%E5%9B%BD%E5%86%85%E5%8A%A0%E9%80%9F/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2025-05-27T16:00:00.000Z",
+  "dateModified": "2026-05-17T16:00:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2025/05/28/Go%E8%AE%BE%E7%BD%AEGOPROXY%E5%9B%BD%E5%86%85%E5%8A%A0%E9%80%9F/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Go设置GOPROXY国内加速',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">Go设置GOPROXY国内加速</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Go设置GOPROXY国内加速</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-05-27T16:00:00.000Z" title="发表于 2025-05-28 00:00:00">2025-05-28</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-17T16:00:00.000Z" title="更新于 2026-05-18 00:00:00">2026-05-18</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p><a target="_blank" rel="noopener" href="https://www.doubao.com/?channel=cnblogs&source=hw_db_cnblogs&type=lunt&theme=bianc"><img src="https://img2024.cnblogs.com/blog/35695/202412/35695-20241201073014811-1847930772.jpg"></a></p>
+<p>身体健康！快乐开心！每一天都开心有意义！ |</p>
+<p><a target="_blank" rel="noopener" href="https://wz.cnblogs.com/">收藏</a> <a target="_blank" rel="noopener" href="https://ing.cnblogs.com/">闪存</a> <a target="_blank" rel="noopener" href="https://group.cnblogs.com/">小组</a> <a target="_blank" rel="noopener" href="https://q.cnblogs.com/">博问</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/shengoasis">ShengOasis</a></p>
+<p>园龄：3年2个月 <a target="_blank" rel="noopener" href="https://home.cnblogs.com/u/shengoasis/followers">粉丝：1</a> <a target="_blank" rel="noopener" href="https://home.cnblogs.com/u/shengoasis/followees">关注：0</a></p>
+<h2 id="在-Linux-或-macOS-上面"><a href="#在-Linux-或-macOS-上面" class="headerlink" title="在 Linux 或 macOS 上面"></a>在 Linux 或 macOS 上面</h2><p>需要运行下面命令（或者，可以把以下命令写到.bashrc 或.bash_profile 文件中）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启用 Go Modules 功能</span></span><br><span class="line"></span><br><span class="line">go <span class="built_in">env</span> -w GO111MODULE=on</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line"><span class="comment"># 配置 GOPROXY 环境变量，以下三选一</span></span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line"><span class="comment"># 1. 七牛 CDN</span></span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">go <span class="built_in">env</span> -w  GOPROXY=https://goproxy.cn,direct</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 阿里云</span></span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">go <span class="built_in">env</span> -w GOPROXY=https://mirrors.aliyun.com/goproxy/,direct</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 官方</span></span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">go <span class="built_in">env</span> -w  GOPROXY=https://goproxy.io,direct</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line"><span class="comment"># 确认一下：</span></span><br><span class="line"></span><br><span class="line">$ go <span class="built_in">env</span> | grep GOPROXY</span><br><span class="line"></span><br><span class="line">GOPROXY=<span class="string">&quot;[https://goproxy.cn](https://goproxy.cn/)&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="在Windows上面"><a href="#在Windows上面" class="headerlink" title="在Windows上面"></a>在Windows上面</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启用 Go Modules 功能</span></span><br><span class="line"></span><br><span class="line"><span class="variable">$env</span>:GO111MODULE=<span class="string">&quot;on&quot;</span></span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line"><span class="comment"># 配置 GOPROXY 环境变量，以下三选一</span></span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line"><span class="comment"># 1. 七牛 CDN</span></span><br><span class="line"></span><br><span class="line"><span class="variable">$env</span>:GOPROXY=<span class="string">&quot;https://goproxy.cn,direct&quot;</span></span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 阿里云</span></span><br><span class="line"></span><br><span class="line"><span class="variable">$env</span>:GOPROXY=<span class="string">&quot;https://mirrors.aliyun.com/goproxy/,direct&quot;</span></span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 官方</span></span><br><span class="line"></span><br><span class="line"><span class="variable">$env</span>:GOPROXY=<span class="string">&quot;https://goproxy.io,direct&quot;</span></span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line"><span class="comment"># 确认一下：</span></span><br><span class="line"></span><br><span class="line">$ go <span class="built_in">env</span> | grep GOPROXY</span><br><span class="line"></span><br><span class="line">GOPROXY=<span class="string">&quot;[https://goproxy.cn](https://goproxy.cn/)&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/shengoasis/p/18263472">上一篇 Ubuntu下统计项目的代码行数-cloc工具</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/shengoasis/p/18336540">下一篇 Ubuntu修改默认网关，以及配置静态ip</a></p>
+<p>本文作者：ShengOasis</p>
+<p>本文链接：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/shengoasis/p/18282305">https://www.cnblogs.com/shengoasis/p/18282305</a></p>
+<p>版权声明：本作品采用知识共享署名-非商业性使用-禁止演绎 2.5 中国大陆 许可协议 进行许可。</p>
+<p><a target="_blank" rel="noopener" href="https://home.cnblogs.com/u/shengoasis/"><img src="https://pic.cnblogs.com/face/2781971/20231130194216.png"></a></p>
+<p><a target="_blank" rel="noopener" href="https://home.cnblogs.com/u/shengoasis/">ShengOasis</a><br><a target="_blank" rel="noopener" href="https://home.cnblogs.com/u/shengoasis/followers/">粉丝 - 1</a> <a target="_blank" rel="noopener" href="https://home.cnblogs.com/u/shengoasis/followees/">关注 - 0</a>  </p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/shengoasis/p/">+加关注</a></p>
+<p>1</p>
+<p>0</p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/shengoasis/p/18263472">«</a> 上一篇： <a target="_blank" rel="noopener" href="https://www.cnblogs.com/shengoasis/p/18263472" title="发布于 2024-06-23 15:09">Ubuntu下统计项目的代码行数-cloc工具</a><br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/shengoasis/p/18336540">»</a> 下一篇： <a target="_blank" rel="noopener" href="https://www.cnblogs.com/shengoasis/p/18336540" title="发布于 2024-08-01 14:07">Ubuntu修改默认网关，以及配置静态ip</a></p>
+<p>评论</p>
+<p>收藏</p>
+<p>关注</p>
+<p>推荐</p>
+<p>深色</p>
+<p>回顶</p>
+<p>收起</p>
+<p><a target="_blank" rel="noopener" href="https://www.trae.com.cn/?utm_source=advertising&utm_medium=cnblogs_ug_cpa&utm_term=hw_trae_cnblogs">支持MCP的AI原生IDE</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2025/05/28/Go%E8%AE%BE%E7%BD%AEGOPROXY%E5%9B%BD%E5%86%85%E5%8A%A0%E9%80%9F/">https://yhao521.github.io/2025/05/28/Go%E8%AE%BE%E7%BD%AEGOPROXY%E5%9B%BD%E5%86%85%E5%8A%A0%E9%80%9F/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/%E6%95%99%E7%A8%8B/">教程</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a><a class="post-meta__tags" href="/tags/%E6%91%98%E5%BD%95/">摘录</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/05/28/%E6%88%91%E7%9A%84%20Obsidian%20%E5%B7%A5%E4%BD%9C%E6%B5%81%EF%BC%9A%E6%A8%A1%E6%9D%BF+QuickAdd+Dataview%20%E5%BF%AB%E9%80%9F%E5%88%9B%E5%BB%BA%E5%92%8C%E8%87%AA%E5%8A%A8%E7%B4%A2%E5%BC%95%20-%20%E5%B0%91%E6%95%B0%E6%B4%BE/" title="我的 Obsidian 工作流：模板+QuickAdd+Dataview 快速创建和自动索引 - 少数派"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">我的 Obsidian 工作流：模板+QuickAdd+Dataview 快速创建和自动索引 - 少数派</div></div><div class="info-2"><div class="info-item-1">你可以想象到的最优雅的输入方式嗨，大家！ 不知不觉，使用Obsidian已经一年了，从一开始无从下手，到在日记（Obsidian的核心插件）中写一元笔记，从写写流水帐，到它几乎承包了我所有的笔记场景。而我也从一个笔记爱好者成为了一名写作者。 我的笔记场景经过一轮更新重组，变为了以下这些：  闪念笔记：随时记录闪念，到当天日记。如果有需要展开的闪念，则在时间充裕时单独做一张卡片。 文献笔记：即阅读和观影笔记。阅读产生的思考会在阅读完之后拆分到新的卡片。 项目笔记：为写作而服务，分为灵感提案、写作中的文章和已完成的文章。  当我的文章多起来以后，我发现要找到它们开始变得困难。我会想知道我有哪些灵感是还没有写的，这样我接下来可以构思新文章；哪些是正在写作的，方便我继续写；哪些是已经发布的；哪些只发布了一个平台，另一个平台还在等待发布。 怎么解决呢？我想到了Dataview插件，它根据不同的条件生成文件目录。于是我设计了一些属性，用于提案笔记和输出笔记，让他们可以被Dataview识别，自动帮我归好类。 整理之后果然非常清晰明了，打开项目索引笔记，我就可以看到现在进行中的项目，灵感库还有...</div></div></div></a><a class="pagination-related" href="/2025/05/27/golang%E5%BC%80%E5%8F%91GUI%E6%A1%8C%E9%9D%A2%E5%BA%94%E7%94%A8%EF%BC%88%E5%85%AD%EF%BC%89-%20wails%EF%BC%8CWebView2%EF%BC%8CpostMessage%EF%BC%8C%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86_golang%20wails-CSDN%E5%8D%9A%E5%AE%A2/" title="golang开发GUI桌面应用（六）- wails，WebView2，postMessage，实现原理_golang wails-CSDN博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">golang开发GUI桌面应用（六）- wails，WebView2，postMessage，实现原理_golang wails-CSDN博客</div></div><div class="info-2"><div class="info-item-1">简介官网：https://wails.io/zh-Hans/ 文档：https://wails.io/zh-Hans/docs/introduction/ github ：https://github.com/wailsapp/wails 将它看作为 Go 的快并且轻量的 Electron 替代品。 您可以使用 Go 的 灵活性 和强大功能，结合丰富的现代前端，轻松的构建应用程序。 之前使用Electron开发过一个 简单的桌面应用 ，打包后居然有一百多M，它不仅嵌入 Chromium 和 Node.js 到 二进制文件，而且包含完整的前端代码， 对比 ，但是 Electron有一个超级应用，那就是 vscode。 功能  原生菜单、对话框、主题和半透明 Windows、macOS 和 linux 支持 内置 Svelte、React 、Preact 、Vue、Lit 和 Vanilla JS 的模板 从 JavaScript 轻松调用 Go 方法 自动将 Go 结构体转换为 TypeScript 模块 Windows 上不需要 CGO 或外部 DLL 使用 Vite 的实时开发...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/07/10/%E4%BD%BF%E7%94%A8Golang%E5%AE%9E%E7%8E%B0%E9%AB%98%E6%95%88%E7%9A%84%E4%BA%A4%E4%BA%92%E5%BC%8F%E5%91%BD%E4%BB%A4%E8%A1%8C%E6%8F%90%E7%A4%BA%E5%B7%A5%E5%85%B7%20-%20%E4%BA%91%E5%8E%9F%E7%94%9F%E5%AE%9E%E8%B7%B5/" title="使用Golang实现高效的交互式命令行提示工具 - 云原生实践"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-07-10</div><div class="info-item-2">使用Golang实现高效的交互式命令行提示工具 - 云原生实践</div></div><div class="info-2"><div class="info-item-1">引言在软件开发领域，命令行工具（CLI）一直是开发者不可或缺的工具之一。它们简洁、高效，能够快速完成各种任务。随着技术的发展，交互式命令行工具（Interactive CLI）逐渐成为新的趋势，它们通过提供自动补全、语法高亮等功能，极大地提升了用户体验。本文将探讨如何使用Golang实现一个高效的交互式命令行提示工具，并结合一些流行的库和框架，展示其强大功能和灵活性。 Golang简介Golang，也被称为Go语言，是由Google开发的一种开源编程语言。它以其简洁、直观和高效的语法而受到广泛喜爱。Golang具有静态类型、垃圾回收、并发编程和内存安全等特性，特别适合用于开发高性能的网络工具和命令行应用程序。 交互式命令行工具的需求传统的命令行工具通常缺乏交互性，用户需要手动输入完整的命令和参数，这不仅效率低下，还容易出错。交互式命令行工具通过提供自动补全、语法高亮和历史记录等功能，极大地提升了用户体验和工作效率。 关键技术1. Go-prompt库go-prompt 是一个功能强大的Golang库，用于构建交互式命令行界面。它提供了类似于Python的 prompt_toolk...</div></div></div></a><a class="pagination-related" href="/2025/05/13/nginx%20%E5%BC%80%E5%90%AF%E7%9B%AE%E5%BD%95%E6%B5%8F%E8%A7%88%E5%8A%9F%E8%83%BD%E5%8F%8A%E4%B8%BB%E9%A2%98%E7%BE%8E%E5%8C%96/" title="nginx 开启目录浏览功能及主题美化"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-13</div><div class="info-item-2">nginx 开启目录浏览功能及主题美化</div></div><div class="info-2"><div class="info-item-1">![[_resources&#x2F;46515eaf0d7b8037451bd4cc691c1efa_MD5.png]] 1.开启目录浏览功能Nginx 提供了相应的 ngx_http_autoindex_module 模块该模块有以下几个命令：    命令 默认值 值域 作用域 EG    autoindex off on：开启目录浏览；off：关闭目录浏览 http, server, location autoindex on; 打开目录浏览功能   autoindex_format html html、xml、json、jsonp 分别用这几个风格展示目录 http, server, location autoindex_format html;  以网页的风格展示目录内容。该属性在 1.7.9 及以上适用   autoindex_exact_size on on：展示文件字节数； off：以可读的方式显示文件大小 http, server, location autoindex_exact_size off; 以可读的方式显示文件大小，单位为 KB、MB 或者 GB，a...</div></div></div></a><a class="pagination-related" href="/2025/06/24/docker%20%E5%AE%89%E8%A3%85%E5%8F%AF%E8%A7%86%E5%8C%96%E5%B7%A5%E5%85%B7%20Portainer%20%E4%BB%A5%E5%8F%8A%20%E6%B1%89%E5%8C%96_portainer%E8%AE%BE%E7%BD%AE%E4%B8%AD%E6%96%87-CSDN%E5%8D%9A%E5%AE%A2/" title="docker 安装可视化工具 Portainer 以及 汉化_portainer设置中文-CSDN博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-06-24</div><div class="info-item-2">docker 安装可视化工具 Portainer 以及 汉化_portainer设置中文-CSDN博客</div></div><div class="info-2"><div class="info-item-1">本文详细指导如何在Linux上安装Portainer的最新汉化版2.9.1，包括拉取镜像、创建容器、开放端口以及汉化步骤，最后展示汉化后的界面。 摘要生成于 C知道 ，由 DeepSeek-R1 满血版支持， 前往体验 &gt;  安装 portainer 是最新版本， 汉化 指定版本2.9.1 。如果要安装汉化版，可直接跳转步骤四  一、拉去镜像 安装网址： Install Portainer BE with Docker on Linux - Portainer Documentation  12docker pull portainer/portainerXML  二、根据portainer镜像创建容器1234567891011121314docker run -d -p 8000:8000 -p 9000:9000\--name portainer --restart=always \-v /var/run/docker.sock:/var/run/docker.sock \-v portainer_data:/data \portainer/portainer  XML...</div></div></div></a><a class="pagination-related" href="/2025/05/29/Hygen/" title="Hygen"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-29</div><div class="info-item-2">Hygen</div></div><div class="info-2"><div class="info-item-1">[TOC] 起步安装12345npm i -g hygen或cnpm i -g hygen  初始化1234567进入项目地址cd /projects/demo初始化模板hygen init self  初始化成功后，会自动在项目根目录下生成 _templates 文件夹，并且默认生成了一个名为 generator 的生成器及其工作目录。后续会依托该生成器，派生出更多的生成器来满足需求。  注意 不要删除 _templates/generator 文件夹，否则会导致无法创建 Generator 。   提示 后续的所有命令行操作，如无特殊说明，都在项目根目录。  创建第一个生成器1hygen generator new component  执行后会生成一个生成器 component 及其工作目录，目录中默认存在一个示例文件 hello.ejs.t 。 12345678910111213141516171819---to: app/hello.js---const hello = \`\`\`Hello!This is your first hygen template.Lear...</div></div></div></a><a class="pagination-related" href="/2025/08/07/Ollama%E8%BF%9B%E9%98%B6%EF%BC%8C%E5%9C%A8Python%E3%80%81Java%E3%80%81Go%E9%A1%B9%E7%9B%AE%E4%B8%AD%E9%9B%86%E6%88%90Deepseek%E3%80%81QWQ%E5%A4%A7%E6%A8%A1%E5%9E%8B/" title="Ollama进阶，在Python、Java、Go项目中集成Deepseek、QWQ大模型"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-08-07</div><div class="info-item-2">Ollama进阶，在Python、Java、Go项目中集成Deepseek、QWQ大模型</div></div><div class="info-2"><div class="info-item-1">Ollama系列文章：Ollama入门，一键启动本地DeepSeek大模型Ollama入门，Ollama技术架构与原理Ollama进阶，在Python、Java、Go项目中集成Deepseek、QWQ大模型Ollama进阶，在Javascript(nodejs)前后端项目中集成Deepseek、QWQ大模型Ollama高手，玩转本地自定义大模型（LLM）Ollama高手，调优Ollama环境变量，提高性能与安全性Ollama高手，调优Ollama模型参数，提高模型输出质量  在“ Ollama入门，一键启动本地DeepSeek大模型 ”一文中，我们介绍了Ollama的基本使用方法，同时也推荐了ChatBox、Cherry Studio等AI智能客户端来完成文字、图片、语音等多模态输入，实现与 AI 的交互。 但是，仅仅这样常常不足以满足实际的需要，而在线版的Deepseek、ChatGPT、豆包往往可以提供更好功能，这样在本地部署DeepSeek大模型就成了geek的自娱自乐了，因此我们必须将Ollama整合到项目中去，让它与自有系统整合起来，实现更加丰富的功能。 1、如何调用O...</div></div></div></a><a class="pagination-related" href="/2025/06/30/docker%E3%80%81containerd%E3%80%81runc%E3%80%81shim...%20%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E5%90%8D%E8%AF%8D%E5%85%A8%E8%A7%A3%E6%9E%90-CSDN%E5%8D%9A%E5%AE%A2/" title="docker、containerd、runc、shim... 容器技术名词全解析-CSDN博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-06-30</div><div class="info-item-2">docker、containerd、runc、shim... 容器技术名词全解析-CSDN博客</div></div><div class="info-2"><div class="info-item-1">docker、containerd、runc、shim… 容器技术名词全解析本文链接： https://blog.csdn.net/dillanzhou/article/details/116505401 云原生的概念在最近两年得到了广泛的关注，各大云厂商和技术团队都纷纷推出了各种“云原生”的技术和产品。虽然云原生到底包括哪些概念和技术并没有一个公认的答案，但容器技术是云原生的基础和核心应该是现阶段的一个共识。 但是容器技术经过多年的发展和演变，各种实现方案和早期版本相比已经有了巨大的差异，而且仍然在不断演进的过程中。各种组件的产生、随之而来的接口规范、基于接口规范实现的新可选组件让相关的名称和概念更加复杂。新的开发使用者很难全面理解容器相关的各类名词和概念，以及这些名词和概念在真实的容器部署环境中的作用和关系。 笔者作为容器运行时开发人员，对于容器相关的概念仍然经常犯迷糊。 docker 、libcontainer、containerd、shim、runc分别起什么作用？CRI、OCI是什么层次的规范、有什么区别？各个组件的功能和协作方式是怎样的？使用k8s管理容器后相关组件和...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8-Linux-%E6%88%96-macOS-%E4%B8%8A%E9%9D%A2"><span class="toc-number">1.</span> <span class="toc-text">在 Linux 或 macOS 上面</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8Windows%E4%B8%8A%E9%9D%A2"><span class="toc-number">2.</span> <span class="toc-text">在Windows上面</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

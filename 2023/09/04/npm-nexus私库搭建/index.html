@@ -1,0 +1,335 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>npm-nexus私库搭建 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="title: npm-nexus私库搭建date: 2023-09-03 20:17:08category:  开发语言 doc_nodejstag: doc_nodejsauthor:   5.使用nexus3配置npm私有仓库当我们运行前端项目的时候，常常在解决依赖的时候会加上一个参数npm install --registry&#x3D;https:&#x2F;&#x2F;registry.npm.taobao.org">
+<meta property="og:type" content="article">
+<meta property="og:title" content="npm-nexus私库搭建">
+<meta property="og:url" content="https://yhao521.github.io/2023/09/04/npm-nexus%E7%A7%81%E5%BA%93%E6%90%AD%E5%BB%BA/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="title: npm-nexus私库搭建date: 2023-09-03 20:17:08category:  开发语言 doc_nodejstag: doc_nodejsauthor:   5.使用nexus3配置npm私有仓库当我们运行前端项目的时候，常常在解决依赖的时候会加上一个参数npm install --registry&#x3D;https:&#x2F;&#x2F;registry.npm.taobao.org">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2023-09-04T03:18:09.000Z">
+<meta property="article:modified_time" content="2023-09-04T03:18:27.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "npm-nexus私库搭建",
+  "url": "https://yhao521.github.io/2023/09/04/npm-nexus%E7%A7%81%E5%BA%93%E6%90%AD%E5%BB%BA/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2023-09-04T03:18:09.000Z",
+  "dateModified": "2023-09-04T03:18:27.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2023/09/04/npm-nexus%E7%A7%81%E5%BA%93%E6%90%AD%E5%BB%BA/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'npm-nexus私库搭建',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">npm-nexus私库搭建</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">npm-nexus私库搭建</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-09-04T03:18:09.000Z" title="发表于 2023-09-04 11:18:09">2023-09-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-09-04T03:18:27.000Z" title="更新于 2023-09-04 11:18:27">2023-09-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><hr>
+<p>title: npm-nexus私库搭建<br>date: 2023-09-03 20:17:08<br>category:</p>
+<ul>
+<li>开发语言</li>
+<li>doc_nodejs<br>tag:</li>
+<li>doc_nodejs<br>author:</li>
+</ul>
+<hr>
+<h1 id="5-使用nexus3配置npm私有仓库"><a href="#5-使用nexus3配置npm私有仓库" class="headerlink" title="5.使用nexus3配置npm私有仓库"></a><a target="_blank" rel="noopener" href="https://www.cnblogs.com/sanduzxcvbnm/p/13100534.html">5.使用nexus3配置npm私有仓库</a></h1><p>当我们运行前端项目的时候，常常在解决依赖的时候会加上一个参数<code>npm install --registry=https://registry.npm.taobao.org</code>将源指定为淘宝的源，以期让速度加快起来，事实上这种的确能够让速度变快，但是长久来看，如果想真正的快速敏捷开发部署，搭建企业内部的私服，则会让速度更上一个台阶。</p>
+<p>搭建npm私服，我们依旧使用nexus3。</p>
+<p>与其他私服一样的，npm私服同样有三种类型：</p>
+<ul>
+<li><code>hosted</code> : 本地存储，即同 docker 官方仓库一样提供本地私服功能</li>
+<li><code>proxy</code> : 提供代理其他仓库的类型，如 docker 中央仓库</li>
+<li><code>group</code> : 组类型，实质作用是组合多个仓库为一个地址</li>
+</ul>
+<p>那么就来一个一个创建。</p>
+<h2 id="1，创建blob存储"><a href="#1，创建blob存储" class="headerlink" title="1，创建blob存储"></a>1，创建blob存储</h2><p>为其创建一个单独的存储空间。<br><img src="https://img2020.cnblogs.com/blog/794174/202006/794174-20200612162739232-1663990351.png" alt="img"></p>
+<h2 id="2，创建hosted类型的npm"><a href="#2，创建hosted类型的npm" class="headerlink" title="2，创建hosted类型的npm"></a>2，创建hosted类型的npm</h2><ul>
+<li><code>Name</code>: 定义一个名称local-npm</li>
+<li><code>Storage</code>：Blob store，我们下拉选择前面创建好的专用blob：npm-hub。</li>
+<li><code>Hosted</code>：开发环境，我们运行重复发布，因此Delpoyment policy 我们选择Allow redeploy。这个很重要！</li>
+</ul>
+<p><img src="https://img2020.cnblogs.com/blog/794174/202006/794174-20200612163257412-1384867580.png" alt="img"></p>
+<h2 id="3，创建一个proxy类型的npm仓库"><a href="#3，创建一个proxy类型的npm仓库" class="headerlink" title="3，创建一个proxy类型的npm仓库"></a>3，创建一个proxy类型的npm仓库</h2><ul>
+<li><code>Name</code>: proxy-npm</li>
+<li><code>Proxy</code>：Remote Storage: 远程仓库地址，这里填写: <a target="_blank" rel="noopener" href="http://www.eryajf.net/go?url=https://registry.npmjs.org">https://registry.npmjs.org</a></li>
+<li><code>Storage</code>: npm-hub。</li>
+</ul>
+<p>其他的均是默认。</p>
+<p>整体配置截图如下：<br><img src="https://img2020.cnblogs.com/blog/794174/202006/794174-20200612163424372-1227743830.png" alt="img"></p>
+<h2 id="4，创建一个group类型的npm仓库"><a href="#4，创建一个group类型的npm仓库" class="headerlink" title="4，创建一个group类型的npm仓库"></a>4，创建一个group类型的npm仓库</h2><ul>
+<li><code>Name</code>：group-npm</li>
+<li><code>Storage</code>：选择专用的blob存储npm-hub。</li>
+<li><code>group</code> : 将左边可选的2个仓库，添加到右边的members下。</li>
+</ul>
+<p>整体配置截图如下：<br><img src="https://img2020.cnblogs.com/blog/794174/202006/794174-20200612163523376-703398348.png" alt="img"></p>
+<p>这些配置完成之后，就可以使用了。</p>
+<h2 id="5，验证使用"><a href="#5，验证使用" class="headerlink" title="5，验证使用"></a>5，验证使用</h2><p>新建一台环境干净的主机，安装好node环境,然后拷贝一份前端项目的源码。</p>
+<h3 id="1，首先获取默认的仓库地址："><a href="#1，首先获取默认的仓库地址：" class="headerlink" title="1，首先获取默认的仓库地址："></a>1，首先获取默认的仓库地址：</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># npm config get registry</span><br><span class="line">https://registry.npmjs.org/</span><br></pre></td></tr></table></figure>
+
+<h3 id="2，配置为私服地址。"><a href="#2，配置为私服地址。" class="headerlink" title="2，配置为私服地址。"></a>2，配置为私服地址。</h3><p>从如下截图中查看(其实就是创建的组对外的地址)。<br><img src="https://img2020.cnblogs.com/blog/794174/202006/794174-20200612164043518-1749061316.png" alt="img"></p>
+<p>通过如下命令配置：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># npm config set registry http://localhost:9011/repository/npm-group/</span><br><span class="line"># npm config get registry</span><br><span class="line">http://localhost:9011/repository/group-npm/</span><br></pre></td></tr></table></figure>
+
+<p>现在开始安装，安装之前先看一下组里的内容：<br><img src="https://img2020.cnblogs.com/blog/794174/202006/794174-20200612164209866-557733454.png" alt="img"><br>可以看到还是空的。</p>
+<h3 id="3，安装编译"><a href="#3，安装编译" class="headerlink" title="3，安装编译"></a>3，安装编译</h3><p>前端框架网址：<a target="_blank" rel="noopener" href="https://wepyjs.github.io/wepy-docs/2.x/">https://wepyjs.github.io/wepy-docs/2.x/</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install @wepy/cli -g</span><br></pre></td></tr></table></figure>
+
+<p>在编译的过程中，我们已经可以看看组里的变化了：<br><img src="https://img2020.cnblogs.com/blog/794174/202006/794174-20200612165233507-265767636.png" alt="img"></p>
+<h3 id="4，再一次安装编译"><a href="#4，再一次安装编译" class="headerlink" title="4，再一次安装编译"></a>4，再一次安装编译</h3><p>这里再准备一台环境干净的主机，然后进行一次编译安装，看看效果。</p>
+<p>编译之前，先将远程地址配置为我们自己的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># npm config set registry http://localhost:9011/repository/group-npm/</span><br><span class="line">npm config set @chint:registry http://localhost:9011/repository/npm-group/</span><br><span class="line"></span><br><span class="line">npm config set registry http://localhost:9011/repository/npm-group/</span><br><span class="line"># npm config get registry</span><br><span class="line">http://localhost:9011/repository/group-npm/</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，同样是全新的环境下，因为第一次已经将依赖从远程缓存到本地私服，那么在第二次安装编译的时候，用时比首次快多了。</p>
+<h2 id="注册登录hosted仓库"><a href="#注册登录hosted仓库" class="headerlink" title="注册登录hosted仓库"></a>注册登录hosted仓库</h2><p><img src="/img/f160acdf5f3c4117b17e23533d65b752.png" alt="在这里插入图片描述"></p>
+<p>在上图该位置获取仓库地址。</p>
+<p>注册hosted仓库。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm adduser --registry=http://localhost:9011/repository/npm-hosted/</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/29b9e2c9f26040beb97b601451065cff.png" alt="在这里插入图片描述"></p>
+<p>该操作会要求输入账号、密码和邮箱，账号、密码为nexus的账号密码，邮箱随意。</p>
+<h2 id="3-发布"><a href="#3-发布" class="headerlink" title="3.发布"></a>3.发布</h2><p>进入包目录下。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm publish --registry=http://localhost:9011/repository/npm-hosted/</span><br></pre></td></tr></table></figure>
+
+<p>！注意事项：</p>
+<p>上传之前不能执行npm config set @chint:registry <a target="_blank" rel="noopener" href="http://localhost:9011/repository/npm-group/%E3%80%82">http://localhost:9011/repository/npm-group/。</a><br>如果有@chint源，则需要使用 npm config delete @chint:registry 删除。</p>
+<p><img src="/img/693e52bb93fd44199e0fe54f99a1e070.png" alt="在这里插入图片描述"></p>
+<h2 id="4-查看发布成功的包"><a href="#4-查看发布成功的包" class="headerlink" title="4.查看发布成功的包"></a>4.查看发布成功的包</h2><p><img src="/img/b3e5b31569e14032be69b2f4c10e5fdf.png" alt="在这里插入图片描述"></p>
+<h2 id="5-更新包"><a href="#5-更新包" class="headerlink" title="5.更新包"></a>5.更新包</h2><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>npm version prerelease</td>
+<td>升级预发布号</td>
+</tr>
+<tr>
+<td>npm version prepatch</td>
+<td>升级修订号，保留预发布号</td>
+</tr>
+<tr>
+<td>npm version preminor</td>
+<td>升级次版本号，保留预发布号</td>
+</tr>
+<tr>
+<td>npm version premajor</td>
+<td>升级主版本号，保留预发布号</td>
+</tr>
+<tr>
+<td>npm version patch</td>
+<td>升级修订号</td>
+</tr>
+<tr>
+<td>npm version minor</td>
+<td>升级次版本号</td>
+</tr>
+<tr>
+<td>npm version major</td>
+<td>升级主版本号</td>
+</tr>
+</tbody></table>
+<p>​</p>
+<p>​<br>​<br>​<br>​<br>​<br>​</p>
+<h2 id="四、本地项目安装私库中的npm包"><a href="#四、本地项目安装私库中的npm包" class="headerlink" title="四、本地项目安装私库中的npm包"></a>四、本地项目安装私库中的npm包</h2><p>！准备工作：</p>
+<p>用记事本打开系统当前用户下的 .npmrc 文件，把里面的内容备份。<br>清理 npm 缓存。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm cache clean --force</span><br></pre></td></tr></table></figure>
+
+<p>1 1.设置npm包的源为私有库</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm config set registry http://localhost:9011/repository/npm-group/</span><br></pre></td></tr></table></figure>
+
+<p>1 2.注册登录hosted仓库</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm adduser --registry=http://localhost:9011/repository/npm-hosted/</span><br></pre></td></tr></table></figure>
+
+<p>1<br>3.npm配置私有库</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm config set @chint:registry http://localhost:9011/repository/npm-group/</span><br></pre></td></tr></table></figure>
+
+<p>1 4.设置npm包的源为npmjs官方地址</p>
+<p>如果不设置其他npm包会找不到</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm config set registry https://registry.npmjs.org/</span><br></pre></td></tr></table></figure>
+
+<p>1 5.安装</p>
+<p>执行 npm install 安装。</p>
+<h1 id="npm-install-时卡在了node-gyp-rebuild"><a href="#npm-install-时卡在了node-gyp-rebuild" class="headerlink" title="npm install 时卡在了node-gyp rebuild"></a>npm install 时卡在了node-gyp rebuild</h1><p>npm install时会需要nodejs的源码，所以可以先把源码下载到本地</p>
+<p>源码地址：<a target="_blank" rel="noopener" href="https://nodejs.org/en/">https://nodejs.org/en/</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tar zxf /paas/iddbs/a-tools/node-v10.9.0-headers.tar.gz -C ~/.node-gyp</span><br><span class="line">mv ~/.node-gyp/node-v10.9.0 ~/.node-gyp/10.9.0</span><br><span class="line">printf &quot;9\n&quot;&gt;~/.node-gyp/10.9.0/installVersio</span><br></pre></td></tr></table></figure>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2023/09/04/npm-nexus%E7%A7%81%E5%BA%93%E6%90%AD%E5%BB%BA/">https://yhao521.github.io/2023/09/04/npm-nexus%E7%A7%81%E5%BA%93%E6%90%AD%E5%BB%BA/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2023/09/04/ohmyzsh%E4%B8%BB%E9%A2%98%E5%AE%89%E8%A3%85%E4%B8%8E%E6%8F%92%E4%BB%B6%E6%8E%A8%E8%8D%90/" title="ohmyzsh主题安装与插件推荐"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">ohmyzsh主题安装与插件推荐</div></div><div class="info-2"><div class="info-item-1"> title: ohmyzsh主题安装与插件推荐date: 2023-09-03 20:17:08category: tag: author:  ohmyzsh主题安装与插件推荐ZSH_THEME&#x3D;”random” 前言1.安装zsh 1sudo yum install zsh  1 2.切换到zsh 1sudo chsh -s /bin/zsh  3.安装git 1sudo yum install git  ohmyzsh官网官网： https://ohmyz.sh/ 安装方法： 1sh -c &quot;$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)&quot;  主题推荐原生主题robbyrussell自带主题ys 随机主机 “random” 123456vim ~/.zshrc# ZSH_THEME=&quot;robbyrussell&quot;ZSH_THEME=&quot;ys&quot;ZSH_THEME=&quot;random&qu...</div></div></div></a><a class="pagination-related" href="/2023/09/04/nodist/" title="nodist"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">nodist</div></div><div class="info-2"><div class="info-item-1"> title: nodistdate: 2023-09-03 20:17:08category:  开发语言 doc_nodejstag: doc_nodejsauthor:   nodist使用安装地址： https://github.com/nullivex/nodist 下载后 安装配置环境变量 setx NODIST_X64 1setx NODE_PATH E:\Nodist\bin\node_modulessetx NODIST_PREFIX E:\Nodist@REM setx Path “%Path%;%NODIST_PREFIX%\bin;” setx NODIST_NODE_MIRROR https://npm.taobao.org/mirrors/nodesetx NODIST_IOJS_MIRROR https://npm.taobao.org/mirrors/iojs setx SASS_BINARY_PATH E:\Nodist\win32-x64-64_binding.node 命令查看帮助命令 nodist –help 安装所有可用node版本 no...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/starUML%E6%BF%80%E6%B4%BB/" title="starUML激活"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">starUML激活</div></div><div class="info-2"><div class="info-item-1"> title: starUML激活date: 2023-09-03 20:17:08category:  UML类图tag: UML类图author:   StarUML（一） —— 简介和破解（一） 刀客传奇关注 0.1232022.01.03 17:34:47字数 795阅读 1,289 版本记录   版本号 时间    V1.0 2022.01.03 星期一   前言 StarUML(简称SU)，是一种创建UML类图，生成类图和其他类型的统一建模语言(UML)图表的工具。StarUML是一个开源项目之一发展快、灵活、可扩展性强。我们一般都是使用这个软件画一个时序图和软件图等，特别是软件图是我们常用的，用来反映各个模块各个类之间的关系。  简介StarUML是一款开放源码的UML开发工具，是由韩国公司主导开发出来的产品，可以直接到StarUML网站下载。可以用来创建UML类图。  可绘制9款UML图：用例图、类图、序列图、状态图、活动图、通信图、构件图、部署图以及复合结构图等。  完全免费：StarUML是一套开放源码的软件，不仅免费自由下载，连代码都免费开放。 多种格式影像...</div></div></div></a><a class="pagination-related" href="/2023/09/04/M1%E8%8A%AF%E7%89%87MAC%E4%BD%BF%E7%94%A8VMwareFusion%E5%AE%89%E8%A3%85Win11/" title="M1芯片MAC使用VMwareFusion安装Win11"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">M1芯片MAC使用VMwareFusion安装Win11</div></div><div class="info-2"><div class="info-item-1"> title: M1芯片MAC使用VMwareFusion安装Win11date: 2023-09-03 20:17:08category:  mactag: macauthor:   M1芯片MAC使用VMware Fusion安装Windows 11最近居家办公，旧笔记本电脑卡的受不了，就买了2020款的MacBook Air，然而有些东西还是避不开要使用Windows系统，安装虚拟机成了最好的选择，通过两天的search和尝试，终于安装成功了Windows 11，之后就写下了一个总结，废话不多说，开始安装。 VMware Fusion13密钥 1HF200-0W05K-089X8-4R1EK-032J0  14C21U-2KK9Q-M8130-4V2QH-CF810  一、首先就是下载虚拟机软件和系统镜像进入VMware官网下载VMware Fusion个人免费版本，只需要注册即可下载安装使用； 获取Windows 11 ARM64镜像，我是直接从微软官方下载的预览版镜像：在Windows Insider Preview点击页面中的「 Windows Client ARM6...</div></div></div></a><a class="pagination-related" href="/2023/09/04/MAC%E5%85%B3%E9%97%ADSIP/" title="MAC关闭SIP"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">MAC关闭SIP</div></div><div class="info-2"><div class="info-item-1"> title: MAC关闭SIPdate: 2023-09-03 20:17:08category:  mactag: macauthor:   MAC关闭SIP关机，按住触控键，直到提示 进入选项，选择顶层菜单中的 终端 关闭SIP 输入csrutil diable 开启SIP csrutil enable </div></div></div></a><a class="pagination-related" href="/2023/09/04/windows%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E8%AE%BE%E7%BD%AE/" title="windows环境变量设置"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">windows环境变量设置</div></div><div class="info-2"><div class="info-item-1"> title: windows环境变量设置date: 2023-09-03 20:17:08category:  wintag: winauthor:   windows环境变量设置nodejs npm 环境变量解压安装；node-v12.8.0-win-x64.zip 123【NODE_HOME】=【D:\Develop\node-v12.8.0-win-x64\node_global】【NODE_PATH】=【%NODE_HOME%\node_modules】【Path】增加【%NODE_HOME%】  测试 命令行执行 12npm -vnode -v  JDK环境变量123【JAVA_HOME】=【E:\jdk\jdk1.7.0_80】【Path】增加【%JAVA_HOME%\bin;%JAVA_HOME%\jre\bin】【CLASSPATH】=【%JAVA_HOME%\lib\dt.jar;%JAVA_HOME%\lib\tools.jar】  测试 命令行执行 1java --version  linux 配置jdk环境变量vim &#x2F;etc&#x2F;pro...</div></div></div></a><a class="pagination-related" href="/2023/09/04/Open%20API%20%E8%A7%84%E8%8C%83%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/" title="Open API 规范基础知识"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">Open API 规范基础知识</div></div><div class="info-2"><div class="info-item-1"> title: Open API 规范基础知识date: 2023-09-03 20:17:08category: tag: author:  Open API 规范基础知识API 规范，比较知名的是 OpenAPI Specfication 和 Google API Design Guide 。前者针对 RESTful API 设计在细节层面给出了非常具体的规定，已经成为 RESTful API 设计领域的事实标准，而后者则主要从云厂商的角度提出许多最佳实践性质的规范与建议，这些原则不仅仅适用于 RESTful API，也适合其他类型 API 设计。 一、主要 2 种风格  二、Restful 设计 主要是理清资源模型和明确资源关系。 三、RPC 设计 偏向于过程化的调用，低层级及灵活一点。 OpenAPI 规范本规范基于 RESTful 风格的架构设计准则，广泛参考 GitHub、Azure、Google API Design Guide、腾讯云、阿里云等公开资料，兼顾现有实际情况和未来发展做一个概括性记录总结。 一、协议API 与用户的通信协议，总是使用 HTTPS 协议。...</div></div></div></a><a class="pagination-related" href="/2023/09/04/vue%E9%A1%B9%E7%9B%AE%E6%9E%84%E5%BB%BA%E7%89%B9%E5%88%AB%E7%9A%84%E6%8A%A5%E9%94%99/" title="vue项目构建特别的报错"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">vue项目构建特别的报错</div></div><div class="info-2"><div class="info-item-1"> title: vue项目构建特别的报错date: 2023-09-03 20:17:08category:  开发语言 doc_nodejstag: doc_nodejsauthor:   vue项目构建特别的报错引入comon.scss样式，npm run build 构建报错：document is not defined报错信息：  123456789101112131415161718192021222324252627282930313233343536ERROR in ./node_modules/extract-text-webpack-plugin/dist/loader.js?&#123;&quot;omit&quot;:1,&quot;remove&quot;:true,&quot;publicPath&quot;:&quot;../../&quot;&#125;!./node_modules/vue-style-loader!./node_modules/css-loader?&#123;&quot;sourceMap&quot;:true&#125;!....</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#5-%E4%BD%BF%E7%94%A8nexus3%E9%85%8D%E7%BD%AEnpm%E7%A7%81%E6%9C%89%E4%BB%93%E5%BA%93"><span class="toc-number">1.</span> <span class="toc-text">5.使用nexus3配置npm私有仓库</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1%EF%BC%8C%E5%88%9B%E5%BB%BAblob%E5%AD%98%E5%82%A8"><span class="toc-number">1.1.</span> <span class="toc-text">1，创建blob存储</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2%EF%BC%8C%E5%88%9B%E5%BB%BAhosted%E7%B1%BB%E5%9E%8B%E7%9A%84npm"><span class="toc-number">1.2.</span> <span class="toc-text">2，创建hosted类型的npm</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3%EF%BC%8C%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AAproxy%E7%B1%BB%E5%9E%8B%E7%9A%84npm%E4%BB%93%E5%BA%93"><span class="toc-number">1.3.</span> <span class="toc-text">3，创建一个proxy类型的npm仓库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4%EF%BC%8C%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AAgroup%E7%B1%BB%E5%9E%8B%E7%9A%84npm%E4%BB%93%E5%BA%93"><span class="toc-number">1.4.</span> <span class="toc-text">4，创建一个group类型的npm仓库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5%EF%BC%8C%E9%AA%8C%E8%AF%81%E4%BD%BF%E7%94%A8"><span class="toc-number">1.5.</span> <span class="toc-text">5，验证使用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1%EF%BC%8C%E9%A6%96%E5%85%88%E8%8E%B7%E5%8F%96%E9%BB%98%E8%AE%A4%E7%9A%84%E4%BB%93%E5%BA%93%E5%9C%B0%E5%9D%80%EF%BC%9A"><span class="toc-number">1.5.1.</span> <span class="toc-text">1，首先获取默认的仓库地址：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2%EF%BC%8C%E9%85%8D%E7%BD%AE%E4%B8%BA%E7%A7%81%E6%9C%8D%E5%9C%B0%E5%9D%80%E3%80%82"><span class="toc-number">1.5.2.</span> <span class="toc-text">2，配置为私服地址。</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3%EF%BC%8C%E5%AE%89%E8%A3%85%E7%BC%96%E8%AF%91"><span class="toc-number">1.5.3.</span> <span class="toc-text">3，安装编译</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4%EF%BC%8C%E5%86%8D%E4%B8%80%E6%AC%A1%E5%AE%89%E8%A3%85%E7%BC%96%E8%AF%91"><span class="toc-number">1.5.4.</span> <span class="toc-text">4，再一次安装编译</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B3%A8%E5%86%8C%E7%99%BB%E5%BD%95hosted%E4%BB%93%E5%BA%93"><span class="toc-number">1.6.</span> <span class="toc-text">注册登录hosted仓库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E5%8F%91%E5%B8%83"><span class="toc-number">1.7.</span> <span class="toc-text">3.发布</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E6%9F%A5%E7%9C%8B%E5%8F%91%E5%B8%83%E6%88%90%E5%8A%9F%E7%9A%84%E5%8C%85"><span class="toc-number">1.8.</span> <span class="toc-text">4.查看发布成功的包</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E6%9B%B4%E6%96%B0%E5%8C%85"><span class="toc-number">1.9.</span> <span class="toc-text">5.更新包</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E6%9C%AC%E5%9C%B0%E9%A1%B9%E7%9B%AE%E5%AE%89%E8%A3%85%E7%A7%81%E5%BA%93%E4%B8%AD%E7%9A%84npm%E5%8C%85"><span class="toc-number">1.10.</span> <span class="toc-text">四、本地项目安装私库中的npm包</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#npm-install-%E6%97%B6%E5%8D%A1%E5%9C%A8%E4%BA%86node-gyp-rebuild"><span class="toc-number">2.</span> <span class="toc-text">npm install 时卡在了node-gyp rebuild</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

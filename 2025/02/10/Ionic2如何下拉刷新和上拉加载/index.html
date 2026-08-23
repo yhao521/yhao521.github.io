@@ -1,0 +1,210 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Ionic2如何下拉刷新和上拉加载 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="上拉刷新&#x3D;&#x3D;&gt; Html: 1234&lt;ion-content style&#x3D;&quot;background-color:white&quot;&gt;     &lt;ion-refresher (ionRefresh)&#x3D;&quot;doRefresh($event)&quot;&gt;          &lt;ion-refresher-content pull">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Ionic2如何下拉刷新和上拉加载">
+<meta property="og:url" content="https://yhao521.github.io/2025/02/10/Ionic2%E5%A6%82%E4%BD%95%E4%B8%8B%E6%8B%89%E5%88%B7%E6%96%B0%E5%92%8C%E4%B8%8A%E6%8B%89%E5%8A%A0%E8%BD%BD/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="上拉刷新&#x3D;&#x3D;&gt; Html: 1234&lt;ion-content style&#x3D;&quot;background-color:white&quot;&gt;     &lt;ion-refresher (ionRefresh)&#x3D;&quot;doRefresh($event)&quot;&gt;          &lt;ion-refresher-content pull">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2025-02-10T04:58:18.000Z">
+<meta property="article:modified_time" content="2025-02-10T05:01:40.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Ionic2如何下拉刷新和上拉加载",
+  "url": "https://yhao521.github.io/2025/02/10/Ionic2%E5%A6%82%E4%BD%95%E4%B8%8B%E6%8B%89%E5%88%B7%E6%96%B0%E5%92%8C%E4%B8%8A%E6%8B%89%E5%8A%A0%E8%BD%BD/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2025-02-10T04:58:18.000Z",
+  "dateModified": "2025-02-10T05:01:40.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2025/02/10/Ionic2%E5%A6%82%E4%BD%95%E4%B8%8B%E6%8B%89%E5%88%B7%E6%96%B0%E5%92%8C%E4%B8%8A%E6%8B%89%E5%8A%A0%E8%BD%BD/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Ionic2如何下拉刷新和上拉加载',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">Ionic2如何下拉刷新和上拉加载</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Ionic2如何下拉刷新和上拉加载</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-02-10T04:58:18.000Z" title="发表于 2025-02-10 12:58:18">2025-02-10</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-02-10T05:01:40.000Z" title="更新于 2025-02-10 13:01:40">2025-02-10</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>上拉刷新&#x3D;&#x3D;&gt;</p>
+<p>Html:</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">ion-content</span> <span class="attr">style</span>=<span class="string">&quot;background-color:white&quot;</span>&gt;</span>   </span><br><span class="line">  <span class="tag">&lt;<span class="name">ion-refresher</span> (<span class="attr">ionRefresh</span>)=<span class="string">&quot;doRefresh($event)&quot;</span>&gt;</span>      </span><br><span class="line">    <span class="tag">&lt;<span class="name">ion-refresher-content</span> <span class="attr">pullingIcon</span>=<span class="string">&quot;arrow-dropdown&quot;</span>  <span class="attr">pullingText</span>=<span class="string">&quot;Pull to refresh&quot;</span>  <span class="attr">refreshingSpinner</span>=<span class="string">&quot;circles&quot;</span>  <span class="attr">refreshingText</span>=<span class="string">&quot;Refreshing...&quot;</span>&gt;</span>         <span class="tag">&lt;/<span class="name">ion-refresher-content</span>&gt;</span>   </span><br><span class="line">  <span class="tag">&lt;/<span class="name">ion-refresher</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=TypeScript&spm=1001.2101.3001.7020">TypeScript</a>:</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">      //下拉刷新    </span><br><span class="line">doRefresh(refresher) &#123;  </span><br><span class="line">//console.log(&#x27;Begin async operation&#x27;, refresher);  </span><br><span class="line">setTimeout(() =&gt; &#123;       </span><br><span class="line">this.BindUserModule(); </span><br><span class="line">//绑定方法      </span><br><span class="line">console.log(&#x27;Async operation has ended&#x27;);   </span><br><span class="line">refresher.complete();   </span><br><span class="line">&#125;, 1000); </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">上拉刷新==&gt;</span><br><span class="line">HTML:</span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">ion-content</span>&gt;</span>  <span class="tag">&lt;<span class="name">ion-list</span>&gt;</span>   <span class="tag">&lt;<span class="name">ion-item</span> *<span class="attr">ngFor</span>=<span class="string">&quot;let i of items&quot;</span>&gt;</span>&#123;&#123;i&#125;&#125;<span class="tag">&lt;/<span class="name">ion-item</span>&gt;</span> <span class="tag">&lt;/<span class="name">ion-list</span>&gt;</span>   <span class="tag">&lt;<span class="name">ion-infinite-scroll</span> (<span class="attr">ionInfinite</span>)=<span class="string">&quot;doInfinite($event)&quot;</span>&gt;</span>    <span class="tag">&lt;<span class="name">ion-infinite-scroll-content</span>      <span class="attr">loadingSpinner</span>=<span class="string">&quot;bubbles&quot;</span>      <span class="attr">loadingText</span>=<span class="string">&quot;Loading more data...&quot;</span>&gt;</span>    <span class="tag">&lt;/<span class="name">ion-infinite-scroll-content</span>&gt;</span>  <span class="tag">&lt;/<span class="name">ion-infinite-scroll</span>&gt;</span> <span class="tag">&lt;/<span class="name">ion-content</span>&gt;</span></span><br><span class="line">TypeScript:</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@Component(&#123;...&#125;)export class NewsFeedPage &#123;  items = [];   constructor() &#123;    for (let i = 0; i &lt; 30; i++) &#123;      this.items.push( this.items.length );    &#125;  &#125;   doInfinite(infiniteScroll) &#123;    console.log(&#x27;Begin async operation&#x27;);     setTimeout(() =&gt; &#123;      for (let i = 0; i &lt; 30; i++) &#123;        this.items.push( this.items.length );      &#125;       console.log(&#x27;Async operation has ended&#x27;);      infiniteScroll.complete();    &#125;, 500);  &#125; &#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2025/02/10/Ionic2%E5%A6%82%E4%BD%95%E4%B8%8B%E6%8B%89%E5%88%B7%E6%96%B0%E5%92%8C%E4%B8%8A%E6%8B%89%E5%8A%A0%E8%BD%BD/">https://yhao521.github.io/2025/02/10/Ionic2%E5%A6%82%E4%BD%95%E4%B8%8B%E6%8B%89%E5%88%B7%E6%96%B0%E5%92%8C%E4%B8%8A%E6%8B%89%E5%8A%A0%E8%BD%BD/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/02/11/vue%20%E9%80%9A%E8%BF%87iframe%E5%B5%8C%E5%85%A5%E6%9C%AC%E5%9C%B0html%E5%92%8C%E5%A4%96%E9%83%A8html/" title="vue 通过iframe嵌入本地html和外部html"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">vue 通过iframe嵌入本地html和外部html</div></div><div class="info-2"><div class="info-item-1">vue中通过iframe方式嵌入本地html实现方法：1、在public文件夹下创建static文件夹，static文件夹下放置需要展示的html文件2、在vue页面中通过iframe嵌入html 具体文件位置： 代码12345678910&lt;div style=&quot;width: 100%&quot;&gt;    &lt;!--静态html资源--&gt;    &lt;div class=&quot;textCenter&quot;&gt;      &lt;h2&gt;标题&lt;/h2&gt;    &lt;/div&gt;    &lt;div&gt;      &lt;iframe src=&quot;/static/home.html&quot; scrolling=&quot;auto&quot; frameborder=&quot;0&quot; style=&quot;width: 100%;height: 600px;&quot;&gt;&lt;/iframe&gt;    &lt;/div&gt;&lt;/div&gt;123456789  效...</div></div></div></a><a class="pagination-related" href="/2025/02/05/LocalSend%E8%B7%A8%E8%AE%BE%E5%A4%87%E4%BC%A0%E8%BE%93%E6%96%87%E4%BB%B6%E4%BC%A0%E8%BE%93%E5%8D%8F%E8%AE%AE%20v2/" title="LocalSend跨设备传输文件传输协议 v2"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">LocalSend跨设备传输文件传输协议 v2</div></div><div class="info-2"><div class="info-item-1">LocalSend仓库地址：GitHub - localsend&#x2F;localsend: An open-source cross-platform alternative to AirDropLocalSend 协议 v2English | 简体中文 主要为了实现一个不依赖于任何外部服务器的简单 REST 协议。 因为计算机网络比较复杂，因此我们不能假设每种方法都可用。某些设备可能不支持多点广播或不能运行 HTTP 服务器。 就是这个原因，所以这协议尝试用多种方式去发现其他 LocalSend 成员，从而执行发送文件。 该协议只需要一方建立 HTTP 服务器即可运行。 目录 LocalSend 协议 v2 目录 1. 默认配置 2. 指纹 3. 搜寻发现 3.1 UDP 广播 3.2 HTTP (传统模式)   4. 文件传输 (HTTP) 4.1 准备工作 (仅元数据) 4.2 发送文件 4.3 取消   5. 反向文件传输 (HTTP) 5.1 浏览器 URL 5.2 接收请求 5.3 接收文件   6. 其他 API 6.1 信息   7. 枚举 7.1 设备类型...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2024/01/11/%E6%89%8B%E6%8A%8A%E6%89%8B%E6%95%99%20_%20Docker%20Compose%E5%BF%AB%E9%80%9F%E5%90%AF%E5%8A%A8Postgres/" title="手把手教 | Docker Compose快速启动Postgres"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-11</div><div class="info-item-2">手把手教 | Docker Compose快速启动Postgres</div></div><div class="info-2"><div class="info-item-1">这是我参与11月更文挑战的第6天，活动详情查看：2021最后一次更文挑战  借助于容器技术，我们能够方便的创建运行测试环境，今天这篇文章手把手教你们使用Docker Compose快速启动Postgres。  一、创建Docker Compose文件首先创建一个文件夹来存储我们的文件: 1mkdir ~/postgres-demo &amp;&amp; cd ~/postgres-demo  然后创建一个 docker-compose. yml 文件: 1touch docker-compose.yml  在文件中添加以下内容: 123456789101112131415161718192021version: &#x27;3&#x27;services:  postgres:    image: postgres:13.1    healthcheck:      test: [ &quot;CMD&quot;, &quot;pg_isready&quot;, &quot;-q&quot;, &quot;-d&quot;, &quot;postgres&quot;, &quot...</div></div></div></a><a class="pagination-related" href="/2023/09/04/mac%E5%AE%89%E8%A3%85%E7%9A%84%E8%BD%AF%E4%BB%B6/" title="mac安装的软件"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">mac安装的软件</div></div><div class="info-2"><div class="info-item-1"> title: mac安装的软件date: 2023-09-03 20:17:08category:  mactag: macauthor:   mac安装的软件brew方式安装的123456789101112131415161718192021222324➜  ~ brew list==&gt; Formulaesqlite	nginx  subversionopenssl@1.1gitbrew-rmtree	 # 卸载软件及其依赖git-flow	  #自动设置git开发用的分支流程wgetgopython@3.10graphvizcmakecmake-docsqemu	# 重新生成虚拟镜像的格式	mycli  # 链接mysql的客户端  redis==&gt; Casksdockerwechattweak-cli   # 微信的扩展插件：拦截撤回消息，登录新账号  源码编译安装的1234567mysql8.0influxdb-1.8.0-1  官方二进制安装12345678910111213nodejsjavapythonoh-my-zshmavenjenkinsnexus </div></div></div></a><a class="pagination-related" href="/2023/09/04/%E8%8E%AB%E7%94%9F%E6%B0%94%E5%8F%A3%E8%AF%80%E5%AE%8C%E6%95%B4%E7%89%88/" title="莫生气口诀完整版"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">莫生气口诀完整版</div></div><div class="info-2"><div class="info-item-1"> title: 莫生气口诀完整版date: 2023-09-03 20:17:08category: tag: author:  莫生气口诀完整版是如下： 1、版本一： 人生就像一场戏，因为有缘才相聚。 相扶到老不容易，是否更该去珍惜。 为了小事发脾气，回头想想又何必。 别人生气我不气，气出病来无人替。 我若气死谁如意，况且伤神又费力。 邻居亲朋不要比，儿孙琐事由他去。 吃苦享乐在一起，神仙羡慕好伴侣。 2、版本二： 人生就像一场戏，今世有缘才相聚。 相处一处不容易，人人应该去珍惜。 世上万物般般有，哪能件件如我意。 为了小事发脾气，回想起来又何必。 他人气我我不气，气出病来无人替。 生气伤肝又伤脾，促人衰老又生疾。 看病花钱又受罪，还说气病治非易。 小人量小不让人，常常气人气自己。 君子量大同天地，好事坏事包在里。 他人骂我我装聋，高声上天低入地。 我若错了真该骂，诚心改正受教育。 要是根本没那事，全当他是骂自己。 左亲右邻团结好，家庭和睦乐无比。 夫妻互助又亲爱，朝夕相伴笑嘻嘻。 政通人和享天伦，晚年幸福甜如蜜。 邻里亲友不要比，儿孙琐事随他去。 淡泊名利促健康，文明礼貌争第...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E5%AE%89%E8%A3%85mysql%E6%8A%A5%E9%94%99%E9%97%AE%E9%A2%98/" title="安装mysql报错问题"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">安装mysql报错问题</div></div><div class="info-2"><div class="info-item-1"> title: 安装mysql报错问题date: 2023-09-03 20:17:08category: tag: author:  安装mysql报错问题1.问题： 123456789[root@localhost lcl]# rpm -ivh MySQL-server-5.5.23-1.linux2.6.i386.rpmPreparing... ########################################### [100%]ls: /var/lib/mysql/*.err: 没有那个文件或目录ls: /var/lib/mysql/*.err: 没有那个文件或目录1:MySQL-server ########################################### [100%]  解决： 之前或系统自带的文件或目录没有卸载干净，卸载干净后，重新安装就好了。 2.问题： 远程连接：主机连接虚拟机的mysql1.问题： 123456789[root@localhost lcl]# rpm -ivh MySQL-server-5.5.23-1.li...</div></div></div></a><a class="pagination-related" href="/2024/01/17/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E9%9D%A2%E8%AF%95%E9%A2%98-%E5%8F%82%E8%80%83%E5%9B%9E%E7%AD%94/" title="微服务面试题-参考回答"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-17</div><div class="info-item-2">微服务面试题-参考回答</div></div><div class="info-2"><div class="info-item-1">微服务面试题**面试官：**Spring Cloud 5大组件有哪些？候选人： 早期我们一般认为的Spring Cloud五大组件是   Eureka   : 注册中心 Ribbon  : 负载均衡 Feign     : 远程调用 Hystrix :  服务熔断 Zuul&#x2F;Gateway  : 网关  随着SpringCloudAlibba在国内兴起 , 我们项目中使用了一些阿里巴巴的组件   注册中心&#x2F;配置中心 Nacos 负载均衡 Ribbon 服务调用 Feign 服务保护 sentinel 服务网关 Gateway  **面试官：**服务注册和发现是什么意思？Spring Cloud 如何实现服务注册发现？候选人： 我理解的是主要三块大功能，分别是服务注册 、服务发现、服务状态监控 我们当时项目采用的eureka作为注册中心，这个也是spring cloud体系中的一个核心组件 服务注册：服务提供者需要把自己的信息注册到eureka，由eureka来保存这些信息，比如服务名称、ip、端口等等 服务发现：消费者向eureka拉取服务列表信息，如果服务提...</div></div></div></a><a class="pagination-related" href="/2024/05/06/Mac%E5%AE%89%E8%A3%85Oracle%2019.3.0/" title="Mac安装Oracle 19.3.0"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-05-06</div><div class="info-item-2">Mac安装Oracle 19.3.0</div></div><div class="info-2"><div class="info-item-1">目前学校在教数据库设计需要用到Oracle，但是Oracle不能直接安装在Mac上，按住了新买一台电脑的冲动，经过一个小时的研究，找到了个方法在Mac上运行Oracle以及与DataGrip相连，希望能帮助到大家。 在最开始我想先简单说说这个方法最大缺点 -&gt; 需要占用大量电脑的储存空间，大概是55个G左右，如果能接受这个缺点就请往下看  首先用Docker安装Oracle需要两个文件  docker-images-master.zip (3.1MB)在 https://github.com/oracle/docker-images下载Oracle Docker build files.   LINUX.X64_193000_db_home.zip (3.07GB)访问http://www.oracle.com/technetwork/database/enterprise-edition/downloads/index.html下载 (需要注册Oracle)  ![在这里插入图片描述](&#x2F;img&#x2F;CleanShot 2024-05-07 at 09.4...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

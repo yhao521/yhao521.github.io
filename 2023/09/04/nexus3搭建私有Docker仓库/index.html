@@ -1,0 +1,288 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>nexus3搭建私有Docker仓库 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="title: nexus3搭建私有Docker仓库date: 2023-09-03 20:17:08category:  nexustag: nexusauthor:   nexus3搭建私有Docker仓库Nexus3：123456789101112version: &quot;3&quot;services:  nexus:    image: sonatype&#x2F;nexus3:3.33.0">
+<meta property="og:type" content="article">
+<meta property="og:title" content="nexus3搭建私有Docker仓库">
+<meta property="og:url" content="https://yhao521.github.io/2023/09/04/nexus3%E6%90%AD%E5%BB%BA%E7%A7%81%E6%9C%89Docker%E4%BB%93%E5%BA%93/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="title: nexus3搭建私有Docker仓库date: 2023-09-03 20:17:08category:  nexustag: nexusauthor:   nexus3搭建私有Docker仓库Nexus3：123456789101112version: &quot;3&quot;services:  nexus:    image: sonatype&#x2F;nexus3:3.33.0">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2023-09-04T03:18:09.000Z">
+<meta property="article:modified_time" content="2024-01-22T22:24:04.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="java&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "nexus3搭建私有Docker仓库",
+  "url": "https://yhao521.github.io/2023/09/04/nexus3%E6%90%AD%E5%BB%BA%E7%A7%81%E6%9C%89Docker%E4%BB%93%E5%BA%93/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2023-09-04T03:18:09.000Z",
+  "dateModified": "2024-01-22T22:24:04.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2023/09/04/nexus3%E6%90%AD%E5%BB%BA%E7%A7%81%E6%9C%89Docker%E4%BB%93%E5%BA%93/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'nexus3搭建私有Docker仓库',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">nexus3搭建私有Docker仓库</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">nexus3搭建私有Docker仓库</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-09-04T03:18:09.000Z" title="发表于 2023-09-04 11:18:09">2023-09-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-01-22T22:24:04.000Z" title="更新于 2024-01-23 06:24:04">2024-01-23</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><hr>
+<p>title: nexus3搭建私有Docker仓库<br>date: 2023-09-03 20:17:08<br>category:</p>
+<ul>
+<li>nexus<br>tag:</li>
+<li>nexus<br>author:</li>
+</ul>
+<hr>
+<h1 id="nexus3搭建私有Docker仓库"><a href="#nexus3搭建私有Docker仓库" class="headerlink" title="nexus3搭建私有Docker仓库"></a><a target="_blank" rel="noopener" href="https://www.cnblogs.com/xysgo/p/16379577.html">nexus3搭建私有Docker仓库</a></h1><h1 id="Nexus3："><a href="#Nexus3：" class="headerlink" title="Nexus3："></a>Nexus3：</h1><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">version:</span> <span class="string">&quot;3&quot;</span></span><br><span class="line"><span class="attr">services:</span></span><br><span class="line">  <span class="attr">nexus:</span></span><br><span class="line">    <span class="attr">image:</span> <span class="string">sonatype/nexus3:3.33.0</span></span><br><span class="line">    <span class="attr">volumes:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">/home/nexus-data:/nexus-data</span></span><br><span class="line">    <span class="attr">restart:</span> <span class="string">always</span></span><br><span class="line">    <span class="attr">ports:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">&quot;8081:8081&quot;</span></span><br><span class="line">      <span class="comment"># 这两个个端口给docker私有仓库使用，在创建仓库时指定，并且在Dockers中需要添加配置 &quot;insecure-registries&quot;: [&quot;172.18.0.1:8082&quot;]</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">&quot;5000:5000&quot;</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">&quot;8082:8082&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="启动Nexus3"><a href="#启动Nexus3" class="headerlink" title="启动Nexus3"></a>启动Nexus3</h2><figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker-compose -f nexus3_dockerfile <span class="meta">up</span> -d</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/2810804-20220615192556661-777200386.png" alt="image-20220615185100339"></p>
+<h1 id="配置docker仓库"><a href="#配置docker仓库" class="headerlink" title="配置docker仓库"></a>配置docker仓库</h1><h2 id="新建docker仓库存储"><a href="#新建docker仓库存储" class="headerlink" title="新建docker仓库存储"></a>新建docker仓库存储</h2><p><img src="/img/2810804-20220615192557047-1103072806.png" alt="image-20220615184320755"></p>
+<h2 id="新建仓库"><a href="#新建仓库" class="headerlink" title="新建仓库"></a>新建仓库</h2><p><img src="/img/2810804-20220615192557336-1689774336.png" alt="image-20220615184747399"></p>
+<h2 id="添加权限"><a href="#添加权限" class="headerlink" title="添加权限"></a>添加权限</h2><p><img src="/img/2810804-20220615192557608-930094022.png" alt="image-20220615184855769"></p>
+<h1 id="配置docker"><a href="#配置docker" class="headerlink" title="配置docker"></a>配置docker</h1><h2 id="在daemon-json中添加如下配置"><a href="#在daemon-json中添加如下配置" class="headerlink" title="在daemon.json中添加如下配置"></a>在daemon.json中添加如下配置</h2><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;insecure-registries&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;local.docker.repo:8082&quot;</span><span class="punctuation">,</span> <span class="string">&quot;local.docker.repo:5000&quot;</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;registry-mirrors&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;https://local.docker.repo:8082&quot;</span><span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="在本地host中添加IP映射"><a href="#在本地host中添加IP映射" class="headerlink" title="在本地host中添加IP映射"></a>在本地host中添加IP映射</h2><figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 192.168.142.128 这个是Nexus3安装机器的IP</span></span><br><span class="line">192.168.142.128   local.docker.repo</span><br></pre></td></tr></table></figure>
+
+<h1 id="测试使用"><a href="#测试使用" class="headerlink" title="测试使用"></a>测试使用</h1><h2 id="登录本地docker仓库"><a href="#登录本地docker仓库" class="headerlink" title="登录本地docker仓库"></a>登录本地docker仓库</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker login local.docker.repo:8082</span><br><span class="line"></span><br><span class="line">docker login local.docker.repo:5001 -u admin -p admin123</span><br><span class="line">Login Succeeded</span><br></pre></td></tr></table></figure>
+
+<h2 id="查看本地镜像"><a href="#查看本地镜像" class="headerlink" title="查看本地镜像"></a>查看本地镜像</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker images</span><br><span class="line">REPOSITORY        TAG       IMAGE ID       CREATED         SIZE</span><br><span class="line">redis             latest    604d80444252   39 hours ago    117MB</span><br></pre></td></tr></table></figure>
+
+<h2 id="将redis镜像打Tag"><a href="#将redis镜像打Tag" class="headerlink" title="将redis镜像打Tag"></a>将redis镜像打Tag</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">docker tag redis  local.docker.repo:8082/reids:myreids</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">查看</span></span><br><span class="line">docker images</span><br><span class="line">REPOSITORY                     TAG       IMAGE ID       CREATED         SIZE</span><br><span class="line">redis                          latest    604d80444252   39 hours ago    117MB</span><br><span class="line">local.docker.repo:8082/reids   myreids   604d80444252   39 hours ago    117MB</span><br></pre></td></tr></table></figure>
+
+<p><strong>仔细查看会发现，上面的两个镜像的IMAGE ID是一模一样的，这表示这两个实际上是一个镜像，打Tag只是将这个Image添加了一个远程仓库地址。</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">## docker inspect <span class="number">604</span>d80444252</span><br><span class="line"><span class="punctuation">[</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;Id&quot;</span><span class="punctuation">:</span> <span class="string">&quot;sha256:604d80444252dd46a4b4d35bb0226fc16e1022efcd18bf5980650f72d1cf29e5&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;RepoTags&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">      <span class="string">&quot;redis:latest&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="string">&quot;local.docker.repo:8082/reids:myreids&quot;</span></span><br><span class="line">    <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;RepoDigests&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">      <span class="string">&quot;redis@sha256:cfda0458239615720cc16d6edf6bae7905c31265f218d2033c43cdb40cd59792&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="string">&quot;local.docker.repo:8082/reids@sha256:724ea5177e7d07426eea81233896eee4ff37f594097fcb317fac0b67508036ed&quot;</span></span><br><span class="line">    <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Created&quot;</span><span class="punctuation">:</span> <span class="string">&quot;2022-06-13T20:08:18.293162564Z&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Container&quot;</span><span class="punctuation">:</span> <span class="string">&quot;6d8faf114f3b7db70e1440ac6969c969cbcdbf46ab2d51c718d34539cd7ce1a3&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Config&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;Image&quot;</span><span class="punctuation">:</span> <span class="string">&quot;sha256:67bda0239af475f3fd8fd6d9d7d51dcb47a116600f4be2c47897280800ae1cc2&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;Volumes&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;/data&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="punctuation">&#125;</span></span><br><span class="line">      <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;WorkingDir&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/data&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;Entrypoint&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">        <span class="string">&quot;docker-entrypoint.sh&quot;</span></span><br><span class="line">      <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;OnBuild&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;Labels&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Metadata&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;LastTagTime&quot;</span><span class="punctuation">:</span> <span class="string">&quot;2022-06-15T10:58:51.3346662Z&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">]</span></span><br></pre></td></tr></table></figure>
+
+<p>通过命令docker inspect imageId查看到镜像中的RepoTags多了一行数据**”local.docker.repo:8082&#x2F;reids:myreids”<strong>，这个就是本地的docker仓库，而</strong>“redis:latest”**则是默认的官方远程仓库。</p>
+<h2 id="将打过Tag的镜像推送到Nexus的Docker仓库"><a href="#将打过Tag的镜像推送到Nexus的Docker仓库" class="headerlink" title="将打过Tag的镜像推送到Nexus的Docker仓库"></a>将打过Tag的镜像推送到Nexus的Docker仓库</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">docker push local.docker.repo:8082/reids:myreids</span><br><span class="line">The push refers to repository [local.docker.repo:8082/reids]</span><br><span class="line">2e30f92c5d54: Pushed</span><br><span class="line">6f263637b351: Pushed</span><br><span class="line">6278b061fc42: Pushed</span><br><span class="line">309498e524b3: Pushed</span><br><span class="line">49cba0f0997b: Pushed</span><br><span class="line">ad6562704f37: Pushed</span><br><span class="line">myreids: digest: sha256:724ea5177e7d07426eea81233896eee4ff37f594097fcb317fac0b67508036ed size: 1573</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://img2022.cnblogs.com/blog/2810804/202206/2810804-20220615192557839-1763633978.png" alt="image-20220615191220012"></p>
+<h2 id="创建自己的镜像"><a href="#创建自己的镜像" class="headerlink" title="创建自己的镜像"></a>创建自己的镜像</h2><figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> redis:latest</span><br><span class="line"><span class="comment"># 构建一个自定义的tomcat镜像，需要的jdk和tomcat自行下载</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">WORKDIR</span><span class="language-bash"> /home</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">ENV</span> CATALINA_HOME /home/tomcat/apache-tomcat-<span class="number">8.5</span>.<span class="number">40</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">ENV</span> JAVA_HOME /home/jdk/jdk1.<span class="number">8.0</span>_144</span><br><span class="line"><span class="keyword">ENV</span> JRE_HOME $&#123;JAVA_HOME&#125;/jre</span><br><span class="line"><span class="keyword">ENV</span> CLASSPATH .:$&#123;JAVA_HOME&#125;/lib:$&#123;JRE_HOME&#125;/lib</span><br><span class="line"><span class="keyword">ENV</span> PATH $PATH:$&#123;JAVA_HOME&#125;/bin:$&#123;CATALINA_HOME&#125;/bin</span><br><span class="line"></span><br><span class="line"><span class="keyword">CMD</span><span class="language-bash"> [ <span class="string">&quot;catalina.sh&quot;</span>, <span class="string">&quot;run&quot;</span> ]</span></span><br></pre></td></tr></table></figure>
+
+<p>使用上面的Dockerfile创建两个镜像</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">docker build -t cus:my -f Dockerfile .</span><br><span class="line">[+] Building 0.1s (6/6) FINISHED</span><br><span class="line"> =&gt; [internal] load build definition from Dockerfile</span><br><span class="line"> =&gt; =&gt; writing image sha256:75518b6aca2c4e1cd22bec2e9815a8d851b4a7686f5c17066bd1f273077dd4a8         0.0s</span><br><span class="line"> =&gt; =&gt; naming to docker.io/library/cus:my</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">docker build -t local.docker.repo:8082/cus:my -f Dockerfile .</span><br><span class="line">[+] Building 0.1s (6/6) FINISHED</span><br><span class="line"> =&gt; [internal] load build definition from Dockerfile</span><br><span class="line"> =&gt; =&gt; writing image sha256:75518b6aca2c4e1cd22bec2e9815a8d851b4a7686f5c17066bd1f273077dd4a8</span><br><span class="line"> =&gt; =&gt; naming to local.docker.repo:8082/cus:my</span><br><span class="line"></span><br><span class="line">  docker images</span><br><span class="line">REPOSITORY                     TAG       IMAGE ID       CREATED         SIZE</span><br><span class="line">cus                            my        75518b6aca2c   21 hours ago    117MB</span><br><span class="line">local.docker.repo:8082/cus     my        75518b6aca2c   21 hours ago    117MB</span><br><span class="line">redis                          latest    604d80444252   39 hours ago    117MB</span><br><span class="line">local.docker.repo:8082/reids   myreids   604d80444252   39 hours ago    117MB</span><br><span class="line"></span><br><span class="line"> docker inspect 75518b6aca2c</span><br></pre></td></tr></table></figure>
+
+<p><strong>从上面结果可以看到，两个镜像实际还是同一个，只是有两个不同的远程仓库地址</strong></p>
+<h2 id="推送镜像"><a href="#推送镜像" class="headerlink" title="推送镜像"></a>推送镜像</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">docker push local.docker.repo:8082/cus:my</span><br><span class="line">The push refers to repository [local.docker.repo:8082/cus]</span><br><span class="line">5f70bf18a086: Pushed</span><br><span class="line">2e30f92c5d54: Layer already exists</span><br><span class="line">6f263637b351: Layer already exists</span><br><span class="line">6278b061fc42: Layer already exists</span><br><span class="line">309498e524b3: Layer already exists</span><br><span class="line">49cba0f0997b: Layer already exists</span><br><span class="line">ad6562704f37: Layer already exists</span><br><span class="line">my: digest: sha256:eaef54ee0c7eebc47c2bdb8cab81c33909f7c110c9e93ec94f1c1de8054eca36 size: 1779</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">docker push cus:my</span><br><span class="line">The push refers to repository [docker.io/library/cus]</span><br><span class="line">5f70bf18a086: Preparing</span><br><span class="line">2e30f92c5d54: Preparing</span><br><span class="line">6f263637b351: Preparing</span><br><span class="line">6278b061fc42: Preparing</span><br><span class="line">309498e524b3: Preparing</span><br><span class="line">49cba0f0997b: Waiting</span><br><span class="line">ad6562704f37: Waiting</span><br><span class="line">denied: requested access to the resource is denied</span><br><span class="line">官方的仓库地址推送失败了，这个是正常的，因为我没有登录且也没有权限</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/2810804-20220615192558091-1671246938.png" alt="image-20220615192331750"></p>
+<h1 id="首先我们看一下国内有哪些镜像仓库："><a href="#首先我们看一下国内有哪些镜像仓库：" class="headerlink" title="首先我们看一下国内有哪些镜像仓库："></a>首先我们看一下国内有哪些镜像仓库：</h1><table>
+<thead>
+<tr>
+<th>公司 &#x2F; 机构 &#x2F; 大学</th>
+<th>镜像链接</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>中国科学技术大学</td>
+<td><a href="https://link.zhihu.com/?target=https://docker.mirrors.ustc.edu.cn">https://docker.mirrors.ustc.edu.cn</a></td>
+<td>目前不推荐使用，具体参考USTC官方使用帮助：<a href="https://link.zhihu.com/?target=https://mirrors.ustc.edu.cn/help/dockerhub.html">https://mirrors.ustc.edu.cn/help/dockerhub.html</a> Docker CE安装包下载镜像可放心使用：<a href="https://link.zhihu.com/?target=https://mirrors.ustc.edu.cn/docker-ce">https://mirrors.ustc.edu.cn/docker-ce</a></td>
+</tr>
+<tr>
+<td>Docker中国区官方</td>
+<td><a href="https://link.zhihu.com/?target=https://registry.docker-cn.com">https://registry.docker-cn.com</a></td>
+<td></td>
+</tr>
+<tr>
+<td>网易</td>
+<td><a href="https://link.zhihu.com/?target=http://hub-mirror.c.163.com">http://hub-mirror.c.163.com</a></td>
+<td></td>
+</tr>
+<tr>
+<td>阿里云</td>
+<td>https:&#x2F;&#x2F;[xxx].mirror.aliyuncs.com</td>
+<td>需要自己去以下链接创建专属镜像仓库 <a href="https://link.zhihu.com/?target=https://cr.console.aliyun.com/">https://cr.console.aliyun.com/</a></td>
+</tr>
+</tbody></table>
+<p>daocloud镜像市场：<a target="_blank" rel="noopener" href="https://hub.daocloud.io/">https://hub.daocloud.io/</a></p>
+<p>1.<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=Docker&spm=1001.2101.3001.7020">Docker</a>中国区官方镜像<br><a target="_blank" rel="noopener" href="https://registry.docker-cn.com/">https://registry.docker-cn.com</a></p>
+<p>2.网易<br><a target="_blank" rel="noopener" href="http://hub-mirror.c.163.com/">http://hub-mirror.c.163.com</a></p>
+<p>3.ustc<br><a target="_blank" rel="noopener" href="https://docker.mirrors.ustc.edu.cn/">https://docker.mirrors.ustc.edu.cn</a></p>
+<p>4.中国科技大学<br><a target="_blank" rel="noopener" href="https://docker.mirrors.ustc.edu.cn/">https://docker.mirrors.ustc.edu.cn</a></p>
+<p>5.阿里云容器 生成自己的加速地址</p>
+<p>登录：cr.console.aliyun.com</p>
+<p>点击“创建我的容器镜像”，得到专属加速地址。</p>
+<p><img src="/img/213ac2d7e0d4354e7eaf768d3d97b3da.png" alt="img"></p>
+<h1 id="daemon-json-文件"><a href="#daemon-json-文件" class="headerlink" title="daemon.json 文件"></a>daemon.json 文件</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;builder&quot;: &#123;</span><br><span class="line">    &quot;gc&quot;: &#123;</span><br><span class="line">      &quot;defaultKeepStorage&quot;: &quot;20GB&quot;,</span><br><span class="line">      &quot;enabled&quot;: true</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  &quot;experimental&quot;: true,</span><br><span class="line">  &quot;features&quot;: &#123;</span><br><span class="line">    &quot;buildkit&quot;: true</span><br><span class="line">  &#125;,</span><br><span class="line">  &quot;insecure-registries&quot;: [</span><br><span class="line">    &quot;local.docker.repo:5000&quot;,</span><br><span class="line">    &quot;local.docker.repo:5001&quot;</span><br><span class="line">  ],</span><br><span class="line">  &quot;registry-mirrors&quot;: [</span><br><span class="line">    &quot;http://local.docker.repo:5000&quot;,</span><br><span class="line">    &quot;http://local.docker.repo:5001&quot;,</span><br><span class="line">    &quot;https://gy9pggit.mirror.aliyuncs.com&quot;,</span><br><span class="line">    &quot;http://hub-mirror.c.163.com&quot;,</span><br><span class="line">    &quot;https://hub.daocloud.io&quot;,</span><br><span class="line">    &quot;https://dockerproxy.com&quot;,</span><br><span class="line">    &quot;https://registry.docker-cn.com&quot;,</span><br><span class="line">    &quot;http://hub-mirror.c.163.com&quot;,</span><br><span class="line">    &quot;http://f1361db2.m.daocloud.io&quot;,</span><br><span class="line">    &quot;https://mirror.ccs.tencentyun.com&quot;,</span><br><span class="line">    &quot;https://gy9pggit.mirror.aliyuncs.com&quot;,</span><br><span class="line">    &quot;http://hub-mirror.c.163.com&quot;,</span><br><span class="line">    &quot;https://dockerhub.azk8s.cn&quot;,</span><br><span class="line">    &quot;https://registry.docker-cn.com&quot;,</span><br><span class="line">    &quot;https://docker.mirrors.ustc.edu.cn&quot;</span><br><span class="line">  ],</span><br><span class="line">  &quot;live-restore&quot;: true</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2023/09/04/nexus3%E6%90%AD%E5%BB%BA%E7%A7%81%E6%9C%89Docker%E4%BB%93%E5%BA%93/">https://yhao521.github.io/2023/09/04/nexus3%E6%90%AD%E5%BB%BA%E7%A7%81%E6%9C%89Docker%E4%BB%93%E5%BA%93/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/java-programming/">java/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2023/09/04/nexus%E8%87%AA%E5%90%AF%E5%8A%A8/" title="nexus自启动"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">nexus自启动</div></div><div class="info-2"><div class="info-item-1"> title: nexus自启动lang: en-USdate: 2023-09-03 20:17:08category:  nexustag: nexusauthor:   1. nexus自启动1.1. 1、进入到&#x2F;etc&#x2F;init.d目录下，新建一个nexus脚本cd   &#x2F;etc&#x2F;init.d vi nexus #!/bin/bash #chkconfig:2345 20 90 #description:nexus #processname:nexus  export JAVA_HOME=/home/yhao521/centos_default_enr/jdk1.8.0_211  NEXUS3TOOLS_HOME=/home/yhao521/dockerImageMake/tools/nexus3Tools   case $1 in         start) $NEXUS3TOOLS_HOME/snexus start;;         stop)  $NEXUS3TOOLS_HOME/snexus stop;;       ...</div></div></div></a><a class="pagination-related" href="/2023/09/04/nexus/" title="nexus"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">nexus</div></div><div class="info-2"><div class="info-item-1"> title: nexus简要说明lang: en-USdate: 2023-09-03 20:17:08category:  nexustag: nexusauthor:   1. 简要说明：搭建maven私服主要是为了方便在一个团队中使用maven中央仓库没有的jar包，这些非中央仓库的jar包可能是自己团队开发的公共依赖jar包，可能是第三方私有的认证相关jar包，特殊的还有oracle的驱动jar包，下面是使用Nexus搭建maven私服及私服使用 nexus3.现在可以作为docker的镜像仓库 1.1. Nexus3.x安装及配置前置条件要求存在jdk1.8的环境 1.1.1. 下载官方下载页： https://www.sonatype.com/download-oss-sonatype linux资源地址 wget https://sonatype-download.global.ssl.fastly.net/repository/repositoryManager/3/nexus-3.15.2-01-unix.tar.gz  1.1.2. 安装及配置#解压  ta...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/ulimit%E5%91%BD%E4%BB%A4/" title="ulimit命令"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">ulimit命令</div></div><div class="info-2"><div class="info-item-1"> title: ulimit命令date: 2023-09-03 20:17:08category: tag: author:  ulimit 命令。ulimit用于shell启动进程所占用的资源. 12345678910111213141516-H 设置硬资源限制.-S 设置软资源限制.-a 显示当前所有的资源限制.-c size:设置core文件的最大值.单位:blocks-d size:设置数据段的最大值.单位:kbytes-f size:设置创建文件的最大值.单位:blocks-l size:设置在内存中锁定进程的最大值.单位:kbytes-m size:设置可以使用的常驻内存的最大值.单位:kbytes-n size:设置内核可以同时打开的文件描述符的最大值.单位:n-p size:设置管道缓冲区的最大值.单位:kbytes-s size:设置堆栈的最大值.单位:kbytes-t size:设置CPU使用时间的最大上限.单位:seconds-v size:设置虚拟内存的最大值.单位:kbytes-u &lt;程序数目&gt; 　用户最多可开启的程序数目  ulimit ...</div></div></div></a><a class="pagination-related" href="/2023/09/04/windows%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E8%AE%BE%E7%BD%AE/" title="windows环境变量设置"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">windows环境变量设置</div></div><div class="info-2"><div class="info-item-1"> title: windows环境变量设置date: 2023-09-03 20:17:08category:  wintag: winauthor:   windows环境变量设置nodejs npm 环境变量解压安装；node-v12.8.0-win-x64.zip 123【NODE_HOME】=【D:\Develop\node-v12.8.0-win-x64\node_global】【NODE_PATH】=【%NODE_HOME%\node_modules】【Path】增加【%NODE_HOME%】  测试 命令行执行 12npm -vnode -v  JDK环境变量123【JAVA_HOME】=【E:\jdk\jdk1.7.0_80】【Path】增加【%JAVA_HOME%\bin;%JAVA_HOME%\jre\bin】【CLASSPATH】=【%JAVA_HOME%\lib\dt.jar;%JAVA_HOME%\lib\tools.jar】  测试 命令行执行 1java --version  linux 配置jdk环境变量vim &#x2F;etc&#x2F;pro...</div></div></div></a><a class="pagination-related" href="/2023/09/04/nexus-docker%E4%B8%8B%E8%BD%BD%E4%BD%BF%E7%94%A8/" title="nexus-docker下载使用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">nexus-docker下载使用</div></div><div class="info-2"><div class="info-item-1"> title: nexus下载使用date: 2023-09-03 20:17:08category:  nexustag: nexusauthor:   nexus-docker下载使用参考官网的打包git clone https://github.com/sonatype/docker-nexus3.git docker-compose.yml 1234567891011121314151617181920212223# nexus# docker pull sonatype/nexus3# http://localhost:9011# admin/admin123# docker pull sonatype/nexus3:3.52.0version: &#x27;3&#x27;services:  nexus3:    build: ./build    image: yanghao52/nexus3:3.63.0# 需要拷贝docker-nexus3.git下的rh-docker目录和Dockerfile.rh.centos 到 ./build_centos目录下#   ...</div></div></div></a><a class="pagination-related" href="/2024/01/17/JVM%E7%9B%B8%E5%85%B3%E9%9D%A2%E8%AF%95%E9%A2%98/" title="JVM相关面试题"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-17</div><div class="info-item-2">JVM相关面试题</div></div><div class="info-2"><div class="info-item-1">JVM相关面试题1 JVM组成1.1 JVM由那些部分组成，运行流程是什么？ 难易程度：☆☆☆ 出现频率：☆☆☆☆  JVM是什么 Java Virtual Machine Java程序的运行环境（java二进制字节码的运行环境） 好处：  一次编写，到处运行  自动内存管理，垃圾回收机制    JVM由哪些部分组成，运行流程是什么？  从图中可以看出 JVM 的主要组成部分  ClassLoader（类加载器） Runtime Data Area（运行时数据区，内存分区） Execution Engine（执行引擎） Native Method Library（本地库接口）  运行流程： （1）类加载器（ClassLoader）把Java代码转换为字节码 （2）运行时数据区（Runtime Data Area）把字节码加载到内存中，而字节码文件只是JVM的一套指令集规范，并不能直接交给底层系统去执行，而是有执行引擎运行 （3）执行引擎（Execution Engine）将字节码翻译为底层系统指令，再交由CPU执行去执行，此时需要调用其他语言的本地库接口（Native Metho...</div></div></div></a><a class="pagination-related" href="/2023/09/11/Android%E6%9C%80%E5%85%A8UI%E5%BA%93%E5%90%88%E9%9B%86/" title="Android最全UI库合集"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-11</div><div class="info-item-2">Android最全UI库合集</div></div><div class="info-2"><div class="info-item-1">推荐一个GitHub上面超级强的ui库 android_ui这个库几乎涵盖了Android所有优秀的库，而且配有gif动图。google官方推荐的一个动画库使用起来很方便，里面还有gif动图。Android UI Library目录索引 抽屉菜单 ListView WebView SwitchButton 按钮 点赞按钮 进度条 TabLayout 图标 下拉刷新 ViewPager 图表(Chart) 菜单(Menu) 浮动菜单 对话框 空白页 滑动删除 手势操作 RecyclerView Card Color Drawable Spinner 布局 模糊效果 TabBar AppBar 选择器(Picker) 跑马灯 日历时间 主题样式 ImageView 通知 聊天视图 Header 引导图(Intro) 图片 徽章(Badge) RatingView 滚动效果(Scroll) 时间轴 TreeView SearchView TagView TextView EditText Sliding 表单 分段控件 轮播图 文件操作 启动页 MD BottomNavigation ...</div></div></div></a><a class="pagination-related" href="/2023/09/04/mac%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7/" title="mac命令行工具"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">mac命令行工具</div></div><div class="info-2"><div class="info-item-1"> title: mac命令行工具date: 2023-09-03 20:17:08category:  mactag: macauthor:   8个不可不知的Mac OS X专用命令行工具OS X的终端下通用很多Unix的工具和脚本。如果从Linux迁移到OS X会发现很多熟悉的命令和脚本工具，其实并没有任何区别。 但是OS X也提供了很多其他系统所没有的特别的命令行工具。我们推荐8个这类的工具，希望有助于提高在Mac的命令行环境下的效率。 1. openopen命令用于打开文件、目录或执行程序。就等同于在命令行模式下，重复图形界面“双击”的动作。例如这个命令与在Finder中双击Safari是一样的： 1$ open /Applications/Safari.app/  如果open一个文件，则会使用关联的程序打开之。例如open screenshot.png会在Preview中查看图片。 可以使用-a选项要求自行选择打开的程序，或使用-e强制在TextEdit中编辑此文件。 open一个目录会在Finder窗口中打开此目录。一个很有用的技巧是open .打开当前目录。 Fi...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#nexus3%E6%90%AD%E5%BB%BA%E7%A7%81%E6%9C%89Docker%E4%BB%93%E5%BA%93"><span class="toc-number">1.</span> <span class="toc-text">nexus3搭建私有Docker仓库</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Nexus3%EF%BC%9A"><span class="toc-number">2.</span> <span class="toc-text">Nexus3：</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%AF%E5%8A%A8Nexus3"><span class="toc-number">2.1.</span> <span class="toc-text">启动Nexus3</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%85%8D%E7%BD%AEdocker%E4%BB%93%E5%BA%93"><span class="toc-number">3.</span> <span class="toc-text">配置docker仓库</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B0%E5%BB%BAdocker%E4%BB%93%E5%BA%93%E5%AD%98%E5%82%A8"><span class="toc-number">3.1.</span> <span class="toc-text">新建docker仓库存储</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B0%E5%BB%BA%E4%BB%93%E5%BA%93"><span class="toc-number">3.2.</span> <span class="toc-text">新建仓库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B7%BB%E5%8A%A0%E6%9D%83%E9%99%90"><span class="toc-number">3.3.</span> <span class="toc-text">添加权限</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%85%8D%E7%BD%AEdocker"><span class="toc-number">4.</span> <span class="toc-text">配置docker</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8daemon-json%E4%B8%AD%E6%B7%BB%E5%8A%A0%E5%A6%82%E4%B8%8B%E9%85%8D%E7%BD%AE"><span class="toc-number">4.1.</span> <span class="toc-text">在daemon.json中添加如下配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8%E6%9C%AC%E5%9C%B0host%E4%B8%AD%E6%B7%BB%E5%8A%A0IP%E6%98%A0%E5%B0%84"><span class="toc-number">4.2.</span> <span class="toc-text">在本地host中添加IP映射</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%B5%8B%E8%AF%95%E4%BD%BF%E7%94%A8"><span class="toc-number">5.</span> <span class="toc-text">测试使用</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%99%BB%E5%BD%95%E6%9C%AC%E5%9C%B0docker%E4%BB%93%E5%BA%93"><span class="toc-number">5.1.</span> <span class="toc-text">登录本地docker仓库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E6%9C%AC%E5%9C%B0%E9%95%9C%E5%83%8F"><span class="toc-number">5.2.</span> <span class="toc-text">查看本地镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%86redis%E9%95%9C%E5%83%8F%E6%89%93Tag"><span class="toc-number">5.3.</span> <span class="toc-text">将redis镜像打Tag</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%86%E6%89%93%E8%BF%87Tag%E7%9A%84%E9%95%9C%E5%83%8F%E6%8E%A8%E9%80%81%E5%88%B0Nexus%E7%9A%84Docker%E4%BB%93%E5%BA%93"><span class="toc-number">5.4.</span> <span class="toc-text">将打过Tag的镜像推送到Nexus的Docker仓库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E8%87%AA%E5%B7%B1%E7%9A%84%E9%95%9C%E5%83%8F"><span class="toc-number">5.5.</span> <span class="toc-text">创建自己的镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%A8%E9%80%81%E9%95%9C%E5%83%8F"><span class="toc-number">5.6.</span> <span class="toc-text">推送镜像</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%A6%96%E5%85%88%E6%88%91%E4%BB%AC%E7%9C%8B%E4%B8%80%E4%B8%8B%E5%9B%BD%E5%86%85%E6%9C%89%E5%93%AA%E4%BA%9B%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93%EF%BC%9A"><span class="toc-number">6.</span> <span class="toc-text">首先我们看一下国内有哪些镜像仓库：</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#daemon-json-%E6%96%87%E4%BB%B6"><span class="toc-number">7.</span> <span class="toc-text">daemon.json 文件</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

@@ -1,0 +1,238 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>升级sshd服务 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="title: 升级sshd服务date: 2023-09-03 20:17:08category:  linux centostag: centosauthor:   下载 wget https:&#x2F;&#x2F;cdn.openbsd.org&#x2F;pub&#x2F;OpenBSD&#x2F;OpenSSH&#x2F;portable&#x2F;openssh-8.4p1.tar.gz tar -zxvf openssh-8.4p1.tar.gz cd">
+<meta property="og:type" content="article">
+<meta property="og:title" content="升级sshd服务">
+<meta property="og:url" content="https://yhao521.github.io/2023/09/04/%E5%8D%87%E7%BA%A7sshd%E6%9C%8D%E5%8A%A1/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="title: 升级sshd服务date: 2023-09-03 20:17:08category:  linux centostag: centosauthor:   下载 wget https:&#x2F;&#x2F;cdn.openbsd.org&#x2F;pub&#x2F;OpenBSD&#x2F;OpenSSH&#x2F;portable&#x2F;openssh-8.4p1.tar.gz tar -zxvf openssh-8.4p1.tar.gz cd">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2023-09-04T03:18:09.000Z">
+<meta property="article:modified_time" content="2023-09-04T03:18:27.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "升级sshd服务",
+  "url": "https://yhao521.github.io/2023/09/04/%E5%8D%87%E7%BA%A7sshd%E6%9C%8D%E5%8A%A1/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2023-09-04T03:18:09.000Z",
+  "dateModified": "2023-09-04T03:18:27.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2023/09/04/%E5%8D%87%E7%BA%A7sshd%E6%9C%8D%E5%8A%A1/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '升级sshd服务',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">升级sshd服务</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">升级sshd服务</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-09-04T03:18:09.000Z" title="发表于 2023-09-04 11:18:09">2023-09-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-09-04T03:18:27.000Z" title="更新于 2023-09-04 11:18:27">2023-09-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><hr>
+<p>title: 升级sshd服务<br>date: 2023-09-03 20:17:08<br>category:</p>
+<ul>
+<li>linux</li>
+<li>centos<br>tag:</li>
+<li>centos<br>author:</li>
+</ul>
+<hr>
+<p>下载</p>
+<p>wget <a target="_blank" rel="noopener" href="https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-8.4p1.tar.gz">https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-8.4p1.tar.gz</a></p>
+<p>tar -zxvf openssh-8.4p1.tar.gz</p>
+<p>cd openssh-8.4p1</p>
+<p>.&#x2F;configure –prefix&#x3D;&#x2F;usr&#x2F; –sysconfdir&#x3D;&#x2F;etc&#x2F;ssh&#x2F; –with-ssl –with-md5-passwords mandir&#x3D;&#x2F;usr&#x2F;share&#x2F;man&#x2F;</p>
+<p>make &amp;&amp; make install</p>
+<p>缺少依赖： yum install -y openssl-devel zlib-devel gcc</p>
+<p>删除&#x2F;etc&#x2F;ssh&#x2F;下的密钥对，rm -f &#x2F;etc&#x2F;ssh&#x2F;ssh<em>host</em>* （只删除密钥对即可，在重启的时候会重新生成）</p>
+<p>复制启动文件至&#x2F;etc&#x2F;init.d&#x2F;</p>
+<p>cp contrib&#x2F;redhat&#x2F;sshd.init &#x2F;etc&#x2F;init.d&#x2F;sshd</p>
+<p>修改启动文件：vim &#x2F;etc&#x2F;init.d&#x2F;sshd，将PID_FILE路径改为原来的sshd.pid的路径</p>
+<p>[root@myhost7 openssh-8.4p1]# &#x2F;etc&#x2F;init.d&#x2F;sshd stop<br>Stopping sshd (via systemctl): [ OK ]<br>[root@myhost7 openssh-8.4p1]# &#x2F;etc&#x2F;init.d&#x2F;sshd start<br>Starting sshd (via systemctl): [ OK ]</p>
+<hr>
+<p><strong>1.在服务器上的随意目录里下载SSH安装包，如不知道去什么地方下载，可以用浏览器百度SSH官网进行下载；</strong></p>
+<p><strong>2.将下载好的SSH包，进行解压，并进入解压后生成的目录：</strong></p>
+<p># tar -xf openssh-8.0p1.tar.gz<br># cd openssh-8.0p1</p>
+<p><strong>3.进行编译安装：</strong></p>
+<p># .&#x2F;configure –prefix&#x3D;&#x2F;usr –sysconfdir&#x3D;&#x2F;etc&#x2F;ssh –with-md5-passwords –with-pam –with-zlib –with-openssl-includes&#x3D;&#x2F;usr –with-privsep-path&#x3D;&#x2F;var&#x2F;lib&#x2F;sshd</p>
+<p># make &amp;&amp; make install</p>
+<p><strong>4.将新的配置文件添加到指定的SSH目录，并查看SSH版本：</strong></p>
+<p># install -v -m755 contrib&#x2F;ssh-copy-id &#x2F;usr&#x2F;bin<br># install -v -m644 contrib&#x2F;ssh-copy-id.1 &#x2F;usr&#x2F;share&#x2F;man&#x2F;man1<br># install -v -m755 -d &#x2F;usr&#x2F;share&#x2F;doc&#x2F;openssh-8.0p1<br># install -v -m644 INSTALL LICENCE OVERVIEW README* &#x2F;usr&#x2F;share&#x2F;doc&#x2F;openssh-8.0p1<br># ssh -V</p>
+<p><strong>5.配置并重启：</strong></p>
+<p>echo “PermitRootLogin yes” &gt;&gt; &#x2F;etc&#x2F;ssh&#x2F;sshd_config<br>cp -p contrib&#x2F;redhat&#x2F;sshd.init &#x2F;etc&#x2F;init.d&#x2F;sshd<br>chmod +x &#x2F;etc&#x2F;init.d&#x2F;sshd<br>chkconfig –add sshd<br>chkconfig sshd on<br>&#x2F;etc&#x2F;init.d&#x2F;sshd restart</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2023/09/04/%E5%8D%87%E7%BA%A7sshd%E6%9C%8D%E5%8A%A1/">https://yhao521.github.io/2023/09/04/%E5%8D%87%E7%BA%A7sshd%E6%9C%8D%E5%8A%A1/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2023/09/04/%E5%91%8A%E8%AD%A6%E4%BF%A1%E6%81%AF%E6%A8%A1%E6%9D%BF/" title="告警信息模板"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">告警信息模板</div></div><div class="info-2"><div class="info-item-1"> title: 告警信息模板date: 2023-09-03 20:17:08category: tag: author:   告警标题：KingbaseExporter实例运行状态  &#x3D;&#x3D;告警级别&#x3D;&#x3D;(数字越大级别越大)： 告警说明：kingbase_cluster10 - 172.21.13.10 : KingbaseExporter正在运行 节点：null 主机地址：172.21.13.10 集群名：kingbase_cluster10 12345678910&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;blockquote&gt;&lt;p&gt;&lt;strong&gt;告警标题&lt;/strong&gt;：KingbaseExporter实例运行状态&lt;/p&gt;&lt;/blockquote&gt;&lt;p&gt;&lt;strong&gt;&lt;mark&gt;告警级别&lt;/mark&gt;&lt;/strong&gt;(数字越大级别越大)：&lt;/p&gt;&lt;p&gt;&lt;...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E5%89%8D%E7%AB%AF%E6%B5%8F%E8%A7%88%E5%99%A8%E7%BC%93%E5%AD%98%E7%9F%A5%E8%AF%86%E6%A2%B3%E7%90%86/" title="前端浏览器缓存知识梳理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">前端浏览器缓存知识梳理</div></div><div class="info-2"><div class="info-item-1"> title: 前端浏览器缓存知识梳理date: 2023-09-03 20:17:08category:  开发语言 doc_nodejstag: doc_nodejsauthor:   前端浏览器缓存知识梳理在前端性能优化的方式中，最重要的当然是缓存了，使用好了缓存，对项目有很大的帮助。比如我们访问网页时，使用网页后退功能，会发现加载的非常快，体验感很好，这就是缓存的力量。 什么是缓存呢？ 当我们第一次访问网站的时候，比如 juejin.cn，电脑会把网站上的图片和数据下载到电脑上，当我们再次访问该网站的时候，网站就会从电脑中直接加载出来，这就是缓存。 缓存有哪些好处？ \1. 缓解服务器压力，不用每次都去请求某些数据了。 2.提升性能，打开本地资源肯定会比请求服务器来的快。 3.减少带宽消耗，当我们使用缓存时，只会产生很小的网络消耗，至于为什么打开本地资源也会产生网络消耗，下面会有说明。 **Web缓存种类：**数据库缓存，CDN缓存，代理服务器缓存，浏览器缓存。  所谓浏览器缓存其实就是指在本地使用的计算机中开辟一个内存区，同时也开辟一个硬盘区作为数据传输的缓冲区，然后用...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/%E4%BD%BF%E7%94%A8MAC%E8%BF%9B%E8%A1%8C%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91/" title="使用MAC进行软件开发"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">使用MAC进行软件开发</div></div><div class="info-2"><div class="info-item-1"> title: 使用MAC进行软件开发date: 2023-09-03 20:17:08category:  mactag: macauthor:   使用MAC进行软件开发https://www.jianshu.com/p/a29eca251fc5 作为一名程序员，我经历了从使用Windows、Ubuntu、MAC系统进行开发工作，最终我选择了MAC系统，原因主要有两个：软件运行流畅度、界面视觉享受高以下介绍使用MAC系统过程中，我常用的一些软件，浏览器插件相关可跳转至 好用的Google浏览器插件 1、包管理器：brewMAC系统使用比较好的包管理器，新系统没有预安装brew，需要自行安装，执行命令 1/bin/zsh -c &quot;$(curl -fsSL https://gitee.com/cunkai/HomebrewCN/raw/master/Homebrew.sh)&quot;  2、软件下载网站和浏览器插件下载网站下方相关软件如果你不方便从官网进行下载可通过以下网站进行下载并安装，有兴趣的同学可以自行探索哦 软件下载：  App Store：https://w...</div></div></div></a><a class="pagination-related" href="/2021/09/15/%E5%9F%BA%E7%A1%80%E7%AF%87%E8%AE%B2%E4%B9%89/" title="基础篇讲义"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2021-09-15</div><div class="info-item-2">基础篇讲义</div></div><div class="info-2"><div class="info-item-1">基础篇 基础篇要点：算法、数据结构、基础设计模式  1. 二分查找要求  能够用自己语言描述二分查找算法 能够手写二分查找代码 能够解答一些变化后的考法  算法描述  前提：有已排序数组 A（假设已经做好）  定义左边界 L、右边界 R，确定搜索范围，循环执行二分查找（3、4两步）  获取中间索引 M &#x3D; Floor((L+R) &#x2F;2)  中间索引的值  A[M] 与待搜索的值 T 进行比较 ① A[M] &#x3D;&#x3D; T 表示找到，返回中间索引 ② A[M] &gt; T，中间值右侧的其它元素都大于 T，无需比较，中间索引左边去找，M - 1 设置为右边界，重新查找 ③ A[M] &lt; T，中间值左侧的其它元素都小于 T，无需比较，中间索引右边去找， M + 1 设置为左边界，重新查找  当 L &gt; R 时，表示没有找到，应结束循环    更形象的描述请参考：binary_search.html  算法实现 1234567891011121314public static int binarySearch(int[] a, int t)...</div></div></div></a><a class="pagination-related" href="/2023/09/04/ARM%E6%9E%B6%E6%9E%84%E4%B8%8BKubernetes%E9%9B%86%E7%BE%A4%E7%9A%84%E6%90%AD%E5%BB%BA/" title="ARM架构下Kubernetes集群的搭建"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">ARM架构下Kubernetes集群的搭建</div></div><div class="info-2"><div class="info-item-1"> title: ARM架构下Kubernetes集群的搭建date: 2023-09-03 20:17:08category:  doc_dockertag: doc_dockerauthor:   ARM架构下Kubernetes集群的搭建机器信息：三台linux&#x2F;arm64架构系统版本：centos7.6版本    主机名称 IP地址 说明 软件    Master01 192.168.100.21 master节点 kube-apiserver、kube-controller-manager、kube-scheduler、etcd、 kubelet、kube-proxy   Node01 192.168.100.22 node节点 kubelet、kube-proxy   Node02 192.168.100.23 node节点 kubelet、kube-proxy   安装配置环境设置主机名 123hostnamectl set-hostname k8s-master01hostnamectl set-hostname k8s-node01hostnamectl...</div></div></div></a><a class="pagination-related" href="/2024/03/15/%E4%B8%80%E5%A4%A7%E6%B3%A2%20AppleScript%20%E6%9D%A5%E8%A2%AD%EF%BC%9A%E6%89%93%E5%BC%80%20Chrome%20%E7%AA%97%E5%8F%A3%E3%80%81%E8%B0%83%E6%95%B4%20DevTool%20%E4%BD%8D%E7%BD%AE%E3%80%81%E8%BD%BD%E5%85%A5%20S/" title="一大波 AppleScript 来袭：打开 Chrome 窗口、调整 DevTool 位置、载入 Sublime 项目、执行 ITerm 命令 等等..."><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-15</div><div class="info-item-2">一大波 AppleScript 来袭：打开 Chrome 窗口、调整 DevTool 位置、载入 Sublime 项目、执行 ITerm 命令 等等...</div></div><div class="info-2"><div class="info-item-1">前言前阵子说过，发现了 Mac 调度中心的正确用法，在三屏显示器下很酷，后来又实现了让 mac 和外联的显示器一起随机成同一个壁纸，真是赏心悦目。 想要更高效然而，如何在桌面空间里为一堆项目窗口进行自动化布局这件事一直让我念念不忘，好在现在有了收获。 一大波 Applescript 脚本此处只分享脚本和用法，具体组装需要各人自行领会，菜端上来了，怎么吃，请自行动筷。 我的工作环境里，主要涉及 Chrome Sublime iTerm 等软件，以下代码供参考。 开一个新窗口（不是新标签）方法： 1234567891011121314151617181920212223242526272829303132on newWindow(name, openStr, newWindowStr)    tell application &quot;Dock&quot;        activate    end tell    tell application &quot;System Events&quot;        tell process &quot;Dock&quot;    ...</div></div></div></a><a class="pagination-related" href="/2023/09/04/m1%E5%AE%89%E8%A3%85centos7/" title="m1安装centos7"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">m1安装centos7</div></div><div class="info-2"><div class="info-item-1"> title: m1安装centos7date: 2023-09-03 20:17:08category:  mactag: macauthor:   m1安装centos7下载镜像阿里云盘 &#x3D;&#x3D;!!!这里是一个大坑,从官网下载的镜像,没办法使用,我下载了五六个arm镜像,全是卡在安装界面,一直在下边的页面反复横跳,然后在网上搜,发现能运行的似乎都是那一个版本的&#x3D;&#x3D; 进入install选择界面，此处选择第一个跳过测试直接安装（因为上面提到过这个镜像不是公开版本测试会报错）点击回车进入安装图形化界面  输入r  这个是因为pd自己升级后没有成功启动Xstarup的问题，需要手动文字字符安装下第一次r以后有三个感叹号 输入5  这个先选数字5 再按提示c c c，完成磁盘的选择，就是上面的  密码设置 输入8，输入root用户的密码root1234，然后输入b  安装完成  输入命令 ip a查看centos7的ip地址 使用iterm2登录 yum源配置(这个也挺坑的,M1 linux切换阿里好像只能用这一) 先安装 wget 1yum in...</div></div></div></a><a class="pagination-related" href="/2026/05/15/%E5%A6%82%E4%BD%95%E5%B0%86%E4%B8%80%E4%B8%AAGit%E4%BB%A3%E7%A0%81%E5%BA%93%E4%BD%9C%E4%B8%BA%E4%B8%80%E4%B8%AA%E5%AD%90%E6%96%87%E4%BB%B6%E5%A4%B9%E5%90%88%E5%B9%B6%E8%BF%9B%E5%8F%A6%E4%B8%80%E4%B8%AA%E4%BB%A3%E7%A0%81%E5%BA%93/" title="如何将一个Git代码库作为一个子文件夹合并进另一个代码库"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-15</div><div class="info-item-2">如何将一个Git代码库作为一个子文件夹合并进另一个代码库</div></div><div class="info-2"><div class="info-item-1">前情提要因业务变动，有一个旧服务代码需要作为一个子模块（子文件夹）合并进一个新的大项目来维护，并希望保留之前的commit记录。对应的Git操作在中文网上并未直接搜到，遂将Google到的一片教程翻译在此，以便后来查阅。  原文地址：Moving One Git Repository Into Another As A Subdirectory  译文 时间有限，目前一半内容是Google翻译  我最近不得不将许多独立项目合并为一个更大的项目，以实现长期项目的重组工作。因为我们使用Git管理所有项目，这应该很容易，但是仍然需要一些研究才能弄清楚改如何去做。 所以假设如果你有两个项目：old-project和new-project，你想最终得到一个名为old-project的新项目中的子目录，并带有旧项目的所有代码，并且要保留该项目的历史记录。 这是我们为此要做的事情的概述：  获取包含正在拉入的项目的存储库的本地副本 修改本地副本以将所有文件移动到子目录中 将本地副本作为伪造的“远程”添加到我们更大的项目中 把当地的“远程”拉进来，从而把整个历史也拉进来  出于本演示的目的，ol...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

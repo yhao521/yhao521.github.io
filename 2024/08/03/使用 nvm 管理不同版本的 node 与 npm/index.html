@@ -1,0 +1,314 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>使用 nvm 管理不同版本的 node 与 npm | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="使用 nvm 管理不同版本的 node 与 npm分类 编程技术在我们的日常开发中经常会遇到这种情况：手上有好几个项目，每个项目的需求不同，进而不同项目必须依赖不同版的 NodeJS 运行环境。如果没有一个合适的工具，这个问题将非常棘手。 nvm 应运而生，nvm 是 Mac 下的 node 管理工具，有点类似管理 Ruby 的 rvm，如果需要管理 Windows 下的 node，官方推荐使用">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用 nvm 管理不同版本的 node 与 npm">
+<meta property="og:url" content="https://yhao521.github.io/2024/08/03/%E4%BD%BF%E7%94%A8%20nvm%20%E7%AE%A1%E7%90%86%E4%B8%8D%E5%90%8C%E7%89%88%E6%9C%AC%E7%9A%84%20node%20%E4%B8%8E%20npm/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="使用 nvm 管理不同版本的 node 与 npm分类 编程技术在我们的日常开发中经常会遇到这种情况：手上有好几个项目，每个项目的需求不同，进而不同项目必须依赖不同版的 NodeJS 运行环境。如果没有一个合适的工具，这个问题将非常棘手。 nvm 应运而生，nvm 是 Mac 下的 node 管理工具，有点类似管理 Ruby 的 rvm，如果需要管理 Windows 下的 node，官方推荐使用">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2024-08-03T08:44:55.000Z">
+<meta property="article:modified_time" content="2024-08-03T08:45:13.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c++&#x2F;programming">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "使用 nvm 管理不同版本的 node 与 npm",
+  "url": "https://yhao521.github.io/2024/08/03/%E4%BD%BF%E7%94%A8%20nvm%20%E7%AE%A1%E7%90%86%E4%B8%8D%E5%90%8C%E7%89%88%E6%9C%AC%E7%9A%84%20node%20%E4%B8%8E%20npm/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2024-08-03T08:44:55.000Z",
+  "dateModified": "2024-08-03T08:45:13.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2024/08/03/%E4%BD%BF%E7%94%A8%20nvm%20%E7%AE%A1%E7%90%86%E4%B8%8D%E5%90%8C%E7%89%88%E6%9C%AC%E7%9A%84%20node%20%E4%B8%8E%20npm/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '使用 nvm 管理不同版本的 node 与 npm',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">使用 nvm 管理不同版本的 node 与 npm</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">使用 nvm 管理不同版本的 node 与 npm</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-08-03T08:44:55.000Z" title="发表于 2024-08-03 16:44:55">2024-08-03</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-08-03T08:45:13.000Z" title="更新于 2024-08-03 16:45:13">2024-08-03</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h2 id="使用-nvm-管理不同版本的-node-与-npm"><a href="#使用-nvm-管理不同版本的-node-与-npm" class="headerlink" title="使用 nvm 管理不同版本的 node 与 npm"></a>使用 nvm 管理不同版本的 node 与 npm</h2><h3 id="分类-编程技术"><a href="#分类-编程技术" class="headerlink" title="分类 编程技术"></a><em>分类</em> <a target="_blank" rel="noopener" href="https://www.runoob.com/w3cnote_genre/code">编程技术</a></h3><p>在我们的日常开发中经常会遇到这种情况：手上有好几个项目，每个项目的需求不同，进而不同项目必须依赖不同版的 NodeJS 运行环境。如果没有一个合适的工具，这个问题将非常棘手。</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/creationix/nvm">nvm</a> 应运而生，nvm 是 Mac 下的 node 管理工具，有点类似管理 Ruby 的 rvm，如果需要管理 Windows 下的 node，官方推荐使用 <a target="_blank" rel="noopener" href="https://github.com/hakobera/nvmw">nvmw</a> 或 <a target="_blank" rel="noopener" href="https://github.com/coreybutler/nvm-windows">nvm-windows</a>。不过，nvm-windows 并不是 nvm 的简单移植，他们也没有任何关系。但下面介绍的所有命令，都可以在 nvm-windows 中运行。</p>
+<hr>
+<h2 id="nvm-与-n-的区别"><a href="#nvm-与-n-的区别" class="headerlink" title="nvm 与 n 的区别"></a>nvm 与 n 的区别</h2><p>node 版本管理工具还有一个是 TJ大神的 <a target="_blank" rel="noopener" href="https://github.com/tj/n">n</a> 命令，n 命令是作为一个 node 的模块而存在，而 nvm 是一个独立于 node&#x2F;npm 的外部 shell 脚本，因此 n 命令相比 nvm 更加局限。</p>
+<p>由于 npm 安装的模块路径均为 <strong>&#x2F;usr&#x2F;local&#x2F;lib&#x2F;node_modules</strong>，当使用 n 切换不同的 node 版本时，实际上会共用全局的 node&#x2F;npm 目录。 因此不能很好的满足『按不同 node 版本使用不同全局 node 模块』的需求。</p>
+<hr>
+<h2 id="卸载全局安装的-node-npm"><a href="#卸载全局安装的-node-npm" class="headerlink" title="卸载全局安装的 node&#x2F;npm"></a>卸载全局安装的 node&#x2F;npm</h2><p>在官网下载的 node 安装包，运行后会自动安装在全局目录，使用过程中经常会遇到一些<strong>权限问题</strong>，所以推荐按照以下方法卸载全局安装的 node&#x2F;npm。</p>
+<p>首先，打开你 Finder，按 <strong>shift+command+G</strong>，打开前往文件夹的窗口，分别输入下列目录进去之后删除 <strong>node</strong> 和 <strong>node_modules</strong>相关的文件和文件夹:</p>
+<ul>
+<li>打开 <strong>&#x2F;usr&#x2F;local&#x2F;lib</strong>，删除 <strong>node</strong> 和 <strong>node_modules</strong> 相关的文件和文件夹</li>
+<li>打开 <strong>&#x2F;usr&#x2F;local&#x2F;include</strong>，删除 <strong>node</strong> 和 <strong>node_modules</strong> 相关的文件和文件夹</li>
+<li>如果你是使用的 <strong>brew install node</strong> 安装的 NodeJS，那么你还需要在终端中执行 <strong>brew uninstall node</strong> 命令来卸载</li>
+<li>检查你的个人主文件夹下面的所有的 <strong>local</strong>、<strong>lib</strong> 以及 <strong>include</strong> 文件夹，并且删除所有与 <strong>node</strong> 和 <strong>node_modules</strong> 相关的文件以及文件夹</li>
+<li>打开 <strong>&#x2F;usr&#x2F;local&#x2F;bin</strong> 并删除 <strong>node</strong> 可执行文件</li>
+</ul>
+<p>你可能还需要在你的终端中输入一些额外的指令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">sudo rm /usr/local/bin/npm</span><br><span class="line">sudo rm /usr/local/share/man/man1/node.1</span><br><span class="line">sudo rm /usr/local/lib/dtrace/node.d</span><br><span class="line">sudo rm -rf ~/.npm</span><br><span class="line">sudo rm -rf ~/.node-gyp</span><br><span class="line">sudo rm /opt/local/bin/node</span><br><span class="line">sudo rm /opt/local/include/node</span><br><span class="line">sudo rm -rf /opt/local/lib/node_modules</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="Windows-安装"><a href="#Windows-安装" class="headerlink" title="Windows 安装"></a>Windows 安装</h2><p>首先最重要的是：一定要卸载已安装的 NodeJS，否则会发生冲突。然后下载 <a target="_blank" rel="noopener" href="https://github.com/coreybutler/nvm-windows/releases">nvm-windows</a> 最新安装包，直接安装即可。</p>
+<hr>
+<h2 id="OS-X-Linux-安装"><a href="#OS-X-Linux-安装" class="headerlink" title="OS X&#x2F;Linux 安装"></a>OS X&#x2F;Linux 安装</h2><p>与 Windows 不同，我们并不一定要先卸载原有的 NodeJS。当然我们推荐还是先卸载掉比较好。另外，你还需要 C++ 编译器，Linux 发行版一般不用担心，像 Ubuntu 都可以直接用 <strong>build-essential</strong> 套件，OS X 的话，可以用 <strong>X-Code</strong> 的命令行工具。运行这个命令即可：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xcode-select --install</span><br></pre></td></tr></table></figure>
+
+<p>在 Linux 中：（如果是 Debian 发行版）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install build-essential</span><br></pre></td></tr></table></figure>
+
+<p>然后我们可以使用</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.40.0/install.sh | bash</span><br></pre></td></tr></table></figure>
+
+<p>或者</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.40.0/install.sh | bash</span><br></pre></td></tr></table></figure>
+
+<p>从远程下载 <strong>install.sh</strong> 脚本并执行。注意这个版本年数字 <strong>v0.33.0</strong> 会随着项目开发而变化。随时通过<a target="_blank" rel="noopener" href="https://github.com/creationix/nvm#install-script">官方最新安装命令</a>来检查最新安装版本是有好处的。</p>
+<hr>
+<h2 id="安装多版本-node-npm"><a href="#安装多版本-node-npm" class="headerlink" title="安装多版本 node&#x2F;npm"></a>安装多版本 node&#x2F;npm</h2><p>例如，我们要安装4.2.2版本，可以用如下命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nvm install 4.2.2</span><br></pre></td></tr></table></figure>
+
+<p>nvm 遵守<a target="_blank" rel="noopener" href="http://semver.org/lang/zh-CN/">语义化版本</a>命名规则。例如，你想安装最新的 <strong>4.2</strong> 系列的最新的一个版本的话，可以运行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nvm install 4.2</span><br></pre></td></tr></table></figure>
+
+<p>nvm 会寻找 <strong>4.2.x</strong> 中最高的版本来安装。</p>
+<p>你可以通过以下命令来列出远程服务器上所有的可用版本：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nvm ls-remote</span><br></pre></td></tr></table></figure>
+
+<p>Windows 的话，就是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nvm ls available</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="在不同版本间切换"><a href="#在不同版本间切换" class="headerlink" title="在不同版本间切换"></a>在不同版本间切换</h2><p>每当我们安装了一个新版本 Node 后，全局环境会自动把这个新版本设置为默认。</p>
+<p>nvm 提供了 <strong>nvm use</strong> 命令。这个命令的使用方法和 <strong>install</strong> 命令类似。</p>
+<p>例如，切换到 <strong>4.2.2</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nvm use 4.2.2</span><br></pre></td></tr></table></figure>
+
+<p>切换到最新的 <strong>4.2.x</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nvm use 4.2</span><br></pre></td></tr></table></figure>
+
+<p>切换到 iojs：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nvm use iojs-v3.2.0</span><br></pre></td></tr></table></figure>
+
+<p>切换到最新版：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nvm use node</span><br></pre></td></tr></table></figure>
+
+<p>每次执行切换的时候，系统都会把 node 的可执行文件链接放到特定版本的文件上。</p>
+<p>我们还可以用 nvm 给不同的版本号设置别名：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nvm alias awesome-version 4.2.2</span><br></pre></td></tr></table></figure>
+
+<p>我们给 <strong>4.2.2</strong> 这个版本号起了一个名字叫做 <strong>awesome-version</strong>，然后我们可以运行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nvm use awesome-version</span><br></pre></td></tr></table></figure>
+
+<p>下面这个命令可以取消别名：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nvm unalias awesome-version</span><br></pre></td></tr></table></figure>
+
+<p>另外，你还可以设置 <strong>default</strong> 这个特殊别名：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nvm alias default node</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="列出已安装实例"><a href="#列出已安装实例" class="headerlink" title="列出已安装实例"></a>列出已安装实例</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nvm ls</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://www.runoob.com/wp-content/uploads/2018/04/nvm-ls.png" alt="img"></p>
+<p>上面绿色箭头是当前正在使用的版本，下面列出的还有设置过的别名。</p>
+<hr>
+<h2 id="在项目中使用不同版本的-Node"><a href="#在项目中使用不同版本的-Node" class="headerlink" title="在项目中使用不同版本的 Node"></a>在项目中使用不同版本的 Node</h2><p>我们可以通过创建项目目录中的 <strong>.nvmrc</strong> 文件来指定要使用的 Node 版本。之后在项目目录中执行 <strong>nvm use</strong> 即可。<strong>.nvmrc</strong> 文件内容只需要遵守上文提到的语义化版本规则即可。另外还有个工具叫做 <a target="_blank" rel="noopener" href="https://github.com/wbyoung/avn">avn</a>，可以自动化这个过程。</p>
+<hr>
+<h2 id="在多环境中，npm该如何使用呢？"><a href="#在多环境中，npm该如何使用呢？" class="headerlink" title="在多环境中，npm该如何使用呢？"></a>在多环境中，npm该如何使用呢？</h2><p>每个版本的 Node 都会自带一个不同版本的 npm，可以用 <strong>npm -v</strong> 来查看 npm 的版本。全局安装的 npm 包并不会在不同的 Node 环境中共享，因为这会引起兼容问题。它们被放在了不同版本的目录下，例如 <strong>~&#x2F;.nvm&#x2F;versions&#x2F;node&#x2F;<version>&#x2F;lib&#x2F;node_modules</version></strong> 这样的目录。这刚好也省去我们在 Linux 中使用 <strong>sudo</strong> 的功夫了。因为这是用户的主文件夹，并不会引起权限问题。</p>
+<p>但问题来了，我们安装过的 npm 包，都要重新再装一次？幸运的是，我们有个办法来解决我们的问题，运行下面这个命令，可以从特定版本导入到我们将要安装的新版本 Node：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nvm install v5.0.0 --reinstall-packages-from=4.2</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="其他命令"><a href="#其他命令" class="headerlink" title="其他命令"></a>其他命令</h2><p>直接运行特定版本的 Node</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nvm run 4.2.2 --version</span><br></pre></td></tr></table></figure>
+
+<p>在当前终端的子进程中运行特定版本的 Node</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nvm exec 4.2.2 node --version</span><br></pre></td></tr></table></figure>
+
+<p>确认某个版本Node的路径</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nvm which 4.2.2</span><br></pre></td></tr></table></figure>
+
+<p>安装 Node 的其他实现，例如 iojs（一个基于 ES6 的 Node 实现，现在已经和 Node 合并）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nvm install iojs-v3.2.0</span><br></pre></td></tr></table></figure>
+
+<p>快捷命令：</p>
+<ul>
+<li><strong>nvm install node</strong> 安装最新版 Node</li>
+<li><strong>nvm install iojs</strong> 安装最新版 iojs</li>
+<li><strong>nvm install unstable</strong> 安装最新不稳定版本的 Node</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2024/08/03/%E4%BD%BF%E7%94%A8%20nvm%20%E7%AE%A1%E7%90%86%E4%B8%8D%E5%90%8C%E7%89%88%E6%9C%AC%E7%9A%84%20node%20%E4%B8%8E%20npm/">https://yhao521.github.io/2024/08/03/%E4%BD%BF%E7%94%A8%20nvm%20%E7%AE%A1%E7%90%86%E4%B8%8D%E5%90%8C%E7%89%88%E6%9C%AC%E7%9A%84%20node%20%E4%B8%8E%20npm/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/c-programming/">c++/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/08/03/nvm%20%E5%8F%AA%E6%9C%89iojs%E5%88%97%E8%A1%A8%E8%A7%A3%E5%86%B3%E5%8A%9E%E6%B3%95/" title="nvm 只有iojs列表解决办法"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">nvm 只有iojs列表解决办法</div></div><div class="info-2"><div class="info-item-1">nvm管理node版本，出现nvm ls-remote 只有iojs列表解决办法最新有些项目需要使用特定版本的node，但是又不想把已经安装的最新版本的node给卸载掉，所以准备安装nvm来管理node（mac） 1废话不多说，直接开干  1， 安装nvm ，随便一搜，网上大把，这里需要注意的是安装完成之后，需要重新启动你的终端，不然有可能会报错，找不到命令 12， 安装完成之后，可以使用nvm ls-remote 来查看需要安装的node版本，但是我安装完成之后，使用nvm ls-remote 发现竟然是只有iojs的版本，后来查了一下，这是可能由于nodejs升级了某个协议导致的。  3， 可以使用 NVM_NODEJS_ORG_MIRROR&#x3D;http://nodejs.org/dist nvm ls-remote，安装的时候同样使用 1NVM_NODEJS_ORG_MIRROR=http://nodejs.org/dist nvm install v7.10.0，即可</div></div></div></a><a class="pagination-related" href="/2024/08/03/You%20may%20need%20an%20appropriate%20loader%20to%20handle%20this%20/" title="You may need an appropriate loader to handle this file type"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">You may need an appropriate loader to handle this file type</div></div><div class="info-2"><div class="info-item-1">原因是我在webpack.config.js 配置loader时 写成 这种写法是错误的  test:’&#x2F;.css$&#x2F;‘  正确写法应该是去掉引号 下面是正确写法 123456789101112131415161718var path = require(&quot;path&quot;);module.exports = &#123;    entry:&quot;./src/index.js&quot;,    output:&#123;        filename:&quot;bundle.js&quot;,        path:path.resolve(__dirname,&quot;dist&quot;)    &#125;,    mode:&quot;development&quot;,    module:&#123;        rules:[            &#123;                test:/\.css$/,                use:[&#x27;style-loader&#x27;,&#...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/pgsql%E6%95%99%E7%A8%8B/" title="pgsql教程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">pgsql教程</div></div><div class="info-2"><div class="info-item-1"> title: pgsql教程date: 2023-09-03 20:17:08category:  数据库 doc_pgsqltag: doc_pgsqlauthor:   [TOC]   postgresql 教程1.源码pgsql安装1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465666768697071727374757677787980818283wget https://ftp.postgresql.org/pub/source/v12.3/postgresql-12.3.tar.gz#解压tar -zxvf postgresql-12.3.tar.gz# 编译./configure --prefix=/home/yhao521/pgsqlmake &amp;&amp; make install#创建目录mkdir -p  pgdata/12/&#123;data,backup...</div></div></div></a><a class="pagination-related" href="/2024/06/27/%E4%BB%8EMac%E5%88%B0Windows%E7%9A%84Go%20%20Golang%E4%BA%A4%E5%8F%89%E7%BC%96%E8%AF%91%EF%BC%9A%E8%87%B4%E5%91%BD%E9%94%99%E8%AF%AF%EF%BC%9A%E6%89%BE%E4%B8%8D%E5%88%B0%E2%80%9C%20windows.h%E2%80%9D%E6%96%87%E4%BB%B6/" title="从Mac到Windows的Go  Golang交叉编译：致命错误：找不到“ windows.h”文件"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-06-27</div><div class="info-item-2">从Mac到Windows的Go  Golang交叉编译：致命错误：找不到“ windows.h”文件</div></div><div class="info-2"><div class="info-item-1">从Mac到Windows的Go &#x2F; Golang交叉编译：致命错误：找不到“ windows.h”文件cross-platformgoheader-files Go&#x2F;Golang Cross-Compile from Mac to Windows: fatal error: ‘windows.h’ file not found摘要：当我尝试交叉编译.go源文件(包括在文件链中某个位置的C文件)，并从Mac主机针对Windows AMD64时，得到：    1 &#x2F;usr&#x2F;local&#x2F;go&#x2F;src&#x2F;runtime&#x2F;cgo&#x2F;gcc_windows_amd64.c:8:10: fatal error: ‘windows.h’ file not found        纯粹的Go代码似乎可以交叉编译而不会出错；当涉及C文件时，有没有办法获取正确的头文件进行交叉编译？ 更多详细信息：我在Mac上安装了LiteIDE，以用于某些.go项目，而LiteIDE使将其他平台作为构建目标相对容易。我仅在Go上的...</div></div></div></a><a class="pagination-related" href="/2024/05/21/%E7%9B%98%E7%82%B920%E6%AC%BE%E4%BC%98%E8%B4%A8%E7%9A%84%E5%BC%80%E6%BA%90%E6%B8%B8%E6%88%8F%EF%BC%8C2024%E6%9C%80%E6%96%B0%E6%94%B6%E9%9B%86%EF%BC%81/" title="盘点20款优质的开源游戏，2024最新收集！"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-05-21</div><div class="info-item-2">盘点20款优质的开源游戏，2024最新收集！</div></div><div class="info-2"><div class="info-item-1">本文收集了20款优质的开源游戏，部分还可以点击就可以玩，干货满满，建议先收藏一下。 如果你有值得推荐的开源游戏，欢迎评论中指出！ 1、红警https://github.com/electronicarts/CnC_Remastered_Collection 红警，或者更准确地说，应该称为“红色警戒”，是大多数80后记忆中与游戏最深刻的联系之一。  这款游戏是由当年的Westwood工作室打造的一款即时战略游戏，以至于一提到即时战略游戏，我脑海中浮现的第一个就是红警。 然而，在1998年8月17日，EA收购了Westwood。一般情况下，一旦游戏工作室被EA收购，就意味着走向没落。  这次开源的代码实际上是1996年发布的第一代红警，国内也称之为红警95。  此次开源不涉及游戏素材和游戏引擎，只包括TiberianDawn.DLL和RedAlert.dll的源码，允许Mod社区更好地改变游戏行为。 在6月5日，这两款游戏发布了重制版。 命令与征服系列游戏是用C++实现的，打开代码后可以看到非常规范的代码，令人赞叹不已。  下面是一个示例，展示了飞行器寻找新降落点的函数，函数功能、输...</div></div></div></a><a class="pagination-related" href="/2023/09/04/3%E7%A7%8D%E6%9C%AC%E5%9C%B0%E8%BF%90%E8%A1%8CLlama%202%E7%9A%84%E6%96%B9%E6%B3%95/" title="3种本地运行Llama 2的方法"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">3种本地运行Llama 2的方法</div></div><div class="info-2"><div class="info-item-1"> title: 3种本地运行Llama 2的方法date: 2023-09-03 20:17:08category:  mactag: macauthor:   3种本地运行Llama 2的方法我们已经讨论了很多关于如何在 Replicate 上运行和微调 Llama 2。 但你也可以在 M1&#x2F;M2 Mac、Windows、Linux 甚至手机上本地运行 Llama。 在本地运行 Llama 2 的一个很酷的事情是，甚至不需要互联网连接。   推荐：用NSDT设计器快速搭建可编程3D场景。  Llama 2 发布才几天，但已经有一些在本地运行它的技术。 在这篇博文中，我们将介绍三个可用于在你自己的设备上运行 Llama 2 的开源工具：  Llama.cpp (Mac&#x2F;Windows&#x2F;Linux) Ollama (Mac) MLC LLM（iOS&#x2F;Android）  1、Llama.cpp (Mac&#x2F;Windows&#x2F;Linux)Llama.cpp 是 Llama 在 C&#x2F;C++ 中的移植，这使得可以在 Mac ...</div></div></div></a><a class="pagination-related" href="/2026/05/15/nodejs+npm%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" title="nodejs+npm环境搭建"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-15</div><div class="info-item-2">nodejs+npm环境搭建</div></div><div class="info-2"><div class="info-item-1">centos7 npm安装——CentOS7常用软件推荐个https://npm.taobao.org/mirrors/可以下载想要的node版本 首先安装必要的环境(推荐方式一安装)yum install gcc gcc-c++ 一、方式一wget https://npm.taobao.org/mirrors/node/v12.8.0/node-v12.8.0-linux-x64.tar.gz 然后执行下面命令 tar -zxvf node-v12.8.0-linux-x64.tar.gzmv node-v12.8.0-linux-x64 node 配置环境变量 vim &#x2F;etc&#x2F;profilevi .bash_profile 在文件中添加，目录写自己的实际目录 123#set for nodejs  export NODE_HOME=/usr/local/node  export PATH=$NODE_HOME/bin:$PATH  生效配置文件 source &#x2F;etc&#x2F;profilesource .bash_profilenode -...</div></div></div></a><a class="pagination-related" href="/2024/08/12/Java%E5%85%AB%E8%82%A1%E6%96%87%E5%90%88%E9%9B%86%EF%BC%882024%E5%B9%B45%E6%9C%8828%E6%8C%81%E7%BB%AD%E6%9B%B4%E6%96%B0%EF%BC%89/" title="Java八股文合集（2024年5月28持续更新）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-12</div><div class="info-item-2">Java八股文合集（2024年5月28持续更新）</div></div><div class="info-2"><div class="info-item-1">一、java基础1、java有哪几种数据类型？ 基本数据类型：byte（1），char（2），short（2），int（4），long（8），double（8），float（4），boolean（1） 引用数据类型：各种类和接口，枚举，数组  2、 面向对象和面向过程的区别？面向对象和面向过程都是一种开发思想。  面向过程就是根据解决问题所需要的步骤，具体化的一步一步的去实现。 面向对象就是把数据及对数据的操作方法放在一起，作为一个整体，也就是对象，若干个这样的整体组成一个系统去解决实际问题。 面向过程只用函数实现，性能比较快因为不需要进行实例化，但是不容易扩展、维护，复用 面向对象通过类去实现功能模块，代码安全性高，容易扩展和复用，比较灵活且便于维护   篇幅限制下面就只能给大家展示小册部分内容了。这份面试笔记包括了：Java面试、Spring、JVM、MyBatis、Redis、MySQL、并发编程、微服务、Linux、Springboot、SpringCloud、MQ、Kafka 面试专题 需要全套面试笔记的【点击此处即可】即可免费获取  3、JDK&#x2F;JRE&#x...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8-nvm-%E7%AE%A1%E7%90%86%E4%B8%8D%E5%90%8C%E7%89%88%E6%9C%AC%E7%9A%84-node-%E4%B8%8E-npm"><span class="toc-number">1.</span> <span class="toc-text">使用 nvm 管理不同版本的 node 与 npm</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E7%B1%BB-%E7%BC%96%E7%A8%8B%E6%8A%80%E6%9C%AF"><span class="toc-number">1.1.</span> <span class="toc-text">分类 编程技术</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#nvm-%E4%B8%8E-n-%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">2.</span> <span class="toc-text">nvm 与 n 的区别</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%B8%E8%BD%BD%E5%85%A8%E5%B1%80%E5%AE%89%E8%A3%85%E7%9A%84-node-npm"><span class="toc-number">3.</span> <span class="toc-text">卸载全局安装的 node&#x2F;npm</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Windows-%E5%AE%89%E8%A3%85"><span class="toc-number">4.</span> <span class="toc-text">Windows 安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#OS-X-Linux-%E5%AE%89%E8%A3%85"><span class="toc-number">5.</span> <span class="toc-text">OS X&#x2F;Linux 安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E5%A4%9A%E7%89%88%E6%9C%AC-node-npm"><span class="toc-number">6.</span> <span class="toc-text">安装多版本 node&#x2F;npm</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8%E4%B8%8D%E5%90%8C%E7%89%88%E6%9C%AC%E9%97%B4%E5%88%87%E6%8D%A2"><span class="toc-number">7.</span> <span class="toc-text">在不同版本间切换</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%97%E5%87%BA%E5%B7%B2%E5%AE%89%E8%A3%85%E5%AE%9E%E4%BE%8B"><span class="toc-number">8.</span> <span class="toc-text">列出已安装实例</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8%E9%A1%B9%E7%9B%AE%E4%B8%AD%E4%BD%BF%E7%94%A8%E4%B8%8D%E5%90%8C%E7%89%88%E6%9C%AC%E7%9A%84-Node"><span class="toc-number">9.</span> <span class="toc-text">在项目中使用不同版本的 Node</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8%E5%A4%9A%E7%8E%AF%E5%A2%83%E4%B8%AD%EF%BC%8Cnpm%E8%AF%A5%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8%E5%91%A2%EF%BC%9F"><span class="toc-number">10.</span> <span class="toc-text">在多环境中，npm该如何使用呢？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B6%E4%BB%96%E5%91%BD%E4%BB%A4"><span class="toc-number">11.</span> <span class="toc-text">其他命令</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

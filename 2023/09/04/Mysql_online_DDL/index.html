@@ -1,0 +1,219 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Mysql_online_DDL | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="title: Mysql_online_DDLdate: 2023-09-03 20:17:08category:  数据库 MySQL监控和运维tag: MySQL监控和运维author:   参考： https:&#x2F;&#x2F;www.cnblogs.com&#x2F;mysql-dba&#x2F;p&#x2F;6192897.html 建议： 1、尽量不要在业务高峰期间进行DDL，即使是online DDL; 2、对于大表（G级别">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mysql_online_DDL">
+<meta property="og:url" content="https://yhao521.github.io/2023/09/04/Mysql_online_DDL/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="title: Mysql_online_DDLdate: 2023-09-03 20:17:08category:  数据库 MySQL监控和运维tag: MySQL监控和运维author:   参考： https:&#x2F;&#x2F;www.cnblogs.com&#x2F;mysql-dba&#x2F;p&#x2F;6192897.html 建议： 1、尽量不要在业务高峰期间进行DDL，即使是online DDL; 2、对于大表（G级别">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2023-09-04T03:18:09.000Z">
+<meta property="article:modified_time" content="2023-09-04T03:18:27.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Mysql_online_DDL",
+  "url": "https://yhao521.github.io/2023/09/04/Mysql_online_DDL/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2023-09-04T03:18:09.000Z",
+  "dateModified": "2023-09-04T03:18:27.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2023/09/04/Mysql_online_DDL/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Mysql_online_DDL',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">Mysql_online_DDL</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Mysql_online_DDL</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-09-04T03:18:09.000Z" title="发表于 2023-09-04 11:18:09">2023-09-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-09-04T03:18:27.000Z" title="更新于 2023-09-04 11:18:27">2023-09-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><hr>
+<p>title: Mysql_online_DDL<br>date: 2023-09-03 20:17:08<br>category:</p>
+<ul>
+<li>数据库</li>
+<li>MySQL监控和运维<br>tag:</li>
+<li>MySQL监控和运维<br>author:</li>
+</ul>
+<hr>
+<p>参考：</p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/mysql-dba/p/6192897.html">https://www.cnblogs.com/mysql-dba/p/6192897.html</a></p>
+<p>建议：</p>
+<p>1、尽量不要在业务高峰期间进行DDL，即使是online DDL;</p>
+<p>2、对于大表（G级别）DDL，最好在测试库上做一遍，预估下时间，不至于到线上执行时心慌手乱；（线上和测试环境数据量差不多）</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2023/09/04/Mysql_online_DDL/">https://yhao521.github.io/2023/09/04/Mysql_online_DDL/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2023/09/04/MySQL%E8%BF%90%E7%BB%B4%E8%A7%84%E8%8C%83/" title="MySQL运维规范"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">MySQL运维规范</div></div><div class="info-2"><div class="info-item-1"> title: MySQL运维规范date: 2023-09-04 17:49:38permalink: &#x2F;pages&#x2F;1530f0&#x2F;category:  数据库 doc_mysqltag: doc_mysqlauthor:   数据库运维必备：非常完整的 MySQL 规范一、数据库命令规范 所有数据库对象名称必须使用小写字母并用下划线分割 所有数据库对象名称禁止使用mysql保留关键字（如果表名中包含关键字查询时，需要将其用单引号括起来） 数据库对象的命名要能做到见名识意，并且最后不要超过32个字符 临时库表必须以tmp为前缀并以日期为后缀，备份表必须以bak为前缀并以日期(时间戳)为后缀 所有存储相同数据的列名和列类型必须一致（一般作为关联列，如果查询时关联列类型不一致会自动进行数据类型隐式转换，会造成列上的索引失效，导致查询效率降低）  二、数据库基本设计规范1、所有表必须使用Innodb存储引擎 没有特殊要求（即Innodb无法满足的功能如：列存储，存储空间数据等）的情况下，所有表必须使用Innodb存储引擎（mysql5.5之前默认使用My...</div></div></div></a><a class="pagination-related" href="/2023/09/04/MySQL%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" title="MySQL常用命令"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">MySQL常用命令</div></div><div class="info-2"><div class="info-item-1"> title: MySql常用命令总结lang: en-USdate: 2023-09-04 17:49:38category:  数据库 doc_mysqltag: doc_mysqlauthor:   [[_resources&#x2F;eca4f5f3d74b0ad7ab1fbb33df942a2e_MD5.sh|Open: mysql_createuser.sh]]![[_resources&#x2F;eca4f5f3d74b0ad7ab1fbb33df942a2e_MD5.sh]] 1. MySql常用命令总结1.1. 创建主从同步用户123GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* to repl@&#x27;%&#x27; IDENTIFIED BY &#x27;repl&#x27;CHANGE MASTER TO MASTER_HOST=&#x27;172.18.231.120&#x27;,MASTER_PORT=3306,MASTER_USER=&#x27;repl&#x27;,MASTER_PASSWO...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/JVM%20%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E5%B7%A5%E5%85%B7/" title="JVM 常见问题排查工具"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">JVM 常见问题排查工具</div></div><div class="info-2"><div class="info-item-1"> title: JVM 常见问题排查工具date: 2023-09-03 20:17:08category: tag: author:  一. 背景 在使用 Java开发的过程中， 可能会碰到 线程卡死，cpu高耗， 内存泄漏OOM等问题， 因此需要一些工具和方法排查相关问题。 二. JDK 自带工具使用介绍 常用的 JDK 自带的工具主要包括 jps， jstat, jstack, jinfo 等。 1. jps主要用来打印主机上运行 Java 进程号， 和 ps -ef |grep xxx 效果是一样的 。  2. jstat一般用来监控 JVM 的 gc情况， class加载情况 。 使用用法 ： (1) 监控 JVM GC 情况 ： jstat -gcutil [pid] 1000 10 监控指定 Java 进程的 gc概况, 每 1000ms 打印一次，一共打印 10次 。  如果需要监控 gc 更详细的信息， 可以将 -gcutil 选项替换为其他参数 ：  -gc -gccapacity -gccause -gcmetacapacity -gcnew -gcnewc...</div></div></div></a><a class="pagination-related" href="/2024/08/03/vue-markdown%E7%BC%96%E8%BE%91%E5%99%A8/" title="vue-markdown编辑器"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-03</div><div class="info-item-2">vue-markdown编辑器</div></div><div class="info-2"><div class="info-item-1">简介一款使用marked和highlight.js开发的一款markdown编辑器，除常见markdown语法外，支持快捷输入、图片粘贴、代码复制、全屏编辑、预览等功能。 使用起来简单方便，只需几行代码，即可在你的页面上引入一个markdown编辑器，编辑区支持像专业编辑器那样。 编辑器涵盖了常用的markdown编辑器功能，可通过已有属性进行配置，对编辑器功能和样式进行基本的配置，也可根据需求进行深度定制。 项目地址文档地址示例    特点 使用简单，只需要安装npm包，引入项目即可使用，不需要繁琐的初始化配置。 方便扩展，根据实际需求，支持常见的功能配置，也可根据实际需求进行深度定制。 体积小，加载速度快，npm包删除了highlight.js和codemirror里的依赖。 灵活的主题，默认支持四种代码块风格，也可根据实际需求定制自己的主题样式 功能强大，支持专业版的编辑器，使用codemirror实现编辑窗口，可识别markdown语法 键盘事件监听，如保存、粘贴、回车时上次输入语法判断等 可扩展性强，除了提供的属性配置编辑器，也可直接在原有组件基础上进行二次开发  实现...</div></div></div></a><a class="pagination-related" href="/2023/09/04/git%E9%A1%B9%E7%9B%AE%E6%8B%86%E5%88%86%E4%BF%9D%E7%95%99git%E8%AE%B0%E5%BD%95%E6%8B%86%E5%88%86/" title="git项目拆分保留git记录拆分"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">git项目拆分保留git记录拆分</div></div><div class="info-2"><div class="info-item-1"> title: git项目拆分保留git记录拆分date: 2023-09-03 20:17:08category:  gittag: gitauthor:   git项目拆分保留git记录拆分需求 现在有如下需求，之前多个项目（Project A,Project B,Project C）混在了一个大的Project里面，不便于管理。 现在需要把Project C 单独拆分出来，并保留该项目之前的git记录。 解决 在此我们使用 git subtree 工具 来进行拆分，简单来说就是先把Project C的所有提交抽离成一个单独的分支，然后把该分支merge到一个全新的仓库。 1git subtree split --prefix=&lt;prefix&gt; [OPTIONS] [&lt;commit&gt;]  Step1: 拆分项目Project C到 branchC分支 123456789git subtree split -P ProjectC -b branchC# 切换到新的分支git checkout branchCgit subtree split -P crd...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E8%B0%B7%E6%AD%8C%E6%B5%8F%E8%A7%88%E5%99%A889%E7%89%88%E6%9C%AC/" title="谷歌浏览器89版本"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">谷歌浏览器89版本</div></div><div class="info-2"><div class="info-item-1"> title: 谷歌浏览器89版本lang: en-USdate: 2022-11-04 00:00:00sidebar: autocategories:  浏览器tags:  谷歌  chromecategory: tag: author:    谷歌浏览器 历史版本下载（下载89版本）： https://www.chromedownloads.net/chrome64osx-stable/1154.html mac禁用谷歌浏览器自动升级:cd ~&#x2F;Library&#x2F;Googlesudo chown root:wheel GoogleSoftwareUpdate </div></div></div></a><a class="pagination-related" href="/2024/07/17/Docker%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%20(28)%20-%20%E5%9C%A8%20Dockerfile%20%E4%B8%AD%E4%BB%A5%20scratch%20%E4%B8%BA%E5%9F%BA%E7%A1%80%E9%95%9C%E5%83%8F%20(F/" title="Docker基础知识 (28) - 在 Dockerfile 中以 scratch 为基础镜像 (FROM scratch)"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-17</div><div class="info-item-2">Docker基础知识 (28) - 在 Dockerfile 中以 scratch 为基础镜像 (FROM scratch)</div></div><div class="info-2"><div class="info-item-1">Docker基础知识 (28) - 在 Dockerfile 中以 scratch 为基础镜像 (FROM scratch)通常使用 Docker 镜像时会以一个已存在的镜像为基础，在其上进行定制，这个已存在的镜像就是基础镜像。 在 DockerFile 中必须指定基础镜像，FROM 指令就是用于指定基础镜像，因此一个 Dockerfile 中 FROM 是必备的指令，并且必须是第一条指令。 Docker 还存在一个特殊的镜像，名为 scratch。这个镜像是虚拟的概念，并不实际存在，它表示一个空白的镜像。在 Dockerfile 中以 scratch 为基础镜像 (FROM scratch)，意味着不以任何镜像为基础，接下来所写的指令将作为镜像第一层开始存在。 对于 Linux 下静态编译的程序来说，并不需要有操作系统提供运行时支持，所需的一切库都已经在可执行文件里了，因此直接 FROM scratch 会让镜像体积更加小巧。使用 Go 语言开发的应用很多会使用这种方式来制作镜像，这也是为什么有人认为 Go 是特别适合容器微服务架构的语言的原因之一。 1. 创建基于静态编译的 ...</div></div></div></a><a class="pagination-related" href="/2023/09/04/python/" title="python"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">python</div></div><div class="info-2"><div class="info-item-1"> title: python2和python3共存lang: en-USdate: 2023-09-03 20:17:08category:  开发语言 doc_pythontag: doc_pythonauthor:   python2和python3共存https://www.cnblogs.com/zhujingzhi/p/9778043.html wget https://www.python.org/ftp/python/3.8.1/Python-3.8.1.tgz Centos7下进行python2.6和yum完全卸载及重装 1、删除现有Python #rpm -qa|grep python|xargs rpm -ev --allmatches --nodeps ##强制删除已安装程序及其关联 #whereis python |xargs rm -frv ##删除所有残余文件 ##xargs，允许你对输出执行其他某些命令 #whereis python ##验证删除，返回无结果  2、删除现有的yum #rpm -qa|grep yum|xargs rpm -ev -...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

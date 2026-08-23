@@ -1,0 +1,3072 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Activiti 8.x 工作流入门（含demo） | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="文章浏览阅读746次，点赞4次，收藏11次。Activiti 是一个工作流引擎，它可以将业务系统中复杂的业务流程抽取出来，使用专门的建模语言 BPMN2.0 进行定义，业务流程按照预先定义的流程进行执行，实现了系统的流程由 Activiti 进行管理，减少业务系统由于流程变更进行系统升级改造的工作量，从而提高系统的健壮性，同时也减少了系统开发维护成本。截至2025.3官方最新版本是8.x，较于7.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Activiti 8.x 工作流入门（含demo）">
+<meta property="og:url" content="https://yhao521.github.io/2025/06/18/Activiti%208.x%20%E5%B7%A5%E4%BD%9C%E6%B5%81%E5%85%A5%E9%97%A8%EF%BC%88%E5%90%ABdemo%EF%BC%89/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="文章浏览阅读746次，点赞4次，收藏11次。Activiti 是一个工作流引擎，它可以将业务系统中复杂的业务流程抽取出来，使用专门的建模语言 BPMN2.0 进行定义，业务流程按照预先定义的流程进行执行，实现了系统的流程由 Activiti 进行管理，减少业务系统由于流程变更进行系统升级改造的工作量，从而提高系统的健壮性，同时也减少了系统开发维护成本。截至2025.3官方最新版本是8.x，较于7.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2025-06-17T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-17T16:00:00.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="java&#x2F;programming">
+<meta property="article:tag" content="摘录">
+<meta property="article:tag" content="教程">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Activiti 8.x 工作流入门（含demo）",
+  "url": "https://yhao521.github.io/2025/06/18/Activiti%208.x%20%E5%B7%A5%E4%BD%9C%E6%B5%81%E5%85%A5%E9%97%A8%EF%BC%88%E5%90%ABdemo%EF%BC%89/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2025-06-17T16:00:00.000Z",
+  "dateModified": "2026-05-17T16:00:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2025/06/18/Activiti%208.x%20%E5%B7%A5%E4%BD%9C%E6%B5%81%E5%85%A5%E9%97%A8%EF%BC%88%E5%90%ABdemo%EF%BC%89/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Activiti 8.x 工作流入门（含demo）',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">Activiti 8.x 工作流入门（含demo）</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Activiti 8.x 工作流入门（含demo）</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-06-17T16:00:00.000Z" title="发表于 2025-06-18 00:00:00">2025-06-18</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-17T16:00:00.000Z" title="更新于 2026-05-18 00:00:00">2026-05-18</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p><strong>目录</strong></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/#t0">1. 简介</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/#t1">2. BPMN2.0</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/#t2">3. SpringBoot集成Activiti8</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/#t3">3.1. 关键依赖</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/#t4">3.2. 完整pom文件</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/#t5">3.3. 关键配置</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/#t6">3.4. 配置SpringSecurity</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/#t7">3.5. 表解读</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/#t8">3.5.1. 全局通用表</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/#t9">3.5.2. 历史数据表</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/#t10">3.5.3. 静态资源表</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/#t11">3.5.4. 运行时数据表</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/#t12">4. 基本操作</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/#t13">4.1. 流程部署</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/#t14">4.1.1. 部署流程</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/#t15">4.1.2. 查询流程定义</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/#t16">4.2. 流程实例</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/#t17">4.2.1. 发起流程实例</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/#t18">4.2.2. 查询流程实例</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/#t19">4.2.3. 流程实例的挂起与激活</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/#t20">4.2.4. 删除流程实例</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/#t21">4.3. 任务管理</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/#t22">4.3.1. 查询任务</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/#t23">4.3.2. 执行任务</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/#t24">4.3.3. 添加批注</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/#t25">4.3.4. 任务的拾取与归还</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/#t26">4.3.5. 任务的交办&#x2F;转办</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/#t27">4.3.6. 任务的委派</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/#t28">4.4. 历史记录</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/#t29">4.5. UEL表达式</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/#t30">4.6. BPMN2.0网关</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/#t31">4.6.1. 并行网关（Parallel Gateway）</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/#t32">4.6.2. 排他网关（Exclusive gateway）</a></p>
+<h2 id="1-简介"><a href="#1-简介" class="headerlink" title="1. 简介"></a>1. 简介</h2><p>Activiti 是一个 工作流引擎 ，它可以将业务系统中复杂的业务流程抽取出来，使用专门的建模语言 BPMN2.0 进行定义，业务流程按照预先定义的流程进行执行，实现了系统的流程由 Activiti 进行管理，减少业务系统由于流程变更进行系统升级改造的工作量，从而提高系统的健壮性，同时也减少了系统开发维护成本。截至2025.3官方最新版本是8.x，较于7.x版本增加了对SpringBoot3.x版本的生态支持。</p>
+<p>官方网站: <a target="_blank" rel="noopener" href="https://www.activiti.org/" title="Open Source Business Automation | Activiti">Open Source Business Automation | Activiti</a></p>
+<p>它的主要service如下：</p>
+<p>![[_resources&#x2F;d714522fceeae1639ce39b64defae319_MD5.png]]</p>
+<h2 id="2-BPMN2-0"><a href="#2-BPMN2-0" class="headerlink" title="2. BPMN2.0"></a>2. BPMN2.0</h2><p>BPMN（Business Process Model And Notation），业务流程模型和符号，是由BPMI（Business Process Management Initiative）开发的一套的业务流程建模符号，使用BPMN提供的符号可以创建业务流程。2004年5月发布了BPMN1.0规范。BPMI于2005年9月并入OMG（The Object Management Group，对象管理组织）组织。OMG于2011年1月发布BPMN2.0的最终版本。</p>
+<p>Activit就是使用BPMN2.0进行流程建模、流程执行管理，它包括很多的建模符号。</p>
+<p>![[_resources&#x2F;6864f5e008ef376446b6dec9677397b3_MD5.png]]</p>
+<p>举个栗子：</p>
+<ol>
+<li>当事人填写请假单，启动流程后把请假单ID绑定到流程中；</li>
+<li>部门经理对请假单进行审核；</li>
+<li>然后人事经理进行复核并进行备案；</li>
+<li>最后请假流程结束</li>
+</ol>
+<p>![[_resources&#x2F;bc7a22f43a8574862fcec1f7533d6cd9_MD5.png]]</p>
+<p>其对应的bpmn文件如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line"></span><br><span class="line">&lt;definitions xmlns=&quot;http://www.omg.org/spec/BPMN/20100524/MODEL&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xmlns:xsd=&quot;http://www.w3.org/2001/XMLSchema&quot; xmlns:activiti=&quot;http://activiti.org/bpmn&quot; xmlns:bpmndi=&quot;http://www.omg.org/spec/BPMN/20100524/DI&quot; xmlns:omgdc=&quot;http://www.omg.org/spec/DD/20100524/DC&quot; xmlns:omgdi=&quot;http://www.omg.org/spec/DD/20100524/DI&quot; typeLanguage=&quot;http://www.w3.org/2001/XMLSchema&quot; expressionLanguage=&quot;http://www.w3.org/1999/XPath&quot; targetNamespace=&quot;http://www.activiti.org/processdef&quot;&gt;</span><br><span class="line"></span><br><span class="line">  &lt;process id=&quot;leave&quot; name=&quot;请假流程&quot; isExecutable=&quot;true&quot;&gt;</span><br><span class="line"></span><br><span class="line">    &lt;startEvent id=&quot;sid-5093280b-01bd-4e25-b0a1-8d7a5c3fbd04&quot; name=&quot;start&quot;&gt;</span><br><span class="line"></span><br><span class="line">      &lt;documentation&gt;start&lt;/documentation&gt;</span><br><span class="line"></span><br><span class="line">    &lt;/startEvent&gt;</span><br><span class="line"></span><br><span class="line">    &lt;userTask id=&quot;sid-1c4676e3-a321-4577-958f-4f58338ca30f&quot; name=&quot;部门经理审批&quot;/&gt;</span><br><span class="line"></span><br><span class="line">    &lt;endEvent id=&quot;sid-31bf179d-0e5d-4247-819c-fcec8bbf0dcf&quot; name=&quot;end&quot;&gt;</span><br><span class="line"></span><br><span class="line">      &lt;documentation&gt;end&lt;/documentation&gt;</span><br><span class="line"></span><br><span class="line">    &lt;/endEvent&gt;</span><br><span class="line"></span><br><span class="line">    &lt;userTask id=&quot;sid-8b644537-23e0-4b11-a6a7-b2ab3e9c672f&quot; name=&quot;人事复批&quot;/&gt;</span><br><span class="line"></span><br><span class="line">    &lt;sequenceFlow id=&quot;sid-79e3137d-f940-4da2-9f88-a9948c880398&quot; sourceRef=&quot;sid-5093280b-01bd-4e25-b0a1-8d7a5c3fbd04&quot; targetRef=&quot;sid-1c4676e3-a321-4577-958f-4f58338ca30f&quot;/&gt;</span><br><span class="line"></span><br><span class="line">    &lt;sequenceFlow id=&quot;sid-4ea4d53f-15c5-447e-adee-bdc3afedcf8d&quot; sourceRef=&quot;sid-1c4676e3-a321-4577-958f-4f58338ca30f&quot; targetRef=&quot;sid-8b644537-23e0-4b11-a6a7-b2ab3e9c672f&quot;/&gt;</span><br><span class="line"></span><br><span class="line">    &lt;sequenceFlow id=&quot;sid-987322e4-0127-408b-8e31-9cbf8aef59ac&quot; sourceRef=&quot;sid-8b644537-23e0-4b11-a6a7-b2ab3e9c672f&quot; targetRef=&quot;sid-31bf179d-0e5d-4247-819c-fcec8bbf0dcf&quot;/&gt;</span><br><span class="line"></span><br><span class="line">  &lt;/process&gt;</span><br><span class="line"></span><br><span class="line">  &lt;bpmndi:BPMNDiagram id=&quot;BPMNDiagram_leave&quot;&gt;</span><br><span class="line"></span><br><span class="line">    &lt;bpmndi:BPMNPlane bpmnElement=&quot;leave&quot; id=&quot;BPMNPlane_leave&quot;&gt;</span><br><span class="line"></span><br><span class="line">      &lt;bpmndi:BPMNShape id=&quot;shape-fa730c4a-d8fb-40eb-9d59-820dae226bc5&quot; bpmnElement=&quot;sid-5093280b-01bd-4e25-b0a1-8d7a5c3fbd04&quot;&gt;</span><br><span class="line"></span><br><span class="line">        &lt;omgdc:Bounds x=&quot;-80.0&quot; y=&quot;9.5&quot; width=&quot;30.0&quot; height=&quot;30.0&quot;/&gt;</span><br><span class="line"></span><br><span class="line">      &lt;/bpmndi:BPMNShape&gt;</span><br><span class="line"></span><br><span class="line">      &lt;bpmndi:BPMNShape id=&quot;shape-91f5616b-c6eb-460b-a5c8-5484205f8dc4&quot; bpmnElement=&quot;sid-1c4676e3-a321-4577-958f-4f58338ca30f&quot;&gt;</span><br><span class="line"></span><br><span class="line">        &lt;omgdc:Bounds x=&quot;-5.0&quot; y=&quot;-15.5&quot; width=&quot;100.0&quot; height=&quot;80.0&quot;/&gt;</span><br><span class="line"></span><br><span class="line">      &lt;/bpmndi:BPMNShape&gt;</span><br><span class="line"></span><br><span class="line">      &lt;bpmndi:BPMNShape id=&quot;shape-c5c32bb0-6ae1-412e-8bea-aa762aaec71c&quot; bpmnElement=&quot;sid-31bf179d-0e5d-4247-819c-fcec8bbf0dcf&quot;&gt;</span><br><span class="line"></span><br><span class="line">        &lt;omgdc:Bounds x=&quot;285.0&quot; y=&quot;9.5&quot; width=&quot;30.0&quot; height=&quot;30.0&quot;/&gt;</span><br><span class="line"></span><br><span class="line">      &lt;/bpmndi:BPMNShape&gt;</span><br><span class="line"></span><br><span class="line">      &lt;bpmndi:BPMNShape id=&quot;shape-e5ab4f02-c479-475f-81ad-13347e442556&quot; bpmnElement=&quot;sid-8b644537-23e0-4b11-a6a7-b2ab3e9c672f&quot;&gt;</span><br><span class="line"></span><br><span class="line">        &lt;omgdc:Bounds x=&quot;140.0&quot; y=&quot;-15.5&quot; width=&quot;100.0&quot; height=&quot;80.0&quot;/&gt;</span><br><span class="line"></span><br><span class="line">      &lt;/bpmndi:BPMNShape&gt;</span><br><span class="line"></span><br><span class="line">      &lt;bpmndi:BPMNEdge id=&quot;edge-bce72f21-997b-426c-87b0-bae4a889f33f&quot; bpmnElement=&quot;sid-79e3137d-f940-4da2-9f88-a9948c880398&quot;&gt;</span><br><span class="line"></span><br><span class="line">        &lt;omgdi:waypoint x=&quot;-50.0&quot; y=&quot;24.5&quot;/&gt;</span><br><span class="line"></span><br><span class="line">        &lt;omgdi:waypoint x=&quot;-5.0&quot; y=&quot;24.5&quot;/&gt;</span><br><span class="line"></span><br><span class="line">      &lt;/bpmndi:BPMNEdge&gt;</span><br><span class="line"></span><br><span class="line">      &lt;bpmndi:BPMNEdge id=&quot;edge-207689ac-79a2-4011-b446-845c982d859e&quot; bpmnElement=&quot;sid-4ea4d53f-15c5-447e-adee-bdc3afedcf8d&quot;&gt;</span><br><span class="line"></span><br><span class="line">        &lt;omgdi:waypoint x=&quot;95.0&quot; y=&quot;24.5&quot;/&gt;</span><br><span class="line"></span><br><span class="line">        &lt;omgdi:waypoint x=&quot;140.0&quot; y=&quot;24.5&quot;/&gt;</span><br><span class="line"></span><br><span class="line">      &lt;/bpmndi:BPMNEdge&gt;</span><br><span class="line"></span><br><span class="line">      &lt;bpmndi:BPMNEdge id=&quot;edge-4d3dbdef-8cb8-482d-94e9-7264ba7fe60a&quot; bpmnElement=&quot;sid-987322e4-0127-408b-8e31-9cbf8aef59ac&quot;&gt;</span><br><span class="line"></span><br><span class="line">        &lt;omgdi:waypoint x=&quot;240.0&quot; y=&quot;24.5&quot;/&gt;</span><br><span class="line"></span><br><span class="line">        &lt;omgdi:waypoint x=&quot;285.0&quot; y=&quot;24.5&quot;/&gt;</span><br><span class="line"></span><br><span class="line">      &lt;/bpmndi:BPMNEdge&gt;</span><br><span class="line"></span><br><span class="line">    &lt;/bpmndi:BPMNPlane&gt;</span><br><span class="line"></span><br><span class="line">  &lt;/bpmndi:BPMNDiagram&gt;</span><br><span class="line"></span><br><span class="line">&lt;/definitions&gt;</span><br></pre></td></tr></table></figure>
+
+<p>在Idea中，可以选用插件“Activiti BPMN visualizer”，其具体操作不做具体讲解。</p>
+<h2 id="3-SpringBoot集成Activiti8"><a href="#3-SpringBoot集成Activiti8" class="headerlink" title="3. SpringBoot集成Activiti8"></a>3. SpringBoot集成Activiti8</h2><p>本示例所选用的SpringBoot版本是3.4.1、activiti选择的版本是8.4.0、jdk-22。因为官方依赖矩阵不明确，所以建议选用和笔者一致的版本。</p>
+<p>ps：如何有官方提供的依赖矩阵，请评论告诉我，我是没找到。</p>
+<h3 id="3-1-关键依赖"><a href="#3-1-关键依赖" class="headerlink" title="3.1. 关键依赖"></a>3.1. 关键依赖</h3><p>自activiti7.1.x版本官方不再将构建制品发布到 maven 中央仓库了，而是发布在了alfresco仓库，这就需要我们仓库才能正确下载依赖，在pom中添加repositories标签，然后再添加repository标签。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&lt;repositories&gt;</span><br><span class="line"></span><br><span class="line">  &lt;repository&gt;</span><br><span class="line"></span><br><span class="line">    &lt;id&gt;activiti-releases&lt;/id&gt;</span><br><span class="line"></span><br><span class="line">    &lt;url&gt;https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases&lt;/url&gt;</span><br><span class="line"></span><br><span class="line">  &lt;/repository&gt;</span><br><span class="line"></span><br><span class="line">&lt;/repositories&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line"></span><br><span class="line">  &lt;groupId&gt;org.activiti&lt;/groupId&gt;</span><br><span class="line"></span><br><span class="line">  &lt;artifactId&gt;activiti-spring-boot-starter&lt;/artifactId&gt;</span><br><span class="line"></span><br><span class="line">  &lt;version&gt;8.4.0&lt;/version&gt;</span><br><span class="line"></span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-2-完整pom文件"><a href="#3-2-完整pom文件" class="headerlink" title="3.2. 完整pom文件"></a>3.2. 完整pom文件</h3><p>除了activiti的核心依赖，还有数据库引擎依赖，此处将完整的pom文件列出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line"></span><br><span class="line">&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span><br><span class="line"></span><br><span class="line">  xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;</span><br><span class="line"></span><br><span class="line">  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;</span><br><span class="line"></span><br><span class="line">  &lt;parent&gt;</span><br><span class="line"></span><br><span class="line">    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line"></span><br><span class="line">    &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;</span><br><span class="line"></span><br><span class="line">    &lt;version&gt;3.4.1&lt;/version&gt;</span><br><span class="line"></span><br><span class="line">    &lt;relativePath/&gt;</span><br><span class="line"></span><br><span class="line">  &lt;/parent&gt;</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">  &lt;groupId&gt;com.zz&lt;/groupId&gt;</span><br><span class="line"></span><br><span class="line">  &lt;artifactId&gt;sb-activiti&lt;/artifactId&gt;</span><br><span class="line"></span><br><span class="line">  &lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;</span><br><span class="line"></span><br><span class="line">  &lt;name&gt;sb-mybatis&lt;/name&gt;</span><br><span class="line"></span><br><span class="line">  &lt;description&gt;sb-activiti&lt;/description&gt;</span><br><span class="line"></span><br><span class="line">  &lt;properties&gt;</span><br><span class="line"></span><br><span class="line">    &lt;java.version&gt;22&lt;/java.version&gt;</span><br><span class="line"></span><br><span class="line">  &lt;/properties&gt;</span><br><span class="line"></span><br><span class="line">  </span><br><span class="line"></span><br><span class="line">  &lt;dependencies&gt;</span><br><span class="line"></span><br><span class="line">    &lt;dependency&gt;</span><br><span class="line"></span><br><span class="line">      &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line"></span><br><span class="line">      &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;</span><br><span class="line"></span><br><span class="line">    &lt;/dependency&gt;</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">    &lt;dependency&gt;</span><br><span class="line"></span><br><span class="line">      &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line"></span><br><span class="line">      &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;</span><br><span class="line"></span><br><span class="line">      &lt;scope&gt;test&lt;/scope&gt;</span><br><span class="line"></span><br><span class="line">    &lt;/dependency&gt;</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">    &lt;dependency&gt;</span><br><span class="line"></span><br><span class="line">      &lt;groupId&gt;com.mysql&lt;/groupId&gt;</span><br><span class="line"></span><br><span class="line">      &lt;artifactId&gt;mysql-connector-j&lt;/artifactId&gt;</span><br><span class="line"></span><br><span class="line">      &lt;scope&gt;runtime&lt;/scope&gt;</span><br><span class="line"></span><br><span class="line">    &lt;/dependency&gt;</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">    &lt;dependency&gt;</span><br><span class="line"></span><br><span class="line">      &lt;groupId&gt;com.baomidou&lt;/groupId&gt;</span><br><span class="line"></span><br><span class="line">      &lt;artifactId&gt;mybatis-plus-spring-boot3-starter&lt;/artifactId&gt;</span><br><span class="line"></span><br><span class="line">      &lt;version&gt;3.5.10.1&lt;/version&gt;</span><br><span class="line"></span><br><span class="line">    &lt;/dependency&gt;</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">    &lt;dependency&gt;</span><br><span class="line"></span><br><span class="line">      &lt;groupId&gt;org.activiti&lt;/groupId&gt;</span><br><span class="line"></span><br><span class="line">      &lt;artifactId&gt;activiti-spring-boot-starter&lt;/artifactId&gt;</span><br><span class="line"></span><br><span class="line">    &lt;/dependency&gt;</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">  &lt;/dependencies&gt;</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">  &lt;repositories&gt;</span><br><span class="line"></span><br><span class="line">    &lt;repository&gt;</span><br><span class="line"></span><br><span class="line">      &lt;id&gt;aliyun-releases&lt;/id&gt;</span><br><span class="line"></span><br><span class="line">      &lt;name&gt;阿里云仓库&lt;/name&gt;</span><br><span class="line"></span><br><span class="line">      &lt;url&gt;https://maven.aliyun.com/repository/public&lt;/url&gt;</span><br><span class="line"></span><br><span class="line">    &lt;/repository&gt;</span><br><span class="line"></span><br><span class="line">    &lt;repository&gt;</span><br><span class="line"></span><br><span class="line">      &lt;id&gt;activiti-releases&lt;/id&gt;</span><br><span class="line"></span><br><span class="line">      &lt;url&gt;https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases&lt;/url&gt;</span><br><span class="line"></span><br><span class="line">    &lt;/repository&gt;</span><br><span class="line"></span><br><span class="line">  &lt;/repositories&gt;</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">  &lt;build&gt;</span><br><span class="line"></span><br><span class="line">    &lt;plugins&gt;</span><br><span class="line"></span><br><span class="line">      &lt;plugin&gt;</span><br><span class="line"></span><br><span class="line">        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line"></span><br><span class="line">        &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;</span><br><span class="line"></span><br><span class="line">      &lt;/plugin&gt;</span><br><span class="line"></span><br><span class="line">    &lt;/plugins&gt;</span><br><span class="line"></span><br><span class="line">  &lt;/build&gt;</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">&lt;/project&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-3-关键配置"><a href="#3-3-关键配置" class="headerlink" title="3.3. 关键配置"></a>3.3. 关键配置</h3><p>既然是SpringBoot集成，配置文件当然可以写在application.yaml文件中，此处列出常用配置和相关注释：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">spring:</span><br><span class="line"></span><br><span class="line">  application:</span><br><span class="line"></span><br><span class="line">    name: sb-mybatis</span><br><span class="line"></span><br><span class="line">  datasource:</span><br><span class="line"></span><br><span class="line">    driver-class-name: com.mysql.cj.jdbc.Driver</span><br><span class="line"></span><br><span class="line">    type: com.zaxxer.hikari.HikariDataSource</span><br><span class="line"></span><br><span class="line">    url: jdbc:mysql://localhost:3306/temp?useUnicode=true&amp;useSSL=false&amp;serverTimezone=UTC&amp;characterEncoding=UTF8&amp;nullCatalogMeansCurrent=true</span><br><span class="line"></span><br><span class="line">    username: root</span><br><span class="line"></span><br><span class="line">    password: lei19960711</span><br><span class="line"></span><br><span class="line">  activiti:</span><br><span class="line"></span><br><span class="line">    db-history-used: true</span><br><span class="line"></span><br><span class="line">    history-level: full</span><br><span class="line"></span><br><span class="line">    database-schema-update: true</span><br><span class="line"></span><br><span class="line">    check-process-definitions: false</span><br><span class="line"></span><br><span class="line">    deployment-mode: never-fail</span><br><span class="line"></span><br><span class="line">    async-executor-activate： false</span><br></pre></td></tr></table></figure>
+<ul>
+<li>db-history-used：数据库历史表是否启用，默认为false，建议改为true</li>
+<li>history-level：记录历史记录，可配置的历史级别包括：</li>
+<li><ul>
+<li>none：不记录任何历史信息，流程执行中最高效。<ul>
+<li>activity：级别高于none，保存流程实例与流程行为，其他数据不保存。</li>
+<li>audit：除activity级别会保存的数据外，还会保存全部的流程任务及其属性。audit为history的默认值。</li>
+<li>full：保存历史数据的最高级别，除了会保存audit级别的数据外，还会保存其他全部流程相关的细节数据，包括一些流程参数等。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>database-schema-update：数据库更新操作，可选项包括：</li>
+<li><ul>
+<li>false：activiti在启动时，对比数据库表中保存的版本，如果没有表或者版本不匹配，将抛出异常。<ul>
+<li>true：默认值，activiti会对数据库中所有表进行更新操作。如果表不存在，则自动创建。</li>
+<li>create_drop： 在activiti启动时创建表，在关闭时删除表（必须手动关闭引擎，才能删除表）。</li>
+<li>drop-create： 在activiti启动时删除原来的旧表，然后在创建新表（不需要手动关闭引擎）。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>check-process-definitions：校验流程文件，默认校验resources下的processes文件夹里的流程文件。</li>
+<li>deployment-mode：定义流程部署失败时的处理策略。</li>
+<li><ul>
+<li>never-fail：关闭 SpringAutoDeployment。<ul>
+<li>default：默认。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-4-配置SpringSecurity"><a href="#3-4-配置SpringSecurity" class="headerlink" title="3.4. 配置SpringSecurity"></a>3.4. 配置SpringSecurity</h3><p>activiti内置了SpringSecurity安全框架，需要配置UserDetailsService Bean。这里不做过多配置，仅配置该bean即可。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">DemoApplicationConfiguration</span> &#123;</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="type">UserDetailsService</span> <span class="title function_">userDetailsService</span><span class="params">()</span> &#123;</span><br><span class="line"></span><br><span class="line">        User.<span class="type">UserBuilder</span> <span class="variable">users</span> <span class="operator">=</span> User.withDefaultPasswordEncoder();</span><br><span class="line"></span><br><span class="line">        <span class="type">UserDetails</span> <span class="variable">user</span> <span class="operator">=</span> users.username(<span class="string">&quot;user&quot;</span>)</span><br><span class="line"></span><br><span class="line">                .password(<span class="string">&quot;&#123;noop&#125;pass&quot;</span>)</span><br><span class="line"></span><br><span class="line">                .authorities(<span class="string">&quot;ROLE_ACTIVITI_USER&quot;</span>)</span><br><span class="line"></span><br><span class="line">                .build();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">InMemoryUserDetailsManager</span>(user);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>UserDetailsService 用于配置用户及其各自的组和角色。需要 ACTIVITI_USER 角色才能与 Activiti 的 TaskRuntime API 进行交互。</p>
+<h3 id="3-5-表解读"><a href="#3-5-表解读" class="headerlink" title="3.5. 表解读"></a>3.5. 表解读</h3><p>至此，启动SpringBoot后会在指定的数据库中自动创建activiti的25张表！！！</p>
+<p>![[_resources&#x2F;bd284e7ea918fd1e453652a859386d65_MD5.png]]</p>
+<p>Activiti 使用到的表都是 ACT_ 开头的，表名的第二部分表示用途。</p>
+<ul>
+<li>ACT_GE_ （GE） 表示 general 全局通用数据及设置，各种情况都使用的数据。</li>
+<li>ACT_HI_ （HI） 表示 history 历史数据表，包含着程执行的历史相关数据。</li>
+<li>ACT_RE_ （RE） 表示 repository 存储，包含的是静态信息。</li>
+<li>ACT_RU_ （RU） 表示 runtime 运行时，运行时的流程变量，用户任务，变量，职责（job）等运行时数据。</li>
+</ul>
+<h4 id="3-5-1-全局通用表"><a href="#3-5-1-全局通用表" class="headerlink" title="3.5.1. 全局通用表"></a>3.5.1. 全局通用表</h4><table>
+<thead>
+<tr>
+<th><strong>表名</strong></th>
+<th><strong>解释</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ACT_GE_BYTEARRAY</td>
+<td>二进制 <a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=%E6%95%B0%E6%8D%AE%E8%A1%A8&spm=1001.2101.3001.7020">数据表</a> ，存储通用的流程定义和流程资源。</td>
+</tr>
+<tr>
+<td>ACT_GE_PROPERTY</td>
+<td>系统相关属性，属性数据表存储整个流程引擎级别的数据。</td>
+</tr>
+</tbody></table>
+<p>act_ge_bytearray：</p>
+<table>
+<thead>
+<tr>
+<th>字段名称</th>
+<th>字段描述</th>
+<th>数据类型</th>
+<th>主键</th>
+<th>为空</th>
+<th>取值说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ID_</td>
+<td>ID_</td>
+<td>nvarchar(64)</td>
+<td>Y</td>
+<td></td>
+<td>主键ID</td>
+</tr>
+<tr>
+<td>REV_</td>
+<td>乐观锁</td>
+<td>int</td>
+<td></td>
+<td>Y</td>
+<td>Version(版本)</td>
+</tr>
+<tr>
+<td>NAME_</td>
+<td>名称</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>Y</td>
+<td>部署的文件名称，如：leave.bpmn.png,leave.bpmn20.xml</td>
+</tr>
+<tr>
+<td>DEPLOYMENT_ID_</td>
+<td>部署ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>Y</td>
+<td>部署表ID</td>
+</tr>
+<tr>
+<td>BYTES_</td>
+<td>字节</td>
+<td>varbinary</td>
+<td></td>
+<td>Y</td>
+<td>部署文件</td>
+</tr>
+<tr>
+<td>GENERATED_</td>
+<td>是否是引擎生成</td>
+<td>tinyint</td>
+<td></td>
+<td>Y</td>
+<td>0为用户生成，1为activiti生成</td>
+</tr>
+</tbody></table>
+<p>act_ge_property：略</p>
+<h4 id="3-5-2-历史数据表"><a href="#3-5-2-历史数据表" class="headerlink" title="3.5.2. 历史数据表"></a>3.5.2. 历史数据表</h4><table>
+<thead>
+<tr>
+<th><strong>表名</strong></th>
+<th><strong>解释</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ACT_HI_ACTINST</td>
+<td>历史节点表</td>
+</tr>
+<tr>
+<td>ACT_HI_ATTACHMENT</td>
+<td>历史附件表</td>
+</tr>
+<tr>
+<td>ACT_HI_COMMENT</td>
+<td>历史意见表</td>
+</tr>
+<tr>
+<td>ACT_HI_DETAIL</td>
+<td>历史详情表，提供历史变量的查询</td>
+</tr>
+<tr>
+<td>ACT_HI_IDENTITYLINK</td>
+<td>历史流程人员表</td>
+</tr>
+<tr>
+<td>ACT_HI_PROCINST</td>
+<td>历史流程实例表</td>
+</tr>
+<tr>
+<td>ACT_HI_TASKINST</td>
+<td>历史任务实例表</td>
+</tr>
+<tr>
+<td>ACT_HI_VARINST</td>
+<td>历史变量表</td>
+</tr>
+</tbody></table>
+<p>act_hi_actinst：历史活动信息。这里记录流程流转过的所有节点，与HI_TASKINST不同的是，taskinst只记录usertask内容</p>
+<table>
+<thead>
+<tr>
+<th>字段名称</th>
+<th>字段描述</th>
+<th>数据类型</th>
+<th>主键</th>
+<th>为空</th>
+<th>取值说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ID_</td>
+<td>ID_</td>
+<td>nvarchar(64)</td>
+<td>√</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>PROC_DEF_ID_</td>
+<td>流程定义ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>PROC_INST_ID_</td>
+<td>流程实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>EXECUTION_ID_</td>
+<td>执行实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>ACT_ID_</td>
+<td>节点ID</td>
+<td>nvarchar(225)</td>
+<td></td>
+<td></td>
+<td>节点定义ID</td>
+</tr>
+<tr>
+<td>TASK_ID_</td>
+<td>任务实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>任务实例ID 其他节点类型实例ID在这里为空</td>
+</tr>
+<tr>
+<td>CALL_PROC_INST_ID_</td>
+<td>调用外部的流程实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>调用外部流程的流程实例ID’</td>
+</tr>
+<tr>
+<td>ACT_NAME_</td>
+<td>节点名称</td>
+<td>nvarchar(225)</td>
+<td></td>
+<td>√</td>
+<td>节点定义名称</td>
+</tr>
+<tr>
+<td>ACT_TYPE_</td>
+<td>节点类型</td>
+<td>nvarchar(225)</td>
+<td></td>
+<td></td>
+<td>如startEvent、userTask</td>
+</tr>
+<tr>
+<td>ASSIGNEE_</td>
+<td>签收人</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>节点签收人</td>
+</tr>
+<tr>
+<td>START_TIME_</td>
+<td>开始时间</td>
+<td>datetime</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>END_TIME_</td>
+<td>结束时间</td>
+<td>datetime</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>DURATION_</td>
+<td>耗时</td>
+<td>numeric(19,0)</td>
+<td></td>
+<td>√</td>
+<td>毫秒值</td>
+</tr>
+<tr>
+<td>DELETE_REASON_</td>
+<td></td>
+<td>nvarchar(4000)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>TENANT_ID_</td>
+<td></td>
+<td>nvarchar(225)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<p>act_hi_attachment：历史附件表</p>
+<table>
+<thead>
+<tr>
+<th>字段名称</th>
+<th>字段描述</th>
+<th>数据类型</th>
+<th>主键</th>
+<th>为空</th>
+<th>取值说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ID_</td>
+<td>ID_</td>
+<td>nvarchar(64)</td>
+<td>√</td>
+<td></td>
+<td>主键ID</td>
+</tr>
+<tr>
+<td>REV_</td>
+<td>乐观锁</td>
+<td>integer</td>
+<td></td>
+<td>√</td>
+<td>Version</td>
+</tr>
+<tr>
+<td>USER_ID_</td>
+<td>用户ID</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>用户ID</td>
+</tr>
+<tr>
+<td>NAME_</td>
+<td>名称</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>附件名称</td>
+</tr>
+<tr>
+<td>DESCRIPTION_</td>
+<td>描述</td>
+<td>nvarchar(4000)</td>
+<td></td>
+<td>√</td>
+<td>描述</td>
+</tr>
+<tr>
+<td>TYPE_</td>
+<td>类型</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>附件类型</td>
+</tr>
+<tr>
+<td>TASK_ID_</td>
+<td>任务实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>节点实例ID</td>
+</tr>
+<tr>
+<td>PROC_INST_ID_</td>
+<td>流程实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>流程实例ID</td>
+</tr>
+<tr>
+<td>URL_</td>
+<td>URL_</td>
+<td>nvarchar(4000)</td>
+<td></td>
+<td>√</td>
+<td>附件地址</td>
+</tr>
+<tr>
+<td>CONTENT_ID_</td>
+<td>字节表的ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>ACT_GE_BYTEARRAY的ID</td>
+</tr>
+<tr>
+<td>TIME_</td>
+<td></td>
+<td>datetime</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+</tbody></table>
+<p>act_hi_comment：历史意见表</p>
+<table>
+<thead>
+<tr>
+<th>字段名称</th>
+<th>字段描述</th>
+<th>数据类型</th>
+<th>主键</th>
+<th>为空</th>
+<th>取值说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ID_</td>
+<td>ID_</td>
+<td>nvarchar(64)</td>
+<td>√</td>
+<td></td>
+<td>主键ID</td>
+</tr>
+<tr>
+<td>TYPE_</td>
+<td>类型</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>类型：event（事件）comment（意见）</td>
+</tr>
+<tr>
+<td>TIME_</td>
+<td>时间</td>
+<td>datetime</td>
+<td></td>
+<td></td>
+<td>填写时间’</td>
+</tr>
+<tr>
+<td>USER_ID_</td>
+<td>用户ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>填写人</td>
+</tr>
+<tr>
+<td>TASK_ID_</td>
+<td>节点任务ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>节点实例ID</td>
+</tr>
+<tr>
+<td>PROC_INST_ID_</td>
+<td>流程实例ID</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>流程实例ID</td>
+</tr>
+<tr>
+<td>ACTION_</td>
+<td>行为类型</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>见备注1</td>
+</tr>
+<tr>
+<td>MESSAGE_</td>
+<td>基本内容</td>
+<td>nvarchar(4000)</td>
+<td></td>
+<td>√</td>
+<td>用于存放流程产生的信息，比如审批意见</td>
+</tr>
+<tr>
+<td>FULL_MSG_</td>
+<td>全部内容</td>
+<td>varbinary(max)</td>
+<td></td>
+<td>√</td>
+<td>附件地址</td>
+</tr>
+</tbody></table>
+<p>act_hi_detail：历史详情表：流程中产生的变量详细，包括控制流程流转的变量，业务表单中填写的流程需要用到的变量等。</p>
+<table>
+<thead>
+<tr>
+<th>字段名称</th>
+<th>字段描述</th>
+<th>数据类型</th>
+<th>主键</th>
+<th>为空</th>
+<th>取值说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ID_</td>
+<td>ID_</td>
+<td>nvarchar(64)</td>
+<td>√</td>
+<td></td>
+<td>主键</td>
+</tr>
+<tr>
+<td>TYPE_</td>
+<td>类型</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td></td>
+<td>见备注2</td>
+</tr>
+<tr>
+<td>PROC_INST_ID_</td>
+<td>流程实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>流程实例ID</td>
+</tr>
+<tr>
+<td>EXECUTION_ID_</td>
+<td>执行实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>执行实例ID</td>
+</tr>
+<tr>
+<td>TASK_ID_</td>
+<td>任务实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>任务实例ID</td>
+</tr>
+<tr>
+<td>ACT_INST_ID_</td>
+<td>节点实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>ACT_HI_ACTINST表的ID</td>
+</tr>
+<tr>
+<td>NAME_</td>
+<td>名称</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td></td>
+<td>名称</td>
+</tr>
+<tr>
+<td>VAR_TYPE_</td>
+<td>参数类型</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>见备注3</td>
+</tr>
+<tr>
+<td>REV_</td>
+<td>乐观锁</td>
+<td>int</td>
+<td></td>
+<td>√</td>
+<td>Version</td>
+</tr>
+<tr>
+<td>TIME_</td>
+<td>时间戳</td>
+<td>datetime</td>
+<td></td>
+<td></td>
+<td>创建时间</td>
+</tr>
+<tr>
+<td>BYTEARRAY_ID_</td>
+<td>字节表ID</td>
+<td>nvarchar</td>
+<td></td>
+<td>√</td>
+<td>ACT_GE_BYTEARRAY表的ID</td>
+</tr>
+<tr>
+<td>DOUBLE_</td>
+<td>DOUBLE_</td>
+<td>double precision</td>
+<td></td>
+<td>√</td>
+<td>存储变量类型为Double</td>
+</tr>
+<tr>
+<td>LONG_</td>
+<td>LONG_</td>
+<td>numeric</td>
+<td></td>
+<td>√</td>
+<td>存储变量类型为long</td>
+</tr>
+<tr>
+<td>TEXT_</td>
+<td>TEXT_</td>
+<td>nvarchar</td>
+<td></td>
+<td>√</td>
+<td>存储变量值类型为String</td>
+</tr>
+<tr>
+<td>TEXT2_</td>
+<td>TEXT2_</td>
+<td>nvarchar</td>
+<td></td>
+<td>√</td>
+<td>此处存储的是JPA持久化对象时，才会有值。此值为对象ID</td>
+</tr>
+</tbody></table>
+<p>act_ru_identitylink：历史流程人员表：任务参与者数据表。主要存储历史节点参与者的信息</p>
+<table>
+<thead>
+<tr>
+<th>字段名称</th>
+<th>字段描述</th>
+<th>数据类型</th>
+<th>主键</th>
+<th>为空</th>
+<th>取值说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ID_</td>
+<td>ID_</td>
+<td>nvarchar(64)</td>
+<td>√</td>
+<td></td>
+<td>ID_</td>
+</tr>
+<tr>
+<td>GROUP_ID_</td>
+<td>组ID</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>组ID</td>
+</tr>
+<tr>
+<td>TYPE_</td>
+<td>类型</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>备注4</td>
+</tr>
+<tr>
+<td>USER_ID_</td>
+<td>用户ID</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>用户ID</td>
+</tr>
+<tr>
+<td>TASK_ID_</td>
+<td>节点实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>节点实例ID</td>
+</tr>
+<tr>
+<td>PROC_INST_ID_</td>
+<td>流程实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>流程实例ID</td>
+</tr>
+</tbody></table>
+<p>act_hi_procinst：流程实例表</p>
+<table>
+<thead>
+<tr>
+<th>字段名称</th>
+<th>字段描述</th>
+<th>数据类型</th>
+<th>主键</th>
+<th>为空</th>
+<th>取值说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ID_</td>
+<td>ID_</td>
+<td>nvarchar(64)</td>
+<td>√</td>
+<td></td>
+<td>主键ID</td>
+</tr>
+<tr>
+<td>PROC_INST_ID_</td>
+<td>流程实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td></td>
+<td>流程实例ID</td>
+</tr>
+<tr>
+<td>BUSINESS_KEY_</td>
+<td>业务主键</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>业务主键，业务表单的ID</td>
+</tr>
+<tr>
+<td>PROC_DEF_ID_</td>
+<td>流程定义ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td></td>
+<td>流程定义ID</td>
+</tr>
+<tr>
+<td>START_TIME_</td>
+<td>开始时间</td>
+<td>datetime</td>
+<td></td>
+<td></td>
+<td>开始时间</td>
+</tr>
+<tr>
+<td>END_TIME_</td>
+<td>结束时间</td>
+<td>datetime</td>
+<td></td>
+<td>√</td>
+<td>结束时间</td>
+</tr>
+<tr>
+<td>DURATION_</td>
+<td>耗时</td>
+<td>Numeric(19)</td>
+<td></td>
+<td>√</td>
+<td>耗时</td>
+</tr>
+<tr>
+<td>START_USER_ID_</td>
+<td>起草人</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>起草人</td>
+</tr>
+<tr>
+<td>START_ACT_ID_</td>
+<td>开始节点ID</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>起草环节ID</td>
+</tr>
+<tr>
+<td>END_ACT_ID_</td>
+<td>结束节点ID</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>结束环节ID</td>
+</tr>
+<tr>
+<td>SUPER_PROCESS_INSTANCE_ID_</td>
+<td>父流程实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>父流程实例ID</td>
+</tr>
+<tr>
+<td>DELETE_REASON_</td>
+<td>删除原因</td>
+<td>nvarchar(4000)</td>
+<td></td>
+<td>√</td>
+<td>删除原因</td>
+</tr>
+<tr>
+<td>TENANT_ID_</td>
+<td></td>
+<td>nvarchar(255)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>NAME_</td>
+<td></td>
+<td>nvarchar(255)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<p>act_hi_taskinst：历史任务示例表</p>
+<table>
+<thead>
+<tr>
+<th>字段名称</th>
+<th>字段描述</th>
+<th>数据类型</th>
+<th>主键</th>
+<th>为空</th>
+<th>取值说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ID_</td>
+<td>ID_</td>
+<td>nvarchar(64)</td>
+<td>√</td>
+<td></td>
+<td>主键ID</td>
+</tr>
+<tr>
+<td>PROC_DEF_ID_</td>
+<td>流程定义ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>流程定义ID</td>
+</tr>
+<tr>
+<td>TASK_DEF_KEY_</td>
+<td>节点定义ID</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>节点定义ID</td>
+</tr>
+<tr>
+<td>PROC_INST_ID_</td>
+<td>流程实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>流程实例ID</td>
+</tr>
+<tr>
+<td>EXECUTION_ID_</td>
+<td>执行实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>执行实例ID</td>
+</tr>
+<tr>
+<td>NAME_</td>
+<td>名称</td>
+<td>varchar(255)</td>
+<td></td>
+<td>√</td>
+<td>名称</td>
+</tr>
+<tr>
+<td>PARENT_TASK_ID_</td>
+<td>父节点实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>父节点实例ID</td>
+</tr>
+<tr>
+<td>DESCRIPTION_</td>
+<td>描述</td>
+<td>nvarchar(400)</td>
+<td></td>
+<td>√</td>
+<td>描述</td>
+</tr>
+<tr>
+<td>OWNER_</td>
+<td>实际签收人 任务的拥有者</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>签收人（默认为空，只有在委托时才有值）</td>
+</tr>
+<tr>
+<td>ASSIGNEE_</td>
+<td>签收人或被委托</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>签收人或被委托</td>
+</tr>
+<tr>
+<td>START_TIME_</td>
+<td>开始时间</td>
+<td>datetime</td>
+<td></td>
+<td></td>
+<td>开始时间</td>
+</tr>
+<tr>
+<td>CLAIM_TIME_</td>
+<td>提醒时间</td>
+<td>datetime</td>
+<td></td>
+<td>√</td>
+<td>提醒时间</td>
+</tr>
+<tr>
+<td>END_TIME_</td>
+<td>结束时间</td>
+<td>datetime</td>
+<td></td>
+<td>√</td>
+<td>结束时间</td>
+</tr>
+<tr>
+<td>DURATION_</td>
+<td>耗时</td>
+<td>numeric(19)</td>
+<td></td>
+<td>√</td>
+<td>耗时</td>
+</tr>
+<tr>
+<td>DELETE_REASON_</td>
+<td>删除原因</td>
+<td>nvarchar(4000)</td>
+<td></td>
+<td>√</td>
+<td>删除原因(completed,deleted)</td>
+</tr>
+<tr>
+<td>PRIORITY_</td>
+<td>优先级别</td>
+<td>int</td>
+<td></td>
+<td>√</td>
+<td>优先级别</td>
+</tr>
+<tr>
+<td>DUE_DATE_</td>
+<td>过期时间</td>
+<td>datetime</td>
+<td></td>
+<td>√</td>
+<td>过期时间，表明任务应在多长时间内完成</td>
+</tr>
+<tr>
+<td>FORM_KEY_</td>
+<td>节点定义的formkey</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>desinger节点定义的form_key属性</td>
+</tr>
+<tr>
+<td>CATEGORY_</td>
+<td></td>
+<td>varchar(255)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>TENANT_ID_</td>
+<td></td>
+<td>varchar(255)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+</tbody></table>
+<p>act_hi_varinst：历史变量表。</p>
+<table>
+<thead>
+<tr>
+<th><strong>字段名称</strong></th>
+<th><strong>字段描述</strong></th>
+<th><strong>数据类型</strong></th>
+<th><strong>主键</strong></th>
+<th><strong>为空</strong></th>
+<th><strong>取值说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ID_</td>
+<td>ID_</td>
+<td>nvarchar(64)</td>
+<td>√</td>
+<td></td>
+<td>ID_</td>
+</tr>
+<tr>
+<td>PROC_INST_ID_</td>
+<td>流程实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>流程实例ID</td>
+</tr>
+<tr>
+<td>EXECUTION_ID_</td>
+<td>执行实例ID</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>执行实例ID</td>
+</tr>
+<tr>
+<td>TASK_ID_</td>
+<td>任务实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>任务实例ID</td>
+</tr>
+<tr>
+<td>NAME_</td>
+<td>名称</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td></td>
+<td>参数名称(英文)</td>
+</tr>
+<tr>
+<td>VAR_TYPE_</td>
+<td>参数类型</td>
+<td>varchar(255)</td>
+<td></td>
+<td>√</td>
+<td>备注5</td>
+</tr>
+<tr>
+<td>REV_</td>
+<td>乐观锁</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>乐观锁 Version</td>
+</tr>
+<tr>
+<td>BYTEARRAY_ID_</td>
+<td>字节表ID</td>
+<td>nvarchar(400)</td>
+<td></td>
+<td>√</td>
+<td>ACT_GE_BYTEARRAY表的主键</td>
+</tr>
+<tr>
+<td>DOUBLE_</td>
+<td>DOUBLE_</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>存储DoubleType类型的数据</td>
+</tr>
+<tr>
+<td>LONG_</td>
+<td>LONG_</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>存储LongType类型的数据</td>
+</tr>
+<tr>
+<td>TEXT_</td>
+<td>TEXT_</td>
+<td>datetime</td>
+<td></td>
+<td>√</td>
+<td>备注6</td>
+</tr>
+<tr>
+<td>TEXT2_</td>
+<td>TEXT2_</td>
+<td>datetime</td>
+<td></td>
+<td>√</td>
+<td>此处存储的是JPA持久化对象时，才会有值。此值为对象ID</td>
+</tr>
+<tr>
+<td>CREATE_TIME_</td>
+<td></td>
+<td>datetime</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>LAST_UPDATED_TIME_</td>
+<td></td>
+<td>datetime</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<h4 id="3-5-3-静态资源表"><a href="#3-5-3-静态资源表" class="headerlink" title="3.5.3. 静态资源表"></a>3.5.3. 静态资源表</h4><table>
+<thead>
+<tr>
+<th><strong>表名</strong></th>
+<th><strong>解释</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ACT_RE_DEPLOYMENT</td>
+<td>部署信息表</td>
+</tr>
+<tr>
+<td>ACT_RE_MODEL</td>
+<td>流程设计 模型 部署表</td>
+</tr>
+<tr>
+<td>ACT_RE_PROCDEF</td>
+<td>流程定义数据表</td>
+</tr>
+</tbody></table>
+<p>act_re_deployment：部署流程定义时需要被持久化保存下来的信息。</p>
+<table>
+<thead>
+<tr>
+<th><strong>字段名称</strong></th>
+<th><strong>字段描述</strong></th>
+<th><strong>数据类型</strong></th>
+<th><strong>主键</strong></th>
+<th><strong>为空</strong></th>
+<th><strong>取值说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ID_</td>
+<td>ID_</td>
+<td>nvarchar(64)</td>
+<td>√</td>
+<td></td>
+<td>主键ID</td>
+</tr>
+<tr>
+<td>NAME_</td>
+<td>部署名称</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>部署文件名</td>
+</tr>
+<tr>
+<td>CATEGORY_</td>
+<td>分类</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>类别</td>
+</tr>
+<tr>
+<td>KEY_</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>TENANT_ID_</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>DEPLOY_TIME_</td>
+<td>部署时间</td>
+<td>datetime</td>
+<td></td>
+<td>√</td>
+<td>部署时间</td>
+</tr>
+<tr>
+<td>ENGINE_VERSION_</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<p>act_re_model：流程设计器设计流程后，保存数据到该表。</p>
+<table>
+<thead>
+<tr>
+<th><strong>字段名称</strong></th>
+<th><strong>字段描述</strong></th>
+<th><strong>数据类型</strong></th>
+<th><strong>主键</strong></th>
+<th><strong>为空</strong></th>
+<th><strong>取值说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ID_</td>
+<td>ID_</td>
+<td>nvarchar(64)</td>
+<td>√</td>
+<td></td>
+<td>ID_</td>
+</tr>
+<tr>
+<td>REV_</td>
+<td>乐观锁</td>
+<td>int</td>
+<td></td>
+<td>√</td>
+<td>乐观锁</td>
+</tr>
+<tr>
+<td>NAME_</td>
+<td>名称</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>名称</td>
+</tr>
+<tr>
+<td>KEY_</td>
+<td>KEY_</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>key</td>
+</tr>
+<tr>
+<td>CATEGORY_</td>
+<td>分类</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>分类</td>
+</tr>
+<tr>
+<td>CREATE_TIME_</td>
+<td>创建时间</td>
+<td>datetime</td>
+<td></td>
+<td>√</td>
+<td>创建时间</td>
+</tr>
+<tr>
+<td>LAST_UPDATE_TIME_</td>
+<td>最新修改时间</td>
+<td>datetime</td>
+<td></td>
+<td>√</td>
+<td>最新修改时间</td>
+</tr>
+<tr>
+<td>VERSION_</td>
+<td>版本</td>
+<td>int</td>
+<td></td>
+<td>√</td>
+<td>版本</td>
+</tr>
+<tr>
+<td>META_INFO_</td>
+<td>META_INFO_</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>以json格式保存流程定义的信息</td>
+</tr>
+<tr>
+<td>DEPLOYMENT_ID_</td>
+<td>部署ID</td>
+<td>varchar(64)</td>
+<td></td>
+<td>√</td>
+<td>部署ID</td>
+</tr>
+<tr>
+<td>EDITOR_SOURCE_VALUE_ID_</td>
+<td></td>
+<td>varchar(64)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>EDITOR_SOURCE_EXTRA_VALUE_ID_</td>
+<td></td>
+<td>varchar(64)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>TENANT_ID_</td>
+<td></td>
+<td>varchar(255)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<p>act_re_procdef：业务流程定义数据表。此表和 ACT_RE_DEPLOYMENT 是多对一的关系，即，一个部署的bar包里可能包含多个流程定义文件，每个流程定义文件都会有一条记录在 ACT_REPROCDEF 表内，每个流程定义的数据，都会对应 ACT_GE_BYTEARRAY 表内的一个资源文件和 PNG 图片文件。和 ACT_GE_BYTEARRAY 的关联是通过程序用ACT_GE_BYTEARRAY.NAME 与 ACT_RE_PROCDEF.NAME 完成的，在数据库表结构中没有体现。</p>
+<table>
+<thead>
+<tr>
+<th><strong>字段名称</strong></th>
+<th><strong>字段描述</strong></th>
+<th><strong>数据类型</strong></th>
+<th><strong>主键</strong></th>
+<th><strong>为空</strong></th>
+<th><strong>取值说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ID_</td>
+<td>ID_</td>
+<td>nvarchar(64)</td>
+<td>√</td>
+<td></td>
+<td>ID_</td>
+</tr>
+<tr>
+<td>REV_</td>
+<td>乐观锁</td>
+<td>int</td>
+<td></td>
+<td>√</td>
+<td>乐观锁</td>
+</tr>
+<tr>
+<td>CATEGORY_</td>
+<td>分类</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>流程定义的Namespace就是类别</td>
+</tr>
+<tr>
+<td>NAME_</td>
+<td>名称</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>名称</td>
+</tr>
+<tr>
+<td>KEY_</td>
+<td>定义的KEY</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td></td>
+<td>流程定义ID</td>
+</tr>
+<tr>
+<td>VERSION_</td>
+<td>版本</td>
+<td>int</td>
+<td></td>
+<td></td>
+<td>版本</td>
+</tr>
+<tr>
+<td>DEPLOYMENT_ID_</td>
+<td>部署表ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>部署表ID</td>
+</tr>
+<tr>
+<td>RESOURCE_NAME_</td>
+<td>bpmn文件名称</td>
+<td>nvarchar(4000)</td>
+<td></td>
+<td>√</td>
+<td>流程bpmn文件名称</td>
+</tr>
+<tr>
+<td>DGRM_RESOURCE_NAME_</td>
+<td>png图片名称</td>
+<td>nvarchar(4000)</td>
+<td></td>
+<td>√</td>
+<td>流程图片名称</td>
+</tr>
+<tr>
+<td>DESCRIPTION_</td>
+<td>描述</td>
+<td>nvarchar(4000)</td>
+<td></td>
+<td>√</td>
+<td>描述</td>
+</tr>
+<tr>
+<td>HAS_START_FORM_KEY</td>
+<td>是否存在开始节点formKey</td>
+<td>tinyint</td>
+<td></td>
+<td>√</td>
+<td>start节点是否存在formKey 0否 1是</td>
+</tr>
+<tr>
+<td>SUSPENSION_STATE_</td>
+<td>是否挂起</td>
+<td>tinyint</td>
+<td></td>
+<td>√</td>
+<td>1 激活 2挂起</td>
+</tr>
+<tr>
+<td>HAS_GRAPHICAL_NOTATION_</td>
+<td></td>
+<td>tinyint</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>TENANT_ID_</td>
+<td></td>
+<td>varchar(255)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>ENGINE_VERSION_</td>
+<td></td>
+<td>varchar(255)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<h4 id="3-5-4-运行时数据表"><a href="#3-5-4-运行时数据表" class="headerlink" title="3.5.4. 运行时数据表"></a>3.5.4. 运行时数据表</h4><table>
+<thead>
+<tr>
+<th><strong>表名</strong></th>
+<th><strong>解释</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ACT_RU_DEADLETTER_JOB</td>
+<td>无法执行工作表： 如果一个任务执行了很多次，都无法执行，那么这个任务会写到</td>
+</tr>
+<tr>
+<td>ACT_RU_EXECUTION</td>
+<td>运行时流程执行实例</td>
+</tr>
+<tr>
+<td>ACT_RU_EVENT_SUBSCR</td>
+<td>运行时事件 throwEvent、catchEvent 时间监听信息表</td>
+</tr>
+<tr>
+<td>ACT_RU_IDENTITYLINK</td>
+<td>运行时流程人员表，主要存储任务节点与参与者的相关信息</td>
+</tr>
+<tr>
+<td>ACT_RU_INTEGRATION</td>
+<td>运行时积分表</td>
+</tr>
+<tr>
+<td>ACT_RU_JOB</td>
+<td>运行时定时任务数据表</td>
+</tr>
+<tr>
+<td>ACT_RU_SUSPENDED_JOB</td>
+<td>暂停的工作，流程中有一个定时任务，如果把这个任务停止工作了，这个任务会在act_ru_suspended_job中写入数据</td>
+</tr>
+<tr>
+<td>ACT_RU_TASK</td>
+<td>运行时任务节点表</td>
+</tr>
+<tr>
+<td>ACT_RU_TIMER_JOB</td>
+<td>运行时定时器作业表</td>
+</tr>
+<tr>
+<td>ACT_RU_VARIABLE</td>
+<td>运行时流程变量数据表</td>
+</tr>
+</tbody></table>
+<p>act_ru_deadletter_job：</p>
+<table>
+<thead>
+<tr>
+<th><strong>字段名称</strong></th>
+<th><strong>字段描述</strong></th>
+<th><strong>数据类型</strong></th>
+<th><strong>主键</strong></th>
+<th><strong>为空</strong></th>
+<th><strong>取值说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ID_</td>
+<td>ID_</td>
+<td>varchar(64)</td>
+<td>√</td>
+<td></td>
+<td>ID_</td>
+</tr>
+<tr>
+<td>REV_</td>
+<td></td>
+<td>int</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>TYPE_</td>
+<td></td>
+<td>varchar(255)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>EXCLUSIVE_</td>
+<td></td>
+<td>tinyint(1)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>EXECUTION_ID_</td>
+<td></td>
+<td>varchar(64)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>PROCESS_INSTANCE_ID_</td>
+<td></td>
+<td>varchar(64)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>PROC_DEF_ID_</td>
+<td></td>
+<td>varchar(64)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>EXCEPTION_STACK_ID_</td>
+<td></td>
+<td>varchar(64)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>EXCEPTION_MSG_</td>
+<td></td>
+<td>varchar(4000)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>DUEDATE_</td>
+<td></td>
+<td>timestamp</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>REPEAT_</td>
+<td></td>
+<td>varchar(255)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>HANDLER_TYPE_</td>
+<td></td>
+<td>varchar(255)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>HANDLER_CFG_</td>
+<td></td>
+<td>varchar(4000)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>TENANT_ID_</td>
+<td></td>
+<td>varchar(255)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+</tbody></table>
+<p>act_ru_event_subscr：</p>
+<table>
+<thead>
+<tr>
+<th><strong>字段名称</strong></th>
+<th><strong>字段描述</strong></th>
+<th><strong>数据类型</strong></th>
+<th><strong>主键</strong></th>
+<th><strong>为空</strong></th>
+<th><strong>取值说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ID_</td>
+<td>事件ID</td>
+<td>nvarchar(64)</td>
+<td>√</td>
+<td></td>
+<td>事件ID</td>
+</tr>
+<tr>
+<td>REV_</td>
+<td>版本</td>
+<td>int</td>
+<td></td>
+<td>√</td>
+<td>乐观锁Version</td>
+</tr>
+<tr>
+<td>EVENT_TYPE_</td>
+<td>事件类型</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td></td>
+<td>事件类型</td>
+</tr>
+<tr>
+<td>EVENT_NAME_</td>
+<td>事件名称</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>事件名称</td>
+</tr>
+<tr>
+<td>EXECUTION_ID_</td>
+<td>执行实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>执行实例ID</td>
+</tr>
+<tr>
+<td>PROC_INST_ID_</td>
+<td>流程实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>流程实例ID</td>
+</tr>
+<tr>
+<td>ACTIVITY_ID_</td>
+<td>活动实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>活动实例ID</td>
+</tr>
+<tr>
+<td>CONFIGURATION_</td>
+<td>配置</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>配置</td>
+</tr>
+<tr>
+<td>CREATED_</td>
+<td>是否创建</td>
+<td>datetime</td>
+<td></td>
+<td></td>
+<td>默认值 当前系统时间戳CURRENT_TIMESTAMP</td>
+</tr>
+<tr>
+<td>PROC_DEF_ID_</td>
+<td></td>
+<td>varchar(64)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>TENANT_ID_</td>
+<td></td>
+<td>varchar(255)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+</tbody></table>
+<p>act_ru_execution：运行时流程执行实例表</p>
+<table>
+<thead>
+<tr>
+<th><strong>字段名称</strong></th>
+<th><strong>字段描述</strong></th>
+<th><strong>数据类型</strong></th>
+<th><strong>主键</strong></th>
+<th><strong>为空</strong></th>
+<th><strong>取值说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ID_</td>
+<td>事件ID</td>
+<td>nvarchar(64)</td>
+<td>√</td>
+<td></td>
+<td>事件ID</td>
+</tr>
+<tr>
+<td>REV_</td>
+<td>版本</td>
+<td>int</td>
+<td></td>
+<td>√</td>
+<td>乐观锁Version</td>
+</tr>
+<tr>
+<td>EVENT_TYPE_</td>
+<td>事件类型</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td></td>
+<td>事件类型</td>
+</tr>
+<tr>
+<td>EVENT_NAME_</td>
+<td>事件名称</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>事件名称</td>
+</tr>
+<tr>
+<td>EXECUTION_ID_</td>
+<td>执行实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>执行实例ID</td>
+</tr>
+<tr>
+<td>PROC_INST_ID_</td>
+<td>流程实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>流程实例ID</td>
+</tr>
+<tr>
+<td>ACTIVITY_ID_</td>
+<td>活动实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>活动实例ID</td>
+</tr>
+<tr>
+<td>CONFIGURATION_</td>
+<td>配置</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>配置</td>
+</tr>
+<tr>
+<td>CREATED_</td>
+<td>是否创建</td>
+<td>datetime</td>
+<td></td>
+<td></td>
+<td>默认值 当前系统时间戳CURRENT_TIMESTAMP</td>
+</tr>
+<tr>
+<td>PROC_DEF_ID_</td>
+<td></td>
+<td>varchar(64)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>TENANT_ID_</td>
+<td></td>
+<td>varchar(255)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+</tbody></table>
+<p>act_ru_identitylink：运行时流程人员表：任务参与者数据表。主要存储当前节点参与者的信息。</p>
+<table>
+<thead>
+<tr>
+<th><strong>字段名称</strong></th>
+<th><strong>字段描述</strong></th>
+<th><strong>数据类型</strong></th>
+<th><strong>主键</strong></th>
+<th><strong>为空</strong></th>
+<th><strong>取值说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ID_</td>
+<td>ID_</td>
+<td>nvarchar(64)</td>
+<td>√</td>
+<td></td>
+<td>ID_</td>
+</tr>
+<tr>
+<td>REV_</td>
+<td>乐观锁</td>
+<td>int</td>
+<td></td>
+<td>√</td>
+<td>乐观锁</td>
+</tr>
+<tr>
+<td>GROUP_ID_</td>
+<td>组ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>组ID</td>
+</tr>
+<tr>
+<td>TYPE_</td>
+<td>类型</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>备注7</td>
+</tr>
+<tr>
+<td>USER_ID_</td>
+<td>用户ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>用户ID</td>
+</tr>
+<tr>
+<td>TASK_ID_</td>
+<td>节点实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>节点实例ID</td>
+</tr>
+<tr>
+<td>PROC_INST_ID_</td>
+<td>流程实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>流程实例ID</td>
+</tr>
+<tr>
+<td>PROC_DEF_ID_</td>
+<td>流程定义ID</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>流程定义ID</td>
+</tr>
+</tbody></table>
+<p>act_ru_integration：</p>
+<table>
+<thead>
+<tr>
+<th><strong>字段名称</strong></th>
+<th><strong>字段描述</strong></th>
+<th><strong>数据类型</strong></th>
+<th><strong>主键</strong></th>
+<th><strong>为空</strong></th>
+<th><strong>取值说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ID_</td>
+<td></td>
+<td>varchar(64)</td>
+<td>√</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>EXECUTION_ID_</td>
+<td></td>
+<td>varchar(64)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>PROCESS_INSTANCE_ID_</td>
+<td></td>
+<td>varchar(64)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>PROC_DEF_ID_</td>
+<td></td>
+<td>varchar(64)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>FLOW_NODE_ID_</td>
+<td></td>
+<td>varchar(64)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>CREATED_DATE_</td>
+<td></td>
+<td>timestamp</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+</tbody></table>
+<p>act_ru_job：运行时定时任务数据表( act_ru_job )</p>
+<table>
+<thead>
+<tr>
+<th><strong>字段名称</strong></th>
+<th><strong>字段描述</strong></th>
+<th><strong>数据类型</strong></th>
+<th><strong>主键</strong></th>
+<th><strong>为空</strong></th>
+<th><strong>取值说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ID_</td>
+<td>标识</td>
+<td>nvarchar(64)</td>
+<td>√</td>
+<td></td>
+<td>标识</td>
+</tr>
+<tr>
+<td>REV_</td>
+<td>版本</td>
+<td>int</td>
+<td></td>
+<td>√</td>
+<td>版本</td>
+</tr>
+<tr>
+<td>TYPE_</td>
+<td>类型</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td></td>
+<td>类型</td>
+</tr>
+<tr>
+<td>LOCK_EXP_TIME_</td>
+<td>锁定释放时间</td>
+<td>锁定释放时间</td>
+<td></td>
+<td>√</td>
+<td>锁定释放时间</td>
+</tr>
+<tr>
+<td>LOCK_OWNER_</td>
+<td>挂起者</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>挂起者</td>
+</tr>
+<tr>
+<td>EXCLUSIVE_</td>
+<td></td>
+<td>bit</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>EXECUTION_ID_</td>
+<td>执行实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>执行实例ID</td>
+</tr>
+<tr>
+<td>PROCESS_INSTANCE_ID_</td>
+<td>流程实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>流程实例ID</td>
+</tr>
+<tr>
+<td>PROC_DEF_ID_</td>
+<td>流程定义ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>流程定义ID</td>
+</tr>
+<tr>
+<td>RETRIES_</td>
+<td></td>
+<td>int</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>EXCEPTION_STACK_ID_</td>
+<td>异常信息ID</td>
+<td>varchar(64)</td>
+<td></td>
+<td>√</td>
+<td>异常信息ID</td>
+</tr>
+<tr>
+<td>EXCEPTION_MSG_</td>
+<td>异常信息</td>
+<td>nvarchar(4000)</td>
+<td></td>
+<td>√</td>
+<td>异常信息</td>
+</tr>
+<tr>
+<td>DUEDATE_</td>
+<td>到期时间</td>
+<td>datetime</td>
+<td></td>
+<td>√</td>
+<td>到期时间</td>
+</tr>
+<tr>
+<td>REPEAT_</td>
+<td>重复</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>重复</td>
+</tr>
+<tr>
+<td>HANDLER_TYPE_</td>
+<td>处理类型</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>处理类型</td>
+</tr>
+<tr>
+<td>HANDLER_CFG_</td>
+<td></td>
+<td>nvarchar(4000)</td>
+<td></td>
+<td>√</td>
+<td>标识</td>
+</tr>
+<tr>
+<td>TENANT_ID_</td>
+<td></td>
+<td>nvarchar(255)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<p>act_ru_suspended_job：</p>
+<table>
+<thead>
+<tr>
+<th><strong>字段名称</strong></th>
+<th><strong>字段描述</strong></th>
+<th><strong>数据类型</strong></th>
+<th><strong>主键</strong></th>
+<th><strong>为空</strong></th>
+<th><strong>取值说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ID_</td>
+<td></td>
+<td>varchar(64)</td>
+<td>√</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>REV_</td>
+<td></td>
+<td>int</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>TYPE_</td>
+<td></td>
+<td>varchar(255)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>EXCLUSIVE_</td>
+<td></td>
+<td>tinyint(1)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>EXECUTION_ID_</td>
+<td></td>
+<td>varchar(64)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>PROCESS_INSTANCE_ID_</td>
+<td></td>
+<td>varchar(64)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>PROC_DEF_ID_</td>
+<td></td>
+<td>varchar(64)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>RETRIES_</td>
+<td></td>
+<td>int</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>EXCEPTION_STACK_ID_</td>
+<td></td>
+<td>varchar(64)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>EXCEPTION_MSG_</td>
+<td></td>
+<td>varchar(4000)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>DUEDATE_</td>
+<td></td>
+<td>timestamp</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>REPEAT_</td>
+<td></td>
+<td>varchar(255)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>HANDLER_TYPE_</td>
+<td></td>
+<td>varchar(255)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>HANDLER_CFG_</td>
+<td></td>
+<td>varchar(4000)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>TENANT_ID_</td>
+<td></td>
+<td>varchar(255)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+</tbody></table>
+<p>act_ru_task ：运行时任务节点表</p>
+<table>
+<thead>
+<tr>
+<th><strong>字段名称</strong></th>
+<th><strong>字段描述</strong></th>
+<th><strong>数据类型</strong></th>
+<th><strong>主键</strong></th>
+<th><strong>为空</strong></th>
+<th><strong>取值说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ID_</td>
+<td>ID_</td>
+<td>nvarchar(64)</td>
+<td>√</td>
+<td></td>
+<td>ID_</td>
+</tr>
+<tr>
+<td>REV_</td>
+<td>乐观锁</td>
+<td>int</td>
+<td></td>
+<td>√</td>
+<td>乐观锁</td>
+</tr>
+<tr>
+<td>EXECUTION_ID_</td>
+<td>执行实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>执行实例ID</td>
+</tr>
+<tr>
+<td>PROC_INST_ID_</td>
+<td>流程实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>流程实例ID</td>
+</tr>
+<tr>
+<td>PROC_DEF_ID_</td>
+<td>流程定义ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>流程定义ID</td>
+</tr>
+<tr>
+<td>NAME_</td>
+<td>节点定义名称</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>节点定义名称</td>
+</tr>
+<tr>
+<td>PARENT_TASK_ID_</td>
+<td>父节点实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>父节点实例ID</td>
+</tr>
+<tr>
+<td>DESCRIPTION_</td>
+<td>节点定义描述</td>
+<td>nvarchar(4000)</td>
+<td></td>
+<td>√</td>
+<td>节点定义描述</td>
+</tr>
+<tr>
+<td>TASK_DEF_KEY_</td>
+<td>节点定义的KEY</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>任务定义的ID</td>
+</tr>
+<tr>
+<td>OWNER_</td>
+<td>实际签收人</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>拥有者（一般情况下为空，只有在委托时才有值）</td>
+</tr>
+<tr>
+<td>ASSIGNEE_</td>
+<td>签收人或委托人</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td>√</td>
+<td>签收人或委托人</td>
+</tr>
+<tr>
+<td>DELEGATION_</td>
+<td>委托类型</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>备注8</td>
+</tr>
+<tr>
+<td>PRIORITY_</td>
+<td>优先级别</td>
+<td>int</td>
+<td></td>
+<td>√</td>
+<td>优先级别，默认为：50</td>
+</tr>
+<tr>
+<td>CREATE_TIME_</td>
+<td>创建时间</td>
+<td>datetime</td>
+<td></td>
+<td>√</td>
+<td>创建时间</td>
+</tr>
+<tr>
+<td>DUE_DATE_</td>
+<td>过期时间</td>
+<td>datetime</td>
+<td></td>
+<td>√</td>
+<td>耗时</td>
+</tr>
+<tr>
+<td>CATEGORY_</td>
+<td></td>
+<td>varchar(255)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>SUSPENSION_STATE_</td>
+<td>是否挂起</td>
+<td>int</td>
+<td></td>
+<td>√</td>
+<td>1代表激活 2代表挂起</td>
+</tr>
+<tr>
+<td>TENANT_ID_</td>
+<td></td>
+<td>varchar(255)</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>FORM_KEY_</td>
+<td>节点表单KEY</td>
+<td>varchar(255)</td>
+<td></td>
+<td>√</td>
+<td>节点表单key</td>
+</tr>
+<tr>
+<td>CLAIM_TIME_</td>
+<td></td>
+<td>datetime</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+</tbody></table>
+<p>act_ru_timer_job：</p>
+<table>
+<thead>
+<tr>
+<th><strong>字段名称</strong></th>
+<th><strong>字段描述</strong></th>
+<th><strong>数据类型</strong></th>
+<th><strong>主键</strong></th>
+<th><strong>为空</strong></th>
+<th><strong>取值说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ID_</td>
+<td></td>
+<td>varchar(64)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>REV_</td>
+<td></td>
+<td>int</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>TYPE_</td>
+<td></td>
+<td>varchar(255)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>LOCK_EXP_TIME_</td>
+<td></td>
+<td>timestamp</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>LOCK_OWNER_</td>
+<td></td>
+<td>varchar(255)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>EXCLUSIVE_</td>
+<td></td>
+<td>tinyint(1)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>EXECUTION_ID_</td>
+<td></td>
+<td>varchar(64)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>PROCESS_INSTANCE_ID_</td>
+<td></td>
+<td>varchar(64)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>PROC_DEF_ID_</td>
+<td></td>
+<td>varchar(64)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>RETRIES_</td>
+<td></td>
+<td>int</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>EXCEPTION_STACK_ID_</td>
+<td></td>
+<td>varchar(64)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>EXCEPTION_MSG_</td>
+<td></td>
+<td>varchar(4000)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>DUEDATE_</td>
+<td></td>
+<td>timestamp</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>REPEAT_</td>
+<td></td>
+<td>varchar(255)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>HANDLER_TYPE_</td>
+<td></td>
+<td>varchar(255)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>HANDLER_CFG_</td>
+<td></td>
+<td>varchar(4000)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>TENANT_ID_</td>
+<td></td>
+<td>varchar(255)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<p>act_ru_variable ：运行时流程变量数据表</p>
+<table>
+<thead>
+<tr>
+<th><strong>字段名称</strong></th>
+<th><strong>字段描述</strong></th>
+<th><strong>数据类型</strong></th>
+<th><strong>主键</strong></th>
+<th><strong>为空</strong></th>
+<th><strong>取值说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ID_</td>
+<td>ID_</td>
+<td>nvarchar(64)</td>
+<td>√</td>
+<td></td>
+<td>主键标识</td>
+</tr>
+<tr>
+<td>REV_</td>
+<td>乐观锁</td>
+<td>int</td>
+<td></td>
+<td>√</td>
+<td>乐观锁</td>
+</tr>
+<tr>
+<td>TYPE_</td>
+<td>类型</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td></td>
+<td>备注9</td>
+</tr>
+<tr>
+<td>NAME_</td>
+<td>名称</td>
+<td>nvarchar(255)</td>
+<td></td>
+<td></td>
+<td>变量名称</td>
+</tr>
+<tr>
+<td>EXECUTION_ID_</td>
+<td>执行实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>执行的ID</td>
+</tr>
+<tr>
+<td>PROC_INST_ID_</td>
+<td>流程实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>流程实例ID</td>
+</tr>
+<tr>
+<td>TASK_ID_</td>
+<td>节点实例ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>节点实例ID(Local）</td>
+</tr>
+<tr>
+<td>BYTEARRAY_ID_</td>
+<td>字节表ID</td>
+<td>nvarchar(64)</td>
+<td></td>
+<td>√</td>
+<td>字节表的ID（ACT_GE_BYTEARRAY）</td>
+</tr>
+<tr>
+<td>DOUBLE_</td>
+<td>DOUBLE_</td>
+<td>float</td>
+<td></td>
+<td>√</td>
+<td>存储变量类型为Double</td>
+</tr>
+<tr>
+<td>LONG_</td>
+<td>LONG_</td>
+<td>numeric(19)</td>
+<td></td>
+<td>√</td>
+<td>存储变量类型为long</td>
+</tr>
+<tr>
+<td>TEXT_</td>
+<td>TEXT_</td>
+<td>nvarchar(4000)</td>
+<td></td>
+<td>√</td>
+<td>‘存储变量值类型为String 如此处存储持久化对象时，值jpa对象的class</td>
+</tr>
+<tr>
+<td>TEXT2_</td>
+<td>TEXT2_</td>
+<td>nvarchar(4000)</td>
+<td></td>
+<td>√</td>
+<td>此处存储的是JPA持久化对象时，才会有值。此值为对象</td>
+</tr>
+</tbody></table>
+<h2 id="4-基本操作"><a href="#4-基本操作" class="headerlink" title="4. 基本操作"></a>4. 基本操作</h2><h3 id="4-1-流程部署"><a href="#4-1-流程部署" class="headerlink" title="4.1. 流程部署"></a>4.1. 流程部署</h3><p>流程部署分为自动部署和手动部署</p>
+<ul>
+<li><em>自动部署</em> ：将 <code>bpmn</code> 文件放入 <code>resources</code> 资源目录下的 <code>processes</code> 文件夹中，项目启动时则进行自动部署。check-process-definitions需设置为true。</li>
+<li><em>手动部署</em> ：新建测试类，并编写流程部署测试方法。</li>
+</ul>
+<h4 id="4-1-1-部署流程"><a href="#4-1-1-部署流程" class="headerlink" title="4.1.1. 部署流程"></a>4.1.1. 部署流程</h4><p>需要使用RepositoryService部署流程定义。</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br></pre></td><td class="code"><pre><span class="line">@Service</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">TestDemo</span> &#123;</span><br><span class="line"></span><br><span class="line">    </span><br><span class="line"></span><br><span class="line">    @Autowired</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> RepositoryService repositoryService;</span><br><span class="line"></span><br><span class="line">    </span><br><span class="line"></span><br><span class="line">    <span class="comment">// 测试部署</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Deployment <span class="title">deploy</span>()</span> &#123;</span><br><span class="line"></span><br><span class="line"><span class="comment">//        // 获取 ProcessEngine 流程引擎</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//        // 获取RepositoryService</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//        RepositoryService repositoryService = processEngine.getRepositoryService();</span></span><br><span class="line"></span><br><span class="line">        </span><br><span class="line"></span><br><span class="line">        <span class="comment">// 进行部署</span></span><br><span class="line"></span><br><span class="line">        Deployment deploy = repositoryService.createDeployment()</span><br><span class="line"></span><br><span class="line">                .addClasspathResource(<span class="string">&quot;bpmn/leave.bpmn20.xml&quot;</span>)</span><br><span class="line"></span><br><span class="line">                .name(<span class="string">&quot;请假流程&quot;</span>)</span><br><span class="line"></span><br><span class="line">                .deploy();</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">        System.<span class="keyword">out</span>.println(STR.<span class="string">&quot;流程部署id:\&#123;deploy.getId()&#125;&quot;</span>);</span><br><span class="line"></span><br><span class="line">        System.<span class="keyword">out</span>.println(STR.<span class="string">&quot;流程部署name:\&#123;deploy.getName()&#125;&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> deploy;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Deployment <span class="title">deployZip</span>()</span> &#123;</span><br><span class="line"></span><br><span class="line">        InputStream inputStream = <span class="keyword">this</span>.getClass()</span><br><span class="line"></span><br><span class="line">                .getClassLoader()</span><br><span class="line"></span><br><span class="line">                .getResourceAsStream(<span class="string">&quot;bpmn/leave.bpmn20.zip&quot;</span>);</span><br><span class="line"></span><br><span class="line">        ZipInputStream zipInputStream = <span class="keyword">new</span> ZipInputStream(inputStream);</span><br><span class="line"></span><br><span class="line">        Deployment deploy = repositoryService.createDeployment()</span><br><span class="line"></span><br><span class="line">                .addZipInputStream(zipInputStream)</span><br><span class="line"></span><br><span class="line">                .name(<span class="string">&quot;请假流程-zip&quot;</span>)</span><br><span class="line"></span><br><span class="line">                .deploy();</span><br><span class="line"></span><br><span class="line">        System.<span class="keyword">out</span>.println(STR.<span class="string">&quot;流程部署id:\&#123;deploy.getId()&#125;&quot;</span>);</span><br><span class="line"></span><br><span class="line">        System.<span class="keyword">out</span>.println(STR.<span class="string">&quot;流程部署name:\&#123;deploy.getName()&#125;&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> deploy;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">    <span class="comment">// 查询流程部署列表</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">getDeploymentList</span>()</span> &#123;</span><br><span class="line"></span><br><span class="line">        List&lt;Deployment&gt; deployments = repositoryService.createDeploymentQuery().list();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (!deployments.isEmpty()) &#123;</span><br><span class="line"></span><br><span class="line">            deployments.forEach(deployment -&gt; &#123;</span><br><span class="line"></span><br><span class="line">                System.<span class="keyword">out</span>.println(STR.<span class="string">&quot;Id：\&#123;deployment.getId()&#125;&quot;</span>);</span><br><span class="line"></span><br><span class="line">                System.<span class="keyword">out</span>.println(STR.<span class="string">&quot;Name：\&#123;deployment.getName()&#125;&quot;</span>);</span><br><span class="line"></span><br><span class="line">                System.<span class="keyword">out</span>.println(STR.<span class="string">&quot;DeploymentTime：\&#123;deployment.getDeploymentTime()&#125;&quot;</span>);</span><br><span class="line"></span><br><span class="line">                System.<span class="keyword">out</span>.println(STR.<span class="string">&quot;Key：\&#123;deployment.getKey()&#125;&quot;</span>);</span><br><span class="line"></span><br><span class="line">            &#125;);</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">    <span class="comment">// 删除流程部署</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">deleteDeployment</span>()</span> &#123;</span><br><span class="line"></span><br><span class="line">        String deploymentId = <span class="string">&quot;0f1cf913-0c4c-11f0-88fe-002b672ee8ea&quot;</span>;</span><br><span class="line"></span><br><span class="line">        repositoryService.deleteDeployment(deploymentId, <span class="literal">false</span>);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到在SpringBoot中使用 repositoryService 非常方便，直接使用IOC容器中的bean即可。如果在非容器环境中，需要先获得ProcessEngine流程引擎，然后再通过ProcessEngine得到 repositoryService，进而进行部署。</p>
+<p>涉及数据表：act_re_deployment、act_re_procdef、act_ge_bytearray、act_ru_identitylink</p>
+<h4 id="4-1-2-查询流程定义"><a href="#4-1-2-查询流程定义" class="headerlink" title="4.1.2. 查询流程定义"></a>4.1.2. 查询流程定义</h4><figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 查询流程定义列表</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">getProcessDefinition</span>()</span> &#123;</span><br><span class="line"></span><br><span class="line">    List&lt;ProcessDefinition&gt; list = repositoryService.createProcessDefinitionQuery().list();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (ProcessDefinition processDefinition : list) &#123;</span><br><span class="line"></span><br><span class="line">        System.<span class="keyword">out</span>.println(STR.<span class="string">&quot;流程定义key：\&#123;processDefinition.getKey()&#125;&quot;</span>);</span><br><span class="line"></span><br><span class="line">        System.<span class="keyword">out</span>.println(STR.<span class="string">&quot;流程定义name：\&#123;processDefinition.getName()&#125;&quot;</span>);</span><br><span class="line"></span><br><span class="line">        System.<span class="keyword">out</span>.println(STR.<span class="string">&quot;流程部署id：\&#123;processDefinition.getDeploymentId()&#125;&quot;</span>);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上述例子知识列举了一个最简单的列表查询，此外关于流程定义在实际应用中，还有很多更为高级的查询方式：</p>
+<ul>
+<li>active()：查询激活状态的流程定义</li>
+<li>latestVersion()：查询version字段最新的流程定义</li>
+<li>processDefinitionKey()：根据流程定义的key查询</li>
+<li>processDefinitionId()：根据流程定义的id查询</li>
+<li>processDefinitionIdOrKey()：根据流程定义的id或key查询</li>
+</ul>
+<h3 id="4-2-流程实例"><a href="#4-2-流程实例" class="headerlink" title="4.2. 流程实例"></a>4.2. 流程实例</h3><h4 id="4-2-1-发起流程实例"><a href="#4-2-1-发起流程实例" class="headerlink" title="4.2.1. 发起流程实例"></a>4.2.1. 发起流程实例</h4><p>在部署了流程定义之后，接下来就是发起流程实例。</p>
+<p>针对上述的流程，启动一个流程实例相当于发起一个请假申请单，这就相当于Java类和Java对象的关系，类定义好之后需要new创建一个对象使用，当然，也可以new多个对象。</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">@Autowired</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> RuntimeService runtimeService;</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line"><span class="comment">// 启动流程实例</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">startProcessInstance</span>()</span> &#123;</span><br><span class="line"></span><br><span class="line">    String processDefinitionKey = <span class="string">&quot;leave&quot;</span>;</span><br><span class="line"></span><br><span class="line">    ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(processDefinitionKey);</span><br><span class="line"></span><br><span class="line">    System.<span class="keyword">out</span>.println(STR.<span class="string">&quot;流程实例id：\&#123;processInstance.getProcessInstanceId()&#125;&quot;</span>);</span><br><span class="line"></span><br><span class="line">    System.<span class="keyword">out</span>.println(STR.<span class="string">&quot;流程实例的businessKey：\&#123;processInstance.getBusinessKey()&#125;&quot;</span>);</span><br><span class="line"></span><br><span class="line">    System.<span class="keyword">out</span>.println(STR.<span class="string">&quot;流程定义id：\&#123;processInstance.getProcessDefinitionId()&#125;&quot;</span>);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>runtimeService可直接从容器中获取，然后可以调用startProcessInstanceByKey()方法启动一个流程实例，这个方法必须传入流程定义的key-processDefinitionKey，此外还以传入：</p>
+<ul>
+<li>businessKey：业务key，将流程实例和业务数据关联起来。</li>
+<li>variables：动态传入的参数，可作为后续分支流转的条件。</li>
+</ul>
+<p>涉及数据表：act_hi_actinst、act_hi_taskinst、act_hi_identitylink、act_hi_procinst、act_ru_execution、act_ru_identitylink、act_ru_task</p>
+<h4 id="4-2-2-查询流程实例"><a href="#4-2-2-查询流程实例" class="headerlink" title="4.2.2. 查询流程实例"></a>4.2.2. 查询流程实例</h4><p>和流程定义一样，流程实例的查询也可以有多种方式，比如下面例子中例举了最常见的几种查询方式。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">// 查询流程实例</span><br><span class="line"></span><br><span class="line">public void getProcessInstance() &#123;</span><br><span class="line"></span><br><span class="line">    // 通过流程定义key查询</span><br><span class="line"></span><br><span class="line">    String processDefinitionKey = &quot;leave&quot;;</span><br><span class="line"></span><br><span class="line">    List&lt;ProcessInstance&gt; list = runtimeService.createProcessInstanceQuery()</span><br><span class="line"></span><br><span class="line">    .processDefinitionKey(processDefinitionKey).list();</span><br><span class="line"></span><br><span class="line">    for (ProcessInstance processInstance : list) &#123;</span><br><span class="line"></span><br><span class="line">        System.out.println(processInstance.getProcessInstanceId());</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">    // 通过业务key查询</span><br><span class="line"></span><br><span class="line">    String businessKey = &quot;zl-leave&quot;;</span><br><span class="line"></span><br><span class="line">    List&lt;ProcessInstance&gt; list1 = runtimeService.createProcessInstanceQuery()</span><br><span class="line"></span><br><span class="line">    .processInstanceBusinessKey(businessKey).list();</span><br><span class="line"></span><br><span class="line">    for (ProcessInstance processInstance : list1) &#123;</span><br><span class="line"></span><br><span class="line">        System.out.println(processInstance.getProcessInstanceId());</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="4-2-3-流程实例的挂起与激活"><a href="#4-2-3-流程实例的挂起与激活" class="headerlink" title="4.2.3. 流程实例的挂起与激活"></a>4.2.3. 流程实例的挂起与激活</h4><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 流程实例的挂起</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="built_in">void</span> <span class="title function_">suspendProcessInstance</span>(<span class="params"></span>) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="title class_">String</span> processInstanceId = <span class="string">&quot;cd81c512-0c56-11f0-828a-002b672ee8ea&quot;</span>;</span><br><span class="line"></span><br><span class="line">    runtimeService.<span class="title function_">suspendProcessInstanceById</span>(processInstanceId);</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line"><span class="comment">// 流程实例的激活</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="built_in">void</span> <span class="title function_">activeProcessInstance</span>(<span class="params"></span>) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="title class_">String</span> processInstanceId = <span class="string">&quot;cd81c512-0c56-11f0-828a-002b672ee8ea&quot;</span>;</span><br><span class="line"></span><br><span class="line">    runtimeService.<span class="title function_">activateProcessInstanceById</span>(processInstanceId);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>act_ru_task表中的SUSPENSION_STATE_字段发生变更，1代表激活、2代表挂起。</p>
+<p>除了流程实例，像流程定义、任务也可以挂起和激活</p>
+<h4 id="4-2-4-删除流程实例"><a href="#4-2-4-删除流程实例" class="headerlink" title="4.2.4. 删除流程实例"></a>4.2.4. 删除流程实例</h4><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 删除流程实例</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="built_in">void</span> <span class="title function_">deleteProcessInstance</span>(<span class="params"></span>) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="title class_">String</span> processInstanceId = <span class="string">&quot;cd81c512-0c56-11f0-828a-002b672ee8ea&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="title class_">String</span> deleteReason = <span class="string">&quot;不想请假了&quot;</span>;</span><br><span class="line"></span><br><span class="line">    runtimeService.<span class="title function_">deleteProcessInstance</span>(processInstanceId, deleteReason);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-3-任务管理"><a href="#4-3-任务管理" class="headerlink" title="4.3. 任务管理"></a>4.3. 任务管理</h3><p>我们以最常见的UserTask为例，利用Activiti BPMN visualizer插件可以查看UserTask如下：</p>
+<p>![[_resources&#x2F;1c7a68637852b9868915019ac062ada0_MD5.png]]</p>
+<ul>
+<li>Assignee：执行人&#x2F;代理人</li>
+<li>Candidate Users：候选人</li>
+<li>Candidate Groups：候选组</li>
+<li>Due Date：任务到期时间</li>
+</ul>
+<p>涉及数据表：act_hi_actinst、act_hi_taskinst、act_hi_identitylink、act_hi_procinst、act_ru_execution、act_ru_identitylink、act_ru_task</p>
+<h4 id="4-3-1-查询任务"><a href="#4-3-1-查询任务" class="headerlink" title="4.3.1. 查询任务"></a>4.3.1. 查询任务</h4><p>在任务管理时，可以查看任务列表，当然也可以根据指定的执行人查询。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">@Autowired</span><br><span class="line"></span><br><span class="line">private TaskService taskService;</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">// 查询任务</span><br><span class="line"></span><br><span class="line">public void getTask() &#123;</span><br><span class="line"></span><br><span class="line">    // 查询任务列表</span><br><span class="line"></span><br><span class="line">    List&lt;Task&gt; list = taskService.createTaskQuery().list();</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">    // 查询某个执行人的任务</span><br><span class="line"></span><br><span class="line">    List&lt;Task&gt; list1 = taskService.createTaskQuery().taskAssignee(&quot;张磊&quot;).list();</span><br><span class="line"></span><br><span class="line">    </span><br><span class="line"></span><br><span class="line">    // 查询某个执行人执行的某项任务</span><br><span class="line"></span><br><span class="line">    List&lt;Task&gt; list2 = taskService.createTaskQuery().processDefinitionKey(&quot;leave&quot;).taskAssignee(&quot;张磊&quot;).list();</span><br><span class="line"></span><br><span class="line">    </span><br><span class="line"></span><br><span class="line">    // 查询没有执行人的任务</span><br><span class="line"></span><br><span class="line">    List&lt;Task&gt; list3 = taskService.createTaskQuery().taskUnassigned().list();</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="4-3-2-执行任务"><a href="#4-3-2-执行任务" class="headerlink" title="4.3.2. 执行任务"></a>4.3.2. 执行任务</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">// 完成任务</span><br><span class="line"></span><br><span class="line">public void completeTask() &#123;</span><br><span class="line"></span><br><span class="line">    // 完成所有执行人为“张磊”的请假任务</span><br><span class="line"></span><br><span class="line">    List&lt;Task&gt; list = taskService.createTaskQuery()</span><br><span class="line"></span><br><span class="line">        .processDefinitionKey(&quot;leave&quot;)</span><br><span class="line"></span><br><span class="line">        .taskAssignee(&quot;张磊&quot;)</span><br><span class="line"></span><br><span class="line">        .list();</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">    for (Task task : list) &#123;</span><br><span class="line"></span><br><span class="line">        // 完成任务</span><br><span class="line"></span><br><span class="line">        taskService.complete(task.getId());</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在完成任务时，基本思路就是先按照流程定义key、或任务执行人、或任务id，找到待完成的任务，然后调用complete方法完成任务，其接收两个参数，分别是：</p>
+<ul>
+<li>taskId：任务id</li>
+<li>variables：向下流转的参数</li>
+</ul>
+<h4 id="4-3-3-添加批注"><a href="#4-3-3-添加批注" class="headerlink" title="4.3.3. 添加批注"></a>4.3.3. 添加批注</h4><p>在执行任务之前，还可以添加批注，然后可以在后续的 <a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=%E5%8E%86%E5%8F%B2%E8%AE%B0%E5%BD%95&spm=1001.2101.3001.7020">历史记录</a> 中看到添加的批注</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">// 添加批注</span><br><span class="line"></span><br><span class="line">public void addCommend() &#123;</span><br><span class="line"></span><br><span class="line">    String user = &quot;jack&quot;;</span><br><span class="line"></span><br><span class="line">    List&lt;Task&gt; list = taskService.createTaskQuery().taskAssignee(user).list();</span><br><span class="line"></span><br><span class="line">    for (Task task : list) &#123;</span><br><span class="line"></span><br><span class="line">        String taskId = task.getId();</span><br><span class="line"></span><br><span class="line">        String processInstanceId = task.getProcessInstanceId();</span><br><span class="line"></span><br><span class="line">        //在任务执行之前任务添加批注信息</span><br><span class="line"></span><br><span class="line">        taskService.addComment(taskId, processInstanceId, &quot;审批通过&quot;);</span><br><span class="line"></span><br><span class="line">        taskService.complete(taskId);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">// 查看批注</span><br><span class="line"></span><br><span class="line">public void getCommend() &#123;</span><br><span class="line"></span><br><span class="line">    String taskId = &quot;xxxx&quot;;</span><br><span class="line"></span><br><span class="line">    if(taskComments.size()&gt;0)&#123;</span><br><span class="line"></span><br><span class="line">        System.out.println(&quot;审批批注:&quot;+taskComments.get(0).getFullMessage());</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="4-3-4-任务的拾取与归还"><a href="#4-3-4-任务的拾取与归还" class="headerlink" title="4.3.4. 任务的拾取与归还"></a>4.3.4. 任务的拾取与归还</h4><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 任务拾取</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="built_in">void</span> <span class="title function_">claimTask</span>(<span class="params"></span>) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="title class_">String</span> taskId = <span class="string">&quot;9409084b-0c67-11f0-a4a4-002b672ee8ea&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="title class_">String</span> userId = <span class="string">&quot;wtc&quot;</span>;</span><br><span class="line"></span><br><span class="line">    taskService.<span class="title function_">claim</span>(taskId, userId);</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line"><span class="comment">// 任务归还</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="built_in">void</span> <span class="title function_">returnTask</span>(<span class="params"></span>) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="title class_">String</span> taskId = <span class="string">&quot;9409084b-0c67-11f0-a4a4-002b672ee8ea&quot;</span>;</span><br><span class="line"></span><br><span class="line">    taskService.<span class="title function_">unclaim</span>(taskId);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>假设一个任务没有指定执行人，某人则可以动态的拾取任务，也可以归还任务。落到表中对应的是act_ru_task表中的ASSIGNEE_字段。</p>
+<h4 id="4-3-5-任务的交办-转办"><a href="#4-3-5-任务的交办-转办" class="headerlink" title="4.3.5. 任务的交办&#x2F;转办"></a>4.3.5. 任务的交办&#x2F;转办</h4><p>此外，除了主动是取任务，还可以被动交办任务，但其实落到表中是同一个字段。</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 交办任务</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="built_in">void</span> <span class="title function_">handoverTask</span>(<span class="params"></span>) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="title class_">String</span> taskId = <span class="string">&quot;9409084b-0c67-11f0-a4a4-002b672ee8ea&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="title class_">String</span> userId = <span class="string">&quot;jack&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 交办任务</span></span><br><span class="line"></span><br><span class="line">    taskService.<span class="title function_">setAssignee</span>(taskId, userId);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果当前已经有了任务的执行人，再次调用setAssignee方法就是更新ASSIGNEE_字段，此种场景就是任务的转办！</p>
+<h4 id="4-3-6-任务的委派"><a href="#4-3-6-任务的委派" class="headerlink" title="4.3.6. 任务的委派"></a>4.3.6. 任务的委派</h4><p>任务的委派，指的是将任务转交给他人处理，当他人处理完成后，任务会自动回到当前处理人身上。</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 委派任务</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="built_in">void</span> <span class="title function_">handoverTask</span>(<span class="params"></span>) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="title class_">String</span> taskId = <span class="string">&quot;9409084b-0c67-11f0-a4a4-002b672ee8ea&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="title class_">String</span> userId = <span class="string">&quot;jack&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 委派任务</span></span><br><span class="line"></span><br><span class="line">    taskService.<span class="title function_">delegateTask</span>(taskId, userId);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>比如，当前任务的处理人是”zl“，如果此时”zl“将任务委派给”jack“。则落到数据库中，act_ru_task表中的ASSIGNEE_字段则会变为”jack“，而OWNER_字段会变为”zl“。</p>
+<p>任务到”jack“后，由其resolveTask：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="built_in">void</span> <span class="title function_">customTest</span>(<span class="params"></span>) &#123;</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">    <span class="title class_">String</span> user = <span class="string">&quot;jack&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="title class_">List</span>&lt;<span class="title class_">Task</span>&gt; list = taskService.<span class="title function_">createTaskQuery</span>().<span class="title function_">taskAssignee</span>(user).<span class="title function_">list</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="title class_">Task</span> task : list) &#123;</span><br><span class="line"></span><br><span class="line">        taskService.<span class="title function_">resolveTask</span>(task.<span class="title function_">getId</span>());</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>至此，任务就会回到”zl“处。</p>
+<h3 id="4-4-历史记录"><a href="#4-4-历史记录" class="headerlink" title="4.4. 历史记录"></a>4.4. 历史记录</h3><p>利用HistoryService 自然可以查询历史记录，简单示例如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line">@Autowired</span><br><span class="line"></span><br><span class="line">private HistoryService historyService;</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">@Test</span><br><span class="line"></span><br><span class="line">public void history() &#123;</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">    // 根据用户名查询历史记录</span><br><span class="line"></span><br><span class="line">    String assignee = &quot;张磊&quot;;</span><br><span class="line"></span><br><span class="line">    List&lt;HistoricTaskInstance&gt; historicTasks = this.historyService.createHistoricTaskInstanceQuery()</span><br><span class="line"></span><br><span class="line">    .orderByHistoricTaskInstanceEndTime()</span><br><span class="line"></span><br><span class="line">    .asc()</span><br><span class="line"></span><br><span class="line">    .taskAssignee(assignee)</span><br><span class="line"></span><br><span class="line">    .list();</span><br><span class="line"></span><br><span class="line">    if (!CollectionUtils.isEmpty(historicTasks)) &#123;</span><br><span class="line"></span><br><span class="line">        historicTasks.forEach(historicTaskInstance -&gt; &#123;</span><br><span class="line"></span><br><span class="line">            System.out.println(STR.&quot;Id：\&#123;historicTaskInstance.getId()&#125;&quot;);</span><br><span class="line"></span><br><span class="line">            System.out.println(STR.&quot;ProcessInstanceId：\&#123;historicTaskInstance.getProcessInstanceId()&#125;&quot;);</span><br><span class="line"></span><br><span class="line">            System.out.println(STR.&quot;Name：\&#123;historicTaskInstance.getName()&#125;&quot;);</span><br><span class="line"></span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">    //  根据流程实例ID查询历史</span><br><span class="line"></span><br><span class="line">    String processInstanceId = &quot;0f8a9b00-479e-11ed-af85-e4a8dfd43d4a&quot;;</span><br><span class="line"></span><br><span class="line">    List&lt;HistoricTaskInstance&gt; historicTasks1 = this.historyService.createHistoricTaskInstanceQuery()</span><br><span class="line"></span><br><span class="line">    .orderByHistoricTaskInstanceEndTime()</span><br><span class="line"></span><br><span class="line">    .asc()</span><br><span class="line"></span><br><span class="line">    .processInstanceId(processInstanceId)</span><br><span class="line"></span><br><span class="line">    .list();</span><br><span class="line"></span><br><span class="line">    if (!CollectionUtils.isEmpty(historicTasks1)) &#123;</span><br><span class="line"></span><br><span class="line">        historicTasks1.forEach(historicTaskInstance -&gt; &#123;</span><br><span class="line"></span><br><span class="line">            System.out.println(STR.&quot;Id：\&#123;historicTaskInstance.getId()&#125;&quot;);</span><br><span class="line"></span><br><span class="line">            System.out.println(STR.&quot;ProcessInstanceId：\&#123;historicTaskInstance.getProcessInstanceId()&#125;&quot;);</span><br><span class="line"></span><br><span class="line">            System.out.println(STR.&quot;Name：\&#123;historicTaskInstance.getName()&#125;&quot;);</span><br><span class="line"></span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-5-UEL表达式"><a href="#4-5-UEL表达式" class="headerlink" title="4.5. UEL表达式"></a>4.5. UEL表达式</h3><ul>
+<li>表达式以 <code>${</code> 开始； <code>}</code> 结束，例如：${day &gt; 100}</li>
+<li>支持逻辑运算：${username &#x3D;&#x3D; “admin” and password &#x3D;&#x3D; “123456”}</li>
+<li>支持变量（变量名必须小写）与实体类赋值</li>
+</ul>
+<p>涉及数据表：act_hi_varinst、act_ru_variable</p>
+<p>通常UEL表达式可用于条件网关等场景。</p>
+<p>需求：根据订单金额决定是否需要经理审批。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&lt;exclusiveGateway id=&quot;approvalGateway&quot;/&gt;</span><br><span class="line"></span><br><span class="line">&lt;sequenceFlow id=&quot;toManager&quot; sourceRef=&quot;approvalGateway&quot; targetRef=&quot;managerApproval&quot;&gt;</span><br><span class="line"></span><br><span class="line">  &lt;conditionExpression xsi:type=&quot;tFormalExpression&quot;&gt;$&#123;order.amount &gt; 10000&#125;&lt;/conditionExpression&gt;</span><br><span class="line"></span><br><span class="line">&lt;/sequenceFlow&gt;</span><br><span class="line"></span><br><span class="line">&lt;sequenceFlow id=&quot;toDirect&quot; sourceRef=&quot;approvalGateway&quot; targetRef=&quot;directComplete&quot;&gt;</span><br><span class="line"></span><br><span class="line">  &lt;conditionExpression xsi:type=&quot;tFormalExpression&quot;&gt;$&#123;order.amount &lt;= 10000&#125;&lt;/conditionExpression&gt;</span><br><span class="line"></span><br><span class="line">&lt;/sequenceFlow&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-6-BPMN2-0网关"><a href="#4-6-BPMN2-0网关" class="headerlink" title="4.6. BPMN2.0网关"></a>4.6. BPMN2.0网关</h3><h4 id="4-6-1-并行网关（Parallel-Gateway）"><a href="#4-6-1-并行网关（Parallel-Gateway）" class="headerlink" title="4.6.1. 并行网关（Parallel Gateway）"></a>4.6.1. 并行网关（Parallel Gateway）</h4><p>![[_resources&#x2F;f90bab9a43a2d915ee8a8d7d17ea1be5_MD5.png]]</p>
+<p>并行网关（Parallel Gateway）用于控制流程的 并行执行 和 同步汇聚，分为两种类型：</p>
+<ul>
+<li>分叉（Fork）：创建多个并行路径，流程同时进入多个分支。</li>
+<li>汇聚（Join）：等待所有并行分支完成后，流程继续向下执行。</li>
+</ul>
+<p>在 BPMN 中，并行网关通过 <parallelGateway> 标签定义，其 ID 需在分叉和汇聚节点之间对应。</p>
+<h4 id="4-6-2-排他网关（Exclusive-gateway）"><a href="#4-6-2-排他网关（Exclusive-gateway）" class="headerlink" title="4.6.2. 排他网关（Exclusive gateway）"></a>4.6.2. 排他网关（Exclusive gateway）</h4><p>![[_resources&#x2F;729b00bb2c82ed3ab6b29dc2e66d89bb_MD5.png]]</p>
+<p>排他网关（Exclusive gateway）基于条件选择 唯一一条分支 执行，分支间互斥。有两点需要注意：</p>
+<ul>
+<li>必须定义至少一个条件分支，否则流程会报错。</li>
+<li>若多个条件同时满足，默认选择第一个匹配的分支。</li>
+</ul>
+<p>在BPMN中，排他网关通过<exclusiveGateway>标签定义。</p>
+<p>举个栗子：如上图，其中排他网关有两个分支，分别使请假&gt;5天、请假&lt;&#x3D;5天，如下：</p>
+<p>![[_resources&#x2F;cc7950399e2b44b22bc3a5917a9e1978_MD5.png]]</p>
+<p>![[_resources&#x2F;1f68b8f75ce6b2de004a42d8d4ee8827_MD5.png]]</p>
+<p>可见在Condition expression处，填写的就是UEL表达式，而day变量则是在排他网关之前传入。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">@Test</span><br><span class="line"></span><br><span class="line">public void customTest() &#123;</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">    String user = &quot;zl&quot;;</span><br><span class="line"></span><br><span class="line">    List&lt;Task&gt; list = taskService.createTaskQuery().taskAssignee(user).list();</span><br><span class="line"></span><br><span class="line">    for (Task task : list) &#123;</span><br><span class="line"></span><br><span class="line">        HashMap&lt;String, Object&gt; variables = new HashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        variables.put(&quot;day&quot;, 10);</span><br><span class="line"></span><br><span class="line">        taskService.complete(task.getId(), variables);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如上，传入的day为10，所以排他网关就会走”总经理审批“这个条件分支。</p>
+<hr>
+<p>后续可能还会继续研究其与SpringSecurity安全框架之间的详细联系，以及关于前端框架的结合，未完待续…</p>
+<p>登录后您可以享受以下权益：</p>
+<ul>
+<li>免费复制代码</li>
+<li>和博主大V互动</li>
+<li>下载海量资源</li>
+<li>发动态&#x2F;写文章&#x2F;加入社区<br>×</li>
+</ul>
+<p>实付 元</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44954504/article/details/">使用余额支付</a></p>
+<p>点击重新获取</p>
+<p>扫码支付</p>
+<p>钱包余额 0</p>
+<p>抵扣说明：</p>
+<p>1.余额是钱包充值的虚拟货币，按照1:1的比例进行支付金额的抵扣。<br>2.余额无法直接购买下载，可以购买VIP、付费专栏及课程。</p>
+<p><a target="_blank" rel="noopener" href="https://i.csdn.net/#/wallet/balance/recharge">余额充值</a></p>
+<p>举报</p>
+<p>[![[_resources&#x2F;4bc9ab7d6ff27653410cf36782730aac_MD5.gif]]](<a target="_blank" rel="noopener" href="https://mall.csdn.net/vip?utm_source=25618_vip_blogrighticon">https://mall.csdn.net/vip?utm_source=25618_vip_blogrighticon</a>) [![[_resources&#x2F;35c7362356adf5a11cd3cc47fd01628f_MD5.png]] 点击体验<br>DeepSeekR1满血版](<a target="_blank" rel="noopener" href="https://ai.csdn.net/?utm_source=cknow_pc_blogdetail&spm=1001.2101.3001.10583">https://ai.csdn.net/?utm_source=cknow_pc_blogdetail&amp;spm=1001.2101.3001.10583</a>) ![[_resources&#x2F;90bd0cbf3aff8fdff8bf9b011b581e20_MD5.png]]</p>
+<p>程序员都在用的中文IT技术交流社区</p>
+<p>![[_resources&#x2F;08a47e60886378fe60a3d9c8f4ae8bc6_MD5.png]]</p>
+<p>专业的中文 IT 技术社区，与千万技术人共成长</p>
+<p>![[_resources&#x2F;a51be6c085b867a5bd82d8dc1cea9b46_MD5.png]]</p>
+<p>关注【CSDN】视频号，行业资讯、技术分享精彩不断，直播好礼送不停！</p>
+<p>客服 返回顶部</p>
+<p>![[_resources&#x2F;d714522fceeae1639ce39b64defae319_MD5.png]] ![[_resources&#x2F;6864f5e008ef376446b6dec9677397b3_MD5.png]] ![[_resources&#x2F;bc7a22f43a8574862fcec1f7533d6cd9_MD5.png]] ![[_resources&#x2F;bd284e7ea918fd1e453652a859386d65_MD5.png]] ![[_resources&#x2F;1c7a68637852b9868915019ac062ada0_MD5.png]] ![[_resources&#x2F;f90bab9a43a2d915ee8a8d7d17ea1be5_MD5.png]] ![[_resources&#x2F;729b00bb2c82ed3ab6b29dc2e66d89bb_MD5.png]] ![[_resources&#x2F;cc7950399e2b44b22bc3a5917a9e1978_MD5.png]] ![[_resources&#x2F;1f68b8f75ce6b2de004a42d8d4ee8827_MD5.png]]</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2025/06/18/Activiti%208.x%20%E5%B7%A5%E4%BD%9C%E6%B5%81%E5%85%A5%E9%97%A8%EF%BC%88%E5%90%ABdemo%EF%BC%89/">https://yhao521.github.io/2025/06/18/Activiti%208.x%20%E5%B7%A5%E4%BD%9C%E6%B5%81%E5%85%A5%E9%97%A8%EF%BC%88%E5%90%ABdemo%EF%BC%89/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/%E6%95%99%E7%A8%8B/">教程</a><a class="post-meta__tags" href="/tags/java-programming/">java/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a><a class="post-meta__tags" href="/tags/%E6%91%98%E5%BD%95/">摘录</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/06/18/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E5%BC%80%E5%8F%91%E4%B8%80%E4%B8%AA%20MCP%20Server%EF%BC%81%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%81/" title="从零开始开发一个 MCP Server！保姆级教程！"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">从零开始开发一个 MCP Server！保姆级教程！</div></div><div class="info-2"><div class="info-item-1">![[_resources&#x2F;ad1028622ee00318a8201de6763092db_MD5.png]] 从零开始开发一个 MCP Server！保姆级教程！ 大家好，我是R哥。 之前分享了一篇 MCP 的介绍及使用：  最近热火朝天的 MCP 是什么鬼？如何使用MCP？一文给你讲清楚！  这篇文章得到了大家的广泛阅读，让大家对 MCP 的概念和使用也有了一个基础的认知，也介绍了如何使用 MCP Server ，这篇再来介绍下如何从 0 开发一个自己的 MCP Server。 MCP 本质上是为 AI 大模型提供 调用外部工具 的能力，MCP Server 就是这个能力的具体实现——你可以通过它，把你已有的 API、脚本、服务 包装成 AI 能理解和调用的 MCP 工具。 这篇我们就以 获取图片 为例来创建一个 MCP Server，让 AI 根据 自然语言 来获取图片网站上的图片，比如 Pixabay 图片网站，它就提供了 API 可以让外界来搜索图片。 Pixabay API 文档：  pixabay.com&#x2F;api&#x2F;docs&#x2F;...</div></div></div></a><a class="pagination-related" href="/2025/06/16/%E5%A6%82%E4%BD%95%E5%88%A9%E7%94%A8ollama%E5%92%8CObsidian%E6%9E%84%E5%BB%BA%E6%9C%AC%E5%9C%B0AI%E5%86%99%E4%BD%9C%E5%8A%A9%E6%89%8B%20%20%20-%20WMW/" title="如何利用ollama和Obsidian构建本地AI写作助手   - WMW"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">如何利用ollama和Obsidian构建本地AI写作助手   - WMW</div></div><div class="info-2"><div class="info-item-1">Published on 2024-09-15 &#x2F; 626 Visits 如何利用ollama和Obsidian构建本地AI写作助手ollama与Obsidian的结合可以有效读取Obsidian中的所有文档，实现本地知识库的问答以及与大型模型的对话。这种方式相较于我之前介绍的 ollama+MaxKB，构建本地AI知识库 而言，无需进行额外的部署和上传文档到其他平台。这种组合对于像我这样使用Obsidian作为写作工具的文字工作者尤为实用。在撰写 Macbook Pro M2 Max 96G 8TB性能测试，成功运行Llama 70B和Mistral 8x7B（4位量化） 时，我下载了ollama及其4位量化的Llama 70B模型，该模型仅占30G内存，并且运行速度极快。ollama的配置可以在官方页面找到下载教程。首先下载应用程序，然后在终端运行 ollama run llama3:70b 。不同模型的内容质量有所差异，作为示例，这里使用ollama。如果中文笔记数量较多，建议寻找一个开源的中文LLM，如最近表现较好的Qwen，详情见下图。 ![[_resourc...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/06/24/docker%20%E5%AE%89%E8%A3%85%E5%8F%AF%E8%A7%86%E5%8C%96%E5%B7%A5%E5%85%B7%20Portainer%20%E4%BB%A5%E5%8F%8A%20%E6%B1%89%E5%8C%96_portainer%E8%AE%BE%E7%BD%AE%E4%B8%AD%E6%96%87-CSDN%E5%8D%9A%E5%AE%A2/" title="docker 安装可视化工具 Portainer 以及 汉化_portainer设置中文-CSDN博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-06-24</div><div class="info-item-2">docker 安装可视化工具 Portainer 以及 汉化_portainer设置中文-CSDN博客</div></div><div class="info-2"><div class="info-item-1">本文详细指导如何在Linux上安装Portainer的最新汉化版2.9.1，包括拉取镜像、创建容器、开放端口以及汉化步骤，最后展示汉化后的界面。 摘要生成于 C知道 ，由 DeepSeek-R1 满血版支持， 前往体验 &gt;  安装 portainer 是最新版本， 汉化 指定版本2.9.1 。如果要安装汉化版，可直接跳转步骤四  一、拉去镜像 安装网址： Install Portainer BE with Docker on Linux - Portainer Documentation  12docker pull portainer/portainerXML  二、根据portainer镜像创建容器1234567891011121314docker run -d -p 8000:8000 -p 9000:9000\--name portainer --restart=always \-v /var/run/docker.sock:/var/run/docker.sock \-v portainer_data:/data \portainer/portainer  XML...</div></div></div></a><a class="pagination-related" href="/2025/08/07/Ollama%E8%BF%9B%E9%98%B6%EF%BC%8C%E5%9C%A8Python%E3%80%81Java%E3%80%81Go%E9%A1%B9%E7%9B%AE%E4%B8%AD%E9%9B%86%E6%88%90Deepseek%E3%80%81QWQ%E5%A4%A7%E6%A8%A1%E5%9E%8B/" title="Ollama进阶，在Python、Java、Go项目中集成Deepseek、QWQ大模型"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-08-07</div><div class="info-item-2">Ollama进阶，在Python、Java、Go项目中集成Deepseek、QWQ大模型</div></div><div class="info-2"><div class="info-item-1">Ollama系列文章：Ollama入门，一键启动本地DeepSeek大模型Ollama入门，Ollama技术架构与原理Ollama进阶，在Python、Java、Go项目中集成Deepseek、QWQ大模型Ollama进阶，在Javascript(nodejs)前后端项目中集成Deepseek、QWQ大模型Ollama高手，玩转本地自定义大模型（LLM）Ollama高手，调优Ollama环境变量，提高性能与安全性Ollama高手，调优Ollama模型参数，提高模型输出质量  在“ Ollama入门，一键启动本地DeepSeek大模型 ”一文中，我们介绍了Ollama的基本使用方法，同时也推荐了ChatBox、Cherry Studio等AI智能客户端来完成文字、图片、语音等多模态输入，实现与 AI 的交互。 但是，仅仅这样常常不足以满足实际的需要，而在线版的Deepseek、ChatGPT、豆包往往可以提供更好功能，这样在本地部署DeepSeek大模型就成了geek的自娱自乐了，因此我们必须将Ollama整合到项目中去，让它与自有系统整合起来，实现更加丰富的功能。 1、如何调用O...</div></div></div></a><a class="pagination-related" href="/2025/05/29/Hygen/" title="Hygen"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-29</div><div class="info-item-2">Hygen</div></div><div class="info-2"><div class="info-item-1">[TOC] 起步安装12345npm i -g hygen或cnpm i -g hygen  初始化1234567进入项目地址cd /projects/demo初始化模板hygen init self  初始化成功后，会自动在项目根目录下生成 _templates 文件夹，并且默认生成了一个名为 generator 的生成器及其工作目录。后续会依托该生成器，派生出更多的生成器来满足需求。  注意 不要删除 _templates/generator 文件夹，否则会导致无法创建 Generator 。   提示 后续的所有命令行操作，如无特殊说明，都在项目根目录。  创建第一个生成器1hygen generator new component  执行后会生成一个生成器 component 及其工作目录，目录中默认存在一个示例文件 hello.ejs.t 。 12345678910111213141516171819---to: app/hello.js---const hello = \`\`\`Hello!This is your first hygen template.Lear...</div></div></div></a><a class="pagination-related" href="/2025/10/08/Redis%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E2%80%94SETNX+Lua%E8%84%9A%E6%9C%AC%E5%AE%9E%E7%8E%B0%E7%AF%87/" title="Redis分布式锁—SETNX+Lua脚本实现篇"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-10-08</div><div class="info-item-2">Redis分布式锁—SETNX+Lua脚本实现篇</div></div><div class="info-2"><div class="info-item-1">前言平时的工作中，由于生产环境中的项目是需要部署在多台服务器中的，所以经常会面临解决分布式场景下数据一致性的问题，那么就需要引入分布式锁来解决这一问题。 针对分布式锁的实现，目前比较常用的就如下几种方案：  基于数据库实现分布式锁 基于Redis实现分布式锁 【本文】 基于Zookeeper实现分布式锁  接下来这个系列文章会跟大家一块探讨这三种方案，本篇为Redis实现分布式锁篇。 Redis分布式环境搭建推荐： 基于Docker的Redis集群搭建 Redis分布式锁一览说到 redis 锁，能搜到的，或者说常用的无非就下面这两个：  setNX + Lua脚本 【本文】 Redisson + RLock可重入锁  接下来我们一一探索这两个的实现，本文为 setNX + Lua脚本 实现篇。 1、setNX完整语法：SET key value [EX seconds|PX milliseconds] [NX|XX] [KEEPTTL] 必选参数说明：  SET：命令 key：待设置的key value：设置的key的value，最好为随机字符串  可选参数说明：  NX：表示...</div></div></div></a><a class="pagination-related" href="/2023/09/03/%E7%BB%84%E5%90%88%E5%AE%9E%E4%BD%93%E6%A8%A1%E5%BC%8F/" title="组合实体模式"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-03</div><div class="info-item-2">组合实体模式</div></div><div class="info-2"><div class="info-item-1">组合实体模式组合实体模式（Composite Entity Pattern）用在 EJB 持久化机制中。一个组合实体是一个 EJB 实体 bean，代表了对象的图解。当更新一个组合实体时，内部依赖对象 beans 会自动更新，因为它们是由 EJB 实体 bean 管理的。以下是组合实体 bean 的参与者。  组合实体（Composite Entity） - 它是主要的实体 bean。它可以是粗粒的，或者可以包含一个粗粒度对象，用于持续生命周期。 粗粒度对象（Coarse-Grained Object） - 该对象包含依赖对象。它有自己的生命周期，也能管理依赖对象的生命周期。 依赖对象（Dependent Object） - 依赖对象是一个持续生命周期依赖于粗粒度对象的对象。 策略（Strategies） - 策略表示如何实现组合实体。  实现我们将创建作为组合实体的 CompositeEntity 对象。CoarseGrainedObject 是一个包含依赖对象的类。 CompositeEntityPatternDemo，我们的演示类使用 Client 类来演示组合实体模式的用...</div></div></div></a><a class="pagination-related" href="/2025/05/13/8%E6%AC%BE%E5%BC%80%E6%BA%90%E8%87%AA%E5%8A%A8%E5%8C%96%E6%B5%8B%E8%AF%95%E6%A1%86%E6%9E%B6%20-%20%E5%B0%8F%E5%BC%BA%E6%89%BEBUG%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD/" title="8款开源自动化测试框架 - 小强找BUG - 博客园"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-13</div><div class="info-item-2">8款开源自动化测试框架 - 小强找BUG - 博客园</div></div><div class="info-2"><div class="info-item-1">[![[_resources&#x2F;92442b0eb6563aee8410c83388de292d_MD5.jpg]]](https://www.doubao.com/?channel=cnblogs&amp;source=hw_db_cnblogs&amp;type=lunt&amp;theme=bianc) 在如今开源的时代，我们就不要再闭门造车了，热烈的拥抱开源吧！本文针对性能测试、Web UI 测试、API 测试、数据库测试、接口测试、单元测试等方面，为大家整理了github或码云上优秀的自动化测试开源项目，希望能给大家带来一点帮助。 一、性能自动化测试1、项目名称：基于Jmeter实现的在线压测平台和在线管理Jmeter脚本系统 ![[_resources&#x2F;ec84e1ab1778a07ca7e9b3519408a643_MD5.png]] 项目简介：  本项目基于renren-fast Java开发平台开发，内核基于Jmeter-Api和Jmeter脚本实现在线性能压测。  具有如下特点  友好的代码结构及注释，便于阅读及二次开发 实现前后端分离，通过...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E7%AE%80%E4%BB%8B"><span class="toc-number">1.</span> <span class="toc-text">1. 简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-BPMN2-0"><span class="toc-number">2.</span> <span class="toc-text">2. BPMN2.0</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-SpringBoot%E9%9B%86%E6%88%90Activiti8"><span class="toc-number">3.</span> <span class="toc-text">3. SpringBoot集成Activiti8</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E5%85%B3%E9%94%AE%E4%BE%9D%E8%B5%96"><span class="toc-number">3.1.</span> <span class="toc-text">3.1. 关键依赖</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E5%AE%8C%E6%95%B4pom%E6%96%87%E4%BB%B6"><span class="toc-number">3.2.</span> <span class="toc-text">3.2. 完整pom文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E5%85%B3%E9%94%AE%E9%85%8D%E7%BD%AE"><span class="toc-number">3.3.</span> <span class="toc-text">3.3. 关键配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-%E9%85%8D%E7%BD%AESpringSecurity"><span class="toc-number">3.4.</span> <span class="toc-text">3.4. 配置SpringSecurity</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-5-%E8%A1%A8%E8%A7%A3%E8%AF%BB"><span class="toc-number">3.5.</span> <span class="toc-text">3.5. 表解读</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-5-1-%E5%85%A8%E5%B1%80%E9%80%9A%E7%94%A8%E8%A1%A8"><span class="toc-number">3.5.1.</span> <span class="toc-text">3.5.1. 全局通用表</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-5-2-%E5%8E%86%E5%8F%B2%E6%95%B0%E6%8D%AE%E8%A1%A8"><span class="toc-number">3.5.2.</span> <span class="toc-text">3.5.2. 历史数据表</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-5-3-%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E8%A1%A8"><span class="toc-number">3.5.3.</span> <span class="toc-text">3.5.3. 静态资源表</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-5-4-%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E8%A1%A8"><span class="toc-number">3.5.4.</span> <span class="toc-text">3.5.4. 运行时数据表</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C"><span class="toc-number">4.</span> <span class="toc-text">4. 基本操作</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E6%B5%81%E7%A8%8B%E9%83%A8%E7%BD%B2"><span class="toc-number">4.1.</span> <span class="toc-text">4.1. 流程部署</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-1-1-%E9%83%A8%E7%BD%B2%E6%B5%81%E7%A8%8B"><span class="toc-number">4.1.1.</span> <span class="toc-text">4.1.1. 部署流程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-1-2-%E6%9F%A5%E8%AF%A2%E6%B5%81%E7%A8%8B%E5%AE%9A%E4%B9%89"><span class="toc-number">4.1.2.</span> <span class="toc-text">4.1.2. 查询流程定义</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-%E6%B5%81%E7%A8%8B%E5%AE%9E%E4%BE%8B"><span class="toc-number">4.2.</span> <span class="toc-text">4.2. 流程实例</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-2-1-%E5%8F%91%E8%B5%B7%E6%B5%81%E7%A8%8B%E5%AE%9E%E4%BE%8B"><span class="toc-number">4.2.1.</span> <span class="toc-text">4.2.1. 发起流程实例</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-2-2-%E6%9F%A5%E8%AF%A2%E6%B5%81%E7%A8%8B%E5%AE%9E%E4%BE%8B"><span class="toc-number">4.2.2.</span> <span class="toc-text">4.2.2. 查询流程实例</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-2-3-%E6%B5%81%E7%A8%8B%E5%AE%9E%E4%BE%8B%E7%9A%84%E6%8C%82%E8%B5%B7%E4%B8%8E%E6%BF%80%E6%B4%BB"><span class="toc-number">4.2.3.</span> <span class="toc-text">4.2.3. 流程实例的挂起与激活</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-2-4-%E5%88%A0%E9%99%A4%E6%B5%81%E7%A8%8B%E5%AE%9E%E4%BE%8B"><span class="toc-number">4.2.4.</span> <span class="toc-text">4.2.4. 删除流程实例</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-%E4%BB%BB%E5%8A%A1%E7%AE%A1%E7%90%86"><span class="toc-number">4.3.</span> <span class="toc-text">4.3. 任务管理</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-1-%E6%9F%A5%E8%AF%A2%E4%BB%BB%E5%8A%A1"><span class="toc-number">4.3.1.</span> <span class="toc-text">4.3.1. 查询任务</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-2-%E6%89%A7%E8%A1%8C%E4%BB%BB%E5%8A%A1"><span class="toc-number">4.3.2.</span> <span class="toc-text">4.3.2. 执行任务</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-3-%E6%B7%BB%E5%8A%A0%E6%89%B9%E6%B3%A8"><span class="toc-number">4.3.3.</span> <span class="toc-text">4.3.3. 添加批注</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-4-%E4%BB%BB%E5%8A%A1%E7%9A%84%E6%8B%BE%E5%8F%96%E4%B8%8E%E5%BD%92%E8%BF%98"><span class="toc-number">4.3.4.</span> <span class="toc-text">4.3.4. 任务的拾取与归还</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-5-%E4%BB%BB%E5%8A%A1%E7%9A%84%E4%BA%A4%E5%8A%9E-%E8%BD%AC%E5%8A%9E"><span class="toc-number">4.3.5.</span> <span class="toc-text">4.3.5. 任务的交办&#x2F;转办</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-6-%E4%BB%BB%E5%8A%A1%E7%9A%84%E5%A7%94%E6%B4%BE"><span class="toc-number">4.3.6.</span> <span class="toc-text">4.3.6. 任务的委派</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-%E5%8E%86%E5%8F%B2%E8%AE%B0%E5%BD%95"><span class="toc-number">4.4.</span> <span class="toc-text">4.4. 历史记录</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-5-UEL%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="toc-number">4.5.</span> <span class="toc-text">4.5. UEL表达式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-6-BPMN2-0%E7%BD%91%E5%85%B3"><span class="toc-number">4.6.</span> <span class="toc-text">4.6. BPMN2.0网关</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-6-1-%E5%B9%B6%E8%A1%8C%E7%BD%91%E5%85%B3%EF%BC%88Parallel-Gateway%EF%BC%89"><span class="toc-number">4.6.1.</span> <span class="toc-text">4.6.1. 并行网关（Parallel Gateway）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-6-2-%E6%8E%92%E4%BB%96%E7%BD%91%E5%85%B3%EF%BC%88Exclusive-gateway%EF%BC%89"><span class="toc-number">4.6.2.</span> <span class="toc-text">4.6.2. 排他网关（Exclusive gateway）</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

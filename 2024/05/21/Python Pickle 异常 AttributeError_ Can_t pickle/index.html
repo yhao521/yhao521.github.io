@@ -1,0 +1,221 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Python Pickle 异常 AttributeError_ Can't pickle... | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="之前使用进程池时遇到： TypeError: can’t pickle _thread.lock objects。 进程池内部处理使用了pickle模块(用于python特有的类型和python的数据类型间进行转换)中的dump(obj, file, protocol&#x3D;None,)方法对参数进行了封装处理。 而pickle dump 方法不支持自定义的类。 最近在机器学习保存类数据时也用">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python Pickle 异常 AttributeError_ Can&#39;t pickle...">
+<meta property="og:url" content="https://yhao521.github.io/2024/05/21/Python%20Pickle%20%E5%BC%82%E5%B8%B8%20AttributeError_%20Can_t%20pickle/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="之前使用进程池时遇到： TypeError: can’t pickle _thread.lock objects。 进程池内部处理使用了pickle模块(用于python特有的类型和python的数据类型间进行转换)中的dump(obj, file, protocol&#x3D;None,)方法对参数进行了封装处理。 而pickle dump 方法不支持自定义的类。 最近在机器学习保存类数据时也用">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2024-05-20T19:31:38.000Z">
+<meta property="article:modified_time" content="2024-05-20T19:31:38.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="python&#x2F;programming">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Python Pickle 异常 AttributeError_ Can't pickle...",
+  "url": "https://yhao521.github.io/2024/05/21/Python%20Pickle%20%E5%BC%82%E5%B8%B8%20AttributeError_%20Can_t%20pickle/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2024-05-20T19:31:38.000Z",
+  "dateModified": "2024-05-20T19:31:38.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2024/05/21/Python%20Pickle%20%E5%BC%82%E5%B8%B8%20AttributeError_%20Can_t%20pickle/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Python Pickle 异常 AttributeError_ Can\'t pickle...',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">Python Pickle 异常 AttributeError_ Can't pickle...</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Python Pickle 异常 AttributeError_ Can't pickle...</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-05-20T19:31:38.000Z" title="发表于 2024-05-21 03:31:38">2024-05-21</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-05-20T19:31:38.000Z" title="更新于 2024-05-21 03:31:38">2024-05-21</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>之前<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_41935140/article/details/81153611">使用进程池时遇到： TypeError: can’t pickle _thread.lock objects</a>。</p>
+<p>进程池内部处理使用了pickle模块(用于python特有的类型和python的数据类型间进行转换)中的dump(obj, file, protocol&#x3D;None,)方法对参数进行了封装处理。</p>
+<p>而pickle dump 方法不支持自定义的类。</p>
+<p>最近在机器学习保存类数据时也用到了这个方式，因为类中传递了自定义的函数，所以抛出异常：AttributeError: Can’t pickle local object</p>
+<p>pickle用来序列化对象很方便，但是pickle对传入对象的要求是不能是内部类，也不能是lambda函数。所以如果遇到类似问题，可以使用<a target="_blank" rel="noopener" href="https://pypi.org/project/dill/">dill包</a>来代替，使用方法和pickle一样。</p>
+<p>安装：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install dill</span><br></pre></td></tr></table></figure>
+
+<p>使用：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">import dill</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class Obj:</span><br><span class="line">    def __init__(self, info):</span><br><span class="line">        self.info = info</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">obj = Obj(&quot;this is a local object&quot;)</span><br><span class="line"></span><br><span class="line">pk = dill.dumps(obj)</span><br><span class="line">new_obj = dill.loads(pk)</span><br></pre></td></tr></table></figure>
+
+<p>dill扩展了python的pickle模块，用于对大多数内置python类型进行序列化和反序列化。序列化是将对象转换为字节流的过程，而相反的过程是将字节流转换回python对象层次结构。</p>
+<p>所以如果遇到了pickle模块无法序列化的对象，不妨试试dill。</p>
+<p><strong>【Life is short，you need Python！】</strong></p>
+<p><strong>专注分享技术干货，欢迎关注留言交流学习！</strong></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2024/05/21/Python%20Pickle%20%E5%BC%82%E5%B8%B8%20AttributeError_%20Can_t%20pickle/">https://yhao521.github.io/2024/05/21/Python%20Pickle%20%E5%BC%82%E5%B8%B8%20AttributeError_%20Can_t%20pickle/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/python-programming/">python/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/05/21/%E7%9B%98%E7%82%B920%E6%AC%BE%E4%BC%98%E8%B4%A8%E7%9A%84%E5%BC%80%E6%BA%90%E6%B8%B8%E6%88%8F%EF%BC%8C2024%E6%9C%80%E6%96%B0%E6%94%B6%E9%9B%86%EF%BC%81/" title="盘点20款优质的开源游戏，2024最新收集！"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">盘点20款优质的开源游戏，2024最新收集！</div></div><div class="info-2"><div class="info-item-1">本文收集了20款优质的开源游戏，部分还可以点击就可以玩，干货满满，建议先收藏一下。 如果你有值得推荐的开源游戏，欢迎评论中指出！ 1、红警https://github.com/electronicarts/CnC_Remastered_Collection 红警，或者更准确地说，应该称为“红色警戒”，是大多数80后记忆中与游戏最深刻的联系之一。  这款游戏是由当年的Westwood工作室打造的一款即时战略游戏，以至于一提到即时战略游戏，我脑海中浮现的第一个就是红警。 然而，在1998年8月17日，EA收购了Westwood。一般情况下，一旦游戏工作室被EA收购，就意味着走向没落。  这次开源的代码实际上是1996年发布的第一代红警，国内也称之为红警95。  此次开源不涉及游戏素材和游戏引擎，只包括TiberianDawn.DLL和RedAlert.dll的源码，允许Mod社区更好地改变游戏行为。 在6月5日，这两款游戏发布了重制版。 命令与征服系列游戏是用C++实现的，打开代码后可以看到非常规范的代码，令人赞叹不已。  下面是一个示例，展示了飞行器寻找新降落点的函数，函数功能、输...</div></div></div></a><a class="pagination-related" href="/2024/05/20/InstantID%E5%A4%A7%E7%81%AB%EF%BC%8C%E4%BD%A0%E8%A3%85%E7%9A%84%E4%B8%8A%E5%90%97%EF%BC%9F%EF%BC%88webui%E7%89%88%E6%9C%AC%EF%BC%89/" title="InstantID大火，你装的上吗？（webui版本）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">InstantID大火，你装的上吗？（webui版本）</div></div><div class="info-2"><div class="info-item-1">额，好像好多小伙伴装环境装不上啊，让我来看看。 首先，为了避免各种麻烦，一个非常科学的网络还是必备的。另外，有好多小伙伴用的秋叶启动器哈，本机科学了，秋叶里不开科学，那就是开了个寂寞…… 再说一遍，这个给我打开~~~端口号是你科学的端口号，自己去看，一般默认是7890，也有不是的。  总网址：https://github.com/InstantID/InstantID 在里面找到webui和comfyui的网址去配置。 webui插件更新InstantID在webui中，是集成在Controlnet插件里的，所以首先要把Controlnet版本更新到最新版，这样就有预处理器了。 不知道在哪更新，再手把手教一遍啊，从启动器里更新最方便。    模型下载预处理器更新好了，现在只需要把模型下载好放进去： https://github.com/Mikubill/sd-webui-controlnet/discussions/2589 进入上面的网址，找到：    一个一个来，先点第一个链接，下载后的名字叫ip-adapter.bin，需要改名为ip-adapter_instant_id_...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2024/05/20/%E8%84%B8%E9%83%A8%E4%B8%80%E8%87%B4%E6%80%A7%E6%A8%A1%E5%9E%8B%E5%8F%88%E5%87%BA%E6%96%B0--InstantID%E5%9C%A8ComfyUI%E7%9A%84%E5%AE%89%E8%A3%85%E5%92%8C%E9%83%A8%E7%BD%B2/" title="脸部一致性模型又出新--InstantID在ComfyUI的安装和部署"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-05-20</div><div class="info-item-2">脸部一致性模型又出新--InstantID在ComfyUI的安装和部署</div></div><div class="info-2"><div class="info-item-1">1.什么是InstantIDInstantID 是一种全新无需微调的最先进方法，它只需要单张图像，即可实现生成新图像的同时保留原图像中的人员身份信息，支持各种后续任务，例如人脸识别、人脸属性分析任务。 简单讲就是类似IPA-faceID, Reactor这些模型，能保持人脸部的一致性。 2.ComfyUI InstantID插件cubiq&#x2F;ComfyUI_InstantID (github.com) 目前有几个支持InstantID的节点，我个人还是喜欢这个作者的，它是原生的InstantID节点。作者同时也是cubiq&#x2F;ComfyUI_IPAdapter_plus (github.com)的作者。 1）节点安装在custome_nodes通过git,克隆插件 1e:\ComfyUI_windows_portable\ComfyUI\custom_nodes&gt;git clone https://github.com/cubiq/ComfyUI_InstantID.git  或者通过GitHub下载zip包，解压到custom_node1节点下。 2）依赖...</div></div></div></a><a class="pagination-related" href="/2024/01/18/%E8%83%8E%E6%95%99%E7%BA%A7stable_diffusion%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83%EF%BC%88%E7%9C%9F%E4%BA%BA%E3%80%81lora%E3%80%81%E5%8A%A8%E6%BC%AB%E3%80%81%E8%90%8C%E5%AE%A0......)/" title="胎教级stable_diffusion模型训练（真人、lora、动漫、萌宠......)"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-18</div><div class="info-item-2">胎教级stable_diffusion模型训练（真人、lora、动漫、萌宠......)</div></div><div class="info-2"><div class="info-item-1">训练方式分类stable diffusion中比较常用的几种训练方式，分别是Dreambooth、textual inversion、LORA和Hypernetworks。在模型市场civitai.com&#x2F;中选择模型时也能看到它们的身影 你或许有疑问，我们为什么不去训练常见的Checkpoint呢？ checkpoint模型大部分都是基于精简版（prund）的Stable Diffusion1.5模型训练而来，所以，整体个头都比较大，下载下来比较占硬盘空间。（自带Stable Diffusion1.5） 而LORA模型的个头都比较小，常见的都是144MB左右，使用的时候要与精简版（prund）的Stable Diffusion1.5模型配合使用。（不带Stable Diffusion1.5） LORALORA，英文全称Low-Rank Adaptation of Large Language Models（大语言模型的低阶适应）， 比如，GPT-3有1750亿参数，为了让它能干特定领域的活儿，需要做微调，但是如果直接对GPT-3做微调，成本太高太麻烦。 LoRA的做法是...</div></div></div></a><a class="pagination-related" href="/2024/07/08/%E5%9B%BD%E5%86%85%E6%9C%80%E7%81%AB%E7%9A%84%20HTML%E3%80%81CSS%E3%80%81JavaScript%20%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE%20Top%20%E6%A6%9C%EF%BC%8C%E4%BD%A0%E7%9F%A5%E5%A4%9A%E5%B0%91%EF%BC%9F/" title="国内最火的 HTML、CSS、JavaScript 开源项目 Top 榜，你知多少？"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-08</div><div class="info-item-2">国内最火的 HTML、CSS、JavaScript 开源项目 Top 榜，你知多少？</div></div><div class="info-2"><div class="info-item-1">对于开发者而言，想要着手前端开发，HTML、CSS 和 JavaScript 是三项必备的基础技能。而如何事半功倍地掌握好这些知识？通过了解当下火热的开源项目不乏为最佳学习姿势。本文盘点国内评分最高且收藏量超过 100 的前端技术开源项目，希望可以帮助更多的开发者扩展学习。 1.极简模块化前端UI框架 Layui评分：9.3；收藏量：873 授权协议：MIT开发语言：JavaScript、HTML&#x2F;CSS操作系统：跨平台源码地址：https://gitee.com/sentsin/layui Layui 是一款采用自身模块规范编写的情怀型前端UI框架，遵循原生HTML&#x2F;CSS&#x2F;JS的书写与组织形式，门槛极低，拿来即用。其外在极简，却又不失饱满的内在，体积轻盈，组件丰盈，从核心代码到API的每一处细节都经过精心雕琢，非常适合界面的快速开发。Layui 首个版本发布于2016年金秋，她区别于那些基于MVVM底层的UI框架，却并非逆道而行，而是信奉返璞归真之道。准确地说，她更多是为服务端程序员量身定做，你无需涉足各种前端工具的复杂配置，只需面对浏览器本身，...</div></div></div></a><a class="pagination-related" href="/2023/09/04/LLaMA2%E4%B8%AD%E6%96%87%E5%BE%AE%E8%B0%83/" title="LLaMA2中文微调"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">LLaMA2中文微调</div></div><div class="info-2"><div class="info-item-1"> title: LLaMA2中文微调date: 2023-09-03 20:17:08category:  mactag: macauthor:   LLaMA2中文微调LLaMA2模型的许可证发生了变化，已允许商用，模型推出时，LLaMA2-Chat也同时推出，本人在16G推理卡上实践了微调Llama-2-7b-chat（ https://zhuanlan.zhihu.com/p/645152512 ，代码在 https://github.com/git-cloner/llama2-lora-fine-tuning ），但即使扩充了中文词表，推理效果依然不佳，回答主要以英文为主。 官方在LLaMA2模型发布时，就已开源了官方微调程序，叫做LLaMA伴侣（ https://github.com/facebookresearch/llama-recipes ），支持全量、Lora等方式微调，相对来说兼容性优于第三方的程序。 本文是在llama-recipes的基础上，修改适配显卡资源，基于Lora对LLaMA2-7b原始模型进行微调实践，结果推理效果尚可，本项目也提供了测试过程和流...</div></div></div></a><a class="pagination-related" href="/2024/07/03/%E9%9D%A2%E8%AF%95%E5%AE%98%EF%BC%9A%E8%AF%B4%E8%AF%B4MySQL%E4%B8%8EPostgreSQL%E4%B9%8B%E9%97%B4%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%8C%E8%AF%A5%E5%A6%82%E4%BD%95%E6%8A%80%E6%9C%AF%E9%80%89%E5%9E%8B%EF%BC%9F/" title="面试官：说说MySQL与PostgreSQL之间的区别，该如何技术选型？"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-03</div><div class="info-item-2">面试官：说说MySQL与PostgreSQL之间的区别，该如何技术选型？</div></div><div class="info-2"><div class="info-item-1">面试官：说说MySQL与PostgreSQL之间的区别，该如何技术选型？发布于 2021-03-03 10:51:37 8.9K1 举报 文章被收录于专栏：业余草 你知道的越多，不知道的就越多，业余的像一棵小草！你来，我们一起精进！你不来，我和你的竞争对手一起精进！ 编辑：业余草blog.csdn.net&#x2F;u012414189&#x2F;article&#x2F;details&#x2F;84064146推荐：https://www.xttblog.com/?p=5155如果你稍微有一点工作经验，那么技术选型，技术比较就是面试中必问的知识点之一了。最近就有粉丝在面试中被问到了MySQL与PostgreSQL之间技术选型与比较的问题，下面是一些总结，希望能对大家有所帮助！ 1.问题如果打算为项目选择一款免费、开源的数据库，那么你可能会在MySQL与PostgreSQL之间犹豫不定。MySQL与PostgreSQL都是免费、开源、强大、且功能丰富的数据库。你主要的问题可能是：哪一个才是最好的开源数据库，MySQL还是PostgreSQL呢？该选择哪一个开源数据库呢？ 在选择...</div></div></div></a><a class="pagination-related" href="/2023/09/04/mac%E5%AE%89%E8%A3%85%E7%9A%84%E8%BD%AF%E4%BB%B6/" title="mac安装的软件"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">mac安装的软件</div></div><div class="info-2"><div class="info-item-1"> title: mac安装的软件date: 2023-09-03 20:17:08category:  mactag: macauthor:   mac安装的软件brew方式安装的123456789101112131415161718192021222324➜  ~ brew list==&gt; Formulaesqlite	nginx  subversionopenssl@1.1gitbrew-rmtree	 # 卸载软件及其依赖git-flow	  #自动设置git开发用的分支流程wgetgopython@3.10graphvizcmakecmake-docsqemu	# 重新生成虚拟镜像的格式	mycli  # 链接mysql的客户端  redis==&gt; Casksdockerwechattweak-cli   # 微信的扩展插件：拦截撤回消息，登录新账号  源码编译安装的1234567mysql8.0influxdb-1.8.0-1  官方二进制安装12345678910111213nodejsjavapythonoh-my-zshmavenjenkinsnexus </div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

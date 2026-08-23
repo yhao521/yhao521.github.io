@@ -1,0 +1,325 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>「详解」conda 安装与使用-CSDN博客 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="文章浏览阅读10w+次，点赞170次，收藏1k次。本文详细介绍了conda软件包管理器的安装、配置镜像源、创建和管理环境、在环境内使用pip、安装与删除软件、卸载conda及解决CondaHTTPError问题的方法。重点讲述了conda环境的创建、激活、删除及包的安装更新，同时提供了添加和切换国内镜像源的步骤，以加速下载速度。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="「详解」conda 安装与使用-CSDN博客">
+<meta property="og:url" content="https://yhao521.github.io/2025/08/05/%E3%80%8C%E8%AF%A6%E8%A7%A3%E3%80%8Dconda%20%E5%AE%89%E8%A3%85%E4%B8%8E%E4%BD%BF%E7%94%A8-CSDN%E5%8D%9A%E5%AE%A2/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="文章浏览阅读10w+次，点赞170次，收藏1k次。本文详细介绍了conda软件包管理器的安装、配置镜像源、创建和管理环境、在环境内使用pip、安装与删除软件、卸载conda及解决CondaHTTPError问题的方法。重点讲述了conda环境的创建、激活、删除及包的安装更新，同时提供了添加和切换国内镜像源的步骤，以加速下载速度。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2025-08-04T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-17T16:00:00.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="python&#x2F;programming">
+<meta property="article:tag" content="摘录">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "「详解」conda 安装与使用-CSDN博客",
+  "url": "https://yhao521.github.io/2025/08/05/%E3%80%8C%E8%AF%A6%E8%A7%A3%E3%80%8Dconda%20%E5%AE%89%E8%A3%85%E4%B8%8E%E4%BD%BF%E7%94%A8-CSDN%E5%8D%9A%E5%AE%A2/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2025-08-04T16:00:00.000Z",
+  "dateModified": "2026-05-17T16:00:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2025/08/05/%E3%80%8C%E8%AF%A6%E8%A7%A3%E3%80%8Dconda%20%E5%AE%89%E8%A3%85%E4%B8%8E%E4%BD%BF%E7%94%A8-CSDN%E5%8D%9A%E5%AE%A2/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '「详解」conda 安装与使用-CSDN博客',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">「详解」conda 安装与使用-CSDN博客</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">「详解」conda 安装与使用-CSDN博客</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-08-04T16:00:00.000Z" title="发表于 2025-08-05 00:00:00">2025-08-05</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-17T16:00:00.000Z" title="更新于 2026-05-18 00:00:00">2026-05-18</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>本文详细介绍了conda软件包管理器的安装、配置镜像源、创建和管理环境、在环境内使用pip、安装与删除软件、卸载conda及解决CondaHTTPError问题的方法。重点讲述了conda环境的创建、激活、删除及包的安装更新，同时提供了添加和切换国内镜像源的步骤，以加速下载速度。</p>
+<p>摘要生成于 <a target="_blank" rel="noopener" href="https://ai.csdn.net/?utm_source=cknow_pc_ai_abstract">C知道</a> ，由 DeepSeek-R1 满血版支持， <a target="_blank" rel="noopener" href="https://ai.csdn.net/?utm_source=cknow_pc_ai_abstract">前往体验 &gt;</a></p>
+<blockquote>
+<p>conda 是一个开源的 <a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=%E8%BD%AF%E4%BB%B6%E5%8C%85&spm=1001.2101.3001.7020">软件包</a> 管理系统和环境管理软件，用于安装多个版本的软件包及其依赖关系，并在它们之间轻松切换。conda 是为Python程序创建的，类似于 Linux 、MacOS、Windows，也可以打包和分发其他软件。<br>&#x3D;&#x3D;注！必须在 cmd 里面才可以，在 powershell 里面输入命令有些是无效的&#x3D;&#x3D;</p>
+</blockquote>
+<h2 id="1、安装-conda"><a href="#1、安装-conda" class="headerlink" title="1、安装 conda"></a>1、安装 conda</h2><p>conda 分为 anaconda 和 miniconda，anaconda 是一个包含了许多常用库的集合版本，miniconda 是精简版本（只包含conda、pip、zlib、python 以及它们所需的包），剩余的通过 conda install command 命令自行安装即可；</p>
+<ul>
+<li><strong>miniconda 官网</strong> ： <a target="_blank" rel="noopener" href="https://conda.io/miniconda.html"><strong>https://conda.io/miniconda.html</strong></a></li>
+<li><a target="_blank" rel="noopener" href="https://www.anaconda.com/docs/getting-started/miniconda/install#macos-2">https://www.anaconda.com/docs/getting-started/miniconda/install#macos-2</a></li>
+<li><strong>anaconda 官网</strong> ： <a target="_blank" rel="noopener" href="https://www.anaconda.com/download"><strong>https://www.anaconda.com/download</strong></a></li>
+</ul>
+<p>点击安装即可，不需要另外安装 Python运行环境，安装过程中，出现 Advanced options选项，第一个选项是将Anaconda的路径加入环境变量，第二个是默认将conda安装的 Python 定为系统使用的默认版本；</p>
+<p>![[_resources&#x2F;a594f7a7250fc719253a64b5a721477f_MD5.png]]<br>检查 conda 是否安装成功，返回conda版本号则说明安装成功</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">conda --version</span><br><span class="line">python1</span><br></pre></td></tr></table></figure>
+
+<p>升级 conda</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">conda update conda</span><br><span class="line">python1</span><br></pre></td></tr></table></figure>
+
+<p>安装完conda之后，可能报没有conda，如下图所示，只需要 <code>source ~/.bashrc</code> 即可<br>![[_resources&#x2F;1d7d80b3b39318dec76c64bfaa1d5691_MD5.jpg]]</p>
+<h2 id="2、添加镜像源"><a href="#2、添加镜像源" class="headerlink" title="2、添加镜像源"></a>2、添加镜像源</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/</span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/</span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/</span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/bioconda/</span><br><span class="line">conda config --add channels https://mirrors.bfsu.edu.cn/anaconda/cloud/bioconda/</span><br><span class="line">conda config --add channels https://mirrors.bfsu.edu.cn/anaconda/cloud/conda-forge/</span><br><span class="line">conda config --add channels https://mirrors.bfsu.edu.cn/anaconda/pkgs/free/</span><br><span class="line">conda config --add channels https://mirrors.bfsu.edu.cn/anaconda/pkgs/main/</span><br><span class="line"></span><br><span class="line">下面这个我没用过, 可以添加一下试试看.</span><br><span class="line">conda config --add channels https://mirrors.bfsu.edu.cn/anaconda/pkgs/r/</span><br><span class="line"></span><br><span class="line">目前国内提供conda镜像的大学</span><br><span class="line">  清华大学: https://mirrors.tuna.tsinghua.edu.cn/<span class="built_in">help</span>/anaconda/</span><br><span class="line">  北京外国语大学: https://mirrors.bfsu.edu.cn/<span class="built_in">help</span>/anaconda/</span><br><span class="line">  南京邮电大学: https://mirrors.njupt.edu.cn/</span><br><span class="line">  南京大学: http://mirrors.nju.edu.cn/</span><br><span class="line">  重庆邮电大学: http://mirror.cqupt.edu.cn/</span><br><span class="line">  上海交通大学: https://mirror.sjtu.edu.cn/</span><br><span class="line">  哈尔滨工业大学: http://mirrors.hit.edu.cn/<span class="comment">#/home</span></span><br><span class="line">  (目测哈工大的镜像同步的是最勤最新的)</span><br><span class="line">python12345678910111213141516171819202122</span><br></pre></td></tr></table></figure>
+
+<p>查看已经添加的channels</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">conda config --get channels</span><br><span class="line">python1</span><br></pre></td></tr></table></figure>
+
+<p>已添加的channel在哪里查看</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># windows 用户在C:\Users\～\下面</span></span><br><span class="line">windows 用户无法直接创建 .condarc 文件，需要通过指令 </span><br><span class="line">conda config --<span class="built_in">set</span> show_channel_urls yes </span><br><span class="line">生成该文件，然后可以通过 vim/notepad++ 再修改</span><br><span class="line">python1234</span><br></pre></td></tr></table></figure>
+
+<p>恢复默认镜像源</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">conda config --remove-key channels</span><br><span class="line">python1</span><br></pre></td></tr></table></figure>
+<h2 id="3、创建-删除-环境"><a href="#3、创建-删除-环境" class="headerlink" title="3、创建&#x2F;删除 环境"></a>3、创建&#x2F;删除 环境</h2><p>命令创建python版本为X.X、名字为 env_name 的虚拟环境。env_name文件可以在Anaconda安装目录 envs文件下找到。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">conda create -n env_name python=<span class="number">3.8</span></span><br><span class="line">python1</span><br></pre></td></tr></table></figure>
+
+<p>在conda环境下，输入以下命令查看当前存在的环境：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">conda env <span class="built_in">list</span>（或者输入conda info --envs也是一样滴）</span><br><span class="line">python1</span><br></pre></td></tr></table></figure>
+
+<p>删除环境</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">conda remove -n env_name --<span class="built_in">all</span></span><br><span class="line">conda env remove -n env_name</span><br><span class="line">python12</span><br></pre></td></tr></table></figure>
+
+<p>重命名环境（将 –clone 后面的环境重命名成 -n 后面的名字）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">conda create -n torch --clone py3      <span class="comment"># 将 py3 重命名为 torch</span></span><br><span class="line">python1</span><br></pre></td></tr></table></figure>
+
+<p>创建完成环境之后，系统会提示如何 进入和退出环境，如下</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">conda activate env_name          <span class="comment"># 进入环境</span></span><br><span class="line">conda deactivate                <span class="comment"># 退出环境</span></span><br><span class="line">python12</span><br></pre></td></tr></table></figure>
+
+<p>![[_resources&#x2F;dfd1d59a52b4163c73530c9e6fd6f874_MD5.png]]</p>
+<p>![[_resources&#x2F;158c627eac671be0aafe62ee5ca268dc_MD5.png]]</p>
+<h2 id="4、在conda环境内使用-pip安装"><a href="#4、在conda环境内使用-pip安装" class="headerlink" title="4、在conda环境内使用 pip安装"></a>4、在conda环境内使用 pip安装</h2><p>在anaconda下用pip装包的原因：尽管在anaconda下我们可以很方便的使用conda install来安装我们需要的依赖，但是anaconda本身只提供部分包，远没有pip提供的包多，有时conda无法安装我们需要的包，我们需要用pip将其装到conda环境里。</p>
+<p>首先进入指定的环境中，然后再通过 pip 安装即可，命令如下</p>
+<blockquote>
+<p>&#x3D;&#x3D;注！安装特定版本的包， <strong>conda用“&#x3D;”，pip用“&#x3D;&#x3D;”</strong>&#x3D;&#x3D;</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">conda activate env_name          <span class="comment"># 进入环境</span></span><br><span class="line"></span><br><span class="line">conda install numpy=<span class="number">1.93</span></span><br><span class="line">pip  install numpy==<span class="number">1.93</span></span><br><span class="line"></span><br><span class="line">conda deactivate                <span class="comment"># 安装完之后记得退出环境</span></span><br><span class="line">python123456</span><br></pre></td></tr></table></figure>
+<h2 id="5、安装-删除-命令"><a href="#5、安装-删除-命令" class="headerlink" title="5、安装&#x2F;删除 命令:"></a>5、安装&#x2F;删除 命令:</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">conda install gatk</span><br><span class="line">conda install gatk=<span class="number">3.7</span>                    <span class="comment"># 安装特定的版本:</span></span><br><span class="line">conda install -n env_name gatk           <span class="comment"># 将 gatk 安装都 指定env_name中</span></span><br><span class="line">python123</span><br></pre></td></tr></table></figure>
+
+<p>当然, 也可以用这个命令进行搜索（会稍微慢一点）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">conda search gatk</span><br><span class="line">python1</span><br></pre></td></tr></table></figure>
+
+<p>安装完成后，可以用“which 软件名”来查看该软件安装的位置：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">which gatk</span><br><span class="line">python1</span><br></pre></td></tr></table></figure>
+
+<p>查看已安装的库:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">conda <span class="built_in">list</span></span><br><span class="line">conda <span class="built_in">list</span> -n env_name      <span class="comment"># 查看 env_name 下的库</span></span><br><span class="line">python12</span><br></pre></td></tr></table></figure>
+
+<p>更新指定库:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">conda update gatk</span><br><span class="line">conda update --<span class="built_in">all</span>       <span class="comment"># 升级全部库</span></span><br><span class="line">python12</span><br></pre></td></tr></table></figure>
+
+<p>删除环境中的某个库：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">conda remove --name env_name gatk</span><br><span class="line">python1</span><br></pre></td></tr></table></figure>
+<h2 id="6、卸载-conda"><a href="#6、卸载-conda" class="headerlink" title="6、卸载 conda"></a>6、卸载 conda</h2><ol>
+<li>清理： <code>rm -rf /opt/anaconda3</code></li>
+<li>删除 ~&#x2F;.bash_profile中anaconda的环境变量</li>
+<li>删除Anaconda的可能存在隐藏的文件<br> <code>rm -rf ~/.condarc ~/.conda ~/.continuum</code></li>
+<li>经过以上步骤后，Anaconda 就被彻底删除了。</li>
+</ol>
+<h2 id="7、迁移-conda-环境"><a href="#7、迁移-conda-环境" class="headerlink" title="7、迁移 conda 环境"></a>7、迁移 conda 环境</h2><p>将要迁移的环境打包</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">conda pack -n 虚拟环境名称 -o environment.tar.gz</span><br><span class="line"></span><br><span class="line">如果报错：No command ‘conda pack’</span><br><span class="line">尝试使用：conda install -c conda-forge conda-pack</span><br><span class="line">shell1234</span><br></pre></td></tr></table></figure>
+
+<p>复制压缩文件到新的电脑环境</p>
+<p>进到conda的安装目录：&#x2F;anaconda(或者miniconda)&#x2F;envs&#x2F;</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">对于 ubuntu 可以通过 whereis conda 查看 conda的安装路径</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">cd</span> 到 conda 的安装路径</span></span><br><span class="line">mkdir environment</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">解压conda环境：</span></span><br><span class="line">tar -xzvf environment.tar.gz -C  environment</span><br><span class="line">shell123456</span><br></pre></td></tr></table></figure>
+
+<p>使用conda env list查看虚拟环境，进入迁移的环境内，通过 pip list 查看迁移前后 包的安装情况</p>
+<h2 id="、CondaHTTPError-问题"><a href="#、CondaHTTPError-问题" class="headerlink" title="#、CondaHTTPError 问题"></a>#、CondaHTTPError 问题</h2><p>对于创建环境或者安装库的时候可能出现 CondaHTTPError 的问题，提供一下两种解决方案</p>
+<ol>
+<li>添加国内镜像源，可以参考上面【2】的添加办法，或者采用以下方法皆可<br> 在系统C盘用户文件夹下面，会有一个.condarc 的文件，在此可以手动自行添加 channels</li>
+<li>可能是现有的库文件版本较低，可以尝试升级下现有的库，方法如下 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">conda update --<span class="built_in">all</span>       <span class="comment"># 升级全部库</span></span><br><span class="line">python1</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>登录后您可以享受以下权益：</p>
+<ul>
+<li>免费复制代码</li>
+<li>和博主大V互动</li>
+<li>下载海量资源</li>
+<li>发动态&#x2F;写文章&#x2F;加入社区<br>×</li>
+</ul>
+<p>打赏作者</p>
+<p>¥1 ¥2 ¥4 ¥6 ¥10 ¥20</p>
+<p>扫码支付： ¥1</p>
+<p>获取中</p>
+<p>扫码支付</p>
+<p>您的余额不足，请更换扫码支付或 <a target="_blank" rel="noopener" href="https://i.csdn.net/#/wallet/balance/recharge?utm_source=RewardVip">充值</a></p>
+<p>打赏作者</p>
+<p>实付 元</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/ViatorSun/article/details/">使用余额支付</a></p>
+<p>点击重新获取</p>
+<p>扫码支付</p>
+<p>钱包余额 0</p>
+<p>抵扣说明：</p>
+<p>1.余额是钱包充值的虚拟货币，按照1:1的比例进行支付金额的抵扣。<br>2.余额无法直接购买下载，可以购买VIP、付费专栏及课程。</p>
+<p><a target="_blank" rel="noopener" href="https://i.csdn.net/#/wallet/balance/recharge">余额充值</a></p>
+<p>举报</p>
+<p> [![[_resources&#x2F;c35245c3757ac04bf09b76cc4021fb0a_MD5.png]] 点击体验<br>DeepSeekR1满血版](<a target="_blank" rel="noopener" href="https://ai.csdn.net/?utm_source=cknow_pc_blogdetail&spm=1001.2101.3001.10583">https://ai.csdn.net/?utm_source=cknow_pc_blogdetail&amp;spm=1001.2101.3001.10583</a>) ![[_resources&#x2F;90bd0cbf3aff8fdff8bf9b011b581e20_MD5.png]]</p>
+<p>程序员都在用的中文IT技术交流社区</p>
+<p>![[_resources&#x2F;08a47e60886378fe60a3d9c8f4ae8bc6_MD5.png]]</p>
+<p>专业的中文 IT 技术社区，与千万技术人共成长</p>
+<p>![[_resources&#x2F;a51be6c085b867a5bd82d8dc1cea9b46_MD5.png]]</p>
+<p>关注【CSDN】视频号，行业资讯、技术分享精彩不断，直播好礼送不停！</p>
+<p>客服 返回顶部</p>
+<p>![[_resources&#x2F;a594f7a7250fc719253a64b5a721477f_MD5.png]]![[_resources&#x2F;1d7d80b3b39318dec76c64bfaa1d5691_MD5.jpg]] ![[_resources&#x2F;dfd1d59a52b4163c73530c9e6fd6f874_MD5.png]]![[_resources&#x2F;158c627eac671be0aafe62ee5ca268dc_MD5.png]]</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2025/08/05/%E3%80%8C%E8%AF%A6%E8%A7%A3%E3%80%8Dconda%20%E5%AE%89%E8%A3%85%E4%B8%8E%E4%BD%BF%E7%94%A8-CSDN%E5%8D%9A%E5%AE%A2/">https://yhao521.github.io/2025/08/05/%E3%80%8C%E8%AF%A6%E8%A7%A3%E3%80%8Dconda%20%E5%AE%89%E8%A3%85%E4%B8%8E%E4%BD%BF%E7%94%A8-CSDN%E5%8D%9A%E5%AE%A2/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a><a class="post-meta__tags" href="/tags/%E6%91%98%E5%BD%95/">摘录</a><a class="post-meta__tags" href="/tags/python-programming/">python/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/08/07/Ollama%E8%BF%9B%E9%98%B6%EF%BC%8C%E5%9C%A8Python%E3%80%81Java%E3%80%81Go%E9%A1%B9%E7%9B%AE%E4%B8%AD%E9%9B%86%E6%88%90Deepseek%E3%80%81QWQ%E5%A4%A7%E6%A8%A1%E5%9E%8B/" title="Ollama进阶，在Python、Java、Go项目中集成Deepseek、QWQ大模型"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Ollama进阶，在Python、Java、Go项目中集成Deepseek、QWQ大模型</div></div><div class="info-2"><div class="info-item-1">Ollama系列文章：Ollama入门，一键启动本地DeepSeek大模型Ollama入门，Ollama技术架构与原理Ollama进阶，在Python、Java、Go项目中集成Deepseek、QWQ大模型Ollama进阶，在Javascript(nodejs)前后端项目中集成Deepseek、QWQ大模型Ollama高手，玩转本地自定义大模型（LLM）Ollama高手，调优Ollama环境变量，提高性能与安全性Ollama高手，调优Ollama模型参数，提高模型输出质量  在“ Ollama入门，一键启动本地DeepSeek大模型 ”一文中，我们介绍了Ollama的基本使用方法，同时也推荐了ChatBox、Cherry Studio等AI智能客户端来完成文字、图片、语音等多模态输入，实现与 AI 的交互。 但是，仅仅这样常常不足以满足实际的需要，而在线版的Deepseek、ChatGPT、豆包往往可以提供更好功能，这样在本地部署DeepSeek大模型就成了geek的自娱自乐了，因此我们必须将Ollama整合到项目中去，让它与自有系统整合起来，实现更加丰富的功能。 1、如何调用O...</div></div></div></a><a class="pagination-related" href="/2025/07/23/%E5%A6%82%E4%BD%95%E7%8E%A9%E8%BD%ACObsidian%EF%BC%9F%E6%88%91%E7%9A%84%E5%85%8D%E8%B4%B9%E5%90%8C%E6%AD%A5%E6%96%B9%E6%A1%88+%E6%87%92%E4%BA%BA%E6%95%B4%E7%90%86%E6%9C%AF/" title="如何玩转Obsidian？我的免费同步方案+懒人整理术"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">如何玩转Obsidian？我的免费同步方案+懒人整理术</div></div><div class="info-2"><div class="info-item-1">今天想和大家聊聊我用得比较爽的笔记工具——Obsidian。 它不是什么新鲜玩意儿，也不是我的“生产力神器”，但就像一张越用越顺手的草稿纸，陪我写日记、整理灵感、甚至规划生活。最关键的是，我一分钱没花，还摸索出了一套适合自己的“野生用法”。如果你也喜欢折腾工具但预算有限，或许我的经验能给你一点启发。  一、为什么选择Obsidian？我是个“工具控”，但更是个“实用主义者”。试用过有道云、石墨、MarkEditor2、Notion、Evernote、OneNote，最后留在电脑里的还是Obsidian。原因很简单：  1. 数据完全属于我：所有笔记都以Markdown文件存在本地，不用担心服务商倒闭或涨价； 2. 极简却灵活：没有花哨界面，但插件和自定义功能深不见底； 3. 强迫症友好：文件夹结构清晰，找笔记像翻实体笔记本一样顺手。  不过，真正让我离不开它的，是下面这两个“私房功能”。  二、我的“零成本”同步方案Obsidian官方同步服务要8美元&#x2F;月，而我……选择自己动手。 最初用谷歌云同步（我相信任何网盘都可以），但偶尔遇到手机和电脑内容冲突，或者丢失。我后来发...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/05/13/8%E6%AC%BE%E5%BC%80%E6%BA%90%E8%87%AA%E5%8A%A8%E5%8C%96%E6%B5%8B%E8%AF%95%E6%A1%86%E6%9E%B6%20-%20%E5%B0%8F%E5%BC%BA%E6%89%BEBUG%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD/" title="8款开源自动化测试框架 - 小强找BUG - 博客园"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-13</div><div class="info-item-2">8款开源自动化测试框架 - 小强找BUG - 博客园</div></div><div class="info-2"><div class="info-item-1">[![[_resources&#x2F;92442b0eb6563aee8410c83388de292d_MD5.jpg]]](https://www.doubao.com/?channel=cnblogs&amp;source=hw_db_cnblogs&amp;type=lunt&amp;theme=bianc) 在如今开源的时代，我们就不要再闭门造车了，热烈的拥抱开源吧！本文针对性能测试、Web UI 测试、API 测试、数据库测试、接口测试、单元测试等方面，为大家整理了github或码云上优秀的自动化测试开源项目，希望能给大家带来一点帮助。 一、性能自动化测试1、项目名称：基于Jmeter实现的在线压测平台和在线管理Jmeter脚本系统 ![[_resources&#x2F;ec84e1ab1778a07ca7e9b3519408a643_MD5.png]] 项目简介：  本项目基于renren-fast Java开发平台开发，内核基于Jmeter-Api和Jmeter脚本实现在线性能压测。  具有如下特点  友好的代码结构及注释，便于阅读及二次开发 实现前后端分离，通过...</div></div></div></a><a class="pagination-related" href="/2025/09/10/%E9%B8%BF%E8%92%99next%E5%BC%80%E5%8F%91%E9%85%8D%E7%BD%AE%E6%89%8B%E5%8A%A8%E7%AD%BE%E5%90%8D/" title="鸿蒙next开发配置手动签名"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-09-10</div><div class="info-item-2">鸿蒙next开发配置手动签名</div></div><div class="info-2"><div class="info-item-1">最新推荐文章于 2025-06-05 11:56:16 发布 原创 于 2025-03-21 10:26:12 发布 · 1.2k 阅读 · 11 · CC 4.0 BY-SA版权 版权声明：本文为博主原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接和本声明。 由于项目中要使用 推送服务 ，需要配置手动签名，整体配置签名的流程如下 ![[_resources&#x2F;37bbe47b36f84fa67dca09340bd60d95_MD5.png]] 1.生成密钥和证书请求文件使用DevEco Studio来生成密钥（存储在格式为.p12的密钥 库文件 中）和证书请求文件（.csr文件）。 在主菜单栏单击 Build &gt; Generate Key and CSR 。 ![[_resources&#x2F;44361608fc12fc4b1ccef108ff289121_MD5.png]] 在 Key Store File 中，单击 New 进行创建。 选择文件路径和填写密码 ![[_resources&#x2F;a377604224c6e12de...</div></div></div></a><a class="pagination-related" href="/2026/03/19/OpenClaw%20%E6%9C%AC%E5%9C%B0%E6%A8%A1%E5%9E%8B%E6%9C%80%E4%BD%B3%E6%96%B9%E6%A1%88%EF%BC%9A%E6%A8%A1%E5%9E%8B%E6%8E%A8%E8%8D%90%20+%20vLLM%20%E9%83%A8%E7%BD%B2%E4%BC%98%E5%8C%96%E5%AE%8C%E6%95%B4%E6%95%99%E7%A8%8B%EF%BC%81/" title="OpenClaw 本地模型最佳方案：模型推荐 + vLLM 部署优化完整教程！"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-19</div><div class="info-item-2">OpenClaw 本地模型最佳方案：模型推荐 + vLLM 部署优化完整教程！</div></div><div class="info-2"><div class="info-item-1">OpenClaw 如何切换到本地模型？如果希望在执行自动化任务时保持流畅、不出现卡顿，同时避免频繁触发上下文长度限制，那么选择一个合适的开源模型就非常关键。 对于 OpenClaw 来说，模型不仅需要具备良好的推理能力和语言理解能力，还需要拥有稳定的 工具调用（Tool Calling）能力。因为在自动化任务中，模型需要频繁调用各种工具完成操作，因此工具调用能力往往是选择模型时最重要的指标之一。  很多人在第一次尝试本地部署模型时，往往会选择 Ollama。它的优点确实很明显：安装简单、配置方便，几乎可以做到“傻瓜式”部署。 开发工具 但在 OpenClaw 这种自动化任务场景下，Ollama 的调用方式和推理速度并不理想。实际使用中往往会遇到两个问题：  推理速度较慢 上下文长度很容易被耗尽  在连续运行多个任务后，经常会出现上下文不够用的情况。 因此，如果你希望获得更稳定、更高效的本地部署体验，就需要选择更合适的推理框架。 一般来说：  远程集群 &#x2F; 多 Agent 场景 ：推荐使用 SGLang 单卡本地部署 ：强烈推荐 vLLM  目前来看，vLLM 可以说是单...</div></div></div></a><a class="pagination-related" href="/2025/06/23/%E3%80%90anaconda%E3%80%91conda%E5%88%9B%E5%BB%BA%E3%80%81%E6%9F%A5%E7%9C%8B%E3%80%81%E5%88%A0%E9%99%A4%E8%99%9A%E6%8B%9F%E7%8E%AF%E5%A2%83%EF%BC%88anaconda%E5%91%BD%E4%BB%A4%E9%9B%86%EF%BC%89_conda%20%E5%88%9B%E5%BB%BA%E7%8E%AF%E5%A2%83-CSDN%E5%8D%9A%E5%AE%A2/" title="【anaconda】conda创建、查看、删除虚拟环境（anaconda命令集）_conda 创建环境-CSDN博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-06-23</div><div class="info-item-2">【anaconda】conda创建、查看、删除虚拟环境（anaconda命令集）_conda 创建环境-CSDN博客</div></div><div class="info-2"><div class="info-item-1">源12豆瓣(douban) http://pypi.douban.com/simple/python1  一、管理conda：（1）检查conda版本 conda --version  （2）获取版本号 conda --version 或 conda -V  （3）列出所有的环境 conda env list conda list 命令用于查看conda下的包，而 conda env list 命令可以用来查看conda创建的所有虚拟环境。  （4）查看环境管理的全部命令帮助 conda env -h  （5）conda升级我们可以在命令行中或者 anaconda prompt中执行命令进行操作。  conda update conda 升级conda conda update anaconda 升级anaconda前要先升级conda conda update --all 升级所有包  （6）conda升级后释放空间在升级完成之后，我们可以使用命令来清理一些无用的包以释放一些空间：  conda clean -p 删除没有用的包 conda clean -t 删除保存下来的压缩...</div></div></div></a><a class="pagination-related" href="/2025/07/10/%E4%BD%BF%E7%94%A8Golang%E5%AE%9E%E7%8E%B0%E9%AB%98%E6%95%88%E7%9A%84%E4%BA%A4%E4%BA%92%E5%BC%8F%E5%91%BD%E4%BB%A4%E8%A1%8C%E6%8F%90%E7%A4%BA%E5%B7%A5%E5%85%B7%20-%20%E4%BA%91%E5%8E%9F%E7%94%9F%E5%AE%9E%E8%B7%B5/" title="使用Golang实现高效的交互式命令行提示工具 - 云原生实践"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-07-10</div><div class="info-item-2">使用Golang实现高效的交互式命令行提示工具 - 云原生实践</div></div><div class="info-2"><div class="info-item-1">引言在软件开发领域，命令行工具（CLI）一直是开发者不可或缺的工具之一。它们简洁、高效，能够快速完成各种任务。随着技术的发展，交互式命令行工具（Interactive CLI）逐渐成为新的趋势，它们通过提供自动补全、语法高亮等功能，极大地提升了用户体验。本文将探讨如何使用Golang实现一个高效的交互式命令行提示工具，并结合一些流行的库和框架，展示其强大功能和灵活性。 Golang简介Golang，也被称为Go语言，是由Google开发的一种开源编程语言。它以其简洁、直观和高效的语法而受到广泛喜爱。Golang具有静态类型、垃圾回收、并发编程和内存安全等特性，特别适合用于开发高性能的网络工具和命令行应用程序。 交互式命令行工具的需求传统的命令行工具通常缺乏交互性，用户需要手动输入完整的命令和参数，这不仅效率低下，还容易出错。交互式命令行工具通过提供自动补全、语法高亮和历史记录等功能，极大地提升了用户体验和工作效率。 关键技术1. Go-prompt库go-prompt 是一个功能强大的Golang库，用于构建交互式命令行界面。它提供了类似于Python的 prompt_toolk...</div></div></div></a><a class="pagination-related" href="/2025/08/07/Ollama%E8%BF%9B%E9%98%B6%EF%BC%8C%E5%9C%A8Python%E3%80%81Java%E3%80%81Go%E9%A1%B9%E7%9B%AE%E4%B8%AD%E9%9B%86%E6%88%90Deepseek%E3%80%81QWQ%E5%A4%A7%E6%A8%A1%E5%9E%8B/" title="Ollama进阶，在Python、Java、Go项目中集成Deepseek、QWQ大模型"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-08-07</div><div class="info-item-2">Ollama进阶，在Python、Java、Go项目中集成Deepseek、QWQ大模型</div></div><div class="info-2"><div class="info-item-1">Ollama系列文章：Ollama入门，一键启动本地DeepSeek大模型Ollama入门，Ollama技术架构与原理Ollama进阶，在Python、Java、Go项目中集成Deepseek、QWQ大模型Ollama进阶，在Javascript(nodejs)前后端项目中集成Deepseek、QWQ大模型Ollama高手，玩转本地自定义大模型（LLM）Ollama高手，调优Ollama环境变量，提高性能与安全性Ollama高手，调优Ollama模型参数，提高模型输出质量  在“ Ollama入门，一键启动本地DeepSeek大模型 ”一文中，我们介绍了Ollama的基本使用方法，同时也推荐了ChatBox、Cherry Studio等AI智能客户端来完成文字、图片、语音等多模态输入，实现与 AI 的交互。 但是，仅仅这样常常不足以满足实际的需要，而在线版的Deepseek、ChatGPT、豆包往往可以提供更好功能，这样在本地部署DeepSeek大模型就成了geek的自娱自乐了，因此我们必须将Ollama整合到项目中去，让它与自有系统整合起来，实现更加丰富的功能。 1、如何调用O...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1%E3%80%81%E5%AE%89%E8%A3%85-conda"><span class="toc-number">1.</span> <span class="toc-text">1、安装 conda</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2%E3%80%81%E6%B7%BB%E5%8A%A0%E9%95%9C%E5%83%8F%E6%BA%90"><span class="toc-number">2.</span> <span class="toc-text">2、添加镜像源</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3%E3%80%81%E5%88%9B%E5%BB%BA-%E5%88%A0%E9%99%A4-%E7%8E%AF%E5%A2%83"><span class="toc-number">3.</span> <span class="toc-text">3、创建&#x2F;删除 环境</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4%E3%80%81%E5%9C%A8conda%E7%8E%AF%E5%A2%83%E5%86%85%E4%BD%BF%E7%94%A8-pip%E5%AE%89%E8%A3%85"><span class="toc-number">4.</span> <span class="toc-text">4、在conda环境内使用 pip安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5%E3%80%81%E5%AE%89%E8%A3%85-%E5%88%A0%E9%99%A4-%E5%91%BD%E4%BB%A4"><span class="toc-number">5.</span> <span class="toc-text">5、安装&#x2F;删除 命令:</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6%E3%80%81%E5%8D%B8%E8%BD%BD-conda"><span class="toc-number">6.</span> <span class="toc-text">6、卸载 conda</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7%E3%80%81%E8%BF%81%E7%A7%BB-conda-%E7%8E%AF%E5%A2%83"><span class="toc-number">7.</span> <span class="toc-text">7、迁移 conda 环境</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E3%80%81CondaHTTPError-%E9%97%AE%E9%A2%98"><span class="toc-number">8.</span> <span class="toc-text">#、CondaHTTPError 问题</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

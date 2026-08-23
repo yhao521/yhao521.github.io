@@ -1,0 +1,215 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>influxdb升级步骤 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="influxdb1.7.4 升级为influxdb1.8.01.停掉原有的influxdbps -ef| grep influxd | grep -v ‘grep’ | grep -v ‘proxy’ | awk ‘{print $2}’ | xargs kill -9 2.上传安装包，解压tar  -zxvf  tsdb-influxdb1.8.0-e3base1.6.0.tgzmv tsdb-">
+<meta property="og:type" content="article">
+<meta property="og:title" content="influxdb升级步骤">
+<meta property="og:url" content="https://yhao521.github.io/2024/01/13/influxdb%E5%8D%87%E7%BA%A7%E6%AD%A5%E9%AA%A4/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="influxdb1.7.4 升级为influxdb1.8.01.停掉原有的influxdbps -ef| grep influxd | grep -v ‘grep’ | grep -v ‘proxy’ | awk ‘{print $2}’ | xargs kill -9 2.上传安装包，解压tar  -zxvf  tsdb-influxdb1.8.0-e3base1.6.0.tgzmv tsdb-">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2024-01-12T20:39:55.000Z">
+<meta property="article:modified_time" content="2024-01-12T20:44:43.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "influxdb升级步骤",
+  "url": "https://yhao521.github.io/2024/01/13/influxdb%E5%8D%87%E7%BA%A7%E6%AD%A5%E9%AA%A4/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2024-01-12T20:39:55.000Z",
+  "dateModified": "2024-01-12T20:44:43.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2024/01/13/influxdb%E5%8D%87%E7%BA%A7%E6%AD%A5%E9%AA%A4/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'influxdb升级步骤',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">influxdb升级步骤</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">influxdb升级步骤</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-01-12T20:39:55.000Z" title="发表于 2024-01-13 04:39:55">2024-01-13</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-01-12T20:44:43.000Z" title="更新于 2024-01-13 04:44:43">2024-01-13</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="influxdb1-7-4-升级为influxdb1-8-0"><a href="#influxdb1-7-4-升级为influxdb1-8-0" class="headerlink" title="influxdb1.7.4 升级为influxdb1.8.0"></a>influxdb1.7.4 升级为influxdb1.8.0</h1><h2 id="1-停掉原有的influxdb"><a href="#1-停掉原有的influxdb" class="headerlink" title="1.停掉原有的influxdb"></a>1.停掉原有的influxdb</h2><p>ps -ef| grep influxd | grep -v ‘grep’ | grep -v ‘proxy’ | awk ‘{print $2}’ | xargs kill -9</p>
+<h2 id="2-上传安装包，解压"><a href="#2-上传安装包，解压" class="headerlink" title="2.上传安装包，解压"></a>2.上传安装包，解压</h2><p>tar  -zxvf  tsdb-influxdb1.8.0-e3base1.6.0.tgz<br>mv tsdb-influxdb1.8.0-e3base1.6.0 influxdb1.8.0<br>mkdir -p .&#x2F;influxdb1.8.0&#x2F;{data,logs}</p>
+<h2 id="3-修改配置文件中的下列对应参数"><a href="#3-修改配置文件中的下列对应参数" class="headerlink" title="3.修改配置文件中的下列对应参数"></a>3.修改配置文件中的下列对应参数</h2><p>  cd influxdb1.8.0&#x2F;etc&#x2F;influxdb. &amp;&amp; vi influxdb.conf<br>[meta]<br>  dir &#x3D; “&#x2F;paas&#x2F;iddbs&#x2F;crds_web&#x2F;influxdb1.8.0&#x2F;data&#x2F;influxdb&#x2F;meta”<br>   logging-enabled &#x3D; false<br>[data]<br>  dir &#x3D; “&#x2F;paas&#x2F;iddbs&#x2F;crds_web&#x2F;influxdb1.8.0&#x2F;data&#x2F;influxdb&#x2F;data”<br>  wal-dir &#x3D; “&#x2F;paas&#x2F;iddbs&#x2F;crds_web&#x2F;influxdb1.8.0&#x2F;data&#x2F;influxdb&#x2F;wal”<br>   query-log-enabled &#x3D; false<br>   max-series-per-database &#x3D;0<br>   max-values-per-tag &#x3D; 0<br>[http]<br>   bind-address &#x3D; “172.18.231.39:25001”<br>   log-enabled &#x3D; false</p>
+<h2 id="4-迁移数据目录-保留原始备份"><a href="#4-迁移数据目录-保留原始备份" class="headerlink" title="4.迁移数据目录(保留原始备份)"></a>4.迁移数据目录(保留原始备份)</h2><p>cd  influxdb1.7.4<br>cp -r data ..&#x2F;influxdb1.8.0&#x2F;</p>
+<h2 id="5-启动influxdb"><a href="#5-启动influxdb" class="headerlink" title="5.启动influxdb"></a>5.启动influxdb</h2><p>  nohup &#x2F;paas&#x2F;iddbs&#x2F;crds_web&#x2F;influxdb1.8.0&#x2F;usr&#x2F;bin&#x2F;influxd -config &#x2F;paas&#x2F;iddbs&#x2F;crds_web&#x2F;influxdb1.8.0&#x2F;etc&#x2F;influxdb&#x2F;influxdb.conf 2&gt;&amp;1 &gt;&gt; &#x2F;paas&#x2F;iddbs&#x2F;crds_web&#x2F;influxdb1.8.0&#x2F;logs&#x2F;influxdb.log &amp;</p>
+<h2 id="5-登陆验证"><a href="#5-登陆验证" class="headerlink" title="5.登陆验证"></a>5.登陆验证</h2><p>  &#x2F;paas&#x2F;iddbs&#x2F;crds_web&#x2F;influxdb1.8.0&#x2F;usr&#x2F;bin&#x2F;influx -precision rfc3339 -host 172.18.231.39 -port 25001</p>
+<h2 id="6-如果之前有配置用户密码，登陆执行命令，创建用户（可选）"><a href="#6-如果之前有配置用户密码，登陆执行命令，创建用户（可选）" class="headerlink" title="6.如果之前有配置用户密码，登陆执行命令，创建用户（可选）"></a>6.如果之前有配置用户密码，登陆执行命令，创建用户（可选）</h2><p>CREATE USER “promethues” WITH PASSWORD ‘promethues’ WITH ALL PRIVILEGES</p>
+<h2 id="7-如果之前有配置用户密码，请继续设置参数，开启验证，重新创建用户（可选）"><a href="#7-如果之前有配置用户密码，请继续设置参数，开启验证，重新创建用户（可选）" class="headerlink" title="7.如果之前有配置用户密码，请继续设置参数，开启验证，重新创建用户（可选）"></a>7.如果之前有配置用户密码，请继续设置参数，开启验证，重新创建用户（可选）</h2><p>[http]<br>   auth-enabled &#x3D; true</p>
+<h2 id="8-停掉、再启动influxdb（执行第1步、第4步的命令）（可选）"><a href="#8-停掉、再启动influxdb（执行第1步、第4步的命令）（可选）" class="headerlink" title="8.停掉、再启动influxdb（执行第1步、第4步的命令）（可选）"></a>8.停掉、再启动influxdb（执行第1步、第4步的命令）（可选）</h2><h2 id="9-验证登陆，有账号的（可选）"><a href="#9-验证登陆，有账号的（可选）" class="headerlink" title="9.验证登陆，有账号的（可选）"></a>9.验证登陆，有账号的（可选）</h2><p> &#x2F;paas&#x2F;iddbs&#x2F;crds_web&#x2F;influxdb1.8.0&#x2F;usr&#x2F;bin&#x2F;influx -precision rfc3339 -host 172.18.231.39 -port 25001 -username ‘promethues’ -password ‘promethues’</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2024/01/13/influxdb%E5%8D%87%E7%BA%A7%E6%AD%A5%E9%AA%A4/">https://yhao521.github.io/2024/01/13/influxdb%E5%8D%87%E7%BA%A7%E6%AD%A5%E9%AA%A4/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/01/13/MySQL%E5%8D%87%E7%BA%A7/" title="MySQL升级"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">MySQL升级</div></div><div class="info-2"><div class="info-item-1">MySQL升级一、升级要求1．支持从MySQL5.7升级到8.0，注意仅支持GA版本之间的升级，并且要求版本为5.7.9或者更高（此句未测试） 2．不支持跨大版本的升级，如从5.6升级到8.0是不支持的 3．建议升级大版本前先升级到当前版本的最近小版本，如5.7先升级到5.7.35后再升级到8.0 4．在大版本内部GA的小版本可以直接升级，如从8.0.9直接升级到8.0.26 二、升级内容1．升级数据字典表的版本：升级数据字典包括升级mysql schema中的数据字典表，以及performance schema，information_schema。升级数据字典表时，如当前版本低于期望版本，则服务器将创建新版本的数据字典表并将持久化的元数据拷贝到新表，在新旧表做原子性替换后重新初始化数据字典。服务器启动后会按需执行，可以使用 –upgrade&#x3D;NONE（8.0.16以后）或–no-dd-upgrade （8.0.16之前）参数启动MySQL，阻止数据字典表的升级 2．升级MySQL server 版本，主要包括system表以及其他schema对象：在8.0.16之前...</div></div></div></a><a class="pagination-related" href="/2024/01/11/9.3k%20Star%EF%BC%81PostgreSQL%20%E7%9A%84%E5%A2%9E%E5%BC%BA%E7%89%88%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%AE%A2%E6%88%B7%E7%AB%AF/" title="9.3k Star！PostgreSQL 的增强版命令行客户端"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">9.3k Star！PostgreSQL 的增强版命令行客户端</div></div><div class="info-2"><div class="info-item-1">【导语】：pgcli 是针对PostgreSQL的命令行工具，对SQL语句有语法高亮显示，并且能对输入进行自动提示。 简介pgcli是PostgreSQL的客户端工具，支持语法高亮，支持自动提示补全命令，顺嘴一提，MySQL也有类似的工具叫mycli。  项目地址：https://github.com/dbcli/pgcli 简单使用下载安装pgcli本质上是一个python库，所以它的安装方式和其他python库安装一样： 12345$ pip install -U pgcli# Only on Debian based Linux (e.g. Ubuntu, Mint, etc)$ sudo apt-get install pgcli # Only on macOS$ brew install pgcli    使用连接数据库的语法为： 123$ pgcli [database_name]或者$ pgcli postgresql://[user[:password]@][netloc][:port][/dbname][?extra=value[&amp;other=other...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/docker_nginx%E5%88%B6%E4%BD%9C/" title="docker_nginx制作"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">docker_nginx制作</div></div><div class="info-2"><div class="info-item-1"> title: docker_nginx制作date: 2023-09-03 20:17:08category:  doc_dockertag: doc_dockerauthor:   Docker安装NginxDocker安装完成后，我们需要部署web应用上去，需要用到Nginx做反向代理访问Docker容器，也可以使用Jexus。本文主要介绍的是使用Docker运行Nginx及其简单配置，Jexus留待之后介绍。 1、拉取官方镜像docker pull nginx 2、运行容器 docker run -p 80:80 –name nginx -d nginx 3、第二步运行的Nginx的配置文件是在容器内部的，不方便修改，所以我们可以先把容器内的配置文件复制到宿主机 查看nginx的配置文件目录 复制代码docker exec nginx ls &#x2F;etc&#x2F;nginx conf.dfastcgi_paramskoi-utfkoi-winmime.typesmodulesnginx.confscgi_paramsuwsgi_paramswin-utf复制代码 ...</div></div></div></a><a class="pagination-related" href="/2024/10/20/Ionic%E6%96%87%E4%BB%B6%E9%80%89%E6%8B%A9%E6%8F%92%E4%BB%B6filechooser%E9%80%89%E6%8B%A9%E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0%E7%9A%84%E9%97%AE%E9%A2%98/" title="Ionic文件选择插件filechooser选择图片上传的问题"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-10-20</div><div class="info-item-2">Ionic文件选择插件filechooser选择图片上传的问题</div></div><div class="info-2"><div class="info-item-1">Ionic3&#x2F;4文件选择插件filechooser选择图片上传的问题  插件安装 文件选择 filechooser 获取文件的实际路径 读取选择的图片     选择图库中的文件上传请看另一文章  在移动项目开发中，使用的是Ionic框架，当中涉及到文件上传。 开发思路：  使用文件选择插件获取路径 使用路径上传文件  开发流程涉及到的组件有(Ionic官方文档)  文件选择 https://ionicframework.com/docs/native/file-chooser 文件打开 https://ionicframework.com/docs/native/file-opener （在已上传的文件列表中可能你会使用上） 文件路径 https://ionicframework.com/docs/native/file-path  插件安装下面只列举文件选择的插件安装方法。文件打开和文件路径安装方式同理，文档有具体描述，文件选择插件有版本的注意事项 Ionic3.x 123$ ionic cordova plugin add cordova-plugin-filech...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E4%BD%BF%E7%94%A8MAC%E8%BF%9B%E8%A1%8C%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91/" title="使用MAC进行软件开发"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">使用MAC进行软件开发</div></div><div class="info-2"><div class="info-item-1"> title: 使用MAC进行软件开发date: 2023-09-03 20:17:08category:  mactag: macauthor:   使用MAC进行软件开发https://www.jianshu.com/p/a29eca251fc5 作为一名程序员，我经历了从使用Windows、Ubuntu、MAC系统进行开发工作，最终我选择了MAC系统，原因主要有两个：软件运行流畅度、界面视觉享受高以下介绍使用MAC系统过程中，我常用的一些软件，浏览器插件相关可跳转至 好用的Google浏览器插件 1、包管理器：brewMAC系统使用比较好的包管理器，新系统没有预安装brew，需要自行安装，执行命令 1/bin/zsh -c &quot;$(curl -fsSL https://gitee.com/cunkai/HomebrewCN/raw/master/Homebrew.sh)&quot;  2、软件下载网站和浏览器插件下载网站下方相关软件如果你不方便从官网进行下载可通过以下网站进行下载并安装，有兴趣的同学可以自行探索哦 软件下载：  App Store：https://w...</div></div></div></a><a class="pagination-related" href="/2026/05/15/%E6%A6%82%E8%A6%81%E8%AE%BE%E8%AE%A1/" title="概要设计"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-15</div><div class="info-item-2">概要设计</div></div><div class="info-2"><div class="info-item-1">深度与广度的平衡：Java继续保持深度（JVM调优、并发编程），Go扩展广度（云原生、高并发），Python&#x2F;Shell作为工具链补充 简历项目描述示例：不要写：“用Java开发了一个监控系统”要写：“设计并实现混合架构监控平台，采用Go处理高频指标数据（10w+ QPS），Java实现复杂告警规则引擎，性能较纯Java方案提升40%，资源消耗降低30%” 混合技术栈监控告警平台概要设计📊 平台整体架构12345678910111213141516171819202122232425262728┌─────────────────────────────────────────────────────────────────┐│                        展示层 (Vue + Java API)                    │├─────────────────────────────────────────────────────────────────┤│       API网关/负载均衡 (Go/Java)  │  配置中心 (Ja...</div></div></div></a><a class="pagination-related" href="/2024/06/04/Nginx%E6%B5%8F%E8%A7%88%E7%9B%AE%E5%BD%95%E9%85%8D%E7%BD%AE%E5%8F%8A%E7%BE%8E%E5%8C%96-1/" title="Nginx浏览目录配置及美化-1"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-06-04</div><div class="info-item-2">Nginx浏览目录配置及美化-1</div></div><div class="info-2"><div class="info-item-1">在项目中有一个功能需要在浏览器页面中浏览服务器的目录。服务器使用Nginx，而Nginx提供了相应的ngx_http_autoindex_module 模块，该模块提供了我们想要的功能。 Nginx-Fancyindex-Theme这是从一个项目Fork过来，做了部分改动，并修复了少量bug后的完整的可用项目，需要的可以参考：Nginx-Fancyindex-Theme Nginx ngx_http_autoindex_module 模块该模块有以下几个命令：    命令 默认值 值域 作用域 EG    autoindex off on：开启目录浏览；     off：关闭目录浏览 http, server, location autoindex on;打开目录浏览功能     autoindex_format html html、xml、json、jsonp 分别用这几个风格展示目录 http, server, location autoindex_format html; 以网页的风格展示目录内容。该属性在1.7.9及以上适用   autoindex_exact_size ...</div></div></div></a><a class="pagination-related" href="/2024/08/15/%E8%A7%A3%E5%86%B3centos(linux)%20ffmepg%20%E6%94%AF%E6%8C%81%20h264%20mp4%20%E7%BC%96%E7%A0%81%E6%96%B9%E6%B3%95%20Unknown%20en/" title="解决centos(linux) ffmepg 支持 h264 mp4 编码方法 Unknown encoder ‘h264‘"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-15</div><div class="info-item-2">解决centos(linux) ffmepg 支持 h264 mp4 编码方法 Unknown encoder ‘h264‘</div></div><div class="info-2"><div class="info-item-1">下载并安装x264123456789git clone https://code.videolan.org/videolan/x264.gitcd x264./configure --help# 报缺少asm 时 可加入--disable-asm./configure --enable-shared --enable-static --disable-asmmake# x264将会安装到 ：/usr/local/ 目录下sudo make install12345678  重新编译 ffmpeg1234567891011121314151617181920212223# 下载ffmpegwget https://ffmpeg.org/releases/ffmpeg-snapshot.tar.bz2 --no-check-certificatetar xjf ffmpeg-snapshot.tar.bz2cd ffmpeg/./configure --prefix=/usr/local/ffmpeg --enable-shared --enable-yasm --enable-li...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#influxdb1-7-4-%E5%8D%87%E7%BA%A7%E4%B8%BAinfluxdb1-8-0"><span class="toc-number">1.</span> <span class="toc-text">influxdb1.7.4 升级为influxdb1.8.0</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E5%81%9C%E6%8E%89%E5%8E%9F%E6%9C%89%E7%9A%84influxdb"><span class="toc-number">1.1.</span> <span class="toc-text">1.停掉原有的influxdb</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E4%B8%8A%E4%BC%A0%E5%AE%89%E8%A3%85%E5%8C%85%EF%BC%8C%E8%A7%A3%E5%8E%8B"><span class="toc-number">1.2.</span> <span class="toc-text">2.上传安装包，解压</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E4%BF%AE%E6%94%B9%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E4%B8%AD%E7%9A%84%E4%B8%8B%E5%88%97%E5%AF%B9%E5%BA%94%E5%8F%82%E6%95%B0"><span class="toc-number">1.3.</span> <span class="toc-text">3.修改配置文件中的下列对应参数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E8%BF%81%E7%A7%BB%E6%95%B0%E6%8D%AE%E7%9B%AE%E5%BD%95-%E4%BF%9D%E7%95%99%E5%8E%9F%E5%A7%8B%E5%A4%87%E4%BB%BD"><span class="toc-number">1.4.</span> <span class="toc-text">4.迁移数据目录(保留原始备份)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E5%90%AF%E5%8A%A8influxdb"><span class="toc-number">1.5.</span> <span class="toc-text">5.启动influxdb</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E7%99%BB%E9%99%86%E9%AA%8C%E8%AF%81"><span class="toc-number">1.6.</span> <span class="toc-text">5.登陆验证</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E5%A6%82%E6%9E%9C%E4%B9%8B%E5%89%8D%E6%9C%89%E9%85%8D%E7%BD%AE%E7%94%A8%E6%88%B7%E5%AF%86%E7%A0%81%EF%BC%8C%E7%99%BB%E9%99%86%E6%89%A7%E8%A1%8C%E5%91%BD%E4%BB%A4%EF%BC%8C%E5%88%9B%E5%BB%BA%E7%94%A8%E6%88%B7%EF%BC%88%E5%8F%AF%E9%80%89%EF%BC%89"><span class="toc-number">1.7.</span> <span class="toc-text">6.如果之前有配置用户密码，登陆执行命令，创建用户（可选）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-%E5%A6%82%E6%9E%9C%E4%B9%8B%E5%89%8D%E6%9C%89%E9%85%8D%E7%BD%AE%E7%94%A8%E6%88%B7%E5%AF%86%E7%A0%81%EF%BC%8C%E8%AF%B7%E7%BB%A7%E7%BB%AD%E8%AE%BE%E7%BD%AE%E5%8F%82%E6%95%B0%EF%BC%8C%E5%BC%80%E5%90%AF%E9%AA%8C%E8%AF%81%EF%BC%8C%E9%87%8D%E6%96%B0%E5%88%9B%E5%BB%BA%E7%94%A8%E6%88%B7%EF%BC%88%E5%8F%AF%E9%80%89%EF%BC%89"><span class="toc-number">1.8.</span> <span class="toc-text">7.如果之前有配置用户密码，请继续设置参数，开启验证，重新创建用户（可选）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-%E5%81%9C%E6%8E%89%E3%80%81%E5%86%8D%E5%90%AF%E5%8A%A8influxdb%EF%BC%88%E6%89%A7%E8%A1%8C%E7%AC%AC1%E6%AD%A5%E3%80%81%E7%AC%AC4%E6%AD%A5%E7%9A%84%E5%91%BD%E4%BB%A4%EF%BC%89%EF%BC%88%E5%8F%AF%E9%80%89%EF%BC%89"><span class="toc-number">1.9.</span> <span class="toc-text">8.停掉、再启动influxdb（执行第1步、第4步的命令）（可选）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#9-%E9%AA%8C%E8%AF%81%E7%99%BB%E9%99%86%EF%BC%8C%E6%9C%89%E8%B4%A6%E5%8F%B7%E7%9A%84%EF%BC%88%E5%8F%AF%E9%80%89%EF%BC%89"><span class="toc-number">1.10.</span> <span class="toc-text">9.验证登陆，有账号的（可选）</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

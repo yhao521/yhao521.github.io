@@ -1,0 +1,251 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>【Go】获取站点标题和图标_golang通过url获取标题-CSDN博客 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="文章浏览阅读1.2k次。该博客介绍了如何利用Go语言和goscraper库从网站中抓取标题、图标和其他元信息。通过示例代码展示了如何导入和使用goscraper包，以及如何处理可能的错误。示例展示了从GitHub官网获取信息，包括图标URL、网站名称、标题、描述和预览图片。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【Go】获取站点标题和图标_golang通过url获取标题-CSDN博客">
+<meta property="og:url" content="https://yhao521.github.io/2025/07/04/%E3%80%90Go%E3%80%91%E8%8E%B7%E5%8F%96%E7%AB%99%E7%82%B9%E6%A0%87%E9%A2%98%E5%92%8C%E5%9B%BE%E6%A0%87_golang%E9%80%9A%E8%BF%87url%E8%8E%B7%E5%8F%96%E6%A0%87%E9%A2%98-CSDN%E5%8D%9A%E5%AE%A2/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="文章浏览阅读1.2k次。该博客介绍了如何利用Go语言和goscraper库从网站中抓取标题、图标和其他元信息。通过示例代码展示了如何导入和使用goscraper包，以及如何处理可能的错误。示例展示了从GitHub官网获取信息，包括图标URL、网站名称、标题、描述和预览图片。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2025-07-03T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-17T16:00:00.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="swift&#x2F;programming">
+<meta property="article:tag" content="摘录">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "【Go】获取站点标题和图标_golang通过url获取标题-CSDN博客",
+  "url": "https://yhao521.github.io/2025/07/04/%E3%80%90Go%E3%80%91%E8%8E%B7%E5%8F%96%E7%AB%99%E7%82%B9%E6%A0%87%E9%A2%98%E5%92%8C%E5%9B%BE%E6%A0%87_golang%E9%80%9A%E8%BF%87url%E8%8E%B7%E5%8F%96%E6%A0%87%E9%A2%98-CSDN%E5%8D%9A%E5%AE%A2/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2025-07-03T16:00:00.000Z",
+  "dateModified": "2026-05-17T16:00:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2025/07/04/%E3%80%90Go%E3%80%91%E8%8E%B7%E5%8F%96%E7%AB%99%E7%82%B9%E6%A0%87%E9%A2%98%E5%92%8C%E5%9B%BE%E6%A0%87_golang%E9%80%9A%E8%BF%87url%E8%8E%B7%E5%8F%96%E6%A0%87%E9%A2%98-CSDN%E5%8D%9A%E5%AE%A2/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '【Go】获取站点标题和图标_golang通过url获取标题-CSDN博客',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">【Go】获取站点标题和图标_golang通过url获取标题-CSDN博客</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">【Go】获取站点标题和图标_golang通过url获取标题-CSDN博客</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-07-03T16:00:00.000Z" title="发表于 2025-07-04 00:00:00">2025-07-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-17T16:00:00.000Z" title="更新于 2026-05-18 00:00:00">2026-05-18</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h2 id="【Go】获取站点标题和图标"><a href="#【Go】获取站点标题和图标" class="headerlink" title="【Go】获取站点标题和图标"></a>【Go】获取站点标题和图标</h2><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/a137748099" title="芒果黑">芒果黑</a> 于 2021-04-22 22:19:14 发布</p>
+<p>CC 4.0 BY-SA版权</p>
+<p>分类专栏：</p>
+<p>版权声明：本文为博主原创文章，遵循 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-sa/4.0/">CC 4.0 BY-SA</a> 版权协议，转载请附上原文出处链接和本声明。</p>
+<p>本文链接： <a target="_blank" rel="noopener" href="https://blog.csdn.net/a137748099/article/details/116034018">https://blog.csdn.net/a137748099/article/details/116034018</a></p>
+<p>该博客介绍了如何利用Go语言和goscraper库从网站中抓取标题、图标和其他元信息。通过示例代码展示了如何导入和使用goscraper包，以及如何处理可能的错误。示例展示了从GitHub官网获取信息，包括图标URL、网站名称、标题、描述和预览图片。</p>
+<p>摘要生成于 <a target="_blank" rel="noopener" href="https://ai.csdn.net/?utm_source=cknow_pc_ai_abstract">C知道</a> ，由 DeepSeek-R1 满血版支持， <a target="_blank" rel="noopener" href="https://ai.csdn.net/?utm_source=cknow_pc_ai_abstract">前往体验 &gt;</a></p>
+<p>在 <a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=github&spm=1001.2101.3001.7020">github</a> 上找到了go获取站点标题和图标的代码，地址为： <a target="_blank" rel="noopener" href="https://github.com/badoux/goscraper">https://github.com/badoux/goscraper</a></p>
+<p>github上也提供了调用的例子</p>
+<p>使用的话把goscraper.go拿到项目中，创建名为goscraper的文件夹，做成包调用的方式，工程执行</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go mod tidy</span><br></pre></td></tr></table></figure>
+
+<p>把相关依赖补全即可使用</p>
+<p>用法如下</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line"></span><br><span class="line">    <span class="string">&quot;fmt&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="string">&quot;wesite-title/goscraper&quot;</span></span><br><span class="line"></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> <span class="title function_">main</span>() &#123;</span><br><span class="line"></span><br><span class="line">    s, err :<span class="operator">=</span> goscraper.<span class="type">Scrape</span>(<span class="string">&quot;https://github.com&quot;</span>, <span class="number">5</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> err <span class="operator">!=</span> <span class="literal">nil</span> &#123;</span><br><span class="line"></span><br><span class="line">        fmt.<span class="type">Println</span>(err)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    fmt.<span class="type">Printf</span>(<span class="string">&quot;Icon : %s<span class="subst">\n</span>&quot;</span>, s.<span class="type">Preview</span>.<span class="type">Icon</span>)</span><br><span class="line"></span><br><span class="line">    fmt.<span class="type">Printf</span>(<span class="string">&quot;Name : %s<span class="subst">\n</span>&quot;</span>, s.<span class="type">Preview</span>.<span class="type">Name</span>)</span><br><span class="line"></span><br><span class="line">    fmt.<span class="type">Printf</span>(<span class="string">&quot;Title : %s<span class="subst">\n</span>&quot;</span>, s.<span class="type">Preview</span>.<span class="type">Title</span>)</span><br><span class="line"></span><br><span class="line">    fmt.<span class="type">Printf</span>(<span class="string">&quot;Description : %s<span class="subst">\n</span>&quot;</span>, s.<span class="type">Preview</span>.<span class="type">Description</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> len(s.<span class="type">Preview</span>.<span class="type">Images</span>) <span class="operator">&gt;</span> <span class="number">0</span> &#123;</span><br><span class="line"></span><br><span class="line">        fmt.<span class="type">Printf</span>(<span class="string">&quot;Image: %s<span class="subst">\n</span>&quot;</span>, s.<span class="type">Preview</span>.<span class="type">Images</span>[<span class="number">0</span>])</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    fmt.<span class="type">Printf</span>(<span class="string">&quot;Url : %s<span class="subst">\n</span>&quot;</span>, s.<span class="type">Preview</span>.<span class="type">Link</span>)</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>结果</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Icon : https://github.githubassets.com/favicons/favicon.svg</span><br><span class="line"></span><br><span class="line">Name : GitHub</span><br><span class="line"></span><br><span class="line">Title : GitHub: Where the world builds software</span><br><span class="line"></span><br><span class="line">Description : GitHub is where over 56 million developers shape the future of software, together. Contribute to the open source community, manage your Git repositories, review code like a pro, track bugs and feat...</span><br><span class="line"></span><br><span class="line">Image: https://github.githubassets.com/images/modules/site/social-cards/github-social.png</span><br><span class="line"></span><br><span class="line">Url : https://github.com/</span><br></pre></td></tr></table></figure>
+
+<p>有些站点Icon只返回文件名，和检测的域名组合起来就好了</p>
+<p>![[_resources&#x2F;3845bc093f7a7241eff280ffe5f20ccd_MD5.png]]</p>
+<p>登录后您可以享受以下权益：</p>
+<ul>
+<li>免费复制代码</li>
+<li>和博主大V互动</li>
+<li>下载海量资源</li>
+<li>发动态&#x2F;写文章&#x2F;加入社区<br>×</li>
+</ul>
+<p>实付 元</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/a137748099/article/details/">使用余额支付</a></p>
+<p>点击重新获取</p>
+<p>扫码支付</p>
+<p>钱包余额 0</p>
+<p>抵扣说明：</p>
+<p>1.余额是钱包充值的虚拟货币，按照1:1的比例进行支付金额的抵扣。<br>2.余额无法直接购买下载，可以购买VIP、付费专栏及课程。</p>
+<p><a target="_blank" rel="noopener" href="https://i.csdn.net/#/wallet/balance/recharge">余额充值</a></p>
+<p>举报</p>
+<p> [![[_resources&#x2F;35c7362356adf5a11cd3cc47fd01628f_MD5.png]] 点击体验<br>DeepSeekR1满血版](<a target="_blank" rel="noopener" href="https://ai.csdn.net/?utm_source=cknow_pc_blogdetail&spm=1001.2101.3001.10583">https://ai.csdn.net/?utm_source=cknow_pc_blogdetail&amp;spm=1001.2101.3001.10583</a>) ![[_resources&#x2F;90bd0cbf3aff8fdff8bf9b011b581e20_MD5.png]]</p>
+<p>程序员都在用的中文IT技术交流社区</p>
+<p>![[_resources&#x2F;08a47e60886378fe60a3d9c8f4ae8bc6_MD5.png]]</p>
+<p>专业的中文 IT 技术社区，与千万技术人共成长</p>
+<p>![[_resources&#x2F;a51be6c085b867a5bd82d8dc1cea9b46_MD5.png]]</p>
+<p>关注【CSDN】视频号，行业资讯、技术分享精彩不断，直播好礼送不停！</p>
+<p>客服 返回顶部</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2025/07/04/%E3%80%90Go%E3%80%91%E8%8E%B7%E5%8F%96%E7%AB%99%E7%82%B9%E6%A0%87%E9%A2%98%E5%92%8C%E5%9B%BE%E6%A0%87_golang%E9%80%9A%E8%BF%87url%E8%8E%B7%E5%8F%96%E6%A0%87%E9%A2%98-CSDN%E5%8D%9A%E5%AE%A2/">https://yhao521.github.io/2025/07/04/%E3%80%90Go%E3%80%91%E8%8E%B7%E5%8F%96%E7%AB%99%E7%82%B9%E6%A0%87%E9%A2%98%E5%92%8C%E5%9B%BE%E6%A0%87_golang%E9%80%9A%E8%BF%87url%E8%8E%B7%E5%8F%96%E6%A0%87%E9%A2%98-CSDN%E5%8D%9A%E5%AE%A2/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a><a class="post-meta__tags" href="/tags/%E6%91%98%E5%BD%95/">摘录</a><a class="post-meta__tags" href="/tags/swift-programming/">swift/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/07/10/%E4%BD%BF%E7%94%A8Golang%E5%AE%9E%E7%8E%B0%E9%AB%98%E6%95%88%E7%9A%84%E4%BA%A4%E4%BA%92%E5%BC%8F%E5%91%BD%E4%BB%A4%E8%A1%8C%E6%8F%90%E7%A4%BA%E5%B7%A5%E5%85%B7%20-%20%E4%BA%91%E5%8E%9F%E7%94%9F%E5%AE%9E%E8%B7%B5/" title="使用Golang实现高效的交互式命令行提示工具 - 云原生实践"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">使用Golang实现高效的交互式命令行提示工具 - 云原生实践</div></div><div class="info-2"><div class="info-item-1">引言在软件开发领域，命令行工具（CLI）一直是开发者不可或缺的工具之一。它们简洁、高效，能够快速完成各种任务。随着技术的发展，交互式命令行工具（Interactive CLI）逐渐成为新的趋势，它们通过提供自动补全、语法高亮等功能，极大地提升了用户体验。本文将探讨如何使用Golang实现一个高效的交互式命令行提示工具，并结合一些流行的库和框架，展示其强大功能和灵活性。 Golang简介Golang，也被称为Go语言，是由Google开发的一种开源编程语言。它以其简洁、直观和高效的语法而受到广泛喜爱。Golang具有静态类型、垃圾回收、并发编程和内存安全等特性，特别适合用于开发高性能的网络工具和命令行应用程序。 交互式命令行工具的需求传统的命令行工具通常缺乏交互性，用户需要手动输入完整的命令和参数，这不仅效率低下，还容易出错。交互式命令行工具通过提供自动补全、语法高亮和历史记录等功能，极大地提升了用户体验和工作效率。 关键技术1. Go-prompt库go-prompt 是一个功能强大的Golang库，用于构建交互式命令行界面。它提供了类似于Python的 prompt_toolk...</div></div></div></a><a class="pagination-related" href="/2025/07/02/2025%E5%B9%B4%E4%B8%8B%E5%8D%8A%E5%B9%B4%E9%99%95%E8%A5%BF%E7%9C%81%E5%85%A8%E5%9B%BD%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%AD%89%E7%BA%A7%E8%80%83%E8%AF%95%E6%8A%A5%E5%90%8D%E5%85%AC%E5%91%8A-%E9%99%95%E8%A5%BF%E7%9C%81%E6%95%99%E8%82%B2%E8%80%83%E8%AF%95%E9%99%A2/" title="2025年下半年陕西省全国计算机等级考试报名公告-陕西省教育考试院"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">2025年下半年陕西省全国计算机等级考试报名公告-陕西省教育考试院</div></div><div class="info-2"><div class="info-item-1">2025 年下半年全国计算机等级考试将于 9 月 20 日至 22 日进行，现将网上报名有关事项公告如下： 1 ． 报名时间： 2025 年 6 月 26 日 9 ∶ 00 至 7 月 2 日 17 ∶ 00 ； 2 ． 缴费时段： 2025 年 6 月 26 日 9 ∶ 00 至 7 月 2 日 17 ∶ 00 ； 3 ． 打印准考证时间： 2025 年 9 月 15 日 9 ∶ 00 起至当次考试结束； 4 ． 报名方式及注意事项：考生可登录中国教育考试网报名网址： ncre-bm.neea.cn （公网）或 ncre-bm.neea.edu.cn （教育网）， 选择网页 上 “ （ 61 ）陕西 省 ”报名 入口进入陕西省报名系统 。报考前请认真阅读《报名协议》，按照《陕西省全国计算机等级考试网上报名须知及流程》（附件 1 ），在规定时间内完成网上注册、报名和缴费，逾期不予补报。 特别提醒： 1 ． 同次考试同一考生只能在一个省级承办机构的一个考点报名，不允许跨省报考，否则将按违规进行处理； 2 ． 在校学生原则上应在本校考点报名，本校无考点和非在校考生可选择接收社会考生的...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/03/19/OpenClaw%20%E6%9C%AC%E5%9C%B0%E6%A8%A1%E5%9E%8B%E6%9C%80%E4%BD%B3%E6%96%B9%E6%A1%88%EF%BC%9A%E6%A8%A1%E5%9E%8B%E6%8E%A8%E8%8D%90%20+%20vLLM%20%E9%83%A8%E7%BD%B2%E4%BC%98%E5%8C%96%E5%AE%8C%E6%95%B4%E6%95%99%E7%A8%8B%EF%BC%81/" title="OpenClaw 本地模型最佳方案：模型推荐 + vLLM 部署优化完整教程！"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-19</div><div class="info-item-2">OpenClaw 本地模型最佳方案：模型推荐 + vLLM 部署优化完整教程！</div></div><div class="info-2"><div class="info-item-1">OpenClaw 如何切换到本地模型？如果希望在执行自动化任务时保持流畅、不出现卡顿，同时避免频繁触发上下文长度限制，那么选择一个合适的开源模型就非常关键。 对于 OpenClaw 来说，模型不仅需要具备良好的推理能力和语言理解能力，还需要拥有稳定的 工具调用（Tool Calling）能力。因为在自动化任务中，模型需要频繁调用各种工具完成操作，因此工具调用能力往往是选择模型时最重要的指标之一。  很多人在第一次尝试本地部署模型时，往往会选择 Ollama。它的优点确实很明显：安装简单、配置方便，几乎可以做到“傻瓜式”部署。 开发工具 但在 OpenClaw 这种自动化任务场景下，Ollama 的调用方式和推理速度并不理想。实际使用中往往会遇到两个问题：  推理速度较慢 上下文长度很容易被耗尽  在连续运行多个任务后，经常会出现上下文不够用的情况。 因此，如果你希望获得更稳定、更高效的本地部署体验，就需要选择更合适的推理框架。 一般来说：  远程集群 &#x2F; 多 Agent 场景 ：推荐使用 SGLang 单卡本地部署 ：强烈推荐 vLLM  目前来看，vLLM 可以说是单...</div></div></div></a><a class="pagination-related" href="/2025/10/08/Redis%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E2%80%94Redisson+RLock%E5%8F%AF%E9%87%8D%E5%85%A5%E9%94%81%E5%AE%9E%E7%8E%B0%E7%AF%87/" title="Redis分布式锁—Redisson+RLock可重入锁实现篇"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-10-08</div><div class="info-item-2">Redis分布式锁—Redisson+RLock可重入锁实现篇</div></div><div class="info-2"><div class="info-item-1">前言平时的工作中，由于生产环境中的项目是需要部署在多台服务器中的，所以经常会面临解决分布式场景下数据一致性的问题，那么就需要引入分布式锁来解决这一问题。 针对分布式锁的实现，目前比较常用的就如下几种方案：  基于数据库实现分布式锁 基于 Redis 实现分布式锁 【本文】 基于 Zookeeper 实现分布式锁  接下来这个系列文章会跟大家一块探讨这三种方案，本篇为 Redis 实现分布式锁篇。 Redis分布式环境搭建推荐： 基于Docker的Redis集群搭建 Redis分布式锁一览说到 Redis 锁，能搜到的，或者说常用的无非就下面这两个：  setNX + Lua脚本 Redisson + RLock可重入锁 【本文】  接下来我们一一探索这两个的实现，本文为 Redisson + RLock可重入锁 实现篇。 1、setNX+Lua实现方式跳转链接： https://www.cnblogs.com/niceyoo/p/13711149.html 2、Redisson介绍Redisson 是 java 的 Redis 客户端之一，是 Redis 官网推荐的 java 语...</div></div></div></a><a class="pagination-related" href="/2025/05/13/nginx%20%E5%BC%80%E5%90%AF%E7%9B%AE%E5%BD%95%E6%B5%8F%E8%A7%88%E5%8A%9F%E8%83%BD%E5%8F%8A%E4%B8%BB%E9%A2%98%E7%BE%8E%E5%8C%96/" title="nginx 开启目录浏览功能及主题美化"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-13</div><div class="info-item-2">nginx 开启目录浏览功能及主题美化</div></div><div class="info-2"><div class="info-item-1">![[_resources&#x2F;46515eaf0d7b8037451bd4cc691c1efa_MD5.png]] 1.开启目录浏览功能Nginx 提供了相应的 ngx_http_autoindex_module 模块该模块有以下几个命令：    命令 默认值 值域 作用域 EG    autoindex off on：开启目录浏览；off：关闭目录浏览 http, server, location autoindex on; 打开目录浏览功能   autoindex_format html html、xml、json、jsonp 分别用这几个风格展示目录 http, server, location autoindex_format html;  以网页的风格展示目录内容。该属性在 1.7.9 及以上适用   autoindex_exact_size on on：展示文件字节数； off：以可读的方式显示文件大小 http, server, location autoindex_exact_size off; 以可读的方式显示文件大小，单位为 KB、MB 或者 GB，a...</div></div></div></a><a class="pagination-related" href="/2025/09/10/%E9%B8%BF%E8%92%99next%E5%BC%80%E5%8F%91%E9%85%8D%E7%BD%AE%E6%89%8B%E5%8A%A8%E7%AD%BE%E5%90%8D/" title="鸿蒙next开发配置手动签名"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-09-10</div><div class="info-item-2">鸿蒙next开发配置手动签名</div></div><div class="info-2"><div class="info-item-1">最新推荐文章于 2025-06-05 11:56:16 发布 原创 于 2025-03-21 10:26:12 发布 · 1.2k 阅读 · 11 · CC 4.0 BY-SA版权 版权声明：本文为博主原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接和本声明。 由于项目中要使用 推送服务 ，需要配置手动签名，整体配置签名的流程如下 ![[_resources&#x2F;37bbe47b36f84fa67dca09340bd60d95_MD5.png]] 1.生成密钥和证书请求文件使用DevEco Studio来生成密钥（存储在格式为.p12的密钥 库文件 中）和证书请求文件（.csr文件）。 在主菜单栏单击 Build &gt; Generate Key and CSR 。 ![[_resources&#x2F;44361608fc12fc4b1ccef108ff289121_MD5.png]] 在 Key Store File 中，单击 New 进行创建。 选择文件路径和填写密码 ![[_resources&#x2F;a377604224c6e12de...</div></div></div></a><a class="pagination-related" href="/2025/10/08/Redis%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E2%80%94SETNX+Lua%E8%84%9A%E6%9C%AC%E5%AE%9E%E7%8E%B0%E7%AF%87/" title="Redis分布式锁—SETNX+Lua脚本实现篇"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-10-08</div><div class="info-item-2">Redis分布式锁—SETNX+Lua脚本实现篇</div></div><div class="info-2"><div class="info-item-1">前言平时的工作中，由于生产环境中的项目是需要部署在多台服务器中的，所以经常会面临解决分布式场景下数据一致性的问题，那么就需要引入分布式锁来解决这一问题。 针对分布式锁的实现，目前比较常用的就如下几种方案：  基于数据库实现分布式锁 基于Redis实现分布式锁 【本文】 基于Zookeeper实现分布式锁  接下来这个系列文章会跟大家一块探讨这三种方案，本篇为Redis实现分布式锁篇。 Redis分布式环境搭建推荐： 基于Docker的Redis集群搭建 Redis分布式锁一览说到 redis 锁，能搜到的，或者说常用的无非就下面这两个：  setNX + Lua脚本 【本文】 Redisson + RLock可重入锁  接下来我们一一探索这两个的实现，本文为 setNX + Lua脚本 实现篇。 1、setNX完整语法：SET key value [EX seconds|PX milliseconds] [NX|XX] [KEEPTTL] 必选参数说明：  SET：命令 key：待设置的key value：设置的key的value，最好为随机字符串  可选参数说明：  NX：表示...</div></div></div></a><a class="pagination-related" href="/2024/04/14/Vue3+TypeScript%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E8%BF%9B%E9%98%B6%EF%BC%88%E4%B8%80%EF%BC%89%E2%80%94%E2%80%94Vue3%E7%AE%80%E4%BB%8B%E5%8F%8A%E4%BB%8B%E7%BB%8D/" title="Vue3+TypeScript从入门到进阶（一）——Vue3简介及介绍"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-14</div><div class="info-item-2">Vue3+TypeScript从入门到进阶（一）——Vue3简介及介绍</div></div><div class="info-2"><div class="info-item-1">Vue3+TypeScript从入门到进阶（一）——Vue3简介及介绍——附沿途学习案例及项目实战代码一、简介1、认识VueVue (读音 &#x2F;vjuː&#x2F;，类似于 view) 是一套用于构建用户界面的渐进式框架。  全程是Vue.js或者Vuejs；  什么是渐进式框架呢？表示我们可以在项目中一点点来引入和使用Vue，而不一定需要全部使用Vue来开发整个项目；    渐进式: (自底向上逐层的应用) (1) 简单应用: 只需要一个轻量小巧的核心库 (2) 复杂应用: 可以引用各种vue插件 这里说的渐进式框架其实是与Spring类似的分层架构，Vue由5个模块组成：声明式渲染&#x2F;组件系统（vue.js）、客户端路由（vue-router）、大规模状态管理（vuex&#x2F;pinia）、构建工具（vue-loader&#x2F;webpack&#x2F;vue-cli&#x2F;vite）、数据持久化（涉及到后端，没有具体方案）  目前Vue在前端处于什么地位？ 目前前端最流行的是三大框架：Vue、React、Angular。  2、前端框架数据对比框...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E3%80%90Go%E3%80%91%E8%8E%B7%E5%8F%96%E7%AB%99%E7%82%B9%E6%A0%87%E9%A2%98%E5%92%8C%E5%9B%BE%E6%A0%87"><span class="toc-number">1.</span> <span class="toc-text">【Go】获取站点标题和图标</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

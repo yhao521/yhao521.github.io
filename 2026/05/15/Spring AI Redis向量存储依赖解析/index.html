@@ -1,0 +1,242 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Spring AI Redis向量存储依赖解析 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="该依赖 spring-ai-starter-vector-store-redis 是 Spring AI 项目为 Redis 提供的向量存储（Vector Store）启动器，用于在 Spring Boot 应用中快速集成 Redis 作为向量数据库，实现语义搜索、推荐系统等基于向量相似度的功能。 1. 什么是 Spring AI Vector Store？Spring AI 是 Spring 生">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring AI Redis向量存储依赖解析">
+<meta property="og:url" content="https://yhao521.github.io/2026/05/15/Spring%20AI%20Redis%E5%90%91%E9%87%8F%E5%AD%98%E5%82%A8%E4%BE%9D%E8%B5%96%E8%A7%A3%E6%9E%90/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="该依赖 spring-ai-starter-vector-store-redis 是 Spring AI 项目为 Redis 提供的向量存储（Vector Store）启动器，用于在 Spring Boot 应用中快速集成 Redis 作为向量数据库，实现语义搜索、推荐系统等基于向量相似度的功能。 1. 什么是 Spring AI Vector Store？Spring AI 是 Spring 生">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2026-05-14T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-17T16:00:00.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="java&#x2F;programming">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Spring AI Redis向量存储依赖解析",
+  "url": "https://yhao521.github.io/2026/05/15/Spring%20AI%20Redis%E5%90%91%E9%87%8F%E5%AD%98%E5%82%A8%E4%BE%9D%E8%B5%96%E8%A7%A3%E6%9E%90/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2026-05-14T16:00:00.000Z",
+  "dateModified": "2026-05-17T16:00:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2026/05/15/Spring%20AI%20Redis%E5%90%91%E9%87%8F%E5%AD%98%E5%82%A8%E4%BE%9D%E8%B5%96%E8%A7%A3%E6%9E%90/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Spring AI Redis向量存储依赖解析',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">Spring AI Redis向量存储依赖解析</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Spring AI Redis向量存储依赖解析</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-05-14T16:00:00.000Z" title="发表于 2026-05-15 00:00:00">2026-05-15</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-17T16:00:00.000Z" title="更新于 2026-05-18 00:00:00">2026-05-18</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>该依赖 <code>spring-ai-starter-vector-store-redis</code> 是 <strong>Spring AI</strong> 项目为 <strong>Redis</strong> 提供的向量存储（Vector Store）启动器，用于在 Spring Boot 应用中快速集成 Redis 作为向量数据库，实现语义搜索、推荐系统等基于向量相似度的功能。</p>
+<h2 id="1-什么是-Spring-AI-Vector-Store？"><a href="#1-什么是-Spring-AI-Vector-Store？" class="headerlink" title="1. 什么是 Spring AI Vector Store？"></a>1. 什么是 Spring AI Vector Store？</h2><p>Spring AI 是 Spring 生态系统中的 AI 工程化框架，它抽象了与 AI 模型（如 OpenAI、Hugging Face）和向量数据库的交互。<br><strong>Vector Store</strong>（向量存储）是其中用于存储和检索嵌入向量（Embeddings）的组件。通常流程：</p>
+<ul>
+<li>将文本、图片等数据通过嵌入模型转换为向量。</li>
+<li>将向量存入 Vector Store。</li>
+<li>运行时将查询文本转为向量，并在 Vector Store 中进行相似性搜索，找到最相关的记录。</li>
+</ul>
+<h2 id="2-Redis-作为向量存储"><a href="#2-Redis-作为向量存储" class="headerlink" title="2. Redis 作为向量存储"></a>2. Redis 作为向量存储</h2><p>Redis 从 6.x 版本开始，通过 <strong>RediSearch</strong> 模块支持向量搜索功能。<br>Spring AI 对 Redis 的支持依赖 Redis Stack（包含 RediSearch 和 RedisJSON 模块）或独立启用了 RediSearch 的 Redis 实例。它提供以下能力：</p>
+<ul>
+<li>自动创建向量索引。</li>
+<li>支持多种相似度算法（如 L2 欧氏距离、内积、余弦相似度）。</li>
+<li>与 Spring AI 的 <code>Document</code> 抽象无缝集成。</li>
+</ul>
+<h2 id="3-添加依赖"><a href="#3-添加依赖" class="headerlink" title="3. 添加依赖"></a>3. 添加依赖</h2><p>在 <code>pom.xml</code> 中加入：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.ai<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-ai-starter-vector-store-redis<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.0.0-M6<span class="tag">&lt;/<span class="name">version</span>&gt;</span>  <span class="comment">&lt;!-- 请使用最新稳定版本 --&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>注意</strong>：Spring AI 的版本与 Spring Boot 版本有对应关系，建议查阅 <a target="_blank" rel="noopener" href="https://docs.spring.io/spring-ai/reference/">Spring AI 官方文档</a> 选择合适的版本。<br>若使用 Spring Boot 3.2+，可尝试 <code>1.0.0-M6</code> 或更高里程碑版本。</p>
+<h2 id="4-配置-Redis-连接"><a href="#4-配置-Redis-连接" class="headerlink" title="4. 配置 Redis 连接"></a>4. 配置 Redis 连接</h2><p>在 <code>application.yml</code> 或 <code>application.properties</code> 中配置：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">ai:</span></span><br><span class="line">    <span class="attr">vectorstore:</span></span><br><span class="line">      <span class="attr">redis:</span></span><br><span class="line">        <span class="attr">host:</span> <span class="string">localhost</span></span><br><span class="line">        <span class="attr">port:</span> <span class="number">6379</span></span><br><span class="line">        <span class="attr">index:</span> <span class="string">my-vector-index</span>   <span class="comment"># 索引名称</span></span><br><span class="line">        <span class="attr">prefix:</span> <span class="string">&quot;doc:&quot;</span>           <span class="comment"># 存储key的前缀</span></span><br><span class="line">        <span class="attr">initialize-schema:</span> <span class="literal">true</span>  <span class="comment"># 是否自动创建索引（生产环境建议手动管理）</span></span><br></pre></td></tr></table></figure>
+
+<p>如果 Redis 需要密码或 SSL，添加 <code>password</code>、<code>ssl</code> 等配置。</p>
+<h2 id="5-基本用法示例"><a href="#5-基本用法示例" class="headerlink" title="5. 基本用法示例"></a>5. 基本用法示例</h2><h3 id="5-1-创建-VectorStore-Bean"><a href="#5-1-创建-VectorStore-Bean" class="headerlink" title="5.1 创建 VectorStore Bean"></a>5.1 创建 VectorStore Bean</h3><p>Spring Boot 自动配置会创建 <code>RedisVectorStore</code> 实例，可直接注入使用。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.springframework.ai.vectorstore.VectorStore;</span><br><span class="line"><span class="keyword">import</span> org.springframework.ai.vectorstore.SearchRequest;</span><br><span class="line"><span class="keyword">import</span> org.springframework.ai.document.Document;</span><br><span class="line"><span class="keyword">import</span> org.springframework.beans.factory.annotation.Autowired;</span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Service;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SearchService</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> VectorStore vectorStore;  <span class="comment">// 实际类型是 RedisVectorStore</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 添加文档</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">void</span> <span class="title function_">addDocuments</span><span class="params">(String content, Map&lt;String, Object&gt; metadata)</span> &#123;</span><br><span class="line">        <span class="type">Document</span> <span class="variable">doc</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Document</span>(content, metadata);</span><br><span class="line">        vectorStore.add(List.of(doc));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 相似性搜索</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">List</span>&lt;Document&gt; <span class="title function_">search</span><span class="params">(String query, <span class="type">int</span> topK)</span> &#123;</span><br><span class="line">        <span class="type">SearchRequest</span> <span class="variable">request</span> <span class="operator">=</span> SearchRequest.query(query).withTopK(topK);</span><br><span class="line">        <span class="keyword">return</span> vectorStore.similaritySearch(request);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-2-配合-Embedding-模型"><a href="#5-2-配合-Embedding-模型" class="headerlink" title="5.2 配合 Embedding 模型"></a>5.2 配合 Embedding 模型</h3><p>实际使用时，需要先通过 <code>EmbeddingModel</code>（如 OpenAI、Ollama 等）将文本转为向量，再存入 Vector Store。<br>Spring AI 会自动调用配置的 EmbeddingModel 完成转换，因此上述代码中直接使用文本即可，背后会自动嵌入。</p>
+<h2 id="6-注意事项"><a href="#6-注意事项" class="headerlink" title="6. 注意事项"></a>6. 注意事项</h2><ul>
+<li><strong>Redis 版本要求</strong>：必须使用包含 RediSearch 模块的 Redis（如 Redis Stack 6.2+）。可通过 <code>redis-cli MODULE LIST</code> 检查是否已加载 <code>search</code> 模块。</li>
+<li><strong>索引管理</strong>：<code>initialize-schema: true</code> 会在启动时自动创建索引，但生产环境建议关闭，手动通过 Redis CLI 或迁移工具管理索引，避免意外覆盖。</li>
+<li><strong>性能调优</strong>：向量维度（默认 1536，OpenAI 嵌入维度）需与嵌入模型输出一致，可通过 <code>spring.ai.vectorstore.redis.dimension</code> 配置。</li>
+<li><strong>事务性</strong>：RedisVectorStore 不支持 ACID 事务，但保证了原子性操作。</li>
+</ul>
+<h2 id="7-参考文档"><a href="#7-参考文档" class="headerlink" title="7. 参考文档"></a>7. 参考文档</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://docs.spring.io/spring-ai/reference/api/vectordbs/redis.html">Spring AI Redis Vector Store 官方文档</a></li>
+<li><a target="_blank" rel="noopener" href="https://redis.io/docs/stack/search/reference/vectors/">Redis 向量搜索文档</a></li>
+</ul>
+<p>如果你有更具体的需求（如使用本地 Ollama 嵌入、自定义索引参数），欢迎进一步提问。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2026/05/15/Spring%20AI%20Redis%E5%90%91%E9%87%8F%E5%AD%98%E5%82%A8%E4%BE%9D%E8%B5%96%E8%A7%A3%E6%9E%90/">https://yhao521.github.io/2026/05/15/Spring%20AI%20Redis%E5%90%91%E9%87%8F%E5%AD%98%E5%82%A8%E4%BE%9D%E8%B5%96%E8%A7%A3%E6%9E%90/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/java-programming/">java/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/05/15/Vite%E4%BC%98%E5%8C%96%E6%96%B9%E6%A1%88%EF%BC%9A%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8Vite%E7%BC%A9%E5%B0%8F%E6%89%93%E5%8C%85%E4%BD%93%E7%A7%AF/" title="Vite优化方案：如何使用Vite缩小打包体积"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Vite优化方案：如何使用Vite缩小打包体积</div></div><div class="info-2"><div class="info-item-1">我正在参加「掘金·启航计划」  说到前端性能优化🚀，通过我个人的感觉总体的来说优化的本质就是优化文件的体积，体积小了加载就快了，当然前端性能不光是在体积方面，在代码层面需要去优化，本篇文章主要讲述的是Vite打包优化，下面就跟大家分享一下我总结的一些有关Vite打包的优化方案吧！   下面给大家分享一下我的一些方案，如果文章中存在哪些问题还请指正  分析文件依赖其实也可以使用浏览器自带的lighthouse进行网站检测 其实优化的主要难点还是从哪里开始去优化，如果不清楚自己的项目问题出现在哪里，就显得比较盲目，不知道优化哪里，那在优化之前我们先分析一下我文件依赖   安装插件 rollup-plugin-visualizer  123plugins:[     visualizer(&#123; open: true &#125;) // 自动开启分析页面]   运行打包命令，会自动弹出效果如下    通过该关系图得出依赖之间的关系，与文件大小，可以指定的去优化  指定文件按需加载 比如下面的echarts,这样就不会将整个包加载进来，因为vite自动开启tree-shakin...</div></div></div></a><a class="pagination-related" href="/2026/05/15/SUPPORT-Haoyun-Music/" title="SUPPORT-Haoyun-Music"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">SUPPORT-Haoyun-Music</div></div><div class="info-2"><div class="info-item-1">☕ 支持 Haoyun Music Player 开发Haoyun Music Player 是一个开源免费的音乐播放器，如果您觉得它对您有帮助，欢迎通过以下方式支持开发者继续改进！  💳 捐赠方式💙 支付宝扫描下方二维码即可捐赠：  💚 微信支付扫描下方二维码即可捐赠：   🙏 感谢您的支持每一份支持都是对我们最大的鼓励！您的捐赠将用于：  ✨ 持续功能开发和优化 🐛 Bug 修复和性能提升 🎨 更好的用户体验设计   📝 关于项目Haoyun Music Player 基于以下技术构建：  Go 1.25 - 高性能后端 Wails v3 - 跨平台桌面应用框架 Vue 3 - 现代化前端框架 Oto v3 - 音频播放库 FFmpeg - 多媒体处理    💝 Haoyun Music Player | Made with ❤️ for music lovers   📊 项目信息 版本: 0.0.X 许可证: 开源免费 技术支持: Go + Wails3 + Vue 3 平台: macOS &#x2F; Windows &#x2F; Linux   感谢您...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2024/08/04/%E5%8D%87%E7%BA%A7%20Vite%205%20%E5%87%BA%E7%8E%B0%E8%AD%A6%E5%91%8A%20The%20CJS%20build%20of%20Vite%E2%80%98s%20Node%20API%20is/" title="升级 Vite 5 出现警告 The CJS build of Vite‘s Node API is deprecated."><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-04</div><div class="info-item-2">升级 Vite 5 出现警告 The CJS build of Vite‘s Node API is deprecated.</div></div><div class="info-2"><div class="info-item-1"> 🚀 作者主页： 有来技术🔥 开源项目： youlai-mall 🍃 vue3-element-admin 🍃 youlai-boot🌺 仓库主页： Gitee 💫 Github 💫 GitCode💖 欢迎点赞 👍 收藏 ⭐留言 📝 如有错误敬请纠正！  目录 错误描述 问题原因 解决方案  解决方案一 解决方案二   问题扩展  什么是 CJS？ 什么是 ESM? CJS 和 ESM 的区别 Vite 为什么弃用 CJS？   开源项目  错误描述vue3-element-admin 升级 Vite4 至 Vite5 后启动项目出现如下警告： 12The CJS build of Vite&#x27;s Node API is deprecated. See https://vitejs.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.1   问题原因Vite 官方弃用 CJS 说明： deprecate-cjs-node-api 解决方案Vite 官方...</div></div></div></a><a class="pagination-related" href="/2025/02/11/vue%20%E9%80%9A%E8%BF%87iframe%E5%B5%8C%E5%85%A5%E6%9C%AC%E5%9C%B0html%E5%92%8C%E5%A4%96%E9%83%A8html/" title="vue 通过iframe嵌入本地html和外部html"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-02-11</div><div class="info-item-2">vue 通过iframe嵌入本地html和外部html</div></div><div class="info-2"><div class="info-item-1">vue中通过iframe方式嵌入本地html实现方法：1、在public文件夹下创建static文件夹，static文件夹下放置需要展示的html文件2、在vue页面中通过iframe嵌入html 具体文件位置： 代码12345678910&lt;div style=&quot;width: 100%&quot;&gt;    &lt;!--静态html资源--&gt;    &lt;div class=&quot;textCenter&quot;&gt;      &lt;h2&gt;标题&lt;/h2&gt;    &lt;/div&gt;    &lt;div&gt;      &lt;iframe src=&quot;/static/home.html&quot; scrolling=&quot;auto&quot; frameborder=&quot;0&quot; style=&quot;width: 100%;height: 600px;&quot;&gt;&lt;/iframe&gt;    &lt;/div&gt;&lt;/div&gt;123456789  效...</div></div></div></a><a class="pagination-related" href="/2024/03/07/%E5%90%8E%E7%AB%AF%E6%8A%80%E6%9C%AF%E6%A0%88/" title="后端技术栈"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-07</div><div class="info-item-2">后端技术栈</div></div><div class="info-2"><div class="info-item-1">后端技术栈后端技术栈    技术 说明 官网    Spring &amp; SpringMVC Java全栈应用程序框架和WEB容器实现 https://spring.io/   SpringBoot Spring应用简化集成开发框架 https://spring.io/projects/spring-boot   mybatis 数据库orm框架 https://mybatis.org   mybatis-plus 数据库orm框架 https://baomidou.com/   mybatis PageHelper 数据库翻页插件 https://github.com/pagehelper/Mybatis-PageHelper   elasticsearch 近实时文本搜索 https://www.elastic.co/cn/elasticsearch/service   redis 内存数据存储 https://redis.io   rabbitmq 消息队列 https://www.rabbitmq.com   mongodb NoSql数据库 https://www....</div></div></div></a><a class="pagination-related" href="/2023/09/04/List%E9%9B%86%E5%90%88/" title="List集合"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">List集合</div></div><div class="info-2"><div class="info-item-1"> title: List集合date: 2023-09-03 20:17:08category:  开发语言 java 8tag: 8 8author:   List集合操作list匹配判断 1boolean match = pwdHistory.stream().anyMatch(user -&gt; StringUtils.equals(user, userInfo.getPassword())); </div></div></div></a><a class="pagination-related" href="/2025/03/18/Cypress%20vs%20Playwright%E2%80%94%E2%80%94%E5%93%AA%E4%B8%AA%20JavaScript%20%E6%B5%8B%E8%AF%95%E6%A1%86%E6%9E%B6%E6%9B%B4%E5%A5%BD%EF%BC%9F/" title="Cypress vs Playwright——哪个 JavaScript 测试框架更好？"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-18</div><div class="info-item-2">Cypress vs Playwright——哪个 JavaScript 测试框架更好？</div></div><div class="info-2"><div class="info-item-1"> 10 年前，自动化测试人员如果要编写 E2E 测试，主要使用 Selenium。每个有机会使用该解决方案的人都应该会记得设置、编写和调试是多么不愉快。在此过程中还创建了一些更有趣的自动化工具，例如 Webdriver.io、TestCafe、Nightwatch.js 和 Puppeteer。但是我们今天不会关注那些，因为我想谈谈Cypress和Playwright中测试自动化的几个问题。Cypress 和 Playwright是目前为测试实现创建理想工具的顶级框架。 两个框架，相似……  Cypress 是一种基于 JavaScript 的前端测试工具。设计为对开发人员友好，它直接在浏览器中运行。 Cypress 的第一个版本于 2015 年发布，并于 2018 年开始真正流行，并于 2020 年筹集了 4000 万美元的 B 轮融资。他们以开源为荣，他们相信这将帮助他们在竞争中取得领先。Playwright（微软），于2020年发布。它是一个用于端到端测试的跨浏览器自动化库，也是开源的。它最初是一个 JavaScript 库，但现在已经扩展到还支持 Python、NET 和...</div></div></div></a><a class="pagination-related" href="/2023/09/04/springboot%E9%9B%86%E6%88%90jedis/" title="springboot集成jedis"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">springboot集成jedis</div></div><div class="info-2"><div class="info-item-1"> title: Spring Boot集成Jedis运行问题lang: en-USdate: 2023-09-03 20:17:08category:  开发语言 java springtag: springauthor:   集成运行问题No qualifying bean of type ‘org.springframework.data.redis.connection.RedisC 原因：我们在pom.xml中引入了spring-boot-starter-data-redis却没有引入redis.client;或在打包过程中有其他依赖冲突等问题，造成打包后不存在jedis包 解决方式：增加redis client依赖；版本有重复则需要明确版本，并唯一。 123456&lt;dependency&gt;    &lt;groupId&gt;redis.clients&lt;/groupId&gt;    &lt;artifactId&gt;jedis&lt;/artifactId&gt;    &lt;version&gt;2.10.2&lt;/version&gt;&lt...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E4%BB%80%E4%B9%88%E6%98%AF-Spring-AI-Vector-Store%EF%BC%9F"><span class="toc-number">1.</span> <span class="toc-text">1. 什么是 Spring AI Vector Store？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-Redis-%E4%BD%9C%E4%B8%BA%E5%90%91%E9%87%8F%E5%AD%98%E5%82%A8"><span class="toc-number">2.</span> <span class="toc-text">2. Redis 作为向量存储</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E6%B7%BB%E5%8A%A0%E4%BE%9D%E8%B5%96"><span class="toc-number">3.</span> <span class="toc-text">3. 添加依赖</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E9%85%8D%E7%BD%AE-Redis-%E8%BF%9E%E6%8E%A5"><span class="toc-number">4.</span> <span class="toc-text">4. 配置 Redis 连接</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E5%9F%BA%E6%9C%AC%E7%94%A8%E6%B3%95%E7%A4%BA%E4%BE%8B"><span class="toc-number">5.</span> <span class="toc-text">5. 基本用法示例</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-%E5%88%9B%E5%BB%BA-VectorStore-Bean"><span class="toc-number">5.1.</span> <span class="toc-text">5.1 创建 VectorStore Bean</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-%E9%85%8D%E5%90%88-Embedding-%E6%A8%A1%E5%9E%8B"><span class="toc-number">5.2.</span> <span class="toc-text">5.2 配合 Embedding 模型</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="toc-number">6.</span> <span class="toc-text">6. 注意事项</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="toc-number">7.</span> <span class="toc-text">7. 参考文档</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

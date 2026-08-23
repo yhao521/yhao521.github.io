@@ -1,0 +1,285 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Mac电脑微信双开指南 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="title: Mac电脑微信双开指南date: 2023-09-03 20:17:08category:  mactag: macauthor:   Mac电脑微信双开指南0 Abstract本文主要介绍了如何在Mac上通过脚本实现微信双开，并通过自动操作创建应用程序APP，在启动台点击后可以直接启动第二个微信，无需打开终端输入代码，且双开后无终端出现。通过打包和修改图标添加至dock栏，当作一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mac电脑微信双开指南">
+<meta property="og:url" content="https://yhao521.github.io/2023/09/04/Mac%E7%94%B5%E8%84%91%E5%BE%AE%E4%BF%A1%E5%8F%8C%E5%BC%80%E6%8C%87%E5%8D%97/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="title: Mac电脑微信双开指南date: 2023-09-03 20:17:08category:  mactag: macauthor:   Mac电脑微信双开指南0 Abstract本文主要介绍了如何在Mac上通过脚本实现微信双开，并通过自动操作创建应用程序APP，在启动台点击后可以直接启动第二个微信，无需打开终端输入代码，且双开后无终端出现。通过打包和修改图标添加至dock栏，当作一">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2023-09-04T03:18:09.000Z">
+<meta property="article:modified_time" content="2023-09-04T03:18:27.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Mac电脑微信双开指南",
+  "url": "https://yhao521.github.io/2023/09/04/Mac%E7%94%B5%E8%84%91%E5%BE%AE%E4%BF%A1%E5%8F%8C%E5%BC%80%E6%8C%87%E5%8D%97/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2023-09-04T03:18:09.000Z",
+  "dateModified": "2023-09-04T03:18:27.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2023/09/04/Mac%E7%94%B5%E8%84%91%E5%BE%AE%E4%BF%A1%E5%8F%8C%E5%BC%80%E6%8C%87%E5%8D%97/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Mac电脑微信双开指南',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">Mac电脑微信双开指南</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Mac电脑微信双开指南</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-09-04T03:18:09.000Z" title="发表于 2023-09-04 11:18:09">2023-09-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-09-04T03:18:27.000Z" title="更新于 2023-09-04 11:18:27">2023-09-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><hr>
+<p>title: Mac电脑微信双开指南<br>date: 2023-09-03 20:17:08<br>category:</p>
+<ul>
+<li>mac<br>tag:</li>
+<li>mac<br>author:</li>
+</ul>
+<hr>
+<h1 id="Mac电脑微信双开指南"><a href="#Mac电脑微信双开指南" class="headerlink" title="Mac电脑微信双开指南"></a>Mac电脑微信双开指南</h1><h2 id="0-Abstract"><a href="#0-Abstract" class="headerlink" title="0 Abstract"></a><strong>0 Abstract</strong></h2><p>本文主要介绍了如何在Mac上通过脚本实现微信双开，并通过自动操作创建应用程序APP，在启动台点击后可以直接启动第二个微信，无需打开终端输入代码，且双开后无终端出现。通过打包和修改图标添加至dock栏，当作一个应用程序，点击即可。</p>
+<p>效果如图，黑色微信是修改图标后的双开启动器，两个微信同时共存，且无终端窗口打扰。</p>
+<p><img src="/img/v2-fe78bdf5923ca088b7fec42d6ce63618_1440w.jpg" alt="img"></p>
+<blockquote>
+<p>如果你不在乎原理，不在乎图标样式，只讲究能用就行，直接跳至章节2。</p>
+</blockquote>
+<hr>
+<h2 id="1-基本原理"><a href="#1-基本原理" class="headerlink" title="1 基本原理"></a><strong>1 基本原理</strong></h2><blockquote>
+<p>如果您不想理解原理，不懂Shell，或者懒得搞，可以直接去我的仓库下载“Dual WeChat.app”，保存在应用程序（Applications）文件夹里，启动台就有了，但是我更建议你自己按照教程一步一步来。</p>
+</blockquote>
+<p>懒人包：<a href="https://link.zhihu.com/?target=https://github.com/CLOUDUH/dual-wechat">https://github.com/CLOUDUH/dual-wechat</a></p>
+<p>使用posix nohup命令实现「感谢<a target="_blank" rel="noopener" href="https://www.zhihu.com/people/ghostflyby">ghostflyby</a>的评论提示」，将微信主程序输出到一个“黑洞”里，即使此时关掉终端也不会影响双开微信的运行。</p>
+<p>将以下代码复制到终端（Teriminal）运行，即可开启第二个微信，开启后，关闭终端也可以正常运行。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nohup /Applications/WeChat.app/Contents/MacOS/WeChat &gt; /dev/null 2&gt;&amp;1</span><br></pre></td></tr></table></figure>
+
+<p>这种骚操作存在一定问题，这是WeChat程序决定的，暂无解决方案：</p>
+<ul>
+<li>点击微信A通知横幅，会跳转至微信B窗口。</li>
+<li>电脑休眠之后，再次开启可能会提示“登录遇到问题，请重新登录”</li>
+<li>重新登录时，可能必须使用扫码才能登录。</li>
+</ul>
+<p>弊端是每次都需要复制此代码到终端，非常不优雅，接下来的章节介绍如何使用自动操作打包。</p>
+<hr>
+<h2 id="2-使用自动操作打包脚本"><a href="#2-使用自动操作打包脚本" class="headerlink" title="2 使用自动操作打包脚本"></a><strong>2 使用自动操作打包脚本</strong></h2><p>自动操作（Automator）是Mac电脑上自带的一款软件，通过设置，可以实现电脑上的大部分操作自动进行，可以简单理解为一个更加硬核的快捷指令（Shortcuts）</p>
+<ol>
+<li>在启动台找到<strong>自动操作（Automator）</strong>，点开打开。</li>
+</ol>
+<p><img src="/img/v2-b5286e7e7ff8167d60dabd449b3dd423_1440w.webp" alt="img"></p>
+<ol start="2">
+<li>选择<strong>新建文稿</strong></li>
+</ol>
+<p><img src="/img/v2-ba69816641e94d2d3e82b2fe48bfb07e_1440w.webp" alt="img"></p>
+<ol start="3">
+<li>选择文稿类型为<strong>应用程序</strong>。</li>
+</ol>
+<p><img src="/img/v2-de6ff02536d5c1a6334caa1f6fdc4586_1440w.webp" alt="img"></p>
+<ol start="4">
+<li>找到<strong>实用工具——运行Shell脚本</strong>，双击或者拖拽至右侧空白处。</li>
+</ol>
+<p><img src="/img/v2-a76b28e0af4168ac2546db2622be8a0c_1440w.webp" alt="img"></p>
+<ol start="5">
+<li><strong>复制代码</strong>至文本框，Shell类型<strong>默认&#x2F;bin&#x2F;zsh或&#x2F;bin&#x2F;bash</strong>即可。</li>
+</ol>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nohup /Applications/WeChat.app/Contents/MacOS/WeChat &gt; /dev/null 2&gt;&amp;1</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/v2-fe2cf488c4a37594aede82b8e8b79094_1440w.webp" alt="img"></p>
+<ol start="6">
+<li>保存文件（Cmd+S），名称随意，位置选择<strong>应用程序（Applications）</strong>，文件格式选择<strong>应用程序</strong>，存储即可。</li>
+</ol>
+<p><img src="/img/v2-bee3b999a30a6f6fa2c90220baf7c957_1440w.webp" alt="img"></p>
+<ol start="7">
+<li>打开<strong>启动台</strong>，图标出现，点击即可启动第二个微信。</li>
+</ol>
+<p><img src="/img/v2-47e80170ef7778472da2f64a873ecf57_1440w.webp" alt="img"></p>
+<hr>
+<h2 id="3-嫌丑换图标"><a href="#3-嫌丑换图标" class="headerlink" title="3 嫌丑换图标"></a><strong>3 嫌丑换图标</strong></h2><p>这个图标只是脚本启动APP的图标，脚本执行之后出现的第二个微信还是原版本的，如果还是嫌丑就改图标，自己设计或者去网上找一个心仪的图标。我喜欢这个黑白的，因为有植物大战僵尸里面模仿者（Imitater）的感觉。</p>
+<p><img src="/img/v2-3fb8287f66cc870d23214a5d8ccece54_1440w.webp" alt="img"></p>
+<ol>
+<li>复制（Cmd+C）下载好的图标文件。</li>
+<li>在应用程序（Applications）文件夹里找到刚保存的脚本程序，<strong>右击图标，点击显示简介</strong>。</li>
+</ol>
+<p><img src="/img/v2-658731bede49b8edfa31375f4f9bd04c_1440w.webp" alt="img"></p>
+<ol start="3">
+<li><strong>点击右上方的小图标</strong>，周围变蓝即可，然后粘贴（Cmd+V），即可完成。</li>
+</ol>
+<p><img src="/img/v2-381547e458f7c8b945301e094778a52c_1440w.webp" alt="img"></p>
+<hr>
+<h2 id="4-效果展示"><a href="#4-效果展示" class="headerlink" title="4 效果展示"></a><strong>4 效果展示</strong></h2><p>把双开启动软件放在dock栏，点击之后就可以实现微信双开，而且全程无终端打开，也不会出现其他方法中关闭终端，第二个微信就关闭的情况。</p>
+<p><img src="/img/v2-fe78bdf5923ca088b7fec42d6ce63618_1440w.png" alt="img"></p>
+<p>同样的，如果更改代码，也可以实现其他软件的双开，可以自行探索。</p>
+<p>懒人包：<a href="https://link.zhihu.com/?target=https://github.com/CLOUDUH/dual-wechat">https://github.com/CLOUDUH/dual-wechat</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2023/09/04/Mac%E7%94%B5%E8%84%91%E5%BE%AE%E4%BF%A1%E5%8F%8C%E5%BC%80%E6%8C%87%E5%8D%97/">https://yhao521.github.io/2023/09/04/Mac%E7%94%B5%E8%84%91%E5%BE%AE%E4%BF%A1%E5%8F%8C%E5%BC%80%E6%8C%87%E5%8D%97/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2023/09/04/Miniconda3%E5%AE%89%E8%A3%85/" title="Miniconda3安装"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Miniconda3安装</div></div><div class="info-2"><div class="info-item-1"> title: Miniconda3安装date: 2023-09-03 20:17:08category:  mactag: macauthor:   Quick command line installThese quick command line instructions will get you set up quickly with the latest Miniconda installer. For graphical installer (.exe and .pkg) and hash checking instructions, see Installing Miniconda. These four commands quickly and quietly install the latest M1 macOS version of the installer and then clean up after themselves. To install a different version or architecture of Miniconda for ...</div></div></div></a><a class="pagination-related" href="/2023/09/04/Mac%E7%8E%AF%E5%A2%83%E4%B8%8Bsvn%E7%9A%84%E4%BD%BF%E7%94%A8%EF%BC%88%E8%BD%AC%EF%BC%89/" title="Mac环境下svn的使用（转）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Mac环境下svn的使用（转）</div></div><div class="info-2"><div class="info-item-1"> title: Mac环境下svn的使用（转）date: 2023-09-03 20:17:08category:  mactag: macauthor:    Mac环境下svn的使用（转）本文目录  一、创建代码仓库，用来存储客户端所上传的代码 二、配置svn的用户权限 三、使用svn客户端功能  在Windows环境中，我们一般使用TortoiseSVN来搭建svn环境。在Mac环境下，由于Mac自带了svn的服务器端和客户端功能，所以我们可以在不装任何第三方软件的前提下使用svn功能，不过还需做一下简单的配置。 我们首先来看下，如何在Mac环境下搭建svn服务器端环境。 回到顶部 一、创建代码仓库，用来存储客户端所上传的代码我先在&#x2F;User&#x2F;apple目录下新建一个svn目录，以后可以在svn目录下创建多个仓库目录 打开终端，创建一个mycode仓库，输入指令：svnadmin create &#x2F;Users&#x2F;apple&#x2F;svn&#x2F;mycode 指令执行成功后，会发现硬盘上多了个&#x2F;Users&#x2F;app...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/python/" title="python"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">python</div></div><div class="info-2"><div class="info-item-1"> title: python2和python3共存lang: en-USdate: 2023-09-03 20:17:08category:  开发语言 doc_pythontag: doc_pythonauthor:   python2和python3共存https://www.cnblogs.com/zhujingzhi/p/9778043.html wget https://www.python.org/ftp/python/3.8.1/Python-3.8.1.tgz Centos7下进行python2.6和yum完全卸载及重装 1、删除现有Python #rpm -qa|grep python|xargs rpm -ev --allmatches --nodeps ##强制删除已安装程序及其关联 #whereis python |xargs rm -frv ##删除所有残余文件 ##xargs，允许你对输出执行其他某些命令 #whereis python ##验证删除，返回无结果  2、删除现有的yum #rpm -qa|grep yum|xargs rpm -ev -...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E6%89%8B%E6%8A%8A%E6%89%8B%E6%95%99%E4%BD%A0%E4%BD%BF%E7%94%A8Electron5+vue-cli3%E5%BC%80%E5%8F%91%E8%B7%A8%E5%B9%B3%E5%8F%B0%E6%A1%8C%E9%9D%A2%E5%BA%94%E7%94%A8/" title="手把手教你使用Electron5+vue-cli3开发跨平台桌面应用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">手把手教你使用Electron5+vue-cli3开发跨平台桌面应用</div></div><div class="info-2"><div class="info-item-1"> title: 手把手教你使用Electron5+vue-cli3开发跨平台桌面应用date: 2023-09-03 20:17:08category:  mactag: macauthor:   手把手教你使用Electron5+vue-cli3开发跨平台桌面应用Electron是一个基于Chromium和 Node.js，可以使用 HTML、CSS和JavaScript构建跨平台应用的技术框架，兼容 Mac、Windows 和 Linux。虽然B&#x2F;S是目前开发的主流，但是C&#x2F;S仍然有很大的市场需求。受限于浏览器的沙盒限制，网页应用无法满足某些场景下的使用需求，而桌面应用可以读写本地文件、调用更多系统资源，再加上Web开发的低成本、高效率的优势，这种方式越来越受到开发者的喜爱。 本文一步一步教你如何使用Electron5和vue-cli3，在完全保留vue开发web应用的习惯下，搭建桌面应用。 本文不涉及Electron和vue的开发教程，仅以实现两者结合为目的，如深入学习Electron和vue，请访问官方： Electron: https://elect...</div></div></div></a><a class="pagination-related" href="/2023/09/04/github%E8%AE%BF%E9%97%AE%E5%8A%A0%E9%80%9F/" title="github访问加速"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">github访问加速</div></div><div class="info-2"><div class="info-item-1"> title: github访问加速date: 2023-09-03 20:17:08category: tag: author:  github访问加速 使用镜像网站 使用代理网站下载 cdn加速 转入gitee加速  概括: 如果是下载比较大的项目,比如耗时5min往上,大小30mb往上,十分推荐使用代理网站下载,或者转入gitee的方式下载. 如果仅仅是下载比较小的项目,类似代码性质,文档性质的项目,使用cdn加速,提升到100多KB&#x2F;s也就够用了 github加速神器https://github.com/dotnetcore/FastGithub 一.使用镜像网站使用github的镜像网站 https://hub.fastgit.org/ 进行搜索 二. 使用代理网站下载对于github release中下载的大文件 使用https://toolwa.com/github/来下载，速度起飞,无需注册，亲测有效。  三. cdn加速通过修改系统hosts文件的办法，绕过国内dns解析，直接访问GitHub的CDN节点，从而达到github访问加速的目的。不需要海外...</div></div></div></a><a class="pagination-related" href="/2023/09/04/Linux%20%E4%BF%AE%E6%94%B9%E5%90%88%E4%B8%8A%E7%AC%94%E8%AE%B0%E6%9C%AC%E7%9B%96%E5%AD%90%E5%92%8C%E6%8C%89%E4%B8%8B%E7%94%B5%E6%BA%90%E6%8C%89%E9%92%AE%E9%94%81%E5%AE%9A%E5%B1%8F%E5%B9%95/" title="Linux 修改合上笔记本盖子和按下电源按钮锁定屏幕"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">Linux 修改合上笔记本盖子和按下电源按钮锁定屏幕</div></div><div class="info-2"><div class="info-item-1"> title: Linux 修改合上笔记本盖子和按下电源按钮锁定屏幕date: 2023-09-03 20:17:08category:  linuxtag: linuxauthor:   #Linux 修改合上笔记本盖子和按下电源按钮锁定屏幕 你需要修改的文件是 &#x2F;etc&#x2F;systemd&#x2F;logind.conf 。 在修改之前，你需要了解配置选项的含义，方法是 man logind.conf。 主要选项有： HandlePowerKey：按下电源键后的动作 HandleSleepKey：按下挂起键后的动作 HandleHibernateKey: 按下休眠键后的动作 HandleLidSwitch：合上笔记本盖后待机  可以选择的值有： ignore（什么都不做） poweroff（关机） reboot（重新启动） halt（关机，和poweroff有什么区别，需要手动断开电源？） suspend（待机挂起） hibernate（休眠） lock（锁屏）  修改内容如下： HandleLidSwitch=ignore HandlePowerKey=l...</div></div></div></a><a class="pagination-related" href="/2023/09/04/mac%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7/" title="mac命令行工具"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">mac命令行工具</div></div><div class="info-2"><div class="info-item-1"> title: mac命令行工具date: 2023-09-03 20:17:08category:  mactag: macauthor:   8个不可不知的Mac OS X专用命令行工具OS X的终端下通用很多Unix的工具和脚本。如果从Linux迁移到OS X会发现很多熟悉的命令和脚本工具，其实并没有任何区别。 但是OS X也提供了很多其他系统所没有的特别的命令行工具。我们推荐8个这类的工具，希望有助于提高在Mac的命令行环境下的效率。 1. openopen命令用于打开文件、目录或执行程序。就等同于在命令行模式下，重复图形界面“双击”的动作。例如这个命令与在Finder中双击Safari是一样的： 1$ open /Applications/Safari.app/  如果open一个文件，则会使用关联的程序打开之。例如open screenshot.png会在Preview中查看图片。 可以使用-a选项要求自行选择打开的程序，或使用-e强制在TextEdit中编辑此文件。 open一个目录会在Finder窗口中打开此目录。一个很有用的技巧是open .打开当前目录。 Fi...</div></div></div></a><a class="pagination-related" href="/2023/09/04/MySQL%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" title="MySQL常用命令"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">MySQL常用命令</div></div><div class="info-2"><div class="info-item-1"> title: MySql常用命令总结lang: en-USdate: 2023-09-04 17:49:38category:  数据库 doc_mysqltag: doc_mysqlauthor:   [[_resources&#x2F;eca4f5f3d74b0ad7ab1fbb33df942a2e_MD5.sh|Open: mysql_createuser.sh]]![[_resources&#x2F;eca4f5f3d74b0ad7ab1fbb33df942a2e_MD5.sh]] 1. MySql常用命令总结1.1. 创建主从同步用户123GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* to repl@&#x27;%&#x27; IDENTIFIED BY &#x27;repl&#x27;CHANGE MASTER TO MASTER_HOST=&#x27;172.18.231.120&#x27;,MASTER_PORT=3306,MASTER_USER=&#x27;repl&#x27;,MASTER_PASSWO...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Mac%E7%94%B5%E8%84%91%E5%BE%AE%E4%BF%A1%E5%8F%8C%E5%BC%80%E6%8C%87%E5%8D%97"><span class="toc-number">1.</span> <span class="toc-text">Mac电脑微信双开指南</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#0-Abstract"><span class="toc-number">1.1.</span> <span class="toc-text">0 Abstract</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86"><span class="toc-number">1.2.</span> <span class="toc-text">1 基本原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E4%BD%BF%E7%94%A8%E8%87%AA%E5%8A%A8%E6%93%8D%E4%BD%9C%E6%89%93%E5%8C%85%E8%84%9A%E6%9C%AC"><span class="toc-number">1.3.</span> <span class="toc-text">2 使用自动操作打包脚本</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E5%AB%8C%E4%B8%91%E6%8D%A2%E5%9B%BE%E6%A0%87"><span class="toc-number">1.4.</span> <span class="toc-text">3 嫌丑换图标</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E6%95%88%E6%9E%9C%E5%B1%95%E7%A4%BA"><span class="toc-number">1.5.</span> <span class="toc-text">4 效果展示</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

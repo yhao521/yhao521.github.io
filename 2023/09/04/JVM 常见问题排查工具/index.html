@@ -1,0 +1,281 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>JVM 常见问题排查工具 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="title: JVM 常见问题排查工具date: 2023-09-03 20:17:08category: tag: author:  一. 背景 在使用 Java开发的过程中， 可能会碰到 线程卡死，cpu高耗， 内存泄漏OOM等问题， 因此需要一些工具和方法排查相关问题。 二. JDK 自带工具使用介绍 常用的 JDK 自带的工具主要包括 jps， jstat, jstack, jinfo">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JVM 常见问题排查工具">
+<meta property="og:url" content="https://yhao521.github.io/2023/09/04/JVM%20%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E5%B7%A5%E5%85%B7/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="title: JVM 常见问题排查工具date: 2023-09-03 20:17:08category: tag: author:  一. 背景 在使用 Java开发的过程中， 可能会碰到 线程卡死，cpu高耗， 内存泄漏OOM等问题， 因此需要一些工具和方法排查相关问题。 二. JDK 自带工具使用介绍 常用的 JDK 自带的工具主要包括 jps， jstat, jstack, jinfo">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2023-09-04T03:18:09.000Z">
+<meta property="article:modified_time" content="2023-09-04T03:18:27.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="java&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="php&#x2F;programming">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "JVM 常见问题排查工具",
+  "url": "https://yhao521.github.io/2023/09/04/JVM%20%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E5%B7%A5%E5%85%B7/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2023-09-04T03:18:09.000Z",
+  "dateModified": "2023-09-04T03:18:27.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2023/09/04/JVM%20%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E5%B7%A5%E5%85%B7/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'JVM 常见问题排查工具',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">JVM 常见问题排查工具</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">JVM 常见问题排查工具</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-09-04T03:18:09.000Z" title="发表于 2023-09-04 11:18:09">2023-09-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-09-04T03:18:27.000Z" title="更新于 2023-09-04 11:18:27">2023-09-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><hr>
+<p>title: JVM 常见问题排查工具<br>date: 2023-09-03 20:17:08<br>category:</p>
+<p>tag:</p>
+<p>author:</p>
+<hr>
+<p><strong>一. 背景</strong></p>
+<p>在使用 Java开发的过程中， 可能会碰到 线程卡死，cpu高耗， 内存泄漏OOM等问题， 因此需要一些工具和方法排查相关问题。</p>
+<p><strong>二. JDK 自带工具使用介绍</strong></p>
+<p>常用的 JDK 自带的工具主要包括 jps， jstat, jstack, jinfo 等。</p>
+<p><strong>1. jps</strong><br>主要用来打印主机上运行 Java 进程号， 和 ps -ef |grep xxx 效果是一样的 。</p>
+<p><img src="/img/f71593d0-2714-4b3e-a0e8-6e09d5787dba.png" alt="img"></p>
+<p><strong>2. jstat</strong><br>一般用来监控 JVM 的 gc情况， class加载情况 。 使用用法 ：</p>
+<p>(1) 监控 JVM GC 情况 ： jstat -gcutil [pid] 1000 10 监控指定 Java 进程的 gc概况, 每 1000ms 打印一次，一共打印 10次 。</p>
+<p><img src="/img/737c3f95-932d-4c1d-97aa-a2273672ff74.png" alt="img"></p>
+<p>如果需要监控 gc 更详细的信息， 可以将 -gcutil 选项替换为其他参数 ：</p>
+<ul>
+<li>-gc</li>
+<li>-gccapacity</li>
+<li>-gccause</li>
+<li>-gcmetacapacity</li>
+<li>-gcnew</li>
+<li>-gcnewcapacity</li>
+<li>-gcold</li>
+<li>-gcoldcapacity</li>
+<li>-gcutil</li>
+</ul>
+<p>(2) 查看类加载的概况 ：</p>
+<p><img src="/img/8014acdc-18f7-4440-9799-07c5342cd95f.png" alt="img"></p>
+<p><strong>3. jstack</strong><br>用来监控 JVM 中线程运行状态。</p>
+<p>(1) 如果需要查看当前 JVM 线程状态 ： jstack -l [pid] &gt; 线程存储的文件名。<br>例如 : jstack -l 13632 &gt; test1 将 Java进程 13632 的JVM的线程信息输出到 test1 文件中</p>
+<p>针对输出的 test1 文件， 一般我们应用的线程会很多， 肉眼很难分析， 可以借助 IBM jca <a target="_blank" rel="noopener" href="https://www.ibm.com/support/pages/ibm-thread-and-monitor-dump-analyzer-java-tmda">https://www.ibm.com/support/pages/ibm-thread-and-monitor-dump-analyzer-java-tmda</a> 进行分析：</p>
+<p><img src="/img/d19f6509-8df3-41e3-b79a-c5319edada9c.png" alt="img"></p>
+<p>(2) 针对 CPU 高耗的情况， 可以在 Linux 下找到高耗的 线程PID。<br><strong>top -Hp pid 例如 ： top -Hp 13632</strong></p>
+<p><img src="/img/4d515192-4b90-45ce-9804-7e0cc4039751.png" alt="img"></p>
+<p>假如 PID 13662 是CPU高耗的线程编号， 将该线程PID 转为 16进制 ： printf “%x\n” 13662</p>
+<p><img src="/img/a8346682-5c74-4940-937e-03025645d09d.png" alt="img"></p>
+<p>可以在上面导出的 jstack 文件中，查找 355e 线程对应的堆栈信息 。</p>
+<p><img src="/img/ac549182-f8fe-49ea-a5f2-259a48a857a9.png" alt="img"></p>
+<p>( 该堆栈信息是一个JVM自身线程信息， 所以比较短， 业务线程的话一般可以还可以看到代码堆栈信息)</p>
+<p><strong>3. jmap</strong></p>
+<p>jmap 一般用来dump JVM 内存信息</p>
+<p>（1） 打印 JVM内存统计信息： jmap -heap pid， 例如 ： jmap -heap 13632</p>
+<p><img src="/img/5131fb47-8ccd-408c-be7b-bec0e6ebdd17.png" alt="img"></p>
+<p>（2） 打印 JVM 中 类对象的统计信息 ： jmap -histo 13632</p>
+<p><img src="/img/9144c036-5136-488d-b256-cfe8c26c9b21.png" alt="img"></p>
+<p>（3） 如果需要分析内存泄漏或者使用情况，可以生成内存 dump 文件 ： jmap -dump:format&#x3D;b,file&#x3D;dump.dat 13632</p>
+<p><img src="/img/91882f52-31a8-49bf-b8b8-378fb3052ac9.png" alt="img"></p>
+<p>可以用 jhat 对内存 dump文件分析， 但是推荐使用 MAT(<a target="_blank" rel="noopener" href="http://www.eclipse.org/mat/downloads.php">http://www.eclipse.org/mat/downloads.php</a>) 分析</p>
+<p><strong>三. JMC 使用介绍</strong><br>JMC 是在 JAVA 7u40 发布中加入的性能监控工具， 如果本机电脑可以直连服务器环境， JMC几乎是定位 JVM问题最快速的工具。</p>
+<p>JMC 使用时， 一般通过 JMX 暴露JVM信息给 监控工具， 可以在启动 Java 程序时，增加 启动参数，例如：</p>
+<p>java -jar -Dcom.sun.management.jmxremote.port&#x3D;8999 -Dcom.sun.management.jmxremote.ssl&#x3D;false -Dcom.sun.management.jmxremote.authenticate&#x3D;false -Djava.rmi.server.hostname&#x3D;172.18.234.250 -XX:+UnlockCommercialFeatures -XX:+FlightRecorder hello-boot-1.0.jar</p>
+<p>启动应用后， 如果本地使用的是 Oracle JDK1.8，Oracle jdk8 提供了 Java Mission Control的界面</p>
+<p><img src="/img/d5ef762f-9d6b-4b26-8bdf-72b6d4c94be3.jpg" alt="img"></p>
+<p><img src="/img/33f3cb6a-9fa7-46aa-9a36-d58fe833cb4d.jpg" alt="img"></p>
+<p><strong>四. Arthas</strong></p>
+<p>Arthas 是Alibaba开源的Java诊断工具， Arthas 的原理基于 JDK6 的 instrument 功能，instrument 功能提供了 一种 JVM虚拟机级别支持的AOP实现。 使得开发者不用修改任何代码，就可以对虚拟机进行监控，甚至替换和修改运行在JVM中的Class。 instrument 的使用方式一般有2种， 一种是在启动 Java 程序时增加 agent， 比如 pinpoint，cat，skywalking 都采用这种实现方式； 另一种是 通过 Java Tool API 中的 attach， 可以在运行过程中动态的设置加载代理类， 例如之前介绍的 jps，jstat，jstack 等都是采用这种方式。</p>
+<p><strong>1. Arthas 下载 ：</strong><br>地址： <a target="_blank" rel="noopener" href="https://arthas.aliyun.com/doc/download.html">https://arthas.aliyun.com/doc/download.html</a><br>同时 Arthas 还提供了 docker 安装方式， 只要将 Arthas 工具安装到基础镜像即可 ： <a target="_blank" rel="noopener" href="https://arthas.aliyun.com/doc/docker.html%E3%80%82">https://arthas.aliyun.com/doc/docker.html。</a></p>
+<p><strong>2. 基础使用</strong></p>
+<p>安装解压后， 通过 .&#x2F;as.sh 进入交互界面</p>
+<p><img src="/img/c4bd59b7-93df-4a74-84ee-0da1c7b4a419.png" alt="img"></p>
+<p>选择要 attach 的Java 进程， 然后回车 进入交互式命令行 。</p>
+<p><img src="/img/6f8212bd-161f-4db6-8f0c-673560f141d0.png" alt="img"></p>
+<p>通过 dashboard 命令， 可以 查看当前 JVM概况 ：</p>
+<p><img src="/img/a3c7fa2e-1dc1-494d-992f-64fbaea0751c.png" alt="img"></p>
+<p>thread 线程号 可以实时查看 线程堆栈情况 ：</p>
+<p><img src="/img/a8e8fab1-172b-43d2-9217-c98190e70128.png" alt="img"></p>
+<p>jad 命令可以反编译 Class, 在怀疑线上代码版本不对时， 可以反编译看下。</p>
+<p>watch 可以用来 查看 函数的返回值 ，</p>
+<p><img src="/img/0ba1d124-d3d9-4615-a9ec-3792fafcfa8b.png" alt="img"></p>
+<p><strong>3. 具体使用</strong></p>
+<p>​ 具体命令和使用详见 ： <a target="_blank" rel="noopener" href="https://arthas.aliyun.com/doc/advanced-use.html">https://arthas.aliyun.com/doc/advanced-use.html</a></p>
+<p>​</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2023/09/04/JVM%20%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E5%B7%A5%E5%85%B7/">https://yhao521.github.io/2023/09/04/JVM%20%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E5%B7%A5%E5%85%B7/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/java-programming/">java/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a><a class="post-meta__tags" href="/tags/php-programming/">php/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2023/09/04/Javafx19-jdk11%E5%BC%80%E5%8F%91%E6%90%AD%E5%BB%BA/" title="Javafx19-jdk11开发搭建"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Javafx19-jdk11开发搭建</div></div><div class="info-2"><div class="info-item-1"> title: Javafx19-jdk11开发搭建date: 2023-09-03 20:17:08category:  开发语言 javaFXtag: javaFXauthor:   Javafx19-jdk11开发搭建安装前置环境1） jdk11 https://www.oracle.com/java/technologies/downloads/#java11-windows 下载jdk11后，安装配置环境变量。 2） Javafx19 https://gluonhq.com/products/javafx/ 非maven模式，下载引入 maven模式：不需要安装，使用依赖引入 ；参考链接 3）graalvm https://github.com/graalvm/graalvm-ce-builds/releases xcode从app store安装 下载 https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-22.2.0/graalvm-ce-java11-darwin-aarch64-22....</div></div></div></a><a class="pagination-related" href="/2023/09/04/JSP%E6%B8%A9%E4%B9%A0/" title="JSP温习"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">JSP温习</div></div><div class="info-2"><div class="info-item-1"> title: JSP温习date: 2023-09-03 20:17:08category: tag: author:  **JSP注释**   **语法** **描述**    &lt;%-- 注释 --%&gt; JSP注释，注释内容不会被发送至浏览器甚至不会被编译   &lt;!-- 注释 --&gt; HTML注释，通过浏览器查看网页源代码时可以看见注释内容   &lt;\% 代表静态 &lt;%常量   %\&gt; 代表静态 %&gt; 常量   \&#39; 在属性中使用的单引号   \&quot; 在属性中使用的双引号   **JSP行为**行为标签基本上是一些预先就定义好的函数，下表罗列出了一些可用的JSP行为标签：：    **语法** **描述**    jsp:include 用于在当前页面中包含静态或动态资源   jsp:useBean 寻找和初始化一个JavaBean组件   jsp:setProperty 设置 JavaBean组件的值   jsp:getProperty 将 JavaBean组件的值插入到 output中   jsp:forwar...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/vscode%E4%BD%BF%E7%94%A8/" title="vscode使用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">vscode使用</div></div><div class="info-2"><div class="info-item-1"> title: vscode的使用lang: en-USdate: 2023-09-03 20:17:08category:  vscodetag: vscodeauthor:   1. vscode的使用1.1. 插件位置更改参考：https://blog.csdn.net/zhaojunwei08/article/details/86021665 https://blog.csdn.net/u011127019/article/details/86737308#comments mklink使用 https://www.icoa.cn/a/910.html set oldDir&#x3D;%UserProfile%.vscode\extensions mklink &#x2F;D “%oldDir%” “E:\eclipse-hao\HTML\extensions” 确保有 这个 .vscode 空目录  bat方式： 123456789@echo offif &quot;%1&quot; == &quot;h&quot; goto beginmshta vbscript:c...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E5%89%8D%E7%AB%AF%E5%85%A5%E9%97%A8%E6%89%8B%E5%86%8C/" title="前端入门手册"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">前端入门手册</div></div><div class="info-2"><div class="info-item-1"> title: 前端入门手册date: 2023-09-03 20:17:08category:  开发语言tag: 开发语言author:   前端入门手册blossom html css JavaScript程序员入门的时候整理的一份学习笔记,见证了我的成长备份 HTML视频音频标签带控制器的视频标签, 不同浏览器有不同的文件格式要求所以用 2 个 source 标签指定不同的视频格式 1234&lt;video width=&quot;300&quot; height=&quot;200&quot; controls=&quot;controls&quot;&gt;  &lt;source src=&quot;movie.mp4&quot; /&gt;  &lt;source src=&quot;movie.ogv&quot; /&gt;&lt;/video&gt;  带控制器的音频标签, 不同浏览器有不同的文件格式要求所以用 2 个 source 标签指定不同的音频格式 1234&lt;audio id=&quot;id-audio-player&quot; contro...</div></div></div></a><a class="pagination-related" href="/2024/01/20/SkyWalking/" title="SkyWalking"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-20</div><div class="info-item-2">SkyWalking</div></div><div class="info-2"><div class="info-item-1">1. SkyWalking是什么？skywalking 是一个国产开源框架，2015年由个人吴晟（华为开发者）开源 ， 2017年加入Apache孵化器，skywalking是分布式系统的应用程序性能监视工具，专为微服务、云原生架构和基于容器（Docker、K8s、Mesos）架构而设计。SkyWalking 是观察性分析平台和应用性能管理系统。提供分布式追踪、服务网格遥测分析、度量聚合和可视化一体化解决方案 官网：Apache SkyWalking 下载：Downloads Github: https://github.com/apache/skywalking 文档：Welcome 1.2 链路追踪框架对比​ 1.Zipkin是Twitter开源的调用链分析工具，目前基于springcloud sleuth得到了广泛的使用，特点是轻量，使用部署简单。 ​ 2.Pinpoint是韩国人开源的基于字节码注入的调用链分析，以及应用监控分析工具，特点是支持多种插件，UI功能强大，接入端无代码侵入。 ​ 3.SkyWalking是本土开源的基于字节码注入的调用链分析，以及应用监控分析工...</div></div></div></a><a class="pagination-related" href="/2023/09/04/Sqlite%E5%92%8Cmysql%E7%9A%84%E5%8C%BA%E5%88%AB%E5%8F%8A%E4%BC%98%E7%BC%BA%E7%82%B9/" title="Sqlite和mysql的区别及优缺点"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">Sqlite和mysql的区别及优缺点</div></div><div class="info-2"><div class="info-item-1"> title: Sqlite和mysql的区别及优缺点date: 2023-09-03 20:17:08category:  开发语言 java springboottag: springbootauthor:   Sqlite和mysql的区别及优缺点小型嵌入式，跟mysql差不多，但更小,功能也少，属于本地数据库多用于读多写少，100W以下的数据压力不大，不支持分布式。 真正开源的小型嵌入式数据库，支持事务、触发器器 性能至少优于mysql4.1.0 目前已被几乎所有的高级程序开发语言支持 由于可以自定义数据库函数，尤其在php的扩展中可支持全部php函数，其性能可以说是无上限的 “最主要的是没有 Access 的界面” 有很多用php开发的管理工具，与phpmyadmin的界面很相似 我用的是SQLiteManager SQLite 是一个类似Access的轻量级数据库系统，但是更小、更快、容量更大，并发更高。为什么说 SQLite 最适合做 CMS (内容管理系统)呢?并不是说其他数据库不好, oracle、MySQL、SQLServer 也都是非常优秀的 DBS，只不过...</div></div></div></a><a class="pagination-related" href="/2023/09/04/putty/" title="putty"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">putty</div></div><div class="info-2"><div class="info-item-1"> title: puttydate: 2023-09-03 20:17:08category:  doc_puttytag: doc_puttyauthor:   https://www.jianshu.com/p/d6acf623382b 使用putty&#x2F;ssh 进行端口映射Putty 1.是指将本地端口映射到指定地址2.是指将远程端口映射到指定地址 SSH如果使用 linux&#x2F;mac 下的 ssh 命令 $ ssh -R 9000:127.0.0.1:9000 hostR 代表 remote , 也就是将远程端口9000映射到指定地址127.0.0.1:9000 (本机) $ ssh -L 27018:127.0.0.1:27017 hostL 代表 location ,也就是将本地端口27018映射到指定地址127.0.0.1:9000 (远程服务器的本机) 测试 判断是否映射成功 $ netstat -a -n | grep –color&#x3D;auto 9000 如何选择 L &#x2F; R  当远程服务器上有一个服务, 如 mongodb &...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E5%AE%98%E7%BD%91%E5%AF%BC%E8%88%AA/" title="官网导航"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">官网导航</div></div><div class="info-2"><div class="info-item-1"> title: 官网导航date: 2023-09-03 20:17:08category: tag: author:  官网导航 前端   VuePress中文网 VuePress官网 Vue.js v1版本插件 v2主题 reco主题官网 Echarts官网 element-plus element   数据库   influxdata介绍 influxdb下载链接 influxdb集群 Grafana基础知识 SQL 审核查询平台-github SQLAdvisor快速   linux   centos-mac镜像下载 centos下载 nodejs下载 jdk-7下载   刷题   力扣官网 牛客网   javaFx   gluonhq打包javafx   markdown   milkdown管网   其他   SpringBoot下实现Shutdown Hook的几种方式 在自己的应用里集成grafana iTerm2配色教程 mac-Homebrew Electron5+vue-cli3开发跨平台桌面应用  oracle-jdk下载地址 本机git服务 本机nexu...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

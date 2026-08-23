@@ -1,0 +1,332 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>M1芯片MAC使用VMwareFusion安装Win11 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="title: M1芯片MAC使用VMwareFusion安装Win11date: 2023-09-03 20:17:08category:  mactag: macauthor:   M1芯片MAC使用VMware Fusion安装Windows 11最近居家办公，旧笔记本电脑卡的受不了，就买了2020款的MacBook Air，然而有些东西还是避不开要使用Windows系统，安装虚拟机成了最好">
+<meta property="og:type" content="article">
+<meta property="og:title" content="M1芯片MAC使用VMwareFusion安装Win11">
+<meta property="og:url" content="https://yhao521.github.io/2023/09/04/M1%E8%8A%AF%E7%89%87MAC%E4%BD%BF%E7%94%A8VMwareFusion%E5%AE%89%E8%A3%85Win11/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="title: M1芯片MAC使用VMwareFusion安装Win11date: 2023-09-03 20:17:08category:  mactag: macauthor:   M1芯片MAC使用VMware Fusion安装Windows 11最近居家办公，旧笔记本电脑卡的受不了，就买了2020款的MacBook Air，然而有些东西还是避不开要使用Windows系统，安装虚拟机成了最好">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2023-09-04T03:18:09.000Z">
+<meta property="article:modified_time" content="2023-09-04T03:18:27.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="php&#x2F;programming">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "M1芯片MAC使用VMwareFusion安装Win11",
+  "url": "https://yhao521.github.io/2023/09/04/M1%E8%8A%AF%E7%89%87MAC%E4%BD%BF%E7%94%A8VMwareFusion%E5%AE%89%E8%A3%85Win11/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2023-09-04T03:18:09.000Z",
+  "dateModified": "2023-09-04T03:18:27.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2023/09/04/M1%E8%8A%AF%E7%89%87MAC%E4%BD%BF%E7%94%A8VMwareFusion%E5%AE%89%E8%A3%85Win11/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'M1芯片MAC使用VMwareFusion安装Win11',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">M1芯片MAC使用VMwareFusion安装Win11</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">M1芯片MAC使用VMwareFusion安装Win11</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-09-04T03:18:09.000Z" title="发表于 2023-09-04 11:18:09">2023-09-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-09-04T03:18:27.000Z" title="更新于 2023-09-04 11:18:27">2023-09-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><hr>
+<p>title: M1芯片MAC使用VMwareFusion安装Win11<br>date: 2023-09-03 20:17:08<br>category:</p>
+<ul>
+<li>mac<br>tag:</li>
+<li>mac<br>author:</li>
+</ul>
+<hr>
+<h1 id="M1芯片MAC使用VMware-Fusion安装Windows-11"><a href="#M1芯片MAC使用VMware-Fusion安装Windows-11" class="headerlink" title="M1芯片MAC使用VMware Fusion安装Windows 11"></a>M1芯片MAC使用VMware Fusion安装Windows 11</h1><p>最近居家办公，旧笔记本电脑卡的受不了，就买了2020款的MacBook Air，然而有些东西还是避不开要使用Windows系统，安装虚拟机成了最好的选择，通过两天的search和尝试，终于安装成功了Windows 11，之后就写下了一个总结，废话不多说，开始安装。</p>
+<p>VMware Fusion13密钥</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HF200-0W05K-089X8-4R1EK-032J0</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">4C21U-2KK9Q-M8130-4V2QH-CF810</span><br></pre></td></tr></table></figure>
+
+<h2 id="一、首先就是下载虚拟机软件和系统镜像"><a href="#一、首先就是下载虚拟机软件和系统镜像" class="headerlink" title="一、首先就是下载虚拟机软件和系统镜像"></a>一、首先就是下载虚拟机软件和系统镜像</h2><p>进入VMware官网下载<a target="_blank" rel="noopener" href="https://customerconnect.vmware.com/web/vmware/evalcenter?p=fusion-player-personal">VMware Fusion个人免费版本</a>，只需要注册即可下载安装使用；</p>
+<p>获取Windows 11 ARM64镜像，我是直接从微软官方下载的预览版镜像：在<a target="_blank" rel="noopener" href="https://www.microsoft.com/en-us/software-download/windowsinsiderpreviewarm64">Windows Insider Preview</a>点击页面中的「 Windows Client ARM64 Insider Preview」下载VHDX文件；*由于是预览版本，所以系统是英文模式的，可以在安装好后在设置里面添加中文语言；</p>
+<p>VMware Fusion不支持VHDK格式的文件，所以需要转换为vmdk格式使用；</p>
+<p>首先安装brew，自行百度安装，后期安装其他东西也会用到；</p>
+<p>使用brew安装qemu，终端运行<code>brew install qemu</code>；</p>
+<p>将VHDX转换为vmdk，终端运行<code>qemu-img convert -p -f vhdx -O vmdk VHDX文件的路径 新的vmdk文件路径</code>；</p>
+<h2 id="二、然后是安装VMware-Fusion并挂载镜像"><a href="#二、然后是安装VMware-Fusion并挂载镜像" class="headerlink" title="二、然后是安装VMware Fusion并挂载镜像"></a>二、然后是安装VMware Fusion并挂载镜像</h2><p>因为是免费注册的，所以安装VMware Fusion直接一路下一步即可；</p>
+<p>安装好后选择创建自定虚拟机，选择「其他&gt;其他64位 ARM」，然后选择保存虚拟机的位置；</p>
+<p>创建好后先不要打开虚拟机，先修改虚拟机配置：</p>
+<p>把处理器和内存选择适当配置（Windows 11最低配置要求是4G内存，65G硬盘，我实际配置2G+80G，也可以用，只是会在桌面右下角有提示，不影响使用）；</p>
+<p>CD&#x2F;DVD先移除原驱动器，然后右上角添加设备，选择现有磁盘，选择磁盘中转换后的vmdk文件进行挂载即可；</p>
+<p>在虚拟机资源库中右击创建的虚拟机，然后按option同时选择「在“编辑器”中打开“配置文件”」，将<code>guestOS = &quot;arm-other-64&quot;</code>修给为<code>guestOS = “arm-windows11-64”</code>，保存后关闭；</p>
+<h2 id="三、接着就是安装系统"><a href="#三、接着就是安装系统" class="headerlink" title="三、接着就是安装系统"></a>三、接着就是安装系统</h2><p>启动虚拟机后按 Shift - F10 打开命令提示符界面，运行regedit，打开注册表编辑器定位到：HKEY_LOCAL_MACHINE&#x2F;SYSTEM&#x2F;Setup，右击Setup新建一个名为LabConfig的键；然后在右侧窗格选择「新建」&gt;「DWORD ( 32位 ) 值」，名为「BypassTPMCheck」值为1，同样的方法再新建一个名为「BypassSecureBootCheck」值为1。</p>
+<p>在终端依次运行以下命令实现网络连接：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">bcdedit /debug on</span><br><span class="line">bcdedit /dbgsettings net hostip:10.0.0.1 port:50000</span><br></pre></td></tr></table></figure>
+
+<p>四、最后连接使用虚拟机</p>
+<p>用VMware Fusion安装的虚拟机无法调整尺寸和分辨率，很影响正常使用，所以曲线救国，可以使用Microsoft Remote Desktop客户端连接虚拟机使用，然而大陆地区的App Store无法下载这个软件，所以还得去微软官方下载，这里我是<a target="_blank" rel="noopener" href="https://install.appcenter.ms/orgs/rdmacios-k2vy/apps/microsoft-remote-desktop-for-mac/distribution_groups/all-users-of-microsoft-remote-desktop-for-mac">下载beta</a>版本使用；</p>
+<p>下载安装后添加PC，输入虚拟机的ip（通过在命令行运行ipconfig查看ip）在「Display」选项卡勾选「Optimize for Retina displays」和「Update the session resolution on resize」，即可高清、自适应显示尺寸；</p>
+<p>至此在M1芯片MacBook使用VMware Fusion安装Windows 11 ARM64虚拟机已完成，需要注意的是使用Microsoft Remote Desktop客户端连接到虚拟机后无法建立SSL VPN连接，至于其他问题暂时还没有出现，毕竟是个虚拟机，没有太多奢求。</p>
+<p>本文章参考以下文章并结合自己的实际操作完成编写，码字不易，感谢支持。<br><a target="_blank" rel="noopener" href="http://app.myzaker.com/news/article.php?pk=6188be13b15ec07f0b1ff70e">http://app.myzaker.com/news/article.php?pk=6188be13b15ec07f0b1ff70e</a></p>
+<h1 id="Mac-M1-Vmware-Fusion-安装-Windows-11-arm版及相关问题解决"><a href="#Mac-M1-Vmware-Fusion-安装-Windows-11-arm版及相关问题解决" class="headerlink" title="Mac M1 + Vmware Fusion 安装 Windows 11 arm版及相关问题解决"></a>Mac M1 + Vmware Fusion 安装 Windows 11 arm版及相关问题解决</h1><h2 id="下载并安装-vmware-fusion"><a href="#下载并安装-vmware-fusion" class="headerlink" title="下载并安装 vmware fusion"></a>下载并安装 vmware fusion</h2><p>parallels 因为某些原因无法满足需求（比如在Mac的活动监视器里可以看到虚拟机里的正在运行的程序），故折腾下使用 Vmware Fusion 安装Win 11。 vmware fusion for ARM下载地址（需要登录）：<a href="https://link.zhihu.com/?target=https://customerconnect.vmware.com/downloads/get-download?downloadGroup=FUS-PUBTP-2021H1">https://customerconnect.vmware.com/downloads/get-download?downloadGroup=FUS-PUBTP-2021H1</a></p>
+<p><img src="/img/v2-b4e6b8197d71a6138fad7f3d1988c40a_1440w.jpg" alt="img"></p>
+<h2 id="0x02-下载-Windows-11-内部预览版"><a href="#0x02-下载-Windows-11-内部预览版" class="headerlink" title="0x02. 下载 Windows 11 内部预览版"></a>0x02. 下载 Windows 11 内部预览版</h2><p><a href="https://link.zhihu.com/?target=https://www.microsoft.com/en-us/software-download/windowsinsiderpreviewARM64?wa=wsignin1.0">https://www.microsoft.com/en-us/software-download/windowsinsiderpreviewARM64?wa=wsignin1.0</a></p>
+<p>需要先访问以上链接，使用微软账号注册内部预览版体验计划，再返回上述链接所对应页面即可看到下载链接：</p>
+<p><img src="/img/v2-92edb92fa54c826b1ece8918b32572e8_1440w.jpg" alt="img"></p>
+<p>不过下载后的是一个 .VHDX文件，大小9.7G左右，这种格式的镜像文件是Hyper-V用的，我们可以用qemu-img命令转换成vmware所用的 .vmdk 格式的镜像</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">brew install qemu</span><br><span class="line">qemu-img convert Windows11_InsiderPreview_Client_ARM64_en-us_22598.vhdx -O vmdk -o adapter_type=lsilogic Windows11_InsiderPreview_Client_ARM64_en-us_22598.vmdk</span><br><span class="line"></span><br><span class="line">qemu-img convert Windows11_InsiderPreview_Client_ARM64_en-us_25201.VHDX -O vmdk -o adapter_type=lsilogic WWindows11_InsiderPreview_Client_ARM64_en-us_25201.vmdk</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>PS：文件名可能需要根据自己下载的镜像名字进行修改。</p>
+<h2 id="0x03-安装-Windows-11"><a href="#0x03-安装-Windows-11" class="headerlink" title="0x03. 安装 Windows 11"></a>0x03. 安装 Windows 11</h2><p>新建 -&gt; 创建自定义虚拟机 -&gt; 其他 64位 ARM -&gt; 使用现有虚拟磁盘，然后选择虚拟磁盘时选中第二步中生成的 .vmdk 镜像即可：</p>
+<p><img src="/img/v2-2269e9a40d3cb650d0babf5f3582fcb7_1440w.jpg" alt="img"></p>
+<p><img src="/img/v2-e1eb71c3daa5420d7f5728928513fd3c_1440w.jpg" alt="img"></p>
+<p>之后启动虚拟机之前需要修改下默认的cpu数量和内存大小（默认的实在太小了），接着正常启动即可。</p>
+<p>安装过程中有一步是需要连接到网络，没找到可以连网的地方，Next按钮也为灰色，如下：</p>
+<p><img src="/img/v2-469e9dbb931bcf7864e69b6ed215abd7_1440w.jpg" alt="img"></p>
+<p>这时可以通过fn+ shift + F10 组合键打开命令行，然后输入</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">OOBE\BYPASSNRO</span><br></pre></td></tr></table></figure>
+
+<p>并回车，如下：</p>
+<p><img src="/img/v2-e3756be51db0582336662a697db6fa12_1440w.jpg" alt="img"></p>
+<p>接着虚拟机会自动重启，重启后如下：</p>
+<p><img src="/img/v2-ae05f34ecb7c2a69a761788af9455ca8_1440w.jpg" alt="img"></p>
+<p><img src="/img/v2-877cb20a02a824655051240a7896686d_1440w.jpg" alt="img"></p>
+<p>安装好后如下：</p>
+<p><img src="/img/v2-07e3cd6a154c09b3b012c6f54395a0f9_1440w.jpg" alt="img"></p>
+<h2 id="0x04-解决虚拟机不能联网的问题"><a href="#0x04-解决虚拟机不能联网的问题" class="headerlink" title="0x04. 解决虚拟机不能联网的问题"></a>0x04. 解决虚拟机不能联网的问题</h2><p>安装虚拟机的tools</p>
+<p>由于 VMware 尚未正式支持 Windows 11 ARM64，VMware Tools 也没有完成适配，故一些专用驱动和辅助程序无法安装，导致虚拟机找不到网卡而无法上网，可通过以下方式解决虚拟机联网的问题。</p>
+<p>以管理员权限打开命令行，执行以下命令：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">bcdedit /debug on</span><br><span class="line">bcdedit /dbgsettings net hostip:xxx.xxx.xxx.xxx port:50000    # hostip应该随便写（一般写192.168网段的，避免冲突，最后分配的ip不一定是自己填的hostip），端口需要为49151 和65536 之间的值</span><br></pre></td></tr></table></figure>
+
+<p>执行上述命令后重启系统即可发现虚拟机可以正常上网了（不过会使虚拟机暴露在混杂模式下，出于安全考虑，VMware Fusion 在每次开启虚拟机联网的时候，都要提示输入 macOS 用户密码。但混杂模式对于普通用户的影响是微乎其微的，可以通过在菜单栏里选择 VMware Fusion &gt; 偏好设置，解开左下角的锁头按钮，然后将“需要通过鉴定才能进入混杂模式”的勾选去掉）</p>
+<p>PS：bcdedit 是 Windows 上用于调试启动选项的命令行工具；而上述两行命令的作用，就是首先启用内核调试器，然后添加一个专用于内核调试的以太网网络连接。</p>
+<h2 id="0x05-解决虚拟机无法调整分辨率的问题"><a href="#0x05-解决虚拟机无法调整分辨率的问题" class="headerlink" title="0x05. 解决虚拟机无法调整分辨率的问题"></a>0x05. 解决虚拟机无法调整分辨率的问题</h2><p>安装好后的虚拟机分辨率较低，且调整分辨率按钮为灰色，这就很尴尬了，解决方案如下：</p>
+<p>以管理员权限打开命令行，执行如下命令：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mountvol a: /s</span><br><span class="line">a:</span><br><span class="line">dir</span><br><span class="line">dir EFI</span><br><span class="line">cd EFI</span><br><span class="line">mkdir debian</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/v2-f19b251d873385b3b9679fe83af58138_1440w.jpg" alt="img"></p>
+<p>我这边默认是没有debian这个文件夹的（上述红框中的debian文件夹是自己通过创建的）</p>
+<p>然后将以下两个文件（grub.cfg 和 grubaa64.efi）放到debian目录下：</p>
+<p>grub.cfg</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">#</span><br><span class="line"># minimal grub configuration</span><br><span class="line">#</span><br><span class="line"></span><br><span class="line">set timeout=2</span><br><span class="line">set default=0</span><br><span class="line"></span><br><span class="line">set gfxmode=1920x1200</span><br><span class="line"></span><br><span class="line">menuentry &quot;Windows 11&quot; &#123;</span><br><span class="line">    insmod gfxterm</span><br><span class="line">    terminal_output gfxterm</span><br><span class="line">    set bootnext=/efi/microsoft/boot/bootmgfw.efi</span><br><span class="line">    search --file $bootnext --set root</span><br><span class="line">    chainloader $bootnext</span><br><span class="line">    boot</span><br><span class="line">&#125;</span><br><span class="line"># eof</span><br></pre></td></tr></table></figure>
+
+<p>grubaa64.efi 可通过以下途径获取：</p>
+<p>下载以下deb包：<a href="https://link.zhihu.com/?target=https://deb.debian.org/debian/pool/main/g/grub2/grub-efi-arm64-bin_2.06-2_arm64.deb">https://deb.debian.org/debian/pool/main/g/grub2/grub-efi-arm64-bin_2.06-2_arm64.deb</a></p>
+<p>解压后如下：</p>
+<p><img src="/img/v2-d824991e5a4b4c3e56d6f49e48938346_1440w.jpg" alt="img"></p>
+<p>再解压data.tar.xz 文件，进入以下目录：</p>
+<p>grub-efi-arm64-bin_2.06-2_arm64&#x2F;usr&#x2F;lib&#x2F;grub&#x2F;arm64-efi&#x2F;monolithic</p>
+<p><img src="/img/v2-18b12fc824b00c651639104b30fea2a3_1440w.jpg" alt="img"></p>
+<p>把上述 grubaa64.efi 也放到debian目录下，命令如下（管理员权限执行）：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">copy c:\users\用户名\desktop\grub.cfg a:\efi\debian\</span><br><span class="line">copy c:\users\用户名\desktop\grubaa64.efi a:\efi\debian\</span><br></pre></td></tr></table></figure>
+
+<p>然后选择启动到固件，调整下启动顺序：</p>
+<p><img src="/img/v2-640bad56e10ed364cb7cb48f7a62607a_1440w.jpg" alt="img"></p>
+<p>Boot Maintenance Manager –&gt; Boot Options –&gt; Add Boot Option</p>
+<p><img src="/img/v2-477ea7fbec8f466d04ab33d5620d88f8_1440w.jpg" alt="img"></p>
+<p><img src="/img/v2-c7e024a6545fae5893d07e7dc41f72e7_1440w.jpg" alt="img"></p>
+<p><img src="/img/v2-b091be2cc72fedc6f207fb46e1e09c29_1440w.jpg" alt="img"></p>
+<p>上述输入描述的地方，笔者输入的是 change display，这个可以随意写，然后F10 保存，Commit Changes and Exit即可。</p>
+<p>接着调整下启动顺序：</p>
+<p><img src="/img/v2-14b1a998c9a6848e494d47f1aaae6ea0_1440w.jpg" alt="img"></p>
+<p><img src="/img/v2-d0a135077ce301fed1a4ea430411d47f_1440w.jpg" alt="img"></p>
+<p>选中 change display 然后按+键调整到第一位即可。</p>
+<p><img src="/img/v2-7268107b93bc188ff39e6fb189342fca_1440w.jpg" alt="img"></p>
+<p>选中 Commit Changes and Exit，回车。</p>
+<p>再次开启虚拟机后，可以看到虚拟机分辨率已调整：</p>
+<p><img src="/img/v2-934817d47ff29d0bb210f8b97005a06c_1440w.jpg" alt="img"></p>
+<p>其实还有个更简单的方案：使用 <a href="https://link.zhihu.com/?target=https://install.appcenter.ms/orgs/rdmacios-k2vy/apps/microsoft-remote-desktop-for-mac/distribution_groups/all-users-of-microsoft-remote-desktop-for-mac">Microsoft Remote Desktop</a></p>
+<p>比较简单就不具体写了。</p>
+<h1 id="win10、win11使用WindowsPowershell-碰到-“无法加载文件-xx-ps1，因为在此系统上禁止运行脚本。”解决办法"><a href="#win10、win11使用WindowsPowershell-碰到-“无法加载文件-xx-ps1，因为在此系统上禁止运行脚本。”解决办法" class="headerlink" title="win10、win11使用WindowsPowershell 碰到 “无法加载文件 xx.ps1，因为在此系统上禁止运行脚本。”解决办法"></a><a target="_blank" rel="noopener" href="https://www.cnblogs.com/yhanblog/p/16168975.html">win10、win11使用WindowsPowershell 碰到 “无法加载文件 xx.ps1，因为在此系统上禁止运行脚本。”解决办法</a></h1><p>在win10、win11中使用WindowsPowershell 碰到“无法加载文件 xx.ps1，因为在此系统上禁止运行脚本。”</p>
+<p>这里以win11为例，在程序中找到 WindowsPowershell ，右键 用管理员身份运行 ，再开打命令窗口输入</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">set-executionpolicy remotesigned</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/2289518-20220420105854969-893658595.png" alt="img"></p>
+<p><img src="/img/2289518-20220420105926355-1482310140.png" alt="img"></p>
+<p>输入y,回车即可解决”无法加载文件 xx.ps1“的问题。</p>
+<h2 id="解决虚拟机win10不能关闭defender病毒与防护"><a href="#解决虚拟机win10不能关闭defender病毒与防护" class="headerlink" title="解决虚拟机win10不能关闭defender病毒与防护"></a>解决虚拟机win10不能关闭defender病毒与防护</h2><p>安装360卫士，体检，扫描等等，启动项</p>
+<h2 id="【工具干货】VMware-Fusion如何实现windows虚机与Mac间文件拖拽复制"><a href="#【工具干货】VMware-Fusion如何实现windows虚机与Mac间文件拖拽复制" class="headerlink" title="【工具干货】VMware Fusion如何实现windows虚机与Mac间文件拖拽复制"></a>【工具干货】VMware Fusion如何实现windows虚机与Mac间文件拖拽复制</h2><p>过程：在mac下安装了vmware fusion 12，想从mac中将文件拖拽到windows虚机中，同时借win虚机来使用ntfs格式移动硬盘，发现无法直接拖拽，需要安装VMware Tools来实现这个功能。</p>
+<p>1、安装VMware Fusion 12和windows虚机的过程略过，建议**安装win10版本镜像，**对虚拟化的支持度更好。</p>
+<p>安装win7 professional版本的话。镜像要注意使用sp1以上的，否则安装vmware tools有如下报错：</p>
+<p><img src="https://img2020.cnblogs.com/blog/720944/202104/720944-20210429143952172-1072504153.png" alt="img"></p>
+<p>镜像下载地址推荐：<a target="_blank" rel="noopener" href="https://msdn.itellyou.cn/">https://msdn.itellyou.cn/</a></p>
+<p>2、在VMware Fusion 的Vmware Machine菜单中找到“安装 Vmware Tools”，但发现是灰色的，无法直接安装：</p>
+<p><img src="https://img2020.cnblogs.com/blog/720944/202104/720944-20210429151149848-488948220.png" alt="img"></p>
+<p>只能去程序包里去看看，最终找到了，路径为 应用程序 - VMwareFusion - 右键：显示包内容 - contents&#x2F;library&#x2F;isoimages&#x2F; - windows.iso</p>
+<p><img src="https://img2020.cnblogs.com/blog/720944/202104/720944-20210429151501419-833420296.png" alt="img"></p>
+<p><img src="https://img2020.cnblogs.com/blog/720944/202104/720944-20210429151822273-1975063281.png" alt="img"></p>
+<p>3、右键 拷贝 出来，在虚机中，用光驱加载，然后安装就可以了。</p>
+<p><img src="https://img2020.cnblogs.com/blog/720944/202104/720944-20210429153200499-446334176.png" alt="img"></p>
+<p><img src="/img/720944-20210429152907746-1428135451.png" alt="img"></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2023/09/04/M1%E8%8A%AF%E7%89%87MAC%E4%BD%BF%E7%94%A8VMwareFusion%E5%AE%89%E8%A3%85Win11/">https://yhao521.github.io/2023/09/04/M1%E8%8A%AF%E7%89%87MAC%E4%BD%BF%E7%94%A8VMwareFusion%E5%AE%89%E8%A3%85Win11/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a><a class="post-meta__tags" href="/tags/php-programming/">php/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2023/09/04/MAC%E6%8C%82%E8%BD%BD%E7%A3%81%E7%9B%98%E6%A0%BC%E5%BC%8FNTFS/" title="MAC挂载磁盘格式NTFS"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">MAC挂载磁盘格式NTFS</div></div><div class="info-2"><div class="info-item-1"> title: MAC挂载磁盘格式NTFSdate: 2023-09-03 20:17:08category:  mactag: macauthor:   mac m1可用的windows磁盘格式NTFS挂载软件，适用U盘或者硬盘目录 安装步骤： 1.下载解压之后双击安装（推荐关掉其他软件，因为后面要关机） 2.需要内核插件授权          很多有思想、同时也在用M1的同学们肯定是不差钱的，因为磁盘制式的问题，win上面NTFS的U盘&#x2F;优盘&#x2F;移动硬盘什么的来插mac的话，总是只读操作不了，尝试过很多软件都不得劲，用的最多的还是免费的轻量级软件Mounty for NTFS，但是经常就不合适了，重新安装了无数遍，最终放弃了，重新寻找了一款完美的替代品——Paragon NTFS for Mac         其实还有同类别的：Tuxera NTFS for Mac         BUT ！！！         这两款都是收费的哇，对于我们不差钱的同学来说，自然是很不友好了，经过无限搜索，排除了网上各类破解的版本之后，被我发现了一款比较稳妥的路子，话不多...</div></div></div></a><a class="pagination-related" href="/2023/09/04/MAC%E5%AE%89%E8%A3%85Mysql%E8%B6%85%E8%AF%A6%E7%BB%86%E5%AE%8C%E6%95%B4%E6%95%99%E7%A8%8B/" title="MAC安装Mysql超详细完整教程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">MAC安装Mysql超详细完整教程</div></div><div class="info-2"><div class="info-item-1"> title: MAC安装Mysql超详细完整教程date: 2023-09-03 20:17:08category:  mactag: macauthor:   MAC安装Mysql超详细完整教程安装**登录MySQL网站用dmg的方式安装。Download MySQL Community Server 或者常规方式，打开官网 : http://www.mysql.com/downloads/ 进入, 点击下方的DOWNLOADS : MySQL Community Server https://dev.mysql.com/downloads/mysql/  这里我的电脑是M1芯片 选择的是第一个ARM架构的.dmg下载，大家可以根据自己电脑情况选择下载。  选择选择不登录,直接下载接着, 会跳转到如下页面, 你只需要选择不登录,直接下载即可。 我安装的是8.0.27版本的，安装一路下一步，会让你设置root密码. 打开MySQL服务正常情况下，安装成功。   此时代表已经安装成功，如果需要开启服务Start MySQL Server即可。但还需要为mysql配置环境变量。 配...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/putty/" title="putty"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">putty</div></div><div class="info-2"><div class="info-item-1"> title: puttydate: 2023-09-03 20:17:08category:  doc_puttytag: doc_puttyauthor:   https://www.jianshu.com/p/d6acf623382b 使用putty&#x2F;ssh 进行端口映射Putty 1.是指将本地端口映射到指定地址2.是指将远程端口映射到指定地址 SSH如果使用 linux&#x2F;mac 下的 ssh 命令 $ ssh -R 9000:127.0.0.1:9000 hostR 代表 remote , 也就是将远程端口9000映射到指定地址127.0.0.1:9000 (本机) $ ssh -L 27018:127.0.0.1:27017 hostL 代表 location ,也就是将本地端口27018映射到指定地址127.0.0.1:9000 (远程服务器的本机) 测试 判断是否映射成功 $ netstat -a -n | grep –color&#x3D;auto 9000 如何选择 L &#x2F; R  当远程服务器上有一个服务, 如 mongodb &...</div></div></div></a><a class="pagination-related" href="/2024/07/03/%E9%9D%A2%E8%AF%95%E5%AE%98%EF%BC%9A%E8%AF%B4%E8%AF%B4MySQL%E4%B8%8EPostgreSQL%E4%B9%8B%E9%97%B4%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%8C%E8%AF%A5%E5%A6%82%E4%BD%95%E6%8A%80%E6%9C%AF%E9%80%89%E5%9E%8B%EF%BC%9F/" title="面试官：说说MySQL与PostgreSQL之间的区别，该如何技术选型？"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-03</div><div class="info-item-2">面试官：说说MySQL与PostgreSQL之间的区别，该如何技术选型？</div></div><div class="info-2"><div class="info-item-1">面试官：说说MySQL与PostgreSQL之间的区别，该如何技术选型？发布于 2021-03-03 10:51:37 8.9K1 举报 文章被收录于专栏：业余草 你知道的越多，不知道的就越多，业余的像一棵小草！你来，我们一起精进！你不来，我和你的竞争对手一起精进！ 编辑：业余草blog.csdn.net&#x2F;u012414189&#x2F;article&#x2F;details&#x2F;84064146推荐：https://www.xttblog.com/?p=5155如果你稍微有一点工作经验，那么技术选型，技术比较就是面试中必问的知识点之一了。最近就有粉丝在面试中被问到了MySQL与PostgreSQL之间技术选型与比较的问题，下面是一些总结，希望能对大家有所帮助！ 1.问题如果打算为项目选择一款免费、开源的数据库，那么你可能会在MySQL与PostgreSQL之间犹豫不定。MySQL与PostgreSQL都是免费、开源、强大、且功能丰富的数据库。你主要的问题可能是：哪一个才是最好的开源数据库，MySQL还是PostgreSQL呢？该选择哪一个开源数据库呢？ 在选择...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E5%89%8D%E7%AB%AF%E5%85%A5%E9%97%A8%E6%89%8B%E5%86%8C/" title="前端入门手册"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">前端入门手册</div></div><div class="info-2"><div class="info-item-1"> title: 前端入门手册date: 2023-09-03 20:17:08category:  开发语言tag: 开发语言author:   前端入门手册blossom html css JavaScript程序员入门的时候整理的一份学习笔记,见证了我的成长备份 HTML视频音频标签带控制器的视频标签, 不同浏览器有不同的文件格式要求所以用 2 个 source 标签指定不同的视频格式 1234&lt;video width=&quot;300&quot; height=&quot;200&quot; controls=&quot;controls&quot;&gt;  &lt;source src=&quot;movie.mp4&quot; /&gt;  &lt;source src=&quot;movie.ogv&quot; /&gt;&lt;/video&gt;  带控制器的音频标签, 不同浏览器有不同的文件格式要求所以用 2 个 source 标签指定不同的音频格式 1234&lt;audio id=&quot;id-audio-player&quot; contro...</div></div></div></a><a class="pagination-related" href="/2024/01/20/SkyWalking/" title="SkyWalking"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-20</div><div class="info-item-2">SkyWalking</div></div><div class="info-2"><div class="info-item-1">1. SkyWalking是什么？skywalking 是一个国产开源框架，2015年由个人吴晟（华为开发者）开源 ， 2017年加入Apache孵化器，skywalking是分布式系统的应用程序性能监视工具，专为微服务、云原生架构和基于容器（Docker、K8s、Mesos）架构而设计。SkyWalking 是观察性分析平台和应用性能管理系统。提供分布式追踪、服务网格遥测分析、度量聚合和可视化一体化解决方案 官网：Apache SkyWalking 下载：Downloads Github: https://github.com/apache/skywalking 文档：Welcome 1.2 链路追踪框架对比​ 1.Zipkin是Twitter开源的调用链分析工具，目前基于springcloud sleuth得到了广泛的使用，特点是轻量，使用部署简单。 ​ 2.Pinpoint是韩国人开源的基于字节码注入的调用链分析，以及应用监控分析工具，特点是支持多种插件，UI功能强大，接入端无代码侵入。 ​ 3.SkyWalking是本土开源的基于字节码注入的调用链分析，以及应用监控分析工...</div></div></div></a><a class="pagination-related" href="/2023/09/04/vscode%E4%BD%BF%E7%94%A8/" title="vscode使用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">vscode使用</div></div><div class="info-2"><div class="info-item-1"> title: vscode的使用lang: en-USdate: 2023-09-03 20:17:08category:  vscodetag: vscodeauthor:   1. vscode的使用1.1. 插件位置更改参考：https://blog.csdn.net/zhaojunwei08/article/details/86021665 https://blog.csdn.net/u011127019/article/details/86737308#comments mklink使用 https://www.icoa.cn/a/910.html set oldDir&#x3D;%UserProfile%.vscode\extensions mklink &#x2F;D “%oldDir%” “E:\eclipse-hao\HTML\extensions” 确保有 这个 .vscode 空目录  bat方式： 123456789@echo offif &quot;%1&quot; == &quot;h&quot; goto beginmshta vbscript:c...</div></div></div></a><a class="pagination-related" href="/2023/09/04/docker/" title="docker"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">docker</div></div><div class="info-2"><div class="info-item-1"> title: dockerdate: 2023-09-03 20:17:08category:  doc_dockertag: doc_dockerauthor:   Docker创建镜像、怎么修改、上传镜像等详细介绍: https://www.jb51.net/article/100942.htm centos7 安装docker使用 yum 安装Docker 要求 CentOS 系统的内核版本高于 3.10 ，查看本页面的前提条件来验证你的CentOS 版本是否支持 Docker 。通过 uname -r 命令查看你当前的内核版本 $ uname -r 3.10.0-957.5.1.el7.x86_64  安装 Docker从 2017 年 3 月开始 docker 在原来的基础上分为两个分支版本: Docker CE 和 Docker EE。Docker CE 即社区免费版，Docker EE 即企业版，强调安全，但需付费使用。 仅介绍 Docker CE 的安装使用。移除旧的版本 sudo yum remove -y docker \               doc...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#M1%E8%8A%AF%E7%89%87MAC%E4%BD%BF%E7%94%A8VMware-Fusion%E5%AE%89%E8%A3%85Windows-11"><span class="toc-number">1.</span> <span class="toc-text">M1芯片MAC使用VMware Fusion安装Windows 11</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E9%A6%96%E5%85%88%E5%B0%B1%E6%98%AF%E4%B8%8B%E8%BD%BD%E8%99%9A%E6%8B%9F%E6%9C%BA%E8%BD%AF%E4%BB%B6%E5%92%8C%E7%B3%BB%E7%BB%9F%E9%95%9C%E5%83%8F"><span class="toc-number">1.1.</span> <span class="toc-text">一、首先就是下载虚拟机软件和系统镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E7%84%B6%E5%90%8E%E6%98%AF%E5%AE%89%E8%A3%85VMware-Fusion%E5%B9%B6%E6%8C%82%E8%BD%BD%E9%95%9C%E5%83%8F"><span class="toc-number">1.2.</span> <span class="toc-text">二、然后是安装VMware Fusion并挂载镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E6%8E%A5%E7%9D%80%E5%B0%B1%E6%98%AF%E5%AE%89%E8%A3%85%E7%B3%BB%E7%BB%9F"><span class="toc-number">1.3.</span> <span class="toc-text">三、接着就是安装系统</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Mac-M1-Vmware-Fusion-%E5%AE%89%E8%A3%85-Windows-11-arm%E7%89%88%E5%8F%8A%E7%9B%B8%E5%85%B3%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3"><span class="toc-number">2.</span> <span class="toc-text">Mac M1 + Vmware Fusion 安装 Windows 11 arm版及相关问题解决</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8B%E8%BD%BD%E5%B9%B6%E5%AE%89%E8%A3%85-vmware-fusion"><span class="toc-number">2.1.</span> <span class="toc-text">下载并安装 vmware fusion</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02-%E4%B8%8B%E8%BD%BD-Windows-11-%E5%86%85%E9%83%A8%E9%A2%84%E8%A7%88%E7%89%88"><span class="toc-number">2.2.</span> <span class="toc-text">0x02. 下载 Windows 11 内部预览版</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03-%E5%AE%89%E8%A3%85-Windows-11"><span class="toc-number">2.3.</span> <span class="toc-text">0x03. 安装 Windows 11</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x04-%E8%A7%A3%E5%86%B3%E8%99%9A%E6%8B%9F%E6%9C%BA%E4%B8%8D%E8%83%BD%E8%81%94%E7%BD%91%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">2.4.</span> <span class="toc-text">0x04. 解决虚拟机不能联网的问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x05-%E8%A7%A3%E5%86%B3%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%97%A0%E6%B3%95%E8%B0%83%E6%95%B4%E5%88%86%E8%BE%A8%E7%8E%87%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">2.5.</span> <span class="toc-text">0x05. 解决虚拟机无法调整分辨率的问题</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#win10%E3%80%81win11%E4%BD%BF%E7%94%A8WindowsPowershell-%E7%A2%B0%E5%88%B0-%E2%80%9C%E6%97%A0%E6%B3%95%E5%8A%A0%E8%BD%BD%E6%96%87%E4%BB%B6-xx-ps1%EF%BC%8C%E5%9B%A0%E4%B8%BA%E5%9C%A8%E6%AD%A4%E7%B3%BB%E7%BB%9F%E4%B8%8A%E7%A6%81%E6%AD%A2%E8%BF%90%E8%A1%8C%E8%84%9A%E6%9C%AC%E3%80%82%E2%80%9D%E8%A7%A3%E5%86%B3%E5%8A%9E%E6%B3%95"><span class="toc-number">3.</span> <span class="toc-text">win10、win11使用WindowsPowershell 碰到 “无法加载文件 xx.ps1，因为在此系统上禁止运行脚本。”解决办法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E8%99%9A%E6%8B%9F%E6%9C%BAwin10%E4%B8%8D%E8%83%BD%E5%85%B3%E9%97%ADdefender%E7%97%85%E6%AF%92%E4%B8%8E%E9%98%B2%E6%8A%A4"><span class="toc-number">3.1.</span> <span class="toc-text">解决虚拟机win10不能关闭defender病毒与防护</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E3%80%90%E5%B7%A5%E5%85%B7%E5%B9%B2%E8%B4%A7%E3%80%91VMware-Fusion%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0windows%E8%99%9A%E6%9C%BA%E4%B8%8EMac%E9%97%B4%E6%96%87%E4%BB%B6%E6%8B%96%E6%8B%BD%E5%A4%8D%E5%88%B6"><span class="toc-number">3.2.</span> <span class="toc-text">【工具干货】VMware Fusion如何实现windows虚机与Mac间文件拖拽复制</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

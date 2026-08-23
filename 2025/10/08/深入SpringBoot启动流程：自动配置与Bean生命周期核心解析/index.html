@@ -1,0 +1,239 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>深入SpringBoot启动流程：自动配置与Bean生命周期核心解析 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="深入SpringBoot启动流程：自动配置与Bean生命周期核心解析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深入SpringBoot启动流程：自动配置与Bean生命周期核心解析">
+<meta property="og:url" content="https://yhao521.github.io/2025/10/08/%E6%B7%B1%E5%85%A5SpringBoot%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%EF%BC%9A%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E4%B8%8EBean%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E6%A0%B8%E5%BF%83%E8%A7%A3%E6%9E%90/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="深入SpringBoot启动流程：自动配置与Bean生命周期核心解析">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2025-10-07T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-17T16:00:00.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="Spring">
+<meta property="article:tag" content="web&#x2F;frontend">
+<meta property="article:tag" content="摘录">
+<meta property="article:tag" content="教程">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "深入SpringBoot启动流程：自动配置与Bean生命周期核心解析",
+  "url": "https://yhao521.github.io/2025/10/08/%E6%B7%B1%E5%85%A5SpringBoot%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%EF%BC%9A%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E4%B8%8EBean%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E6%A0%B8%E5%BF%83%E8%A7%A3%E6%9E%90/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2025-10-07T16:00:00.000Z",
+  "dateModified": "2026-05-17T16:00:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2025/10/08/%E6%B7%B1%E5%85%A5SpringBoot%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%EF%BC%9A%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E4%B8%8EBean%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E6%A0%B8%E5%BF%83%E8%A7%A3%E6%9E%90/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '深入SpringBoot启动流程：自动配置与Bean生命周期核心解析',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">深入SpringBoot启动流程：自动配置与Bean生命周期核心解析</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">深入SpringBoot启动流程：自动配置与Bean生命周期核心解析</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-10-07T16:00:00.000Z" title="发表于 2025-10-08 00:00:00">2025-10-08</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-17T16:00:00.000Z" title="更新于 2026-05-18 00:00:00">2026-05-18</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h3 id="深入SpringBoot启动流程：自动配置与Bean生命周期核心解析"><a href="#深入SpringBoot启动流程：自动配置与Bean生命周期核心解析" class="headerlink" title="深入SpringBoot启动流程：自动配置与Bean生命周期核心解析"></a>深入SpringBoot启动流程：自动配置与Bean生命周期核心解析</h3><hr>
+<h4 id="一、SpringBoot启动全流程（面试回答框架）"><a href="#一、SpringBoot启动全流程（面试回答框架）" class="headerlink" title="一、SpringBoot启动全流程（面试回答框架）"></a>一、SpringBoot启动全流程（面试回答框架）</h4><p><strong>回答结构建议</strong> ：<br>“SpringBoot的启动流程可以拆解为几个核心阶段，我们可以结合源码关键类来串联整个过程。总体分为：环境准备→上下文初始化→自动装配→Bean生命周期管理。以下是具体链路（边说边画流程图效果更佳）：”</p>
+<ol>
+<li><strong>启动入口</strong> ：<br> <code>SpringApplication.run(主类, args)</code><br> → 初始化 <code>SpringApplication</code> 实例，加载 <code>META-INF/spring.factories</code> 中的 <strong>ApplicationContextInitializer</strong> 、 <strong>ApplicationListener</strong> 。</li>
+<li><strong>环境准备</strong> ：<br> → <code>prepareEnvironment()</code> 加载配置文件（application.yml&#x2F;properties）<br> → 发布 <strong>ApplicationEnvironmentPreparedEvent</strong> 事件（监听器处理Profile激活等）。</li>
+<li><strong>创建上下文</strong> ：<br> → 根据Web类型（Servlet&#x2F;Reactive）创建 <strong>AnnotationConfigServletWebServerApplicationContext</strong> （默认）<br> → 调用 <code>refreshContext(context)</code> 进入核心阶段。</li>
+<li><strong>刷新上下文（核心！）</strong> ：<br> → <code>AbstractApplicationContext.refresh()</code> 执行12个关键步骤：<br> • <strong>BeanFactory准备</strong> ： <code>obtainFreshBeanFactory()</code> 初始化Bean容器。<br> • <strong>Invoke BeanFactoryPostProcessors</strong> （ <strong>自动装配在此触发！</strong> ）：<br> → 处理 <code>@Configuration</code> 类， <strong>ConfigurationClassPostProcessor</strong> 解析 <code>@EnableAutoConfiguration</code><br> → 加载所有 <code>META-INF/spring.factories</code> 中的 <strong>AutoConfigurationImportSelector</strong> ，筛选有效配置类。<br> • <strong>注册BeanPostProcessors</strong> ：例如处理 <code>@Autowired</code> 的 <strong>AutowiredAnnotationBeanPostProcessor</strong> 。<br> • <strong>实例化单例Bean</strong> ：包括主类、Starter中的条件Bean。</li>
+<li><strong>内嵌容器启动</strong> ：<br> → 如果是Web应用， <strong>TomcatServletWebServerFactory</strong> 创建并启动Tomcat。</li>
+</ol>
+<hr>
+<h4 id="二、自动配置（Starter）加载时机"><a href="#二、自动配置（Starter）加载时机" class="headerlink" title="二、自动配置（Starter）加载时机"></a>二、自动配置（Starter）加载时机</h4><p><strong>面试聚焦点</strong> ：<br>“自动配置类的加载发生在 <code>refresh()</code> 阶段的 <code>invokeBeanFactoryPostProcessors()</code> ，由 <strong>ConfigurationClassPostProcessor</strong> 解析主类上的 <code>@SpringBootApplication</code> （隐含 <code>@EnableAutoConfiguration</code> ）。”</p>
+<p>• <strong>关键链路</strong> ：<br><code>SpringApplication.run()</code> → <code>refreshContext()</code> → <code>refresh()</code> → <code>invokeBeanFactoryPostProcessors()</code><br>→ 调用 <code>ConfigurationClassParser.parse()</code> 扫描 <code>spring.factories</code> → 过滤无效配置（通过 <code>@ConditionalOnClass</code> 等条件注解）。</p>
+<p>• <strong>示例</strong> ：<br>当引入 <code>spring-boot-starter-web</code> 时， <code>SpringBootApplication</code> 会触发加载 <strong>EmbeddedTomcatAutoConfiguration</strong> ，但仅在检测到存在 <code>Servlet.class</code> 和 <code>Tomcat.class</code> 时生效。</p>
+<hr>
+<h4 id="三、Bean生命周期与扩展点（重点！）"><a href="#三、Bean生命周期与扩展点（重点！）" class="headerlink" title="三、Bean生命周期与扩展点（重点！）"></a>三、Bean生命周期与扩展点（重点！）</h4><p><strong>回答逻辑</strong> ：<br>“Bean的生命周期由BeanFactory管理，分为实例化→属性填充→初始化→销毁，开发者可通过多种扩展点干预。”</p>
+<ol>
+<li><strong>实例化</strong> ：<br> • <strong>时机</strong> ：容器启动时（非懒加载的单例Bean）或首次 <code>getBean()</code> 调用时。<br> • <strong>底层</strong> ： <code>AbstractAutowireCapableBeanFactory.createBean()</code> → 反射调用构造器。</li>
+<li><strong>初始化</strong> ：<br> • <strong>步骤顺序</strong> ：<ol>
+<li>注入 <code>@Autowired</code> 依赖</li>
+<li>执行 <code>@PostConstruct</code> 方法</li>
+<li>实现 <code>InitializingBean.afterPropertiesSet()</code></li>
+<li>调用自定义 <code>init-method</code> （如 <code>@Bean(initMethod=&quot;xxx&quot;)</code> ）</li>
+</ol>
+</li>
+<li><strong>扩展点</strong> ：<br> • <strong>BeanPostProcessor</strong> （ <strong>最常用！</strong> ）：<br> → <code>postProcessBeforeInitialization</code> （初始化前）<br> → <code>postProcessAfterInitialization</code> （初始化后）<br> → 常见实现类： <code>AutowiredAnnotationBeanPostProcessor</code> （处理@Autowired）、 <code>CommonAnnotationBeanPostProcessor</code> （处理@PostConstruct）。<br> • <strong>BeanFactoryPostProcessor</strong> ：干预Bean定义（如修改属性值）。<br> • <strong>@PreDestroy</strong> ：销毁前回调。</li>
+</ol>
+<p><strong>面试示例</strong> ：<br>“若我们需要在某个Bean初始化后执行日志打印，可以自定义一个BeanPostProcessor，在 <code>postProcessAfterInitialization</code> 方法中判断Bean类型并添加逻辑。”</p>
+<hr>
+<h4 id="四、总结（向面试官输出亮点）"><a href="#四、总结（向面试官输出亮点）" class="headerlink" title="四、总结（向面试官输出亮点）"></a>四、总结（向面试官输出亮点）</h4><p>• <strong>主动关联知识点</strong> ：<br>“SpringBoot的启动流程本质是Spring容器的扩展，自动装配通过条件注解实现‘约定大于配置’，而Bean生命周期扩展点体现了Spring高扩展性的设计思想。”<br>• <strong>实战结合</strong> ：<br>“理解这些机制后，我们可以更高效地解决例如‘自定义Starter’、‘Bean循环依赖’、‘动态注册Bean’等高频面试问题。”</p>
+<hr>
+<p><strong>注意事项</strong> ：<br>• 回答时避免逐句背诵源码，用流程化语言表达（如：“当容器检测到@SpringBootApplication时，会触发自动配置类的条件过滤”）。<br>• 主动引导技术栈，如提到“您提到的Starter自动装配问题，其实与SpringBoot的SPI机制有关，我们可以进一步探讨”。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2025/10/08/%E6%B7%B1%E5%85%A5SpringBoot%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%EF%BC%9A%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E4%B8%8EBean%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E6%A0%B8%E5%BF%83%E8%A7%A3%E6%9E%90/">https://yhao521.github.io/2025/10/08/%E6%B7%B1%E5%85%A5SpringBoot%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%EF%BC%9A%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E4%B8%8EBean%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E6%A0%B8%E5%BF%83%E8%A7%A3%E6%9E%90/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/web-frontend/">web/frontend</a><a class="post-meta__tags" href="/tags/Java/">Java</a><a class="post-meta__tags" href="/tags/%E6%95%99%E7%A8%8B/">教程</a><a class="post-meta__tags" href="/tags/%E6%91%98%E5%BD%95/">摘录</a><a class="post-meta__tags" href="/tags/Spring/">Spring</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/10/08/%E7%BB%86%E5%88%B0%E4%B8%8D%E8%83%BD%E5%86%8D%E7%BB%86%E7%9A%84%20Spring%20Cloud%20Gateway%20%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90%EF%BC%88%E5%86%85%E5%90%AB%E5%A4%9A%E5%BC%A0%E5%9B%BE%E7%89%87%E8%AE%B2%E8%A7%A3%EF%BC%89_gateway%E5%8E%9F%E7%90%86-CSDN%E5%8D%9A%E5%AE%A2/" title="细到不能再细的 Spring Cloud Gateway 原理分析（内含多张图片讲解）_gateway原理-CSDN博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">细到不能再细的 Spring Cloud Gateway 原理分析（内含多张图片讲解）_gateway原理-CSDN博客</div></div><div class="info-2"><div class="info-item-1">本文深入探讨了SpringCloudGateway的原理，包括其作为微服务网关的基本职责，如路由转发、负载均衡。同时，解释了Gateway基于SpringWebFlux和Netty实现高性能的原因。文中还阐述了Gateway的核心组件，如Route、Predicates和Filters，以及它们在处理请求过程中的角色。此外，提到了RouteLocator和RouteDefinitionLocator在路由管理和定义中的作用。尽管未详述Gateway的高级特性如权限校验和流量控制，但本文为理解Gateway的基础架构提供了清晰的概述。 前言本文会通过图文的方式由浅入深的描述 Spring Cloud Gateway (以下简称 gateway)的基本原理。 本文不涉及 gateway 的任何示例代码， 如有需要请参考官网 sample 。 阅读前， 需要读者提前掌握 gateway 的基本使用。至少要能读懂如下配置的含义： 1234567891011spring:  cloud:    gateway:      routes:      - id: test_route     ...</div></div></div></a><a class="pagination-related" href="/2025/10/08/Redis%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E2%80%94SETNX+Lua%E8%84%9A%E6%9C%AC%E5%AE%9E%E7%8E%B0%E7%AF%87/" title="Redis分布式锁—SETNX+Lua脚本实现篇"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Redis分布式锁—SETNX+Lua脚本实现篇</div></div><div class="info-2"><div class="info-item-1">前言平时的工作中，由于生产环境中的项目是需要部署在多台服务器中的，所以经常会面临解决分布式场景下数据一致性的问题，那么就需要引入分布式锁来解决这一问题。 针对分布式锁的实现，目前比较常用的就如下几种方案：  基于数据库实现分布式锁 基于Redis实现分布式锁 【本文】 基于Zookeeper实现分布式锁  接下来这个系列文章会跟大家一块探讨这三种方案，本篇为Redis实现分布式锁篇。 Redis分布式环境搭建推荐： 基于Docker的Redis集群搭建 Redis分布式锁一览说到 redis 锁，能搜到的，或者说常用的无非就下面这两个：  setNX + Lua脚本 【本文】 Redisson + RLock可重入锁  接下来我们一一探索这两个的实现，本文为 setNX + Lua脚本 实现篇。 1、setNX完整语法：SET key value [EX seconds|PX milliseconds] [NX|XX] [KEEPTTL] 必选参数说明：  SET：命令 key：待设置的key value：设置的key的value，最好为随机字符串  可选参数说明：  NX：表示...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/10/08/%E7%BB%86%E5%88%B0%E4%B8%8D%E8%83%BD%E5%86%8D%E7%BB%86%E7%9A%84%20Spring%20Cloud%20Gateway%20%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90%EF%BC%88%E5%86%85%E5%90%AB%E5%A4%9A%E5%BC%A0%E5%9B%BE%E7%89%87%E8%AE%B2%E8%A7%A3%EF%BC%89_gateway%E5%8E%9F%E7%90%86-CSDN%E5%8D%9A%E5%AE%A2/" title="细到不能再细的 Spring Cloud Gateway 原理分析（内含多张图片讲解）_gateway原理-CSDN博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-10-08</div><div class="info-item-2">细到不能再细的 Spring Cloud Gateway 原理分析（内含多张图片讲解）_gateway原理-CSDN博客</div></div><div class="info-2"><div class="info-item-1">本文深入探讨了SpringCloudGateway的原理，包括其作为微服务网关的基本职责，如路由转发、负载均衡。同时，解释了Gateway基于SpringWebFlux和Netty实现高性能的原因。文中还阐述了Gateway的核心组件，如Route、Predicates和Filters，以及它们在处理请求过程中的角色。此外，提到了RouteLocator和RouteDefinitionLocator在路由管理和定义中的作用。尽管未详述Gateway的高级特性如权限校验和流量控制，但本文为理解Gateway的基础架构提供了清晰的概述。 前言本文会通过图文的方式由浅入深的描述 Spring Cloud Gateway (以下简称 gateway)的基本原理。 本文不涉及 gateway 的任何示例代码， 如有需要请参考官网 sample 。 阅读前， 需要读者提前掌握 gateway 的基本使用。至少要能读懂如下配置的含义： 1234567891011spring:  cloud:    gateway:      routes:      - id: test_route     ...</div></div></div></a><a class="pagination-related" href="/2025/05/29/hygen%20%E8%87%AA%E5%8A%A8%E5%8C%96%E5%88%9B%E5%BB%BA%E6%A8%A1%E6%9D%BF%E6%96%87%E4%BB%B6%E7%A5%9E%E5%99%A8-CSDN%E5%8D%9A%E5%AE%A2/" title="hygen 自动化创建模板文件神器-CSDN博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-29</div><div class="info-item-2">hygen 自动化创建模板文件神器-CSDN博客</div></div><div class="info-2"><div class="info-item-1">hygen是什么？作者的介绍是：一个简单，快速，可扩展的代码生成器。其用途是帮助开发者自动创建模板文件的工具，旨在提高开发效率，下面就来说说怎么在项目中使用hygen。hygen官方文档 1、全局安装hygen1npm i -g hygen  2、安装成功后cd到项目目录，然后在项目中初始化hygen1hygen init self  初始化之后项目中会多一个_templates的文件夹，generator是构建器文件夹，再下一级的文件夹名是对应创建文件时的命令，ejs.t 文件则是模板文件，详细的后面会讲解。 ![[_resources&#x2F;882d1eec9937f23bdd32d7078b6ee9c8_MD5.png]] 3、构建第一个自己的构建器，我这里跟官方文档一样起名为mygen1hygen generator new mygen  执行完上面的命令后，_templates文件夹下面就会多了一个mygen的文件夹 4、使用构建器创建第一个文件new就是mygen文件夹下面的new文件夹，执行这条命令就会创建new文件夹下面的所有模板 1hygen mygen n...</div></div></div></a><a class="pagination-related" href="/2025/08/19/shadcn%20vue%EF%BC%88%E6%89%8B%E6%8A%8A%E6%89%8B%E8%AE%B2%E8%A7%A3%EF%BC%89%20-%20%E5%BC%82%E5%B8%B8%E6%95%99%E7%A8%8B/" title="shadcn vue（手把手讲解） - 异常教程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-08-19</div><div class="info-item-2">shadcn vue（手把手讲解） - 异常教程</div></div><div class="info-2"><div class="info-item-1">shadcn vue（手把手讲解）更新时间: 在现代前端开发中，组件库作为提升开发效率的核心工具，始终占据着重要地位。无论是快速搭建界面、保证设计一致性，还是减少重复劳动，组件库都扮演着不可替代的角色。在 Vue 生态中， shadcn vue 作为一款轻量且高度可定制化的组件库，凭借其简洁的设计理念和强大的功能特性，逐渐成为开发者的新宠。本文将从基础概念、核心功能、实战案例到进阶技巧，全面解析如何利用 shadcn vue 加速 Vue 项目的开发流程，并帮助开发者构建出既美观又高效的用户界面。  一、什么是 shadcn vue？shadcn vue 是一款基于 Vue 3 的现代化组件库，其设计灵感来源于 Shadcn（一个专注于 React 生态的组件库）。它通过提供开箱即用的高质量组件（如按钮、表单、对话框等），结合对 Tailwind CSS 的深度集成，帮助开发者快速构建响应式、可访问性强的用户界面。 核心设计理念 轻量级 ：仅包含基础组件，避免冗余功能，减小项目体积。 主题可定制 ：通过 CSS 变量和 Tailwind 配置，实现灵活的主题切换。 语义化 HTM...</div></div></div></a><a class="pagination-related" href="/2025/05/29/Hygen/" title="Hygen"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-29</div><div class="info-item-2">Hygen</div></div><div class="info-2"><div class="info-item-1">[TOC] 起步安装12345npm i -g hygen或cnpm i -g hygen  初始化1234567进入项目地址cd /projects/demo初始化模板hygen init self  初始化成功后，会自动在项目根目录下生成 _templates 文件夹，并且默认生成了一个名为 generator 的生成器及其工作目录。后续会依托该生成器，派生出更多的生成器来满足需求。  注意 不要删除 _templates/generator 文件夹，否则会导致无法创建 Generator 。   提示 后续的所有命令行操作，如无特殊说明，都在项目根目录。  创建第一个生成器1hygen generator new component  执行后会生成一个生成器 component 及其工作目录，目录中默认存在一个示例文件 hello.ejs.t 。 12345678910111213141516171819---to: app/hello.js---const hello = \`\`\`Hello!This is your first hygen template.Lear...</div></div></div></a><a class="pagination-related" href="/2025/09/08/%E6%80%BB%E7%BB%93Vue3%E7%9A%8411%E7%A7%8D%E4%BC%A0%E5%8F%82%E9%80%9A%E4%BF%A1%E6%96%B9%E5%BC%8F%EF%BC%8C%E9%9D%9E%E5%B8%B8%E9%BD%90%E5%85%A8/" title="总结Vue3的11种传参通信方式，非常齐全"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-09-08</div><div class="info-item-2">总结Vue3的11种传参通信方式，非常齐全</div></div><div class="info-2"><div class="info-item-1">本文详细介绍了Vue3中11种常见的传参方式，包括父传子、子传父、mitt事件总线、$attrs、refs、v-model、provide&#x2F;inject、路由参数、Vuex和Pinia状态管理以及浏览器缓存的使用。 前言：vue3 出来很久了，也非常成熟了，平时项目只管用也没多想，直至今天想写一编关于vue3传参，然后我总结一下竟然总结出来11种方式那么多，11种我分别列了出来，由于vue3有两种setup写法，下面我将用最简洁的代码例子针对主流的  父传子 子传父 兄弟组件传参（mitt） $attrs refs v-model provide&#x2F;inject 路由传参 vuex传参 pinia传参 浏览器缓存  一、父传子 思路： 父组件 通过冒号：绑定变量，然后子组件用const props &#x3D; defineProps({})进行接收参数。  父组件代码 ： 在第二行那里:name&#x3D;“name” 把那么传给 子组件 1234567891011&lt;template&gt;  &lt;child :name=&quot;name&quo...</div></div></div></a><a class="pagination-related" href="/2025/05/23/%E5%A6%82%E4%BD%95%E5%88%B6%E4%BD%9C%E4%B8%80%E4%B8%AA%E6%AF%94%E8%BE%83%E5%AE%8C%E7%BE%8E%E7%9A%84elment-pluselement-ui%E7%A6%BB%E7%BA%BF%E6%96%87%E6%A1%A3%E6%9C%AC%E5%9C%B0%E8%BF%90%E8%A1%8C%E6%89%93%E5%8C%85%E5%A5%BD%E7%9A%84html%E6%96%B9%E5%BC%8F_elementplus%E7%A6%BB%E7%BA%BF%E6%96%87%E6%A1%A3-CSDN%E5%8D%9A%E5%AE%A2/" title="如何制作一个比较完美的elment-plus&#x2F;element-ui离线文档&#x2F;本地运行打包好的html方式_elementplus离线文档-CSDN博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-23</div><div class="info-item-2">如何制作一个比较完美的elment-plus&#x2F;element-ui离线文档&#x2F;本地运行打包好的html方式_elementplus离线文档-CSDN博客</div></div><div class="info-2"><div class="info-item-1">如何制作一个比较完美的elment-plus&#x2F;element-ui离线文档&#x2F;本地运行打包好的html方式renovateF5 已于 2025-02-14 14:49:12 修改 分类专栏： 文章标签： github elementui 于 2023-01-29 10:06:14 首次发布 版权声明：本文为博主原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接和本声明。 本文链接： https://blog.csdn.net/renovateF5/article/details/128784830 版权 本文介绍了一种Element Plus组件库的离线部署方法。主要包括从GitHub下载代码、解压缩并使用VSCode配合LiveServer插件预览，或通过安装http-server实现本地服务器访问。 摘要生成于 C知道 ，由 DeepSeek-R1 满血版支持， 前往体验 &gt; 官方给的网站有时候不好用，自己制作的方法 第一步先去下面的网站下载代码，注意一定看看有没有zh-CN这个 文件夹 ， GitHub - element-p...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B7%B1%E5%85%A5SpringBoot%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%EF%BC%9A%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E4%B8%8EBean%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E6%A0%B8%E5%BF%83%E8%A7%A3%E6%9E%90"><span class="toc-number">1.</span> <span class="toc-text">深入SpringBoot启动流程：自动配置与Bean生命周期核心解析</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E3%80%81SpringBoot%E5%90%AF%E5%8A%A8%E5%85%A8%E6%B5%81%E7%A8%8B%EF%BC%88%E9%9D%A2%E8%AF%95%E5%9B%9E%E7%AD%94%E6%A1%86%E6%9E%B6%EF%BC%89"><span class="toc-number">1.1.</span> <span class="toc-text">一、SpringBoot启动全流程（面试回答框架）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%EF%BC%88Starter%EF%BC%89%E5%8A%A0%E8%BD%BD%E6%97%B6%E6%9C%BA"><span class="toc-number">1.2.</span> <span class="toc-text">二、自动配置（Starter）加载时机</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%89%E3%80%81Bean%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E4%B8%8E%E6%89%A9%E5%B1%95%E7%82%B9%EF%BC%88%E9%87%8D%E7%82%B9%EF%BC%81%EF%BC%89"><span class="toc-number">1.3.</span> <span class="toc-text">三、Bean生命周期与扩展点（重点！）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E6%80%BB%E7%BB%93%EF%BC%88%E5%90%91%E9%9D%A2%E8%AF%95%E5%AE%98%E8%BE%93%E5%87%BA%E4%BA%AE%E7%82%B9%EF%BC%89"><span class="toc-number">1.4.</span> <span class="toc-text">四、总结（向面试官输出亮点）</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

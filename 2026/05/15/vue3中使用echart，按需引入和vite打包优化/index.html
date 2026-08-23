@@ -1,0 +1,220 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>vue3中使用echart，按需引入和vite打包优化 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="在项目的开发中需要使用echart完成数据的可视化展示，因为只是使用到折线图和柱状图，但是在打包的时候，发现echart会全部打包进去，为减少编译后的包体积进行相关设置的配置。（当然除了设置按需引入，也可以使用cdn的方式，此篇不涉及） 12pnpm i echart --save-dev1AI写代码  在util中新建commonEchart.ts 12345678910111213141516">
+<meta property="og:type" content="article">
+<meta property="og:title" content="vue3中使用echart，按需引入和vite打包优化">
+<meta property="og:url" content="https://yhao521.github.io/2026/05/15/vue3%E4%B8%AD%E4%BD%BF%E7%94%A8echart%EF%BC%8C%E6%8C%89%E9%9C%80%E5%BC%95%E5%85%A5%E5%92%8Cvite%E6%89%93%E5%8C%85%E4%BC%98%E5%8C%96/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="在项目的开发中需要使用echart完成数据的可视化展示，因为只是使用到折线图和柱状图，但是在打包的时候，发现echart会全部打包进去，为减少编译后的包体积进行相关设置的配置。（当然除了设置按需引入，也可以使用cdn的方式，此篇不涉及） 12pnpm i echart --save-dev1AI写代码  在util中新建commonEchart.ts 12345678910111213141516">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2026-05-14T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-17T16:00:00.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="vue">
+<meta property="article:tag" content="web&#x2F;frontend">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "vue3中使用echart，按需引入和vite打包优化",
+  "url": "https://yhao521.github.io/2026/05/15/vue3%E4%B8%AD%E4%BD%BF%E7%94%A8echart%EF%BC%8C%E6%8C%89%E9%9C%80%E5%BC%95%E5%85%A5%E5%92%8Cvite%E6%89%93%E5%8C%85%E4%BC%98%E5%8C%96/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2026-05-14T16:00:00.000Z",
+  "dateModified": "2026-05-17T16:00:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2026/05/15/vue3%E4%B8%AD%E4%BD%BF%E7%94%A8echart%EF%BC%8C%E6%8C%89%E9%9C%80%E5%BC%95%E5%85%A5%E5%92%8Cvite%E6%89%93%E5%8C%85%E4%BC%98%E5%8C%96/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'vue3中使用echart，按需引入和vite打包优化',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">vue3中使用echart，按需引入和vite打包优化</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">vue3中使用echart，按需引入和vite打包优化</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-05-14T16:00:00.000Z" title="发表于 2026-05-15 00:00:00">2026-05-15</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-17T16:00:00.000Z" title="更新于 2026-05-18 00:00:00">2026-05-18</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>在项目的开发中需要使用<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=echart&spm=1001.2101.3001.7020">echart</a>完成数据的可视化展示，因为只是使用到折线图和柱状图，但是在打包的时候，发现echart会全部打包进去，为减少编译后的包体积进行相关设置的配置。（当然除了设置按需引入，也可以使用cdn的方式，此篇不涉及）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pnpm i echart --save-dev</span><br><span class="line">1AI写代码</span><br></pre></td></tr></table></figure>
+
+<p>在util中新建commonEchart.ts</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">// 引入 echarts 核心模块，核心模块提供了 echarts 使用必须要的接口。</span><br><span class="line">import * as echarts from &quot;echarts/core&quot;;</span><br><span class="line"> </span><br><span class="line">/** 引入柱状图and折线图图表，图表后缀都为 Chart  */</span><br><span class="line">import &#123; BarChart, LineChart &#125; from &quot;echarts/charts&quot;;</span><br><span class="line"> </span><br><span class="line">// 引入提示框，标题，直角坐标系，数据集，内置数据转换器组件，组件后缀都为 Component</span><br><span class="line">import &#123;</span><br><span class="line">  TitleComponent,</span><br><span class="line">  TooltipComponent,</span><br><span class="line">  GridComponent,</span><br><span class="line">  DatasetComponent,</span><br><span class="line">  TransformComponent,</span><br><span class="line">&#125; from &quot;echarts/components&quot;;</span><br><span class="line"> </span><br><span class="line">// 标签自动布局，全局过渡动画等特性</span><br><span class="line">import &#123; LabelLayout, UniversalTransition &#125; from &quot;echarts/features&quot;;</span><br><span class="line"> </span><br><span class="line">// 引入 Canvas 渲染器，注意引入 CanvasRenderer 或者 SVGRenderer 是必须的一步</span><br><span class="line">import &#123; CanvasRenderer &#125; from &quot;echarts/renderers&quot;;</span><br><span class="line"> </span><br><span class="line">// 注册必须的组件</span><br><span class="line">echarts.use([</span><br><span class="line">  TitleComponent,</span><br><span class="line">  TooltipComponent,</span><br><span class="line">  GridComponent,</span><br><span class="line">  DatasetComponent,</span><br><span class="line">  TransformComponent,</span><br><span class="line">  BarChart,</span><br><span class="line">  LabelLayout,</span><br><span class="line">  UniversalTransition,</span><br><span class="line">  CanvasRenderer,</span><br><span class="line">  LineChart,</span><br><span class="line">]);</span><br><span class="line"> </span><br><span class="line">// 导出</span><br><span class="line">export default echarts;</span><br></pre></td></tr></table></figure>
+
+<p>把echart 设置成组件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">myChart.vue</span><br><span class="line">&lt;template&gt;</span><br><span class="line">  &lt;div ref=&quot;chartRef&quot;  class=&quot;my-chart&quot;&gt;&lt;/div&gt;</span><br><span class="line">&lt;/template&gt;</span><br><span class="line">&lt;script setup lang=&quot;ts&quot;&gt;</span><br><span class="line">import &#123; defineProps, onBeforeUnmount, onMounted, ref &#125; from &quot;vue&quot;;</span><br><span class="line">import echarts from &quot;../../utils/commonEchart&quot;;</span><br><span class="line">const props = defineProps([&quot;options&quot;]);</span><br><span class="line">const chartRef = ref&lt;HTMLDivElement&gt;();</span><br><span class="line">let chart: echarts.ECharts | null = null;</span><br><span class="line">const resizeHandler = () =&gt; &#123;</span><br><span class="line">  chart?.resize();</span><br><span class="line">&#125;;</span><br><span class="line">onMounted(() =&gt; &#123;</span><br><span class="line">  setTimeout(() =&gt; &#123;</span><br><span class="line">    initChart();</span><br><span class="line">  &#125;, 20);</span><br><span class="line">  window.addEventListener(&quot;resize&quot;, resizeHandler);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">const initChart = () =&gt; &#123;</span><br><span class="line">  chart = echarts.init(chartRef.value as HTMLDivElement);</span><br><span class="line">  chart.setOption(&#123;</span><br><span class="line">    ...props.options,</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">onBeforeUnmount(() =&gt; &#123;</span><br><span class="line">  window.removeEventListener(&quot;resize&quot;, resizeHandler);</span><br><span class="line">  chart?.dispose();</span><br><span class="line">&#125;);</span><br><span class="line">&lt;/script&gt;</span><br><span class="line"></span><br><span class="line">&lt;style lang=&quot;scss&quot; scoped&gt;&lt;/style&gt;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>在需要使用的页面中</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">&lt;template&gt;</span><br><span class="line">  &lt;div&gt;</span><br><span class="line">    &lt;my-echart :options=&quot;options7&quot; class=&quot;h-right-three-chart&quot;&gt;&lt;/my-echart&gt;</span><br><span class="line">  &lt;/div&gt;</span><br><span class="line">&lt;/template&gt;</span><br><span class="line">&lt;script lang=&quot;ts&quot;&gt;</span><br><span class="line">import MyEchart from &quot;../../components/MyEchart.vue&quot;;</span><br><span class="line">export default &#123;</span><br><span class="line">  components: &#123; MyEchart &#125;,</span><br><span class="line">  setup() &#123;</span><br><span class="line">    const options7 = &#123;</span><br><span class="line">      title: &#123;</span><br><span class="line">        text: &quot;ECharts 入门示例&quot;,</span><br><span class="line">      &#125;,</span><br><span class="line">      tooltip: &#123;&#125;,</span><br><span class="line">      xAxis: &#123;</span><br><span class="line">        data: [&quot;衬衫&quot;, &quot;羊毛衫&quot;, &quot;雪纺衫&quot;, &quot;裤子&quot;, &quot;高跟鞋&quot;, &quot;袜子&quot;],</span><br><span class="line">      &#125;,</span><br><span class="line">      yAxis: &#123;&#125;,</span><br><span class="line">      series: [</span><br><span class="line">        &#123;</span><br><span class="line">          name: &quot;销量&quot;,</span><br><span class="line">          type: &quot;bar&quot;,</span><br><span class="line">          data: [5, 20, 36, 10, 10, 20],</span><br><span class="line">        &#125;,</span><br><span class="line">      ],</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    return &#123;</span><br><span class="line">      options7,</span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;;</span><br><span class="line">&lt;/script&gt;</span><br><span class="line">&lt;style scoped&gt;</span><br><span class="line">.h-right-three-chart &#123;</span><br><span class="line">  width: 100%;</span><br><span class="line">  height: 352px;</span><br><span class="line">&#125;</span><br><span class="line">&lt;/style&gt;</span><br><span class="line"></span><br><span class="line">1234567891011121314151617181920212223242526272829303132333435363738394041AI写代码</span><br></pre></td></tr></table></figure>
+
+<p>在vite.config.ts的build通过设置 manualChunks方案，将echarts单独打包并通过按需引入减少主包体积</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">  build: &#123;</span><br><span class="line">    rollupOptions: &#123;</span><br><span class="line">      output: &#123;</span><br><span class="line">        manualChunks: &#123;</span><br><span class="line">          echarts: [&#x27;echarts&#x27;]</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;,</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;,</span><br><span class="line">123456789AI写代码</span><br></pre></td></tr></table></figure></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2026/05/15/vue3%E4%B8%AD%E4%BD%BF%E7%94%A8echart%EF%BC%8C%E6%8C%89%E9%9C%80%E5%BC%95%E5%85%A5%E5%92%8Cvite%E6%89%93%E5%8C%85%E4%BC%98%E5%8C%96/">https://yhao521.github.io/2026/05/15/vue3%E4%B8%AD%E4%BD%BF%E7%94%A8echart%EF%BC%8C%E6%8C%89%E9%9C%80%E5%BC%95%E5%85%A5%E5%92%8Cvite%E6%89%93%E5%8C%85%E4%BC%98%E5%8C%96/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/web-frontend/">web/frontend</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/vue/">vue</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/05/15/%E3%80%90Vue3+Ts%20project%E3%80%91pinia%20%E5%AE%9E%E7%8E%B0%E6%95%B0%E6%8D%AE%E6%8C%81%E4%B9%85%E5%8C%96/" title="【Vue3+Ts project】pinia 实现数据持久化"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">【Vue3+Ts project】pinia 实现数据持久化</div></div><div class="info-2"><div class="info-item-1">实现pinia实现数据持久化依赖 pinia-plugin-persistedstate    1.安装      pnpm i pinia-plugin-persistedstate# ornpm i pinia-plugin-persistedstate# oryarn add pinia-plugin-persistedstate  2.在main.ts内引入 1import persist from &#x27;pinia-plugin-persistedstate&#x27;const app = createApp(App) app.use(createPinia().use(persist))AI写代码  3.在 defineStore 内开启 , 添加 persist并设置true 1import type &#123; User &#125; from &#x27;@/types/user&#x27;import &#123; defineStore &#125; from &#x27;pinia&#x27;import &#123; ref &#125; fr...</div></div></div></a><a class="pagination-related" href="/2026/05/15/ollama%20%E9%83%A8%E7%BD%B2deepseek/" title="ollama 部署deepseek"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">ollama 部署deepseek</div></div><div class="info-2"><div class="info-item-1">Ollama 是一款开源 macOS 应用程序（适用于 Apple Silicon），可让你通过命令行界面运行、创建和共享大型语言模型。 Ollama 已经支持 Llama 2。 要使用 Ollama CLI，请从 ollama.ai&#x2F;download 下载 macOS 应用程序。 安装完成后，就可以下载 Lllama 2，而无需注册帐户或加入任何等待名单。 在你的终端中运行： 12345# download the 7B model (3.8 GB)ollama pull llama2# or the 13B model (7.3 GB)ollama pull llama2:13b  然后你可以运行模型并与它聊天： 123ollama run llama2&gt;&gt;&gt; hiHello! How can I help you today?  注意：Ollama 建议至少有 8 GB RAM 来运行 3B 模型，16 GB 来运行 7B 模型，32 GB 来运行 13B 模型。下载 运行 deepseek-r1 12345ollama run deepseek...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2024/10/07/Vue.js%20%E5%A6%82%E4%BD%95%E5%9C%A8Vue.js%E4%B8%AD%E5%AF%BC%E5%85%A5%E5%92%8C%E4%BD%BF%E7%94%A8%E6%9C%AC%E5%9C%B0.csv%E6%96%87%E4%BB%B6/" title="Vue.js 如何在Vue.js中导入和使用本地.csv文件"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-10-07</div><div class="info-item-2">Vue.js 如何在Vue.js中导入和使用本地.csv文件</div></div><div class="info-2"><div class="info-item-1">Vue.js 如何在Vue.js中导入和使用本地.csv文件在本文中，我们将介绍在Vue.js中如何导入和使用本地.csv文件的方法。我们将使用CSV文件作为示例，展示如何将其导入到Vue.js项目中，并在应用中使用该文件的数据。 阅读更多：Vue.js 教程 使用CSV文件CSV文件是一种常用的数据文件格式，通常用于存储表格数据。Vue.js可以很方便地处理和操作CSV文件。 导入CSV文件要导入CSV文件，我们可以使用Vue.js的文件导入功能。首先，我们需要在Vue组件中添加一个文件输入字段，以允许用户选择要导入的CSV文件。例如： 123456789101112131415161718192021222324252627282930313233343536373839404142434445464748&lt;template&gt;  &lt;input type=&quot;file&quot; @change=&quot;handleFileUpload&quot;&gt;&lt;/template&gt;&lt;script&gt;export default &...</div></div></div></a><a class="pagination-related" href="/2023/09/04/npm%E5%8D%87%E7%BA%A7/" title="npm升级"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">npm升级</div></div><div class="info-2"><div class="info-item-1"> title: npm升级date: 2023-09-03 20:17:08category:  开发语言 doc_nodejstag: doc_nodejsauthor:   npm install -g npm-check命令行npm-check -u会出现更新列表，选择后升级 https://www.cnblogs.com/xxflz/p/9835344.html 就算之前你装了webpack，那肯定是非全局安装 所以要全局安装 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273npm-check -u❤️  Your modules look amazing. Keep up the great work. ❤️E:\vscodeProjects_sitech\crds_base_web_view_pack&gt;npm run devnpm WARN...</div></div></div></a><a class="pagination-related" href="/2024/10/28/Vue3%E9%97%AE%E9%A2%98%EF%BC%9A%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8WangEditor%E5%AF%8C%E6%96%87%E6%9C%AC%EF%BC%9F%E8%83%BD%E8%87%AA%E5%AE%9A%E4%B9%89%E6%89%8D%E6%98%AF%E7%9C%9F%E7%9A%84%E4%BC%9A%E7%94%A8%EF%BC%81/" title="Vue3问题：如何使用WangEditor富文本？能自定义才是真的会用！"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-10-28</div><div class="info-item-2">Vue3问题：如何使用WangEditor富文本？能自定义才是真的会用！</div></div><div class="info-2"><div class="info-item-1"> 笔者 | 大澈 大家好，我是大澈！ 今天的问题，来自于上周末问题留言的朋友 嘻嘻哈哈。  欢迎大家在周末的问题留言推文中，积极进行问题留言，把这周工作日遇到的问题，分享给大家瞧瞧，或者直接进问答群，一起交流唠唠。 遇到难题，遇到有共鸣的问题，一起讨论，一起沉淀，一起成长。 ONE 需求分析，问题描述 一、需求 使用富文本进行内容编辑，要求自定义工具栏菜单顺序及其分组，并且要求自定义选择图片、自定义选择视频。  二、问题 1、如何配置开始使用？ 2、如何自定义工具栏菜单的展示？ 3、如何自定义工具栏内置菜单的功能？ 4、如何自定义扩展新功能菜单？ TWO 解决问题，答案速览 实现代码如下，复制粘贴即可直接使用。 如果你有时间，具体问题梳理、代码分析、知识总结，可见第三部分。 一、配置开始使用 1、下载依赖 1npm i @wangeditor/editor @wangeditor/editor-for-vue  2、引入css和内置组件 1// 引入 cssimport &#x27;@wangeditor/editor/dist/css/style.css&#x27; // 引入...</div></div></div></a><a class="pagination-related" href="/2024/09/28/%E5%9C%A8vue3%E4%B8%AD%E4%BD%BF%E7%94%A8echarts%EF%BC%8C%E4%BA%B2%E6%B5%8B%E5%8F%AF%E7%94%A8%EF%BC%8C%E6%89%8B%E6%8A%8A%E6%89%8B%E6%95%99%E7%A8%8B%EF%BC%81/" title="在vue3中使用echarts，亲测可用，手把手教程！"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-09-28</div><div class="info-item-2">在vue3中使用echarts，亲测可用，手把手教程！</div></div><div class="info-2"><div class="info-item-1">目录一、 vue3项目初始化二、安装echarts所需要的包三、进行导入和配置四、模拟数据和调试一、vue3项目初始化         vue3项目初始化（我自己用的是pnpm进行创建 ，用npm也可以的 ） 1pnpm create vue@latest         跟着步骤进行 二、安装echarts所需要的包 1pnpm install echarts vue-echarts  三、进行导入和配置 在src&#x2F;main.js中写入以下代码： 1234567891011121314import &#123; createApp &#125; from &#x27;vue&#x27;import &#123; createPinia &#125; from &#x27;pinia&#x27; import App from &#x27;./App.vue&#x27;import router from &#x27;./router&#x27; // 引入echartsimport Echarts from &#x27;vue-echarts&#x27;import ...</div></div></div></a><a class="pagination-related" href="/2024/05/21/%E7%9B%98%E7%82%B920%E6%AC%BE%E4%BC%98%E8%B4%A8%E7%9A%84%E5%BC%80%E6%BA%90%E6%B8%B8%E6%88%8F%EF%BC%8C2024%E6%9C%80%E6%96%B0%E6%94%B6%E9%9B%86%EF%BC%81/" title="盘点20款优质的开源游戏，2024最新收集！"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-05-21</div><div class="info-item-2">盘点20款优质的开源游戏，2024最新收集！</div></div><div class="info-2"><div class="info-item-1">本文收集了20款优质的开源游戏，部分还可以点击就可以玩，干货满满，建议先收藏一下。 如果你有值得推荐的开源游戏，欢迎评论中指出！ 1、红警https://github.com/electronicarts/CnC_Remastered_Collection 红警，或者更准确地说，应该称为“红色警戒”，是大多数80后记忆中与游戏最深刻的联系之一。  这款游戏是由当年的Westwood工作室打造的一款即时战略游戏，以至于一提到即时战略游戏，我脑海中浮现的第一个就是红警。 然而，在1998年8月17日，EA收购了Westwood。一般情况下，一旦游戏工作室被EA收购，就意味着走向没落。  这次开源的代码实际上是1996年发布的第一代红警，国内也称之为红警95。  此次开源不涉及游戏素材和游戏引擎，只包括TiberianDawn.DLL和RedAlert.dll的源码，允许Mod社区更好地改变游戏行为。 在6月5日，这两款游戏发布了重制版。 命令与征服系列游戏是用C++实现的，打开代码后可以看到非常规范的代码，令人赞叹不已。  下面是一个示例，展示了飞行器寻找新降落点的函数，函数功能、输...</div></div></div></a><a class="pagination-related" href="/2024/10/09/Vue%20Loading%20PostCSS%20Plugin%20failed_%20Cannot%20find%20mod/" title="Vue Loading PostCSS Plugin failed_ Cannot find module ‘autoprefixer‘ 问题"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-10-09</div><div class="info-item-2">Vue Loading PostCSS Plugin failed_ Cannot find module ‘autoprefixer‘ 问题</div></div><div class="info-2"><div class="info-item-1">Vue Loading PostCSS Plugin failed: Cannot find module ‘autoprefixer’ 问题vue运行时，提示Vue Loading PostCSS Plugin failed: Cannot find module ‘autoprefixer’ 。 问题原因：未安装postcss-loader autoprefixer。执行以下命令： 12cnpm install postcss-loader autoprefixer postcss  -D1  执行成功，如果运行时还报以下错误： PostCSS plugin autoprefixer requires PostCSS 8 说明PostCSS 版本不对，需要指定版本执行，执行以下脚本： 12cnpm install postcss-loader autoprefixer@8.0.0 postcss  -D1  执行成功，重新运行正常。 </div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

@@ -1,0 +1,879 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>linux下的mysql安装(一个IP多端口) | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="一、首先卸载之前的mysqlyum方式安装的MySQL 1、yum remove mysql mysql-server mysql-libs compat-mysql51 2、rm -rf &#x2F;var&#x2F;lib&#x2F;mysql 3、rm &#x2F;etc&#x2F;my.cnf 查看是否还有mysql软件：rpm -qa|grep mysql 如果存在的话，继续删除即可。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="linux下的mysql安装(一个IP多端口)">
+<meta property="og:url" content="https://yhao521.github.io/2024/01/10/linux%E4%B8%8B%E7%9A%84mysql%E5%AE%89%E8%A3%85(%E4%B8%80%E4%B8%AAIP%E5%A4%9A%E7%AB%AF%E5%8F%A3)/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="一、首先卸载之前的mysqlyum方式安装的MySQL 1、yum remove mysql mysql-server mysql-libs compat-mysql51 2、rm -rf &#x2F;var&#x2F;lib&#x2F;mysql 3、rm &#x2F;etc&#x2F;my.cnf 查看是否还有mysql软件：rpm -qa|grep mysql 如果存在的话，继续删除即可。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2024-01-10T07:06:39.000Z">
+<meta property="article:modified_time" content="2024-01-10T07:58:44.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c++&#x2F;programming">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="java&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="rust&#x2F;programming">
+<meta property="article:tag" content="web&#x2F;frontend">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "linux下的mysql安装(一个IP多端口)",
+  "url": "https://yhao521.github.io/2024/01/10/linux%E4%B8%8B%E7%9A%84mysql%E5%AE%89%E8%A3%85(%E4%B8%80%E4%B8%AAIP%E5%A4%9A%E7%AB%AF%E5%8F%A3)/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2024-01-10T07:06:39.000Z",
+  "dateModified": "2024-01-10T07:58:44.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2024/01/10/linux%E4%B8%8B%E7%9A%84mysql%E5%AE%89%E8%A3%85(%E4%B8%80%E4%B8%AAIP%E5%A4%9A%E7%AB%AF%E5%8F%A3)/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'linux下的mysql安装(一个IP多端口)',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">linux下的mysql安装(一个IP多端口)</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">linux下的mysql安装(一个IP多端口)</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-01-10T07:06:39.000Z" title="发表于 2024-01-10 15:06:39">2024-01-10</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-01-10T07:58:44.000Z" title="更新于 2024-01-10 15:58:44">2024-01-10</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="一、首先卸载之前的mysql"><a href="#一、首先卸载之前的mysql" class="headerlink" title="一、首先卸载之前的mysql"></a>一、首先卸载之前的mysql</h1><p>yum方式安装的<strong>MySQL</strong></p>
+<p>1、yum remove mysql mysql-server mysql-libs compat-mysql51</p>
+<p>2、rm -rf &#x2F;var&#x2F;lib&#x2F;mysql</p>
+<p>3、rm &#x2F;etc&#x2F;my.cnf</p>
+<p>查看是否还有mysql软件：<br>rpm -qa|grep mysql</p>
+<p>如果存在的话，继续删除即可。</p>
+<p>rpm方式安装的mysql</p>
+<p>a）查看系统中是否以rpm包安装的mysql：</p>
+<p>[root@localhost opt]# rpm -qa | grep -i mysql<br>MySQL-server-5.5.28-1.el6.x86_64.rpm<br>MySQL-client-5.5.28-1.el6.x86_64</p>
+<p>b)卸载mysql</p>
+<p>[root@localhost local]# rpm -e MySQL-server-5.5.28-1.el6.x86_64.rpm<br>[root@localhost local]# rpm -e MySQL-client-5.5.28-1.el6.x86_64</p>
+<p>c)删除mysql服务</p>
+<p>[root@localhost local]# chkconfig –list | grep -i mysql<br>[root@localhost local]# chkconfig –del mysql</p>
+<p>d)删除分散mysql文件夹</p>
+<p>[root@localhost local]# whereis mysql 或者 find &#x2F; -name mysql</p>
+<p>mysql: &#x2F;usr&#x2F;lib&#x2F;mysql &#x2F;usr&#x2F;share&#x2F;mysql</p>
+<p>清空相关mysql的所有目录以及文件<br>rm -rf &#x2F;usr&#x2F;lib&#x2F;mysql<br>rm -rf &#x2F;usr&#x2F;share&#x2F;mysql</p>
+<p>rm -rf &#x2F;usr&#x2F;my.cnf</p>
+<p>通过以上几步，mysql应该已经完全卸载干净了</p>
+<h1 id="二、安装mysql（解压版）"><a href="#二、安装mysql（解压版）" class="headerlink" title="二、安装mysql（解压版）"></a>二、安装mysql（解压版）</h1><p>失败</p>
+<h1 id="三、安装简单版mysql"><a href="#三、安装简单版mysql" class="headerlink" title="三、安装简单版mysql"></a>三、安装简单版mysql</h1><h2 id="一、安装Mysql"><a href="#一、安装Mysql" class="headerlink" title="**一、安装Mysql **"></a>**一、安装Mysql **</h2><p>　　 1、下载MySQL的安装文件 <br>　　 安装MySQL需要下面两个文件（两个.rpm文件）： </p>
+<p>　　 MySQL-client-5.5.28-1.el6.x86_64.rpm</p>
+<p>MySQL-server-5.5.28-1.el6.x86_64.rpm<br>　　 下载地址为：<a target="_blank" rel="noopener" href="http://www.mysql.com/downloads/mysql-4.0.html%EF%BC%8C%E6%89%93%E5%BC%80%E6%AD%A4%E7%BD%91%E9%A1%B5%EF%BC%8C%E4%B8%8B%E6%8B%89%E7%BD%91%E9%A1%B5%E6%89%BE%E5%88%B0%E2%80%9CLinux">http://www.mysql.com/downloads/mysql-4.0.html，打开此网页，下拉网页找到“Linux</a> x86 RPM downloads”项，找到“Server”和“Client programs”项，下载需要的上述两个rpm文件。 </p>
+<p>　　 2、安装MySQL <br>　　 rpm文件是Red Hat公司开发的软件安装包，rpm可让Linux在安装软件包时免除许多复杂的手续。该命令在安装时常用的参数是 –ivh ,其中i表示将安装指定的rmp软件包，V表示安装时的详细信息，h表示在安装期间出现“#”符号来显示目前的安装过程。这个符号将持续到安装完成后才停止。<br>1）安装服务器端 <br>　　 在有两个rmp文件的目录下运行如下命令： <br>　　 [root@test1 local]# rpm -ivh MySQL-server-5.5.28-1.el6.x86_64.rpm <br>　　 显示如下信息。 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">Preparing...                ########################################### [100%]</span><br><span class="line">   1:MySQL-server           ########################################### [100%]</span><br><span class="line"></span><br><span class="line">PLEASE REMEMBER TO SET A PASSWORD FOR THE MySQL root USER !</span><br><span class="line">To do so, start the server, then issue the following commands:</span><br><span class="line"></span><br><span class="line">/usr/bin/mysqladmin -u root password &#x27;new-password&#x27;</span><br><span class="line">/usr/bin/mysqladmin -u root -h haoZH password &#x27;new-password&#x27;</span><br><span class="line"></span><br><span class="line">Alternatively you can run:</span><br><span class="line">/usr/bin/mysql_secure_installation</span><br><span class="line"></span><br><span class="line">which will also give you the option of removing the test</span><br><span class="line">databases and anonymous user created by default.  This is</span><br><span class="line">strongly recommended for production servers.</span><br><span class="line"></span><br><span class="line">See the manual for more instructions.</span><br><span class="line"></span><br><span class="line">Please report any problems with the /usr/bin/mysqlbug script!</span><br></pre></td></tr></table></figure>
+
+<p>　　　　　 如出现如上信息，服务端安装完毕。测试是否成功可运行netstat看Mysql端口是否打开，如打开表示服务已经启动，安装成功。Mysql默认的端口是3306。</p>
+<p>[root@test1 local]# netstat -nat <br>　　 Active Internet connections (servers and established) <br>　　 Proto Recv-Q Send-Q Local Address　　　　　 Foreign Address　　　　 State　　　 <br>　　 tcp　　0　　0 0.0.0.0:3306　　　　 0.0.0.0:*　　　　　 LISTEN　　　 <br>　　 上面显示可以看出MySQL服务已经启动。 <br>　　 2）安装客户端 <br>　　 运行如下命令： <br>　　 [root@test1 local]# rpm -ivh MySQL-client-5.5.28-1.el6.x86_64.rpm<br>　　 warning: MySQL-client-4.0.16-0.i386.rpm: V3 DSA signature: NOKEY, key ID 5072e1f5 <br>　　 Preparing…　　　　########################################### [100%] <br>　　 1:MySQL-client　 ########################################### [100%] <br>　　 显示安装完毕。 <br>　　 用下面的命令连接mysql,测试是否成功。</p>
+<p> </p>
+<p> </p>
+<h2 id="二、登录MySQL"><a href="#二、登录MySQL" class="headerlink" title="二、登录MySQL"></a><strong>二、登录MySQL</strong></h2><p>　　 登录MySQL的命令是mysql， mysql 的使用语法如下： <br>　　 mysql [-u username] [-h host] [-p[password]] [dbname] <br>　　 username 与 password 分别是 MySQL 的用户名与密码，mysql的初始管理帐号是root，没有密码，注意：这个root用户不是Linux的系统用户。MySQL默认用户是root，由于初始没有密码，第一次进时只需键入mysql即可。 <br>　　 [root@test1 local]# mysql <br>　　 Welcome to the MySQL monitor.　Commands end with ; or \g. <br>　　 Your MySQL connection id is 1 to server version: 4.0.16-standard <br>　　 Type ‘help;’ or ‘\h’ for help. Type ‘\c’ to clear the buffer. <br>　　 mysql&gt; <br>　　 出现了“mysql&gt;”提示符，恭喜你，安装成功！ <br>　　 增加了密码后的登录格式如下： <br>　　 mysql -u root -p <br>　　 Enter password: (输入密码) <br>　　 其中-u后跟的是用户名，-p要求输入密码，回车后在输入密码处输入密码。 </p>
+<p>　　 注意：这个mysql文件在&#x2F;usr&#x2F;bin目录下，与后面讲的启动文件&#x2F;etc&#x2F;init.d&#x2F;mysql不是一个文件。</p>
+<h2 id="三、MySQL的几个重要目录"><a href="#三、MySQL的几个重要目录" class="headerlink" title="三、MySQL的几个重要目录"></a><strong>三、MySQL的几个重要目录</strong></h2><p>MySQL安装完成后不象SQL Server默认安装在一个目录，它的数据库文件、配置文件和命令文件分别在不同的目录，了解这些目录非常重要，尤其对于Linux的初学者，因为 Linux本身的目录结构就比较复杂，如果搞不清楚MySQL的安装目录那就无从谈起深入学习。 </p>
+<p>　　 下面就介绍一下这几个目录。 </p>
+<p>　　 1、数据库目录 　　 &#x2F;var&#x2F;lib&#x2F;mysql&#x2F; </p>
+<p>　　 2、配置文件 　　 &#x2F;usr&#x2F;share&#x2F;mysql（mysql.server命令及配置文件） </p>
+<p>　　 3、相关命令 　　 &#x2F;usr&#x2F;bin(mysqladmin mysqldump等命令) </p>
+<p>　　 4、启动脚本 　　 &#x2F;etc&#x2F;rc.d&#x2F;init.d&#x2F;（启动脚本文件mysql的目录）</p>
+<h2 id="四、修改登录密码"><a href="#四、修改登录密码" class="headerlink" title="**四、修改登录密码 **"></a>**四、修改登录密码 **</h2><p>MySQL默认没有密码，安装完毕增加密码的重要性是不言而喻的。 </p>
+<p><strong>首先启动mysql，再修改。</strong><br>　　 1、命令 <br>　　 usr&#x2F;bin&#x2F;mysqladmin -u root password ‘new-password’ <br>　　 格式：mysqladmin -u用户名 -p旧密码 password 新密码 </p>
+<p>　　 2、例子 <br>　　 例1：给root加个密码123456。 <br>　　 键入以下命令 ： <br>　　 [root@test1 local]# &#x2F;usr&#x2F;bin&#x2F;mysqladmin -u root password 123456 <br>　　 注：因为开始时root没有密码，所以-p旧密码一项就可以省略了。</p>
+<p> </p>
+<p>　　 3、测试是否修改成功 <br>　　 1）不用密码登录 <br>　　 [root@test1 local]# mysql <br>　　 ERROR 1045: Access denied for user: ‘root@localhost’ (Using password: NO) <br>　　 显示错误，说明密码已经修改。 <br>　　 2）用修改后的密码登录 <br>　　 [root@test1 local]# mysql -u root -p <br>　　 Enter password: (输入修改后的密码123456) <br>　　 Welcome to the MySQL monitor.　Commands end with ; or \g. <br>　　 Your MySQL connection id is 4 to server version: 4.0.16-standard <br>　　 Type ‘help;’ or ‘\h’ for help. Type ‘\c’ to clear the buffer. <br>　　 mysql&gt; <br>　　 成功！ <br>　　 这是通过mysqladmin命令修改口令，也可通过修改库来更改口令。</p>
+<h2 id="五、启动与停止"><a href="#五、启动与停止" class="headerlink" title="五、启动与停止"></a><strong>五、启动与停止</strong></h2><p>　　 1、启动 </p>
+<p>　　 MySQL安装完成后启动文件mysql在&#x2F;etc&#x2F;init.d目录下，在需要启动时运行下面命令即可。 <br>　　 [root@test1 init.d]# &#x2F;etc&#x2F;init.d&#x2F;mysql start </p>
+<p>　　 2、停止 <br>　　 &#x2F;usr&#x2F;bin&#x2F;mysqladmin -u root -proot shutdown </p>
+<p>　　 3、自动启动 <br>　　 1）察看mysql是否在自动启动列表中 <br>　　 [root@test1 local]#　&#x2F;sbin&#x2F;chkconfig –list <br>　　 2）把MySQL添加到你系统的启动服务组里面去 <br>　　 [root@test1 local]#　&#x2F;sbin&#x2F;chkconfig　– add　mysql <br>　　 3）把MySQL从启动服务组里面删除。 <br>　　 [root@test1 local]#　&#x2F;sbin&#x2F;chkconfig　– del　mysql</p>
+<h2 id="六、远程登录"><a href="#六、远程登录" class="headerlink" title="六、远程登录"></a>六、远程登录</h2><p>启动mysql服务：</p>
+<p><code>[root@haozh yhao521]# /etc/init.d/mysql start</code></p>
+<p>远程登录mysql：</p>
+<p>修改完成密码后，进入执行</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; grant all privileges on *.* to &#x27;root&#x27;@&#x27;%&#x27; identified by &#x27;root&#x27; with grant option;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; flush privileges;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br></pre></td></tr></table></figure>
+
+<p>Root用户就可以远程登录了。</p>
+<p>若</p>
+<p>使用navicat远程连接虚拟机中的mysql服务，出现错误信息：</p>
+<p>ERROR 2003 (HY000): Can’t connect to MySQL server on ‘192.168.244.133’</p>
+<p>解决：是防火墙的问题</p>
+<p>Iptables -vnL 检查防火墙状态信息</p>
+<p>Iptables -F 要清除防火墙中链中的规则</p>
+<p>再关闭防火墙：</p>
+<p>查看状态：</p>
+<p>chkconfig –list |grep iptables</p>
+<p>iptables 0:关闭 1:关闭 2:关闭 3:关闭 4:关闭 5:关闭 6:关闭</p>
+<p>开启: chkconfig iptables on</p>
+<p>关闭: chkconfig iptables off</p>
+<p>重启后生效</p>
+<p>Reboot</p>
+<h2 id="七、新建其他用户mysql并附权限"><a href="#七、新建其他用户mysql并附权限" class="headerlink" title="七、新建其他用户mysql并附权限"></a>七、新建其他用户mysql并附权限</h2><p>Mysql 密码：mysql</p>
+<p>INSERT INTO `mysql`.`user` (`Host`, `User`, `Password`, `Select_priv`, `Insert_priv`, `Update_priv`, `Delete_priv`, `Create_priv`, `Drop_priv`, `Reload_priv`, `Shutdown_priv`, `Process_priv`, `File_priv`, `Grant_priv`, `References_priv`, `Index_priv`, `Alter_priv`, `Show_db_priv`, `Super_priv`, `Create_tmp_table_priv`, `Lock_tables_priv`, `Execute_priv`, `Repl_slave_priv`, `Repl_client_priv`, `Create_view_priv`, `Show_view_priv`, `Create_routine_priv`, `Alter_routine_priv`, `Create_user_priv`, `Event_priv`, `Trigger_priv`, `Create_tablespace_priv`, `ssl_type`, `ssl_cipher`, `x509_issuer`, `x509_subject`, `max_questions`, `max_updates`, `max_connections`, `max_user_connections`, `plugin`, `authentication_string`) VALUES (‘%’, ‘mysql’, ‘*E74858DB86EBA20BC33D0AECAE8A8108C56B17FA’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘’, ‘’, ‘’, ‘’, ‘0’, ‘0’, ‘0’, ‘0’, ‘’, NULL);</p>
+<p>INSERT INTO `mysql`.`user` (`Host`, `User`, `Password`, `Select_priv`, `Insert_priv`, `Update_priv`, `Delete_priv`, `Create_priv`, `Drop_priv`, `Reload_priv`, `Shutdown_priv`, `Process_priv`, `File_priv`, `Grant_priv`, `References_priv`, `Index_priv`, `Alter_priv`, `Show_db_priv`, `Super_priv`, `Create_tmp_table_priv`, `Lock_tables_priv`, `Execute_priv`, `Repl_slave_priv`, `Repl_client_priv`, `Create_view_priv`, `Show_view_priv`, `Create_routine_priv`, `Alter_routine_priv`, `Create_user_priv`, `Event_priv`, `Trigger_priv`, `Create_tablespace_priv`, `ssl_type`, `ssl_cipher`, `x509_issuer`, `x509_subject`, `max_questions`, `max_updates`, `max_connections`, `max_user_connections`, `plugin`, `authentication_string`) VALUES (‘localhost’, ‘mysql’, ‘*E74858DB86EBA20BC33D0AECAE8A8108C56B17FA’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘Y’, ‘’, ‘’, ‘’, ‘’, ‘0’, ‘0’, ‘0’, ‘0’, ‘’, ‘’);</p>
+<p>mysql&gt; grant all privileges on *.* to ‘mysql‘@’%’ identified by ‘mysql’ with grant option;</p>
+<p>Query OK, 0 rows affected (0.00 sec)</p>
+<p>mysql&gt; flush privileges;</p>
+<p>Query OK, 0 rows affected (0.00 sec)</p>
+<h2 id="八、中文乱码"><a href="#八、中文乱码" class="headerlink" title="八、中文乱码"></a>八、中文乱码</h2><p>Mysql插入数据，出现中文乱码问题，</p>
+<p>cp &#x2F;usr&#x2F;share&#x2F;mysql&#x2F;my-medium.cnf &#x2F;etc&#x2F;my.cnf</p>
+<p>vi &#x2F;etc&#x2F;my.cnf</p>
+<p>增加</p>
+<p>[client]</p>
+<p>default-character-set&#x3D;utf8</p>
+<p>[mysqld]</p>
+<p>character-set-server&#x3D;utf8</p>
+<p>init_connect&#x3D;’SET NAMES utf8’</p>
+<p>[mysql]</p>
+<p>#default-character-set&#x3D;utf8</p>
+<p>配置完后，重启mysql服务</p>
+<p>Service mysql restart</p>
+<p>查询字符集：</p>
+<p>mysql&gt; show variables like ‘character_set%’;<br>+————————–+—————————-+<br>| Variable_name | Value |<br>+————————–+—————————-+<br>| character_set_client | utf8 |<br>| character_set_connection | utf8 |<br>| character_set_database | utf8 |<br>| character_set_filesystem | binary |<br>| character_set_results | utf8 |<br>| character_set_server | utf8 |<br>| character_set_system | utf8 |<br>| character_sets_dir | &#x2F;usr&#x2F;share&#x2F;mysql&#x2F;charsets&#x2F; |<br>+————————–+—————————-+<br>8 rows in set (0.00 sec)</p>
+<p>成功</p>
+<h1 id="四、一台linux启动多个mysql实例-1"><a href="#四、一台linux启动多个mysql实例-1" class="headerlink" title="四、一台linux启动多个mysql实例(1)"></a>四、一台linux启动多个mysql实例(1)</h1><p>多个端口mysql，要分别赋予权限，使得能够远程登录（1130错误）</p>
+<p>环境：<a target="_blank" rel="noopener" href="http://lib.csdn.net/base/linux"><strong>Linux</strong></a>主机上已经yum安装了<strong>MySQL</strong>，而且<strong>数据库</strong>正在运行。</p>
+<p>在不关闭&#x2F;重启mysql的情况下，重新启动一个新的mysql实例，使用3307端口，实现一台机器上同时运行两个数据库实例。</p>
+<h2 id="1、创建新的mysql实例数据存储目录："><a href="#1、创建新的mysql实例数据存储目录：" class="headerlink" title="1、创建新的mysql实例数据存储目录："></a>1、创建新的mysql实例数据存储目录：</h2><p>mkdir -p &#x2F;data&#x2F;mysql_3307</p>
+<p>2、把my.cnf配置文件复制一份，开几个端口要复制几份。</p>
+<p>cp &#x2F;etc&#x2F;my.cnf &#x2F;data&#x2F;mysql_3307&#x2F;my.cnf</p>
+<p>3、修改&#x2F;data&#x2F;mysql_3307&#x2F;my.cnf文件，把默认的3306端口改成 3307，根据实际情况修改socket，basedir，datadir 。</p>
+<p>[client]<br>port &#x3D; 3307<br>socket &#x3D; &#x2F;tmp&#x2F;mysql_3307.sock<br>default-character-set &#x3D; utf8</p>
+<p># The MySQL server<br>[mysqld]<br>port &#x3D; 3307<br>user &#x3D; mysql<br>socket &#x3D; &#x2F;tmp&#x2F;mysql_3307.sock<br>basedir &#x3D; &#x2F;usr<br>datadir &#x3D; &#x2F;data&#x2F;mysql_3307<br>character-set-server &#x3D; utf8<br>log-error &#x3D; &#x2F;data&#x2F;mysql_3307&#x2F;error.log<br>pid-file &#x3D; &#x2F;data&#x2F;mysql_3307&#x2F;localhost.localdomain.pid</p>
+<p>4、初始化数据库:</p>
+<p>mysql_install_db –basedir&#x3D;&#x2F;usr –datadir&#x3D;&#x2F;data&#x2F;mysql_3307 –user&#x3D;mysql</p>
+<p>mysql是yum安装的，所以basedir&#x3D;&#x2F;usr就可以，它会自动在&#x2F;usr下找mysql的安装目录。</p>
+<p>如果是源码包编译安装的mysql，假如安装路径是在&#x2F;usr&#x2F;local&#x2F;mysql</p>
+<p>cd &#x2F;usr&#x2F;local&#x2F;mysql&#x2F;scripts&#x2F;</p>
+<p>.&#x2F;mysql_install_db –basedir&#x3D;&#x2F;usr&#x2F;local&#x2F;mysql –datadir&#x3D;&#x2F;data&#x2F;mysql_3307 –user&#x3D;mysql</p>
+<h2 id="5、启动mysql，要指定-cnf文件启动"><a href="#5、启动mysql，要指定-cnf文件启动" class="headerlink" title="5、启动mysql，要指定.cnf文件启动"></a>5、启动mysql，要指定.cnf文件启动</h2><p>mysqld_safe –defaults-file&#x3D;&#x2F;data&#x2F;mysql_3307&#x2F;my.cnf –user&#x3D;mysql &amp;</p>
+<h3 id="6、停止MYSQL，需要指定对应的sock文件。"><a href="#6、停止MYSQL，需要指定对应的sock文件。" class="headerlink" title="6、停止MYSQL，需要指定对应的sock文件。"></a>6、停止MYSQL，需要指定对应的sock文件。</h3><p>mysqladmin -uroot -S &#x2F;tmp&#x2F;mysql_3307.sock shutdown</p>
+<h3 id="7、登陆3307端口的mysql"><a href="#7、登陆3307端口的mysql" class="headerlink" title="7、登陆3307端口的mysql"></a>7、登陆3307端口的mysql</h3><p>mysql -S &#x2F;tmp&#x2F;mysql_3307.sock -P 3307</p>
+<p> </p>
+<p> </p>
+<p>启动、停止、重启mysql脚本：</p>
+<p>#!&#x2F;bin&#x2F;bash<br>#mysql 停止\启动\重启脚本 此脚本只针对yum安装的mysql,而且已经为root设置过密码。</p>
+<p>#init<br>port&#x3D;3307<br>mysql_user&#x3D;”root”<br>mysql_pwd&#x3D;”123456”<br>CmdPath&#x3D;”&#x2F;usr&#x2F;bin”<br>mysql_sock&#x3D;”&#x2F;tmp&#x2F;mysql_${port}.sock”</p>
+<p>#startup function<br>function_start_mysql()<br>{<br>    if [ ! -e “$mysql_sock” ];then<br>        printf “Starting MySQL…\n”<br>        ${CmdPath}&#x2F;mysqld_safe –defaults-file&#x3D;&#x2F;data&#x2F;mysql_3307&#x2F;my.cnf –user&#x3D;mysql 2&gt;&amp;1 &gt;&#x2F;dev&#x2F;null &amp;<br>    else<br>        printf “MySQL is running…\n”<br>        exit<br>    fi<br>}</p>
+<p>#stop function<br>function_stop_mysql()<br>{<br>    if [ ! -e “$mysql_sock” ];then<br>        printf “MySQL is stopped…\n”<br>        exit<br>    else<br>        printf “Stoping MySQL…\n”<br>        ${CmdPath}&#x2F;mysqladmin -u ${mysql_user} -p${mysql_pwd} -S ${mysql_sock} shutdown<br>    fi<br>}</p>
+<p>#restart function<br>function_restart_mysql()<br>{<br>    printf “Restarting MySQL…\n”<br>    function_stop_mysql<br>    sleep 2<br>    function_start_mysql<br>}</p>
+<p>case $1 in<br>start)<br>    function_start_mysql<br>;;<br>stop)<br>    function_stop_mysql<br>;;<br>restart)<br>    function_restart_mysql<br>;;<br>*)<br>    printf “Usage: &#x2F;data&#x2F;mysql_3307 {start|stop|restart}\n”<br>esac</p>
+<h1 id="五、一台linux启动多个mysql实例-2"><a href="#五、一台linux启动多个mysql实例-2" class="headerlink" title="五、一台linux启动多个mysql实例(2)"></a>五、一台linux启动多个mysql实例(2)</h1><p>Mysql多实例是指在一台服务器上启动多个运行的mysql实例。</p>
+<p>多实例配置操作内容如下：</p>
+<ol>
+<li><strong>Mysql多实例的配置首先要安装mysql。</strong></li>
+</ol>
+<h2 id="2-mysql安装启动正常后，修改配置文件-etc-my-cnf。"><a href="#2-mysql安装启动正常后，修改配置文件-etc-my-cnf。" class="headerlink" title="2.mysql安装启动正常后，修改配置文件&#x2F;etc&#x2F;my.cnf。"></a>2.mysql安装启动正常后，修改配置文件&#x2F;etc&#x2F;my.cnf。</h2><p>my.cnf由&#x2F;usr&#x2F;share&#x2F;mysql&#x2F;my-medium.cnf处复制来的。</p>
+<p>cp &#x2F;usr&#x2F;share&#x2F;mysql&#x2F;my-medium.cnf &#x2F;etc&#x2F;my.cnf</p>
+<p>如下例子所示,此处配置了4个mysql实例，分别对应不同的端口（3307,3308，3309，3310）:</p>
+<p>Cat &#x2F;etc&#x2F;my.cnf</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br></pre></td><td class="code"><pre><span class="line">[mysqld_multi]</span><br><span class="line">mysqld = /usr/bin/mysqld_safe</span><br><span class="line">mysqladmin = /usr/bin/mysqladmin</span><br><span class="line">user = mysql</span><br><span class="line">password = mysql</span><br><span class="line"></span><br><span class="line">[mysqld3307]</span><br><span class="line">socket = /tmp/mysql.sock3307</span><br><span class="line">port = 3307</span><br><span class="line">pid-file = /data/mysql_3307/haoZH.pid3307</span><br><span class="line">datadir = /data/mysql_3307</span><br><span class="line">user = mysql</span><br><span class="line">Log-bin=mysql-bin</span><br><span class="line">binlog_format=row</span><br><span class="line">character-set-server=utf8</span><br><span class="line">init_connect=&#x27;SET NAMES utf8&#x27;</span><br><span class="line">server-id=3307</span><br><span class="line"></span><br><span class="line">[mysqld3308]</span><br><span class="line">socket = /tmp/mysql.sock3308</span><br><span class="line">port = 3308</span><br><span class="line">pid-file = /data/mysql_3308/haoZH.pid3308</span><br><span class="line">datadir = /data/mysql_3308</span><br><span class="line">user = mysql</span><br><span class="line">log-bin=mysql-bin</span><br><span class="line">binlog_format=row</span><br><span class="line">character-set-server=utf8</span><br><span class="line">init_connect=&#x27;SET NAMES utf8&#x27;</span><br><span class="line">server-id=3308</span><br><span class="line"></span><br><span class="line">[mysqld3309]</span><br><span class="line">socket = /tmp/mysql.sock3309</span><br><span class="line">port = 3309</span><br><span class="line">pid-file = /data/mysql_3309/haoZH.pid3309</span><br><span class="line">datadir = /data/mysql_3309</span><br><span class="line">user = mysql</span><br><span class="line">log-bin=mysql-bin</span><br><span class="line">binlog_format=row</span><br><span class="line">character-set-server=utf8</span><br><span class="line">init_connect=&#x27;SET NAMES utf8&#x27;</span><br><span class="line">server-id=3309</span><br><span class="line"></span><br><span class="line">[mysqld3310]</span><br><span class="line">socket = /tmp/mysql.sock3310</span><br><span class="line">port = 3310</span><br><span class="line">pid-file = /data/mysql_3310/haoZH.pid3310</span><br><span class="line">datadir = /data/mysql_3310</span><br><span class="line">user = mysql</span><br><span class="line">log-bin=mysql-bin</span><br><span class="line">binlog_format=row</span><br><span class="line">character-set-server=utf8</span><br><span class="line">init_connect=&#x27;SET NAMES utf8&#x27;</span><br><span class="line">server-id=3310</span><br><span class="line"></span><br><span class="line">[mysqld3311]</span><br><span class="line">socket = /tmp/mysql.sock3311</span><br><span class="line">port = 3311</span><br><span class="line">pid-file = /data/mysql_3311/haoZH.pid3311</span><br><span class="line">datadir = /data/mysql_3311</span><br><span class="line">user = mysql</span><br><span class="line">log-bin=mysql-bin</span><br><span class="line">binlog_format=row</span><br><span class="line">character-set-server=utf8</span><br><span class="line">init_connect=&#x27;SET NAMES utf8&#x27;</span><br><span class="line">server-id=3311</span><br><span class="line"></span><br><span class="line">[mysqld3312]</span><br><span class="line">socket = /tmp/mysql.sock3312</span><br><span class="line">port = 3312</span><br><span class="line">pid-file = /data/mysql_3312/haoZH.pid3312</span><br><span class="line">datadir = /data/mysql_3312</span><br><span class="line">user = mysql</span><br><span class="line">log-bin=mysql-bin</span><br><span class="line">binlog_format=row</span><br><span class="line">character-set-server=utf8</span><br><span class="line">init_connect=&#x27;SET NAMES utf8&#x27;</span><br><span class="line">server-id=3312</span><br><span class="line"></span><br><span class="line">[mysqld3313]</span><br><span class="line">socket = /tmp/mysql.sock3313</span><br><span class="line">port = 3313</span><br><span class="line">pid-file = /data/mysql_3313/haoZH.pid3313</span><br><span class="line">datadir = /data/mysql_3313</span><br><span class="line">user = mysql</span><br><span class="line">log-bin=mysql-bin</span><br><span class="line">binlog_format=row</span><br><span class="line">character-set-server=utf8</span><br><span class="line">init_connect=&#x27;SET NAMES utf8&#x27;</span><br><span class="line">server-id=3313</span><br></pre></td></tr></table></figure>
+
+<p><strong>此处要注意：多实例配置中关键是多个实例中每个实例都要有自己的数据目录。</strong></p>
+<p>3.创建数据目录</p>
+<p>mkdir -p &#x2F;data&#x2F;mysql_3307</p>
+<p>按照配置文件配置的目录：</p>
+<p>&#x2F;data&#x2F;mysql_3307</p>
+<p>&#x2F;data&#x2F;mysql_3308</p>
+<p>&#x2F;data&#x2F;mysql_3309</p>
+<p>&#x2F;data&#x2F;mysql_3310</p>
+<p><strong>4初始化数据目录</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">/usr/bin/mysql_install_db --datadir=/data/mysql_3307 --user=mysql</span><br><span class="line">/usr/bin/mysql_install_db --datadir=/data/mysql_3308 --user=mysql</span><br><span class="line">/usr/bin/mysql_install_db --datadir=/data/mysql_3309 --user=mysql</span><br><span class="line">/usr/bin/mysql_install_db --datadir=/data/mysql_3310 --user=mysql</span><br></pre></td></tr></table></figure>
+
+<h2 id="5-启动，停止。到此多实例已经配置完成。"><a href="#5-启动，停止。到此多实例已经配置完成。" class="headerlink" title="5. 启动，停止。到此多实例已经配置完成。"></a>5. 启动，停止。到此多实例已经配置完成。</h2><p>停止指定端口的mysql实例：</p>
+<p>赋权限给my.cnf中配置的user”mysql”</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@haoEN data]# mysql -uroot -proot -P3308 -S /tmp/mysql.sock3308</span><br><span class="line">mysql&gt; GRANT SHUTDOWN ON *.* TO &#x27;mysql&#x27;@&#x27;localhost&#x27; IDENTIFIED BY &#x27;mysql&#x27; WITH GRANT OPTION;</span><br><span class="line">Query OK, 0 rows affected (0.01 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; flush privileges;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br></pre></td></tr></table></figure>
+
+<p>后，使用 &#x2F;usr&#x2F;bin&#x2F;mysqld_multi stop 停止mysql多实例。</p>
+<p>使用 &#x2F;usr&#x2F;bin&#x2F;mysqld_multi start 启动mysql即可出现多实例。</p>
+<p>使用 &#x2F;usr&#x2F;bin&#x2F;mysqld_multi stop 停止mysql多实例。</p>
+<p>或者指定启动</p>
+<p>mysqld_multi –defaults-file&#x3D;&#x2F;etc&#x2F;my.cnf start 1-2  </p>
+<p>或者  </p>
+<p>mysqld_multi –defaults-file&#x3D;&#x2F;etc&#x2F; my.cnf start 1  </p>
+<p>mysqld_multi –defaults-file&#x3D;&#x2F;etc&#x2F;my.cnf start 2  </p>
+<p>start,stop和report是指你想到执行的操作。你可以在单独的服务或是多服务上指定一个操作，区别于选项后面的GNR列表。如果没有指定GNR列表，那么mysqld_multi将在所有的服务中根据选项文件进行操作。</p>
+<p>每一个GNR的值是组的序列号或是一个组的序列号范围。此项的值必须是组名字最后的数字，比如说如果组名为mysqld17，那么此项的值则为 17。如果指定一个范围，使用”-“(破折号)来连接二个数字。如GNR的值为10-13,则指组mysqld10到组mysqld13。</p>
+<h1 id="1、mysql安装环境依赖"><a href="#1、mysql安装环境依赖" class="headerlink" title="1、mysql安装环境依赖"></a>1、mysql安装环境依赖</h1><p>yum install -y ncurses-devel</p>
+<p>yum install -y libaio</p>
+<p>yum -y install numactl.x86_64</p>
+<p>yum install -y bison</p>
+<p>yum install -y gcc-c++</p>
+<p>yum install -y openssl-devel</p>
+<h2 id="6-修改密码，登录"><a href="#6-修改密码，登录" class="headerlink" title="6.修改密码，登录"></a>6.修改密码，登录</h2><p>mysqladmin -u root -p -P 3307 -S &#x2F;tmp&#x2F;mysql.sock1 password  &#x2F;&#x2F;刚开始默认没有密码，如果要输入密码，直接回车  </p>
+<p>mysql -u root -p -P 3307 -S &#x2F;tmp&#x2F;mysql.sock1  </p>
+<p>修改密码：</p>
+<p>&#x2F;usr&#x2F;bin&#x2F;mysqladmin -u root password ‘root’ -P 3307 -S &#x2F;tmp&#x2F;mysql.sock3307</p>
+<p>&#x2F;usr&#x2F;bin&#x2F;mysqladmin -u root password ‘root’ -P 3308 -S &#x2F;tmp&#x2F;mysql.sock3308</p>
+<p>&#x2F;usr&#x2F;bin&#x2F;mysqladmin -u root password ‘root’ -P 3309 -S &#x2F;tmp&#x2F;mysql.sock3309</p>
+<p>&#x2F;usr&#x2F;bin&#x2F;mysqladmin -u root password ‘root’ -P 3310 -S &#x2F;tmp&#x2F;mysql.sock3310</p>
+<p>登录：</p>
+<p>mysql -uroot -proot -P3307 -S &#x2F;tmp&#x2F;mysql.sock3307</p>
+<p>mysql -uroot -proot -P3308 -S &#x2F;tmp&#x2F;mysql.sock3308</p>
+<p>mysql -uroot -proot -P3309 -S &#x2F;tmp&#x2F;mysql.sock3309</p>
+<p>mysql -uroot -proot -P3310 -S &#x2F;tmp&#x2F;mysql.sock3310</p>
+<p>[yhao521@haoEN logs]$ mysql -umysql -pmysql -P3308 -S &#x2F;tmp&#x2F;mysql.sock3308</p>
+<h1 id="启动dbproxy代理"><a href="#启动dbproxy代理" class="headerlink" title="启动dbproxy代理"></a>启动dbproxy代理</h1><p>进入到dbproxy根目录</p>
+<p>cd &#x2F;home&#x2F;yhao521&#x2F;dbproxy&#x2F;server&#x2F;bin</p>
+<p><strong>dbproxyV4.0命令：</strong></p>
+<p>sh .&#x2F;startup.sh #启动代理服务</p>
+<p>sh .&#x2F;shutdown.sh #停止代理服务</p>
+<p>sh .&#x2F;restart.sh #重启代理服务</p>
+<p><strong>集群HA命令(一个集群只能启动一个HA服务)：</strong></p>
+<p>sh .&#x2F;clusterHA_shutdown.sh #启动集群HA服务</p>
+<p>sh .&#x2F;clusterHA_startup.sh #停止集群HA服务</p>
+<h2 id="访问"><a href="#访问" class="headerlink" title="访问"></a>访问</h2><p><strong>MySQL命令行访问：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mysql –h&lt;ip&gt; -u&lt;username&gt; -p&lt;password&gt; -P&lt;port&gt;</span><br><span class="line">mysql -h192.168.189.129 -uroot -proot -P8066</span><br><span class="line"></span><br><span class="line">mysql -h192.168.189.129 -utest -ptest -P8066</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><strong>JDBC访问：</strong></p>
+<p>JDBC的mysql driver5.1.26~35版本</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Class.forName(&quot;com.mysql.jdbc.Driver&quot;);</span><br><span class="line">Connection conn =</span><br><span class="line">DriverManager.getConnection(&quot;jdbc:mysql://&lt;ip&gt;:&lt;port&gt;/&lt;schema&gt;&quot;, &quot;&lt;username&gt;&quot;, &quot;&lt;password&gt;&quot;);</span><br></pre></td></tr></table></figure>
+
+<p>其它连接mysql正常（本地连接、远程连接）</p>
+<p><strong>Dbproxy连接mysql报错：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[2017-02-20 10:56:59 WARN ] [$_NIOREACTOR-4-RW] &#123;com.sitech.dbproxy.mysql.nio.MySQLConnectionAuthenticator:101&#125;-can&#x27;t connect to mysql server ,errmsg:Access denied for user &#x27;mysql&#x27;@&#x27;haoZH&#x27; (using password: YES) MySQLConnection [id=52, lastTime=1487559419870, user=mysql, schema=test2, old shema=test2, borrowed=false, fromSlaveDB=false, threadId=318, charset=utf8, txIsolation=0, autocommit=true, attachment=null, respHandler=null, host=192.168.189.128, port=3309, statusSync=null, writeQueue=0, modifiedSQLExecuted=false]</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">INSERT INTO</span> `mysql`.`<span class="keyword">user</span>` (`Host`, `<span class="keyword">User</span>`, `Password`, `Select_priv`, `Insert_priv`, `Update_priv`, `Delete_priv`, `Create_priv`, `Drop_priv`, `Reload_priv`, `Shutdown_priv`, `Process_priv`, `File_priv`, `Grant_priv`, `References_priv`, `Index_priv`, `Alter_priv`, `Show_db_priv`, `Super_priv`, `Create_tmp_table_priv`, `Lock_tables_priv`, `Execute_priv`, `Repl_slave_priv`, `Repl_client_priv`, `Create_view_priv`, `Show_view_priv`, `Create_routine_priv`, `Alter_routine_priv`, `Create_user_priv`, `Event_priv`, `Trigger_priv`, `Create_tablespace_priv`, `ssl_type`, `ssl_cipher`, `x509_issuer`, `x509_subject`, `max_questions`, `max_updates`, `max_connections`, `max_user_connections`, `plugin`, `authentication_string`) <span class="keyword">VALUES</span> (<span class="string">&#x27;%&#x27;</span>, <span class="string">&#x27;mysql&#x27;</span>, <span class="string">&#x27;*E74858DB86EBA20BC33D0AECAE8A8108C56B17FA&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="string">&#x27;0&#x27;</span>, <span class="string">&#x27;0&#x27;</span>, <span class="string">&#x27;0&#x27;</span>, <span class="string">&#x27;0&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="keyword">NULL</span>);</span><br><span class="line"><span class="keyword">INSERT INTO</span> `mysql`.`<span class="keyword">user</span>` (`Host`, `<span class="keyword">User</span>`, `Password`, `Select_priv`, `Insert_priv`, `Update_priv`, `Delete_priv`, `Create_priv`, `Drop_priv`, `Reload_priv`, `Shutdown_priv`, `Process_priv`, `File_priv`, `Grant_priv`, `References_priv`, `Index_priv`, `Alter_priv`, `Show_db_priv`, `Super_priv`, `Create_tmp_table_priv`, `Lock_tables_priv`, `Execute_priv`, `Repl_slave_priv`, `Repl_client_priv`, `Create_view_priv`, `Show_view_priv`, `Create_routine_priv`, `Alter_routine_priv`, `Create_user_priv`, `Event_priv`, `Trigger_priv`, `Create_tablespace_priv`, `ssl_type`, `ssl_cipher`, `x509_issuer`, `x509_subject`, `max_questions`, `max_updates`, `max_connections`, `max_user_connections`, `plugin`, `authentication_string`) <span class="keyword">VALUES</span> (<span class="string">&#x27;localhost&#x27;</span>, <span class="string">&#x27;mysql&#x27;</span>, <span class="string">&#x27;*E74858DB86EBA20BC33D0AECAE8A8108C56B17FA&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="string">&#x27;0&#x27;</span>, <span class="string">&#x27;0&#x27;</span>, <span class="string">&#x27;0&#x27;</span>, <span class="string">&#x27;0&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="string">&#x27;&#x27;</span>);</span><br><span class="line"><span class="keyword">INSERT INTO</span> `mysql`.`<span class="keyword">user</span>` (`Host`, `<span class="keyword">User</span>`, `Password`, `Select_priv`, `Insert_priv`, `Update_priv`, `Delete_priv`, `Create_priv`, `Drop_priv`, `Reload_priv`, `Shutdown_priv`, `Process_priv`, `File_priv`, `Grant_priv`, `References_priv`, `Index_priv`, `Alter_priv`, `Show_db_priv`, `Super_priv`, `Create_tmp_table_priv`, `Lock_tables_priv`, `Execute_priv`, `Repl_slave_priv`, `Repl_client_priv`, `Create_view_priv`, `Show_view_priv`, `Create_routine_priv`, `Alter_routine_priv`, `Create_user_priv`, `Event_priv`, `Trigger_priv`, `Create_tablespace_priv`, `ssl_type`, `ssl_cipher`, `x509_issuer`, `x509_subject`, `max_questions`, `max_updates`, `max_connections`, `max_user_connections`, `plugin`, `authentication_string`) <span class="keyword">VALUES</span> (<span class="string">&#x27;haoEH&#x27;</span>, <span class="string">&#x27;mysql&#x27;</span>, <span class="string">&#x27;*E74858DB86EBA20BC33D0AECAE8A8108C56B17FA &#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="string">&#x27;0&#x27;</span>, <span class="string">&#x27;0&#x27;</span>, <span class="string">&#x27;0&#x27;</span>, <span class="string">&#x27;0&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="string">&#x27;&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">INSERT INTO</span> `mysql`.`<span class="keyword">user</span>` (`Host`, `<span class="keyword">User</span>`, `Password`, `Select_priv`, `Insert_priv`, `Update_priv`, `Delete_priv`, `Create_priv`, `Drop_priv`, `Reload_priv`, `Shutdown_priv`, `Process_priv`, `File_priv`, `Grant_priv`, `References_priv`, `Index_priv`, `Alter_priv`, `Show_db_priv`, `Super_priv`, `Create_tmp_table_priv`, `Lock_tables_priv`, `Execute_priv`, `Repl_slave_priv`, `Repl_client_priv`, `Create_view_priv`, `Show_view_priv`, `Create_routine_priv`, `Alter_routine_priv`, `Create_user_priv`, `Event_priv`, `Trigger_priv`, `Create_tablespace_priv`, `ssl_type`, `ssl_cipher`, `x509_issuer`, `x509_subject`, `max_questions`, `max_updates`, `max_connections`, `max_user_connections`, `plugin`, `authentication_string`) <span class="keyword">VALUES</span> (<span class="string">&#x27;127.0.0.1&#x27;</span>, <span class="string">&#x27;mysql&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="string">&#x27;0&#x27;</span>, <span class="string">&#x27;0&#x27;</span>, <span class="string">&#x27;0&#x27;</span>, <span class="string">&#x27;0&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="string">&#x27;&#x27;</span>);</span><br><span class="line"><span class="keyword">INSERT INTO</span> `mysql`.`<span class="keyword">user</span>` (`Host`, `<span class="keyword">User</span>`, `Password`, `Select_priv`, `Insert_priv`, `Update_priv`, `Delete_priv`, `Create_priv`, `Drop_priv`, `Reload_priv`, `Shutdown_priv`, `Process_priv`, `File_priv`, `Grant_priv`, `References_priv`, `Index_priv`, `Alter_priv`, `Show_db_priv`, `Super_priv`, `Create_tmp_table_priv`, `Lock_tables_priv`, `Execute_priv`, `Repl_slave_priv`, `Repl_client_priv`, `Create_view_priv`, `Show_view_priv`, `Create_routine_priv`, `Alter_routine_priv`, `Create_user_priv`, `Event_priv`, `Trigger_priv`, `Create_tablespace_priv`, `ssl_type`, `ssl_cipher`, `x509_issuer`, `x509_subject`, `max_questions`, `max_updates`, `max_connections`, `max_user_connections`, `plugin`, `authentication_string`) <span class="keyword">VALUES</span> (<span class="string">&#x27;::1&#x27;</span>, <span class="string">&#x27;mysql&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;Y&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="string">&#x27;0&#x27;</span>, <span class="string">&#x27;0&#x27;</span>, <span class="string">&#x27;0&#x27;</span>, <span class="string">&#x27;0&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="string">&#x27;&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<h1 id="Linux源码编译安装MySQL5-7-20"><a href="#Linux源码编译安装MySQL5-7-20" class="headerlink" title="Linux源码编译安装MySQL5.7.20"></a>Linux源码编译安装MySQL5.7.20</h1><p>一、环境准备：</p>
+<p>我尝试过以下环境都是能成功的：<br>1、CentOS6.7 minimal镜像最小化缺省安装；<br>2、RedHat6.5 DVD基本服务器安装；<br>3、其他Linux版本未验证。<br>注意系统安装好之后需要配置好网卡，关闭防火墙及SELINUX：<br># 关闭Linux防火墙命令<br># chkconfig iptables off<br># 修改SELINUX配置<br># vim &#x2F;etc&#x2F;sysconfig&#x2F;selinux<br>SELINUX&#x3D;enforcing<br>修改为：<br>SELINUX&#x3D;disabled<br>修改完成后，保存并退出，然后重启系统。</p>
+<p>二、升级系统：</p>
+<p>先使用 yum -y update 指令升级系统到最新版本。<br>如果服务器在内网，此步骤可略过。</p>
+<p>三、做一些准备工作（以下Linux命令均在su到root用户操作）：</p>
+<p>1、新增mysql用户组<br># groupadd mysql<br>2、新增mysql用户<br># useradd -r -g mysql mysql<br>3、新建数据库执行文件目录(后面会把编译好的mysql程序安装到这个目录)<br># mkdir -p &#x2F;usr&#x2F;local&#x2F;mysql<br>4、新建数据库数据文件目录<br># mkdir -p &#x2F;home&#x2F;mysql<br># mkdir -p &#x2F;home&#x2F;mysql&#x2F;data<br># mkdir -p &#x2F;home&#x2F;mysql&#x2F;logs<br># mkdir -p &#x2F;home&#x2F;mysql&#x2F;temp<br>注意：上面的第3及第4是为了以后将MySQL的数据文件与执行程序文件分离，如果你打算设置到不同的路径，注意修改对应的执行命令和数据库初始化脚本！<br>5、编辑PATH搜索路径<br># vi &#x2F;etc&#x2F;profile +<br># 在profile文件末尾增加两行<br>PATH&#x3D;&#x2F;soft&#x2F;mysql&#x2F;bin:&#x2F;soft&#x2F;mysql&#x2F;lib:$PATH<br>export PATH<br>使PATH搜索路径立即生效：<br># source &#x2F;etc&#x2F;profile<br>6、编辑hosts文件，增加一行，加入本机IP和主机名（需要根据实际情况修改IP和主机名）<br># vi &#x2F;etc&#x2F;hosts +<br>192.168.1.2      linuxidc<br>7、安装编译源码所需的工具和库（如果不能在线安装，需要提前配置好本地源，本地源配置方法度娘吧，以后有时间）(查看cmake的版本cmake –version ，若版本太低则需要更新yum -y install wget gcc-c++ ncurses-devel cmake)<br># yum -y install wget gcc-c++ ncurses-devel cmake make perl<br>注意：如果是RedHat5.4，其ISO源中没有cmake，可以手动编译安装cmake，或者升级到RedHat5.9之后再从源中yum安装cmake。<br>8、通过FTP或SFTP将mysql-5.7.20.tar.gz源码包上传到&#x2F;soft&#x2F;路径下。<br>如果服务器能上网，也可以通过wget下载mysql-5.7.9.tar.gz。下载地址如下：<br># cd &#x2F;soft<br># wget <a target="_blank" rel="noopener" href="http://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.9-linux-glibc2.5-x86_64.tar.gz">http://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.9-linux-glibc2.5-x86_64.tar.gz</a></p>
+<p>四、开始编译安装mysql-5.7.20：</p>
+<p>1、进入源码压缩包下载目录<br># cd &#x2F;soft<br>2、解压缩源码包<br># tar -zxvf mysql-5.7.20.tar.gz;</p>
+<p>#tar –zxvf mysql-boost-5.7.20.tar.gz<br>3、进入解压缩源码目录<br># cd mysql-5.7.20<br>4、使用cmake源码安装mysql（如果你打算安装到不同的路径，注意修改下面语句中&#x2F;soft&#x2F;mysql这个路径！）</p>
+<p><strong>不带boost的mysql源码</strong></p>
+<p>参数可以适当增减（</p>
+<p>最简单的：</p>
+<p>Cmake . \</p>
+<p>-DCMAKE_INSTALL_PREFIX&#x3D;&#x2F;soft&#x2F;mysql \</p>
+<p>-DWITH_BOOST&#x3D;&#x2F;soft&#x2F;boost_1_59_0</p>
+<p>）<br>cmake . \</p>
+<p>-DCMAKE_INSTALL_PREFIX&#x3D;&#x2F;soft&#x2F;mysql \</p>
+<p>-DMYSQL_UNIX_ADDR&#x3D;&#x2F;soft&#x2F;mysql&#x2F;mysql.sock \</p>
+<p>-DDEFAULT_CHARSET&#x3D;utf8 \</p>
+<p>-DDEFAULT_COLLATION&#x3D;utf8_general_ci \</p>
+<p>-DWITH_MYISAM_STORAGE_ENGINE&#x3D;1 \</p>
+<p>-DWITH_INNOBASE_STORAGE_ENGINE&#x3D;1 \</p>
+<p>-DWITH_ARCHIVE_STORAGE_ENGINE&#x3D;1 \</p>
+<p>-DWITH_BLACKHOLE_STORAGE_ENGINE&#x3D;1 \</p>
+<p>-DWITH_MEMORY_STORAGE_ENGINE&#x3D;1 \</p>
+<p>-DWITH_READLINE&#x3D;1 \</p>
+<p>-DENABLED_LOCAL_INFILE&#x3D;1 \</p>
+<p>-DMYSQL_DATADIR&#x3D;&#x2F;soft&#x2F;mysql&#x2F;data \</p>
+<p>-DMYSQL_USER&#x3D;mysql \</p>
+<p>-DMYSQL_TCP_PORT&#x3D;3306 \</p>
+<p>-DENABLE_DOWNLOADS&#x3D;1 \</p>
+<p>-DWITH_DEBUG&#x3D;1 \</p>
+<p>-DDOWNLOAD_BOOST&#x3D;1 \</p>
+<p>-DSYSCONFDIR&#x3D;&#x2F;soft&#x2F;mysql&#x2F;etc\</p>
+<p>-DWITH_BOOST&#x3D;&#x2F;soft&#x2F;boost_1_59_0<br>上面的这些复制完，回车，然后就开始cmake的过程，一般时间不会很长。</p>
+<p><strong>带boost的mysql源码</strong></p>
+<p>mysql-boost-5.7.20.tar.gz编译安装命令：（直接指定boost,）</p>
+<p>cmake . \</p>
+<p>-DCMAKE_INSTALL_PREFIX&#x3D;&#x2F;soft&#x2F;mysql \</p>
+<p>-DDEFAULT_CHARSET&#x3D;utf8 \</p>
+<p>-DDEFAULT_COLLATION&#x3D;utf8_general_ci \</p>
+<p>-DWITH_BOOST&#x3D;boost</p>
+<p>cmake . \</p>
+<p>-DCMAKE_INSTALL_PREFIX&#x3D;&#x2F;mysql&#x2F;mysql-5.7 \</p>
+<p>-DMYSQL_UNIX_ADDR&#x3D;&#x2F;soft&#x2F;mysql&#x2F;mysql-5.7&#x2F;mysql.sock \</p>
+<p>-DDEFAULT_CHARSET&#x3D;utf8 \</p>
+<p>-DDEFAULT_COLLATION&#x3D;utf8_general_ci \</p>
+<p>-DMYSQL_DATADIR&#x3D;&#x2F;data&#x2F;3336 \</p>
+<p>-DMYSQL_USER&#x3D;mysql \</p>
+<p>-DMYSQL_TCP_PORT&#x3D;3336 \</p>
+<p>-DSYSCONFDIR&#x3D;&#x2F;mysql&#x2F;mysql-5.7&#x2F;etc \</p>
+<p>-DWITH_BOOST&#x3D;boost</p>
+<p>编译前的配置cmake有如下图提示，则需要升级cmake。</p>
+<p><img src="/img/image1.png"><br><img src="/img/17049017878179.jpg"></p>
+<p>使用cmake-3.10.0版本编译时，提示警告，需要安装bison*</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">CMake Warning at cmake/bison.cmake:20 (MESSAGE):</span><br><span class="line"></span><br><span class="line">Bison executable not found in PATH</span><br><span class="line"></span><br><span class="line">Call Stack (most recent call first):</span><br><span class="line"></span><br><span class="line">sql/CMakeLists.txt:527 (INCLUDE)</span><br><span class="line"></span><br><span class="line">CMake Warning at cmake/bison.cmake:20 (MESSAGE):</span><br><span class="line"></span><br><span class="line">Bison executable not found in PATH</span><br><span class="line"></span><br><span class="line">Call Stack (most recent call first):</span><br><span class="line"></span><br><span class="line">libmysqld/CMakeLists.txt:159 (INCLUDE)</span><br><span class="line"></span><br><span class="line">\# yum -y install bison\* (安装命令)</span><br></pre></td></tr></table></figure>
+
+<p><strong>因为内存不足,会造成下表和图中的make命令执行错误。</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">虚拟机编译mysql-5.7.20 cmake-3.10.0</span><br><span class="line">cmake输出警告</span><br><span class="line">CMake Deprecation Warning at scripts/CMakeLists.txt:316 (CMAKE_POLICY):</span><br><span class="line">  The OLD behavior for policy CMP0007 will be removed from a future version</span><br><span class="line">  of CMake.</span><br><span class="line">  The cmake-policies(7) manual explains that the OLD behaviors of all</span><br><span class="line">  policies are deprecated and that a policy should be set to OLD only under</span><br><span class="line">  specific short-term circumstances.  Projects should be ported to the NEW</span><br><span class="line">  behavior and not rely on setting a policy to OLD.</span><br><span class="line">make 执行输出错误</span><br><span class="line">[ 83%] Building CXX object sql/CMakeFiles/sql.dir/item_geofunc_buffer.cc.o</span><br><span class="line">c++: internal compiler error: Killed (program cc1plus)</span><br><span class="line">Please submit a full bug report,</span><br><span class="line">with preprocessed source if appropriate.</span><br><span class="line">See &lt;http://bugzilla.redhat.com/bugzilla&gt; for instructions.</span><br><span class="line">make[2]: *** [libmysqld/CMakeFiles/sql_embedded.dir/__/sql/item_geofunc.cc.o] Error 4</span><br><span class="line">[ 83%] Building CXX object sql/CMakeFiles/sql.dir/item_geofunc_internal.cc.o</span><br><span class="line">make[1]: *** [libmysqld/CMakeFiles/sql_embedded.dir/all] Error 2</span><br><span class="line">[ 83%] Building CXX object sql/CMakeFiles/sql.dir/item_geofunc_relchecks.cc.o</span><br><span class="line">make[1]: *** Waiting for unfinished jobs....</span><br><span class="line">然后输出多次类似的，卡顿一会时间，才又继续执行。</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/17049018356213.jpg"></p>
+<p>5、cmake结束后开始编译源码，这一步时间会较长，请耐心等待。<br># make</p>
+<p># make –j 24 (24为cpu线程数) 可以提高编译速度 。但是可能会因为内存不足，造成上图中的编译中断。</p>
+<p>也<strong>可以使用命令 ： make &amp;&amp; make install 编译和安装命令一块执行，编译完成后即可执行安装。</strong><br>6、安装编译好的程序<br># make install<br>注意：如果需要重装mysql，在&#x2F;soft&#x2F;mysql-5.7.20在执行下make install就可以了，不需要再cmake和make<br>7、清除安装临时文件<br># make clean</p>
+<p>如果中途编译失败了，需要删除cmake生成的预编译配置参数的缓存文件和make编译后生成的文件，再重新编译。</p>
+<p>shell&gt; rm -f CMakeCache.txt</p>
+<p>shell&gt; make clean</p>
+<p>编译安装完成后，就可以进入二进制版本安装相同。</p>
+<p>8、修改目录拥有者<br># chown -Rf mysql:mysql &#x2F;softl&#x2F;mysql<br># chown -Rf mysql:mysql &#x2F;home&#x2F;mysql<br>9、进入mysql执行程序的安装路径<br># cd &#x2F;soft&#x2F;mysql</p>
+<p>Mysql-5.7.21源码，初始化数据库，使用命令</p>
+<p>.&#x2F;mysqld –initialize –user&#x3D;mysql –basedir&#x3D;&#x2F;mysql&#x2F;mysql-5.7 –datadir&#x3D;&#x2F;data&#x2F;3336 –innodb_undo_tablespaces&#x3D;3 –explicit_defaults_for_timestamp<br>10、执行初始化配置脚本，创建系统自带的数据库和表（注意路径&#x2F;home&#x2F;mysql&#x2F;data需要换成你自定定义的数据库存放路径）<br># scripts&#x2F;mysql_install_db –user&#x3D;mysql –datadir&#x3D;&#x2F;home&#x2F;mysql&#x2F;data<br>#初始化脚本在&#x2F;usr&#x2F;local&#x2F;mysql&#x2F;下生成了配置文件my.cnf，需要更改该配置文件的所有者：<br># chown -Rf mysql:mysql &#x2F;usr&#x2F;local&#x2F;mysql<br>注意：<br>（1）Tips：在启动MySQL服务时，会按照一定次序搜索my.cnf，先在&#x2F;etc目录下找，找不到则会搜索mysql程序目录下是否有my.cnf”；<br>（2）需要注意CentOS 6.4版操作系统的最小安装完成后，即使没有安装mysql，在&#x2F;etc目录下也会存在一个my.cnf文件，建议将此文件更名为其他的名字，否则该文件 会干扰源码安装的MySQL的正确配置，造成无法启动。修改&#x2F;etc&#x2F;my.cnf操作如下：<br># mv &#x2F;etc&#x2F;my.cnf &#x2F;etc&#x2F;my.cnf.bak<br># 当然也可以删除掉&#x2F;etc&#x2F;my.cnf这个文件：<br># rm &#x2F;etc&#x2F;my.cnf<br>（3）如果你需要用于生产环境，不要急着做下面的mysql启动操作。建议把上一步骤中mysql初始化生成的&#x2F;usr&#x2F;local&#x2F;mysql &#x2F;mysql.cnf删除，然后把你优化好的mysql配置文件my.cnf放到&#x2F;etc下。（这是我做mysql主从复制和mysql优化的经验！）<br>11、复制服务启动脚本(开机自启动，不成功)<br># cp &#x2F;soft&#x2F;mysql&#x2F;support-files&#x2F;mysql.server &#x2F;etc&#x2F;init.d&#x2F;mysql<br>12、启动MySQL服务<br># service mysql start<br>13、设置开机自动启动服务<br># chkconfig mysql on<br>14、登录并修改MySQL用户root的密码<br># mysql -u root<br>mysql&gt; use mysql;<br>mysql&gt; GRANT ALL PRIVILEGES ON *.* TO root@”%” IDENTIFIED BY “123456”;<br>mysql&gt; update user set Password &#x3D; password(‘123456’) where User&#x3D;’root’;<br>mysql&gt; flush privileges;<br>mysql&gt; exit;<br>15、检测下上一步MySQL用户root密码是否生效：<br>[root@linuxidc etc]# mysql -u root<br>ERROR 1045 (28000): Access denied for user ‘root‘@’localhost’ (using password: NO)——没有密码无法登录，说明密码修改成功了。<br>[root@linuxidc ~]# mysql -u root -p<br>Enter password: ——这里提示时输入你设置的mysql root帐号密码<br>#登录成功有如下提示：<br>Welcome to the MySQL monitor.  Commands end with ; or \g.<br>Your MySQL connection id is 422<br>Server version: 5.7.9-log Source distribution<br>Copyright (c) 2000, 2013, <a target="_blank" rel="noopener" href="http://www.linuxidc.com/topicnews.aspx?tid=12">Oracle</a> and&#x2F;or its affiliates. All rights reserved.<br>Oracle is a registered trademark of Oracle Corporation and&#x2F;or its<br>affiliates. Other names may be trademarks of their respective<br>owners.<br>Type ‘help;’ or ‘\h’ for help. Type ‘\c’ to clear the current input statement.<br>mysql&gt;<br>16、（可选）运行安全设置脚本，强烈建议生产服务器使用：<br>[root@linuxidc ~]# &#x2F;usr&#x2F;local&#x2F;mysql&#x2F;bin&#x2F;mysql_secure_installation</p>
+<p>NOTE: RUNNING ALL PARTS OF THIS SCRIPT IS RECOMMENDED FOR ALL MySQL<br>    SERVERS IN PRODUCTION USE!  PLEASE READ EACH STEP CAREFULLY!</p>
+<p>In order to log into MySQL to secure it, we’ll need the current<br>password for the root user.  If you’ve just installed MySQL, and<br>you haven’t set the root password yet, the password will be blank,<br>so you should just press enter here.</p>
+<p>Enter current password for root (enter for none):<br>OK, successfully used password, moving on…</p>
+<p>Setting the root password ensures that nobody can log into the MySQL<br>root user without the proper authorisation.</p>
+<p>You already have a root password set, so you can safely answer ‘n’.</p>
+<p>Change the root password? [Y&#x2F;n] n —————这里输入n<br>… skipping.</p>
+<p>By default, a MySQL installation has an anonymous user, allowing anyone<br>to log into MySQL without having to have a user account created for<br>them.  This is intended only for testing, and to make the installation<br>go a bit smoother.  You should remove them before moving into a<br>production environment.</p>
+<p>Remove anonymous users? [Y&#x2F;n] Y —————这里输入Y<br>… Success!</p>
+<p>Normally, root should only be allowed to connect from ‘localhost’.  This<br>ensures that someone cannot guess at the root password from the network.</p>
+<p>Disallow root login remotely? [Y&#x2F;n] n —————这里输入n<br>… skipping.</p>
+<p>By default, MySQL comes with a database named ‘test’ that anyone can<br>access.  This is also intended only for testing, and should be removed<br>before moving into a production environment.</p>
+<p>Remove test database and access to it? [Y&#x2F;n] Y —————这里输入Y</p>
+<ul>
+<li>Dropping test database…<br>ERROR 1008 (HY000) at line 1: Can’t drop database ‘test’; database doesn’t exist<br>… Failed!  Not critical, keep moving…</li>
+<li>Removing privileges on test database…<br>… Success!</li>
+</ul>
+<p>Reloading the privilege tables will ensure that all changes made so far<br>will take effect immediately.</p>
+<p>Reload privilege tables now? [Y&#x2F;n] Y —————这里输入Y<br>… Success!</p>
+<p>All done!  If you’ve completed all of the above steps, your MySQL<br>installation should now be secure.</p>
+<p>Thanks for using MySQL!</p>
+<p>Cleaning up…<br>17、重启服务器，检测mysql是否能开机自动启动<br>[root@linuxidc ~]# reboot</p>
+<p>3，开机启动</p>
+<p>在&#x2F;etc&#x2F;rc.local里加入&#x2F;soft&#x2F;mysql&#x2F;bin&#x2F;mysqld_safe –user&#x3D;mysql &amp;</p>
+<h1 id="Linux源码编译安装MySQL5-7-21"><a href="#Linux源码编译安装MySQL5-7-21" class="headerlink" title="Linux源码编译安装MySQL5.7.21"></a>Linux源码编译安装MySQL5.7.21</h1><p>配置文件<br>my3336.cnf</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line">[mysql]</span><br><span class="line">no_auto_rehash</span><br><span class="line">default_character_set     = utf8</span><br><span class="line"></span><br><span class="line">[mysqld]</span><br><span class="line">user                      = mysql</span><br><span class="line">server_id                 = 4</span><br><span class="line">port                      = 3336</span><br><span class="line">basedir                   = /mysql/mysql</span><br><span class="line">datadir                   = /data/3336</span><br><span class="line">socket                    = /data/3336/mysql.sock</span><br><span class="line">pid_file                  = /data/3336/mysql.pid</span><br><span class="line">log_error                 = /data/3336/mysql_error.log</span><br><span class="line">tmpdir                    = /data/3336/</span><br><span class="line">log_bin                   = /data/3336/mysql_bin</span><br><span class="line">relay_log                 = /data/3336/relay_bin</span><br><span class="line">character_set_server      = utf8</span><br><span class="line">collation_server          = utf8_general_ci</span><br><span class="line"></span><br><span class="line"># InnoDB settings</span><br><span class="line">innodb_buffer_pool_size   = 16G</span><br><span class="line">innodb_buffer_pool_instances = 8</span><br><span class="line">innodb_log_file_size      = 3G</span><br><span class="line">innodb_log_files_in_group = 3</span><br><span class="line">innodb_log_buffer_size    = 128M</span><br><span class="line">innodb_file_per_table     = 1</span><br><span class="line">innodb_open_files         = 8192</span><br><span class="line">innodb_flush_log_at_trx_commit = 1</span><br><span class="line">innodb_flush_method       = O_DIRECT</span><br><span class="line">innodb_io_capacity        = 1000</span><br><span class="line">innodb_io_capacity_max    = 2000</span><br><span class="line">innodb_thread_concurrency = 0</span><br><span class="line">innodb_lock_wait_timeout  = 60</span><br><span class="line">innodb_read_io_threads    = 8</span><br><span class="line">innodb_write_io_threads   = 8</span><br><span class="line">innodb_max_dirty_pages_pct = 75</span><br><span class="line">transaction-isolation     = READ-COMMITTED</span><br><span class="line"></span><br><span class="line"># Cache settings</span><br><span class="line">back_log                  = 500</span><br><span class="line">thread_stack              = 192k</span><br><span class="line">thread_cache_size         = 256</span><br><span class="line">key_buffer_size           = 128M</span><br><span class="line">tmp_table_size            = 32M</span><br><span class="line">read_buffer_size          = 2M</span><br><span class="line">read_rnd_buffer_size      = 8M</span><br><span class="line">sort_buffer_size          = 2M</span><br><span class="line">join_buffer_size          = 2M</span><br><span class="line">max_heap_table_size       = 64M</span><br><span class="line">table_open_cache          = 8192</span><br><span class="line">max_allowed_packet        = 32M</span><br><span class="line">bulk_insert_buffer_size   = 64M</span><br><span class="line"></span><br><span class="line"># Connect settings</span><br><span class="line">max_connect_errors        = 100000</span><br><span class="line">max_connections           = 4000</span><br><span class="line">connect_timeout           = 300</span><br><span class="line">wait_timeout              = 86400</span><br><span class="line">interactive_timeout       = 86400</span><br><span class="line">lower_case_table_names    = 1</span><br><span class="line">skip_name_resolve</span><br><span class="line">skip_external_locking</span><br></pre></td></tr></table></figure>
+
+<p>编译安装mysql-5.7.21</p>
+<p>设置预编译命令</p>
+<p>cmake . \</p>
+<p>-DCMAKE_INSTALL_PREFIX&#x3D;&#x2F;mysql&#x2F;mysql-5.7 \</p>
+<p>-DDEFAULT_CHARSET&#x3D;utf8 \</p>
+<p>-DDEFAULT_COLLATION&#x3D;utf8_general_ci \</p>
+<p>-DMYSQL_DATADIR&#x3D;&#x2F;data&#x2F;3336 \</p>
+<p>-DMYSQL_USER&#x3D;mysql \</p>
+<p>-DMYSQL_TCP_PORT&#x3D;3336 \</p>
+<p>-DSYSCONFDIR&#x3D;&#x2F;mysql&#x2F;mysql-5.7&#x2F;etc \</p>
+<p>-DWITH_BOOST&#x3D;boost</p>
+<p>make &amp;&amp; make install</p>
+<p>初始化数据库</p>
+<p>cd &#x2F;mysql&#x2F;mysql-5.7&#x2F;bin;</p>
+<p>.&#x2F;mysqld –initialize –user&#x3D;mysql –basedir&#x3D;&#x2F;mysql&#x2F;mysql-5.7 –datadir&#x3D;&#x2F;data&#x2F;3336 –innodb_undo_tablespaces&#x3D;3 –explicit_defaults_for_timestamp</p>
+<p>temporary password is generated for root@localhost: st5iMcPFby;O</p>
+<p>启动</p>
+<p>cd &#x2F;mysql&#x2F;mysql-5.7;.&#x2F;bin&#x2F;mysqld_safe –defaults-file&#x3D;&#x2F;mysql&#x2F;mysql-5.7&#x2F;etc&#x2F;my3336.cnf –user&#x3D;mysql &amp;</p>
+<p>cd &#x2F;mysql&#x2F;mysql-5.7;.&#x2F;bin&#x2F;mysqladmin –defaults-file&#x3D;&#x2F;mysql&#x2F;mysql-5.7&#x2F;etc&#x2F;my3336.cnf –socket&#x3D;&#x2F;data&#x2F;3336&#x2F;mysql.sock -umysql -pmysql shutdown</p>
+<p>登录</p>
+<p>.&#x2F;bin&#x2F;mysql -P3336 -uroot –socket&#x3D;&#x2F;data&#x2F;3336&#x2F;mysql.sock -p</p>
+<p>修改密码</p>
+<p>set password&#x3D;password(“root”);</p>
+<p>重新登录创建 用户mysql</p>
+<p>.&#x2F;bin&#x2F;mysql -P3336 -uroot –socket&#x3D;&#x2F;data&#x2F;3336&#x2F;mysql.sock -proot</p>
+<p>grant all PRIVILEGES on *.* to ‘mysql‘@’%’ identified by “mysql” with GRANT option ;</p>
+<p>flush privileges;</p>
+<h1 id="二进制版本mysql安装"><a href="#二进制版本mysql安装" class="headerlink" title="二进制版本mysql安装"></a>二进制版本mysql安装</h1><p>我下载的是版本是mysql5.7.20社区版，具体的下载方法就不介绍，在官网就可以找到。</p>
+<p><strong>解压拷贝</strong></p>
+<p>mysql-5.7.20-linux-glibc2.12-x86_64.tar.gz</p>
+<p>mv &#x2F;soft&#x2F;mysql-5.7.20-linux-glibc2.12-x86_64 &#x2F;soft&#x2F;mysql</p>
+<p><strong>先创建mysql用户</strong></p>
+<p>groupadd mysql &#x2F;&#x2F;创建mysql组</p>
+<p>useradd -g mysql mysql &#x2F;&#x2F;创建mysql用户添加到mysql组</p>
+<p>再运行chown -R mysql:mysql &#x2F;soft&#x2F;mysql</p>
+<p><strong>创建mysql的数据目录，该目录在初始化数据库的时候会用到</strong></p>
+<p>mkdir –p &#x2F;soft&#x2F;mysql&#x2F;data &#x2F;soft&#x2F;mysql&#x2F;logs &#x2F;soft&#x2F;mysql&#x2F;etc</p>
+<p><strong>修改目录权限</strong></p>
+<p>chown -R mysql:mysql &#x2F;soft&#x2F;mysql &#x2F;mysql</p>
+<p><strong>创建my.cnf文件</strong></p>
+<p>vi &#x2F;etc&#x2F;my.cnf</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br></pre></td><td class="code"><pre><span class="line"># MySQL config file.</span><br><span class="line"># Here follows entries for some specific programs</span><br><span class="line"># The MySQL server</span><br><span class="line">[client]</span><br><span class="line">port            = 3306</span><br><span class="line">socket          =/soft/mysql/mysql.sock</span><br><span class="line"></span><br><span class="line">[mysqld]</span><br><span class="line">server-id       = 1</span><br><span class="line">port            = 3306</span><br><span class="line">socket          =/soft/mysql/mysql.sock</span><br><span class="line">datadir     = /soft/mysql/data</span><br><span class="line">pid-file    = /soft/mysql/mysql.pid</span><br><span class="line">#####====================================[log]==============================</span><br><span class="line">log-error   =  /soft/mysql/logs/mysql-error.log</span><br><span class="line">#relay-log   = /soft/mysql/logs/mysql-relay.log</span><br><span class="line">slow_query_log = 1</span><br><span class="line">long_query_time = 1</span><br><span class="line">slow_query_log_file = /soft/mysql/logs/mysql-slow.log</span><br><span class="line">sql_mode=NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES</span><br><span class="line"></span><br><span class="line">log-bin=mysql-bin</span><br><span class="line">binlog_format=mixed</span><br><span class="line">#####====================================[log]==============================</span><br><span class="line"></span><br><span class="line">skip-external-locking</span><br><span class="line">character-set-server = utf8</span><br><span class="line">collation_server=utf8_general_ci</span><br><span class="line">#thread_concurrency = 16</span><br><span class="line">table_open_cache = 513K</span><br><span class="line">#binlog-do-db=mysql #需要同步的数据库</span><br><span class="line">log_bin_trust_function_creators = 1</span><br><span class="line">open_files_limit = 512</span><br><span class="line">max_allowed_packet = 64M</span><br><span class="line">net_buffer_length = 16K</span><br><span class="line">binlog_cache_size = 1M</span><br><span class="line">max_heap_table_size = 64M</span><br><span class="line">read_buffer_size = 8M</span><br><span class="line">read_rnd_buffer_size = 8M</span><br><span class="line">sort_buffer_size = 512M</span><br><span class="line">join_buffer_size = 128M</span><br><span class="line">thread_cache_size = 16</span><br><span class="line">query_cache_type = 0</span><br><span class="line">query_cache_size = 64K</span><br><span class="line">query_cache_limit = 4M</span><br><span class="line">thread_stack = 256K</span><br><span class="line">tmp_table_size = 32M</span><br><span class="line">slow_query_log=1</span><br><span class="line">long_query_time = 2</span><br><span class="line">bulk_insert_buffer_size = 32M</span><br><span class="line">#innodb_additional_mem_pool_size = 32M</span><br><span class="line">innodb_buffer_pool_size = 2G</span><br><span class="line">innodb_write_io_threads = 8</span><br><span class="line">innodb_read_io_threads = 8</span><br><span class="line">innodb_thread_concurrency = 16</span><br><span class="line">innodb_flush_log_at_trx_commit = 0</span><br><span class="line">innodb_log_buffer_size = 16M</span><br><span class="line">innodb_log_file_size = 256M</span><br><span class="line">innodb_log_files_in_group = 2</span><br><span class="line">innodb_max_dirty_pages_pct = 90</span><br><span class="line">innodb_flush_method = O_DSYNC</span><br><span class="line">innodb_lock_wait_timeout = 120</span><br><span class="line">lower_case_table_names=1</span><br><span class="line">max_connect_errors=18446744</span><br><span class="line">max_connections=1200</span><br><span class="line">default-storage-engine =innodb</span><br><span class="line"></span><br><span class="line">[mysqldump]</span><br><span class="line"># Do not buffer the whole result set in memory before writing it to</span><br><span class="line"># file. Required for dumping very large tables</span><br><span class="line">quick</span><br><span class="line">max_allowed_packet = 64M</span><br><span class="line"></span><br><span class="line">[mysql]</span><br><span class="line">no-auto-rehash</span><br><span class="line"># Only allow UPDATEs and DELETEs that use keys.</span><br><span class="line">#safe-updates</span><br><span class="line"></span><br><span class="line">[myisamchk]</span><br><span class="line">key_buffer_size = 512M</span><br><span class="line">sort_buffer_size = 512M</span><br><span class="line">read_buffer = 8M</span><br><span class="line">write_buffer = 8M</span><br><span class="line"></span><br><span class="line">[mysqlhotcopy]</span><br><span class="line">interactive-timeout</span><br><span class="line"></span><br><span class="line">[mysqld_safe]</span><br></pre></td></tr></table></figure>
+
+<p>说明：这里只是进行了一些简单的配置 </p>
+<p><strong>初始化数据库</strong></p>
+<p>在5.7.6之前初始化的方法是：<strong>bin&#x2F;mysql_install_db –user&#x3D;mysql</strong></p>
+<p>我下载的是最新的5.7.20也是4.12号刚发布的版本，5.7.6之后的版本初始化数据库不再使用mysql_install_db</p>
+<p>–defaults-file必须是第一个参数</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">./bin/mysqld  --defaults-file=/soft/mysql/mysql-5.7-3306/etc/my.cnf --initialize --user=mysql --basedir=/soft/mysql/mysql-5.7-3306 --datadir=/soft/mysql/data-3306   --innodb_undo_tablespaces=3 --explicit_defaults_for_timestamp</span><br><span class="line"></span><br><span class="line">./bin/mysqld_safe --defaults-file=/soft/mysql/mysql-5.7-3306/etc/my.cnf   &amp;</span><br><span class="line">./bin/mysqld  --defaults-file=/soft/mysql/mysql-5.7-3306/etc/my.cnf --initialize --user=idcs --innodb_undo_tablespaces=3 --explicit_defaults_for_timestamp</span><br></pre></td></tr></table></figure>
+
+<p> 如果配置了my.cnf的log_error，那么初始密码在log_error文件中，否则会打印出来。</p>
+<p>bin&#x2F;mysql_ssl_rsa_setup –datadir&#x3D;&#x2F;soft&#x2F;mysql&#x2F;data</p>
+<p><strong>修改目录权限</strong></p>
+<p>chown -R mysql:mysql &#x2F;soft&#x2F;mysql</p>
+<p><strong>配置启动文件</strong></p>
+<p>cp &#x2F;soft&#x2F;mysql&#x2F;mysql-5.7-3306&#x2F;etc&#x2F;my.cnf &#x2F;etc&#x2F;</p>
+<p>cp support-files&#x2F;mysql.server &#x2F;etc&#x2F;init.d&#x2F;mysql</p>
+<p>chkconfig –add mysql</p>
+<p>chkconfig mysql on</p>
+<p>service mysql start</p>
+<p>查看mysql 服务的启动状态：</p>
+<p>chkconfig –list 或者 chkconfig | grep mysql</p>
+<p><strong>配置环境变量</strong></p>
+<p>export MYSQL_HOME&#x3D;&#x2F;soft&#x2F;mysql</p>
+<p>PATH&#x3D;$PATH:$MYSQL_HOME&#x2F;bin</p>
+<p>source &#x2F;etc&#x2F;profile</p>
+<p><strong>修改权限（不确定，是否必须要改；error日志的写权限在配置文件中，增加user&#x3D;mysql后，正常了，启动不报错了）</strong></p>
+<p>chmod 775 .&#x2F;mysql&#x2F;</p>
+<p>chmod 775 .&#x2F;mysql&#x2F;*</p>
+<p><strong>用于日志可读写，数据可读写。</strong></p>
+<p><strong>增加用户，修改用户登录权限</strong></p>
+<p>grant all PRIVILEGES on *.* to ‘root‘@’%’ identified by “root” with GRANT option ;</p>
+<p>grant all PRIVILEGES on *.* to ‘mysql‘@’localhost’ identified by “mysql” with GRANT option ;</p>
+<p>grant all PRIVILEGES on *.* to ‘mysql‘@’%’ identified by “mysql” with GRANT option ;</p>
+<p>flush privileges;</p>
+<p><strong>启动停止</strong></p>
+<p>cd &#x2F;soft&#x2F;mysql;.&#x2F;bin&#x2F;mysqladmin –defaults-file&#x3D;&#x2F;soft&#x2F;mysql&#x2F;etc&#x2F;my.cnf -hlocalhost -umysql -pmysql shutdown</p>
+<p>cd &#x2F;soft&#x2F;mysql;.&#x2F;bin&#x2F;mysqld_safe –defaults-file&#x3D;&#x2F;soft&#x2F;mysql&#x2F;etc&#x2F;my.cnf &amp;</p>
+<p><strong>修改密码</strong></p>
+<p>在5.7中存储密码的字段不再是password了，变成了authentication_string</p>
+<p>update mysql.user set authentication_string&#x3D;password(‘root’) where user&#x3D;’root’;</p>
+<p>修改root密码后如果第一次使用root用户登入mysql系统还会需要重置一次root密码</p>
+<p>SET PASSWORD&#x3D;PASSWORD(‘root’);</p>
+<p>SET PASSWORD for ‘root‘@’%’ &#x3D;PASSWORD(‘root’);</p>
+<p>flush privileges;</p>
+<p><img src="/img/17049020240656.jpg"></p>
+<p>和5.6相比数据目录有一些变化板块多出了一些.pem后缀的文件暂时还不知道这些文件的作用，其中多出的sys库是一个很大的特点，这个系统库中包含了很多资源信息统计的视图表包括服务器的io、memory、wait、lock、statement等</p>
+<h1 id="二进制版本mysql-8-0-18安装"><a href="#二进制版本mysql-8-0-18安装" class="headerlink" title="二进制版本mysql-8.0.18安装"></a>二进制版本mysql-8.0.18安装</h1><p>下载的是版本是mysql-8.0.18社区版，具体的下载方法就不介绍，在官网就可以找到。</p>
+<p><strong>解压拷贝</strong></p>
+<p>(1)xz –d &#x2F;usr&#x2F;local&#x2F;mysql-8.0.16-linux-glibc2.12-x86_64.tar.xz</p>
+<p>　　　　(2)tar –xvf &#x2F;usr&#x2F;local&#x2F;mysql-8.0.16-linux-glibc2.12-x86_64.tar</p>
+<p>　　　　(3)mv &#x2F;usr&#x2F;local&#x2F;mysql-8.0.16-linux-glibc2.12-x86_64 &#x2F;usr&#x2F;local&#x2F;mysql</p>
+<p><strong>先创建mysql用户</strong></p>
+<p>groupadd mysql &#x2F;&#x2F;创建mysql组</p>
+<p>useradd -g mysql mysql &#x2F;&#x2F;创建mysql用户添加到mysql组</p>
+<p>再运行chown -R mysql:mysql &#x2F;soft&#x2F;mysql</p>
+<p><strong>创建mysql的数据目录，该目录在初始化数据库的时候会用到</strong></p>
+<p>mkdir –p &#x2F;soft&#x2F;mysql&#x2F;data &#x2F;soft&#x2F;mysql&#x2F;logs &#x2F;soft&#x2F;mysql&#x2F;etc</p>
+<p><strong>修改目录权限</strong></p>
+<p>chown -R mysql:mysql &#x2F;soft&#x2F;mysql &#x2F;mysql</p>
+<p><strong>创建my.cnf文件</strong></p>
+<p>vi &#x2F;etc&#x2F;my.cnf</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line"># MySQL config file.</span><br><span class="line"># Here follows entries for some specific programs</span><br><span class="line"># The MySQL server</span><br><span class="line">[client]</span><br><span class="line">port            = 3306</span><br><span class="line">socket          =/soft/mysql/mysql.sock</span><br><span class="line"></span><br><span class="line">[mysqld]</span><br><span class="line">server-id       = 1</span><br><span class="line">port            = 3306</span><br><span class="line">socket          =/soft/mysql/mysql.sock</span><br><span class="line">datadir     = /soft/mysql/data</span><br><span class="line">pid-file    = /soft/mysql/mysql.pid</span><br><span class="line">#####====================================[log]==============================</span><br><span class="line">log-error   =  /soft/mysql/logs/mysql-error.log</span><br><span class="line">#relay-log   = /soft/mysql/logs/mysql-relay.log</span><br><span class="line">slow_query_log = 1</span><br><span class="line">long_query_time = 1</span><br><span class="line">slow_query_log_file = /soft/mysql/logs/mysql-slow.log</span><br><span class="line">sql_mode=NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES</span><br><span class="line"></span><br><span class="line">log-bin=mysql-bin</span><br><span class="line">binlog_format=mixed</span><br><span class="line">#####====================================[log]==============================</span><br><span class="line"></span><br><span class="line">skip-external-locking</span><br><span class="line">character-set-server = utf8</span><br><span class="line">collation_server=utf8_general_ci</span><br><span class="line">#thread_concurrency = 16</span><br><span class="line">table_open_cache = 513K</span><br><span class="line">#binlog-do-db=mysql #需要同步的数据库</span><br><span class="line">log_bin_trust_function_creators = 1</span><br><span class="line">open_files_limit = 512</span><br><span class="line">max_allowed_packet = 64M</span><br><span class="line">net_buffer_length = 16K</span><br><span class="line">binlog_cache_size = 1M</span><br><span class="line">max_heap_table_size = 64M</span><br><span class="line">read_buffer_size = 8M</span><br><span class="line">read_rnd_buffer_size = 8M</span><br><span class="line">sort_buffer_size = 512M</span><br><span class="line">join_buffer_size = 128M</span><br><span class="line">thread_cache_size = 16</span><br><span class="line">thread_stack = 256K</span><br><span class="line">tmp_table_size = 32M</span><br><span class="line">slow_query_log=1</span><br><span class="line">long_query_time = 2</span><br><span class="line">bulk_insert_buffer_size = 32M</span><br><span class="line">#innodb_additional_mem_pool_size = 32M</span><br><span class="line">innodb_buffer_pool_size = 2G</span><br><span class="line">innodb_write_io_threads = 8</span><br><span class="line">innodb_read_io_threads = 8</span><br><span class="line">innodb_thread_concurrency = 16</span><br><span class="line">innodb_flush_log_at_trx_commit = 0</span><br><span class="line">innodb_log_buffer_size = 16M</span><br><span class="line">innodb_log_file_size = 256M</span><br><span class="line">innodb_log_files_in_group = 2</span><br><span class="line">innodb_max_dirty_pages_pct = 90</span><br><span class="line">innodb_flush_method = O_DSYNC</span><br><span class="line">innodb_lock_wait_timeout = 120</span><br><span class="line">lower_case_table_names=1</span><br><span class="line">max_connect_errors=18446744</span><br><span class="line">max_connections=1200</span><br><span class="line">default-storage-engine =innodb</span><br><span class="line"></span><br><span class="line">[mysqldump]</span><br><span class="line"># Do not buffer the whole result set in memory before writing it to</span><br><span class="line"># file. Required for dumping very large tables</span><br><span class="line">quick</span><br><span class="line">max_allowed_packet = 64M</span><br><span class="line"></span><br><span class="line">[mysql]</span><br><span class="line">no-auto-rehash</span><br><span class="line"># Only allow UPDATEs and DELETEs that use keys.</span><br><span class="line">#safe-updates</span><br><span class="line"></span><br><span class="line">[myisamchk]</span><br><span class="line">key_buffer_size = 512M</span><br><span class="line">sort_buffer_size = 512M</span><br><span class="line">read_buffer = 8M</span><br><span class="line">write_buffer = 8M</span><br><span class="line"></span><br><span class="line">[mysqlhotcopy]</span><br><span class="line">interactive-timeout</span><br><span class="line"></span><br><span class="line">[mysqld_safe]</span><br></pre></td></tr></table></figure>
+
+<p>说明：这里只是进行了一些简单的配置 </p>
+<p>去掉参数：</p>
+<p>query_cache_type &#x3D; 0</p>
+<p>query_cache_size &#x3D; 64K</p>
+<p>query_cache_limit &#x3D; 4M</p>
+<p><strong>初始化数据库</strong></p>
+<p>在5.7.6之前初始化的方法是：<strong>bin&#x2F;mysql_install_db –user&#x3D;mysql</strong></p>
+<p>我下载的是最新的5.7.20也是4.12号刚发布的版本，5.7.6之后的版本初始化数据库不再使用mysql_install_db</p>
+<p>–defaults-file必须是第一个参数</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">./bin/mysqld  --defaults-file=/paas/iddbs/yanghao_ac/mysql-8.0.18/etc/my13306.cnf --initialize --basedir=/paas/iddbs/yanghao_ac/mysql-8.0.18    --innodb_undo_tablespaces=3 --explicit_defaults_for_timestamp</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">./bin/mysqld_safe --defaults-file=/paas/iddbs/yanghao_ac/mysql-8.0.18/etc/my13306.cnf   &amp;</span><br><span class="line">./bin/mysqld  --defaults-file=/soft/mysql/mysql-5.7-3306/etc/my.cnf --initialize --user=idcs --innodb_undo_tablespaces=3 --explicit_defaults_for_timestamp</span><br></pre></td></tr></table></figure>
+
+<p> 如果配置了my.cnf的log_error，那么初始密码在log_error文件中，否则会打印出来。</p>
+<p>bin&#x2F;mysql_ssl_rsa_setup –datadir&#x3D;&#x2F;soft&#x2F;mysql&#x2F;data</p>
+<p><strong>修改目录权限</strong></p>
+<p>chown -R mysql:mysql &#x2F;soft&#x2F;mysql</p>
+<p><strong>配置启动文件</strong></p>
+<p>cp &#x2F;soft&#x2F;mysql&#x2F;mysql-5.7-3306&#x2F;etc&#x2F;my.cnf &#x2F;etc&#x2F;</p>
+<p>cp support-files&#x2F;mysql.server &#x2F;etc&#x2F;init.d&#x2F;mysql</p>
+<p>chkconfig –add mysql</p>
+<p>chkconfig mysql on</p>
+<p>service mysql start</p>
+<p>查看mysql 服务的启动状态：</p>
+<p>chkconfig –list 或者 chkconfig | grep mysql</p>
+<p><strong>配置环境变量</strong></p>
+<p>export MYSQL_HOME&#x3D;&#x2F;soft&#x2F;mysql</p>
+<p>PATH&#x3D;$PATH:$MYSQL_HOME&#x2F;bin</p>
+<p>source &#x2F;etc&#x2F;profile</p>
+<p><strong>修改权限（不确定，是否必须要改；error日志的写权限在配置文件中，增加user&#x3D;mysql后，正常了，启动不报错了）</strong></p>
+<p>chmod 775 .&#x2F;mysql&#x2F;</p>
+<p>chmod 775 .&#x2F;mysql&#x2F;*</p>
+<p><strong>用于日志可读写，数据可读写。</strong></p>
+<p><strong>增加用户，修改用户登录权限</strong></p>
+<p>create user ‘root‘@’%’ identified WITH mysql_native_password by ‘root’;</p>
+<p>grant all PRIVILEGES on *.* to ‘root‘@’%’ with GRANT option ;</p>
+<p>create user ‘mysql‘@’localhost’ identified WITH mysql_native_password by ‘mysql’;</p>
+<p>grant all PRIVILEGES on *.* to ‘mysql‘@’localhost’ with GRANT option ;</p>
+<p>create user ‘mysql‘@’%’ identified WITH mysql_native_password by ‘mysql’;</p>
+<p>grant all PRIVILEGES on *.* to ‘mysql‘@’%’ with GRANT option ;</p>
+<p>flush privileges;</p>
+<p><strong>启动停止</strong></p>
+<p>cd &#x2F;soft&#x2F;mysql;.&#x2F;bin&#x2F;mysqladmin –defaults-file&#x3D;&#x2F;soft&#x2F;mysql&#x2F;etc&#x2F;my.cnf -hlocalhost -umysql -pmysql shutdown</p>
+<p>cd &#x2F;soft&#x2F;mysql;.&#x2F;bin&#x2F;mysqld_safe –defaults-file&#x3D;&#x2F;soft&#x2F;mysql&#x2F;etc&#x2F;my.cnf &amp;</p>
+<p><strong>修改密码</strong></p>
+<p>在5.7中存储密码的字段不再是password了，变成了authentication_string</p>
+<p>update mysql.user set authentication_string&#x3D;password(‘root’) where user&#x3D;’root’;</p>
+<p>修改root密码后如果第一次使用root用户登入mysql系统还会需要重置一次root密码</p>
+<p>SET PASSWORD&#x3D;PASSWORD(‘root’);</p>
+<p>SET PASSWORD for ‘root‘@’%’ &#x3D;PASSWORD(‘root’);</p>
+<p>flush privileges;<br><img src="/img/17049020240656.jpg"></p>
+<p>和5.6相比数据目录有一些变化板块多出了一些.pem后缀的文件暂时还不知道这些文件的作用，其中多出的sys库是一个很大的特点，这个系统库中包含了很多资源信息统计的视图表包括服务器的io、memory、wait、lock、statement等</p>
+<p>配置文件增加参数：[mysqld]skip-grant-tables 重启mysql，然后root无密码登录，修改密码，再删除参数 ，重启mysql；</p>
+<p>FLUSH PRIVILEGES;</p>
+<p>ALTER USER ‘root‘@’localhost’ IDENTIFIED BY ‘root’;</p>
+<h1 id="linux下安装cmake方法—下载压缩包"><a href="#linux下安装cmake方法—下载压缩包" class="headerlink" title="linux下安装cmake方法—下载压缩包"></a>linux下安装cmake方法—下载压缩包</h1><p>失败</p>
+<p>　OpenCV 2.2以后的版本需要使用Cmake生成makefile文件，因此需要先安装cmake；还有其它一些软件都需要先安装cmake</p>
+<p>　　1.在linux环境下打开网页浏览器，输入网址：<a target="_blank" rel="noopener" href="https://cmake.org/download/%EF%BC%8C%E6%89%BE%E5%88%B0%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC%E7%9A%84%E4%BD%8D%E7%BD%AE%E3%80%82%E4%B8%80%E8%88%AC%E5%BC%80%E6%94%BE%E6%BA%90%E4%BB%A3%E7%A0%81%E8%BD%AF%E4%BB%B6%E9%83%BD%E4%BC%9A%E6%9C%89%E4%B8%A4%E4%B8%AA%E7%89%88%E6%9C%AC%E5%8F%91%E5%B8%83%EF%BC%9ASource">https://cmake.org/download/，找到最新版本的位置。一般开放源代码软件都会有两个版本发布：Source</a> Distribution 和 Binary Distribution，前者是源代码版，你需要自己编译成可执行软件。后者是已经编译好的可执行版，直接可以拿来用的。</p>
+<p><img src="/img/17049021552056.jpg"></p>
+<p>源码版 安装（二进制版不需要编译，解压后，配置环境变量就行）</p>
+<p>cmake-3.10.0.tar.gz</p>
+<p>解压：</p>
+<p># tar zxvf cmake-2.8.6.tar.gz</p>
+<p># cd cmake-2.8.6</p>
+<p>#.&#x2F;bootstrap –prefix&#x3D;&#x2F;soft&#x2F;cmake_install      &#x3D;&gt; 需要yum install gcc* </p>
+<p># gmake &amp;&amp; make install</p>
+<p>配置</p>
+<p>vi &#x2F;etc&#x2F;profile</p>
+<p>在文件的最后一行加入</p>
+<p>export PATH&#x3D;&#x2F;soft&#x2F;cmake_install&#x2F;bin:$PATH</p>
+<p>保存退出后</p>
+<p>source &#x2F;etc&#x2F;profile</p>
+<p>验证</p>
+<p>cmake –version</p>
+<p>出现版本号则为成功</p>
+<h1 id="Linux安装wget命令"><a href="#Linux安装wget命令" class="headerlink" title="Linux安装wget命令"></a>Linux安装wget命令</h1><p>yum安装</p>
+<p>yum -y install wget</p>
+<h1 id="Linux安装GCC方法"><a href="#Linux安装GCC方法" class="headerlink" title="Linux安装GCC方法"></a>Linux安装GCC方法</h1><p>参考：<a target="_blank" rel="noopener" href="http://os.51cto.com/art/200912/168804.htm">http://os.51cto.com/art/200912/168804.htm</a></p>
+<p>Linux下编写C&#x2F;C++程序自然缺不了一个优秀的编译器，Linux下比较常见的自然是GCC了。2015年4月下旬GCC也出到了5.1.0版本，对于C++11&#x2F;14也有了更好的支持了。因为最近在学习OpenMP, Gcc-5.1.0支持OpenMP4.0最新版本。所以，今天我们就来说说GCC的编译安装，安装的版本正是最新的5.1.0。下面我们进入正题(建议整个过程以root用户进行)：</p>
+<p>1.下载GCC源码：</p>
+<p>wget <a href="ftp://mirrors.kernel.org/gnu/gcc/gcc-5.1.0/gcc-5.1.0.tar.gz">ftp://mirrors.kernel.org/gnu/gcc/gcc-5.1.0/gcc-5.1.0.tar.gz</a></p>
+<p>或者通过浏览器下载：<a target="_blank" rel="noopener" href="https://gcc.gnu.org/mirrors.html">https://gcc.gnu.org/mirrors.html</a></p>
+<p>2.解压：</p>
+<p>tar -zxvf gcc-7.2.0.tar.gz</p>
+<p>3.下载编译所需依赖项：</p>
+<p>  cd gcc-7.2.0                    &#x2F;&#x2F;进入解包后的gcc文件夹<br>  .&#x2F;contrib&#x2F;download_prerequisites                  &#x2F;&#x2F;下载依赖项<br>  cd ..                          &#x2F;&#x2F;返回上层目录</p>
+<p>有如图错误时，<br><img src="/img/17049021731522.jpg"></p>
+<p>执行命令：yum -y install bzip2 下载bzip2后，再执行命令，可以成功。</p>
+<p>4.建立编译输出目录：<br>  mkdir gcc-build-5.1.0</p>
+<p>5.进入输出目录，执行以下命令，并生成makefile文件：</p>
+<p>  cd gcc-build-5.1.0</p>
+<p>  ..&#x2F;gcc-7.2.0&#x2F;configure –enable-checking&#x3D;release –prefix&#x3D;&#x2F;soft&#x2F;gcc&#x2F;install –enable-checking&#x3D;release –enable-languages&#x3D;c,c++,java –disable-multilib</p>
+<p>6.编译：</p>
+<p>make -j4接下来就是等待了，整个过程大约40分钟左右。PS：最好不要在编译过程中再去做别的什么事，整个过程CPU都是满载的，要是莫名终止了，后面麻烦事也不少。</p>
+<p>7.安装：</p>
+<p>编译结束以后，我们就可以执行安装了：</p>
+<p>make install</p>
+<p>8.检查版本：</p>
+<p>gcc –version<br>或gcc -v</p>
+<h1 id="Centos7编译安装GCC7-2"><a href="#Centos7编译安装GCC7-2" class="headerlink" title="Centos7编译安装GCC7.2"></a>Centos7编译安装GCC7.2</h1><p>wget ‘<a target="_blank" rel="noopener" href="http://mirrors-usa.go-parts.com/gcc/releases/gcc-7.2.0/gcc-7.2.0.tar.gz">http://mirrors-usa.go-parts.com/gcc/releases/gcc-7.2.0/gcc-7.2.0.tar.gz</a>‘  &#x2F;&#x2F; 下载gcc7.2源码包  </p>
+<p>tar xvf gcc-7.2.0.tar.gz                                                        &#x2F;&#x2F; 解压缩，默认解压出的文件夹名为gcc-7.2.0  </p>
+<p>mkdir gcc7objdir                                                                &#x2F;&#x2F; 新建一个编译目标文件暂存文件夹，官方文档不建议使用gcc源码包的文件夹  </p>
+<p>yum install gmp-devel                                                           &#x2F;&#x2F; 编译依赖此库  </p>
+<p>yum install mpfr-devel                                                          &#x2F;&#x2F; 编译依赖此库  </p>
+<p>yum install libmpc-devel                                                        &#x2F;&#x2F; 编译依赖此库  </p>
+<p>wget <a href="ftp://gcc.gnu.org/pub/gcc/infrastructure/isl-0.15.tar.bz2">ftp://gcc.gnu.org/pub/gcc/infrastructure/isl-0.15.tar.bz2</a>                  &#x2F;&#x2F; 编译依赖此库  </p>
+<p>yum install bzip2  </p>
+<p>tar -jxvf isl-0.15.tar.bz2  </p>
+<p>cd isl-0.15  </p>
+<p>.&#x2F;configure   </p>
+<p>make  </p>
+<p>make install  </p>
+<p>cd ..&#x2F;gcc7objdir&#x2F;                                                               &#x2F;&#x2F; 到刚刚新建的gcc编译目标暂存文件夹  </p>
+<p>..&#x2F;gcc-7.2.0&#x2F;configure –enable-checking&#x3D;release –prefix&#x3D;&#x2F;soft&#x2F;gcc&#x2F;install –enable-checking&#x3D;release –enable-languages&#x3D;c,c++,java –disable-multilib</p>
+<p>&#x2F;&#x2F; 指定gcc7安装地址，指定所需安装语言，不支持32位  </p>
+<p>export LD_LIBRARY_PATH&#x3D;$LD_LIBRARY_PATH:&#x2F;usr&#x2F;local&#x2F;lib                          &#x2F;&#x2F; 增加编译库依赖地址  </p>
+<p>make -j4                                                                        &#x2F;&#x2F; Make  </p>
+<p>make install                                                                    &#x2F;&#x2F; 安装  </p>
+<p>根据评论的朋友提醒，可能需要大家事先安装下gcc g++&#x2F; gcc-c++, c++的编译器是需要c++编译器的</p>
+<h1 id="一步一步的编译安装gcc"><a href="#一步一步的编译安装gcc" class="headerlink" title="一步一步的编译安装gcc"></a>一步一步的编译安装gcc</h1><p>首先安装gmp，命令如下：</p>
+<p>tar -xvzf gmp-5.0.1.tar.gz</p>
+<p>cd gmp-5.0.1&#x2F;</p>
+<p>mkdir temp</p>
+<p>cd temp&#x2F;</p>
+<p>..&#x2F;configure –prefix&#x3D;&#x2F;usr&#x2F;local&#x2F;gmp-5.0.1</p>
+<p>make</p>
+<p>make install</p>
+<p>　　这样就安装好了，注意：编译时建议指定安装位置，以便后面加载依赖，这里是&#x2F;usr&#x2F;local下</p>
+<p>　　然后安装mpfr，命令如下:</p>
+<p>tar -xvzf mpfr-3.1.5.tar.gz</p>
+<p>cd mpfr-3.1.5&#x2F;</p>
+<p>mkdir temp</p>
+<p>cd temp&#x2F;</p>
+<p>..&#x2F;configure –prefix&#x3D;&#x2F;usr&#x2F;local&#x2F;mpfr-3.1.5 –with-gmp&#x3D;&#x2F;usr&#x2F;local&#x2F;gmp-5.0.1</p>
+<p>make</p>
+<p>make install</p>
+<p>　　到这里mpfr安装完毕，并且必须添加–with-gmp导入gmp依赖，如果不加这个参数也会安装成功，但是后面安装GCC会报一个内部依赖的错误，如果这里不加会很麻烦，然后再安装mpc，命令如下：</p>
+<p>tar -xvzf mpc-1.0.3.tar.gz</p>
+<p>cd mpc-1.0.3&#x2F;</p>
+<p>mkdir temp</p>
+<p>cd temp&#x2F;</p>
+<p>..&#x2F;configure –prefix&#x3D;&#x2F;usr&#x2F;local&#x2F;mpc-1.0.3 –with-gmp&#x3D;&#x2F;usr&#x2F;local&#x2F;gmp-5.0.1 –with-mpfr&#x3D;&#x2F;usr&#x2F;local&#x2F;mpfr-3.1.5</p>
+<p>make</p>
+<p>make install</p>
+<p>　　同样一定要加上依赖的参数，现在mpc也安装完毕，然后执行 vim &#x2F;etc&#x2F;profile 编辑环境变量配置文件，直接在文件最后添加一行下面的变量：</p>
+<p>export LD_LIBRARY_PATH&#x3D;$LD_LIBRARY_PATH:&#x2F;usr&#x2F;local&#x2F;mpc-1.0.3&#x2F;lib:&#x2F;usr&#x2F;local&#x2F;gmp-5.0.1&#x2F;lib:&#x2F;usr&#x2F;local&#x2F;mpfr-3.1.5&#x2F;lib</p>
+<p>　　上面的路径要和实际安装时编译的路径一致，保存并退出后，执行 source &#x2F;etc&#x2F;profile 使环境变量生效</p>
+<p>　　最后就可以开始安装gcc了，安装过程如下：</p>
+<p>tar -jxvf gcc-4.9.3.tar.bz2</p>
+<p>cd gcc-4.9.3&#x2F;</p>
+<p>mkdir output</p>
+<p>cd output&#x2F;</p>
+<p>..&#x2F;configure –disable-multilib –enable-languages&#x3D;c,c++ –with-gmp&#x3D;&#x2F;usr&#x2F;local&#x2F;gmp-5.0.1 –with-mpfr&#x3D;&#x2F;usr&#x2F;local&#x2F;mpfr-3.1.5 –with-mpc&#x3D;&#x2F;usr&#x2F;local&#x2F;mpc-1.0.3</p>
+<p>　　然后开始编译并且安装：</p>
+<p>make</p>
+<p>make install</p>
+<p>　　make过程时间非常长，根据计算机配置不同，时间有所差别，一般来说半个小时到一个多小时都是正常的，因为gcc编译器相对来说还是比较庞大的一个项目的，安装成功之后执行 gcc -v 或者 gcc –version 查看新的版本信息</p>
+<h1 id="六、安装前提"><a href="#六、安装前提" class="headerlink" title="六、安装前提"></a>六、安装前提</h1><p>创建用户和用户组</p>
+<p>groupadd mysql &#x2F;&#x2F;创建mysql组</p>
+<p>useradd -g mysql mysql &#x2F;&#x2F;创建mysql用户添加到mysql组</p>
+<p>再执行chown -R mysql:mysql &#x2F;soft&#x2F;mysql_5.7.9</p>
+<h1 id="物理内存不够用，增大Linux交换分区的方法"><a href="#物理内存不够用，增大Linux交换分区的方法" class="headerlink" title="物理内存不够用，增大Linux交换分区的方法"></a>物理内存不够用，增大Linux交换分区的方法</h1><p>当系统的物理内存不够用的时候，就需要将物理内存中的一部分空间释放出来，以供当前运行的程序使用。那些被释放的空间可能来自一些很长时间没有什么 操作的程序，这些被释放的空间被临时保存到Swap空间中，等到那些程序要运行时，再从Swap中恢复保存的数据到内存中。这样，系统总是在物理内存不够 时，才进行Swap交换。这个是SWAP 交换分区的作用。</p>
+<p>系统中交换分区的大小并不取决于物理内存的量，而是取决于系统中内存的负荷，所以在安装系统时要根据具体的业务来设置SWAP的值。其实虚拟内存并不是等到物理内存用尽了才使用的，是否尽量的使用或不使用swap，在内核空间有一个参数控制。</p>
+<p># cat &#x2F;proc&#x2F;sys&#x2F;vm&#x2F;swappiness</p>
+<p>60</p>
+<p>表示默认的swappiness的值为60。换而言之，当swap空间使用达到60%的时候，开始释放物理内存中的cache&#x2F;buffers。 swappiness&#x3D;0 的时候表示最大限度使用物理内存，然后才是swap空间；swappiness＝100 的时候表示积极的使用swap分区，并且把内存上的数据及时的搬运到swap空间里面。</p>
+<p>现在服务器的内存动不动就是上百G，所以我们可以把这个参数值设置的低一些，让操作系统尽可能的使用物理内存，降低系统对swap的使用，从而提高系统的性能。例如</p>
+<p># echo 10 &gt; &#x2F;proc&#x2F;sys&#x2F;vm&#x2F;swappiness</p>
+<p>或者</p>
+<p># sysctl vm.swappiness&#x3D;10</p>
+<p>vm.swappiness &#x3D; 10</p>
+<p># cat &#x2F;proc&#x2F;sys&#x2F;vm&#x2F;swappiness</p>
+<p>10</p>
+<p>这表明修改已经生效。但是如果我们重启了系统，它又会变成60。为了让我们的修改长久有效，可以修改配置文件&#x2F;etc&#x2F;sysctl.conf：</p>
+<p># echo ‘vm.swappiness&#x3D;10’ &gt;&gt;&#x2F;etc&#x2F;sysctl.conf</p>
+<p>为了让它即时生效，可执行：</p>
+<p># sysctl -p</p>
+<p>重新载入配置文件。 </p>
+<p>目前Red Hat（红帽官方）推荐交换分区的大小应当与系统物理内存的大小保持线性比例关系。不过在小于2GB物理内存的系统中，交换分区大小应该设置为内存大小的 两倍，如果内存大小多于2GB，交换分区大小应该是物理内存大小加上2GB。其原因在于，系统中的物理内存越大， 对于内存的负荷可能也越大。但是，如果物理内存大小扩展到数百GB，这样做就没什么意义了。</p>
+<p>最近，在Gentoo中编译webkit-gtk-1.10.2-r300，辛辛苦苦编译了几个小时，结果报错：</p>
+<p>collect2: ld termiinated with signal 9 [Killed]</p>
+<p>通过Google搜索，发现这是由于编译过程中机器的内存耗尽引起的。这就是说解决问题的办法是增加内存。不过加物理内存是远水，解不了近火。既然 Linux中的交换分区也是内存的一部分，于是不妨尝试增加交换分区。 这又让我们想起了红帽官方对于交换分区的建议：Linux系统交换分区最适合的大小是物理内存的1-2倍。可是谁又会在分区的时候记得这些呢？不过由于 Linux允许文件系统中存在多个交换分区或者交换分区文件，所以亡羊补牢、为时未晚。如果我们的磁盘空间还尚有空余没有划分，那么我们可以直接利用分区 工具再分出一个交换分区。倘若你像我一样，所有空间都已经被划分完了，那么只剩一招了—使用交换分区文件。下面我们主要来说说如何利用交换分区文件扩大分 区。</p>
+<p>首先，需要制作交换分区文件。考虑到我的老机器已有的物理内存是1G、现有交换分区大小是500M。为了我们的编译过程顺利完成，不妨考虑交换分区文件的大小为1G。为此，执行下述命令：</p>
+<p>$ sudo dd if&#x3D;&#x2F;dev&#x2F;zero of&#x3D;&#x2F;var&#x2F;tmp&#x2F;swap bs&#x3D;1k count&#x3D;1024000</p>
+<p>记录了1024000+0 的读入</p>
+<p>记录了1024000+0 的写出</p>
+<p>1048576000字节(1.0 GB)已复制，5.07655 秒，207 MB&#x2F;秒</p>
+<p>它将在&#x2F;var&#x2F;tmp路径创建一个名为swap、大小为1G的分区文件，该分区文件拥有1024000个扇区（block)，每个扇区大小为1K。接着，再把这个分区文件格式化为交换分区格式：</p>
+<p>$ sudo mkswap &#x2F;var&#x2F;tmp&#x2F;swap</p>
+<p>随后，将它挂载到文件系统：</p>
+<p>$ sudo swapon &#x2F;var&#x2F;tmp&#x2F;swap</p>
+<p>如果想要确认交换分区是否挂载成功，可执行：</p>
+<p>$ swapon -s</p>
+<p>Filename Type Size Used Priority</p>
+<p>&#x2F;dev&#x2F;sda1 partition 511996 16192 ?1</p>
+<p>&#x2F;var&#x2F;tmp&#x2F;swap file 1023996 0 ?2</p>
+<p>从显示结果来看，我们确实看到了文件格式交换分区被加载。如果还想要查看系统内存情况，只需执行：</p>
+<p>$ free -m</p>
+<p>total used free shared buffers cached</p>
+<p>Mem: 995 935 60 0 6 551</p>
+<p>-&#x2F;+ buffers&#x2F;cache: 376 618</p>
+<p>Swap: 1499 15 1484</p>
+<p>通过扩大swap区，可以正常将webkit-gtk-1.10.2-r300编译完。实际上，用top跟踪webkit-gtk-1.10.2- r300的编译过程，会发现整个编译过程所需要的内存大概在2G左右。而我们通过增加交换分区的大小，总获得了2.5G左右的内存空间。编译完之后，如果 我们不再需要这一块交换分区文件，那么可以先卸载再删除它：</p>
+<p>$ sudo swapoff &#x2F;var&#x2F;tmp&#x2F;swap</p>
+<p>$ sudo rm -rf &#x2F;var&#x2F;tmp&#x2F;swap</p>
+<p>倘若我们仍希望交换分区文件为以后的编译提供便利，那么可以选择保留它。不过在使用它之前必须先挂载它，因为一旦重启，原先的挂载便会失效！若要让我们的交换分区文件随机器启动自动挂载，则可修改&#x2F;etc&#x2F;fstab文件，例如作如下设置：</p>
+<p>$ cat &#x2F;etc&#x2F;fstab | grep -i swap</p>
+<p>&#x2F;dev&#x2F;sda1 none swap sw 0 0</p>
+<p>&#x2F;var&#x2F;tmp&#x2F;swap swap swap defaults 0 0</p>
+<h1 id="七、报错"><a href="#七、报错" class="headerlink" title="七、报错"></a>七、报错</h1><p>11.初始化后修改密码报错</p>
+<p>ERROR 1820 (HY000): You must reset your password using ALTER USER statement before executing this statement.</p>
+<p>安装完mysql 之后，登陆以后，不管运行任何命令，总是提示这个</p>
+<p>step 1: SET PASSWORD &#x3D; PASSWORD(‘新密码’);</p>
+<p>step 2: ALTER USER ‘root‘@’localhost’ PASSWORD EXPIRE NEVER;</p>
+<p>step 3: flush privileges;</p>
+<p>10.</p>
+<p>配置mysql主从同步复制</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Slave_IO_Running: No</span><br><span class="line">Slave_SQL_Running: Yes</span><br><span class="line">                Last_IO_Errno: 1593</span><br><span class="line">                Last_IO_Error: Fatal error: The slave I/O thread stops because master and slave have equal MySQL server ids; these ids must be different for replication to work (or the --replicate-same-server-id option must be used on slave but this does not always make sense; please check the manual before using it).</span><br></pre></td></tr></table></figure>
+
+<p>Server_id冲突</p>
+<p>更改&#x2F;etc&#x2F;my.cnf,在各个端口下添加</p>
+<p>如[mysqld3308]下添加：</p>
+<p>server_id&#x3D;3308</p>
+<p>重启mysql服务</p>
+<p>9</p>
+<p>mysql&gt; insert into qf1(id,name) values(‘101’,’gg234’);</p>
+<p>ERROR 1064 (HY000): Can’t find a valid data node for specified node index :QF1 -&gt; ID -&gt; 101 -&gt; Index : 2</p>
+<p>Dbrule.xml中的mod-long规则的count由3改为2</p>
+<p>8</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; insert into test.gg(id,name) values(&#x27;322&#x27;,&#x27;gg234&#x27;);</span><br><span class="line">ERROR 1105 (HY000): Table &#x27;test.gg&#x27; doesn&#x27;t exist</span><br><span class="line">mysql&gt; show databases;</span><br><span class="line">+----------+</span><br><span class="line">| DATABASE |</span><br><span class="line">+----------+</span><br><span class="line">| test     |</span><br><span class="line">+----------+</span><br><span class="line">1 row in set (0.00 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; use test;</span><br><span class="line">Database changed</span><br><span class="line">mysql&gt; insert into gg(id,name) values(&#x27;322&#x27;,&#x27;gg234&#x27;);</span><br><span class="line">ERROR 1003 (HY000): Transaction error, need to rollback.Table &#x27;test.gg&#x27; doesn&#x27;t exist</span><br><span class="line">mysql&gt; show tables;</span><br><span class="line">ERROR 1003 (HY000): Transaction error, need to rollback.Table &#x27;test.gg&#x27; doesn&#x27;t exist</span><br><span class="line">mysql&gt; \q</span><br><span class="line"></span><br><span class="line">mysql&gt; insert into qf11(id,name) values(&#x27;322&#x27;,&#x27;gg234&#x27;);</span><br><span class="line">ERROR 1146 (42S02): Table &#x27;test1.qf11&#x27; doesn&#x27;t exist</span><br><span class="line">mysql&gt; insert into qf1(id,name) values(&#x27;322&#x27;,&#x27;gg234&#x27;);</span><br><span class="line">ERROR 1003 (HY000): Transaction error, need to rollback. errno:1146 Table &#x27;test1.qf11&#x27; doesn&#x27;t exist</span><br><span class="line">mysql&gt; rollback;</span><br><span class="line">Query OK, 0 rows affected (0.04 sec)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>4</p>
+<p>[Err] 1064 - com.alibaba.druid.sql.parser.ParserException: syntax error, expect RPAREN, actual ERROR DURATION</p>
+<p>7</p>
+<p>在dbproxy上，全局表执行insert一条记录后，3308和3309上没有该记录，</p>
+<p>一段时间后，dbproxy，也select时，结果为空，没有；</p>
+<p>在图形化界面上执行insert插入记录，dbproxy、3308和3309都没有数据</p>
+<p>解决：在insert后，没有commit提交数据，数据在内存中。</p>
+<p>6</p>
+<p><img src="/img/17049022886739.jpg"></p>
+<p>3308和3309没有分别创建test1和test2数据库</p>
+<p>5</p>
+<p>[yhao521@haoEN logs]$ mysql -umysql -pmysql -P3308 -S &#x2F;tmp&#x2F;mysql.sock3308</p>
+<p>登录mysql执行查询报错</p>
+<p>mysql&gt; select * from gg;</p>
+<p>ERROR 1142 (42000): SELECT command denied to user ‘mysql‘@’localhost’ for table ‘gg’</p>
+<p>先用root登录</p>
+<p>[yhao521@haoEN logs]$ mysql -uroot -proot -P3308 -S &#x2F;tmp&#x2F;mysql.sock3308</p>
+<p>修改mysql用户的权限为all test1.*s</p>
+<p>mysql&gt; grant all privileges on test1.* to ‘mysql‘@’%’ identified by ‘mysql’ with grant option;</p>
+<p>Query OK, 0 rows affected (0.00 sec)</p>
+<p>mysql&gt; flush privileges;</p>
+<p>Query OK, 0 rows affected (0.00 sec)</p>
+<p>之后，执行查询正常。</p>
+<p>3</p>
+<p>[root@haoEN data]# mysql -h192.168.189.129 -utest -ptest -P8066</p>
+<p>报错：</p>
+<p>ERROR 2002 (HY000): Can’t connect to local MySQL server through socket ‘&#x2F;var&#x2F;lib&#x2F;mysql&#x2F;mysql.sock’ (2)</p>
+<p>第1个错误，解决后，第3个也正常了。</p>
+<p>2</p>
+<p>其它连接mysql正常（本地连接、远程连接）</p>
+<p><strong>Dbproxy连接mysql报错：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[2017-02-20 10:56:59 WARN ] [$_NIOREACTOR-4-RW] &#123;com.sitech.dbproxy.mysql.nio.MySQLConnectionAuthenticator:101&#125;-can&#x27;t connect to mysql server ,errmsg:Access denied for user &#x27;mysql&#x27;@&#x27;haoZH&#x27; (using password: YES) MySQLConnection [id=52, lastTime=1487559419870, user=mysql, schema=test2, old shema=test2, borrowed=false, fromSlaveDB=false, threadId=318, charset=utf8, txIsolation=0, autocommit=true, attachment=null, respHandler=null, host=192.168.189.128, port=3309, statusSync=null, writeQueue=0, modifiedSQLExecuted=false]</span><br></pre></td></tr></table></figure>
+
+<p>登录进去后，修改密码</p>
+<p>1</p>
+<p>&#x2F;etc&#x2F;init.d&#x2F;mysql start 启动3306端口的mysqlshujuku报错</p>
+<p>移动原来3306端口的数据到</p>
+<p>mv &#x2F;var&#x2F;lib&#x2F;mysql&#x2F; &#x2F;data&#x2F;</p>
+<p>修改目录名称mysql为mysql_3306</p>
+<p>修改&#x2F;etc&#x2F;my.cnf</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">[client]</span><br><span class="line">socket=/data /mysql_3306/mysql.sock</span><br><span class="line"></span><br><span class="line">[mysqld] </span><br><span class="line">datadir=/data/ mysql_3306 </span><br><span class="line">socket=/data/mysql_3306/mysql.sock</span><br><span class="line"></span><br><span class="line">[mysql] </span><br><span class="line">socket=/data/mysql_3306/mysql.sock</span><br></pre></td></tr></table></figure>
+
+<p>之后，就能正常启动了。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2024/01/10/linux%E4%B8%8B%E7%9A%84mysql%E5%AE%89%E8%A3%85(%E4%B8%80%E4%B8%AAIP%E5%A4%9A%E7%AB%AF%E5%8F%A3)/">https://yhao521.github.io/2024/01/10/linux%E4%B8%8B%E7%9A%84mysql%E5%AE%89%E8%A3%85(%E4%B8%80%E4%B8%AAIP%E5%A4%9A%E7%AB%AF%E5%8F%A3)/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/web-frontend/">web/frontend</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/java-programming/">java/programming</a><a class="post-meta__tags" href="/tags/c-programming/">c++/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a><a class="post-meta__tags" href="/tags/rust-programming/">rust/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/01/10/mysql5.7%E5%8D%95%E5%AE%9E%E4%BE%8B%E5%AE%89%E8%A3%85/" title="mysql5.7单实例安装"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">mysql5.7单实例安装</div></div><div class="info-2"><div class="info-item-1">1.检查环境  [root@lxd-vm1 data]# rpm -qa | grep mysql  mysql-5.1.71-1.el6.x86_64  mysql-libs-5.1.71-1.el6.x86_64  qt-mysql-4.6.2-26.el6_4.x86_64  mysql-devel-5.1.71-1.el6.x86_64  mysql-server-5.1.71-1.el6.x86_64  [root@lxd-vm1 data]#   发现当前环境中在操作系统安装阶段已经安装默认的5.1的mysql，建议删除掉，避免不必要的影响。 2.清理自带的mysql环境  [root@lxd-vm1 data]# rpm -e mysql-5.1.71-1.el6.x86_64 –nodeps  [root@lxd-vm1 data]# rpm -e mysql-libs-5.1.71-1.el6.x86_64 –nodeps  [root@lxd-vm1 data]# rpm -e qt-mysql-4.6.2-26.el6_4.x86_64 –nodeps  [...</div></div></div></a><a class="pagination-related" href="/2024/01/10/%E5%AE%8C%E7%BE%8E%E8%A7%A3%E5%86%B3%EF%BC%9AMySQL8%E6%8A%A5%E9%94%99%EF%BC%9APublic%20Key%20Retrieval%20is%20not%20allowed/" title="完美解决：MySQL8报错：Public Key Retrieval is not allowed"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">完美解决：MySQL8报错：Public Key Retrieval is not allowed</div></div><div class="info-2"><div class="info-item-1">已解决：MySQL8报错：Public Key Retrieval is not allowed 目录 1.问题描述  2.解决过程 方案一： 方案二：  1.问题描述连接MySQL数据库的时候，报错内容如下：“Public Key Retrieval is not allowed”。  2.解决过程 mysql 8.0 默认使用 caching_sha2_password 身份验证机制 （即从原来mysql_native_password 更改为 caching_sha2_password。） 从 5.7 升级 8.0 版本的不会改变现有用户的身份验证方法，但新用户会默认使用新的 caching_sha2_password 。 客户端不支持新的加密方式。 修改用户的密码和加密方式。 方案一：在命令行模式下进入mysql，输入以下命令: 1ALTER USER &#x27;root&#x27;@&#x27;localhost&#x27; IDENTIFIED WITH mysql_native_password BY &#x27;root&#x27;;  或者  1ALTER U...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/npm&yarn/" title="npm&amp;yarn"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">npm&amp;yarn</div></div><div class="info-2"><div class="info-item-1"> title: npm&amp;yarnlang: en-USdate: 2023-09-03 20:17:08category:  开发语言 doc_nodejstag: doc_nodejsauthor:   1. centos7 npm安装——CentOS7常用软件官网下载npm安装包， https://nodejs.org/en/ ，左边是稳定版右边是最新版。  推荐个 https://npm.taobao.org/mirrors/可以下载想要的node版本 2. 首先安装必要的环境(推荐方式一安装)yum install gcc gcc-c++  3. 一、方式一wget https://npm.taobao.org/mirrors/node/v12.8.0/node-v12.8.0-linux-x64.tar.gz  然后执行下面命令 tar -zxvf node-v12.8.0-linux-x64.tar.gz mv node-v12.8.0-linux-x64 node  配置环境变量 vim /etc/profile vi .bash_profile  在文件中...</div></div></div></a><a class="pagination-related" href="/2024/04/14/Vue3+TypeScript%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E8%BF%9B%E9%98%B6%EF%BC%88%E4%B8%83%EF%BC%89%E2%80%94%E2%80%94%E9%A1%B9%E7%9B%AE%E5%AE%9E%E6%88%98/" title="Vue3+TypeScript从入门到进阶（七）——项目实战"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-14</div><div class="info-item-2">Vue3+TypeScript从入门到进阶（七）——项目实战</div></div><div class="info-2"><div class="info-item-1">文章目录   一、简介 二、Vue2和Vue3区别 三、Vue知识点学习 四、TypeScript知识点 五、项目实战  一. 代码规范  1.1. 集成editorconfig配置 1.2. 使用prettier工具 1.3. 使用ESLint检测 1.4. git Husky和eslint 1.5. git commit规范  1.5.1. 代码提交风格 1.5.2. 代码提交验证     二. 第三方库集成  2.1. vue.config.js配置 2.2. vue-router集成 2.3. vuex集成 2.4. element-plus集成  2.4.1. 全局引入 2.4.2. 局部引入 2.4.3 element-plus的icon引入   2.5. axios集成 2.6. VSCode配置     六、项目打包和自动化部署 七、沿途学习代码地址及案例地址  1、沿途学习代码地址 2、项目案例地址   八、知识拓展  1、ES6数组与对象的解构赋值详解  数组的解构赋值 对象的解构赋值 字符串的解构赋值   2、JavaScript的 …（展开运算符） 3、e...</div></div></div></a><a class="pagination-related" href="/2026/01/23/Wails%20v3%E5%88%9D%E8%AF%86/" title="Wails v3初识"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-23</div><div class="info-item-2">Wails v3初识</div></div><div class="info-2"><div class="info-item-1">介绍简介与官网链接Wails 是一个用于构建桌面应用程序的框架，允许开发者使用 Go 语言编写后端逻辑，并结合前端技术（如 HTML、CSS 和 JavaScript）来创建跨平台的桌面应用。它的目标是简化桌面应用的开发流程，同时利用 Go 的高效性和现代前端技术的灵活性。 v3 官网链接 v2 官网链接 特点Wails 是一个可让您使用 Go 和 Web 技术编写桌面应用的项目。 将它看作为 Go 的快并且轻量的 Electron 替代品。 您可以使用 Go 的灵活性和强大功能，结合丰富的现代前端，轻松的构建应用程序。 快速启动模板Wails 带有许多预配置的模板，可让您快速启动和运行应用程序。 有以下框架的模板：Svelte、React、Vue、Preact、Lit 和 Vanilla。 每个模板都有 JavaScript 和 TypeScript 版本。 原生元素Wails 使用专门构建的库来处理窗口、菜单、对话框等原生元素，因此您可以构建美观、功能丰富的桌面应用程序。 It does not embed a browser, so it delivers a small ...</div></div></div></a><a class="pagination-related" href="/2026/03/19/OpenClaw%20%E6%9C%AC%E5%9C%B0%E6%A8%A1%E5%9E%8B%E6%9C%80%E4%BD%B3%E6%96%B9%E6%A1%88%EF%BC%9A%E6%A8%A1%E5%9E%8B%E6%8E%A8%E8%8D%90%20+%20vLLM%20%E9%83%A8%E7%BD%B2%E4%BC%98%E5%8C%96%E5%AE%8C%E6%95%B4%E6%95%99%E7%A8%8B%EF%BC%81/" title="OpenClaw 本地模型最佳方案：模型推荐 + vLLM 部署优化完整教程！"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-19</div><div class="info-item-2">OpenClaw 本地模型最佳方案：模型推荐 + vLLM 部署优化完整教程！</div></div><div class="info-2"><div class="info-item-1">OpenClaw 如何切换到本地模型？如果希望在执行自动化任务时保持流畅、不出现卡顿，同时避免频繁触发上下文长度限制，那么选择一个合适的开源模型就非常关键。 对于 OpenClaw 来说，模型不仅需要具备良好的推理能力和语言理解能力，还需要拥有稳定的 工具调用（Tool Calling）能力。因为在自动化任务中，模型需要频繁调用各种工具完成操作，因此工具调用能力往往是选择模型时最重要的指标之一。  很多人在第一次尝试本地部署模型时，往往会选择 Ollama。它的优点确实很明显：安装简单、配置方便，几乎可以做到“傻瓜式”部署。 开发工具 但在 OpenClaw 这种自动化任务场景下，Ollama 的调用方式和推理速度并不理想。实际使用中往往会遇到两个问题：  推理速度较慢 上下文长度很容易被耗尽  在连续运行多个任务后，经常会出现上下文不够用的情况。 因此，如果你希望获得更稳定、更高效的本地部署体验，就需要选择更合适的推理框架。 一般来说：  远程集群 &#x2F; 多 Agent 场景 ：推荐使用 SGLang 单卡本地部署 ：强烈推荐 vLLM  目前来看，vLLM 可以说是单...</div></div></div></a><a class="pagination-related" href="/2024/05/21/%E7%9B%98%E7%82%B920%E6%AC%BE%E4%BC%98%E8%B4%A8%E7%9A%84%E5%BC%80%E6%BA%90%E6%B8%B8%E6%88%8F%EF%BC%8C2024%E6%9C%80%E6%96%B0%E6%94%B6%E9%9B%86%EF%BC%81/" title="盘点20款优质的开源游戏，2024最新收集！"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-05-21</div><div class="info-item-2">盘点20款优质的开源游戏，2024最新收集！</div></div><div class="info-2"><div class="info-item-1">本文收集了20款优质的开源游戏，部分还可以点击就可以玩，干货满满，建议先收藏一下。 如果你有值得推荐的开源游戏，欢迎评论中指出！ 1、红警https://github.com/electronicarts/CnC_Remastered_Collection 红警，或者更准确地说，应该称为“红色警戒”，是大多数80后记忆中与游戏最深刻的联系之一。  这款游戏是由当年的Westwood工作室打造的一款即时战略游戏，以至于一提到即时战略游戏，我脑海中浮现的第一个就是红警。 然而，在1998年8月17日，EA收购了Westwood。一般情况下，一旦游戏工作室被EA收购，就意味着走向没落。  这次开源的代码实际上是1996年发布的第一代红警，国内也称之为红警95。  此次开源不涉及游戏素材和游戏引擎，只包括TiberianDawn.DLL和RedAlert.dll的源码，允许Mod社区更好地改变游戏行为。 在6月5日，这两款游戏发布了重制版。 命令与征服系列游戏是用C++实现的，打开代码后可以看到非常规范的代码，令人赞叹不已。  下面是一个示例，展示了飞行器寻找新降落点的函数，函数功能、输...</div></div></div></a><a class="pagination-related" href="/2023/09/04/vscode%E4%BD%BF%E7%94%A8/" title="vscode使用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">vscode使用</div></div><div class="info-2"><div class="info-item-1"> title: vscode的使用lang: en-USdate: 2023-09-03 20:17:08category:  vscodetag: vscodeauthor:   1. vscode的使用1.1. 插件位置更改参考：https://blog.csdn.net/zhaojunwei08/article/details/86021665 https://blog.csdn.net/u011127019/article/details/86737308#comments mklink使用 https://www.icoa.cn/a/910.html set oldDir&#x3D;%UserProfile%.vscode\extensions mklink &#x2F;D “%oldDir%” “E:\eclipse-hao\HTML\extensions” 确保有 这个 .vscode 空目录  bat方式： 123456789@echo offif &quot;%1&quot; == &quot;h&quot; goto beginmshta vbscript:c...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E9%A6%96%E5%85%88%E5%8D%B8%E8%BD%BD%E4%B9%8B%E5%89%8D%E7%9A%84mysql"><span class="toc-number">1.</span> <span class="toc-text">一、首先卸载之前的mysql</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%AE%89%E8%A3%85mysql%EF%BC%88%E8%A7%A3%E5%8E%8B%E7%89%88%EF%BC%89"><span class="toc-number">2.</span> <span class="toc-text">二、安装mysql（解压版）</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%AE%89%E8%A3%85%E7%AE%80%E5%8D%95%E7%89%88mysql"><span class="toc-number">3.</span> <span class="toc-text">三、安装简单版mysql</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%AE%89%E8%A3%85Mysql"><span class="toc-number">3.1.</span> <span class="toc-text">**一、安装Mysql **</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E7%99%BB%E5%BD%95MySQL"><span class="toc-number">3.2.</span> <span class="toc-text">二、登录MySQL</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81MySQL%E7%9A%84%E5%87%A0%E4%B8%AA%E9%87%8D%E8%A6%81%E7%9B%AE%E5%BD%95"><span class="toc-number">3.3.</span> <span class="toc-text">三、MySQL的几个重要目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E4%BF%AE%E6%94%B9%E7%99%BB%E5%BD%95%E5%AF%86%E7%A0%81"><span class="toc-number">3.4.</span> <span class="toc-text">**四、修改登录密码 **</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E5%90%AF%E5%8A%A8%E4%B8%8E%E5%81%9C%E6%AD%A2"><span class="toc-number">3.5.</span> <span class="toc-text">五、启动与停止</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E8%BF%9C%E7%A8%8B%E7%99%BB%E5%BD%95"><span class="toc-number">3.6.</span> <span class="toc-text">六、远程登录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E6%96%B0%E5%BB%BA%E5%85%B6%E4%BB%96%E7%94%A8%E6%88%B7mysql%E5%B9%B6%E9%99%84%E6%9D%83%E9%99%90"><span class="toc-number">3.7.</span> <span class="toc-text">七、新建其他用户mysql并附权限</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E4%B8%AD%E6%96%87%E4%B9%B1%E7%A0%81"><span class="toc-number">3.8.</span> <span class="toc-text">八、中文乱码</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E4%B8%80%E5%8F%B0linux%E5%90%AF%E5%8A%A8%E5%A4%9A%E4%B8%AAmysql%E5%AE%9E%E4%BE%8B-1"><span class="toc-number">4.</span> <span class="toc-text">四、一台linux启动多个mysql实例(1)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1%E3%80%81%E5%88%9B%E5%BB%BA%E6%96%B0%E7%9A%84mysql%E5%AE%9E%E4%BE%8B%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%9B%AE%E5%BD%95%EF%BC%9A"><span class="toc-number">4.1.</span> <span class="toc-text">1、创建新的mysql实例数据存储目录：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5%E3%80%81%E5%90%AF%E5%8A%A8mysql%EF%BC%8C%E8%A6%81%E6%8C%87%E5%AE%9A-cnf%E6%96%87%E4%BB%B6%E5%90%AF%E5%8A%A8"><span class="toc-number">4.2.</span> <span class="toc-text">5、启动mysql，要指定.cnf文件启动</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6%E3%80%81%E5%81%9C%E6%AD%A2MYSQL%EF%BC%8C%E9%9C%80%E8%A6%81%E6%8C%87%E5%AE%9A%E5%AF%B9%E5%BA%94%E7%9A%84sock%E6%96%87%E4%BB%B6%E3%80%82"><span class="toc-number">4.2.1.</span> <span class="toc-text">6、停止MYSQL，需要指定对应的sock文件。</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7%E3%80%81%E7%99%BB%E9%99%863307%E7%AB%AF%E5%8F%A3%E7%9A%84mysql"><span class="toc-number">4.2.2.</span> <span class="toc-text">7、登陆3307端口的mysql</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E4%B8%80%E5%8F%B0linux%E5%90%AF%E5%8A%A8%E5%A4%9A%E4%B8%AAmysql%E5%AE%9E%E4%BE%8B-2"><span class="toc-number">5.</span> <span class="toc-text">五、一台linux启动多个mysql实例(2)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-mysql%E5%AE%89%E8%A3%85%E5%90%AF%E5%8A%A8%E6%AD%A3%E5%B8%B8%E5%90%8E%EF%BC%8C%E4%BF%AE%E6%94%B9%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6-etc-my-cnf%E3%80%82"><span class="toc-number">5.1.</span> <span class="toc-text">2.mysql安装启动正常后，修改配置文件&#x2F;etc&#x2F;my.cnf。</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E5%90%AF%E5%8A%A8%EF%BC%8C%E5%81%9C%E6%AD%A2%E3%80%82%E5%88%B0%E6%AD%A4%E5%A4%9A%E5%AE%9E%E4%BE%8B%E5%B7%B2%E7%BB%8F%E9%85%8D%E7%BD%AE%E5%AE%8C%E6%88%90%E3%80%82"><span class="toc-number">5.2.</span> <span class="toc-text">5. 启动，停止。到此多实例已经配置完成。</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1%E3%80%81mysql%E5%AE%89%E8%A3%85%E7%8E%AF%E5%A2%83%E4%BE%9D%E8%B5%96"><span class="toc-number">6.</span> <span class="toc-text">1、mysql安装环境依赖</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E4%BF%AE%E6%94%B9%E5%AF%86%E7%A0%81%EF%BC%8C%E7%99%BB%E5%BD%95"><span class="toc-number">6.1.</span> <span class="toc-text">6.修改密码，登录</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%90%AF%E5%8A%A8dbproxy%E4%BB%A3%E7%90%86"><span class="toc-number">7.</span> <span class="toc-text">启动dbproxy代理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%BF%E9%97%AE"><span class="toc-number">7.1.</span> <span class="toc-text">访问</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Linux%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85MySQL5-7-20"><span class="toc-number">8.</span> <span class="toc-text">Linux源码编译安装MySQL5.7.20</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Linux%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85MySQL5-7-21"><span class="toc-number">9.</span> <span class="toc-text">Linux源码编译安装MySQL5.7.21</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E8%BF%9B%E5%88%B6%E7%89%88%E6%9C%ACmysql%E5%AE%89%E8%A3%85"><span class="toc-number">10.</span> <span class="toc-text">二进制版本mysql安装</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E8%BF%9B%E5%88%B6%E7%89%88%E6%9C%ACmysql-8-0-18%E5%AE%89%E8%A3%85"><span class="toc-number">11.</span> <span class="toc-text">二进制版本mysql-8.0.18安装</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#linux%E4%B8%8B%E5%AE%89%E8%A3%85cmake%E6%96%B9%E6%B3%95%E2%80%94%E4%B8%8B%E8%BD%BD%E5%8E%8B%E7%BC%A9%E5%8C%85"><span class="toc-number">12.</span> <span class="toc-text">linux下安装cmake方法—下载压缩包</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Linux%E5%AE%89%E8%A3%85wget%E5%91%BD%E4%BB%A4"><span class="toc-number">13.</span> <span class="toc-text">Linux安装wget命令</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Linux%E5%AE%89%E8%A3%85GCC%E6%96%B9%E6%B3%95"><span class="toc-number">14.</span> <span class="toc-text">Linux安装GCC方法</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Centos7%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85GCC7-2"><span class="toc-number">15.</span> <span class="toc-text">Centos7编译安装GCC7.2</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E6%AD%A5%E4%B8%80%E6%AD%A5%E7%9A%84%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85gcc"><span class="toc-number">16.</span> <span class="toc-text">一步一步的编译安装gcc</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E5%AE%89%E8%A3%85%E5%89%8D%E6%8F%90"><span class="toc-number">17.</span> <span class="toc-text">六、安装前提</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%89%A9%E7%90%86%E5%86%85%E5%AD%98%E4%B8%8D%E5%A4%9F%E7%94%A8%EF%BC%8C%E5%A2%9E%E5%A4%A7Linux%E4%BA%A4%E6%8D%A2%E5%88%86%E5%8C%BA%E7%9A%84%E6%96%B9%E6%B3%95"><span class="toc-number">18.</span> <span class="toc-text">物理内存不够用，增大Linux交换分区的方法</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E6%8A%A5%E9%94%99"><span class="toc-number">19.</span> <span class="toc-text">七、报错</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

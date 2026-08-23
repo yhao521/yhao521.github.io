@@ -1,0 +1,338 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>【12】ComfyUI中级 - 必须掌握的8种图像放大方式 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="一、图像缩放这种方式会根据设置的宽高，应用相应的缩放方法进行缩放，缩放过程中，会根据裁剪模式，选择是拉伸图像还是从图像中心向外延展裁剪。 缩放方法插值方式原理描述优点缺点邻近插值选择最邻近的像素值进…">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【12】ComfyUI中级 - 必须掌握的8种图像放大方式">
+<meta property="og:url" content="https://yhao521.github.io/2025/06/11/%E3%80%9012%E3%80%91ComfyUI%E4%B8%AD%E7%BA%A7%20-%20%E5%BF%85%E9%A1%BB%E6%8E%8C%E6%8F%A1%E7%9A%848%E7%A7%8D%E5%9B%BE%E5%83%8F%E6%94%BE%E5%A4%A7%E6%96%B9%E5%BC%8F/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="一、图像缩放这种方式会根据设置的宽高，应用相应的缩放方法进行缩放，缩放过程中，会根据裁剪模式，选择是拉伸图像还是从图像中心向外延展裁剪。 缩放方法插值方式原理描述优点缺点邻近插值选择最邻近的像素值进…">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2025-06-10T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-17T16:00:00.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="摘录">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "【12】ComfyUI中级 - 必须掌握的8种图像放大方式",
+  "url": "https://yhao521.github.io/2025/06/11/%E3%80%9012%E3%80%91ComfyUI%E4%B8%AD%E7%BA%A7%20-%20%E5%BF%85%E9%A1%BB%E6%8E%8C%E6%8F%A1%E7%9A%848%E7%A7%8D%E5%9B%BE%E5%83%8F%E6%94%BE%E5%A4%A7%E6%96%B9%E5%BC%8F/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2025-06-10T16:00:00.000Z",
+  "dateModified": "2026-05-17T16:00:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2025/06/11/%E3%80%9012%E3%80%91ComfyUI%E4%B8%AD%E7%BA%A7%20-%20%E5%BF%85%E9%A1%BB%E6%8E%8C%E6%8F%A1%E7%9A%848%E7%A7%8D%E5%9B%BE%E5%83%8F%E6%94%BE%E5%A4%A7%E6%96%B9%E5%BC%8F/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '【12】ComfyUI中级 - 必须掌握的8种图像放大方式',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">【12】ComfyUI中级 - 必须掌握的8种图像放大方式</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">【12】ComfyUI中级 - 必须掌握的8种图像放大方式</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-06-10T16:00:00.000Z" title="发表于 2025-06-11 00:00:00">2025-06-11</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-17T16:00:00.000Z" title="更新于 2026-05-18 00:00:00">2026-05-18</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>![[_resources&#x2F;780785b8e98294acd98f874d43e2ec00_MD5.png]]</p>
+<p>【12】ComfyUI中级 - 必须掌握的8种图像放大方式</p>
+<p>目录</p>
+<p>收起</p>
+<p>一、图像缩放</p>
+<p>缩放方法</p>
+<p>裁剪</p>
+<p>二、图像按系数缩放</p>
+<p>三、图像按像素缩放</p>
+<p>四、图像通过模型放大</p>
+<p>五、Latent缩放</p>
+<p>六、Latent按系数缩放</p>
+<p>七、SD放大</p>
+<p>7.1、放大系数</p>
+<p>7.2、模式类型：直线（Linear）模式</p>
+<p>7.3、分块宽高</p>
+<p>7.4、模糊</p>
+<p>7.5、接缝修复</p>
+<p>八、终极SUPIR放大</p>
+<p>8.1、插件安装</p>
+<p>8.2、模型安装</p>
+<p>8.3、节点位置</p>
+<p>8.4、放大案例</p>
+<p>网盘地址：</p>
+<h2 id="一、图像缩放"><a href="#一、图像缩放" class="headerlink" title="一、图像缩放"></a>一、图像缩放</h2><p>![[_resources&#x2F;8096bf7a5d0586cbe08dc06fe22b3a3d_MD5.jpg]]</p>
+<p>这种方式会根据设置的宽高，应用相应的缩放方法进行缩放，缩放过程中，会根据裁剪模式，选择是拉伸图像还是从图像中心向外延展裁剪。</p>
+<h3 id="缩放方法"><a href="#缩放方法" class="headerlink" title="缩放方法"></a>缩放方法</h3><table>
+<thead>
+<tr>
+<th>插值方式</th>
+<th>原理描述</th>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=249885302&content_type=Article&match_order=1&q=%E9%82%BB%E8%BF%91%E6%8F%92%E5%80%BC&zd_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ6aGlkYV9zZXJ2ZXIiLCJleHAiOjE3NDk3Nzg1MDksInEiOiLpgrvov5Hmj5LlgLwiLCJ6aGlkYV9zb3VyY2UiOiJlbnRpdHkiLCJjb250ZW50X2lkIjoyNDk4ODUzMDIsImNvbnRlbnRfdHlwZSI6IkFydGljbGUiLCJtYXRjaF9vcmRlciI6MSwiemRfdG9rZW4iOm51bGx9.INKPeNOnp8wT8bSJbaWiWGHf1ea5sGXs4tC6_E44e8s&zhida_source=entity">邻近插值</a></td>
+<td>选择最邻近的像素值进行填充</td>
+<td>速度最快</td>
+<td>像素化严重，边缘锯齿感明显</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=249885302&content_type=Article&match_order=1&q=%E5%8F%8C%E7%BA%BF%E6%80%A7%E6%8F%92%E5%80%BC&zd_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ6aGlkYV9zZXJ2ZXIiLCJleHAiOjE3NDk3Nzg1MDksInEiOiLlj4znur_mgKfmj5LlgLwiLCJ6aGlkYV9zb3VyY2UiOiJlbnRpdHkiLCJjb250ZW50X2lkIjoyNDk4ODUzMDIsImNvbnRlbnRfdHlwZSI6IkFydGljbGUiLCJtYXRjaF9vcmRlciI6MSwiemRfdG9rZW4iOm51bGx9.LpNkiygAbGd7Lxq3ft8cGBYlHgY6w8QB1yhSLxkbBqQ&zhida_source=entity">双线性插值</a></td>
+<td>根据四个最近像素值的加权平均进行插值</td>
+<td>过渡平滑，计算量小</td>
+<td>细节模糊，放大效果一般</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=249885302&content_type=Article&match_order=1&q=%E5%8C%BA%E5%9F%9F%E6%8F%92%E5%80%BC&zd_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ6aGlkYV9zZXJ2ZXIiLCJleHAiOjE3NDk3Nzg1MDksInEiOiLljLrln5_mj5LlgLwiLCJ6aGlkYV9zb3VyY2UiOiJlbnRpdHkiLCJjb250ZW50X2lkIjoyNDk4ODUzMDIsImNvbnRlbnRfdHlwZSI6IkFydGljbGUiLCJtYXRjaF9vcmRlciI6MSwiemRfdG9rZW4iOm51bGx9.5UIOnfTNvBg_tqAurRq-gGea2gpVi-DOOK8lr3rTJC0&zhida_source=entity">区域插值</a></td>
+<td>使用较大区域内的像素加权平均进行计算</td>
+<td>保持细节，适合缩小图像</td>
+<td>放大效果不如其他方法</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=249885302&content_type=Article&match_order=1&q=%E5%8F%8C%E4%B8%89%E6%AC%A1%E6%8F%92%E5%80%BC&zd_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ6aGlkYV9zZXJ2ZXIiLCJleHAiOjE3NDk3Nzg1MDksInEiOiLlj4zkuInmrKHmj5LlgLwiLCJ6aGlkYV9zb3VyY2UiOiJlbnRpdHkiLCJjb250ZW50X2lkIjoyNDk4ODUzMDIsImNvbnRlbnRfdHlwZSI6IkFydGljbGUiLCJtYXRjaF9vcmRlciI6MSwiemRfdG9rZW4iOm51bGx9.FQVsVusHrIHK5l1FDFT8Dl42oorsWYOIU0sDkumGeXU&zhida_source=entity">双三次插值</a></td>
+<td>基于16个相邻像素，用三次函数进行插值</td>
+<td>过渡更平滑，细节保留较好</td>
+<td>计算复杂，速度较慢</td>
+</tr>
+<tr>
+<td>Lanczos插值</td>
+<td>使用Lanczos核函数，考虑更大像素范围（8×8区域）进行插值</td>
+<td>保留细节最好，减少模糊和伪影</td>
+<td>计算量最大，速度最慢</td>
+</tr>
+</tbody></table>
+<p>这个表格可以帮助你快速了解每种插值方式的原理、优缺点和适用场景。</p>
+<h3 id="裁剪"><a href="#裁剪" class="headerlink" title="裁剪"></a>裁剪</h3><p>禁用：表示不进行裁剪，会导致图像变形。</p>
+<p>中心：表示从中心点开始向周边裁剪，裁剪尺寸为定义的宽和高。</p>
+<h2 id="二、图像按系数缩放"><a href="#二、图像按系数缩放" class="headerlink" title="二、图像按系数缩放"></a>二、图像按系数缩放</h2><p>![[_resources&#x2F;81bc95117d8b221595150544327295fe_MD5.jpg]]</p>
+<p>这种缩放方式 <strong>本质上来讲是通过填充像素的方式放大图像，或通过抽离像素的方式进行缩小。</strong></p>
+<h2 id="三、图像按像素缩放"><a href="#三、图像按像素缩放" class="headerlink" title="三、图像按像素缩放"></a>三、图像按像素缩放</h2><p>![[_resources&#x2F;810f8779eb5c4de1ac0f102ba340e3ce_MD5.jpg]]</p>
+<p>本质上将这是一种像素填充的方式来放大图像。</p>
+<h2 id="四、图像通过模型放大"><a href="#四、图像通过模型放大" class="headerlink" title="四、图像通过模型放大"></a>四、图像通过模型放大</h2><p>以上3种放大方法，都是基于插值进行放大，也就是添加像素方式放大，而模型放大是基于深度学习的放大。  </p>
+<p>![[_resources&#x2F;61a2fa12ba0f07d7d51eabad8e582cf3_MD5.jpg]]</p>
+<p>基本原理：模型能够学习图像的低级特征和高级特征,提取低分辨率图像的特征,通过采样技术将特征图放大到所需的高分辨率尺寸.  </p>
+<p><strong>模型放大优势</strong><br>质量保持:更好地保持图像的原始质量,减少模糊和伪影<br>细节增强:模型能够恢复图像中的细节<br>灵活性:模型可以针对不同的应用场景进行定制<br><strong>模型放大劣势</strong><br>较高的计算资源</p>
+<p>![[_resources&#x2F;4f24cf244e11772f292353a47c823300_MD5.jpg]]</p>
+<p>可以看到，生图丢失细节严重，如果你对细节要求不严格，可以选择这种方式。</p>
+<h2 id="五、Latent缩放"><a href="#五、Latent缩放" class="headerlink" title="五、Latent缩放"></a>五、Latent缩放</h2><p>一次缩放</p>
+<p>![[_resources&#x2F;52f88324811525ecd873415af2bcb7c4_MD5.jpg]]</p>
+<p>二次采样</p>
+<p>![[_resources&#x2F;55cb48e113d5b8707c6544bb8ac7f9c0_MD5.jpg]]</p>
+<p>1、在潜空间进行放大 2、对放大后的图片进行二次采样 <strong>采样幅度&#x3D;步数 x 降噪值</strong></p>
+<ol>
+<li><strong>步数（Steps）</strong> ：这个参数指的是在生成图像时，从噪声图像到清晰图像的迭代过程需要经历的步骤数量。步数越多，AI 就有更多机会根据输入的提示词（prompts）来调整图像，通常会导致更高的图像质量，但同时也意味着更长的生成时间和更高的计算成本。</li>
+<li><strong>降噪（Denoising）</strong> ：降噪强度是控制图像生成过程中保留原始图像特征与创造新图像之间平衡的参数。降噪强度越高，生成的图像与原始输入图像的差异越大，图像变化也越明显。其取值范围为0到1，其中0表示不添加噪声，1表示添加最大数量的噪声，使得潜在空间中的图像成为一个完全随机的张量 。</li>
+</ol>
+<p>采样步数和降噪，直接影响到出图的结果。一般做法是固定采样步数，调整降噪值调整出图效果。 降噪值越大（步数*降噪越大），即去除噪点越多，图片调整幅度越大，和原图越不像。 降噪值越小（步数*降噪越小），即去除噪点越少，图片调整幅度越小，和原图越像。 为了达到图片放大，且保持图片一致，降噪的值不能太大，太大图片不一致，太小相当于不去噪点，达不到图片放大的效果。反复试验，取一个最合适的值即可。 <strong>缺点：这种放大方式，不能保证放大后的图和原图100%的一致。</strong></p>
+<h2 id="六、Latent按系数缩放"><a href="#六、Latent按系数缩放" class="headerlink" title="六、Latent按系数缩放"></a>六、Latent按系数缩放</h2><p>![[_resources&#x2F;bb36501333c9a45af63aecd9cbcd4105_MD5.jpg]]</p>
+<p>可以看到生成的图像也比较糊</p>
+<h2 id="七、SD放大"><a href="#七、SD放大" class="headerlink" title="七、SD放大"></a>七、SD放大</h2><p>将图片切成好几个小块（Tile），通常是 512×512 或 128×128，然后对每一个小块进行放大，最后再拼回一张大图，这样不仅可以确保放大的效果和视觉品质，同时也能在提升提示的同时，节省计算和储存空间可以说，SD UpScale是目前放大图片的最佳手法，也是许多图像处理软件中经常会用到的一种技术。</p>
+<p>搜索SDUpscale放大插件，安装，重启ComfyUI。  </p>
+<p>![[_resources&#x2F;4c0f781adb5dbd643134db4265dd89e7_MD5.jpg]]</p>
+<p>![[_resources&#x2F;bb3201f9c67415566b8014c555677f51_MD5.jpg]]</p>
+<p>我们一般调整放大系数、采样器、降噪值，其他保持默认即可。</p>
+<h3 id="7-1、放大系数"><a href="#7-1、放大系数" class="headerlink" title="7.1、放大系数"></a>7.1、放大系数</h3><p>就是放大到原来的多少倍</p>
+<h3 id="7-2、模式类型：直线（Linear）模式"><a href="#7-2、模式类型：直线（Linear）模式" class="headerlink" title="7.2、模式类型：直线（Linear）模式"></a>7.2、模式类型：直线（Linear）模式</h3><ul>
+<li><strong>概念</strong> ：这是最常见的插值方式之一，基于线性插值，像素值按照图像的现有数值做平滑过渡，逐行处理。</li>
+<li><strong>特点</strong> ：适合处理均匀渐变的图像，不会引入太多伪影或失真。它提供了一种平滑的放大效果，但是对于图像细节丰富或复杂的图像来说，细节部分可能丢失或模糊。</li>
+<li><strong>应用场景</strong> ：适用于自然风景、渐变背景等图像放大。</li>
+</ul>
+<p><strong>Chess（棋盘格）模式</strong></p>
+<ul>
+<li><strong>概念</strong> ：棋盘格模式通过分割图像为多个区块（像棋盘的格子一样）分别进行处理。这种方法可以更好地处理图像中的局部细节，因为每个区块都可以独立进行运算和优化。</li>
+<li><strong>特点</strong> ：适合处理复杂图像，尤其是具有较多细节或纹理的图像。由于分割成小区块处理，这种方法在保证局部细节方面较好，但可能会导致一些边缘过渡不自然的情况。</li>
+<li><strong>应用场景</strong> ：适合用于人脸、建筑物等图像，需要保持细节清晰的场景。</li>
+</ul>
+<p>一般我们选择Chess就可以。</p>
+<h3 id="7-3、分块宽高"><a href="#7-3、分块宽高" class="headerlink" title="7.3、分块宽高"></a>7.3、分块宽高</h3><p>划分区块的宽高，模型会按照这个设置进行区块划分，在每一个区块上进行重绘。</p>
+<h3 id="7-4、模糊"><a href="#7-4、模糊" class="headerlink" title="7.4、模糊"></a>7.4、模糊</h3><p>用来调节图像在放大时的细节保留和边缘锐化。</p>
+<p>1. <strong>减少细节冲突</strong> 在图像放大的过程中，如果图像原本的细节过多或者过于锐利，放大后的图像可能会出现不自然的锐边或不连贯的细节。通过预先 <strong>模糊处理</strong> ，可以平滑一些过度复杂的细节，使图像在放大后更自然、过渡更平滑。</p>
+<p>2. <strong>防止噪点放大</strong> 当低分辨率的图像中存在一些噪点（如像素颗粒感），直接放大会导致这些噪点也被放大并显得更加明显和刺眼。通过在放大前先模糊掉这些噪点，能够减少它们在放大图像中的影响，提升图像的整体质量。</p>
+<h3 id="7-5、接缝修复"><a href="#7-5、接缝修复" class="headerlink" title="7.5、接缝修复"></a>7.5、接缝修复</h3><p>用于处理区块边缘接缝时的处理方式</p>
+<p>![[_resources&#x2F;569892f054dd93c302b5b121a8609fff_MD5.jpg]]</p>
+<p>有3种接缝修复模式，Band Pass最强，Half Tile较弱，Half Tile + 强弱平衡。<br>通过设置接缝降噪，宽度，模糊，分区达到最近的接缝效果。</p>
+<h2 id="八、终极SUPIR放大"><a href="#八、终极SUPIR放大" class="headerlink" title="八、终极SUPIR放大"></a>八、终极SUPIR放大</h2><p>SUPIR放大不仅可以放大图片，还可以用来修复模糊图片和增强图片细节。SUPIR通过使用深度学习模型来实现图像的高质量放大，提供了一种“无损放大”的解决方案，即使在极大提高细节的同时，也能保持原图内容的不变。</p>
+<h3 id="8-1、插件安装"><a href="#8-1、插件安装" class="headerlink" title="8.1、插件安装"></a>8.1、插件安装</h3><p>![[_resources&#x2F;cc083eabcd9729ff992b894fca5a1c3a_MD5.jpg]]</p>
+<p>首先，我们在节点管理里面搜索SUPIR并安装ComfyUI-SUPIR，然后重启ComfyUI</p>
+<h3 id="8-2、模型安装"><a href="#8-2、模型安装" class="headerlink" title="8.2、模型安装"></a>8.2、模型安装</h3><p>下载地址： <a target="_blank" rel="noopener" href="https://huggingface.co/Kijai/SUPIR_pruned/tree/main">huggingface.co&#x2F;Kijai&#x2F;SU</a></p>
+<p>![[_resources&#x2F;ac4d57a37a0e160df5de3d7b5663148d_MD5.png]]</p>
+<p>下载到本地，放置在~\ComfyUI\models\checkpoints中，刷新ComfyUI</p>
+<h3 id="8-3、节点位置"><a href="#8-3、节点位置" class="headerlink" title="8.3、节点位置"></a>8.3、节点位置</h3><p>![[_resources&#x2F;4927e3015930388c1af3066521350e66_MD5.jpg]]</p>
+<h3 id="8-4、放大案例"><a href="#8-4、放大案例" class="headerlink" title="8.4、放大案例"></a>8.4、放大案例</h3><p>![[_resources&#x2F;296df28732e868017364d393403163d7_MD5.jpg]]</p>
+<p>通过放大，我们发现放大效果是非常棒的，它不仅仅放大了图像，还对图形细节做了很多的修复。可以说是一箭双雕，原图细节也得到很好的保留，不愧是终极方法杀气。</p>
+<p>其他参数保持默认就可以，我们看下几个关键参数，也是我们经常调整的地方：</p>
+<p><strong>SUPIR模型</strong> ：SUPIR\SUPIR-v0Q.ckpt，放大模型，提供放大高清修复能力</p>
+<p><strong>SDXL模型</strong> ：选择SDXL类型的模型 <strong>（SUPIR放大仅适用SDXL模型）</strong></p>
+<p><strong>缩放系数：</strong> 设置放大的倍数</p>
+<p><strong>CFG缩放：</strong> CFG越大，图像就越锐利，越小就越平滑，一般控制在4到6之间</p>
+<p>噪波量：噪波量通常指的是图像放大过程中引入的额外噪声。在SUPIR放大中，噪波量的大小直接影响到图像放大后的质量。如果噪波量较大，即使图像的分辨率得到了提升，放大后的图像也可能因为噪声过多而显得模糊不清，细节丢失。一般保持1不变即可。</p>
+<h2 id="网盘地址："><a href="#网盘地址：" class="headerlink" title="网盘地址："></a>网盘地址：</h2><p>SUPIR模型： <a target="_blank" rel="noopener" href="https://pan.quark.cn/s/b9f8abf7fe3a">pan.quark.cn&#x2F;s&#x2F;b9f8abf7</a></p>
+<p>发布于 2024-10-31 21:20・河南 ，编辑于 2024-10-31 21:42・河南<a target="_blank" rel="noopener" href="https://www.zhihu.com/topic/25477934">AI绘画</a><a target="_blank" rel="noopener" href="https://www.zhihu.com/topic/27445052">comfyUI</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2025/06/11/%E3%80%9012%E3%80%91ComfyUI%E4%B8%AD%E7%BA%A7%20-%20%E5%BF%85%E9%A1%BB%E6%8E%8C%E6%8F%A1%E7%9A%848%E7%A7%8D%E5%9B%BE%E5%83%8F%E6%94%BE%E5%A4%A7%E6%96%B9%E5%BC%8F/">https://yhao521.github.io/2025/06/11/%E3%80%9012%E3%80%91ComfyUI%E4%B8%AD%E7%BA%A7%20-%20%E5%BF%85%E9%A1%BB%E6%8E%8C%E6%8F%A1%E7%9A%848%E7%A7%8D%E5%9B%BE%E5%83%8F%E6%94%BE%E5%A4%A7%E6%96%B9%E5%BC%8F/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/%E6%91%98%E5%BD%95/">摘录</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/06/11/%E3%80%9013%E3%80%91ComfyUI%E9%AB%98%E7%BA%A7%20-%20%E4%B8%80%E6%96%87%E6%8E%8C%E6%8F%A1ComfyUI%E4%B8%AD%E7%9A%84%E7%BC%96%E7%A8%8B%E5%BC%8F/" title="【13】ComfyUI高级 - 一文掌握ComfyUI中的编程式"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">【13】ComfyUI高级 - 一文掌握ComfyUI中的编程式</div></div><div class="info-2"><div class="info-item-1">![[_resources&#x2F;9104e9d22fb062e8a369c7864192e44b_MD5.webp]] 【13】ComfyUI高级 - 一文掌握ComfyUI中的编程式 目录 收起 插件安装 Derfuu插件 Impact插件 Easy-Use插件 Custom-Scripts插件 KJNodes插件 变量定义（浮点数&#x2F;整数&#x2F;字符串&#x2F;布尔值） 常量定义（整数&#x2F;浮点&#x2F;布尔&#x2F;字符串） 数学运算（加减乘除&#x2F;幂运算&#x2F;平方根运算&#x2F;三角函数） 字符串操作（字符串拼接&#x2F;替换&#x2F;搜索&#x2F;合并&#x2F;比较） 逻辑运算 循环 案例说明：整数累加 案例说明：批量图像处理 切换&#x2F;反转切换 切换节点 反转切换 综合实战案例：动态选择图像放大策略 先说一下，我们为什么要熟悉comfyui中的编程式，简单来说，可以将我们的工作流自动化和智能化。掌握下面相关基础知识，对于后面高级进阶的工作流，才能游刃有余，一定不要小看基础知识，很多人都像一下子精通comfyui...</div></div></div></a><a class="pagination-related" href="/2025/06/11/Comfyui%E5%88%B6%E4%BD%9CAI%E8%A7%86%E9%A2%91%EF%BC%8C%E6%94%AF%E6%8C%81%E6%96%87%E7%94%9F%E8%A7%86%E9%A2%91%E3%80%81%E5%9B%BE%E7%94%9F%E8%A7%86%E9%A2%91%E3%80%81%E8%A7%86%E9%A2%91%E7%94%9F%E8%A7%86%E9%A2%91%EF%BC%8C%E4%B8%87%E7%9B%B82.1%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2%E8%AF%A6%E7%BB%86%E6%96%B9%E6%B3%95%20-%20%E8%85%BE%E8%AE%AF%E4%BA%91%E5%BC%80%E5%8F%91%E8%80%85%E7%A4%BE%E5%8C%BA-%E8%85%BE%E8%AE%AF%E4%BA%91/" title="Comfyui制作AI视频，支持文生视频、图生视频、视频生视频，万相2.1本地部署详细方法 - 腾讯云开发者社区-腾讯云"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Comfyui制作AI视频，支持文生视频、图生视频、视频生视频，万相2.1本地部署详细方法 - 腾讯云开发者社区-腾讯云</div></div><div class="info-2"><div class="info-item-1">精选内容&#x2F;技术社群&#x2F;优惠产品,尽在小程序 立即前往 Comfyui制作AI视频，支持文生视频、图生视频、视频生视频，万相2.1本地部署详细方法文章来源：企鹅号 - 橙色C 举报 万相2.1可以在comfyui上自由调用，支持文生视频、图生视频和视频生视频，而且现在还出现了很多wan2.1的lora，今天我们一起来学习wan2.1的本地部署。 一、安装插件 在comfyui中调用万相2.1模型需要用到WanVideoWrapper插件 插件地址：https://github.com/kijai/ComfyUI-WanVideoWrapper 进入comfyui的节点文件夹“custom_nodes”，在地址栏输入”cmd”，然后敲回车，调出命令行 在命令行内输入指令： git clone https://github.com/kijai/ComfyUI-WanVideoWrapper.git ![[_resources&#x2F;6da78af2836a3a963c8c0a5da7520b4d_MD5.png]] 插件安装完成后关闭命令行 二、模型下载 （1）模...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/08/19/shadcn%20vue%EF%BC%88%E6%89%8B%E6%8A%8A%E6%89%8B%E8%AE%B2%E8%A7%A3%EF%BC%89%20-%20%E5%BC%82%E5%B8%B8%E6%95%99%E7%A8%8B/" title="shadcn vue（手把手讲解） - 异常教程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-08-19</div><div class="info-item-2">shadcn vue（手把手讲解） - 异常教程</div></div><div class="info-2"><div class="info-item-1">shadcn vue（手把手讲解）更新时间: 在现代前端开发中，组件库作为提升开发效率的核心工具，始终占据着重要地位。无论是快速搭建界面、保证设计一致性，还是减少重复劳动，组件库都扮演着不可替代的角色。在 Vue 生态中， shadcn vue 作为一款轻量且高度可定制化的组件库，凭借其简洁的设计理念和强大的功能特性，逐渐成为开发者的新宠。本文将从基础概念、核心功能、实战案例到进阶技巧，全面解析如何利用 shadcn vue 加速 Vue 项目的开发流程，并帮助开发者构建出既美观又高效的用户界面。  一、什么是 shadcn vue？shadcn vue 是一款基于 Vue 3 的现代化组件库，其设计灵感来源于 Shadcn（一个专注于 React 生态的组件库）。它通过提供开箱即用的高质量组件（如按钮、表单、对话框等），结合对 Tailwind CSS 的深度集成，帮助开发者快速构建响应式、可访问性强的用户界面。 核心设计理念 轻量级 ：仅包含基础组件，避免冗余功能，减小项目体积。 主题可定制 ：通过 CSS 变量和 Tailwind 配置，实现灵活的主题切换。 语义化 HTM...</div></div></div></a><a class="pagination-related" href="/2025/05/15/Flux%E2%80%9C%E7%82%BC%E4%B8%B9%E7%82%89%E2%80%9D%E2%80%94%E2%80%94fluxgym%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B-CSDN%E5%8D%9A%E5%AE%A2/" title="Flux“炼丹炉”——fluxgym安装教程-CSDN博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-15</div><div class="info-item-2">Flux“炼丹炉”——fluxgym安装教程-CSDN博客</div></div><div class="info-2"><div class="info-item-1">一、介绍这个炼丹炉目前可以训练除了 flux -dev之外的其它模型，只需更改一个配置文件内容即可。重要的是训练时不需要提前进行图片裁剪、打标等前置工作，只需下图的三个步骤即可开始训练。它就是——fluxgym。 ![[_resources&#x2F;df2678e42e581944c5c0fb9d9966148e_MD5.png]] fluxgym：用于训练具有低 VRAM （12GB&#x2F;16GB&#x2F;20GB） 支持的 FLUX LoRA 的简单 Web UI，它具有 AI-Toolkit WebUI 的简单性和 Kohya Scripts 的 灵活性 。  前端：是从 AI-Toolkit（ https://x.com/multimodalart 创建的 Gradio UI）分叉而来的 WebUI) 后端**：** 由 Kohya Scripts 提供支持的训练脚本  它通过默认隐藏的 Advanced 选项卡支持 100% 的 Kohya sd-scripts 功能。 二、怎么安装？介绍完丹炉，我们来看看如何获取吧，本安装教程属于手把手教学，因为网络问题无法...</div></div></div></a><a class="pagination-related" href="/2026/04/08/200%20%E8%A1%8C%20Python%20%E4%BB%A3%E7%A0%81%EF%BC%8C%E4%BB%8E%E9%9B%B6%E6%89%8B%E6%90%93%E6%9E%81%E7%AE%80%20Agent%EF%BC%8C%E5%90%83%E9%80%8F%E6%99%BA%E8%83%BD%E4%BD%93%E6%A0%B8%E5%BF%83%E5%8E%9F%E7%90%86%EF%BC%81/" title="200 行 Python 代码，从零手搓极简 Agent，吃透智能体核心原理！"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-04-08</div><div class="info-item-2">200 行 Python 代码，从零手搓极简 Agent，吃透智能体核心原理！</div></div><div class="info-2"><div class="info-item-1">原创 一枫说码 2026年4月1日 20:02 现在市面上关于 AI Agent（智能体 ） 的讨论越来越多，但大多停留在概念层面：自主思考、任务拆解、多智能体协同…… 听起来很高大上，却很少有人告诉你： AI Agent 的本质，到底是什么？ 对于开发者来说，与其听一堆虚无缥缈的名词，不如亲手写一个。 今天我们不聊复杂理论，不套 LangChain、LlamaIndex 等框架，直接扒开 AI Agent 最底层的运行逻辑。 仅用不到 200 行 Python 代码，从零手搓一个完整可运行的极简 Agent，逐行拆解核心模块，新手复制粘贴就能直接跑通。 最终你到手的这个 Agent，具备四大核心能力：  短期记忆对话 ：维护上下文，让无状态的 LLM 记住当前对话内容。 Function Calling 工具调用 ：给 LLM 装上 『手脚』，可读写文件、执行操作。 智能上下文管理 ：手动清空 &#x2F; 压缩 + 自动压缩上下文，彻底解决 token 溢出问题。 长期记忆 + 极简 RAG ：跨会话记住用户偏好，程序重启也不丢失，语义检索只给模型最相关的记忆。[[_reso...</div></div></div></a><a class="pagination-related" href="/2025/10/01/%E5%AE%89%E5%8D%93%E5%BC%80%E5%8F%91%E8%80%85%E5%BF%85%E5%A4%87%E4%B9%8B%E5%A6%82%E4%BD%95%E5%85%8D%E8%B4%B9%E7%94%B3%E8%AF%B7%E8%BD%AF%E4%BB%B6%E8%91%97%E4%BD%9C%E6%9D%83/" title="安卓开发者必备之如何免费申请软件著作权"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-10-01</div><div class="info-item-2">安卓开发者必备之如何免费申请软件著作权</div></div><div class="info-2"><div class="info-item-1">![[_resources&#x2F;5748e291ac82a16d9a71a2181319849b_MD5.jpg]]![[_resources&#x2F;206b42a7c013357424f6aae87d90ca68_MD5.png]] 1. 背景目前，在国内的安卓应用市场上架一个App，必须有软件著作权作为支持。因此，每一个软件开发者想要在国内合规地上架一款app，都绕不过申请软件著作权这个坎。 下图为华为的AppGallery Connect在提交版本时出现的提示：![[_resources&#x2F;0c9cdf72ea773792c3ec2b7b0dd6cb3b_MD5.webp]] 除了花钱交给代理商来协助我们或全部包办，我们自己也可以全程免费地完成软件著作权的申请。![[_resources&#x2F;3e1d9bc05a83b94cde205475d4589923_MD5.webp]]![[_resources&#x2F;2ea4726b6043f3fe86744538d84f17bf_MD5.webp]] 2. 工作和时间评估需要准备的材料、设备或软件： ...</div></div></div></a><a class="pagination-related" href="/2025/06/30/%E5%88%AB%E5%86%8D%E5%82%BB%E5%82%BB%E5%88%86%E4%B8%8D%E6%B8%85%EF%BC%81%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90%20runC%E3%80%81containerd%E3%80%81Docker%20%E5%90%AF%E5%8A%A8%E9%80%9F%E5%BA%A6%E5%B7%AE%E5%BC%82/" title="别再傻傻分不清！深度剖析 runC、containerd、Docker 启动速度差异"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-06-30</div><div class="info-item-2">别再傻傻分不清！深度剖析 runC、containerd、Docker 启动速度差异</div></div><div class="info-2"><div class="info-item-1">150 0 0 0 启动速度大比拼架构与功能差异runCcontainerdDocker总结兄弟们，今天咱来聊聊容器运行时那点事儿！平时大家用 Docker 用得飞起，但你真的了解它底层是怎么跑起来的吗？ 很多人都把 Docker、containerd、runC 这几个概念搞混，甚至以为它们是同一个东西的不同叫法。其实啊，它们仨可是各司其职，关系密切但又各有不同。 先来捋一捋它们之间的关系：  Docker ：大家最熟悉的“老大哥”，提供了一整套容器解决方案，包括镜像构建、分发、运行等。你可以把它想象成一个全能管家，啥都帮你搞定。 containerd ：Docker 的“幕后功臣”，负责容器的生命周期管理，比如创建、启动、停止、销毁等。它就像一个项目经理，负责协调各个组件的工作。 runC ：真正干活的“苦力”，负责创建和运行容器。它按照 OCI（Open Container Initiative）标准，直接与操作系统内核交互，隔离出容器运行环境。你可以把它看作是一个建筑工人，按照图纸搭建房子。  一句话概括：Docker 使用 containerd 管理容器，containe...</div></div></div></a><a class="pagination-related" href="/2025/06/25/Golang%20%E5%BC%80%E6%BA%90%E5%BA%93%E5%88%86%E4%BA%AB%EF%BC%9Afaker%20-%20%E9%9A%8F%E6%9C%BA%E7%94%9F%E6%88%90%E6%9C%89%E8%B6%A3%E7%9A%84%E5%81%87%E6%95%B0%E6%8D%AE%EF%BC%81/" title="Golang 开源库分享：faker - 随机生成有趣的假数据！"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-06-25</div><div class="info-item-2">Golang 开源库分享：faker - 随机生成有趣的假数据！</div></div><div class="info-2"><div class="info-item-1">GitHub 仓库链接 ： https://github.com/bxcodec/faker 简介在开发和测试过程中，我们经常需要各种各样的测试数据。如果手动去生成这些数据，不仅耗时，还容易出错。 faker 是一个 Go 语言的假数据生成库，可以快速生成各种字段的随机数据。这个库可以帮我们轻松生成各种属性的假数据，比如姓名、地址、手机号、邮箱等，非常适合填充数据库、模拟用户数据、生成测试数据等需求。 主要特点 随机数据生成 ：能生成各种属性的随机数据，比如姓名、邮箱、手机号、地址等。 简单易用 ：直接调用函数生成数据，也支持 struct 中自动填充字段。 可配置 ：支持自定义数据格式和模式，适应不同的数据需求。   安装与引入在项目中安装 faker ： 1Copygo get github.com/bxcodec/faker/v3  然后在代码中引入它： 1Copyimport &quot;github.com/bxcodec/faker/v3&quot;   快速上手1. 生成基本随机数据faker 提供了多种数据生成函数，直接调用就可以生成随机的名字、邮箱、手机号等。 ...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%9B%BE%E5%83%8F%E7%BC%A9%E6%94%BE"><span class="toc-number">1.</span> <span class="toc-text">一、图像缩放</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%A9%E6%94%BE%E6%96%B9%E6%B3%95"><span class="toc-number">1.1.</span> <span class="toc-text">缩放方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A3%81%E5%89%AA"><span class="toc-number">1.2.</span> <span class="toc-text">裁剪</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%9B%BE%E5%83%8F%E6%8C%89%E7%B3%BB%E6%95%B0%E7%BC%A9%E6%94%BE"><span class="toc-number">2.</span> <span class="toc-text">二、图像按系数缩放</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%9B%BE%E5%83%8F%E6%8C%89%E5%83%8F%E7%B4%A0%E7%BC%A9%E6%94%BE"><span class="toc-number">3.</span> <span class="toc-text">三、图像按像素缩放</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E5%9B%BE%E5%83%8F%E9%80%9A%E8%BF%87%E6%A8%A1%E5%9E%8B%E6%94%BE%E5%A4%A7"><span class="toc-number">4.</span> <span class="toc-text">四、图像通过模型放大</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81Latent%E7%BC%A9%E6%94%BE"><span class="toc-number">5.</span> <span class="toc-text">五、Latent缩放</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81Latent%E6%8C%89%E7%B3%BB%E6%95%B0%E7%BC%A9%E6%94%BE"><span class="toc-number">6.</span> <span class="toc-text">六、Latent按系数缩放</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81SD%E6%94%BE%E5%A4%A7"><span class="toc-number">7.</span> <span class="toc-text">七、SD放大</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#7-1%E3%80%81%E6%94%BE%E5%A4%A7%E7%B3%BB%E6%95%B0"><span class="toc-number">7.1.</span> <span class="toc-text">7.1、放大系数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-2%E3%80%81%E6%A8%A1%E5%BC%8F%E7%B1%BB%E5%9E%8B%EF%BC%9A%E7%9B%B4%E7%BA%BF%EF%BC%88Linear%EF%BC%89%E6%A8%A1%E5%BC%8F"><span class="toc-number">7.2.</span> <span class="toc-text">7.2、模式类型：直线（Linear）模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-3%E3%80%81%E5%88%86%E5%9D%97%E5%AE%BD%E9%AB%98"><span class="toc-number">7.3.</span> <span class="toc-text">7.3、分块宽高</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-4%E3%80%81%E6%A8%A1%E7%B3%8A"><span class="toc-number">7.4.</span> <span class="toc-text">7.4、模糊</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-5%E3%80%81%E6%8E%A5%E7%BC%9D%E4%BF%AE%E5%A4%8D"><span class="toc-number">7.5.</span> <span class="toc-text">7.5、接缝修复</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E7%BB%88%E6%9E%81SUPIR%E6%94%BE%E5%A4%A7"><span class="toc-number">8.</span> <span class="toc-text">八、终极SUPIR放大</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#8-1%E3%80%81%E6%8F%92%E4%BB%B6%E5%AE%89%E8%A3%85"><span class="toc-number">8.1.</span> <span class="toc-text">8.1、插件安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-2%E3%80%81%E6%A8%A1%E5%9E%8B%E5%AE%89%E8%A3%85"><span class="toc-number">8.2.</span> <span class="toc-text">8.2、模型安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-3%E3%80%81%E8%8A%82%E7%82%B9%E4%BD%8D%E7%BD%AE"><span class="toc-number">8.3.</span> <span class="toc-text">8.3、节点位置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-4%E3%80%81%E6%94%BE%E5%A4%A7%E6%A1%88%E4%BE%8B"><span class="toc-number">8.4.</span> <span class="toc-text">8.4、放大案例</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BD%91%E7%9B%98%E5%9C%B0%E5%9D%80%EF%BC%9A"><span class="toc-number">9.</span> <span class="toc-text">网盘地址：</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

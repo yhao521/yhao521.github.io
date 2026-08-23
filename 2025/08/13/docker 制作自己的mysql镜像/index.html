@@ -1,0 +1,262 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>docker 制作自己的mysql镜像 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="1、下载mysql，本次以mysql-5.7.29-1.el7.x86_64.rpm-bundle.tar为例 2、编辑启动脚本start.sh，容器启动时会运行这个脚本，主要是安装并初始化mysql 1234567891011121314151617181920212223242526272829303132333435#!&#x2F;bin&#x2F;bashif [ -z &quot;$MYSQL_ROOT_P">
+<meta property="og:type" content="article">
+<meta property="og:title" content="docker 制作自己的mysql镜像">
+<meta property="og:url" content="https://yhao521.github.io/2025/08/13/docker%20%E5%88%B6%E4%BD%9C%E8%87%AA%E5%B7%B1%E7%9A%84mysql%E9%95%9C%E5%83%8F/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="1、下载mysql，本次以mysql-5.7.29-1.el7.x86_64.rpm-bundle.tar为例 2、编辑启动脚本start.sh，容器启动时会运行这个脚本，主要是安装并初始化mysql 1234567891011121314151617181920212223242526272829303132333435#!&#x2F;bin&#x2F;bashif [ -z &quot;$MYSQL_ROOT_P">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2025-08-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-17T16:00:00.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="摘录">
+<meta property="article:tag" content="教程">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "docker 制作自己的mysql镜像",
+  "url": "https://yhao521.github.io/2025/08/13/docker%20%E5%88%B6%E4%BD%9C%E8%87%AA%E5%B7%B1%E7%9A%84mysql%E9%95%9C%E5%83%8F/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2025-08-12T16:00:00.000Z",
+  "dateModified": "2026-05-17T16:00:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2025/08/13/docker%20%E5%88%B6%E4%BD%9C%E8%87%AA%E5%B7%B1%E7%9A%84mysql%E9%95%9C%E5%83%8F/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'docker 制作自己的mysql镜像',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">docker 制作自己的mysql镜像</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">docker 制作自己的mysql镜像</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-08-12T16:00:00.000Z" title="发表于 2025-08-13 00:00:00">2025-08-13</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-17T16:00:00.000Z" title="更新于 2026-05-18 00:00:00">2026-05-18</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>1、下载mysql，本次以mysql-5.7.29-1.el7.x86_64.rpm-bundle.tar为例</p>
+<p>2、编辑启动脚本start.sh，容器启动时会运行这个脚本，主要是安装并初始化mysql</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line"></span><br><span class="line">if [ -z &quot;$MYSQL_ROOT_PASSWORD&quot; ];then</span><br><span class="line"> echo &quot;MYSQL_ROOT_PASSWORD is empty&quot;</span><br><span class="line"> exit 0</span><br><span class="line">fi</span><br><span class="line">INIT_MYSQL()&#123;</span><br><span class="line">   echo &quot;mysql初始化&quot;</span><br><span class="line">   yum install -y libaio  libnuma* net-tools perl.x86_64</span><br><span class="line">   cd /usr/local/src </span><br><span class="line">   #tar xvf mysql-5.7.29-1.el7.x86_64.rpm-bundle.tar</span><br><span class="line">   rpm -ivh mysql-community-common-5.7.29-1.el7.x86_64.rpm</span><br><span class="line">   rpm -ivh mysql-community-libs-5.7.29-1.el7.x86_64.rpm</span><br><span class="line">   rpm -ivh mysql-community-client-5.7.29-1.el7.x86_64.rpm </span><br><span class="line">   rpm -ivh mysql-community-server-5.7.29-1.el7.x86_64.rpm</span><br><span class="line">   mkdir -p /usr/local/mysql/data &amp;&amp; chown -R mysql.mysql /usr/local/mysql</span><br><span class="line">   sed -i &#x27;s/datadir=\/var\/lib\/mysql/datadir=\/usr\/local\/mysql\/data/&#x27; /etc/my.cnf</span><br><span class="line">   sed -i &#x27;/datadir/i default_password_lifetime=0&#x27; /etc/my.cnf</span><br><span class="line">   mysqld  --initialize --user=mysql --datadir=/usr/local/mysql/data</span><br><span class="line">   mysqld --daemonize --pid-file=/var/run/mysqld/mysqld.pid --user=mysql</span><br><span class="line">   dbPassword=\`grep &#x27;temporary password&#x27; /var/log/mysqld.log | awk &#x27;&#123;print $11&#125;&#x27;\`</span><br><span class="line">   mysqladmin -uroot -p$dbPassword password  $MYSQL_ROOT_PASSWORD</span><br><span class="line">   host=&#x27;127.0.0.1&#x27;</span><br><span class="line">   dbUser=&#x27;root&#x27;</span><br><span class="line">   sql_file=&#x27;/usr/local/bin/init.sql&#x27;</span><br><span class="line">   mysql -h $host -u $dbUser -p$MYSQL_ROOT_PASSWORD -e &quot;source $sql_file&quot;;</span><br><span class="line">   echo &quot;Remote connection is set&quot;</span><br><span class="line">   rm -rf /usr/local/src/mysql*</span><br><span class="line">&#125;</span><br><span class="line">if [ \`ls /usr/local/mysql/data |wc -l\` -eq 0 ];then</span><br><span class="line">   INIT_MYSQL</span><br><span class="line">else</span><br><span class="line">   mysqld --daemonize --pid-file=/var/run/mysqld/mysqld.pid --user=mysql</span><br><span class="line">fi</span><br><span class="line">tail -f /var/log/mysqld.log</span><br></pre></td></tr></table></figure>
+
+<p>3、编写init.sql，主要是开启root 远程连接，看需求可以不要</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">use mysql;</span><br><span class="line">update user set host = &#x27;%&#x27; where user = &#x27;root&#x27;;</span><br><span class="line">flush privileges;</span><br></pre></td></tr></table></figure>
+
+<p>4、编写dockerfile</p>
+<p>需要将init.sql 、 localtime（为了和宿主机时间同步，可以不要，要的话，从宿主机拷贝过来即可）、mysql-5.7.29-1.el7.x86_64.rpm-bundle.tar、start.sh放与dockerfile同一目录下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">FROM  centos7.2</span><br><span class="line">ADD mysql-5.7.29-1.el7.x86_64.rpm-bundle.tar /usr/local/src</span><br><span class="line">ADD localtime /etc/localtime</span><br><span class="line">ADD start.sh /usr/local/bin</span><br><span class="line">ADD init.sql /usr/local/bin</span><br><span class="line">CMD [&quot;/usr/local/bin/start.sh&quot;]</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">centos7.2镜像也是自己制作的，可以自己制作系统基础镜像，也可以用网上的</span><br></pre></td></tr></table></figure>
+
+<p>5、制作镜像</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build -t mysql5.7:v1  .</span><br></pre></td></tr></table></figure>
+
+<p>6、运行</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it -e MYSQL_ROOT_PASSWORD=123456 -p 1112:3306  -d mysql5.7:v1</span><br></pre></td></tr></table></figure>
+
+<p>7、其他服务器连接测试</p>
+<p>-——————————————————————–</p>
+<p>上面制作的镜像，运行环境需要能联网才可以，因为要下载依赖包</p>
+<p>如果镜像运行没有网，可以先在有网的环境制作好，再上传到无网环境运行</p>
+<p>制作方法类似，只需更改dockerfile 和start.sh</p>
+<p>dockerfile</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">FROM  centos7.2</span><br><span class="line">ADD mysql-5.7.29-1.el7.x86_64.rpm-bundle.tar /usr/local/src</span><br><span class="line">ADD localtime /etc/localtime</span><br><span class="line">ADD start.sh /usr/local/bin</span><br><span class="line">ADD init.sql /usr/local/bin</span><br><span class="line">RUN rpm --rebuilddb &amp;&amp; yum install -y libaio  libnuma* net-tools perl.x86_64 </span><br><span class="line">RUN cd /usr/local/src &amp;&amp; rpm -ivh mysql-community-common-5.7.29-1.el7.x86_64.rpm &amp;&amp;  rpm -ivh mysql-community-libs-5.7.29-1.el7.x86_64.rpm &amp;&amp; rpm -ivh mysql-community-client-5.7.29-1.el7.x86_64.rpm &amp;&amp; rpm -ivh mysql-community-server-5.7.29-1.el7.x86_64.rpm &amp;&amp; rm -rf /usr/local/src/mysql*</span><br><span class="line">CMD [&quot;/usr/local/bin/start.sh&quot;]</span><br></pre></td></tr></table></figure>
+
+<p>start.sh</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line"></span><br><span class="line">if [ -z &quot;$MYSQL_ROOT_PASSWORD&quot; ];then</span><br><span class="line"> echo &quot;MYSQL_ROOT_PASSWORD is empty&quot;</span><br><span class="line"> exit 0</span><br><span class="line">fi</span><br><span class="line">INIT_MYSQL()&#123;</span><br><span class="line">   echo &quot;mysql初始化&quot;</span><br><span class="line">   mkdir -p /usr/local/mysql/data &amp;&amp; chown -R mysql.mysql /usr/local/mysql</span><br><span class="line">   sed -i &#x27;s/datadir=\/var\/lib\/mysql/datadir=\/usr\/local\/mysql\/data/&#x27; /etc/my.cnf</span><br><span class="line">   sed -i &#x27;/datadir/i default_password_lifetime=0&#x27; /etc/my.cnf</span><br><span class="line">   mysqld  --initialize --user=mysql --datadir=/usr/local/mysql/data</span><br><span class="line">   mysqld --daemonize --pid-file=/var/run/mysqld/mysqld.pid --user=mysql</span><br><span class="line">   dbPassword=\`grep &#x27;temporary password&#x27; /var/log/mysqld.log | awk &#x27;&#123;print $11&#125;&#x27;\`</span><br><span class="line">   mysqladmin -uroot -p$dbPassword password  $MYSQL_ROOT_PASSWORD</span><br><span class="line">   dbUser=&#x27;root&#x27;</span><br><span class="line">   sql_file=&#x27;/usr/local/bin/init.sql&#x27;</span><br><span class="line">   mysql -u $dbUser -p$MYSQL_ROOT_PASSWORD -e &quot;source $sql_file&quot;;</span><br><span class="line">   echo &quot;Remote connection is set&quot;</span><br><span class="line">&#125;</span><br><span class="line">if [ \`ls /usr/local/mysql/data |wc -l\` -eq 0 ];then</span><br><span class="line">   INIT_MYSQL</span><br><span class="line">else</span><br><span class="line">   mysqld --daemonize --pid-file=/var/run/mysqld/mysqld.pid --user=mysql</span><br><span class="line">fi</span><br><span class="line">tail -f /var/log/mysqld.log</span><br></pre></td></tr></table></figure>
+
+<p>-—————————————–主从复制镜像————————————–</p>
+<p>前提：使用上面制作好的mysql5.7:latest镜像</p>
+<p>创建目录</p>
+<p>mkdir -p {master,slave}</p>
+<p>1、master镜像制作</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cd master/</span><br></pre></td></tr></table></figure>
+
+<p>制作my.cnf</p>
+<p>制作dockerfile</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">FROM mysql5.7:latest</span><br><span class="line">ADD my.cnf /etc/my.cnf</span><br></pre></td></tr></table></figure>
+
+<p>制作镜像</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build -t mysql5.7:master .</span><br></pre></td></tr></table></figure>
+
+<p>2、slave镜像</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cd slave</span><br></pre></td></tr></table></figure>
+
+<p>制作my.cnf</p>
+<p>dockerfile</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">FROM mysql5.7:latest</span><br><span class="line">ADD my.cnf /etc/my.cnf</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build -t mysql5.7:slave .</span><br></pre></td></tr></table></figure>
+
+<p>3、启动</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker run -it -p 1111:3306 -e MYSQL_ROOT_PASSWORD=123456  -d -v /data/master:/usr/local/mysql/data mysql5.7:maste</span><br><span class="line">docker run -it -p 2222:3306 -e MYSQL_ROOT_PASSWORD=123456  -d -v /data/slave:/usr/local/mysql/data mysql5.7:slave</span><br></pre></td></tr></table></figure>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2025/08/13/docker%20%E5%88%B6%E4%BD%9C%E8%87%AA%E5%B7%B1%E7%9A%84mysql%E9%95%9C%E5%83%8F/">https://yhao521.github.io/2025/08/13/docker%20%E5%88%B6%E4%BD%9C%E8%87%AA%E5%B7%B1%E7%9A%84mysql%E9%95%9C%E5%83%8F/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/%E6%95%99%E7%A8%8B/">教程</a><a class="post-meta__tags" href="/tags/linux/">linux</a><a class="post-meta__tags" href="/tags/%E6%91%98%E5%BD%95/">摘录</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/08/13/%E4%BD%BF%E7%94%A8docker%E6%9E%84%E5%BB%BA%E5%B9%B6%E9%83%A8%E7%BD%B2MySQL5.7%E9%95%9C%E5%83%8F_docker%20mysql%205.7/" title="使用docker构建并部署MySQL5.7镜像_docker mysql 5.7"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">使用docker构建并部署MySQL5.7镜像_docker mysql 5.7</div></div><div class="info-2"><div class="info-item-1">本文介绍了如何在Docker中使用CentOS镜像和MySQL官方镜像构建MySQL5.7容器。首先，通过编写Dockerfile从CentOS镜像构建MySQL，包括安装依赖、MySQL及其初始化。接着，展示了如何拉取MySQL官方镜像并运行，以及配置外网访问。此外，文章还提到了如何使用初始化脚本执行SQL文件和本地化部署MySQL镜像的方法，包括打包、加载和启动容器。  前言 提示：本篇文章主要讲解如何在docker容器中构建及部署MySQL 一、docker中部署MySQL主要有哪几种方式？ 从 CentOS 镜像中构建 MySQL 容器 从 MySQL 官方镜像中构建容器   从 CentOS 镜像中构建 MySQL 容器可以更好地控制操作系统的版本和配置，而从 MySQL 官方镜像中构建容器则可以更方便地获取最新版本的 MySQL。具体选择哪个镜像，可以根据自己的需求和实际情况来决定。  下面我们来尝试上面两种构建MySQL容器的方式 二、CentOS 镜像中构建 MySQL 容器1.编写DockerfileDockerfile（示例）： 123456789101112...</div></div></div></a><a class="pagination-related" href="/2025/08/07/Ollama%E8%BF%9B%E9%98%B6%EF%BC%8C%E5%9C%A8Python%E3%80%81Java%E3%80%81Go%E9%A1%B9%E7%9B%AE%E4%B8%AD%E9%9B%86%E6%88%90Deepseek%E3%80%81QWQ%E5%A4%A7%E6%A8%A1%E5%9E%8B/" title="Ollama进阶，在Python、Java、Go项目中集成Deepseek、QWQ大模型"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Ollama进阶，在Python、Java、Go项目中集成Deepseek、QWQ大模型</div></div><div class="info-2"><div class="info-item-1">Ollama系列文章：Ollama入门，一键启动本地DeepSeek大模型Ollama入门，Ollama技术架构与原理Ollama进阶，在Python、Java、Go项目中集成Deepseek、QWQ大模型Ollama进阶，在Javascript(nodejs)前后端项目中集成Deepseek、QWQ大模型Ollama高手，玩转本地自定义大模型（LLM）Ollama高手，调优Ollama环境变量，提高性能与安全性Ollama高手，调优Ollama模型参数，提高模型输出质量  在“ Ollama入门，一键启动本地DeepSeek大模型 ”一文中，我们介绍了Ollama的基本使用方法，同时也推荐了ChatBox、Cherry Studio等AI智能客户端来完成文字、图片、语音等多模态输入，实现与 AI 的交互。 但是，仅仅这样常常不足以满足实际的需要，而在线版的Deepseek、ChatGPT、豆包往往可以提供更好功能，这样在本地部署DeepSeek大模型就成了geek的自娱自乐了，因此我们必须将Ollama整合到项目中去，让它与自有系统整合起来，实现更加丰富的功能。 1、如何调用O...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/05/29/Hygen/" title="Hygen"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-29</div><div class="info-item-2">Hygen</div></div><div class="info-2"><div class="info-item-1">[TOC] 起步安装12345npm i -g hygen或cnpm i -g hygen  初始化1234567进入项目地址cd /projects/demo初始化模板hygen init self  初始化成功后，会自动在项目根目录下生成 _templates 文件夹，并且默认生成了一个名为 generator 的生成器及其工作目录。后续会依托该生成器，派生出更多的生成器来满足需求。  注意 不要删除 _templates/generator 文件夹，否则会导致无法创建 Generator 。   提示 后续的所有命令行操作，如无特殊说明，都在项目根目录。  创建第一个生成器1hygen generator new component  执行后会生成一个生成器 component 及其工作目录，目录中默认存在一个示例文件 hello.ejs.t 。 12345678910111213141516171819---to: app/hello.js---const hello = \`\`\`Hello!This is your first hygen template.Lear...</div></div></div></a><a class="pagination-related" href="/2025/05/09/Electron%20%E5%AF%B9%20SQLite%20%E8%BF%9B%E8%A1%8C%E5%8A%A0%E5%AF%86_better-sqlite3-multiple-ciphers-CSDN%E5%8D%9A%E5%AE%A2/" title="Electron 对 SQLite 进行加密_better-sqlite3-multiple-ciphers-CSDN博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-09</div><div class="info-item-2">Electron 对 SQLite 进行加密_better-sqlite3-multiple-ciphers-CSDN博客</div></div><div class="info-2"><div class="info-item-1">Electron 对 SQLite 进行加密最新推荐文章于 2025-04-03 09:22:06 发布 hawk2014bj 于 2024-05-04 14:40:22 发布 文章标签： 前端 版权声明：本文为博主原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接和本声明。 本文链接： https://blog.csdn.net/hawk2014bj/article/details/138438661 版权 本文介绍了如何在Electron应用中使用better-sqlite3-multiple-ciphers库对SQLite数据进行加密，以保护敏感信息。同时处理了在Mac上遇到的架构不一致错误，通过重新编译解决并验证了加密效果。 摘要生成于 C知道 ，由 DeepSeek-R1 满血版支持， 前往体验 &gt; 上一篇讲了如何在 Electron 使用 SQLite，如果 SQLite 中存有敏感数据， 客户端 采用明文存储风险很高，为了保护客户数据，就需要对数据进行加密，由于 electron 对代码并不加密，所以这里排除通过逆向工程进行数据库解密。...</div></div></div></a><a class="pagination-related" href="/2025/06/30/docker%E3%80%81containerd%E3%80%81runc%E3%80%81shim...%20%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E5%90%8D%E8%AF%8D%E5%85%A8%E8%A7%A3%E6%9E%90-CSDN%E5%8D%9A%E5%AE%A2/" title="docker、containerd、runc、shim... 容器技术名词全解析-CSDN博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-06-30</div><div class="info-item-2">docker、containerd、runc、shim... 容器技术名词全解析-CSDN博客</div></div><div class="info-2"><div class="info-item-1">docker、containerd、runc、shim… 容器技术名词全解析本文链接： https://blog.csdn.net/dillanzhou/article/details/116505401 云原生的概念在最近两年得到了广泛的关注，各大云厂商和技术团队都纷纷推出了各种“云原生”的技术和产品。虽然云原生到底包括哪些概念和技术并没有一个公认的答案，但容器技术是云原生的基础和核心应该是现阶段的一个共识。 但是容器技术经过多年的发展和演变，各种实现方案和早期版本相比已经有了巨大的差异，而且仍然在不断演进的过程中。各种组件的产生、随之而来的接口规范、基于接口规范实现的新可选组件让相关的名称和概念更加复杂。新的开发使用者很难全面理解容器相关的各类名词和概念，以及这些名词和概念在真实的容器部署环境中的作用和关系。 笔者作为容器运行时开发人员，对于容器相关的概念仍然经常犯迷糊。 docker 、libcontainer、containerd、shim、runc分别起什么作用？CRI、OCI是什么层次的规范、有什么区别？各个组件的功能和协作方式是怎样的？使用k8s管理容器后相关组件和...</div></div></div></a><a class="pagination-related" href="/2025/10/08/Nacos%E9%83%A8%E7%BD%B2%E5%92%8C%E4%BD%BF%E7%94%A8%EF%BC%88%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C%E4%B8%8E%E5%8F%91%E7%8E%B0%E3%80%81%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83%EF%BC%89/" title="Nacos部署和使用（服务注册与发现、配置中心）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-10-08</div><div class="info-item-2">Nacos部署和使用（服务注册与发现、配置中心）</div></div><div class="info-2"><div class="info-item-1">1. docker部署nacos参考： docker安装nacos-CSDN博客 2.注册中心原理在微服务 远程调用 的过程中，包括两个角色：  服务提供者：提供接口供其它微服务访问，比如 A -service 服务消费者：调用其它微服务提供的接口，比如 B -service  在大型微服务项目中，服务提供者的数量会非常多，为了管理这些服务就引入了 注册中心 的概念。注册中心、服务提供者、服务消费者三者间关系如下： ![[_resources&#x2F;54aafdf158239178b56564502081dc22_MD5.png]] 流程如下：  服务启动时就会注册自己的服务信息（服务名、IP、端口）到注册中心 调用者可以从注册中心订阅想要的服务，获取服务对应的实例列表（1个服务可能多实例部署） 调用者自己对实例列表负载均衡(随机、轮询、IP的hash、最近最少访问…)，挑选一个实例 调用者向该实例发起远程调用  当服务提供者的实例宕机或者启动新实例时，调用者如何得知呢？  服务提供者会定期向注册中心发送请求，报告自己的健康状态（心跳请求） 当注册中心长时间收不到提供者的心跳...</div></div></div></a><a class="pagination-related" href="/2025/05/15/Flux%E2%80%9C%E7%82%BC%E4%B8%B9%E7%82%89%E2%80%9D%E2%80%94%E2%80%94fluxgym%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B-CSDN%E5%8D%9A%E5%AE%A2/" title="Flux“炼丹炉”——fluxgym安装教程-CSDN博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-15</div><div class="info-item-2">Flux“炼丹炉”——fluxgym安装教程-CSDN博客</div></div><div class="info-2"><div class="info-item-1">一、介绍这个炼丹炉目前可以训练除了 flux -dev之外的其它模型，只需更改一个配置文件内容即可。重要的是训练时不需要提前进行图片裁剪、打标等前置工作，只需下图的三个步骤即可开始训练。它就是——fluxgym。 ![[_resources&#x2F;df2678e42e581944c5c0fb9d9966148e_MD5.png]] fluxgym：用于训练具有低 VRAM （12GB&#x2F;16GB&#x2F;20GB） 支持的 FLUX LoRA 的简单 Web UI，它具有 AI-Toolkit WebUI 的简单性和 Kohya Scripts 的 灵活性 。  前端：是从 AI-Toolkit（ https://x.com/multimodalart 创建的 Gradio UI）分叉而来的 WebUI) 后端**：** 由 Kohya Scripts 提供支持的训练脚本  它通过默认隐藏的 Advanced 选项卡支持 100% 的 Kohya sd-scripts 功能。 二、怎么安装？介绍完丹炉，我们来看看如何获取吧，本安装教程属于手把手教学，因为网络问题无法...</div></div></div></a><a class="pagination-related" href="/2025/07/10/%E4%BD%BF%E7%94%A8Golang%E5%AE%9E%E7%8E%B0%E9%AB%98%E6%95%88%E7%9A%84%E4%BA%A4%E4%BA%92%E5%BC%8F%E5%91%BD%E4%BB%A4%E8%A1%8C%E6%8F%90%E7%A4%BA%E5%B7%A5%E5%85%B7%20-%20%E4%BA%91%E5%8E%9F%E7%94%9F%E5%AE%9E%E8%B7%B5/" title="使用Golang实现高效的交互式命令行提示工具 - 云原生实践"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-07-10</div><div class="info-item-2">使用Golang实现高效的交互式命令行提示工具 - 云原生实践</div></div><div class="info-2"><div class="info-item-1">引言在软件开发领域，命令行工具（CLI）一直是开发者不可或缺的工具之一。它们简洁、高效，能够快速完成各种任务。随着技术的发展，交互式命令行工具（Interactive CLI）逐渐成为新的趋势，它们通过提供自动补全、语法高亮等功能，极大地提升了用户体验。本文将探讨如何使用Golang实现一个高效的交互式命令行提示工具，并结合一些流行的库和框架，展示其强大功能和灵活性。 Golang简介Golang，也被称为Go语言，是由Google开发的一种开源编程语言。它以其简洁、直观和高效的语法而受到广泛喜爱。Golang具有静态类型、垃圾回收、并发编程和内存安全等特性，特别适合用于开发高性能的网络工具和命令行应用程序。 交互式命令行工具的需求传统的命令行工具通常缺乏交互性，用户需要手动输入完整的命令和参数，这不仅效率低下，还容易出错。交互式命令行工具通过提供自动补全、语法高亮和历史记录等功能，极大地提升了用户体验和工作效率。 关键技术1. Go-prompt库go-prompt 是一个功能强大的Golang库，用于构建交互式命令行界面。它提供了类似于Python的 prompt_toolk...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>chkconfig | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="title: chkconfigdate: 2023-09-03 20:17:08category:  linuxtag: linuxauthor:   chkconfig $  chkconfig --help chkconfig version 1.7.4 - Copyright (C) 1997-2000 Red Hat, Inc. This may be freely redistrib">
+<meta property="og:type" content="article">
+<meta property="og:title" content="chkconfig">
+<meta property="og:url" content="https://yhao521.github.io/2023/09/04/chkconfig/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="title: chkconfigdate: 2023-09-03 20:17:08category:  linuxtag: linuxauthor:   chkconfig $  chkconfig --help chkconfig version 1.7.4 - Copyright (C) 1997-2000 Red Hat, Inc. This may be freely redistrib">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2023-09-04T03:18:09.000Z">
+<meta property="article:modified_time" content="2023-09-04T03:18:27.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "chkconfig",
+  "url": "https://yhao521.github.io/2023/09/04/chkconfig/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2023-09-04T03:18:09.000Z",
+  "dateModified": "2023-09-04T03:18:27.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2023/09/04/chkconfig/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'chkconfig',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">chkconfig</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">chkconfig</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-09-04T03:18:09.000Z" title="发表于 2023-09-04 11:18:09">2023-09-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-09-04T03:18:27.000Z" title="更新于 2023-09-04 11:18:27">2023-09-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><hr>
+<p>title: chkconfig<br>date: 2023-09-03 20:17:08<br>category:</p>
+<ul>
+<li>linux<br>tag:</li>
+<li>linux<br>author:</li>
+</ul>
+<hr>
+<p>chkconfig</p>
+<pre><code>$  chkconfig --help
+chkconfig version 1.7.4 - Copyright (C) 1997-2000 Red Hat, Inc.
+This may be freely redistributed under the terms of the GNU Public License.
+
+usage:   chkconfig [--list] [--type &lt;type&gt;] [name]
+     chkconfig --add &lt;name&gt;
+     chkconfig --del &lt;name&gt;
+     chkconfig --override &lt;name&gt;
+     chkconfig [--level &lt;levels&gt;] [--type &lt;type&gt;] &lt;name&gt; &lt;on|off|reset|resetpriorities&gt;
+</code></pre>
+<p>chkconfig –list</p>
+<pre><code>$  chkconfig --list
+
+Note: This output shows SysV services only and does not include native
+      systemd services. SysV configuration data might be overridden by native
+      systemd configuration.
+
+      If you want to list systemd services use &#39;systemctl list-unit-files&#39;.
+      To see services enabled on particular target use
+      &#39;systemctl list-dependencies [target]&#39;.
+
+mysql           0:off   1:off   2:on    3:on    4:on    5:on    6:off
+netconsole      0:off   1:off   2:off   3:off   4:off   5:off   6:off
+network         0:off   1:off   2:on    3:on    4:on    5:on    6:off
+nexus           0:off   1:off   2:on    3:on    4:on    5:on    6:off
+</code></pre>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2023/09/04/chkconfig/">https://yhao521.github.io/2023/09/04/chkconfig/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2023/09/04/archery/" title="archery"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">archery</div></div><div class="info-2"><div class="info-item-1"> title: archerydate: 2023-09-03 20:17:08category:  archerytag: archeryauthor:   archery SQL审核平台项目位置：https://github.com/hhyo/archery 背景SQL审核是对MySQL语句写法的统一化，标准化，避免因为SQL的不规范、语法错误等导致出现误删、误更新数据、数据库性能下降等问题。早期的人工审核，针对标准这个问题其实是很吃力的，标准越多，DBA越累，开发也越累；因为Inception诞生了，Inception不止是一个自动化审核工 具，同时还具备执行，生成对影响数据的回滚语句等功能。 简介基于inception的自动化SQL操作平台，支持工单、审核、定时任务、邮件、OSC等功能，还可配置MySQL查询、慢查询管理、会话管理等，将Inception封装成可视化平台，方便开发、运维人员使用。同时集成了部分DB运维功能，如：MySQL优化建议（SQLAdvisor，SOAR），MySQL EXPLAIN细化（MySQLTuning），闪回（binlog2sql），慢SQ...</div></div></div></a><a class="pagination-related" href="/2023/09/04/cmder/" title="cmder"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">cmder</div></div><div class="info-2"><div class="info-item-1"> title: cmderdate: 2023-09-03 20:17:08category:  cmdertag: cmderauthor:   如何使用Cmder替换cmd一、cmder介绍cmder是一款Windows环境下非常简洁美观易用的cmd替代者，它支持了大部分的Linux命令。支持ssh连接linux，使用起来非常方便。比起cmd、powershell、conEmu，其界面美观简洁，功能强大。 二、下载地址地址：http://cmder.net/项目Github地址：https://github.com/cmderdev/cmder 进入官网以后，有mini版和完整版，建议完整版，完整版功能更齐全，还可以使用git，下载好解压文件包以后就可以使用。 官网国内下载很慢，常常失败。可以从下边地址下载： 下载地址： mini版：https://download.csdn.net/download/admans/11989516 full版：https://download.csdn.net/download/admans/11989778 三、关于cmder的一些配置1...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/nexus3%E7%9A%84%E4%BB%8B%E7%BB%8D%E5%92%8C%E4%BD%BF%E7%94%A8/" title="nexus3的介绍和使用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">nexus3的介绍和使用</div></div><div class="info-2"><div class="info-item-1"> title: nexu3的介绍lang: en-USdate: 2022-11-04 00:00:00sidebar: autocategory: tag:  nexusauthor:   1. nexus3的介绍下载https://help.sonatype.com/repomanager3/product-information/download 历史： https://help.sonatype.com/repomanager3/product-information/download/download-archives---repository-manager-3 https://sonatype-download.global.ssl.fastly.net/repository/downloads-prod-group/3/nexus-3.37.3-02-mac.tgz 1.1. 简要说明：搭建maven私服主要是为了方便在一个团队中使用maven中央仓库没有的jar包，这些非中央仓库的jar包可能是自己团队开发的公共依赖jar包，可能是第三方私有的认证相关jar包，...</div></div></div></a><a class="pagination-related" href="/2023/09/04/Win10%E6%89%93%E5%BC%80%E8%BD%AF%E4%BB%B6%E6%8F%90%E7%A4%BA%E2%80%9C%E7%AE%A1%E7%90%86%E5%91%98%E5%B7%B2%E9%98%BB%E6%AD%A2%E4%BD%A0%E8%BF%90%E8%A1%8C%E6%AD%A4%E5%BA%94%E7%94%A8mmc.exe%E2%80%9D%E6%80%8E%E4%B9%88%E8%A7%A3%E5%86%B3%E3%80%90%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95%E3%80%91/" title="Win10打开软件提示“管理员已阻止你运行此应用mmc.exe”怎么解决【解决方法】"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">Win10打开软件提示“管理员已阻止你运行此应用mmc.exe”怎么解决【解决方法】</div></div><div class="info-2"><div class="info-item-1"> title: exe”怎么解决【解决方法】date: 2023-09-03 20:17:08category:  mactag: macauthor:   Win10打开软件提示“管理员已阻止你运行此应用mmc.exe”怎么解决【解决方法】Win10系统下，运行很多软件运行提示用户账户控制“为了对电脑进行保护，已经阻止此应用。管理员已经阻止你运行此应用。有关详细信息，请与管理员联系”，关闭了防火墙也无法解决。那么遇到这个问题要如何解决?下面IT百科分享一下Win10打开软件提示“管理员已阻止你运行此应用mmc.exe”解决方法。 　　具体解决方法： 　　1、由于MMC.exe无法运行，可能会遇到在运行中输入“gpedit.msc”命令无法打开本地组策略编辑器，所以我们鼠标右键点击“开始菜单”，点击“windows powershell(管理员)”，或者是开始→window系统→命令提示符→右击选择以管理员身份运行，在windows powershell(管理员)或者CMD命令提示符(管理员)窗口中输入“gpedit.msc”，打开本地组策略编辑器。 　　扩展阅读： Window...</div></div></div></a><a class="pagination-related" href="/2024/03/18/wails%E6%A1%8C%E9%9D%A2%E6%A1%86%E6%9E%B6%E5%AE%89%E8%A3%85/" title="wails桌面框架安装"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-18</div><div class="info-item-2">wails桌面框架安装</div></div><div class="info-2"><div class="info-item-1">wails桌面框架安装支持的平台 Windows 10&#x2F;11 AMD64&#x2F;ARM64 MacOS 10.13+ AMD64 MacOS 11.0+ ARM64 Linux AMD64&#x2F;ARM64  依赖Wails 有许多安装前需要的常见依赖项：  Go 1.18+ NPM (Node 15+)  Go从 Go 下载页面 下载 Go。 确保您遵守官方的 Go 安装说明。 您还需要确保您的 PATH 环境变量包含您的 ~/go/bin 目录路径。 重启终端并执行以下命令检查：  检查 Go 是否安装正确： go version 检查 “~&#x2F;go&#x2F;bin” 是否在您的 PATH 变量中： echo $PATH | grep go/bin  NPM从 Node 下载页面 下载 NPM。 最好使用最新版本，因为这是我们通常会测试的版本。 运行 npm --version 进行验证。 平台特定依赖关系您还需要安装平台特定的依赖项：  Windows MacOS Linux  Wails 要求安装 xcode 命令行工具。 这可以通过运行 xc...</div></div></div></a><a class="pagination-related" href="/2026/05/15/Android%20armeabiarm64x86%20%E4%B8%8D%E5%90%8CCPU%E6%9E%B6%E6%9E%84%E6%89%93%E5%8C%85%E9%85%8D%E7%BD%AE/" title="Android armeabiarm64x86 不同CPU架构打包配置"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-15</div><div class="info-item-2">Android armeabiarm64x86 不同CPU架构打包配置</div></div><div class="info-2"><div class="info-item-1">谷歌规定：自 2019 年 8 月 1 日起，在 Google Play 上发布的应用必须支持 64 位架构。 64 位 CPU 能够为您的用户提供更快、更丰富的体验。如何查看自己的设备和应用是32位还是64位。 一、查看自己的设备CPU架构类型手机开启USB调试后，连上电脑，在Windows CMD窗口中输入命令： 1、adb devices 查看设备是否连接上 2、adb shell getprop ro.product.cpu.abi 查看手机的CPU架构类型  总结一下，现在市面上常见的CPU架构类型如下： 1、armeabi-v7a: 第7代及以上的 32位ARM 处理器 2、arm64-v8a: ****第8代、64位ARM处理器 3、armeabi: ****第5代、第6代的32位ARM处理器，早期的手机在使用，现在基本很少了。 4、x86: Intel 32位处理器，在平板、模拟器用得比较多。 5、x86_64: Intel 64位处理器，在平板、模拟器用得比较多。 如何查看应用安装包是32位还是64位查看应用文件中是否包含相应的库文件即可。对于 ARM 架构，3...</div></div></div></a><a class="pagination-related" href="/2023/09/04/pgsql%E6%95%99%E7%A8%8B/" title="pgsql教程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">pgsql教程</div></div><div class="info-2"><div class="info-item-1"> title: pgsql教程date: 2023-09-03 20:17:08category:  数据库 doc_pgsqltag: doc_pgsqlauthor:   [TOC]   postgresql 教程1.源码pgsql安装1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465666768697071727374757677787980818283wget https://ftp.postgresql.org/pub/source/v12.3/postgresql-12.3.tar.gz#解压tar -zxvf postgresql-12.3.tar.gz# 编译./configure --prefix=/home/yhao521/pgsqlmake &amp;&amp; make install#创建目录mkdir -p  pgdata/12/&#123;data,backup...</div></div></div></a><a class="pagination-related" href="/2023/09/04/docker%E6%8A%A5%E9%94%99/" title="docker报错"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">docker报错</div></div><div class="info-2"><div class="info-item-1"> title: docker报错date: 2023-09-03 20:17:08category:  doc_dockertag: doc_dockerauthor:   Linux 下非root用户使用docker通常我们使用linux系统的时候，最好是不要直接使用root账号，但是使用Docker的时候，默认又是不能使用非root用户的，关于原因，官方说法如下： The docker daemon binds to a Unix socket instead of a TCP port. By default that Unix socket is owned by the user root and other users can access it with sudo. For this reason, docker daemon always runs as the root user.To avoid having to use sudo when you use the docker command, create a Unix group called dock...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

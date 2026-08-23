@@ -1,0 +1,306 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>面试官：说说什么是Java内存模型？ | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="本文首发我的微信公众号『爱笑的架构师』，欢迎大家关注。     1. 为什么要有内存模型？ 1.1. 硬件内存架构 1.2. 缓存一致性问题 1.3. 处理器优化和指令重排序   2. 并发编程的问题 3. Java 内存模型 3.1. Java 运行时内存区域与硬件内存的关系 3.2. Java 线程与主内存的关系 3.3. 线程间通信   4. 有态度的总结    在面试中，面试官经常喜欢问">
+<meta property="og:type" content="article">
+<meta property="og:title" content="面试官：说说什么是Java内存模型？">
+<meta property="og:url" content="https://yhao521.github.io/2024/03/09/%E9%9D%A2%E8%AF%95%E5%AE%98%EF%BC%9A%E8%AF%B4%E8%AF%B4%E4%BB%80%E4%B9%88%E6%98%AFJava%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%EF%BC%9F/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="本文首发我的微信公众号『爱笑的架构师』，欢迎大家关注。     1. 为什么要有内存模型？ 1.1. 硬件内存架构 1.2. 缓存一致性问题 1.3. 处理器优化和指令重排序   2. 并发编程的问题 3. Java 内存模型 3.1. Java 运行时内存区域与硬件内存的关系 3.2. Java 线程与主内存的关系 3.3. 线程间通信   4. 有态度的总结    在面试中，面试官经常喜欢问">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2024-03-08T17:29:28.000Z">
+<meta property="article:modified_time" content="2024-03-08T17:29:28.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="java&#x2F;programming">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "面试官：说说什么是Java内存模型？",
+  "url": "https://yhao521.github.io/2024/03/09/%E9%9D%A2%E8%AF%95%E5%AE%98%EF%BC%9A%E8%AF%B4%E8%AF%B4%E4%BB%80%E4%B9%88%E6%98%AFJava%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%EF%BC%9F/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2024-03-08T17:29:28.000Z",
+  "dateModified": "2024-03-08T17:29:28.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2024/03/09/%E9%9D%A2%E8%AF%95%E5%AE%98%EF%BC%9A%E8%AF%B4%E8%AF%B4%E4%BB%80%E4%B9%88%E6%98%AFJava%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%EF%BC%9F/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '面试官：说说什么是Java内存模型？',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">面试官：说说什么是Java内存模型？</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">面试官：说说什么是Java内存模型？</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-03-08T17:29:28.000Z" title="发表于 2024-03-09 01:29:28">2024-03-09</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-03-08T17:29:28.000Z" title="更新于 2024-03-09 01:29:28">2024-03-09</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p>本文首发我的微信公众号『<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzIwODI1OTk1Nw==&mid=2650324686&idx=1&sn=0f177ea0b3cbe6da00a4e8b0a46ee22c&chksm=8f09c0d4b87e49c2d98b428b3b42e70550905f36dfcf63a304743d3df88ddcd518501df60b65&token=997683041&lang=zh_CN#rd">爱笑的架构师</a>』，欢迎大家关注。</p>
+</blockquote>
+<!-- TOC -->
+
+<ul>
+<li><a href="#1-%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E6%9C%89%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B">1. 为什么要有内存模型？</a><ul>
+<li><a href="#11-%E7%A1%AC%E4%BB%B6%E5%86%85%E5%AD%98%E6%9E%B6%E6%9E%84">1.1. 硬件内存架构</a></li>
+<li><a href="#12-%E7%BC%93%E5%AD%98%E4%B8%80%E8%87%B4%E6%80%A7%E9%97%AE%E9%A2%98">1.2. 缓存一致性问题</a></li>
+<li><a href="#13-%E5%A4%84%E7%90%86%E5%99%A8%E4%BC%98%E5%8C%96%E5%92%8C%E6%8C%87%E4%BB%A4%E9%87%8D%E6%8E%92%E5%BA%8F">1.3. 处理器优化和指令重排序</a></li>
+</ul>
+</li>
+<li><a href="#2-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%9A%84%E9%97%AE%E9%A2%98">2. 并发编程的问题</a></li>
+<li><a href="#3-java-%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B">3. Java 内存模型</a><ul>
+<li><a href="#31-java-%E8%BF%90%E8%A1%8C%E6%97%B6%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F%E4%B8%8E%E7%A1%AC%E4%BB%B6%E5%86%85%E5%AD%98%E7%9A%84%E5%85%B3%E7%B3%BB">3.1. Java 运行时内存区域与硬件内存的关系</a></li>
+<li><a href="#32-java-%E7%BA%BF%E7%A8%8B%E4%B8%8E%E4%B8%BB%E5%86%85%E5%AD%98%E7%9A%84%E5%85%B3%E7%B3%BB">3.2. Java 线程与主内存的关系</a></li>
+<li><a href="#33-%E7%BA%BF%E7%A8%8B%E9%97%B4%E9%80%9A%E4%BF%A1">3.3. 线程间通信</a></li>
+</ul>
+</li>
+<li><a href="#4-%E6%9C%89%E6%80%81%E5%BA%A6%E7%9A%84%E6%80%BB%E7%BB%93">4. 有态度的总结</a></li>
+</ul>
+<!-- /TOC -->
+
+<p>在面试中，面试官经常喜欢问：『说说什么是Java内存模型(JMM)？』</p>
+<p>面试者内心狂喜，这题刚背过：『Java内存主要分为五大块：堆、方法区、虚拟机栈、本地方法栈、PC寄存器，balabala……』</p>
+<p>面试官会心一笑，露出一道光芒：『好了，今天的面试先到这里了，回去等通知吧』</p>
+<p>一般听到等通知这句话，这场面试大概率就是凉凉了。为什么呢？因为面试者弄错了概念，面试官是想考察JMM，但是面试者一听到<code>Java内存</code>这几个关键字就开始背诵八股文了。Java内存模型(JMM)和Java运行时内存区域区别可大了呢，不要走开接着往下看，答应我要看完。</p>
+<h1 id="1-为什么要有内存模型？"><a href="#1-为什么要有内存模型？" class="headerlink" title="1. 为什么要有内存模型？"></a>1. 为什么要有内存模型？</h1><p>要想回答这个问题，我们需要先弄懂传统计算机硬件内存架构。好了，我要开始画图了。</p>
+<h2 id="1-1-硬件内存架构"><a href="#1-1-硬件内存架构" class="headerlink" title="1.1. 硬件内存架构"></a>1.1. 硬件内存架构</h2><p><img src="https://cdn.jsdelivr.net/gh/smileArchitect/assets/202102/20210415231143.png"></p>
+<p>（1）CPU</p>
+<p>去过机房的同学都知道，一般在大型服务器上会配置多个CPU，每个CPU还会有多个<code>核</code>，这就意味着多个CPU或者多个核可以同时（并发）工作。如果使用Java 起了一个多线程的任务，很有可能每个 CPU 都会跑一个线程，那么你的任务在某一刻就是真正并发执行了。</p>
+<p>（2）CPU Register</p>
+<p>CPU Register也就是 CPU 寄存器。CPU 寄存器是 CPU 内部集成的，在寄存器上执行操作的效率要比在主存上高出几个数量级。</p>
+<p>（3）CPU Cache Memory</p>
+<p>CPU Cache Memory也就是 CPU 高速缓存，相对于寄存器来说，通常也可以成为 L2 二级缓存。相对于硬盘读取速度来说内存读取的效率非常高，但是与 CPU 还是相差数量级，所以在 CPU 和主存间引入了多级缓存，目的是为了做一下缓冲。</p>
+<p>（4）Main Memory</p>
+<p>Main Memory 就是主存，主存比 L1、L2 缓存要大很多。</p>
+<p>注意：部分高端机器还有 L3 三级缓存。</p>
+<h2 id="1-2-缓存一致性问题"><a href="#1-2-缓存一致性问题" class="headerlink" title="1.2. 缓存一致性问题"></a>1.2. 缓存一致性问题</h2><p>由于主存与 CPU 处理器的运算能力之间有数量级的差距，所以在传统计算机内存架构中会引入高速缓存来作为主存和处理器之间的缓冲，CPU 将常用的数据放在高速缓存中，运算结束后 CPU 再讲运算结果同步到主存中。</p>
+<p>使用高速缓存解决了 CPU 和主存速率不匹配的问题，但同时又引入另外一个新问题：缓存一致性问题。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/smileArchitect/assets/202102/20210415231224.png"></p>
+<p>在多CPU的系统中(或者单CPU多核的系统)，每个CPU内核都有自己的高速缓存，它们共享同一主内存(Main Memory)。当多个CPU的运算任务都涉及同一块主内存区域时，CPU 会将数据读取到缓存中进行运算，这可能会导致各自的缓存数据不一致。</p>
+<p>因此需要每个 CPU 访问缓存时遵循一定的协议，在读写数据时根据协议进行操作，共同来维护缓存的一致性。这类协议有 MSI、MESI、MOSI、和 Dragon Protocol 等。</p>
+<h2 id="1-3-处理器优化和指令重排序"><a href="#1-3-处理器优化和指令重排序" class="headerlink" title="1.3. 处理器优化和指令重排序"></a>1.3. 处理器优化和指令重排序</h2><p>为了提升性能在 CPU 和主内存之间增加了高速缓存，但在多线程并发场景可能会遇到<code>缓存一致性问题</code>。那还有没有办法进一步提升 CPU 的执行效率呢？答案是：处理器优化。</p>
+<blockquote>
+<p>为了使处理器内部的运算单元能够最大化被充分利用，处理器会对输入代码进行乱序执行处理，这就是处理器优化。</p>
+</blockquote>
+<p>除了处理器会对代码进行优化处理，很多现代编程语言的编译器也会做类似的优化，比如像 Java 的即时编译器（JIT）会做指令重排序。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/smileArchitect/assets/202102/20210416234526.png"></p>
+<blockquote>
+<p>处理器优化其实也是重排序的一种类型，这里总结一下，重排序可以分为三种类型：</p>
+<ul>
+<li>编译器优化的重排序。编译器在不改变单线程程序语义放入前提下，可以重新安排语句的执行顺序。</li>
+<li>指令级并行的重排序。现代处理器采用了指令级并行技术来将多条指令重叠执行。如果不存在数据依赖性，处理器可以改变语句对应机器指令的执行顺序。</li>
+<li>内存系统的重排序。由于处理器使用缓存和读写缓冲区，这使得加载和存储操作看上去可能是在乱序执行。</li>
+</ul>
+</blockquote>
+<h1 id="2-并发编程的问题"><a href="#2-并发编程的问题" class="headerlink" title="2. 并发编程的问题"></a>2. 并发编程的问题</h1><p>上面讲了一堆硬件相关的东西，有些同学可能会有点懵，绕了这么大圈，这些东西跟 Java 内存模型有啥关系吗？不要急咱们慢慢往下看。</p>
+<p>熟悉 Java 并发的同学肯定对这三个问题很熟悉：『可见性问题』、『原子性问题』、『有序性问题』。如果从更深层次看这三个问题，其实就是上面讲的『缓存一致性』、『处理器优化』、『指令重排序』造成的。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/smileArchitect/assets/202102/20210416234000.png"></p>
+<p>缓存一致性问题其实就是可见性问题，处理器优化可能会造成原子性问题，指令重排序会造成有序性问题，你看是不是都联系上了。</p>
+<p>出了问题总是要解决的，那有什么办法呢？首先想到简单粗暴的办法，干掉缓存让 CPU 直接与主内存交互就解决了可见性问题，禁止处理器优化和指令重排序就解决了原子性和有序性问题，但这样一夜回到解放前了，显然不可取。</p>
+<p>所以技术前辈们想到了在物理机器上定义出一套内存模型， 规范内存的读写操作。内存模型解决并发问题主要采用两种方式：<code>限制处理器优化</code>和<code>使用内存屏障</code>。</p>
+<h1 id="3-Java-内存模型"><a href="#3-Java-内存模型" class="headerlink" title="3. Java 内存模型"></a>3. Java 内存模型</h1><p>同一套内存模型规范，不同语言在实现上可能会有些差别。接下来着重讲一下 Java 内存模型实现原理。</p>
+<h2 id="3-1-Java-运行时内存区域与硬件内存的关系"><a href="#3-1-Java-运行时内存区域与硬件内存的关系" class="headerlink" title="3.1. Java 运行时内存区域与硬件内存的关系"></a>3.1. Java 运行时内存区域与硬件内存的关系</h2><p>了解过 JVM 的同学都知道，JVM 运行时内存区域是分片的，分为栈、堆等，其实这些都是 JVM 定义的逻辑概念。在传统的硬件内存架构中是没有栈和堆这种概念。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/smileArchitect/assets/202102/20210416221328.png"></p>
+<p>从图中可以看出栈和堆既存在于高速缓存中又存在于主内存中，所以两者并没有很直接的关系。</p>
+<h2 id="3-2-Java-线程与主内存的关系"><a href="#3-2-Java-线程与主内存的关系" class="headerlink" title="3.2. Java 线程与主内存的关系"></a>3.2. Java 线程与主内存的关系</h2><p>Java 内存模型是一种规范，定义了很多东西：</p>
+<ul>
+<li>所有的变量都存储在主内存（Main Memory）中。</li>
+<li>每个线程都有一个私有的本地内存（Local Memory），本地内存中存储了该线程以读&#x2F;写共享变量的拷贝副本。</li>
+<li>线程对变量的所有操作都必须在本地内存中进行，而不能直接读写主内存。</li>
+<li>不同的线程之间无法直接访问对方本地内存中的变量。</li>
+</ul>
+<p>看文字太枯燥了，我又画了一张图：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/smileArchitect/assets/202102/20210416224815.png"></p>
+<h2 id="3-3-线程间通信"><a href="#3-3-线程间通信" class="headerlink" title="3.3. 线程间通信"></a>3.3. 线程间通信</h2><p>如果两个线程都对一个共享变量进行操作，共享变量初始值为 1，每个线程都变量进行加 1，预期共享变量的值为 3。在 JMM 规范下会有一系列的操作。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/smileArchitect/assets/202102/20210416230022.png"></p>
+<p>为了更好的控制主内存和本地内存的交互，Java 内存模型定义了八种操作来实现：</p>
+<ul>
+<li>lock：锁定。作用于主内存的变量，把一个变量标识为一条线程独占状态。</li>
+<li>unlock：解锁。作用于主内存变量，把一个处于锁定状态的变量释放出来，释放后的变量才可以被其他线程锁定。</li>
+<li>read：读取。作用于主内存变量，把一个变量值从主内存传输到线程的工作内存中，以便随后的load动作使用</li>
+<li>load：载入。作用于工作内存的变量，它把read操作从主内存中得到的变量值放入工作内存的变量副本中。</li>
+<li>use：使用。作用于工作内存的变量，把工作内存中的一个变量值传递给执行引擎，每当虚拟机遇到一个需要使用变量的值的字节码指令时将会执行这个操作。</li>
+<li>assign：赋值。作用于工作内存的变量，它把一个从执行引擎接收到的值赋值给工作内存的变量，每当虚拟机遇到一个给变量赋值的字节码指令时执行这个操作。</li>
+<li>store：存储。作用于工作内存的变量，把工作内存中的一个变量的值传送到主内存中，以便随后的write的操作。</li>
+<li>write：写入。作用于主内存的变量，它把store操作从工作内存中一个变量的值传送到主内存的变量中。</li>
+</ul>
+<blockquote>
+<p>注意：工作内存也就是本地内存的意思。</p>
+</blockquote>
+<h1 id="4-有态度的总结"><a href="#4-有态度的总结" class="headerlink" title="4. 有态度的总结"></a>4. 有态度的总结</h1><p>由于CPU 和主内存间存在数量级的速率差，想到了引入了多级高速缓存的传统硬件内存架构来解决，多级高速缓存作为 CPU 和主内间的缓冲提升了整体性能。解决了速率差的问题，却又带来了缓存一致性问题。</p>
+<p>数据同时存在于高速缓存和主内存中，如果不加以规范势必造成灾难，因此在传统机器上又抽象出了内存模型。</p>
+<p>Java 语言在遵循内存模型的基础上推出了 JMM 规范，目的是解决由于多线程通过共享内存进行通信时，存在的本地内存数据不一致、编译器会对代码指令重排序、处理器会对代码乱序执行等带来的问题。</p>
+<p>为了更精准控制工作内存和主内存间的交互，JMM 还定义了八种操作：<code>lock</code>, <code>unlock</code>, <code>read</code>, <code>load</code>,<code> use</code>,<code> assign</code>, <code>store</code>, <code>write</code>。</p>
+<p>– End –</p>
+<p>关于Java 内存模型还有很多东西没有展开讲，比如说：<code>内存屏障</code>、<code>happens-before</code>、<code>锁机制</code>、<code>CAS</code>等等。要肝一个系列了，加油！</p>
+<p>我是雷小帅，大家有任何疑问、建议、想法欢迎在留言区套路，最后『求在看』、『求赞』、『求转发』，下期见~</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2024/03/09/%E9%9D%A2%E8%AF%95%E5%AE%98%EF%BC%9A%E8%AF%B4%E8%AF%B4%E4%BB%80%E4%B9%88%E6%98%AFJava%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%EF%BC%9F/">https://yhao521.github.io/2024/03/09/%E9%9D%A2%E8%AF%95%E5%AE%98%EF%BC%9A%E8%AF%B4%E8%AF%B4%E4%BB%80%E4%B9%88%E6%98%AFJava%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%EF%BC%9F/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/java-programming/">java/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/03/09/%E9%9D%A2%E8%AF%95%E5%BF%85%E9%97%AE%E7%9A%84CAS%E5%8E%9F%E7%90%86%E4%BD%A0%E4%BC%9A%E4%BA%86%E5%90%97/" title="面试必问的CAS原理你会了吗"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">面试必问的CAS原理你会了吗</div></div><div class="info-2"><div class="info-item-1"> 本文首发我的微信公众号『爱笑的架构师』，欢迎大家关注。     1. 什么是 CAS？ 2. CAS 基本原理 3. CAS 在 Java 语言中的应用 4. CAS 的问题 4.1. 典型 ABA 问题 4.2. 自旋开销问题 4.3. 只能保证单个变量的原子性   5. 有态度的总结    在并发编程中我们都知道i++操作是非线程安全的，这是因为 i++操作不是原子操作。 如何保证原子性呢？常用的方法就是加锁。在Java语言中可以使用 Synchronized和CAS实现加锁效果。 Synchronized是悲观锁，线程开始执行第一步就是获取锁，一旦获得锁，其他的线程进入后就会阻塞等待锁。如果不好理解，举个生活中的例子：一个人进入厕所后首先把门锁上（获取锁），然后开始上厕所，这个时候有其他人来了只能在外面等（阻塞），就算再急也没用。上完厕所完事后把门打开（解锁），其他人就可以进入了。  CAS是乐观锁，线程执行的时候不会加锁，假设没有冲突去完成某项操作，如果因为冲突失败了就重试，最后直到成功为止。 1. 什么是 CAS？CAS（Compare-And-Swap）是比较并交换...</div></div></div></a><a class="pagination-related" href="/2024/03/09/%E9%9D%A2%E8%AF%95%E5%AE%98%E5%86%8D%E9%97%AERedis%E4%BA%8B%E5%8A%A1%E6%8A%8A%E8%BF%99%E7%AF%87%E6%96%87%E7%AB%A0%E6%89%94%E7%BB%99%E4%BB%96/" title="面试官再问Redis事务把这篇文章扔给他"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">面试官再问Redis事务把这篇文章扔给他</div></div><div class="info-2"><div class="info-item-1"> 本文首发我的微信公众号『爱笑的架构师』，欢迎大家关注。  1. Redis事务生命周期 开启事务：使用MULTI开启一个事务 命令入队列：每次操作的命令都会加入到一个队列中，但命令此时不会真正被执行 提交事务：使用EXEC命令提交事务，开始顺序执行队列中的命令  2. Redis事务到底是不是原子性的？先看关系型数据库ACID 中关于原子性的定义： **原子性：**一个事务(transaction)中的所有操作，要么全部完成，要么全部不完成，不会结束在中间某个环节。事务在执行过程中发生错误，会被恢复(Rollback)到事务开始前的状态，就像这个事务从来没有执行过一样。 官方文档对事务的定义：  事务是一个单独的隔离操作：事务中的所有命令都会序列化、按顺序地执行。事务在执行的过程中，不会被其他客户端发送来的命令请求所打断。 事务是一个原子操作：事务中的命令要么全部被执行，要么全部都不执行。EXEC 命令负责触发并执行事务中的所有命令：如果客户端在使用 MULTI 开启了一个事务之后，却因为断线而没有成功执行 EXEC ，那么事务中的所有命令都不会被执行。另一方面，如果客户端成功...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/03/18/Cypress%20vs%20Playwright%E2%80%94%E2%80%94%E5%93%AA%E4%B8%AA%20JavaScript%20%E6%B5%8B%E8%AF%95%E6%A1%86%E6%9E%B6%E6%9B%B4%E5%A5%BD%EF%BC%9F/" title="Cypress vs Playwright——哪个 JavaScript 测试框架更好？"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-18</div><div class="info-item-2">Cypress vs Playwright——哪个 JavaScript 测试框架更好？</div></div><div class="info-2"><div class="info-item-1"> 10 年前，自动化测试人员如果要编写 E2E 测试，主要使用 Selenium。每个有机会使用该解决方案的人都应该会记得设置、编写和调试是多么不愉快。在此过程中还创建了一些更有趣的自动化工具，例如 Webdriver.io、TestCafe、Nightwatch.js 和 Puppeteer。但是我们今天不会关注那些，因为我想谈谈Cypress和Playwright中测试自动化的几个问题。Cypress 和 Playwright是目前为测试实现创建理想工具的顶级框架。 两个框架，相似……  Cypress 是一种基于 JavaScript 的前端测试工具。设计为对开发人员友好，它直接在浏览器中运行。 Cypress 的第一个版本于 2015 年发布，并于 2018 年开始真正流行，并于 2020 年筹集了 4000 万美元的 B 轮融资。他们以开源为荣，他们相信这将帮助他们在竞争中取得领先。Playwright（微软），于2020年发布。它是一个用于端到端测试的跨浏览器自动化库，也是开源的。它最初是一个 JavaScript 库，但现在已经扩展到还支持 Python、NET 和...</div></div></div></a><a class="pagination-related" href="/2024/01/17/%E9%BB%91%E9%A9%AC%E7%A8%8B%E5%BA%8F%E5%AD%A6%E4%B9%A0%E8%B5%84%E6%96%99/" title="黑马程序学习资料"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-17</div><div class="info-item-2">黑马程序学习资料</div></div><div class="info-2"><div class="info-item-1">黑马程序学习资料http://yun.itheima.com/map?hmcxy= 《黑马MybatisPlus快速精通》在线观看：https://www.bilibili.com/video/BV1Xu411A7tL/网盘链接：https://pan.baidu.com/s/1jdo-ztPnIvTLNish_BExIA?pwd=9988提取码：9988 黑马史上最全面的微服务技术课程B站在线观看：https://www.bilibili.com/video/BV1LQ4y127n4/ 视频+资源教程下载：https://pan.baidu.com/s/169SFtYEvel44hRJhmFTRTQ提取码：1234 Java微服务项目《黑马头条》[666]在线观看：https://www.bilibili.com/video/BV1Qs4y1v7x4/[666]网盘链接：https://pan.baidu.com/s/1u7PNExeoEsYGh5pAnSyocg?pwd=9987提取码：9987 [呲牙]2023新版Java面试在线观看：https://www.bilibil...</div></div></div></a><a class="pagination-related" href="/2024/10/05/Vue3+Vite%E9%A1%B9%E7%9B%AE%E4%BB%8E%E9%9B%B6%E6%90%AD%E5%BB%BA+%E5%AE%89%E8%A3%85%E4%BE%9D%E8%B5%96+%E9%85%8D%E7%BD%AE%E6%8C%89%E9%9C%80%E5%AF%BC%E5%85%A5/" title="Vue3+Vite项目从零搭建+安装依赖+配置按需导入"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-10-05</div><div class="info-item-2">Vue3+Vite项目从零搭建+安装依赖+配置按需导入</div></div><div class="info-2"><div class="info-item-1">环境准备 Vscode&#x2F;HBuilder等任何一种前端开发工具 node.js&amp;npm本地开发环境    源代码管理：Git  技术栈 项目构建创建项目npm create vite依次运行最后三行出现，成功启动项目在浏览器输入 http://localhost:5173/ 可以显示页面   src别名的配置在开发项目的时候文件与文件关系可能很复杂，因此我们需要给src文件夹配置一个别名！！！ 123456789101112import &#123;defineConfig&#125; from &#x27;vite&#x27;import vue from &#x27;@vitejs/plugin-vue&#x27;import path from &#x27;path&#x27;export default defineConfig(&#123;    plugins: [vue()],    resolve: &#123;        alias: &#123;            &quot;@&quot;: path.resolve(&quot;....</div></div></div></a><a class="pagination-related" href="/2024/03/09/%E7%9C%8B%E5%AE%8C%E8%BF%9920%E9%81%93Redis%E9%9D%A2%E8%AF%95%E9%A2%98%EF%BC%8C%E9%98%BF%E9%87%8C%E9%9D%A2%E8%AF%95%E5%8F%AF%E4%BB%A5%E7%BA%A6%E8%B5%B7%E6%9D%A5%E4%BA%86/" title="看完这20道Redis面试题，阿里面试可以约起来了"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-09</div><div class="info-item-2">看完这20道Redis面试题，阿里面试可以约起来了</div></div><div class="info-2"><div class="info-item-1"> 本文首发我的微信公众号『爱笑的架构师』，欢迎大家关注。     1、什么是Redis，Redis有哪些特点？ 2、Redis有哪些数据结构？ 3、一个字符串类型的值能存储最大容量是多少？ 4、能说一下Redis每种数据结构的使用场景吗？ 5、Redis如何做持久化的？能说一下RDB和AOF的实现原理吗？ RDB持久化 AOF持久化 RDB和AOF的优缺点   6、讲解一下Redis的线程模型？ 7、缓存雪崩、缓存穿透、缓存预热、缓存击穿、缓存降级的区别是什么？ （1）缓存穿透 （2）缓存击穿 （3）缓存雪崩 （4）缓存预热 （5）缓存降级   8、Redis的内存淘汰机制 9、Redis有事务机制吗？ 10、Redis事务到底是不是原子性的？ 11、Redis为什么不支持回滚（roll back）？ 12、Redis事务相关的命令有哪几个？ 13、什么是Redis主从复制？ 14、Sentinel（哨兵模式）的原理你能讲一下吗？ 15、Cluster（集群）的原理你能讲一下吗？ 16、Memcache与Redis的区别都有哪些？ 17、假如Redis里面有1亿个key，其中有1...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" title="数据结构"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">数据结构</div></div><div class="info-2"><div class="info-item-1"> title: 数据结构date: 2023-09-03 20:17:08category:  开发语言tag: 开发语言author:   数据结构：八种数据结构大全数据结构1.1 数据结构概述数据结构是计算机存储、组织数据的方式；通常情况下，精心选择的数据结构可以带来更高的运行或者存储效率。数据结构的优良将直接影响着我们程序的性能；常用的数据结构有：数组（Array）、栈（Stack）、队列（Queue）、链表（Linked List）、树（Tree）、图（Graph）、堆（Heap）、散列表（Hash）等；  1.2 数据结构的分类1.2.1 排列方式1）集合集合：数据结构中的元素之间除了“同属一个集合” 的相互关系外，别无其他关系；  2）线性结构线性结构：数据结构中的元素存在一对一的相互关系；  3）树形结构树形结构：数据结构中的元素存在一对多的相互关系；  4）图形结构图形结构：数据结构中的元素存在多对多的相互关系；  1.2.2 逻辑结构数据结构按逻辑上划分为线性结构与非线性结构； 线性结构：有且仅有一个开始结点和一个终端结点，并且所有结点都最多只有一个直接前驱和一...</div></div></div></a><a class="pagination-related" href="/2023/09/04/IntelliJ%20IDEA%20%E6%9C%80%E5%B8%B8%E7%94%A8%E9%85%8D%E7%BD%AE%E8%AF%A6%E7%BB%86%E5%9B%BE%E8%A7%A3/" title="IntelliJ IDEA 最常用配置详细图解"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">IntelliJ IDEA 最常用配置详细图解</div></div><div class="info-2"><div class="info-item-1"> title: IntelliJ IDEA 最常用配置详细图解date: 2023-09-03 20:17:08category:  ideatag: ideaauthor:   IntelliJ IDEA 最常用配置详细图解刚刚使用IntelliJ IDEA 编辑器的时候，会有很多设置，会方便以后的开发，磨刀不误砍柴工。 比如：设置文件字体大小，代码自动完成提示，版本管理，本地代码历史，自动导入包，修改注释，修改tab的显示的数量和行数，打开项目方式，等等一大堆东西。 总结一下，免得下次换了系统，还得再找一遍配置。 设置外观和字体大小  这个呢是设置一下外观。和字体大小。放在第一个没问题。 设置编辑器的快捷键，也就是keymap  这个是修改咱习惯的快捷键映射表，因为我是从eclipse转来的，估计大部分都和我差不多啦，那就可以在这配置成eclipse的快捷键映射表，那么就没有必要再去记一套快捷键映射了，比如我们常用的删除一行 Ctrl d，复制一行Ctrl + alt + 下方向。注释一行，Ctrl + &#x2F; 这都是我们常用的。也是我们习惯的，这个也是极好的设置啊。点...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E6%9C%89%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%EF%BC%9F"><span class="toc-number">1.</span> <span class="toc-text">1. 为什么要有内存模型？</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-%E7%A1%AC%E4%BB%B6%E5%86%85%E5%AD%98%E6%9E%B6%E6%9E%84"><span class="toc-number">1.1.</span> <span class="toc-text">1.1. 硬件内存架构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-%E7%BC%93%E5%AD%98%E4%B8%80%E8%87%B4%E6%80%A7%E9%97%AE%E9%A2%98"><span class="toc-number">1.2.</span> <span class="toc-text">1.2. 缓存一致性问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3-%E5%A4%84%E7%90%86%E5%99%A8%E4%BC%98%E5%8C%96%E5%92%8C%E6%8C%87%E4%BB%A4%E9%87%8D%E6%8E%92%E5%BA%8F"><span class="toc-number">1.3.</span> <span class="toc-text">1.3. 处理器优化和指令重排序</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">2.</span> <span class="toc-text">2. 并发编程的问题</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-Java-%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B"><span class="toc-number">3.</span> <span class="toc-text">3. Java 内存模型</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-Java-%E8%BF%90%E8%A1%8C%E6%97%B6%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F%E4%B8%8E%E7%A1%AC%E4%BB%B6%E5%86%85%E5%AD%98%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="toc-number">3.1.</span> <span class="toc-text">3.1. Java 运行时内存区域与硬件内存的关系</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-Java-%E7%BA%BF%E7%A8%8B%E4%B8%8E%E4%B8%BB%E5%86%85%E5%AD%98%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="toc-number">3.2.</span> <span class="toc-text">3.2. Java 线程与主内存的关系</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-3-%E7%BA%BF%E7%A8%8B%E9%97%B4%E9%80%9A%E4%BF%A1"><span class="toc-number">3.3.</span> <span class="toc-text">3.3. 线程间通信</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E6%9C%89%E6%80%81%E5%BA%A6%E7%9A%84%E6%80%BB%E7%BB%93"><span class="toc-number">4.</span> <span class="toc-text">4. 有态度的总结</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

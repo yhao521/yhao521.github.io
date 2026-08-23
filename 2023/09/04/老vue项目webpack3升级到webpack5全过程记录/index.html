@@ -1,0 +1,735 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>老vue项目webpack3升级到webpack5全过程记录 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="title: 老vue项目webpack3升级到webpack5全过程记录date: 2023-09-03 20:17:08category:  mactag: macauthor:   老vue项目webpack3升级到webpack5全过程记录一、升级过程记录背景19年新建的vue项目，使用的是webpack3，随着项目的积累，组件的增多导致本地构建，线上打包等操作速度极慢，非常影响开发效率">
+<meta property="og:type" content="article">
+<meta property="og:title" content="老vue项目webpack3升级到webpack5全过程记录">
+<meta property="og:url" content="https://yhao521.github.io/2023/09/04/%E8%80%81vue%E9%A1%B9%E7%9B%AEwebpack3%E5%8D%87%E7%BA%A7%E5%88%B0webpack5%E5%85%A8%E8%BF%87%E7%A8%8B%E8%AE%B0%E5%BD%95/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="title: 老vue项目webpack3升级到webpack5全过程记录date: 2023-09-03 20:17:08category:  mactag: macauthor:   老vue项目webpack3升级到webpack5全过程记录一、升级过程记录背景19年新建的vue项目，使用的是webpack3，随着项目的积累，组件的增多导致本地构建，线上打包等操作速度极慢，非常影响开发效率">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2023-09-04T03:18:09.000Z">
+<meta property="article:modified_time" content="2023-09-04T03:18:27.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="java&#x2F;programming">
+<meta property="article:tag" content="javascript">
+<meta property="article:tag" content="js&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="vue">
+<meta property="article:tag" content="web&#x2F;frontend">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "老vue项目webpack3升级到webpack5全过程记录",
+  "url": "https://yhao521.github.io/2023/09/04/%E8%80%81vue%E9%A1%B9%E7%9B%AEwebpack3%E5%8D%87%E7%BA%A7%E5%88%B0webpack5%E5%85%A8%E8%BF%87%E7%A8%8B%E8%AE%B0%E5%BD%95/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2023-09-04T03:18:09.000Z",
+  "dateModified": "2023-09-04T03:18:27.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2023/09/04/%E8%80%81vue%E9%A1%B9%E7%9B%AEwebpack3%E5%8D%87%E7%BA%A7%E5%88%B0webpack5%E5%85%A8%E8%BF%87%E7%A8%8B%E8%AE%B0%E5%BD%95/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '老vue项目webpack3升级到webpack5全过程记录',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">老vue项目webpack3升级到webpack5全过程记录</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">老vue项目webpack3升级到webpack5全过程记录</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-09-04T03:18:09.000Z" title="发表于 2023-09-04 11:18:09">2023-09-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-09-04T03:18:27.000Z" title="更新于 2023-09-04 11:18:27">2023-09-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><hr>
+<p>title: 老vue项目webpack3升级到webpack5全过程记录<br>date: 2023-09-03 20:17:08<br>category:</p>
+<ul>
+<li>mac<br>tag:</li>
+<li>mac<br>author:</li>
+</ul>
+<hr>
+<h1 id="老vue项目webpack3升级到webpack5全过程记录"><a href="#老vue项目webpack3升级到webpack5全过程记录" class="headerlink" title="老vue项目webpack3升级到webpack5全过程记录"></a><a target="_blank" rel="noopener" href="https://www.cnblogs.com/webhmy/p/14791194.html">老vue项目webpack3升级到webpack5全过程记录</a></h1><h2 id="一、升级过程记录"><a href="#一、升级过程记录" class="headerlink" title="一、升级过程记录"></a>一、升级过程记录</h2><h4 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h4><p>19年新建的vue项目，使用的是webpack3，随着项目的积累，组件的增多导致本地构建，线上打包等操作速度极慢，非常影响开发效率和部署效率，基于此问题，本次对webpack及相关插件进行了优化和升级。本博文分为2篇，第 1 篇 会直接附上可运行的代码（去除了一些业务代码配置），直接粘贴复制即可使用（注意是基于vue2.0项目原配置基础上的修改哦，在网上找了一堆都是升级过程的各种坑说明，不如直接粘贴复制运行来的爽丫~~~），第 2 篇也会对相关的修改和遇到的坑进行描述说明。</p>
+<h4 id="升级效果"><a href="#升级效果" class="headerlink" title="升级效果"></a>升级效果</h4><p>1、本地构建<br>第一次构建 5分钟 缩短至 1.5分钟左右， <strong>构建时间提升近 4 倍</strong>；<br>更新构建 由 5-10s 缩短至 1-5s ，<strong>构建提升 2 倍</strong>；<br>2、线上打包<br>执行npm run build 由10-15分钟 缩短至 3-5分钟，<strong>构建时间提升近4倍</strong>；<br><img src="/img/1414921-20210520151642731-549018582.png" alt="img"></p>
+<h4 id="升级过程"><a href="#升级过程" class="headerlink" title="升级过程"></a>升级过程</h4><h5 id="1-更新webpack依赖"><a href="#1-更新webpack依赖" class="headerlink" title="1. 更新webpack依赖"></a>1. 更新webpack依赖</h5><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npm update webpack@<span class="number">5.68</span><span class="number">.0</span></span><br><span class="line">yarn add webpack-dev-server webpack-cli -D</span><br></pre></td></tr></table></figure>
+
+<p>更新其他相关的组件，这里不需要一个个找了，可以使用<code>npm-check-updates</code>一键升级所需的组件，不再赘述怎么用的了，百度一下，你就知道，实在不会就一个个install吧~</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装组件</span></span><br><span class="line">npm install -g npm-check-updates</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">更新package.json中的依赖版本</span></span><br><span class="line">npm-check -u</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">vue版本保持2 及相关依赖保持不变</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装依赖。先</span></span><br><span class="line">rm -rf node_modules</span><br><span class="line">npm install</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-package-json启动命令修改"><a href="#2-package-json启动命令修改" class="headerlink" title="2. package.json启动命令修改"></a>2. <code>package.json</code>启动命令修改</h5><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;scripts&quot;</span>: &#123;</span><br><span class="line">  <span class="string">&quot;dev&quot;</span>: <span class="string">&quot;npx webpack serve --config build/webpack.dev.conf.js --color --progress&quot;</span>,</span><br><span class="line">  <span class="string">&quot;build&quot;</span>: <span class="string">&quot;node build/build.js&quot;</span>,</span><br><span class="line">  <span class="string">&quot;dll&quot;</span>: <span class="string">&quot;npx webpack --config build/webpack.dll.conf.js&quot;</span>,</span><br><span class="line">  <span class="string">&quot;start&quot;</span>: <span class="string">&quot;npm run dev&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="3、webpack-base-conf-js配置修改"><a href="#3、webpack-base-conf-js配置修改" class="headerlink" title="3、webpack.base.conf.js配置修改"></a>3、<code>webpack.base.conf.js</code>配置修改</h5><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&quot;use strict&quot;</span>;</span><br><span class="line"><span class="keyword">const</span> path = <span class="built_in">require</span>(<span class="string">&quot;path&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> utils = <span class="built_in">require</span>(<span class="string">&quot;./utils&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> config = <span class="built_in">require</span>(<span class="string">&quot;../config&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> webpack = <span class="built_in">require</span>(<span class="string">&quot;webpack&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> vueLoaderConfig = <span class="built_in">require</span>(<span class="string">&quot;./vue-loader.conf&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> &#123; <span class="title class_">VueLoaderPlugin</span> &#125; = <span class="built_in">require</span>(<span class="string">&quot;vue-loader&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">resolve</span>(<span class="params">dir</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> path.<span class="title function_">join</span>(__dirname, <span class="string">&quot;..&quot;</span>, dir);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="variable language_">module</span>.<span class="property">exports</span> = &#123;</span><br><span class="line">  <span class="attr">context</span>: path.<span class="title function_">resolve</span>(__dirname, <span class="string">&quot;../&quot;</span>),</span><br><span class="line">  <span class="attr">entry</span>: &#123;</span><br><span class="line">    <span class="attr">app</span>: <span class="string">&quot;./src/main.ts&quot;</span>,</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">output</span>: &#123;</span><br><span class="line">    <span class="attr">path</span>: config.<span class="property">build</span>.<span class="property">assetsRoot</span>,</span><br><span class="line">    <span class="attr">filename</span>: <span class="string">&quot;[name].js&quot;</span>,</span><br><span class="line">    <span class="attr">publicPath</span>:</span><br><span class="line">      process.<span class="property">env</span>.<span class="property">NODE_ENV</span> === <span class="string">&quot;production&quot;</span></span><br><span class="line">        ? config.<span class="property">build</span>.<span class="property">assetsPublicPath</span></span><br><span class="line">        : config.<span class="property">dev</span>.<span class="property">assetsPublicPath</span>,</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">resolve</span>: &#123;</span><br><span class="line">    <span class="attr">extensions</span>: [<span class="string">&quot;.js&quot;</span>, <span class="string">&quot;.vue&quot;</span>, <span class="string">&quot;.json&quot;</span>, <span class="string">&quot;.ts&quot;</span>],</span><br><span class="line">    <span class="attr">alias</span>: &#123;</span><br><span class="line">      <span class="attr">vue$</span>: <span class="string">&quot;vue/dist/vue.esm.js&quot;</span>,</span><br><span class="line">      <span class="string">&quot;@&quot;</span>: <span class="title function_">resolve</span>(<span class="string">&quot;src&quot;</span>),</span><br><span class="line">      <span class="attr">pages</span>: <span class="title function_">resolve</span>(<span class="string">&quot;src/pages&quot;</span>),</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">module</span>: &#123;</span><br><span class="line">    <span class="attr">rules</span>: [</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">test</span>: <span class="regexp">/\.vue$/</span>,</span><br><span class="line">        <span class="attr">use</span>: &#123;</span><br><span class="line">          <span class="attr">loader</span>: <span class="string">&quot;vue-loader&quot;</span>,</span><br><span class="line">        &#125;,</span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">test</span>: <span class="regexp">/\.tsx?$/</span>,</span><br><span class="line">        <span class="attr">exclude</span>: <span class="title function_">resolve</span>(<span class="string">&quot;node_modules&quot;</span>),</span><br><span class="line">        <span class="attr">use</span>: [</span><br><span class="line">          &#123;</span><br><span class="line">            <span class="attr">loader</span>: <span class="string">&quot;babel-loader&quot;</span>,</span><br><span class="line">          &#125;,</span><br><span class="line">          &#123;</span><br><span class="line">            <span class="attr">loader</span>: <span class="string">&quot;ts-loader&quot;</span>,</span><br><span class="line">            <span class="attr">options</span>: &#123; <span class="attr">appendTsxSuffixTo</span>: [<span class="regexp">/\.vue$/</span>], <span class="attr">transpileOnly</span>: <span class="literal">true</span> &#125;,</span><br><span class="line">          &#125;,</span><br><span class="line">        ],</span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">test</span>: <span class="regexp">/\.js$/</span>,</span><br><span class="line">        <span class="attr">use</span>: &#123;</span><br><span class="line">          <span class="attr">loader</span>: <span class="string">&quot;babel-loader&quot;</span>,</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="attr">exclude</span>: <span class="title function_">resolve</span>(<span class="string">&quot;node_modules&quot;</span>),</span><br><span class="line">        <span class="attr">include</span>: <span class="title function_">resolve</span>(<span class="string">&quot;src&quot;</span>),</span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">test</span>: <span class="regexp">/\.(png|jpe?g|gif|svg)(\?.*)?$/</span>,</span><br><span class="line">        <span class="attr">type</span>: <span class="string">&quot;asset&quot;</span>,</span><br><span class="line">        <span class="attr">parser</span>: &#123;</span><br><span class="line">          <span class="attr">dataUrlCondition</span>: &#123;</span><br><span class="line">            <span class="attr">maxSize</span>: <span class="number">10</span> * <span class="number">1024</span>, <span class="comment">// 10kb</span></span><br><span class="line">          &#125;,</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="attr">generator</span>: &#123;</span><br><span class="line">          <span class="attr">filename</span>: utils.<span class="title function_">assetsPath</span>(<span class="string">&quot;img/[name].[hash:7].[ext]&quot;</span>),</span><br><span class="line">        &#125;,</span><br><span class="line">      &#125;,</span><br><span class="line">    ],</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">node</span>: &#123;</span><br><span class="line">    <span class="attr">global</span>: <span class="literal">false</span>,</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">plugins</span>: [</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">VueLoaderPlugin</span>(),</span><br><span class="line">    <span class="keyword">new</span> webpack.<span class="title class_">ProvidePlugin</span>(&#123;</span><br><span class="line">      <span class="attr">jQuery</span>: <span class="string">&quot;jquery&quot;</span>,</span><br><span class="line">      <span class="attr">$</span>: <span class="string">&quot;jquery&quot;</span>,</span><br><span class="line">    &#125;),</span><br><span class="line">    <span class="keyword">new</span> webpack.<span class="title class_">DllReferencePlugin</span>(&#123;</span><br><span class="line">      <span class="attr">context</span>: __dirname,</span><br><span class="line">      <span class="attr">manifest</span>: path.<span class="title function_">resolve</span>(__dirname, <span class="string">&quot;./vendors.manifest.json&quot;</span>),</span><br><span class="line">    &#125;),</span><br><span class="line">  ],</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h5 id="4、webpack-dev-conf-js配置修改"><a href="#4、webpack-dev-conf-js配置修改" class="headerlink" title="4、webpack.dev.conf.js配置修改"></a>4、<code>webpack.dev.conf.js</code>配置修改</h5><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&quot;use strict&quot;</span>;</span><br><span class="line"><span class="keyword">const</span> utils = <span class="built_in">require</span>(<span class="string">&quot;./utils&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> webpack = <span class="built_in">require</span>(<span class="string">&quot;webpack&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> config = <span class="built_in">require</span>(<span class="string">&quot;../config&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> &#123; merge &#125; = <span class="built_in">require</span>(<span class="string">&quot;webpack-merge&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> path = <span class="built_in">require</span>(<span class="string">&quot;path&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> baseWebpackConfig = <span class="built_in">require</span>(<span class="string">&quot;./webpack.base.conf&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> <span class="title class_">CopyWebpackPlugin</span> = <span class="built_in">require</span>(<span class="string">&quot;copy-webpack-plugin&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> <span class="title class_">HtmlWebpackPlugin</span> = <span class="built_in">require</span>(<span class="string">&quot;html-webpack-plugin&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> <span class="title class_">FriendlyErrorsPlugin</span> = <span class="built_in">require</span>(<span class="string">&quot;friendly-errors-webpack-plugin&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> portfinder = <span class="built_in">require</span>(<span class="string">&quot;portfinder&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="variable constant_">HOST</span> = process.<span class="property">env</span>.<span class="property">HOST</span>;</span><br><span class="line"><span class="keyword">const</span> <span class="variable constant_">PORT</span> = process.<span class="property">env</span>.<span class="property">PORT</span> &amp;&amp; <span class="title class_">Number</span>(process.<span class="property">env</span>.<span class="property">PORT</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> devWebpackConfig = <span class="title function_">merge</span>(baseWebpackConfig, &#123;</span><br><span class="line">  <span class="attr">mode</span>: <span class="string">&quot;development&quot;</span>,</span><br><span class="line">  <span class="attr">module</span>: &#123;</span><br><span class="line">    <span class="attr">rules</span>: utils.<span class="title function_">styleLoaders</span>(&#123;</span><br><span class="line">      <span class="attr">sourceMap</span>: config.<span class="property">dev</span>.<span class="property">cssSourceMap</span>,</span><br><span class="line">      <span class="attr">usePostCSS</span>: <span class="literal">true</span>,</span><br><span class="line">    &#125;),</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="comment">// cheap-module-eval-source-map is faster for development</span></span><br><span class="line">  <span class="attr">devtool</span>: config.<span class="property">dev</span>.<span class="property">devtool</span>,</span><br><span class="line"></span><br><span class="line">  <span class="comment">// these devServer options should be customized in /config/index.js</span></span><br><span class="line">  <span class="attr">devServer</span>: &#123;</span><br><span class="line">    <span class="attr">clientLogLevel</span>: <span class="string">&quot;warning&quot;</span>,</span><br><span class="line">    <span class="attr">historyApiFallback</span>: &#123;</span><br><span class="line">      <span class="attr">rewrites</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">from</span>: <span class="regexp">/.*/</span>,</span><br><span class="line">          <span class="attr">to</span>: path.<span class="property">posix</span>.<span class="title function_">join</span>(config.<span class="property">dev</span>.<span class="property">assetsPublicPath</span>, <span class="string">&quot;index.html&quot;</span>),</span><br><span class="line">        &#125;,</span><br><span class="line">      ],</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">hot</span>: <span class="literal">true</span>,</span><br><span class="line">    <span class="attr">contentBase</span>: <span class="literal">false</span>, <span class="comment">// since we use CopyWebpackPlugin.</span></span><br><span class="line">    <span class="attr">compress</span>: <span class="literal">true</span>,</span><br><span class="line">    <span class="attr">host</span>: <span class="variable constant_">HOST</span> || config.<span class="property">dev</span>.<span class="property">host</span>,</span><br><span class="line">    <span class="attr">port</span>: <span class="variable constant_">PORT</span> || config.<span class="property">dev</span>.<span class="property">port</span>,</span><br><span class="line">    <span class="attr">open</span>: config.<span class="property">dev</span>.<span class="property">autoOpenBrowser</span>,</span><br><span class="line">    <span class="attr">overlay</span>: config.<span class="property">dev</span>.<span class="property">errorOverlay</span></span><br><span class="line">      ? &#123; <span class="attr">warnings</span>: <span class="literal">false</span>, <span class="attr">errors</span>: <span class="literal">true</span> &#125;</span><br><span class="line">      : <span class="literal">false</span>,</span><br><span class="line">    <span class="attr">publicPath</span>: config.<span class="property">dev</span>.<span class="property">assetsPublicPath</span>,</span><br><span class="line">    <span class="attr">proxy</span>: config.<span class="property">dev</span>.<span class="property">proxyTable</span>,</span><br><span class="line">    <span class="attr">quiet</span>: <span class="literal">true</span>, <span class="comment">// necessary for FriendlyErrorsPlugin</span></span><br><span class="line">    <span class="attr">watchOptions</span>: &#123;</span><br><span class="line">      <span class="attr">poll</span>: config.<span class="property">dev</span>.<span class="property">poll</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">plugins</span>: [</span><br><span class="line">    <span class="keyword">new</span> webpack.<span class="title class_">DefinePlugin</span>(&#123;</span><br><span class="line">      <span class="string">&quot;process.env&quot;</span>: <span class="built_in">require</span>(<span class="string">&quot;../config/dev.env&quot;</span>),</span><br><span class="line">    &#125;),</span><br><span class="line">    <span class="keyword">new</span> webpack.<span class="title class_">HotModuleReplacementPlugin</span>(),</span><br><span class="line">    <span class="keyword">new</span> webpack.<span class="title class_">NamedModulesPlugin</span>(), <span class="comment">// HMR shows correct file names in console on update.</span></span><br><span class="line">    <span class="keyword">new</span> webpack.<span class="title class_">NoEmitOnErrorsPlugin</span>(),</span><br><span class="line">    <span class="comment">// https://github.com/ampedandwired/html-webpack-plugin</span></span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">HtmlWebpackPlugin</span>(&#123;</span><br><span class="line">      <span class="attr">filename</span>: <span class="string">&quot;index.html&quot;</span>,</span><br><span class="line">      <span class="attr">template</span>: <span class="string">&quot;index.html&quot;</span>,</span><br><span class="line">      <span class="attr">inject</span>: <span class="string">&quot;body&quot;</span>,</span><br><span class="line">      <span class="attr">scriptLoading</span>: <span class="string">&quot;blocking&quot;</span>,</span><br><span class="line">      <span class="attr">minify</span>: &#123;</span><br><span class="line">        <span class="attr">removeComments</span>: <span class="literal">true</span>,</span><br><span class="line">      &#125;,</span><br><span class="line">    &#125;),</span><br><span class="line">    <span class="comment">// copy custom static assets</span></span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">CopyWebpackPlugin</span>(&#123;</span><br><span class="line">      <span class="attr">patterns</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">from</span>: path.<span class="title function_">resolve</span>(__dirname, <span class="string">&quot;../static&quot;</span>),</span><br><span class="line">          <span class="attr">to</span>: config.<span class="property">dev</span>.<span class="property">assetsSubDirectory</span>,</span><br><span class="line">          <span class="attr">globOptions</span>: &#123;</span><br><span class="line">            <span class="attr">dot</span>: <span class="literal">true</span>,</span><br><span class="line">            <span class="attr">gitignore</span>: <span class="literal">true</span>,</span><br><span class="line">            <span class="attr">ignore</span>: [<span class="string">&quot;.*&quot;</span>],</span><br><span class="line">          &#125;,</span><br><span class="line">        &#125;,</span><br><span class="line">      ],</span><br><span class="line">    &#125;),</span><br><span class="line">  ],</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="variable language_">module</span>.<span class="property">exports</span> = <span class="keyword">new</span> <span class="title class_">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</span><br><span class="line">  portfinder.<span class="property">basePort</span> = process.<span class="property">env</span>.<span class="property">PORT</span> || config.<span class="property">dev</span>.<span class="property">port</span>;</span><br><span class="line">  portfinder.<span class="title function_">getPort</span>(<span class="function">(<span class="params">err, port</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (err) &#123;</span><br><span class="line">      <span class="title function_">reject</span>(err);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="comment">// publish the new Port, necessary for e2e tests</span></span><br><span class="line">      process.<span class="property">env</span>.<span class="property">PORT</span> = port;</span><br><span class="line">      <span class="comment">// add port to devServer config</span></span><br><span class="line">      devWebpackConfig.<span class="property">devServer</span>.<span class="property">port</span> = port;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// Add FriendlyErrorsPlugin</span></span><br><span class="line">      devWebpackConfig.<span class="property">plugins</span>.<span class="title function_">push</span>(</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">FriendlyErrorsPlugin</span>(&#123;</span><br><span class="line">          <span class="attr">compilationSuccessInfo</span>: &#123;</span><br><span class="line">            <span class="attr">messages</span>: [</span><br><span class="line">              <span class="string">`Your application is running here: http://<span class="subst">$&#123;devWebpackConfig.devServer.host&#125;</span>:<span class="subst">$&#123;port&#125;</span>`</span>,</span><br><span class="line">            ],</span><br><span class="line">          &#125;,</span><br><span class="line">          <span class="attr">onErrors</span>: config.<span class="property">dev</span>.<span class="property">notifyOnErrors</span></span><br><span class="line">            ? utils.<span class="title function_">createNotifierCallback</span>()</span><br><span class="line">            : <span class="literal">undefined</span>,</span><br><span class="line">        &#125;),</span><br><span class="line">      );</span><br><span class="line"></span><br><span class="line">      <span class="title function_">resolve</span>(devWebpackConfig);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h5 id="5、webpack-prod-conf-js配置修改"><a href="#5、webpack-prod-conf-js配置修改" class="headerlink" title="5、webpack.prod.conf.js配置修改"></a>5、<code>webpack.prod.conf.js</code>配置修改</h5><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&quot;use strict&quot;</span>;</span><br><span class="line"><span class="keyword">const</span> path = <span class="built_in">require</span>(<span class="string">&quot;path&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> utils = <span class="built_in">require</span>(<span class="string">&quot;./utils&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> webpack = <span class="built_in">require</span>(<span class="string">&quot;webpack&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> config = <span class="built_in">require</span>(<span class="string">&quot;../config&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> &#123; merge &#125; = <span class="built_in">require</span>(<span class="string">&quot;webpack-merge&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> baseWebpackConfig = <span class="built_in">require</span>(<span class="string">&quot;./webpack.base.conf&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> <span class="title class_">CopyWebpackPlugin</span> = <span class="built_in">require</span>(<span class="string">&quot;copy-webpack-plugin&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> <span class="title class_">HtmlWebpackPlugin</span> = <span class="built_in">require</span>(<span class="string">&quot;html-webpack-plugin&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> <span class="title class_">OptimizeCSSPlugin</span> = <span class="built_in">require</span>(<span class="string">&quot;optimize-css-assets-webpack-plugin&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> <span class="title class_">TerserWebpackPlugin</span> = <span class="built_in">require</span>(<span class="string">&quot;terser-webpack-plugin&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> <span class="title class_">MiniCssExtractPlugin</span> = <span class="built_in">require</span>(<span class="string">&quot;mini-css-extract-plugin&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> env = <span class="built_in">require</span>(<span class="string">&quot;../config/prod.env&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> webpackConfig = <span class="title function_">merge</span>(baseWebpackConfig, &#123;</span><br><span class="line">  <span class="attr">mode</span>: <span class="string">&quot;production&quot;</span>,</span><br><span class="line">  <span class="attr">module</span>: &#123;</span><br><span class="line">    <span class="attr">rules</span>: utils.<span class="title function_">styleLoaders</span>(&#123;</span><br><span class="line">      <span class="attr">sourceMap</span>: <span class="literal">false</span>,</span><br><span class="line">      <span class="attr">extract</span>: <span class="literal">true</span>,</span><br><span class="line">      <span class="attr">usePostCSS</span>: <span class="literal">true</span>,</span><br><span class="line">    &#125;),</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">devtool</span>: config.<span class="property">build</span>.<span class="property">devtool</span>,</span><br><span class="line">  <span class="attr">output</span>: &#123;</span><br><span class="line">    <span class="attr">path</span>: config.<span class="property">build</span>.<span class="property">assetsRoot</span>,</span><br><span class="line">    <span class="attr">filename</span>: utils.<span class="title function_">assetsPath</span>(<span class="string">&quot;js/[name].[chunkhash].js&quot;</span>),</span><br><span class="line">    <span class="attr">chunkFilename</span>: utils.<span class="title function_">assetsPath</span>(<span class="string">&quot;js/[id].[chunkhash].js&quot;</span>),</span><br><span class="line">    <span class="attr">clean</span>: <span class="literal">true</span>,</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">optimization</span>: &#123;</span><br><span class="line">    <span class="attr">minimize</span>: <span class="literal">true</span>,</span><br><span class="line">    <span class="attr">minimizer</span>: [<span class="keyword">new</span> <span class="title class_">TerserWebpackPlugin</span>(), <span class="keyword">new</span> <span class="title class_">OptimizeCSSPlugin</span>()],</span><br><span class="line">    <span class="attr">runtimeChunk</span>: &#123; <span class="attr">name</span>: <span class="string">&quot;runtime&quot;</span> &#125;,</span><br><span class="line">    <span class="attr">concatenateModules</span>: <span class="literal">true</span>,</span><br><span class="line">    <span class="attr">splitChunks</span>: &#123;</span><br><span class="line">      <span class="attr">cacheGroups</span>: &#123;</span><br><span class="line">        <span class="attr">vendor</span>: &#123;</span><br><span class="line">          <span class="attr">test</span>: <span class="regexp">/[\\/]node_modules[\\/]/</span>,</span><br><span class="line">          <span class="attr">name</span>: <span class="string">&quot;vendor&quot;</span>,</span><br><span class="line">          <span class="attr">chunks</span>: <span class="string">&quot;all&quot;</span>,</span><br><span class="line">          <span class="attr">priority</span>: -<span class="number">10</span>,</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="string">&quot;async-vendors&quot;</span>: &#123;</span><br><span class="line">          <span class="attr">test</span>: <span class="regexp">/[\\/]node_modules[\\/]/</span>,</span><br><span class="line">          <span class="attr">minChunks</span>: <span class="number">2</span>,</span><br><span class="line">          <span class="attr">chunks</span>: <span class="string">&quot;async&quot;</span>,</span><br><span class="line">          <span class="attr">name</span>: <span class="string">&quot;async-vendors&quot;</span>,</span><br><span class="line">        &#125;,</span><br><span class="line">      &#125;,</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">moduleIds</span>: <span class="string">&quot;deterministic&quot;</span>,</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">plugins</span>: [</span><br><span class="line">    <span class="keyword">new</span> webpack.<span class="title class_">DefinePlugin</span>(&#123;</span><br><span class="line">      <span class="string">&quot;process.env&quot;</span>: env,</span><br><span class="line">    &#125;),</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">MiniCssExtractPlugin</span>(&#123;</span><br><span class="line">      <span class="attr">filename</span>: utils.<span class="title function_">assetsPath</span>(<span class="string">&quot;css/[name].[contenthash].css&quot;</span>),</span><br><span class="line">      <span class="attr">chunkFilename</span>: utils.<span class="title function_">assetsPath</span>(<span class="string">&quot;css/[name].[contenthash].css&quot;</span>),</span><br><span class="line">    &#125;),</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">HtmlWebpackPlugin</span>(&#123;</span><br><span class="line">      <span class="attr">filename</span>: config.<span class="property">build</span>.<span class="property">index</span>,</span><br><span class="line">      <span class="attr">template</span>: <span class="string">&quot;index.html&quot;</span>,</span><br><span class="line">      <span class="attr">inject</span>: <span class="literal">true</span>,</span><br><span class="line">      <span class="attr">scriptLoading</span>: <span class="string">&quot;blocking&quot;</span>,</span><br><span class="line">      <span class="attr">minify</span>: &#123;</span><br><span class="line">        <span class="attr">removeComments</span>: <span class="literal">true</span>,</span><br><span class="line">        <span class="attr">collapseWhitespace</span>: <span class="literal">true</span>,</span><br><span class="line">        <span class="attr">removeAttributeQuotes</span>: <span class="literal">true</span>,</span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="attr">chunksSortMode</span>: <span class="string">&quot;auto&quot;</span>,</span><br><span class="line">    &#125;),</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">CopyWebpackPlugin</span>(&#123;</span><br><span class="line">      <span class="attr">patterns</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">from</span>: path.<span class="title function_">resolve</span>(__dirname, <span class="string">&quot;../static&quot;</span>),</span><br><span class="line">          <span class="attr">to</span>: config.<span class="property">build</span>.<span class="property">assetsSubDirectory</span>,</span><br><span class="line">          <span class="attr">globOptions</span>: &#123;</span><br><span class="line">            <span class="attr">dot</span>: <span class="literal">true</span>,</span><br><span class="line">            <span class="attr">gitignore</span>: <span class="literal">true</span>,</span><br><span class="line">            <span class="attr">ignore</span>: [<span class="string">&quot;.*&quot;</span>],</span><br><span class="line">          &#125;,</span><br><span class="line">        &#125;,</span><br><span class="line">      ],</span><br><span class="line">    &#125;),</span><br><span class="line">  ],</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (config.<span class="property">build</span>.<span class="property">productionGzip</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> <span class="title class_">CompressionWebpackPlugin</span> = <span class="built_in">require</span>(<span class="string">&quot;compression-webpack-plugin&quot;</span>);</span><br><span class="line">  webpackConfig.<span class="property">plugins</span>.<span class="title function_">push</span>(</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">CompressionWebpackPlugin</span>(&#123;</span><br><span class="line">      <span class="attr">filename</span>: <span class="string">&quot;[path][base].gz[query]&quot;</span>,</span><br><span class="line">      <span class="attr">algorithm</span>: <span class="string">&quot;gzip&quot;</span>,</span><br><span class="line">      <span class="attr">test</span>: <span class="regexp">/\.(js|css|json|txt|html|ico|svg)(\?.*)?$/i</span>,</span><br><span class="line">      <span class="attr">threshold</span>: <span class="number">10240</span>,</span><br><span class="line">      <span class="attr">minRatio</span>: <span class="number">0.8</span>,</span><br><span class="line">      <span class="attr">deleteOriginalAssets</span>: <span class="literal">true</span>,</span><br><span class="line">    &#125;),</span><br><span class="line">  );</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (config.<span class="property">build</span>.<span class="property">bundleAnalyzerReport</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> <span class="title class_">BundleAnalyzerPlugin</span> =</span><br><span class="line">    <span class="built_in">require</span>(<span class="string">&quot;webpack-bundle-analyzer&quot;</span>).<span class="property">BundleAnalyzerPlugin</span>;</span><br><span class="line">  webpackConfig.<span class="property">plugins</span>.<span class="title function_">push</span>(<span class="keyword">new</span> <span class="title class_">BundleAnalyzerPlugin</span>());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="variable language_">module</span>.<span class="property">exports</span> = webpackConfig;</span><br></pre></td></tr></table></figure>
+
+<h5 id="6、utils-js配置修改"><a href="#6、utils-js配置修改" class="headerlink" title="6、utils.js配置修改"></a>6、<code>utils.js</code>配置修改</h5><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&quot;use strict&quot;</span>;</span><br><span class="line"><span class="keyword">const</span> path = <span class="built_in">require</span>(<span class="string">&quot;path&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> config = <span class="built_in">require</span>(<span class="string">&quot;../config&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> <span class="title class_">MiniCssExtractPlugin</span> = <span class="built_in">require</span>(<span class="string">&quot;mini-css-extract-plugin&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> packageConfig = <span class="built_in">require</span>(<span class="string">&quot;../package.json&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">exports</span>.<span class="property">assetsPath</span> = <span class="keyword">function</span> (<span class="params">_path</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> assetsSubDirectory =</span><br><span class="line">    process.<span class="property">env</span>.<span class="property">NODE_ENV</span> === <span class="string">&quot;production&quot;</span></span><br><span class="line">      ? config.<span class="property">build</span>.<span class="property">assetsSubDirectory</span></span><br><span class="line">      : config.<span class="property">dev</span>.<span class="property">assetsSubDirectory</span>;</span><br><span class="line">  <span class="keyword">return</span> path.<span class="property">posix</span>.<span class="title function_">join</span>(assetsSubDirectory, _path);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="built_in">exports</span>.<span class="property">cssLoaders</span> = <span class="keyword">function</span> (<span class="params">options</span>) &#123;</span><br><span class="line">  options = options || &#123;&#125;;</span><br><span class="line">  <span class="keyword">const</span> cssLoader = &#123;</span><br><span class="line">    <span class="attr">loader</span>: <span class="string">&quot;css-loader&quot;</span>,</span><br><span class="line">    <span class="attr">options</span>: &#123;</span><br><span class="line">      <span class="attr">sourceMap</span>: options.<span class="property">sourceMap</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> postcssLoader = &#123;</span><br><span class="line">    <span class="attr">loader</span>: <span class="string">&quot;postcss-loader&quot;</span>,</span><br><span class="line">    <span class="attr">options</span>: &#123;</span><br><span class="line">      <span class="attr">sourceMap</span>: options.<span class="property">sourceMap</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// generate loader string to be used with extract text plugin</span></span><br><span class="line">  <span class="keyword">function</span> <span class="title function_">generateLoaders</span>(<span class="params">loader, loaderOptions</span>) &#123;</span><br><span class="line">    <span class="keyword">const</span> loaders = options.<span class="property">usePostCSS</span></span><br><span class="line">      ? [cssLoader, postcssLoader]</span><br><span class="line">      : [cssLoader];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (loader) &#123;</span><br><span class="line">      loaders.<span class="title function_">push</span>(&#123;</span><br><span class="line">        <span class="attr">loader</span>: loader + <span class="string">&quot;-loader&quot;</span>,</span><br><span class="line">        <span class="attr">options</span>: <span class="title class_">Object</span>.<span class="title function_">assign</span>(&#123;&#125;, loaderOptions, &#123;</span><br><span class="line">          <span class="attr">sourceMap</span>: options.<span class="property">sourceMap</span>,</span><br><span class="line">        &#125;),</span><br><span class="line">      &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Extract CSS when that option is specified</span></span><br><span class="line">    <span class="comment">// (which is the case during production build)</span></span><br><span class="line">    <span class="keyword">if</span> (options.<span class="property">extract</span>) &#123;</span><br><span class="line">      <span class="keyword">return</span> [</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">loader</span>: <span class="title class_">MiniCssExtractPlugin</span>.<span class="property">loader</span>,</span><br><span class="line">        &#125;,</span><br><span class="line">      ].<span class="title function_">concat</span>(loaders);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> [</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">loader</span>: <span class="string">&quot;style-loader&quot;</span>,</span><br><span class="line">        &#125;,</span><br><span class="line">      ].<span class="title function_">concat</span>(loaders);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// https://vue-loader.vuejs.org/en/configurations/extract-css.html</span></span><br><span class="line">  <span class="keyword">return</span> &#123;</span><br><span class="line">    <span class="attr">css</span>: <span class="title function_">generateLoaders</span>(),</span><br><span class="line">    <span class="attr">postcss</span>: <span class="title function_">generateLoaders</span>(),</span><br><span class="line">    <span class="attr">less</span>: <span class="title function_">generateLoaders</span>(<span class="string">&quot;less&quot;</span>),</span><br><span class="line">    <span class="comment">// sass: generateLoaders(&#x27;sass&#x27;, &#123; indentedSyntax: true &#125;),</span></span><br><span class="line">    <span class="comment">// scss: generateLoaders(&#x27;sass&#x27;),</span></span><br><span class="line">    <span class="comment">// stylus: generateLoaders(&#x27;stylus&#x27;),</span></span><br><span class="line">    <span class="comment">// styl: generateLoaders(&#x27;stylus&#x27;)</span></span><br><span class="line">  &#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Generate loaders for standalone style files (outside of .vue)</span></span><br><span class="line"><span class="built_in">exports</span>.<span class="property">styleLoaders</span> = <span class="keyword">function</span> (<span class="params">options</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> output = [];</span><br><span class="line">  <span class="keyword">const</span> loaders = <span class="built_in">exports</span>.<span class="title function_">cssLoaders</span>(options);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">const</span> extension <span class="keyword">in</span> loaders) &#123;</span><br><span class="line">    <span class="keyword">const</span> loader = loaders[extension];</span><br><span class="line"></span><br><span class="line">    <span class="comment">// console.log(&quot;css-loader&quot;, loader)</span></span><br><span class="line">    output.<span class="title function_">push</span>(&#123;</span><br><span class="line">      <span class="attr">test</span>: <span class="keyword">new</span> <span class="title class_">RegExp</span>(<span class="string">&quot;\\.&quot;</span> + extension + <span class="string">&quot;$&quot;</span>),</span><br><span class="line">      <span class="attr">use</span>: loader,</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> output;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="built_in">exports</span>.<span class="property">createNotifierCallback</span> = <span class="function">() =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">const</span> notifier = <span class="built_in">require</span>(<span class="string">&quot;node-notifier&quot;</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="function">(<span class="params">severity, errors</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (severity !== <span class="string">&quot;error&quot;</span>) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> error = errors[<span class="number">0</span>];</span><br><span class="line">    <span class="keyword">const</span> filename = error.<span class="property">file</span> &amp;&amp; error.<span class="property">file</span>.<span class="title function_">split</span>(<span class="string">&quot;!&quot;</span>).<span class="title function_">pop</span>();</span><br><span class="line"></span><br><span class="line">    notifier.<span class="title function_">notify</span>(&#123;</span><br><span class="line">      <span class="attr">title</span>: packageConfig.<span class="property">name</span>,</span><br><span class="line">      <span class="attr">message</span>: severity + <span class="string">&quot;: &quot;</span> + error.<span class="property">name</span>,</span><br><span class="line">      <span class="attr">subtitle</span>: filename || <span class="string">&quot;&quot;</span>,</span><br><span class="line">      <span class="attr">icon</span>: path.<span class="title function_">join</span>(__dirname, <span class="string">&quot;logo.png&quot;</span>),</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h2 id="二、配置的升级过程中遇到的坑"><a href="#二、配置的升级过程中遇到的坑" class="headerlink" title="二、配置的升级过程中遇到的坑"></a>二、配置的升级过程中遇到的坑</h2><h3 id="1、设置mode"><a href="#1、设置mode" class="headerlink" title="1、设置mode"></a>1、设置mode</h3><p>通过指定mode参数，启用对应环境下webpack内置的优化。有三个可选参数：development，production，none。默认值为production，生产环境在production模式下，会自动压缩代码，可以去除之前配置的一些压缩代码的插件。<br><img src="/img/1414921-20210520194401714-663641748.png" alt="img"></p>
+<h3 id="2、use写法不同"><a href="#2、use写法不同" class="headerlink" title="2、use写法不同"></a>2、use写法不同</h3><p>rules 中对loader的指定写法，支持写对象和数组模式<br><img src="/img/1414921-20210520194527722-757405638.png" alt="img"></p>
+<h3 id="3、改写file-loader-和-url-loader"><a href="#3、改写file-loader-和-url-loader" class="headerlink" title="3、改写file-loader 和 url-loader"></a>3、改写file-loader 和 url-loader</h3><p>在webpack4前我们对一些静态资源的配置，都是通过file-loader 和 url-loader，webpack5引入资源模块的配置，不需要再配置了<br><img src="/img/1414921-20210520194558436-1670833877.png" alt="img"></p>
+<h3 id="4、对插件的引用和使用的更改"><a href="#4、对插件的引用和使用的更改" class="headerlink" title="4、对插件的引用和使用的更改"></a>4、对插件的引用和使用的更改</h3><p>merge 的引用改成：<br><img src="/img/1414921-20210520194832735-1570385063.png" alt="img"></p>
+<p>CopyWebpackPlugin的写法改成：<br><img src="/img/1414921-20210520194901346-69678457.png" alt="img"></p>
+<p>分离css的组件改成 <code>mini-css-extract-plugin</code>：<br><img src="/img/1414921-20210520194947297-1847814527.png" alt="img"></p>
+<p>对文件的压缩处理，放在optimization里性能更好<br><img src="/img/1414921-20210520195033040-1780706172.png" alt="img"></p>
+<p>弃用之前的文件分离，采用新的分离和缓存机制<br><img src="/img/1414921-20210520195104749-1383742238.png" alt="img"></p>
+<p>CompressionWebpackPlugin的写法改写<br><img src="/img/1414921-20210520195147725-1955394363.png" alt="img"></p>
+<h3 id="5、报错处理"><a href="#5、报错处理" class="headerlink" title="5、报错处理"></a>5、报错处理</h3><p><img src="/img/1414921-20210520195514718-1987056505.png" alt="img"><br>出现类似的报错，查出原因是写法不对，版本太低，直接升级对应组件的版本就可以了<br>但是后来发现 iview 也有类似的报错，于是痛定思痛一起把iview的版本也升级了。升级iview还是蛮无缝的，目前遇到的不一致的有：<br>1、任何使用 from ‘iview’ 的都要替换为 from ‘view-design’<br>2、新版的组件默认文字像素大小是14px<br>3、tree 的 render自定义写法有区别</p>
+<h3 id="6-报错处理"><a href="#6-报错处理" class="headerlink" title="6.报错处理"></a>6.报错处理</h3><p><img src="/img/image-20220214143135922.png" alt="image-20220214143135922"></p>
+<p><img src="/img/image-20220214143110293.png"></p>
+<p>报错原因：依赖版本太高，降低版本</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">➜  crds_view git:(temp_yanghao) ✗ npm uninstall chalk</span><br><span class="line"></span><br><span class="line">up to <span class="built_in">date</span> <span class="keyword">in</span> 936ms</span><br><span class="line">➜  crds_view git:(temp_yanghao) ✗ npm install chalk@4.0.0 --save-dev</span><br><span class="line"></span><br><span class="line">added 2 packages, and changed 1 package <span class="keyword">in</span> 1s</span><br><span class="line">➜  crds_view git:(temp_yanghao) ✗ npm uninstall ora</span><br><span class="line"></span><br><span class="line">removed 17 packages <span class="keyword">in</span> 1s</span><br><span class="line">➜  crds_view git:(temp_yanghao) ✗ npm install ora@5.0.0 --save-dev</span><br><span class="line"></span><br><span class="line">added 11 packages, removed 10 packages, and changed 1 package <span class="keyword">in</span> 2s</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-报错处理-1"><a href="#6-报错处理-1" class="headerlink" title="6.报错处理"></a>6.报错处理</h3><p><img src="/img/image-20220214143036696.png" alt="image-20220214143036696"></p>
+<p>发现当引入VueLoaderPligin时报错</p>
+<p>查询发现package.json中vue-loader版本是17.0.0：</p>
+<p>解决方法</p>
+<p>安装低版本的vue-loader</p>
+<p><strong>重新尝试打包，解决问题！</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">➜  crds_view git:(temp_yanghao) ✗ npm i vue-loader@13.7.3 --save-devv</span><br><span class="line">npm WARN deprecated flatten@1.0.3: flatten is deprecated in favor of utility frameworks such as lodash.</span><br><span class="line"></span><br><span class="line">added 42 packages, and removed 1 package in 2s</span><br><span class="line">➜  crds_view git:(temp_yanghao) ✗ npm i vue-loader@13.7.3 --save-dev</span><br><span class="line">npm WARN idealTree Removing dependencies.vue-loader in favor of devDependencies.vue-loader</span><br><span class="line"></span><br><span class="line">up to date in 1s</span><br><span class="line">➜  crds_view git:(temp_yanghao) ✗ npm uni vue-style-loader</span><br><span class="line"></span><br><span class="line">removed 1 package in 1s</span><br><span class="line">➜  crds_view git:(temp_yanghao) ✗ npm uni vue-template-compiler</span><br><span class="line"></span><br><span class="line">up to date in 1s</span><br><span class="line">➜  crds_view git:(temp_yanghao) ✗ npm i vue-template-compiler@2.6.10 --save-dev</span><br><span class="line"></span><br><span class="line">changed 1 package in 1s</span><br><span class="line">➜  crds_view git:(temp_yanghao) ✗ npm i vue-template-compiler@2.6.10 --save-dev</span><br><span class="line"></span><br><span class="line">up to date in 1s</span><br><span class="line">➜  crds_view git:(temp_yanghao) ✗ npm i vue-style-loader@3.0.1 --save-dev</span><br><span class="line"></span><br><span class="line">added 1 package in 1s</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-报错处理-2"><a href="#6-报错处理-2" class="headerlink" title="6.报错处理"></a>6.报错处理</h3><p><img src="/img/image-20220214152441070.png" alt="image-20220214152441070"></p>
+<p>报错原因：</p>
+<p>babel-loader和babel-core版本不对应所产生的，<br>babel-loader 8.x对应babel-core 7.x<br>babel-loader 7.x对应babel-core 6.x</p>
+<p>解决过程：</p>
+<p>去package.json里面查看你安装的babel-loader和babel-core的版本是否对应</p>
+<p>解决办法：</p>
+<p>卸载旧的babel-core 6.x 安装babel-core 7.x</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">➜  crds_view git:(temp_yanghao) ✗ npm un babel-core</span><br><span class="line"></span><br><span class="line">up to date in 1s</span><br><span class="line">➜  crds_view git:(temp_yanghao) ✗ npm i  @babel/core --save-dev</span><br><span class="line"></span><br><span class="line">up to date in 1s</span><br></pre></td></tr></table></figure>
+
+<h3 id="报错处理"><a href="#报错处理" class="headerlink" title="报错处理"></a>报错处理</h3><p><img src="/img/image-20220214152957892.png" alt="image-20220214152957892"></p>
+<p>重新安装了一下vue-loader即可解决问题。</p>
+<p>npm i vue-loader@15 –save-dev</p>
+<p>added 14 packages, removed 3 packages, and changed 1 package in 2s<br>➜ crds_view git:(temp_yanghao) ✗ npm run build</p>
+<h3 id="报错处理-1"><a href="#报错处理-1" class="headerlink" title="报错处理"></a>报错处理</h3><p><img src="/img/image-20220214154200379.png" alt="image-20220214154200379"></p>
+<pre><code>    // new FileManagerPlugin({
+    //   onStart: {
+    //     delete: [&quot;./target&quot;],
+    //     mkdir: [&quot;./target/crds_web_view/soft&quot;]
+    //   },
+    //   onEnd: {
+    //     delete: [&quot;./target/crds_web_view/soft/crds_web_view.zip&quot;],
+    //     archive: [
+    //       {
+    //         source: &quot;./target/dist&quot;,
+    //         destination: &quot;./target/crds_web_view/soft/crds_web_view.zip&quot;
+    //       }
+    //     ]
+    //   }
+    // }),
+    new FileManagerPlugin({
+      events: {
+        onEnd: [
+          {delete: [&quot;./target&quot;]},
+         { mkdir: [&quot;./target/crds_web_view/soft&quot;]},
+        {archive: [
+          {
+            source: &quot;./target/dist&quot;,
+            destination: &quot;./target/crds_web_view/soft/crds_web_view.zip&quot;
+          }
+        ]
+      }
+      ],
+      },
+      runTasksInSeries: false,
+      runOnceInWatchMode: false,
+    })
+</code></pre>
+<h3 id="报错处理-2"><a href="#报错处理-2" class="headerlink" title="报错处理"></a>报错处理</h3><p><img src="/img/image-20220214155639500.png" alt="image-20220214155639500"></p>
+<p>在webpack项目打包的时候，出现以上报错信息。<br>根据报错消息大概可以得知，当使用use来加载loader的时候，不能添加options选项，因为use往往是使用多个loader，你无法对多个loader同时配置。<br>这种问题出在喜欢把<strong>use</strong> 和 <strong>loader</strong> 混用的人。</p>
+<p><strong>问题解决</strong></p>
+<p>将需要配置options的loader 的 关键字从use 改成 loader<br><img src="/img/20210320204319687.png" alt="在这里插入图片描述"><br><img src="/img/20210320204349737.png" alt="在这里插入图片描述"></p>
+<p>另外第二种方法是将loader包装成对象，写在use数组内部。</p>
+<p><img src="/img/20210320210925680.png" alt="在这里插入图片描述"></p>
+<h3 id="DllReferencePlugin和DllPlugin提高打包速度"><a href="#DllReferencePlugin和DllPlugin提高打包速度" class="headerlink" title="DllReferencePlugin和DllPlugin提高打包速度"></a>DllReferencePlugin和DllPlugin提高打包速度</h3><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/tugenhua0707/p/9520780.html">https://www.cnblogs.com/tugenhua0707/p/9520780.html</a></p>
+<p><a target="_blank" rel="noopener" href="https://segmentfault.com/a/1190000011795931">https://segmentfault.com/a/1190000011795931</a></p>
+<p>报错处理</p>
+<p><img src="/img/image-20220214171315786.png" alt="image-20220214171315786"></p>
+<p>取消UglifyJsPlugin插件，使用TerserWebpackPlugin插件</p>
+<pre><code>optimization: {
+    minimize: true,
+    minimizer: [
+        new TerserWebpackPlugin(
+          {
+      terserOptions: {
+        ecma: undefined,
+        warnings: false,
+        parse: {},
+        compress: {
+          drop_console: true,
+          drop_debugger: false,
+          pure_funcs: [&#39;console.log&#39;] // 移除console
+        }
+      },
+          }
+        ),
+        new OptimizeCSSPlugin(),
+    ],
+</code></pre>
+<h3 id="报错处理-3"><a href="#报错处理-3" class="headerlink" title="报错处理"></a>报错处理</h3><p><img src="/img/image-20220214163517387.png" alt="image-20220214163517387"></p>
+<p>Error: Plugin&#x2F;Preset files are not allowed to export objects, only functions<br>package.json 的依赖列表即有 babel 7.0 版本的( @babel&#x2F;core ， @babel&#x2F;preset-react )<br>也有 babel 6.0 版本的 ( <a href="mailto:&#x62;&#97;&#98;&#x65;&#x6c;&#x2d;&#x63;&#x6f;&#x72;&#101;&#x40;&#x36;&#x2e;&#50;&#x36;&#x2e;&#48;">babel-core@6.26.0</a> , <a href="mailto:&#98;&#x61;&#98;&#x65;&#108;&#45;&#x63;&#108;&#x69;&#64;&#x36;&#x2e;&#50;&#x36;&#x2e;&#48;">babel-cli@6.26.0</a> , <a href="mailto:&#98;&#97;&#98;&#101;&#x6c;&#45;&#112;&#x72;&#101;&#115;&#x65;&#x74;&#45;&#114;&#101;&#97;&#x63;&#116;&#x40;&#54;&#46;&#x32;&#52;&#x2e;&#x31;">babel-preset-react@6.24.1</a> )</p>
+<p>也可命令查看 bebel-cli 的版本 （ babel -V ）</p>
+<p>如果在你的 package.json 依赖包中既有 babel 7.0 版本，又有 babel 6.0 版本，就会报这个错误</p>
+<p>很显然就是两个版本是不兼容的</p>
+<p>处理方法<br>我自己把babel-loader版本改低了，原来是8<br>在package.json中改为：“babel-loader”: “^7.1.2”，先把package-lock.json删除<br>1、升级到 babel 7.0</p>
+<p>将所有有关 babel 的包都升级为 7.0 版本</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&quot;@babel/core&quot;: &quot;^7.0.0-beta.40&quot;,</span><br><span class="line">&quot;@babel/cli&quot;: &quot;^7.0.0-beta.40&quot;,</span><br><span class="line">&quot;babel-loader&quot;: &quot;^8.0.0-beta.0&quot;,</span><br><span class="line">&quot;babel-plugin-lodash&quot;: &quot;^3.3.2&quot;,</span><br><span class="line">&quot;babel-plugin-react-transform&quot;: &quot;^3.0.0&quot;,</span><br><span class="line">&quot;@babel/preset-react&quot;: &quot;^7.0.0-beta.40&quot;,</span><br><span class="line">&quot;@babel/preset-stage-0&quot;:&#x27;^7.0.0&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>并且修改 .babelrc 文件</p>
+<p>对应的修改 presets 预设和 plugins 都改为 7.0 形式。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">query: &#123;</span><br><span class="line">	presets: [&#x27;@babel/react&#x27;, &#x27;@babel/stage-0&#x27;],</span><br><span class="line">	plugins: [&#x27;&#x27;]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"> # 执行 npx babel-upgrade 查看需要升级的依赖   .babelrc 需要修改的地方</span><br><span class="line"></span><br><span class="line"> 升级依赖 npm install</span><br><span class="line"></span><br><span class="line">➜  crds_view git:(temp_yanghao) ✗ npm un  babel-cli</span><br><span class="line"></span><br><span class="line">removed 83 packages in 1s</span><br><span class="line"></span><br><span class="line">➜  crds_view git:(temp_yanghao) ✗ npm i @babel/cli --save-dev</span><br><span class="line"></span><br><span class="line">added 20 packages in 2s</span><br><span class="line">➜  crds_view git:(temp_yanghao) ✗ npm un  babel-preset-env</span><br><span class="line"></span><br><span class="line">removed 41 packages, and changed 1 package in 1s</span><br><span class="line">➜  crds_view git:(temp_yanghao) ✗ npm un  babel-preset-stage-2</span><br><span class="line"></span><br><span class="line">removed 40 packages in 922ms</span><br><span class="line">➜  crds_view git:(temp_yanghao) ✗ npm i @babel/preset-env    --save-dev</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_42235173/article/details/90897014">https://blog.csdn.net/weixin_42235173/article/details/90897014</a></p>
+<h3 id="报错处理-4"><a href="#报错处理-4" class="headerlink" title="报错处理"></a>报错处理</h3><p><img src="/img/image-20220215093036522.png" alt="image-20220215093036522"></p>
+<p>问题如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">(node:223804) [DEP_WEBPACK_MAIN_TEMPLATE_HASH_FOR_CHUNK] DeprecationWarning: MainTemplate.hooks.hashForChunk is deprecated (use JavascriptModulesPlugin.getCompilationHooks().chunkHash instead)</span><br><span class="line">(node:223804) [DEP_WEBPACK_CHUNK_TEMPLATE_HASH_FOR_CHUNK] DeprecationWarning: ChunkTemplate.hooks.hashForChunk is deprecated (use JavascriptModulesPlugin.getCompilationHooks().chunkHash instead)</span><br><span class="line">(node:223804) [DEP_WEBPACK_COMPILATION_OPTIMIZE_CHUNK_ASSETS] DeprecationWarning: optimizeChunkAssets is deprecated (use Compilation.hooks.processAssets instead and use one of Compilation.PROCESS_ASSETS_STAGE_* as stage option)</span><br><span class="line">(node:223804) [DEP_WEBPACK_DEPRECATION_ARRAY_TO_SET_LENGTH] DeprecationWarning: chunk.files was changed from Array to Set (using Array property &#x27;length&#x27; is deprecated)</span><br><span class="line">(node:223804) [DEP_WEBPACK_DEPRECATION_ARRAY_TO_SET_INDEXER] DeprecationWarning: chunk.files was changed from Array to Set (indexing Array is deprecated)</span><br></pre></td></tr></table></figure>
+
+<p>解决方案：排查发现时webpack uglifyjs-webpack-plugin插件导致的</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"># 删除相关引入和配置，并且卸载依赖</span><br><span class="line"></span><br><span class="line">npm un uglifyjs-webpack-plugin</span><br><span class="line"></span><br><span class="line">这是因为optimize-css-assets-webpack-plugin 在webpack5中已不在友好支持</span><br><span class="line"></span><br><span class="line">解决办法 使用 css-minimizer-webpack-plugin 为webpack5支持版</span><br><span class="line">npm i --save-dev css-minimizer-webpack-plugin</span><br><span class="line">npm un optimize-css-assets-webpack-plugin</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">const CssMinimizerPlugin = require(&#x27;css-minimizer-webpack-plugin&#x27;)</span><br><span class="line"></span><br><span class="line"> optimization: &#123;</span><br><span class="line"></span><br><span class="line">    minimize: true,</span><br><span class="line"></span><br><span class="line">    minimizer: [</span><br><span class="line"></span><br><span class="line">         new CssMinimizerPlugin(),</span><br><span class="line"></span><br><span class="line">    ],</span><br><span class="line"></span><br><span class="line">链接：https://www.jianshu.com/p/e79b8581eaae</span><br></pre></td></tr></table></figure>
+
+<p>原文链接：<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_42192113/article/details/114645394">https://blog.csdn.net/weixin_42192113/article/details/114645394</a></p>
+<h3 id="Dev报错处理"><a href="#Dev报错处理" class="headerlink" title="Dev报错处理"></a>Dev报错处理</h3><p><img src="/img/image-20220215100447863.png" alt="image-20220215100447863"></p>
+<p>问题原因：5.0 的时候，NamedModulesPlugin已经移除了</p>
+<p>参考 升级废弃的配置项</p>
+<p>NamedModulesPlugin → optimization.moduleIds: ‘named’</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">// &#x27;webpack.dev.config.js&#x27;</span><br><span class="line">module.exports = merge(baseConfig, &#123;</span><br><span class="line">  mode: ,</span><br><span class="line">  entry: ,</span><br><span class="line">  optimization: &#123;</span><br><span class="line">    moduleIds: &#x27;named&#x27;</span><br><span class="line">  &#125;,</span><br><span class="line">  plugins: ,</span><br><span class="line">&#125;);</span><br><span class="line">#   plugins中删除NamedModulesPlugin 配置</span><br><span class="line">    // new webpack.NamedModulesPlugin(), // HMR shows correct file names in console on update.</span><br></pre></td></tr></table></figure>
+
+<h3 id="dev报错处理"><a href="#dev报错处理" class="headerlink" title="dev报错处理"></a>dev报错处理</h3><p><img src="/img/image-20220215100924492.png" alt="image-20220215100924492"></p>
+<p>将devtools配置成：inline-cheap-module-source-map 完美解决，</p>
+<p><a target="_blank" rel="noopener" href="https://webpack.js.org/configuration/devtool/">https://webpack.js.org/configuration/devtool/</a></p>
+<h3 id="dev报错处理-1"><a href="#dev报错处理-1" class="headerlink" title="dev报错处理"></a>dev报错处理</h3><p><img src="/img/image-20220215102413371.png" alt="image-20220215102413371"></p>
+<p><a target="_blank" rel="noopener" href="https://webpack.js.org/configuration/dev-server/#usage-via-api">https://webpack.js.org/configuration/dev-server/#usage-via-api</a></p>
+<p>参考官网api去除多余配置，添加&amp;替换更新后的配置</p>
+<h3 id="dev报错处理-2"><a href="#dev报错处理-2" class="headerlink" title="dev报错处理"></a>dev报错处理</h3><p><img src="/img/image-20220215104220537.png" alt="image-20220215104220537"></p>
+<p><img src="/img/image-20220215105820875.png" alt="image-20220215105820875"></p>
+<p>取消css-loeader配置</p>
+<h3 id="dev报错处理-3"><a href="#dev报错处理-3" class="headerlink" title="dev报错处理"></a>dev报错处理</h3><p><img src="/img/image-20220215120207696.png" alt="image-20220215120207696"></p>
+<p>将。&#x2F;&#x2F; 注释方式改为。&#x2F;_. 注释 _&#x2F;</p>
+<h3 id="dev报错处理-4"><a href="#dev报错处理-4" class="headerlink" title="dev报错处理"></a>dev报错处理</h3><p><img src="/img/image-20220215133528181.png" alt="image-20220215133528181"></p>
+<p>参考的是这篇博主的文章</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44874618/article/details/110647652">https://blog.csdn.net/weixin_44874618/article/details/110647652</a></p>
+<p>去看了下我自己的echarts的版本号</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm ls echarts  //查看echarts的版本</span><br></pre></td></tr></table></figure>
+
+<p>一看确实是5.0的<br>或者在<strong>page.json</strong>文件查看（这是重装好的，仅做演示）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&quot;dependencies&quot;: &#123;</span><br><span class="line">&quot;echarts&quot;: &quot;^5.3.0&quot;,</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+
+<p>按照这篇博主说的，卸载了重装 echarts</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">//卸载重装</span><br><span class="line">npm uninstall echarts</span><br><span class="line">npm install echarts@4.9.0</span><br><span class="line">npm uninstall vue-echarts</span><br><span class="line">npm install vue-echarts@4</span><br><span class="line">npm fund</span><br></pre></td></tr></table></figure>
+
+<h3 id="dev报错处理-5"><a href="#dev报错处理-5" class="headerlink" title="dev报错处理"></a>dev报错处理</h3><p><img src="/img/image-20220215140641640.png" alt="image-20220215140641640"></p>
+<p>Module build failed (from .&#x2F;node_modules&#x2F;sass-resources-loader&#x2F;lib&#x2F;loader.js):</p>
+<p>Error: Can’t find sass resources in your config. Make sure loader.options.resources exists</p>
+<p>配置指定路径</p>
+<pre><code>  {
+    test: /\.scss$/,
+    use: [
+      { loader: &#39;vue-style-loader&#39; },
+      { loader: &#39;css-loader&#39;, options: { sourceMap: true } },
+      { loader: &#39;sass-loader&#39;, options: { sourceMap: true } },
+      {
+        loader: &#39;sass-resources-loader&#39;,
+        options: {
+          sourceMap: true,
+          resources: [
+            path.resolve(__dirname, &#39;../src/styles/variables.scss&#39;),
+            path.resolve(__dirname, &#39;../src/styles/mixins.scss&#39;),
+            path.resolve(__dirname, &#39;../src/styles/common.scss&#39;),
+          ]
+        }
+      }
+    ],
+    // exclude: resolve(&#39;node_modules&#39;),
+    // include: resolve(&#39;src&#39;)
+  }
+</code></pre>
+<p><img src="/img/image-20220215144346754.png" alt="image-20220215144346754"></p>
+<pre><code>  {
+    test: /\.vue$/,
+    // use: {
+    loader: &#39;vue-loader&#39;,
+    options: vueLoaderConfig,
+    // },,
+    // exclude: resolve(&#39;node_modules&#39;),
+    include: [resolve(&#39;src&#39;),
+    resolve(&#39;node_modules/vue-echarts&#39;),
+    resolve(&#39;node_modules/resize-detector&#39;)
+  ]
+  },
+</code></pre>
+<h3 id="dev报错处理-6"><a href="#dev报错处理-6" class="headerlink" title="dev报错处理"></a>dev报错处理</h3><p><img src="/img/image-20220215144826088.png" alt="image-20220215144826088"></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_42713970/article/details/86507781">https://blog.csdn.net/weixin_42713970/article/details/86507781</a></p>
+<p>nodes-<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=sass&spm=1001.2101.3001.7020">sass</a> releases地址：<a target="_blank" rel="noopener" href="https://github.com/sass/node-sass/releases">https://github.com/sass/node-sass/releases</a><br>nodejs releases地址：<a target="_blank" rel="noopener" href="https://nodejs.org/zh-cn/download/releases/">https://nodejs.org/zh-cn/download/releases/</a></p>
+<h4 id="正在寻找某个版本的最新版？"><a href="#正在寻找某个版本的最新版？" class="headerlink" title="正在寻找某个版本的最新版？"></a>正在寻找某个版本的最新版？</h4><table>
+<thead>
+<tr>
+<th>Version</th>
+<th>LTS</th>
+<th>Date</th>
+<th>V8</th>
+<th>npm</th>
+<th>NODE_MODULE_VERSION[<a target="_blank" rel="noopener" href="https://nodejs.org/zh-cn/download/releases/#ref-1">1]</a></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Node.js 17.5.0</td>
+<td></td>
+<td>2022-02-10</td>
+<td>9.6.180.15</td>
+<td>8.4.1</td>
+<td>102</td>
+<td><a target="_blank" rel="noopener" href="https://nodejs.org/download/release/v17.5.0/">下载 </a><a target="_blank" rel="noopener" href="https://github.com/nodejs/node/blob/master/doc/changelogs/CHANGELOG_V17.md#17.5.0">更新日志 </a><a target="_blank" rel="noopener" href="https://nodejs.org/dist/v17.5.0/docs/api/">文档</a></td>
+</tr>
+<tr>
+<td>Node.js 17.4.0</td>
+<td></td>
+<td>2022-01-18</td>
+<td>9.6.180.15</td>
+<td>8.3.1</td>
+<td>102</td>
+<td><a target="_blank" rel="noopener" href="https://nodejs.org/download/release/v17.4.0/">下载 </a><a target="_blank" rel="noopener" href="https://github.com/nodejs/node/blob/master/doc/changelogs/CHANGELOG_V17.md#17.4.0">更新日志 </a><a target="_blank" rel="noopener" href="https://nodejs.org/dist/v17.4.0/docs/api/">文档</a></td>
+</tr>
+<tr>
+<td>Node.js 17.3.1</td>
+<td></td>
+<td>2022-01-10</td>
+<td>9.6.180.15</td>
+<td>8.3.0</td>
+<td>102</td>
+<td><a target="_blank" rel="noopener" href="https://nodejs.org/download/release/v17.3.1/">下载 </a><a target="_blank" rel="noopener" href="https://github.com/nodejs/node/blob/master/doc/changelogs/CHANGELOG_V17.md#17.3.1">更新日志 </a><a target="_blank" rel="noopener" href="https://nodejs.org/dist/v17.3.1/docs/api/">文档</a></td>
+</tr>
+<tr>
+<td>Node.js 17.3.0</td>
+<td></td>
+<td>2021-12-17</td>
+<td>9.6.180.15</td>
+<td>8.3.0</td>
+<td>102</td>
+<td><a target="_blank" rel="noopener" href="https://nodejs.org/download/release/v17.3.0/">下载 </a><a target="_blank" rel="noopener" href="https://github.com/nodejs/node/blob/master/doc/changelogs/CHANGELOG_V17.md#17.3.0">更新日志 </a><a target="_blank" rel="noopener" href="https://nodejs.org/dist/v17.3.0/docs/api/">文档</a></td>
+</tr>
+<tr>
+<td>Node.js 17.2.0</td>
+<td></td>
+<td>2021-11-30</td>
+<td>9.6.180.14</td>
+<td>8.1.4</td>
+<td>102</td>
+<td><a target="_blank" rel="noopener" href="https://nodejs.org/download/release/v17.2.0/">下载 </a><a target="_blank" rel="noopener" href="https://github.com/nodejs/node/blob/master/doc/changelogs/CHANGELOG_V17.md#17.2.0">更新日志 </a><a target="_blank" rel="noopener" href="https://nodejs.org/dist/v17.2.0/docs/api/">文档</a></td>
+</tr>
+<tr>
+<td>Node.js 17.1.0</td>
+<td></td>
+<td>2021-11-09</td>
+<td>9.5.172.25</td>
+<td>8.1.2</td>
+<td>102</td>
+<td><a target="_blank" rel="noopener" href="https://nodejs.org/download/release/v17.1.0/">下载 </a><a target="_blank" rel="noopener" href="https://github.com/nodejs/node/blob/master/doc/changelogs/CHANGELOG_V17.md#17.1.0">更新日志 </a><a target="_blank" rel="noopener" href="https://nodejs.org/dist/v17.1.0/docs/api/">文档</a></td>
+</tr>
+<tr>
+<td>Node.js 17.0.1</td>
+<td></td>
+<td>2021-10-20</td>
+<td>9.5.172.21</td>
+<td>8.1.0</td>
+<td>102</td>
+<td><a target="_blank" rel="noopener" href="https://nodejs.org/download/release/v17.0.1/">下载 </a><a target="_blank" rel="noopener" href="https://github.com/nodejs/node/blob/master/doc/changelogs/CHANGELOG_V17.md#17.0.1">更新日志 </a><a target="_blank" rel="noopener" href="https://nodejs.org/dist/v17.0.1/docs/api/">文档</a></td>
+</tr>
+<tr>
+<td>Node.js 17.0.0</td>
+<td></td>
+<td>2021-10-19</td>
+<td>9.5.172.21</td>
+<td>8.1.0</td>
+<td>102</td>
+<td><a target="_blank" rel="noopener" href="https://nodejs.org/download/release/v17.0.0/">下载 </a><a target="_blank" rel="noopener" href="https://github.com/nodejs/node/blob/master/doc/changelogs/CHANGELOG_V17.md#17.0.0">更新日志 </a><a target="_blank" rel="noopener" href="https://nodejs.org/dist/v17.0.0/docs/api/">文档</a></td>
+</tr>
+<tr>
+<td>Node.js 16.14.0</td>
+<td>Gallium</td>
+<td>2022-02-08</td>
+<td>9.4.146.24</td>
+<td>8.3.1</td>
+<td>93</td>
+<td><a target="_blank" rel="noopener" href="https://nodejs.org/download/release/v16.14.0/">下载 </a><a target="_blank" rel="noopener" href="https://github.com/nodejs/node/blob/master/doc/changelogs/CHANGELOG_V16.md#16.14.0">更新日志 </a><a target="_blank" rel="noopener" href="https://nodejs.org/dist/v16.14.0/docs/api/">文档</a></td>
+</tr>
+<tr>
+<td>Node.js 16.13.2</td>
+<td>Gallium</td>
+<td>2022-01-10</td>
+<td>9.4.146.24</td>
+<td>8.1.2</td>
+<td>93</td>
+<td><a target="_blank" rel="noopener" href="https://nodejs.org/download/release/v16.13.2/">下载 </a><a target="_blank" rel="noopener" href="https://github.com/nodejs/node/blob/master/doc/changelogs/CHANGELOG_V16.md#16.13.2">更新日志 </a><a target="_blank" rel="noopener" href="https://nodejs.org/dist/v16.13.2/docs/api/">文档</a></td>
+</tr>
+<tr>
+<td>1234…67</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<p>node -v。是16时，使用<a href="mailto:&#110;&#x6f;&#x64;&#101;&#x2d;&#x73;&#97;&#x73;&#x73;&#x40;&#54;&#x2e;&#x30;&#46;&#49;">node-sass@6.0.1</a></p>
+<p>npm un node-sass</p>
+<p>npm i <a href="mailto:&#x6e;&#x6f;&#100;&#101;&#45;&#x73;&#97;&#115;&#115;&#x40;&#54;&#x2e;&#x30;&#46;&#49;">node-sass@6.0.1</a></p>
+<p>node -v。是17.5.0时，使用<a href="mailto:&#x6e;&#111;&#100;&#101;&#x2d;&#x73;&#97;&#115;&#115;&#64;&#x37;&#46;&#x30;&#46;&#49;">node-sass@7.0.1</a>。</p>
+<p>npm i <a href="mailto:&#x6e;&#111;&#x64;&#x65;&#45;&#x73;&#x61;&#x73;&#x73;&#x40;&#x37;&#x2e;&#48;&#x2e;&#x31;">node-sass@7.0.1</a></p>
+<p>问题个数减少到153</p>
+<p><img src="/img/image-20220216111159847.png" alt="image-20220216111159847"></p>
+<pre><code>  {
+    test: /\.scss$/,
+    use: [
+      { loader: &#39;vue-style-loader&#39; },
+      { loader: &#39;css-loader&#39;, options: { sourceMap: true } },
+      { loader: &#39;sass-loader&#39;, options: { sourceMap: true } },
+      {
+        loader: &#39;sass-resources-loader&#39;,
+        options: {
+          sourceMap: true,
+          resources: [
+            path.resolve(__dirname, &#39;../src/styles/variables.scss&#39;),
+            path.resolve(__dirname, &#39;../src/styles/mixins.scss&#39;),
+            path.resolve(__dirname, &#39;../src/styles/common.scss&#39;),
+          ]
+        }
+      }
+    ],
+    exclude: resolve(&#39;node_modules&#39;),
+    include: resolve(&#39;src&#39;)
+  }
+</code></pre>
+<p>减少到72</p>
+<p><img src="/img/image-20220216111942121.png" alt="image-20220216111942121"></p>
+<style lang="" scoped>
+</style>
+
+<p>替换为</p>
+<style scoped>
+</style>
+
+<p>不要全部替换为scss</p>
+<p>剩余10个</p>
+<img src="../../../_resources/image-20220216135341496.png" alt="image-20220216135341496" style="zoom:50%;" />
+
+<pre><code> 修改配置
+ {
+    test: /\.vue$/,
+    // use: {
+    loader: &#39;vue-loader&#39;,
+    options: vueLoaderConfig,
+    // },,
+    // exclude: resolve(&#39;node_modules&#39;),
+  //   include: [resolve(&#39;src&#39;),
+  //   resolve(&#39;node_modules/vue-echarts&#39;),
+  //   resolve(&#39;node_modules/resize-detector&#39;)
+  // ]
+  },
+
+  降低vue-loader的版本
+  npm un vue-loader &amp;&amp; npm i -D vue-loader@14
+</code></pre>
+<p><img src="/img/image-20220216162335778.png" alt="image-20220216162335778"></p>
+<p>在<a target="_blank" rel="noopener" href="https://links.jianshu.com/go?to=https://vue-loader.vuejs.org/guide/scoped-css.html%23deep-selectors">vue-loader官网</a>看到这样一句话：</p>
+<p><img src="/img/format,png.png" alt="img"></p>
+<p><strong>解决办法：</strong></p>
+<p>&#x2F;deep&#x2F; 替换成 ::v-deep</p>
+<p><img src="/img/image-20220216165500377.png" alt="image-20220216165500377"></p>
+<p>不需要降低版本 # npm un postcss-loader &amp;&amp; npm i -D postcss-loader@5</p>
+<p>注释掉配置.postcssrc.js参数</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">// https://github.com/michael-ciniawsky/postcss-load-config</span><br><span class="line"></span><br><span class="line">module.exports = &#123;</span><br><span class="line">  &quot;plugins&quot;: &#123;</span><br><span class="line">    // &quot;postcss-import&quot;: &#123;&#125;,</span><br><span class="line">    // &quot;postcss-url&quot;: &#123;&#125;,</span><br><span class="line">    // to edit target browsers: use &quot;browserslist&quot; field in package.json</span><br><span class="line">    // &quot;autoprefixer&quot;: &#123;browsers: &#x27;last 2 version&#x27;&#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>成功</p>
+<p>改变了这个</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">module.exports = &#123;</span><br><span class="line">  plugins: [</span><br><span class="line">    &quot;postcss-import&quot;,</span><br><span class="line">    &quot;tailwindcss&quot;,</span><br><span class="line">    &quot;autoprefixer&quot;,</span><br><span class="line">  ]</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>到</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">module.exports = &#123;</span><br><span class="line">  plugins: [</span><br><span class="line">    require(&quot;postcss-import&quot;),</span><br><span class="line">    require(&quot;tailwindcss&quot;),</span><br><span class="line">    require(&quot;autoprefixer&quot;),</span><br><span class="line">  ]</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>不成功</p>
+<h3 id="dev报错处理-7"><a href="#dev报错处理-7" class="headerlink" title="dev报错处理"></a>dev报错处理</h3><p><img src="/img/image-20220215145711315.png" alt="image-20220215145711315"></p>
+<p><img src="/img/image-20220216103214669.png" alt="image-20220216103214669"></p>
+<p>npm i @babel&#x2F;runtime-corejs2 -D</p>
+<h3 id="dev报错处理-8"><a href="#dev报错处理-8" class="headerlink" title="dev报错处理"></a>dev报错处理</h3><p>图片加载失败</p>
+<img src="../../../_resources/image-20220216173042475.png" alt="image-20220216173042475" style="zoom: 33%;" />
+
+<p>1.在css中通过url引入图片资源，用<code>url-loader（webpack4）</code>、<code>asset（webpack5）</code>处理2.在html中创建img标签引入图片资源，用<code>html-loader</code>处理</p>
+<pre><code>  {
+    test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
+    type: &#39;asset&#39;,
+    parser: {
+      dataUrlCondition: {
+        maxSize: 10 * 1024 // 10kb
+      }
+    },
+    generator: {
+      filename: utils.assetsPath(&#39;img/[name].[hash:7].[ext]&#39;)
+    }
+  },
+</code></pre>
+<h3 id="dev报错处理-9"><a href="#dev报错处理-9" class="headerlink" title="dev报错处理"></a>dev报错处理</h3><p>webpack5 element-ui的icon 不显示</p>
+<p><img src="/img/image-20220216174906387.png" alt="image-20220216174906387"></p>
+<p>网上很多都是ExtractTextPlugin的解决方法，但是ExtractTextPlugin在webpack4中会有点问题，所以现在基本都是使用MiniCssExtractPlugin。</p>
+<p>在build&#x2F;webpack.base.conf.js中增加 publicPath: ‘..&#x2F;..&#x2F;‘,</p>
+<p>{</p>
+<p>　　　　　　test: &#x2F;.(woff2?|eot|ttf|otf)(?.*)?$&#x2F;,</p>
+<p>　　　　　　loader: ‘url-loader’,</p>
+<p>　　　　　　options: {</p>
+<p>　　　　　　　　limit: 10000,</p>
+<p>　　　　　　　　 publicPath: ‘..&#x2F;..&#x2F;‘,</p>
+<p>　　　　　　　　name: utils.assetsPath(‘fonts&#x2F;[name].[hash:7].[ext]’)</p>
+<p>　　　　　　}</p>
+<p>　　　　}</p>
+<p>最后解决如下:更改 build&#x2F;utils.js 文件中 未成功</p>
+<pre><code>    // if (options.extract) {
+    //   return [
+    //     {
+    //       loader: MiniCssExtractPlugin.loader,
+    //     options: {publicPath:&#39;../../&#39;}
+    //     }
+    //   ].concat(loaders)
+    // } else {
+    //   return [
+    //     {
+    //       loader: &#39;style-loader&#39;
+    //     }
+    //   ].concat(loaders)
+    // }
+    if (options.extract) {
+      loaders.push({
+        loader: MiniCssExtractPlugin.loader,
+        options: {publicPath:&#39;../../&#39;}
+      })
+    } else {
+      loaders.push(&#39;vue-style-loader&#39;)
+    }
+    return loaders;
+</code></pre>
+<p><img src="/img/image-20220217103331491.png" alt="image-20220217103331491"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">npm install --save-dev vue-style-loader@4.1.3</span><br><span class="line"></span><br><span class="line">npm install --save element-ui@2.15.6 --color=always</span><br><span class="line"></span><br><span class="line">#npm install --save-dev vue-loader@17.0.0 --color=always</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">npm i -D postcss-loader@2</span><br><span class="line">npm i -D postcss-import@11</span><br><span class="line"></span><br><span class="line">npm i -D postcss-url@7</span><br></pre></td></tr></table></figure>
+
+<h3 id="报错处理-build"><a href="#报错处理-build" class="headerlink" title="报错处理-build"></a>报错处理-build</h3><p><img src="/img/image-20220216173719635.png" alt="image-20220216173719635"></p>
+<pre><code>new FileManagerPlugin({
+  events: {
+    onStart: [
+      {
+        delete: [&quot;./target&quot;]
+      }, {
+        mkdir: [&quot;./target/crds_web_view/soft&quot;]
+      }
+    ],
+    onEnd: [
+      // { delete: [&quot;./target&quot;] },
+      // { mkdir: [&quot;./target/crds_web_view/soft&quot;] },
+      {
+        archive: [
+          {
+            source: &quot;./target/dist&quot;,
+            destination: &quot;./target/crds_web_view/soft/crds_web_view.zip&quot;
+          }, {
+            source: &#39;./target/dist&#39;,
+            destination: &#39;./target/crds_web_view/soft/crds_web_view.tar.gz&#39;,
+            format: &#39;tar&#39;,
+            options: {
+              gzip: true,
+              gzipOptions: {
+                level: 1,
+              },
+              globOptions: {
+                // https://github.com/Yqnn/node-readdir-glob#options
+                dot: true,
+              },
+            },
+          }
+        ]
+      }
+    ],
+  },
+  runTasksInSeries: false,
+  runOnceInWatchMode: false,
+})
+</code></pre>
+<p>修改参数后构建成功</p>
+<h3 id="6、结束语"><a href="#6、结束语" class="headerlink" title="6、结束语"></a>6、结束语</h3><p>升级后的构建和打包速度还是很感人的，尽管升级过程中遇到不少细节坑，但是进一步对webpack的配置有了更多理解，还是比较有收获的，如果你的项目打包构建很慢，也是时候更新一把了~~</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2023/09/04/%E8%80%81vue%E9%A1%B9%E7%9B%AEwebpack3%E5%8D%87%E7%BA%A7%E5%88%B0webpack5%E5%85%A8%E8%BF%87%E7%A8%8B%E8%AE%B0%E5%BD%95/">https://yhao521.github.io/2023/09/04/%E8%80%81vue%E9%A1%B9%E7%9B%AEwebpack3%E5%8D%87%E7%BA%A7%E5%88%B0webpack5%E5%85%A8%E8%BF%87%E7%A8%8B%E8%AE%B0%E5%BD%95/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/web-frontend/">web/frontend</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/vue/">vue</a><a class="post-meta__tags" href="/tags/java-programming/">java/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a><a class="post-meta__tags" href="/tags/javascript/">javascript</a><a class="post-meta__tags" href="/tags/js-programming/">js/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2023/09/04/%E8%A7%A3%E5%86%B3Homebrew%E4%B8%8B%E8%BD%BD%E6%9B%B4%E6%96%B0%E6%9E%81%E6%85%A2%E7%9A%84%E9%97%AE%E9%A2%98/" title="解决Homebrew下载更新极慢的问题"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">解决Homebrew下载更新极慢的问题</div></div><div class="info-2"><div class="info-item-1"> title: 解决Homebrew下载更新极慢的问题date: 2023-09-03 20:17:08category:  mactag: macauthor:   解决Homebrew下载更新极慢的问题https://www.jianshu.com/p/055832c19148由于问题主要是在国内网络环境github下载慢，因此尝试： 更换使用国内的homebrew镜像源； 使用代理访问github.com。 更换Homebrew源 使用以下命令更换国内阿里云上的homebrew镜像： # 替换brew.git: 123cd &quot;$(brew --repo)&quot;git remote set-url origin https://mirrors.aliyun.com/homebrew/brew.git  # 替换homebrew-core.git: 123cd &quot;$(brew --repo)/Library/Taps/homebrew/homebrew-core&quot;git remote set-url origin https://mirror...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E8%8E%AB%E7%94%9F%E6%B0%94%E5%8F%A3%E8%AF%80%E5%AE%8C%E6%95%B4%E7%89%88/" title="莫生气口诀完整版"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">莫生气口诀完整版</div></div><div class="info-2"><div class="info-item-1"> title: 莫生气口诀完整版date: 2023-09-03 20:17:08category: tag: author:  莫生气口诀完整版是如下： 1、版本一： 人生就像一场戏，因为有缘才相聚。 相扶到老不容易，是否更该去珍惜。 为了小事发脾气，回头想想又何必。 别人生气我不气，气出病来无人替。 我若气死谁如意，况且伤神又费力。 邻居亲朋不要比，儿孙琐事由他去。 吃苦享乐在一起，神仙羡慕好伴侣。 2、版本二： 人生就像一场戏，今世有缘才相聚。 相处一处不容易，人人应该去珍惜。 世上万物般般有，哪能件件如我意。 为了小事发脾气，回想起来又何必。 他人气我我不气，气出病来无人替。 生气伤肝又伤脾，促人衰老又生疾。 看病花钱又受罪，还说气病治非易。 小人量小不让人，常常气人气自己。 君子量大同天地，好事坏事包在里。 他人骂我我装聋，高声上天低入地。 我若错了真该骂，诚心改正受教育。 要是根本没那事，全当他是骂自己。 左亲右邻团结好，家庭和睦乐无比。 夫妻互助又亲爱，朝夕相伴笑嘻嘻。 政通人和享天伦，晚年幸福甜如蜜。 邻里亲友不要比，儿孙琐事随他去。 淡泊名利促健康，文明礼貌争第...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/%E6%89%8B%E6%8A%8A%E6%89%8B%E6%95%99%E4%BD%A0%E4%BD%BF%E7%94%A8Electron5+vue-cli3%E5%BC%80%E5%8F%91%E8%B7%A8%E5%B9%B3%E5%8F%B0%E6%A1%8C%E9%9D%A2%E5%BA%94%E7%94%A8/" title="手把手教你使用Electron5+vue-cli3开发跨平台桌面应用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">手把手教你使用Electron5+vue-cli3开发跨平台桌面应用</div></div><div class="info-2"><div class="info-item-1"> title: 手把手教你使用Electron5+vue-cli3开发跨平台桌面应用date: 2023-09-03 20:17:08category:  mactag: macauthor:   手把手教你使用Electron5+vue-cli3开发跨平台桌面应用Electron是一个基于Chromium和 Node.js，可以使用 HTML、CSS和JavaScript构建跨平台应用的技术框架，兼容 Mac、Windows 和 Linux。虽然B&#x2F;S是目前开发的主流，但是C&#x2F;S仍然有很大的市场需求。受限于浏览器的沙盒限制，网页应用无法满足某些场景下的使用需求，而桌面应用可以读写本地文件、调用更多系统资源，再加上Web开发的低成本、高效率的优势，这种方式越来越受到开发者的喜爱。 本文一步一步教你如何使用Electron5和vue-cli3，在完全保留vue开发web应用的习惯下，搭建桌面应用。 本文不涉及Electron和vue的开发教程，仅以实现两者结合为目的，如深入学习Electron和vue，请访问官方： Electron: https://elect...</div></div></div></a><a class="pagination-related" href="/2023/09/04/vscode%E4%BD%BF%E7%94%A8/" title="vscode使用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">vscode使用</div></div><div class="info-2"><div class="info-item-1"> title: vscode的使用lang: en-USdate: 2023-09-03 20:17:08category:  vscodetag: vscodeauthor:   1. vscode的使用1.1. 插件位置更改参考：https://blog.csdn.net/zhaojunwei08/article/details/86021665 https://blog.csdn.net/u011127019/article/details/86737308#comments mklink使用 https://www.icoa.cn/a/910.html set oldDir&#x3D;%UserProfile%.vscode\extensions mklink &#x2F;D “%oldDir%” “E:\eclipse-hao\HTML\extensions” 确保有 这个 .vscode 空目录  bat方式： 123456789@echo offif &quot;%1&quot; == &quot;h&quot; goto beginmshta vbscript:c...</div></div></div></a><a class="pagination-related" href="/2024/12/09/%E5%88%9B%E5%BB%BAVue%E9%A1%B9%E7%9B%AE%E8%AF%A6%E7%BB%86%E6%95%99%E7%A8%8B%20(%E5%BC%95%E5%85%A5Element-plus%20%E5%92%8C%20ArcoDesign)/" title="创建Vue项目详细教程 (引入Element-plus 和 ArcoDesign)"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-12-09</div><div class="info-item-2">创建Vue项目详细教程 (引入Element-plus 和 ArcoDesign)</div></div><div class="info-2"><div class="info-item-1">目录 Vue简介 1 在cmd窗口创建VUE工程 1.前期环境搭建 2.配置npm源 3.安装VUE CLI 4.创建VUE CLI工程 2 在IDEA中创建VUE工程 1 IDEA创建-启动-停止VUE工程步骤 2 可能出现的问题与解决方案 2.1 浏览器显示无法访问或拒绝访问 2.2 vue&#x2F;cli 安装失败，让你升级到npm 10.2.3 2.3 启动项目时满屏 npm ERR! 2.4 ‘vue-cli-service’ 不是内部或外部命令，也不是可运行的程序或批处理文件。 2.5 IDEA的Terminal终端没办法敲命令 3 关于VUE Cli 4 修改项目启动端口号 4 安装Vue.js插件 5 VUE Cli 热部署测试 3 VUE的使用 1 “搭积木”的开发体验 2 App.vue代码讲解 3 HomeView.vue代码讲解 4 index.js代码讲解 5 新view.vue 的创建方式 引入Element Plus 安装使用Element Plus 安装element提示插件 进行elementplus图标全局注册 引入ArcoDesign组件库...</div></div></div></a><a class="pagination-related" href="/2025/03/16/%E5%9C%A8%E6%B5%8F%E8%A7%88%E5%99%A8%E4%B8%AD%E5%BF%AB%E9%80%9F%E6%8E%A2%E6%B5%8BIP%E7%AB%AF%E5%8F%A3%E6%98%AF%E5%90%A6%E5%BC%80%E6%94%BE/" title="在浏览器中快速探测IP端口是否开放"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-16</div><div class="info-item-2">在浏览器中快速探测IP端口是否开放</div></div><div class="info-2"><div class="info-item-1">0×00 前言前两天 freebuf上的的XSS到内网的公开课很受启发，从一个页面到局域网，威力着实增强不少 公开课上检测内网 IP 实现方式用的是 img 标签，加载网站的 favicon.ico 图标，然后监听 onload 事件，看图片能不能加载成功简单易用，就是太慢了 –  0×02 分析浏览器有几秒的尝试容错时间，对于媒体资源，浏览器限制同一域名并发请求为个位数（一般为 6 个），也就是说，把图片全放到页面上，也不能同时开始检测，只能一点一点来，扫端口的时候会非常慢。 管理员在内网搭建的东西也可能没有图标。。。 探测 IP 端口开放原理就是向目标发送请求，看是否有回应。在上面的 img 中是在加载成功和失败体现出来的。img 嫌慢也可以试试别的嘛，经过一番搜索找到了这个，这个和这个。 第一个页面:1document.getElementById(&quot;testdiv&quot;).innerHTML = &#x27;&lt;img src=&quot;http://&#x27; + ip + &#x27;:&#x27; + port + &#x27;&quot; ...</div></div></div></a><a class="pagination-related" href="/2023/09/04/npm&yarn/" title="npm&amp;yarn"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">npm&amp;yarn</div></div><div class="info-2"><div class="info-item-1"> title: npm&amp;yarnlang: en-USdate: 2023-09-03 20:17:08category:  开发语言 doc_nodejstag: doc_nodejsauthor:   1. centos7 npm安装——CentOS7常用软件官网下载npm安装包， https://nodejs.org/en/ ，左边是稳定版右边是最新版。  推荐个 https://npm.taobao.org/mirrors/可以下载想要的node版本 2. 首先安装必要的环境(推荐方式一安装)yum install gcc gcc-c++  3. 一、方式一wget https://npm.taobao.org/mirrors/node/v12.8.0/node-v12.8.0-linux-x64.tar.gz  然后执行下面命令 tar -zxvf node-v12.8.0-linux-x64.tar.gz mv node-v12.8.0-linux-x64 node  配置环境变量 vim /etc/profile vi .bash_profile  在文件中...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E5%89%8D%E7%AB%AF%E5%85%A5%E9%97%A8%E6%89%8B%E5%86%8C/" title="前端入门手册"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">前端入门手册</div></div><div class="info-2"><div class="info-item-1"> title: 前端入门手册date: 2023-09-03 20:17:08category:  开发语言tag: 开发语言author:   前端入门手册blossom html css JavaScript程序员入门的时候整理的一份学习笔记,见证了我的成长备份 HTML视频音频标签带控制器的视频标签, 不同浏览器有不同的文件格式要求所以用 2 个 source 标签指定不同的视频格式 1234&lt;video width=&quot;300&quot; height=&quot;200&quot; controls=&quot;controls&quot;&gt;  &lt;source src=&quot;movie.mp4&quot; /&gt;  &lt;source src=&quot;movie.ogv&quot; /&gt;&lt;/video&gt;  带控制器的音频标签, 不同浏览器有不同的文件格式要求所以用 2 个 source 标签指定不同的音频格式 1234&lt;audio id=&quot;id-audio-player&quot; contro...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%80%81vue%E9%A1%B9%E7%9B%AEwebpack3%E5%8D%87%E7%BA%A7%E5%88%B0webpack5%E5%85%A8%E8%BF%87%E7%A8%8B%E8%AE%B0%E5%BD%95"><span class="toc-number">1.</span> <span class="toc-text">老vue项目webpack3升级到webpack5全过程记录</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%8D%87%E7%BA%A7%E8%BF%87%E7%A8%8B%E8%AE%B0%E5%BD%95"><span class="toc-number">1.1.</span> <span class="toc-text">一、升级过程记录</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">1.1.1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8D%87%E7%BA%A7%E6%95%88%E6%9E%9C"><span class="toc-number">1.1.2.</span> <span class="toc-text">升级效果</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8D%87%E7%BA%A7%E8%BF%87%E7%A8%8B"><span class="toc-number">1.1.3.</span> <span class="toc-text">升级过程</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1-%E6%9B%B4%E6%96%B0webpack%E4%BE%9D%E8%B5%96"><span class="toc-number">1.1.3.1.</span> <span class="toc-text">1. 更新webpack依赖</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-package-json%E5%90%AF%E5%8A%A8%E5%91%BD%E4%BB%A4%E4%BF%AE%E6%94%B9"><span class="toc-number">1.1.3.2.</span> <span class="toc-text">2. package.json启动命令修改</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3%E3%80%81webpack-base-conf-js%E9%85%8D%E7%BD%AE%E4%BF%AE%E6%94%B9"><span class="toc-number">1.1.3.3.</span> <span class="toc-text">3、webpack.base.conf.js配置修改</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4%E3%80%81webpack-dev-conf-js%E9%85%8D%E7%BD%AE%E4%BF%AE%E6%94%B9"><span class="toc-number">1.1.3.4.</span> <span class="toc-text">4、webpack.dev.conf.js配置修改</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#5%E3%80%81webpack-prod-conf-js%E9%85%8D%E7%BD%AE%E4%BF%AE%E6%94%B9"><span class="toc-number">1.1.3.5.</span> <span class="toc-text">5、webpack.prod.conf.js配置修改</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#6%E3%80%81utils-js%E9%85%8D%E7%BD%AE%E4%BF%AE%E6%94%B9"><span class="toc-number">1.1.3.6.</span> <span class="toc-text">6、utils.js配置修改</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E9%85%8D%E7%BD%AE%E7%9A%84%E5%8D%87%E7%BA%A7%E8%BF%87%E7%A8%8B%E4%B8%AD%E9%81%87%E5%88%B0%E7%9A%84%E5%9D%91"><span class="toc-number">1.2.</span> <span class="toc-text">二、配置的升级过程中遇到的坑</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1%E3%80%81%E8%AE%BE%E7%BD%AEmode"><span class="toc-number">1.2.1.</span> <span class="toc-text">1、设置mode</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2%E3%80%81use%E5%86%99%E6%B3%95%E4%B8%8D%E5%90%8C"><span class="toc-number">1.2.2.</span> <span class="toc-text">2、use写法不同</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3%E3%80%81%E6%94%B9%E5%86%99file-loader-%E5%92%8C-url-loader"><span class="toc-number">1.2.3.</span> <span class="toc-text">3、改写file-loader 和 url-loader</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4%E3%80%81%E5%AF%B9%E6%8F%92%E4%BB%B6%E7%9A%84%E5%BC%95%E7%94%A8%E5%92%8C%E4%BD%BF%E7%94%A8%E7%9A%84%E6%9B%B4%E6%94%B9"><span class="toc-number">1.2.4.</span> <span class="toc-text">4、对插件的引用和使用的更改</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5%E3%80%81%E6%8A%A5%E9%94%99%E5%A4%84%E7%90%86"><span class="toc-number">1.2.5.</span> <span class="toc-text">5、报错处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-%E6%8A%A5%E9%94%99%E5%A4%84%E7%90%86"><span class="toc-number">1.2.6.</span> <span class="toc-text">6.报错处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-%E6%8A%A5%E9%94%99%E5%A4%84%E7%90%86-1"><span class="toc-number">1.2.7.</span> <span class="toc-text">6.报错处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-%E6%8A%A5%E9%94%99%E5%A4%84%E7%90%86-2"><span class="toc-number">1.2.8.</span> <span class="toc-text">6.报错处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8A%A5%E9%94%99%E5%A4%84%E7%90%86"><span class="toc-number">1.2.9.</span> <span class="toc-text">报错处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8A%A5%E9%94%99%E5%A4%84%E7%90%86-1"><span class="toc-number">1.2.10.</span> <span class="toc-text">报错处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8A%A5%E9%94%99%E5%A4%84%E7%90%86-2"><span class="toc-number">1.2.11.</span> <span class="toc-text">报错处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#DllReferencePlugin%E5%92%8CDllPlugin%E6%8F%90%E9%AB%98%E6%89%93%E5%8C%85%E9%80%9F%E5%BA%A6"><span class="toc-number">1.2.12.</span> <span class="toc-text">DllReferencePlugin和DllPlugin提高打包速度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8A%A5%E9%94%99%E5%A4%84%E7%90%86-3"><span class="toc-number">1.2.13.</span> <span class="toc-text">报错处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8A%A5%E9%94%99%E5%A4%84%E7%90%86-4"><span class="toc-number">1.2.14.</span> <span class="toc-text">报错处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Dev%E6%8A%A5%E9%94%99%E5%A4%84%E7%90%86"><span class="toc-number">1.2.15.</span> <span class="toc-text">Dev报错处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#dev%E6%8A%A5%E9%94%99%E5%A4%84%E7%90%86"><span class="toc-number">1.2.16.</span> <span class="toc-text">dev报错处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#dev%E6%8A%A5%E9%94%99%E5%A4%84%E7%90%86-1"><span class="toc-number">1.2.17.</span> <span class="toc-text">dev报错处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#dev%E6%8A%A5%E9%94%99%E5%A4%84%E7%90%86-2"><span class="toc-number">1.2.18.</span> <span class="toc-text">dev报错处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#dev%E6%8A%A5%E9%94%99%E5%A4%84%E7%90%86-3"><span class="toc-number">1.2.19.</span> <span class="toc-text">dev报错处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#dev%E6%8A%A5%E9%94%99%E5%A4%84%E7%90%86-4"><span class="toc-number">1.2.20.</span> <span class="toc-text">dev报错处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#dev%E6%8A%A5%E9%94%99%E5%A4%84%E7%90%86-5"><span class="toc-number">1.2.21.</span> <span class="toc-text">dev报错处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#dev%E6%8A%A5%E9%94%99%E5%A4%84%E7%90%86-6"><span class="toc-number">1.2.22.</span> <span class="toc-text">dev报错处理</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%AD%A3%E5%9C%A8%E5%AF%BB%E6%89%BE%E6%9F%90%E4%B8%AA%E7%89%88%E6%9C%AC%E7%9A%84%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%9F"><span class="toc-number">1.2.22.1.</span> <span class="toc-text">正在寻找某个版本的最新版？</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#dev%E6%8A%A5%E9%94%99%E5%A4%84%E7%90%86-7"><span class="toc-number">1.2.23.</span> <span class="toc-text">dev报错处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#dev%E6%8A%A5%E9%94%99%E5%A4%84%E7%90%86-8"><span class="toc-number">1.2.24.</span> <span class="toc-text">dev报错处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#dev%E6%8A%A5%E9%94%99%E5%A4%84%E7%90%86-9"><span class="toc-number">1.2.25.</span> <span class="toc-text">dev报错处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8A%A5%E9%94%99%E5%A4%84%E7%90%86-build"><span class="toc-number">1.2.26.</span> <span class="toc-text">报错处理-build</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6%E3%80%81%E7%BB%93%E6%9D%9F%E8%AF%AD"><span class="toc-number">1.2.27.</span> <span class="toc-text">6、结束语</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

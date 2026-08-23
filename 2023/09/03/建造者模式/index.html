@@ -1,0 +1,298 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>建造者模式 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="建造者模式建造者模式（Builder Pattern）使用多个简单的对象一步一步构建成一个复杂的对象。这种类型的设计模式属于创建型模式，它提供了一种创建对象的最佳方式。 一个 Builder 类会一步一步构造最终的对象。该 Builder 类是独立于其他对象的。 介绍**意图：**将一个复杂的构建与其表示相分离，使得同样的构建过程可以创建不同的表示。 **主要解决：**主要解决在软件系统中，有时候">
+<meta property="og:type" content="article">
+<meta property="og:title" content="建造者模式">
+<meta property="og:url" content="https://yhao521.github.io/2023/09/03/%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="建造者模式建造者模式（Builder Pattern）使用多个简单的对象一步一步构建成一个复杂的对象。这种类型的设计模式属于创建型模式，它提供了一种创建对象的最佳方式。 一个 Builder 类会一步一步构造最终的对象。该 Builder 类是独立于其他对象的。 介绍**意图：**将一个复杂的构建与其表示相分离，使得同样的构建过程可以创建不同的表示。 **主要解决：**主要解决在软件系统中，有时候">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2023-09-03T04:36:32.000Z">
+<meta property="article:modified_time" content="2023-09-03T04:36:32.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="java&#x2F;programming">
+<meta property="article:tag" content="教程">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "建造者模式",
+  "url": "https://yhao521.github.io/2023/09/03/%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2023-09-03T04:36:32.000Z",
+  "dateModified": "2023-09-03T04:36:32.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2023/09/03/%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '建造者模式',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">建造者模式</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">建造者模式</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-09-03T04:36:32.000Z" title="发表于 2023-09-03 12:36:32">2023-09-03</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-09-03T04:36:32.000Z" title="更新于 2023-09-03 12:36:32">2023-09-03</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="建造者模式"><a href="#建造者模式" class="headerlink" title="建造者模式"></a>建造者模式</h1><p>建造者模式（Builder Pattern）使用多个简单的对象一步一步构建成一个复杂的对象。这种类型的设计模式属于创建型模式，它提供了一种创建对象的最佳方式。</p>
+<p>一个 Builder 类会一步一步构造最终的对象。该 Builder 类是独立于其他对象的。</p>
+<h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>**意图：**将一个复杂的构建与其表示相分离，使得同样的构建过程可以创建不同的表示。</p>
+<p>**主要解决：**主要解决在软件系统中，有时候面临着”一个复杂对象”的创建工作，其通常由各个部分的子对象用一定的算法构成；由于需求的变化，这个复杂对象的各个部分经常面临着剧烈的变化，但是将它们组合在一起的算法却相对稳定。</p>
+<p>**何时使用：**一些基本部件不会变，而其组合经常变化的时候。</p>
+<p>**如何解决：**将变与不变分离开。</p>
+<p>**关键代码：**建造者：创建和提供实例，导演：管理建造出来的实例的依赖关系。</p>
+<p><strong>应用实例：</strong><br>1、去肯德基，汉堡、可乐、薯条、炸鸡翅等是不变的，而其组合是经常变化的，生成出所谓的”套餐”。<br>2、JAVA 中的 StringBuilder。</p>
+<p><strong>优点：</strong><br>1、建造者独立，易扩展。<br>2、便于控制细节风险。</p>
+<p><strong>缺点：</strong><br>1、产品必须有共同点，范围有限制。<br>2、如内部变化复杂，会有很多的建造类。</p>
+<p><strong>使用场景：</strong><br>1、需要生成的对象具有复杂的内部结构。<br>2、需要生成的对象内部属性本身相互依赖。</p>
+<p>**注意事项：**与工厂模式的区别是：建造者模式更加关注与零件装配的顺序。</p>
+<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><p>我们假设一个快餐店的商业案例，其中，一个典型的套餐可以是一个汉堡（Burger）和一杯冷饮（Cold drink）。汉堡（Burger）可以是素食汉堡（Veg Burger）或鸡肉汉堡（Chicken Burger），它们是包在纸盒中。冷饮（Cold drink）可以是可口可乐（coke）或百事可乐（pepsi），它们是装在瓶子中。</p>
+<p>我们将创建一个表示食物条目（比如汉堡和冷饮）的 <em>Item</em> 接口和实现 <em>Item</em> 接口的实体类，以及一个表示食物包装的 <em>Packing</em> 接口和实现 <em>Packing</em> 接口的实体类，汉堡是包在纸盒中，冷饮是装在瓶子中。</p>
+<p>然后我们创建一个 <em>Meal</em> 类，带有 <em>Item</em> 的 <em>ArrayList</em> 和一个通过结合 <em>Item</em> 来创建不同类型的 <em>Meal</em> 对象的 <em>MealBuilder</em>。<em>BuilderPatternDemo</em> 类使用 <em>MealBuilder</em> 来创建一个 <em>Meal</em>。</p>
+<p><img src="https://www.runoob.com/wp-content/uploads/2014/08/20210315-builder-pattern.svg" alt="建造者模式的 UML 图"></p>
+<h3 id="步骤-1"><a href="#步骤-1" class="headerlink" title="步骤 1"></a>步骤 1</h3><p>创建一个表示食物条目和食物包装的接口。</p>
+<h2 id="Item-java"><a href="#Item-java" class="headerlink" title="Item.java"></a>Item.java</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">public interface Item &#123;</span><br><span class="line">public String name();</span><br><span class="line"> public Packing packing();</span><br><span class="line"> public float price(); </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+<h2 id="Packing-java"><a href="#Packing-java" class="headerlink" title="Packing.java"></a>Packing.java</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">public interface Packing &#123;</span><br><span class="line">public String pack();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="步骤-2"><a href="#步骤-2" class="headerlink" title="步骤 2"></a>步骤 2</h3><p>创建实现 Packing 接口的实体类。</p>
+<h2 id="Wrapper-java"><a href="#Wrapper-java" class="headerlink" title="Wrapper.java"></a>Wrapper.java</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">public class Wrapper implements Packing &#123;</span><br><span class="line"></span><br><span class="line"> @Override</span><br><span class="line">public String pack() &#123;</span><br><span class="line">return &quot;Wrapper&quot;;</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+<h2 id="Bottle-java"><a href="#Bottle-java" class="headerlink" title="Bottle.java"></a>Bottle.java</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">public class Bottle implements Packing &#123;</span><br><span class="line"></span><br><span class="line"> @Override</span><br><span class="line">public String pack() &#123;</span><br><span class="line">return &quot;Bottle&quot;;</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="步骤-3"><a href="#步骤-3" class="headerlink" title="步骤 3"></a>步骤 3</h3><p>创建实现 Item 接口的抽象类，该类提供了默认的功能。</p>
+<h2 id="Burger-java"><a href="#Burger-java" class="headerlink" title="Burger.java"></a>Burger.java</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">public abstract class Burger implements Item &#123;</span><br><span class="line"></span><br><span class="line"> @Override</span><br><span class="line">public Packing packing() &#123;</span><br><span class="line">return new Wrapper();</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> @Override</span><br><span class="line">public abstract float price();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+<h2 id="ColdDrink-java"><a href="#ColdDrink-java" class="headerlink" title="ColdDrink.java"></a>ColdDrink.java</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">public abstract class ColdDrink implements Item &#123;</span><br><span class="line"></span><br><span class="line"> @Override</span><br><span class="line">public Packing packing() &#123;</span><br><span class="line">return new Bottle();</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> @Override</span><br><span class="line">public abstract float price();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="步骤-4"><a href="#步骤-4" class="headerlink" title="步骤 4"></a>步骤 4</h3><p>创建扩展了 Burger 和 ColdDrink 的实体类。</p>
+<h2 id="VegBurger-java"><a href="#VegBurger-java" class="headerlink" title="VegBurger.java"></a>VegBurger.java</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">public class VegBurger extends Burger &#123;</span><br><span class="line"></span><br><span class="line"> @Override</span><br><span class="line">public float price() &#123;</span><br><span class="line">return 25.0f;</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> @Override</span><br><span class="line">public String name() &#123;</span><br><span class="line">return &quot;Veg Burger&quot;;</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+<h2 id="ChickenBurger-java"><a href="#ChickenBurger-java" class="headerlink" title="ChickenBurger.java"></a>ChickenBurger.java</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">public class ChickenBurger extends Burger &#123;</span><br><span class="line"></span><br><span class="line"> @Override</span><br><span class="line">public float price() &#123;</span><br><span class="line">return 50.5f;</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> @Override</span><br><span class="line">public String name() &#123;</span><br><span class="line">return &quot;Chicken Burger&quot;;</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+<h2 id="Coke-java"><a href="#Coke-java" class="headerlink" title="Coke.java"></a>Coke.java</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">public class Coke extends ColdDrink &#123;</span><br><span class="line"></span><br><span class="line"> @Override</span><br><span class="line">public float price() &#123;</span><br><span class="line">return 30.0f;</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> @Override</span><br><span class="line">public String name() &#123;</span><br><span class="line">return &quot;Coke&quot;;</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+<h2 id="Pepsi-java"><a href="#Pepsi-java" class="headerlink" title="Pepsi.java"></a>Pepsi.java</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">public class Pepsi extends ColdDrink &#123;</span><br><span class="line"></span><br><span class="line"> @Override</span><br><span class="line">public float price() &#123;</span><br><span class="line">return 35.0f;</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> @Override</span><br><span class="line">public String name() &#123;</span><br><span class="line">return &quot;Pepsi&quot;;</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="步骤-5"><a href="#步骤-5" class="headerlink" title="步骤 5"></a>步骤 5</h3><p>创建一个 Meal 类，带有上面定义的 Item 对象。</p>
+<h2 id="Meal-java"><a href="#Meal-java" class="headerlink" title="Meal.java"></a>Meal.java</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">import java.util.ArrayList;</span><br><span class="line">import java.util.List;</span><br><span class="line"></span><br><span class="line">public class Meal &#123;</span><br><span class="line">private List&lt;Item&gt; items = new ArrayList&lt;Item&gt;(); </span><br><span class="line"></span><br><span class="line"> public void addItem(Item item)&#123;</span><br><span class="line">items.add(item);</span><br><span class="line"> &#125;</span><br><span class="line">public float getCost()&#123;</span><br><span class="line">float cost = 0.0f;</span><br><span class="line"> for (Item item : items) &#123;</span><br><span class="line">cost += item.price();</span><br><span class="line"> &#125;</span><br><span class="line">return cost;</span><br><span class="line"> &#125;</span><br><span class="line">public void showItems()&#123;</span><br><span class="line">for (Item item : items) &#123;</span><br><span class="line">System.out.print(&quot;Item : &quot;+item.name());</span><br><span class="line"> System.out.print(&quot;, Packing : &quot;+item.packing().pack());</span><br><span class="line"> System.out.println(&quot;, Price : &quot;+item.price());</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="步骤-6"><a href="#步骤-6" class="headerlink" title="步骤 6"></a>步骤 6</h3><p>创建一个 MealBuilder 类，实际的 builder 类负责创建 Meal 对象。</p>
+<h2 id="MealBuilder-java"><a href="#MealBuilder-java" class="headerlink" title="MealBuilder.java"></a>MealBuilder.java</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">public class MealBuilder &#123;</span><br><span class="line">public Meal prepareVegMeal ()&#123;</span><br><span class="line">Meal meal = new Meal();</span><br><span class="line"> meal.addItem(new VegBurger());</span><br><span class="line"> meal.addItem(new Coke());</span><br><span class="line"> return meal;</span><br><span class="line"> &#125;</span><br><span class="line">public Meal prepareNonVegMeal ()&#123;</span><br><span class="line">Meal meal = new Meal();</span><br><span class="line"> meal.addItem(new ChickenBurger());</span><br><span class="line"> meal.addItem(new Pepsi());</span><br><span class="line"> return meal;</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="步骤-7"><a href="#步骤-7" class="headerlink" title="步骤 7"></a>步骤 7</h3><p>BuiderPatternDemo 使用 MealBuilder 来演示建造者模式（Builder Pattern）。</p>
+<h2 id="BuilderPatternDemo-java"><a href="#BuilderPatternDemo-java" class="headerlink" title="BuilderPatternDemo.java"></a>BuilderPatternDemo.java</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">public class BuilderPatternDemo &#123;</span><br><span class="line">public static void main(String[] args) &#123;</span><br><span class="line">MealBuilder mealBuilder = new MealBuilder();</span><br><span class="line"></span><br><span class="line"> Meal vegMeal = mealBuilder.prepareVegMeal();</span><br><span class="line"> System.out.println(&quot;Veg Meal&quot;);</span><br><span class="line"> vegMeal.showItems();</span><br><span class="line"> System.out.println(&quot;Total Cost: &quot; +vegMeal.getCost());</span><br><span class="line"></span><br><span class="line"> Meal nonVegMeal = mealBuilder.prepareNonVegMeal();</span><br><span class="line"> System.out.println(&quot;\n\nNon-Veg Meal&quot;);</span><br><span class="line"> nonVegMeal.showItems();</span><br><span class="line"> System.out.println(&quot;Total Cost: &quot; +nonVegMeal.getCost());</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="步骤-8"><a href="#步骤-8" class="headerlink" title="步骤 8"></a>步骤 8</h3><p>执行程序，输出结果：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">Veg Meal</span><br><span class="line">Item : Veg Burger, Packing : Wrapper, Price : 25.0</span><br><span class="line">Item : Coke, Packing : Bottle, Price : 30.0</span><br><span class="line">Total Cost: 55.0</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Non-Veg Meal</span><br><span class="line">Item : Chicken Burger, Packing : Wrapper, Price : 50.5</span><br><span class="line">Item : Pepsi, Packing : Bottle, Price : 35.0</span><br><span class="line">Total Cost: 85.5</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<hr>
+<h2 id="相关文章"><a href="#相关文章" class="headerlink" title="相关文章"></a>相关文章</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://www.runoob.com/w3cnote/builder-pattern.html">设计模式之建造者(Builder)模式</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.runoob.com/w3cnote/builder-pattern-2.html">设计模式：Builder模式</a></li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2023/09/03/%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/">https://yhao521.github.io/2023/09/03/%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/Java/">Java</a><a class="post-meta__tags" href="/tags/%E6%95%99%E7%A8%8B/">教程</a><a class="post-meta__tags" href="/tags/java-programming/">java/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2023/09/03/%E6%8B%A6%E6%88%AA%E8%BF%87%E6%BB%A4%E5%99%A8%E6%A8%A1%E5%BC%8F/" title="拦截过滤器模式"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">拦截过滤器模式</div></div><div class="info-2"><div class="info-item-1">拦截过滤器模式拦截过滤器模式（Intercepting Filter Pattern）用于对应用程序的请求或响应做一些预处理&#x2F;后处理。定义过滤器，并在把请求传给实际目标应用程序之前应用在请求上。过滤器可以做认证&#x2F;授权&#x2F;记录日志，或者跟踪请求，然后把请求传给相应的处理程序。以下是这种设计模式的实体。  过滤器（Filter） - 过滤器在请求处理程序执行请求之前或之后，执行某些任务。 过滤器链（Filter Chain） - 过滤器链带有多个过滤器，并在 Target 上按照定义的顺序执行这些过滤器。 Target - Target 对象是请求处理程序。 过滤管理器（Filter Manager） - 过滤管理器管理过滤器和过滤器链。 客户端（Client） - Client 是向 Target 对象发送请求的对象。  实现我们将创建 FilterChain、FilterManager、Target、Client 作为表示实体的各种对象。AuthenticationFilter 和 DebugFilter 表示实体过滤器。 InterceptingFi...</div></div></div></a><a class="pagination-related" href="/2023/09/03/%E5%A4%87%E5%BF%98%E5%BD%95%E6%A8%A1%E5%BC%8F/" title="备忘录模式"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">备忘录模式</div></div><div class="info-2"><div class="info-item-1">备忘录模式备忘录模式（Memento Pattern）保存一个对象的某个状态，以便在适当的时候恢复对象。备忘录模式属于行为型模式。 介绍**意图：**在不破坏封装性的前提下，捕获一个对象的内部状态，并在该对象之外保存这个状态。 **主要解决：**所谓备忘录模式就是在不破坏封装的前提下，捕获一个对象的内部状态，并在该对象之外保存这个状态，这样可以在以后将对象恢复到原先保存的状态。 **何时使用：**很多时候我们总是需要记录一个对象的内部状态，这样做的目的就是为了允许用户取消不确定或者错误的操作，能够恢复到他原先的状态，使得他有”后悔药”可吃。 **如何解决：**通过一个备忘录类专门存储对象状态。 **关键代码：**客户不与备忘录类耦合，与备忘录管理类耦合。 应用实例：1、后悔药。2、打游戏时的存档。3、Windows 里的 ctrl + z。4、IE 中的后退。5、数据库的事务管理。 优点：1、给用户提供了一种可以恢复状态的机制，可以使用户能够比较方便地回到某个历史的状态。2、实现了信息的封装，使得用户不需要关心状态的保存细节。 **缺点：**消耗资源。如果类的成员变量过多，势必会...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2020/12/01/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-5/" title="设计模式-5"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-12-01</div><div class="info-item-2">设计模式-5</div></div><div class="info-2"><div class="info-item-1">6，行为型模式6.5 状态模式6.5.1 概述【例】通过按钮来控制一个电梯的状态，一个电梯有开门状态，关门状态，停止状态，运行状态。每一种状态改变，都有可能要根据其他状态来更新处理。例如，如果电梯门现在处于运行时状态，就不能进行开门操作，而如果电梯门是停止状态，就可以执行开门操作。 类图如下：   代码如下： 123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566676869707172737475767778798081828384858687888990919293949596979899100101102103104105106107108109110111112113114115116117118119120121122123public interface ILift &#123;    //电梯的4个状态    //开门状态    public final static int ...</div></div></div></a><a class="pagination-related" href="/2023/09/03/2.%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F/" title="2.工厂模式"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-03</div><div class="info-item-2">2.工厂模式</div></div><div class="info-2"><div class="info-item-1">工厂模式工厂模式（Factory Pattern）是 Java 中最常用的设计模式之一。这种类型的设计模式属于创建型模式，它提供了一种创建对象的最佳方式。 在工厂模式中，我们在创建对象时不会对客户端暴露创建逻辑，并且是通过使用一个共同的接口来指向新创建的对象。 介绍**意图：**定义一个创建对象的接口，让其子类自己决定实例化哪一个工厂类，工厂模式使其创建过程延迟到子类进行。 **主要解决：**主要解决接口选择的问题。 **何时使用：**我们明确地计划不同条件下创建不同实例时。 **如何解决：**让其子类实现工厂接口，返回的也是一个抽象的产品。 **关键代码：**创建过程在其子类执行。 应用实例：1、您需要一辆汽车，可以直接从工厂里面提货，而不用去管这辆汽车是怎么做出来的，以及这个汽车里面的具体实现。2、Hibernate 换数据库只需换方言和驱动就可以。 优点：1、一个调用者想创建一个对象，只要知道其名称就可以了。2、扩展性高，如果想增加一个产品，只要扩展一个工厂类就可以。3、屏蔽产品的具体实现，调用者只关心产品的接口。 **缺点：**每次增加一个产品时，都需要增加一个具体类和对...</div></div></div></a><a class="pagination-related" href="/2020/12/01/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-3/" title="设计模式-3"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-12-01</div><div class="info-item-2">设计模式-3</div></div><div class="info-2"><div class="info-item-1">5，结构型模式结构型模式描述如何将类或对象按某种布局组成更大的结构。它分为类结构型模式和对象结构型模式，前者采用继承机制来组织接口和类，后者釆用组合或聚合来组合对象。 由于组合关系或聚合关系比继承关系耦合度低，满足“合成复用原则”，所以对象结构型模式比类结构型模式具有更大的灵活性。 结构型模式分为以下 7 种：  代理模式 适配器模式 装饰者模式 桥接模式 外观模式 组合模式 享元模式  5.1 代理模式5.1.1 概述由于某些原因需要给某对象提供一个代理以控制对该对象的访问。这时，访问对象不适合或者不能直接引用目标对象，代理对象作为访问对象和目标对象之间的中介。 Java中的代理按照代理类生成时机不同又分为静态代理和动态代理。静态代理代理类在编译期就生成，而动态代理代理类则是在Java运行时动态生成。动态代理又有JDK代理和CGLib代理两种。 5.1.2 结构代理（Proxy）模式分为三种角色：  抽象主题（Subject）类： 通过接口或抽象类声明真实主题和代理对象实现的业务方法。 真实主题（Real Subject）类： 实现了抽象主题中的具体业务，是代理对象所代表的真实...</div></div></div></a><a class="pagination-related" href="/2023/09/03/11.%E5%A4%96%E8%A7%82%E6%A8%A1%E5%BC%8F/" title="11.外观模式"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-03</div><div class="info-item-2">11.外观模式</div></div><div class="info-2"><div class="info-item-1">外观模式外观模式（Facade Pattern）隐藏系统的复杂性，并向客户端提供了一个客户端可以访问系统的接口。这种类型的设计模式属于结构型模式，它向现有的系统添加一个接口，来隐藏系统的复杂性。 这种模式涉及到一个单一的类，该类提供了客户端请求的简化方法和对现有系统类方法的委托调用。 介绍**意图：**为子系统中的一组接口提供一个一致的界面，外观模式定义了一个高层接口，这个接口使得这一子系统更加容易使用。 **主要解决：**降低访问复杂系统的内部子系统时的复杂度，简化客户端之间的接口。 何时使用：1、客户端不需要知道系统内部的复杂联系，整个系统只需提供一个”接待员”即可。2、定义系统的入口。 **如何解决：**客户端不与系统耦合，外观类与系统耦合。 **关键代码：**在客户端和复杂系统之间再加一层，这一层将调用顺序、依赖关系等处理好。 应用实例：1、去医院看病，可能要去挂号、门诊、划价、取药，让患者或患者家属觉得很复杂，如果有提供接待人员，只让接待人员来处理，就很方便。2、JAVA 的三层开发模式。 优点：1、减少系统相互依赖。2、提高灵活性。3、提高了安全性。 **缺点：**不...</div></div></div></a><a class="pagination-related" href="/2023/09/03/%E7%BB%84%E5%90%88%E6%A8%A1%E5%BC%8F/" title="组合模式"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-03</div><div class="info-item-2">组合模式</div></div><div class="info-2"><div class="info-item-1">组合模式组合模式（Composite Pattern），又叫部分整体模式，是用于把一组相似的对象当作一个单一的对象。组合模式依据树形结构来组合对象，用来表示部分以及整体层次。这种类型的设计模式属于结构型模式，它创建了对象组的树形结构。 这种模式创建了一个包含自己对象组的类。该类提供了修改相同对象组的方式。 我们通过下面的实例来演示组合模式的用法。实例演示了一个组织中员工的层次结构。 介绍**意图：**将对象组合成树形结构以表示”部分-整体”的层次结构。组合模式使得用户对单个对象和组合对象的使用具有一致性。 **主要解决：**它在我们树型结构的问题中，模糊了简单元素和复杂元素的概念，客户程序可以像处理简单元素一样来处理复杂元素，从而使得客户程序与复杂元素的内部结构解耦。 何时使用：1、您想表示对象的部分-整体层次结构（树形结构）。2、您希望用户忽略组合对象与单个对象的不同，用户将统一地使用组合结构中的所有对象。 **如何解决：**树枝和叶子实现统一接口，树枝内部组合该接口。 **关键代码：**树枝内部组合该接口，并且含有内部属性 List，里面放 Component。 应用实例：1...</div></div></div></a><a class="pagination-related" href="/2020/12/01/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-4/" title="设计模式-4"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-12-01</div><div class="info-item-2">设计模式-4</div></div><div class="info-2"><div class="info-item-1">5，结构型模式5.6 组合模式5.6.1 概述  ​	对于这个图片肯定会非常熟悉，上图我们可以看做是一个文件系统，对于这样的结构我们称之为树形结构。在树形结构中可以通过调用某个方法来遍历整个树，当我们找到某个叶子节点后，就可以对叶子节点进行相关的操作。可以将这颗树理解成一个大的容器，容器里面包含很多的成员对象，这些成员对象即可是容器对象也可以是叶子对象。但是由于容器对象和叶子对象在功能上面的区别，使得我们在使用的过程中必须要区分容器对象和叶子对象，但是这样就会给客户带来不必要的麻烦，作为客户而已，它始终希望能够一致的对待容器对象和叶子对象。 定义： ​	又名部分整体模式，是用于把一组相似的对象当作一个单一的对象。组合模式依据树形结构来组合对象，用来表示部分以及整体层次。这种类型的设计模式属于结构型模式，它创建了对象组的树形结构。 5.6.2 结构组合模式主要包含三种角色：  抽象根节点（Component）：定义系统各层次对象的共有方法和属性，可以预先定义一些默认行为和属性。 树枝节点（Composite）：定义树枝节点的行为，存储子节点，组合树枝节点和叶子节点形成一个树形结构。...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F"><span class="toc-number">1.</span> <span class="toc-text">建造者模式</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.1.</span> <span class="toc-text">介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.2.</span> <span class="toc-text">实现</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-1"><span class="toc-number">1.2.1.</span> <span class="toc-text">步骤 1</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Item-java"><span class="toc-number">1.3.</span> <span class="toc-text">Item.java</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Packing-java"><span class="toc-number">1.4.</span> <span class="toc-text">Packing.java</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-2"><span class="toc-number">1.4.1.</span> <span class="toc-text">步骤 2</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Wrapper-java"><span class="toc-number">1.5.</span> <span class="toc-text">Wrapper.java</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Bottle-java"><span class="toc-number">1.6.</span> <span class="toc-text">Bottle.java</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-3"><span class="toc-number">1.6.1.</span> <span class="toc-text">步骤 3</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Burger-java"><span class="toc-number">1.7.</span> <span class="toc-text">Burger.java</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ColdDrink-java"><span class="toc-number">1.8.</span> <span class="toc-text">ColdDrink.java</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-4"><span class="toc-number">1.8.1.</span> <span class="toc-text">步骤 4</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#VegBurger-java"><span class="toc-number">1.9.</span> <span class="toc-text">VegBurger.java</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ChickenBurger-java"><span class="toc-number">1.10.</span> <span class="toc-text">ChickenBurger.java</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Coke-java"><span class="toc-number">1.11.</span> <span class="toc-text">Coke.java</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Pepsi-java"><span class="toc-number">1.12.</span> <span class="toc-text">Pepsi.java</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-5"><span class="toc-number">1.12.1.</span> <span class="toc-text">步骤 5</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Meal-java"><span class="toc-number">1.13.</span> <span class="toc-text">Meal.java</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-6"><span class="toc-number">1.13.1.</span> <span class="toc-text">步骤 6</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MealBuilder-java"><span class="toc-number">1.14.</span> <span class="toc-text">MealBuilder.java</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-7"><span class="toc-number">1.14.1.</span> <span class="toc-text">步骤 7</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#BuilderPatternDemo-java"><span class="toc-number">1.15.</span> <span class="toc-text">BuilderPatternDemo.java</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-8"><span class="toc-number">1.15.1.</span> <span class="toc-text">步骤 8</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E6%96%87%E7%AB%A0"><span class="toc-number">1.16.</span> <span class="toc-text">相关文章</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

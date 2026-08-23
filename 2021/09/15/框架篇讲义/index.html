@@ -1,0 +1,1211 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>框架篇讲义 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="框架篇1. Spring refresh 流程要求  掌握 refresh 的 12 个步骤  Spring refresh 概述 refresh 是 AbstractApplicationContext 中的一个方法，负责初始化 ApplicationContext 容器，容器必须调用 refresh 才能正常工作。它的内部主要会调用 12 个方法，我们把它们称为 refresh 的 12 个步">
+<meta property="og:type" content="article">
+<meta property="og:title" content="框架篇讲义">
+<meta property="og:url" content="https://yhao521.github.io/2021/09/15/%E6%A1%86%E6%9E%B6%E7%AF%87%E8%AE%B2%E4%B9%89/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="框架篇1. Spring refresh 流程要求  掌握 refresh 的 12 个步骤  Spring refresh 概述 refresh 是 AbstractApplicationContext 中的一个方法，负责初始化 ApplicationContext 容器，容器必须调用 refresh 才能正常工作。它的内部主要会调用 12 个方法，我们把它们称为 refresh 的 12 个步">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2021-09-15T01:45:36.000Z">
+<meta property="article:modified_time" content="2021-09-15T01:45:36.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="java&#x2F;programming">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "框架篇讲义",
+  "url": "https://yhao521.github.io/2021/09/15/%E6%A1%86%E6%9E%B6%E7%AF%87%E8%AE%B2%E4%B9%89/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2021-09-15T01:45:36.000Z",
+  "dateModified": "2021-09-15T01:45:36.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2021/09/15/%E6%A1%86%E6%9E%B6%E7%AF%87%E8%AE%B2%E4%B9%89/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '框架篇讲义',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">框架篇讲义</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">框架篇讲义</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-09-15T01:45:36.000Z" title="发表于 2021-09-15 09:45:36">2021-09-15</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-09-15T01:45:36.000Z" title="更新于 2021-09-15 09:45:36">2021-09-15</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="框架篇"><a href="#框架篇" class="headerlink" title="框架篇"></a>框架篇</h1><h2 id="1-Spring-refresh-流程"><a href="#1-Spring-refresh-流程" class="headerlink" title="1. Spring refresh 流程"></a>1. Spring refresh 流程</h2><p><strong>要求</strong></p>
+<ul>
+<li>掌握 refresh 的 12 个步骤</li>
+</ul>
+<p><strong>Spring refresh 概述</strong></p>
+<p>refresh 是 AbstractApplicationContext 中的一个方法，负责初始化 ApplicationContext 容器，容器必须调用 refresh 才能正常工作。它的内部主要会调用 12 个方法，我们把它们称为 refresh 的 12 个步骤：</p>
+<ol>
+<li><p>prepareRefresh</p>
+</li>
+<li><p>obtainFreshBeanFactory</p>
+</li>
+<li><p>prepareBeanFactory</p>
+</li>
+<li><p>postProcessBeanFactory</p>
+</li>
+<li><p>invokeBeanFactoryPostProcessors</p>
+</li>
+<li><p>registerBeanPostProcessors</p>
+</li>
+<li><p>initMessageSource</p>
+</li>
+<li><p>initApplicationEventMulticaster</p>
+</li>
+<li><p>onRefresh</p>
+</li>
+<li><p>registerListeners</p>
+</li>
+<li><p>finishBeanFactoryInitialization</p>
+</li>
+<li><p>finishRefresh</p>
+</li>
+</ol>
+<blockquote>
+<p><em><strong>功能分类</strong></em></p>
+<ul>
+<li><p>1 为准备环境</p>
+</li>
+<li><p>2 3 4 5 6 为准备 BeanFactory</p>
+</li>
+<li><p>7 8 9 10 12 为准备 ApplicationContext</p>
+</li>
+<li><p>11 为初始化 BeanFactory 中非延迟单例 bean</p>
+</li>
+</ul>
+</blockquote>
+<p><strong>1. prepareRefresh</strong></p>
+<ul>
+<li><p>这一步创建和准备了 Environment 对象，它作为 ApplicationContext 的一个成员变量</p>
+</li>
+<li><p>Environment 对象的作用之一是为后续 @Value，值注入时提供键值</p>
+</li>
+<li><p>Environment 分成三个主要部分</p>
+<ul>
+<li>systemProperties - 保存 java 环境键值</li>
+<li>systemEnvironment - 保存系统环境键值</li>
+<li>自定义 PropertySource - 保存自定义键值，例如来自于 *.properties 文件的键值</li>
+</ul>
+</li>
+</ul>
+<p><img src="/img/image-20210902181639048.png" alt="image-20210902181639048"></p>
+<p><strong>2. obtainFreshBeanFactory</strong></p>
+<ul>
+<li>这一步获取（或创建） BeanFactory，它也是作为 ApplicationContext 的一个成员变量</li>
+<li>BeanFactory 的作用是负责 bean 的创建、依赖注入和初始化，bean 的各项特征由 BeanDefinition 定义<ul>
+<li>BeanDefinition 作为 bean 的设计蓝图，规定了 bean 的特征，如单例多例、依赖关系、初始销毁方法等</li>
+<li>BeanDefinition 的来源有多种多样，可以是通过 xml 获得、配置类获得、组件扫描获得，也可以是编程添加</li>
+</ul>
+</li>
+<li>所有的 BeanDefinition 会存入 BeanFactory 中的 beanDefinitionMap 集合</li>
+</ul>
+<p><img src="/img/image-20210902182004819.png" alt="image-20210902182004819"></p>
+<p><strong>3. prepareBeanFactory</strong></p>
+<ul>
+<li>这一步会进一步完善 BeanFactory，为它的各项成员变量赋值</li>
+<li>beanExpressionResolver 用来解析 SpEL，常见实现为 StandardBeanExpressionResolver</li>
+<li>propertyEditorRegistrars 会注册类型转换器<ul>
+<li>它在这里使用了 ResourceEditorRegistrar 实现类</li>
+<li>并应用 ApplicationContext 提供的 Environment 完成 ${ } 解析</li>
+</ul>
+</li>
+<li>registerResolvableDependency 来注册 beanFactory 以及 ApplicationContext，让它们也能用于依赖注入</li>
+<li>beanPostProcessors 是 bean 后处理器集合，会工作在 bean 的生命周期各个阶段，此处会添加两个：<ul>
+<li>ApplicationContextAwareProcessor 用来解析 Aware 接口</li>
+<li>ApplicationListenerDetector 用来识别容器中 ApplicationListener 类型的 bean</li>
+</ul>
+</li>
+</ul>
+<p><img src="/img/image-20210902182541925.png" alt="image-20210902182541925"></p>
+<p><strong>4. postProcessBeanFactory</strong></p>
+<ul>
+<li>这一步是空实现，留给子类扩展。<ul>
+<li>一般 Web 环境的 ApplicationContext 都要利用它注册新的 Scope，完善 Web 下的 BeanFactory</li>
+</ul>
+</li>
+<li>这里体现的是模板方法设计模式</li>
+</ul>
+<p><strong>5. invokeBeanFactoryPostProcessors</strong></p>
+<ul>
+<li>这一步会调用 beanFactory 后处理器</li>
+<li>beanFactory 后处理器，充当 beanFactory 的扩展点，可以用来补充或修改 BeanDefinition</li>
+<li>常见的 beanFactory 后处理器有<ul>
+<li>ConfigurationClassPostProcessor – 解析 @Configuration、@Bean、@Import、@PropertySource 等</li>
+<li>PropertySourcesPlaceHolderConfigurer – 替换 BeanDefinition 中的 ${ }</li>
+<li>MapperScannerConfigurer – 补充 Mapper 接口对应的 BeanDefinition</li>
+</ul>
+</li>
+</ul>
+<p><img src="/img/image-20210902183232114.png" alt="image-20210902183232114"></p>
+<p><strong>6. registerBeanPostProcessors</strong></p>
+<ul>
+<li>这一步是继续从 beanFactory 中找出 bean 后处理器，添加至 beanPostProcessors 集合中</li>
+<li>bean 后处理器，充当 bean 的扩展点，可以工作在 bean 的实例化、依赖注入、初始化阶段，常见的有：<ul>
+<li>AutowiredAnnotationBeanPostProcessor 功能有：解析 @Autowired，@Value 注解</li>
+<li>CommonAnnotationBeanPostProcessor 功能有：解析 @Resource，@PostConstruct，@PreDestroy</li>
+<li>AnnotationAwareAspectJAutoProxyCreator 功能有：为符合切点的目标 bean 自动创建代理</li>
+</ul>
+</li>
+</ul>
+<p><img src="/img/image-20210902183520307.png" alt="image-20210902183520307"></p>
+<p><strong>7. initMessageSource</strong></p>
+<ul>
+<li>这一步是为 ApplicationContext 添加 messageSource 成员，实现国际化功能</li>
+<li>去 beanFactory 内找名为 messageSource 的 bean，如果没有，则提供空的 MessageSource 实现</li>
+</ul>
+<p><img src="/img/image-20210902183819984.png" alt="image-20210902183819984"></p>
+<p><strong>8. initApplicationContextEventMulticaster</strong></p>
+<ul>
+<li>这一步为 ApplicationContext 添加事件广播器成员，即 applicationContextEventMulticaster</li>
+<li>它的作用是发布事件给监听器</li>
+<li>去 beanFactory 找名为 applicationEventMulticaster 的 bean 作为事件广播器，若没有，会创建默认的事件广播器</li>
+<li>之后就可以调用 ApplicationContext.publishEvent(事件对象) 来发布事件</li>
+</ul>
+<p><img src="/img/image-20210902183943469.png" alt="image-20210902183943469"></p>
+<p><strong>9. onRefresh</strong></p>
+<ul>
+<li>这一步是空实现，留给子类扩展<ul>
+<li>SpringBoot 中的子类在这里准备了 WebServer，即内嵌 web 容器</li>
+</ul>
+</li>
+<li>体现的是模板方法设计模式</li>
+</ul>
+<p><strong>10. registerListeners</strong></p>
+<ul>
+<li>这一步会从多种途径找到事件监听器，并添加至 applicationEventMulticaster</li>
+<li>事件监听器顾名思义，用来接收事件广播器发布的事件，有如下来源<ul>
+<li>事先编程添加的</li>
+<li>来自容器中的 bean</li>
+<li>来自于 @EventListener 的解析</li>
+</ul>
+</li>
+<li>要实现事件监听器，只需要实现 ApplicationListener 接口，重写其中 onApplicationEvent(E e) 方法即可</li>
+</ul>
+<p><img src="/img/image-20210902184343872.png" alt="image-20210902184343872"></p>
+<p><strong>11. finishBeanFactoryInitialization</strong></p>
+<ul>
+<li>这一步会将 beanFactory 的成员补充完毕，并初始化所有非延迟单例 bean</li>
+<li>conversionService 也是一套转换机制，作为对 PropertyEditor 的补充</li>
+<li>embeddedValueResolvers 即内嵌值解析器，用来解析 @Value 中的 ${ }，借用的是 Environment 的功能</li>
+<li>singletonObjects 即单例池，缓存所有单例对象<ul>
+<li>对象的创建都分三个阶段，每一阶段都有不同的 bean 后处理器参与进来，扩展功能</li>
+</ul>
+</li>
+</ul>
+<p><img src="/img/image-20210902184641623.png" alt="image-20210902184641623"></p>
+<p><strong>12. finishRefresh</strong></p>
+<ul>
+<li>这一步会为 ApplicationContext 添加 lifecycleProcessor 成员，用来控制容器内需要生命周期管理的 bean</li>
+<li>如果容器中有名称为 lifecycleProcessor 的 bean 就用它，否则创建默认的生命周期管理器</li>
+<li>准备好生命周期管理器，就可以实现<ul>
+<li>调用 context 的 start，即可触发所有实现 LifeCycle 接口 bean 的 start</li>
+<li>调用 context 的 stop，即可触发所有实现 LifeCycle 接口 bean 的 stop</li>
+</ul>
+</li>
+<li>发布 ContextRefreshed 事件，整个 refresh 执行完成</li>
+</ul>
+<p><img src="/img/image-20210902185052433.png" alt="image-20210902185052433"></p>
+<h2 id="2-Spring-bean-生命周期"><a href="#2-Spring-bean-生命周期" class="headerlink" title="2. Spring bean 生命周期"></a>2. Spring bean 生命周期</h2><p><strong>要求</strong></p>
+<ul>
+<li>掌握 Spring bean 的生命周期</li>
+</ul>
+<p><strong>bean 生命周期 概述</strong></p>
+<p>bean 的生命周期从调用 beanFactory 的 getBean 开始，到这个 bean 被销毁，可以总结为以下七个阶段：</p>
+<ol>
+<li>处理名称，检查缓存</li>
+<li>处理父子容器</li>
+<li>处理 dependsOn</li>
+<li>选择 scope 策略</li>
+<li>创建 bean</li>
+<li>类型转换处理</li>
+<li>销毁 bean</li>
+</ol>
+<blockquote>
+<p><em><strong>注意</strong></em></p>
+<ul>
+<li>划分的阶段和名称并不重要，重要的是理解整个过程中做了哪些事情</li>
+</ul>
+</blockquote>
+<p><strong>1. 处理名称，检查缓存</strong></p>
+<ul>
+<li>这一步会处理别名，将别名解析为实际名称</li>
+<li>对 FactoryBean 也会特殊处理，如果以 &amp; 开头表示要获取 FactoryBean 本身，否则表示要获取其产品</li>
+<li>这里针对单例对象会检查一级、二级、三级缓存<ul>
+<li>singletonFactories 三级缓存，存放单例工厂对象</li>
+<li>earlySingletonObjects 二级缓存，存放单例工厂的产品对象<ul>
+<li>如果发生循环依赖，产品是代理；无循环依赖，产品是原始对象</li>
+</ul>
+</li>
+<li>singletonObjects 一级缓存，存放单例成品对象</li>
+</ul>
+</li>
+</ul>
+<p><strong>2. 处理父子容器</strong></p>
+<ul>
+<li>如果当前容器根据名字找不到这个 bean，此时若父容器存在，则执行父容器的 getBean 流程</li>
+<li>父子容器的 bean 名称可以重复</li>
+</ul>
+<p><strong>3. 处理 dependsOn</strong></p>
+<ul>
+<li>如果当前 bean 有通过 dependsOn 指定了非显式依赖的 bean，这一步会提前创建这些 dependsOn 的 bean </li>
+<li>所谓非显式依赖，就是指两个 bean 之间不存在直接依赖关系，但需要控制它们的创建先后顺序</li>
+</ul>
+<p><strong>4. 选择 scope 策略</strong></p>
+<ul>
+<li>对于 singleton scope，首先到单例池去获取 bean，如果有则直接返回，没有再进入创建流程</li>
+<li>对于 prototype scope，每次都会进入创建流程</li>
+<li>对于自定义 scope，例如 request，首先到 request 域获取 bean，如果有则直接返回，没有再进入创建流程</li>
+</ul>
+<p><strong>5.1 创建 bean - 创建 bean 实例</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>要点</strong></th>
+<th><strong>总结</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>有自定义 TargetSource 的情况</td>
+<td>由 AnnotationAwareAspectJAutoProxyCreator 创建代理返回</td>
+</tr>
+<tr>
+<td>Supplier 方式创建 bean 实例</td>
+<td>为 Spring 5.0 新增功能，方便编程方式创建  bean  实例</td>
+</tr>
+<tr>
+<td>FactoryMethod 方式  创建 bean  实例</td>
+<td>① 分成静态工厂与实例工厂；② 工厂方法若有参数，需要对工厂方法参数进行解析，利用  resolveDependency；③ 如果有多个工厂方法候选者，还要进一步按权重筛选</td>
+</tr>
+<tr>
+<td>AutowiredAnnotationBeanPostProcessor</td>
+<td>① 优先选择带  @Autowired  注解的构造；② 若有唯一的带参构造，也会入选</td>
+</tr>
+<tr>
+<td>mbd.getPreferredConstructors</td>
+<td>选择所有公共构造，这些构造之间按权重筛选</td>
+</tr>
+<tr>
+<td>采用默认构造</td>
+<td>如果上面的后处理器和 BeanDefiniation 都没找到构造，采用默认构造，即使是私有的</td>
+</tr>
+</tbody></table>
+<p><strong>5.2 创建 bean - 依赖注入</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>要点</strong></th>
+<th><strong>总结</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AutowiredAnnotationBeanPostProcessor</td>
+<td>识别   @Autowired  及 @Value  标注的成员，封装为  InjectionMetadata 进行依赖注入</td>
+</tr>
+<tr>
+<td>CommonAnnotationBeanPostProcessor</td>
+<td>识别   @Resource  标注的成员，封装为  InjectionMetadata 进行依赖注入</td>
+</tr>
+<tr>
+<td>resolveDependency</td>
+<td>用来查找要装配的值，可以识别：① Optional；② ObjectFactory 及 ObjectProvider；③ @Lazy  注解；④ @Value  注解（${  }, #{ }, 类型转换）；⑤ 集合类型（Collection，Map，数组等）；⑥ 泛型和  @Qualifier（用来区分类型歧义）；⑦ primary  及名字匹配（用来区分类型歧义）</td>
+</tr>
+<tr>
+<td>AUTOWIRE_BY_NAME</td>
+<td>根据成员名字找 bean 对象，修改 mbd 的 propertyValues，不会考虑简单类型的成员</td>
+</tr>
+<tr>
+<td>AUTOWIRE_BY_TYPE</td>
+<td>根据成员类型执行 resolveDependency 找到依赖注入的值，修改  mbd 的 propertyValues</td>
+</tr>
+<tr>
+<td>applyPropertyValues</td>
+<td>根据 mbd 的 propertyValues 进行依赖注入（即xml中 &#96;&lt;property name ref</td>
+</tr>
+</tbody></table>
+<p><strong>5.3 创建 bean - 初始化</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>要点</strong></th>
+<th><strong>总结</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>内置 Aware 接口的装配</td>
+<td>包括 BeanNameAware，BeanFactoryAware 等</td>
+</tr>
+<tr>
+<td>扩展 Aware 接口的装配</td>
+<td>由 ApplicationContextAwareProcessor 解析，执行时机在  postProcessBeforeInitialization</td>
+</tr>
+<tr>
+<td>@PostConstruct</td>
+<td>由 CommonAnnotationBeanPostProcessor 解析，执行时机在  postProcessBeforeInitialization</td>
+</tr>
+<tr>
+<td>InitializingBean</td>
+<td>通过接口回调执行初始化</td>
+</tr>
+<tr>
+<td>initMethod</td>
+<td>根据 BeanDefinition 得到的初始化方法执行初始化，即 <code>&lt;bean init-method&gt;</code> 或 @Bean(initMethod)</td>
+</tr>
+<tr>
+<td>创建 aop 代理</td>
+<td>由 AnnotationAwareAspectJAutoProxyCreator 创建，执行时机在  postProcessAfterInitialization</td>
+</tr>
+</tbody></table>
+<p><strong>5.4 创建 bean - 注册可销毁 bean</strong></p>
+<p>在这一步判断并登记可销毁 bean</p>
+<ul>
+<li>判断依据<ul>
+<li>如果实现了 DisposableBean 或 AutoCloseable 接口，则为可销毁 bean</li>
+<li>如果自定义了 destroyMethod，则为可销毁 bean</li>
+<li>如果采用 @Bean 没有指定 destroyMethod，则采用自动推断方式获取销毁方法名（close，shutdown）</li>
+<li>如果有 @PreDestroy 标注的方法</li>
+</ul>
+</li>
+<li>存储位置<ul>
+<li>singleton scope 的可销毁 bean 会存储于 beanFactory 的成员当中</li>
+<li>自定义 scope 的可销毁 bean 会存储于对应的域对象当中</li>
+<li>prototype scope 不会存储，需要自己找到此对象销毁</li>
+</ul>
+</li>
+<li>存储时都会封装为 DisposableBeanAdapter 类型对销毁方法的调用进行适配</li>
+</ul>
+<p><strong>6. 类型转换处理</strong></p>
+<ul>
+<li>如果 getBean 的 requiredType 参数与实际得到的对象类型不同，会尝试进行类型转换</li>
+</ul>
+<p><strong>7. 销毁 bean</strong></p>
+<ul>
+<li>销毁时机<ul>
+<li>singleton bean 的销毁在 ApplicationContext.close 时，此时会找到所有 DisposableBean 的名字，逐一销毁</li>
+<li>自定义 scope bean 的销毁在作用域对象生命周期结束时</li>
+<li>prototype bean 的销毁可以通过自己手动调用 AutowireCapableBeanFactory.destroyBean 方法执行销毁</li>
+</ul>
+</li>
+<li>同一 bean 中不同形式销毁方法的调用次序<ul>
+<li>优先后处理器销毁，即 @PreDestroy</li>
+<li>其次 DisposableBean 接口销毁</li>
+<li>最后 destroyMethod 销毁（包括自定义名称，推断名称，AutoCloseable 接口 多选一）</li>
+</ul>
+</li>
+</ul>
+<h2 id="3-Spring-bean-循环依赖"><a href="#3-Spring-bean-循环依赖" class="headerlink" title="3. Spring bean 循环依赖"></a>3. Spring bean 循环依赖</h2><p><strong>要求</strong></p>
+<ul>
+<li>掌握单例 set 方式循环依赖的原理</li>
+<li>掌握其它循环依赖的解决方法</li>
+</ul>
+<p><strong>循环依赖的产生</strong></p>
+<ul>
+<li>首先要明白，bean 的创建要遵循一定的步骤，必须是创建、注入、初始化三步，这些顺序不能乱</li>
+</ul>
+<img src="../../../../_resources/image-20210903085238916.png" alt="image-20210903085238916" style="zoom:50%;" />
+
+<ul>
+<li><p>set 方法（包括成员变量）的循环依赖如图所示</p>
+<ul>
+<li><p>可以在【a 创建】和【a set 注入 b】之间加入 b 的整个流程来解决</p>
+</li>
+<li><p>【b set 注入 a】 时可以成功，因为之前 a 的实例已经创建完毕</p>
+</li>
+<li><p>a 的顺序，及 b 的顺序都能得到保障</p>
+</li>
+</ul>
+</li>
+</ul>
+<img src="../../../../_resources/image-20210903085454603.png" alt="image-20210903085454603" style="zoom: 33%;" />
+
+<ul>
+<li>构造方法的循环依赖如图所示，显然无法用前面的方法解决</li>
+</ul>
+<img src="../../../../_resources/image-20210903085906315.png" alt="image-20210903085906315" style="zoom: 50%;" />
+
+<p><strong>构造循环依赖的解决</strong></p>
+<ul>
+<li>思路1<ul>
+<li>a 注入 b 的代理对象，这样能够保证 a 的流程走通</li>
+<li>后续需要用到 b 的真实对象时，可以通过代理间接访问</li>
+</ul>
+</li>
+</ul>
+<img src="../../../../_resources/image-20210903091627659.png" alt="image-20210903091627659" style="zoom: 50%;" />
+
+<ul>
+<li>思路2<ul>
+<li>a 注入 b 的工厂对象，让 b 的实例创建被推迟，这样能够保证 a 的流程先走通</li>
+<li>后续需要用到 b 的真实对象时，再通过 ObjectFactory 工厂间接访问</li>
+</ul>
+</li>
+</ul>
+<img src="../../../../_resources/image-20210903091743366.png" alt="image-20210903091743366" style="zoom:50%;" />
+
+<ul>
+<li>示例1：用 @Lazy 为构造方法参数生成代理</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">App60_1</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">A</span> &#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">log</span> <span class="operator">=</span> LoggerFactory.getLogger(<span class="string">&quot;A&quot;</span>);</span><br><span class="line">        <span class="keyword">private</span> B b;</span><br><span class="line"></span><br><span class="line">        <span class="type">public</span> <span class="title function_">A</span><span class="params">(<span class="meta">@Lazy</span> B b)</span> &#123;</span><br><span class="line">            log.debug(<span class="string">&quot;A(B b) &#123;&#125;&quot;</span>, b.getClass());</span><br><span class="line">            <span class="built_in">this</span>.b = b;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@PostConstruct</span></span><br><span class="line">        <span class="keyword">public</span> <span class="type">void</span> <span class="title function_">init</span><span class="params">()</span> &#123;</span><br><span class="line">            log.debug(<span class="string">&quot;init()&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">B</span> &#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">log</span> <span class="operator">=</span> LoggerFactory.getLogger(<span class="string">&quot;B&quot;</span>);</span><br><span class="line">        <span class="keyword">private</span> A a;</span><br><span class="line"></span><br><span class="line">        <span class="type">public</span> <span class="title function_">B</span><span class="params">(A a)</span> &#123;</span><br><span class="line">            log.debug(<span class="string">&quot;B(&#123;&#125;)&quot;</span>, a);</span><br><span class="line">            <span class="built_in">this</span>.a = a;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@PostConstruct</span></span><br><span class="line">        <span class="keyword">public</span> <span class="type">void</span> <span class="title function_">init</span><span class="params">()</span> &#123;</span><br><span class="line">            log.debug(<span class="string">&quot;init()&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">GenericApplicationContext</span> <span class="variable">context</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">GenericApplicationContext</span>();</span><br><span class="line">        context.registerBean(<span class="string">&quot;a&quot;</span>, A.class);</span><br><span class="line">        context.registerBean(<span class="string">&quot;b&quot;</span>, B.class);</span><br><span class="line">        AnnotationConfigUtils.registerAnnotationConfigProcessors(context.getDefaultListableBeanFactory());</span><br><span class="line">        context.refresh();</span><br><span class="line">        System.out.println();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>示例2：用 ObjectProvider 延迟依赖对象的创建</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">App60_2</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">A</span> &#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">log</span> <span class="operator">=</span> LoggerFactory.getLogger(<span class="string">&quot;A&quot;</span>);</span><br><span class="line">        <span class="keyword">private</span> ObjectProvider&lt;B&gt; b;</span><br><span class="line"></span><br><span class="line">        <span class="type">public</span> <span class="title function_">A</span><span class="params">(ObjectProvider&lt;B&gt; b)</span> &#123;</span><br><span class="line">            log.debug(<span class="string">&quot;A(&#123;&#125;)&quot;</span>, b);</span><br><span class="line">            <span class="built_in">this</span>.b = b;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@PostConstruct</span></span><br><span class="line">        <span class="keyword">public</span> <span class="type">void</span> <span class="title function_">init</span><span class="params">()</span> &#123;</span><br><span class="line">            log.debug(<span class="string">&quot;init()&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">B</span> &#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">log</span> <span class="operator">=</span> LoggerFactory.getLogger(<span class="string">&quot;B&quot;</span>);</span><br><span class="line">        <span class="keyword">private</span> A a;</span><br><span class="line"></span><br><span class="line">        <span class="type">public</span> <span class="title function_">B</span><span class="params">(A a)</span> &#123;</span><br><span class="line">            log.debug(<span class="string">&quot;B(&#123;&#125;)&quot;</span>, a);</span><br><span class="line">            <span class="built_in">this</span>.a = a;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@PostConstruct</span></span><br><span class="line">        <span class="keyword">public</span> <span class="type">void</span> <span class="title function_">init</span><span class="params">()</span> &#123;</span><br><span class="line">            log.debug(<span class="string">&quot;init()&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">GenericApplicationContext</span> <span class="variable">context</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">GenericApplicationContext</span>();</span><br><span class="line">        context.registerBean(<span class="string">&quot;a&quot;</span>, A.class);</span><br><span class="line">        context.registerBean(<span class="string">&quot;b&quot;</span>, B.class);</span><br><span class="line">        AnnotationConfigUtils.registerAnnotationConfigProcessors(context.getDefaultListableBeanFactory());</span><br><span class="line">        context.refresh();</span><br><span class="line"></span><br><span class="line">        System.out.println(context.getBean(A.class).b.getObject());</span><br><span class="line">        System.out.println(context.getBean(B.class));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>示例3：用 @Scope 产生代理</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">App60_3</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">GenericApplicationContext</span> <span class="variable">context</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">GenericApplicationContext</span>();</span><br><span class="line">        <span class="type">ClassPathBeanDefinitionScanner</span> <span class="variable">scanner</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ClassPathBeanDefinitionScanner</span>(context.getDefaultListableBeanFactory());</span><br><span class="line">        scanner.scan(<span class="string">&quot;com.itheima.app60.sub&quot;</span>);</span><br><span class="line">        context.refresh();</span><br><span class="line">        System.out.println();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">A</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">log</span> <span class="operator">=</span> LoggerFactory.getLogger(<span class="string">&quot;A&quot;</span>);</span><br><span class="line">    <span class="keyword">private</span> B b;</span><br><span class="line"></span><br><span class="line">    <span class="type">public</span> <span class="title function_">A</span><span class="params">(B b)</span> &#123;</span><br><span class="line">        log.debug(<span class="string">&quot;A(B b) &#123;&#125;&quot;</span>, b.getClass());</span><br><span class="line">        <span class="built_in">this</span>.b = b;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@PostConstruct</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">void</span> <span class="title function_">init</span><span class="params">()</span> &#123;</span><br><span class="line">        log.debug(<span class="string">&quot;init()&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">B</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">log</span> <span class="operator">=</span> LoggerFactory.getLogger(<span class="string">&quot;B&quot;</span>);</span><br><span class="line">    <span class="keyword">private</span> A a;</span><br><span class="line"></span><br><span class="line">    <span class="type">public</span> <span class="title function_">B</span><span class="params">(A a)</span> &#123;</span><br><span class="line">        log.debug(<span class="string">&quot;B(&#123;&#125;)&quot;</span>, a);</span><br><span class="line">        <span class="built_in">this</span>.a = a;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@PostConstruct</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">void</span> <span class="title function_">init</span><span class="params">()</span> &#123;</span><br><span class="line">        log.debug(<span class="string">&quot;init()&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>示例4：用 Provider 接口解决，原理上与 ObjectProvider 一样，Provider 接口是独立的 jar 包，需要加入依赖</li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>javax.inject<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>javax.inject<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">App60_4</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">A</span> &#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">log</span> <span class="operator">=</span> LoggerFactory.getLogger(<span class="string">&quot;A&quot;</span>);</span><br><span class="line">        <span class="keyword">private</span> Provider&lt;B&gt; b;</span><br><span class="line"></span><br><span class="line">        <span class="type">public</span> <span class="title function_">A</span><span class="params">(Provider&lt;B&gt; b)</span> &#123;</span><br><span class="line">            log.debug(<span class="string">&quot;A(&#123;&#125;&#125;)&quot;</span>, b);</span><br><span class="line">            <span class="built_in">this</span>.b = b;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@PostConstruct</span></span><br><span class="line">        <span class="keyword">public</span> <span class="type">void</span> <span class="title function_">init</span><span class="params">()</span> &#123;</span><br><span class="line">            log.debug(<span class="string">&quot;init()&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">B</span> &#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">log</span> <span class="operator">=</span> LoggerFactory.getLogger(<span class="string">&quot;B&quot;</span>);</span><br><span class="line">        <span class="keyword">private</span> A a;</span><br><span class="line"></span><br><span class="line">        <span class="type">public</span> <span class="title function_">B</span><span class="params">(A a)</span> &#123;</span><br><span class="line">            log.debug(<span class="string">&quot;B(&#123;&#125;&#125;)&quot;</span>, a);</span><br><span class="line">            <span class="built_in">this</span>.a = a;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@PostConstruct</span></span><br><span class="line">        <span class="keyword">public</span> <span class="type">void</span> <span class="title function_">init</span><span class="params">()</span> &#123;</span><br><span class="line">            log.debug(<span class="string">&quot;init()&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">GenericApplicationContext</span> <span class="variable">context</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">GenericApplicationContext</span>();</span><br><span class="line">        context.registerBean(<span class="string">&quot;a&quot;</span>, A.class);</span><br><span class="line">        context.registerBean(<span class="string">&quot;b&quot;</span>, B.class);</span><br><span class="line">        AnnotationConfigUtils.registerAnnotationConfigProcessors(context.getDefaultListableBeanFactory());</span><br><span class="line">        context.refresh();</span><br><span class="line"></span><br><span class="line">        System.out.println(context.getBean(A.class).b.get());</span><br><span class="line">        System.out.println(context.getBean(B.class));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="解决-set-循环依赖的原理"><a href="#解决-set-循环依赖的原理" class="headerlink" title="解决 set 循环依赖的原理"></a>解决 set 循环依赖的原理</h3><p><strong>一级缓存</strong></p>
+<img src="../../../../_resources/image-20210903100752165.png" alt="image-20210903100752165" style="zoom:80%;" />
+
+<p>作用是保证单例对象仅被创建一次</p>
+<ul>
+<li>第一次走 <code>getBean(&quot;a&quot;)</code> 流程后，最后会将成品 a 放入 singletonObjects 一级缓存</li>
+<li>后续再走 <code>getBean(&quot;a&quot;)</code> 流程时，先从一级缓存中找，这时已经有成品 a，就无需再次创建</li>
+</ul>
+<p><strong>一级缓存与循环依赖</strong></p>
+<img src="../../../../_resources/image-20210903100914140.png" alt="image-20210903100914140" style="zoom:80%;" />
+
+<p>一级缓存无法解决循环依赖问题，分析如下</p>
+<ul>
+<li>无论是获取 bean a 还是获取 bean b，走的方法都是同一个 getBean 方法，假设先走 <code>getBean(&quot;a&quot;)</code></li>
+<li>当 a 的实例对象创建，接下来执行 <code>a.setB()</code> 时，需要走 <code>getBean(&quot;b&quot;)</code> 流程，红色箭头 1</li>
+<li>当 b 的实例对象创建，接下来执行 <code>b.setA()</code> 时，又回到了 <code>getBean(&quot;a&quot;)</code> 的流程，红色箭头 2</li>
+<li>但此时 singletonObjects 一级缓存内没有成品的 a，陷入了死循环</li>
+</ul>
+<p><strong>二级缓存</strong></p>
+<img src="../../../../_resources/image-20210903101849924.png" alt="image-20210903101849924" style="zoom:80%;" />
+
+<p>解决思路如下：</p>
+<ul>
+<li>再增加一个 singletonFactories 缓存</li>
+<li>在依赖注入前，即 <code>a.setB()</code> 以及 <code>b.setA()</code> 将 a 及 b 的半成品对象（未完成依赖注入和初始化）放入此缓存</li>
+<li>执行依赖注入时，先看看 singletonFactories 缓存中是否有半成品的对象，如果有拿来注入，顺利走完流程</li>
+</ul>
+<p>对于上面的图</p>
+<ul>
+<li><code>a = new A()</code> 执行之后就会把这个半成品的 a 放入 singletonFactories 缓存，即 <code>factories.put(a)</code></li>
+<li>接下来执行 <code>a.setB()</code>，走入 <code>getBean(&quot;b&quot;)</code> 流程，红色箭头 3</li>
+<li>这回再执行到 <code>b.setA()</code> 时，需要一个 a 对象，有没有呢？有！</li>
+<li><code>factories.get()</code> 在 singletonFactories  缓存中就可以找到，红色箭头 4 和 5</li>
+<li>b 的流程能够顺利走完，将 b 成品放入 singletonObject 一级缓存，返回到 a 的依赖注入流程，红色箭头 6</li>
+</ul>
+<p><strong>二级缓存与创建代理</strong></p>
+<img src="../../../../_resources/image-20210903103030877.png" alt="image-20210903103030877" style="zoom:80%;" />
+
+<p>二级缓存无法正确处理循环依赖并且包含有代理创建的场景，分析如下</p>
+<ul>
+<li>spring 默认要求，在 <code>a.init</code> 完成之后才能创建代理 <code>pa = proxy(a)</code></li>
+<li>由于 a 的代理创建时机靠后，在执行 <code>factories.put(a)</code> 向 singletonFactories 中放入的还是原始对象</li>
+<li>接下来箭头 3、4、5 这几步 b 对象拿到和注入的都是原始对象</li>
+</ul>
+<p><strong>三级缓存</strong></p>
+<p><img src="/img/image-20210903103628639.png" alt="image-20210903103628639"></p>
+<p>简单分析的话，只需要将代理的创建时机放在依赖注入之前即可，但 spring 仍然希望代理的创建时机在 init 之后，只有出现循环依赖时，才会将代理的创建时机提前。所以解决思路稍显复杂：</p>
+<ul>
+<li>图中 <code>factories.put(fa)</code> 放入的既不是原始对象，也不是代理对象而是工厂对象 fa</li>
+<li>当检查出发生循环依赖时，fa 的产品就是代理 pa，没有发生循环依赖，fa 的产品是原始对象 a</li>
+<li>假设出现了循环依赖，拿到了 singletonFactories 中的工厂对象，通过在依赖注入前获得了 pa，红色箭头 5</li>
+<li>这回 <code>b.setA()</code> 注入的就是代理对象，保证了正确性，红色箭头 7</li>
+<li>还需要把 pa 存入新加的 earlySingletonObjects 缓存，红色箭头 6</li>
+<li><code>a.init</code> 完成后，无需二次创建代理，从哪儿找到 pa 呢？earlySingletonObjects 已经缓存，蓝色箭头 9</li>
+</ul>
+<p>当成品对象产生，放入 singletonObject 后，singletonFactories 和 earlySingletonObjects 就中的对象就没有用处，清除即可</p>
+<h2 id="4-Spring-事务失效"><a href="#4-Spring-事务失效" class="headerlink" title="4. Spring 事务失效"></a>4. Spring 事务失效</h2><p><strong>要求</strong></p>
+<ul>
+<li>掌握事务失效的八种场景</li>
+</ul>
+<p><strong>1. 抛出检查异常导致事务不能正确回滚</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Service1</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> AccountMapper accountMapper;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Transactional</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">void</span> <span class="title function_">transfer</span><span class="params">(<span class="type">int</span> from, <span class="type">int</span> to, <span class="type">int</span> amount)</span> <span class="keyword">throws</span> FileNotFoundException &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">fromBalance</span> <span class="operator">=</span> accountMapper.findBalanceBy(from);</span><br><span class="line">        <span class="keyword">if</span> (fromBalance - amount &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">            accountMapper.update(from, -<span class="number">1</span> * amount);</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">FileInputStream</span>(<span class="string">&quot;aaa&quot;</span>);</span><br><span class="line">            accountMapper.update(to, amount);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>原因：Spring 默认只会回滚非检查异常</p>
+</li>
+<li><p>解法：配置 rollbackFor 属性</p>
+<ul>
+<li><code>@Transactional(rollbackFor = Exception.class)</code></li>
+</ul>
+</li>
+</ul>
+<p><strong>2. 业务方法内自己 try-catch 异常导致事务不能正确回滚</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Service2</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> AccountMapper accountMapper;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Transactional(rollbackFor = Exception.class)</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">void</span> <span class="title function_">transfer</span><span class="params">(<span class="type">int</span> from, <span class="type">int</span> to, <span class="type">int</span> amount)</span>  &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="type">int</span> <span class="variable">fromBalance</span> <span class="operator">=</span> accountMapper.findBalanceBy(from);</span><br><span class="line">            <span class="keyword">if</span> (fromBalance - amount &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">                accountMapper.update(from, -<span class="number">1</span> * amount);</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">FileInputStream</span>(<span class="string">&quot;aaa&quot;</span>);</span><br><span class="line">                accountMapper.update(to, amount);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (FileNotFoundException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>原因：事务通知只有捉到了目标抛出的异常，才能进行后续的回滚处理，如果目标自己处理掉异常，事务通知无法知悉</p>
+</li>
+<li><p>解法1：异常原样抛出</p>
+<ul>
+<li>在 catch 块添加 <code>throw new RuntimeException(e);</code></li>
+</ul>
+</li>
+<li><p>解法2：手动设置 TransactionStatus.setRollbackOnly()</p>
+<ul>
+<li>在 catch 块添加 <code>TransactionInterceptor.currentTransactionStatus().setRollbackOnly();</code></li>
+</ul>
+</li>
+</ul>
+<p><strong>3. aop 切面顺序导致导致事务不能正确回滚</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Service3</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> AccountMapper accountMapper;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Transactional(rollbackFor = Exception.class)</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">void</span> <span class="title function_">transfer</span><span class="params">(<span class="type">int</span> from, <span class="type">int</span> to, <span class="type">int</span> amount)</span> <span class="keyword">throws</span> FileNotFoundException &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">fromBalance</span> <span class="operator">=</span> accountMapper.findBalanceBy(from);</span><br><span class="line">        <span class="keyword">if</span> (fromBalance - amount &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">            accountMapper.update(from, -<span class="number">1</span> * amount);</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">FileInputStream</span>(<span class="string">&quot;aaa&quot;</span>);</span><br><span class="line">            accountMapper.update(to, amount);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Aspect</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MyAspect</span> &#123;</span><br><span class="line">    <span class="meta">@Around(&quot;execution(* transfer(..))&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">Object</span> <span class="title function_">around</span><span class="params">(ProceedingJoinPoint pjp)</span> <span class="keyword">throws</span> Throwable &#123;</span><br><span class="line">        LoggerUtils.get().debug(<span class="string">&quot;log:&#123;&#125;&quot;</span>, pjp.getTarget());</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> pjp.proceed();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>原因：事务切面优先级最低，但如果自定义的切面优先级和他一样，则还是自定义切面在内层，这时若自定义切面没有正确抛出异常…</p>
+</li>
+<li><p>解法1、2：同情况2 中的解法:1、2</p>
+</li>
+<li><p>解法3：调整切面顺序，在 MyAspect 上添加 <code>@Order(Ordered.LOWEST_PRECEDENCE - 1)</code> （不推荐）</p>
+</li>
+</ul>
+<p><strong>4. 非 public 方法导致的事务失效</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Service4</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> AccountMapper accountMapper;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Transactional</span></span><br><span class="line">    <span class="type">void</span> <span class="title function_">transfer</span><span class="params">(<span class="type">int</span> from, <span class="type">int</span> to, <span class="type">int</span> amount)</span> <span class="keyword">throws</span> FileNotFoundException &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">fromBalance</span> <span class="operator">=</span> accountMapper.findBalanceBy(from);</span><br><span class="line">        <span class="keyword">if</span> (fromBalance - amount &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">            accountMapper.update(from, -<span class="number">1</span> * amount);</span><br><span class="line">            accountMapper.update(to, amount);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>原因：Spring 为方法创建代理、添加事务通知、前提条件都是该方法是 public 的</p>
+</li>
+<li><p>解法1：改为 public 方法</p>
+</li>
+<li><p>解法2：添加 bean 配置如下（不推荐）</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="keyword">public</span> <span class="type">TransactionAttributeSource</span> <span class="title function_">transactionAttributeSource</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">AnnotationTransactionAttributeSource</span>(<span class="literal">false</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>5. 父子容器导致的事务失效</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> day04.tx.app.service;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Service5</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> AccountMapper accountMapper;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Transactional(rollbackFor = Exception.class)</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">void</span> <span class="title function_">transfer</span><span class="params">(<span class="type">int</span> from, <span class="type">int</span> to, <span class="type">int</span> amount)</span> <span class="keyword">throws</span> FileNotFoundException &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">fromBalance</span> <span class="operator">=</span> accountMapper.findBalanceBy(from);</span><br><span class="line">        <span class="keyword">if</span> (fromBalance - amount &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">            accountMapper.update(from, -<span class="number">1</span> * amount);</span><br><span class="line">            accountMapper.update(to, amount);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>控制器类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> day04.tx.app.controller;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@Controller</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">AccountController</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">public</span> Service5 service;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="type">void</span> <span class="title function_">transfer</span><span class="params">(<span class="type">int</span> from, <span class="type">int</span> to, <span class="type">int</span> amount)</span> <span class="keyword">throws</span> FileNotFoundException &#123;</span><br><span class="line">        service.transfer(from, to, amount);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>App 配置类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="meta">@ComponentScan(&quot;day04.tx.app.service&quot;)</span></span><br><span class="line"><span class="meta">@EnableTransactionManagement</span></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">AppConfig</span> &#123;</span><br><span class="line">    <span class="comment">// ... 有事务相关配置</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Web 配置类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="meta">@ComponentScan(&quot;day04.tx.app&quot;)</span></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">WebConfig</span> &#123;</span><br><span class="line">    <span class="comment">// ... 无事务配置</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>现在配置了父子容器，WebConfig 对应子容器，AppConfig 对应父容器，发现事务依然失效</p>
+<ul>
+<li><p>原因：子容器扫描范围过大，把未加事务配置的 service 扫描进来</p>
+</li>
+<li><p>解法1：各扫描各的，不要图简便</p>
+</li>
+<li><p>解法2：不要用父子容器，所有 bean 放在同一容器</p>
+</li>
+</ul>
+<p><strong>6. 调用本类方法导致传播行为失效</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Service6</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">void</span> <span class="title function_">foo</span><span class="params">()</span> <span class="keyword">throws</span> FileNotFoundException &#123;</span><br><span class="line">        LoggerUtils.get().debug(<span class="string">&quot;foo&quot;</span>);</span><br><span class="line">        bar();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">void</span> <span class="title function_">bar</span><span class="params">()</span> <span class="keyword">throws</span> FileNotFoundException &#123;</span><br><span class="line">        LoggerUtils.get().debug(<span class="string">&quot;bar&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>原因：本类方法调用不经过代理，因此无法增强</p>
+</li>
+<li><p>解法1：依赖注入自己（代理）来调用</p>
+</li>
+<li><p>解法2：通过 AopContext 拿到代理对象，来调用</p>
+</li>
+<li><p>解法3：通过 CTW，LTW 实现功能增强</p>
+</li>
+</ul>
+<p>解法1</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Service6</span> &#123;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Autowired</span></span><br><span class="line">	<span class="keyword">private</span> Service6 proxy; <span class="comment">// 本质上是一种循环依赖</span></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">void</span> <span class="title function_">foo</span><span class="params">()</span> <span class="keyword">throws</span> FileNotFoundException &#123;</span><br><span class="line">        LoggerUtils.get().debug(<span class="string">&quot;foo&quot;</span>);</span><br><span class="line">		System.out.println(proxy.getClass());</span><br><span class="line">		proxy.bar();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">void</span> <span class="title function_">bar</span><span class="params">()</span> <span class="keyword">throws</span> FileNotFoundException &#123;</span><br><span class="line">        LoggerUtils.get().debug(<span class="string">&quot;bar&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>解法2，还需要在 AppConfig 上添加 <code>@EnableAspectJAutoProxy(exposeProxy = true)</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Service6</span> &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">void</span> <span class="title function_">foo</span><span class="params">()</span> <span class="keyword">throws</span> FileNotFoundException &#123;</span><br><span class="line">        LoggerUtils.get().debug(<span class="string">&quot;foo&quot;</span>);</span><br><span class="line">        ((Service6) AopContext.currentProxy()).bar();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">void</span> <span class="title function_">bar</span><span class="params">()</span> <span class="keyword">throws</span> FileNotFoundException &#123;</span><br><span class="line">        LoggerUtils.get().debug(<span class="string">&quot;bar&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>7. @Transactional 没有保证原子行为</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Service7</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">logger</span> <span class="operator">=</span> LoggerFactory.getLogger(Service7.class);</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> AccountMapper accountMapper;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Transactional(rollbackFor = Exception.class)</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">void</span> <span class="title function_">transfer</span><span class="params">(<span class="type">int</span> from, <span class="type">int</span> to, <span class="type">int</span> amount)</span> &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">fromBalance</span> <span class="operator">=</span> accountMapper.findBalanceBy(from);</span><br><span class="line">        logger.debug(<span class="string">&quot;更新前查询余额为: &#123;&#125;&quot;</span>, fromBalance);</span><br><span class="line">        <span class="keyword">if</span> (fromBalance - amount &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">            accountMapper.update(from, -<span class="number">1</span> * amount);</span><br><span class="line">            accountMapper.update(to, amount);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">findBalance</span><span class="params">(<span class="type">int</span> accountNo)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> accountMapper.findBalanceBy(accountNo);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码实际上是有 bug 的，假设 from 余额为 1000，两个线程都来转账 1000，可能会出现扣减为负数的情况</p>
+<ul>
+<li>原因：事务的原子性仅涵盖 insert、update、delete、select … for update 语句，select 方法并不阻塞</li>
+</ul>
+<img src="../../../../_resources/image-20210903120436365.png" alt="image-20210903120436365" style="zoom: 50%;" />
+
+<ul>
+<li>如上图所示，红色线程和蓝色线程的查询都发生在扣减之前，都以为自己有足够的余额做扣减</li>
+</ul>
+<p><strong>8. @Transactional 方法导致的 synchronized 失效</strong></p>
+<p>针对上面的问题，能否在方法上加 synchronized 锁来解决呢？</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Service7</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">logger</span> <span class="operator">=</span> LoggerFactory.getLogger(Service7.class);</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> AccountMapper accountMapper;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Transactional(rollbackFor = Exception.class)</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="type">void</span> <span class="title function_">transfer</span><span class="params">(<span class="type">int</span> from, <span class="type">int</span> to, <span class="type">int</span> amount)</span> &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">fromBalance</span> <span class="operator">=</span> accountMapper.findBalanceBy(from);</span><br><span class="line">        logger.debug(<span class="string">&quot;更新前查询余额为: &#123;&#125;&quot;</span>, fromBalance);</span><br><span class="line">        <span class="keyword">if</span> (fromBalance - amount &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">            accountMapper.update(from, -<span class="number">1</span> * amount);</span><br><span class="line">            accountMapper.update(to, amount);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">findBalance</span><span class="params">(<span class="type">int</span> accountNo)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> accountMapper.findBalanceBy(accountNo);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>答案是不行，原因如下：</p>
+<ul>
+<li>synchronized 保证的仅是目标方法的原子性，环绕目标方法的还有 commit 等操作，它们并未处于 sync 块内</li>
+<li>可以参考下图发现，蓝色线程的查询只要在红色线程提交之前执行，那么依然会查询到有 1000 足够余额来转账</li>
+</ul>
+<p><img src="/img/image-20210903120800185.png" alt="image-20210903120800185"></p>
+<ul>
+<li><p>解法1：synchronized 范围应扩大至代理方法调用</p>
+</li>
+<li><p>解法2：使用 select … for update 替换 select</p>
+</li>
+</ul>
+<h2 id="5-Spring-MVC-执行流程"><a href="#5-Spring-MVC-执行流程" class="headerlink" title="5. Spring MVC 执行流程"></a>5. Spring MVC 执行流程</h2><p><strong>要求</strong></p>
+<ul>
+<li>掌握 Spring MVC 的执行流程</li>
+<li>了解 Spring MVC 的重要组件的作用</li>
+</ul>
+<p><strong>概要</strong></p>
+<p>我把整个流程分成三个阶段</p>
+<ul>
+<li>准备阶段</li>
+<li>匹配阶段</li>
+<li>执行阶段</li>
+</ul>
+<p><strong>准备阶段</strong></p>
+<ol>
+<li><p>在 Web 容器第一次用到 DispatcherServlet 的时候，会创建其对象并执行 init 方法</p>
+</li>
+<li><p>init 方法内会创建 Spring Web 容器，并调用容器 refresh 方法</p>
+</li>
+<li><p>refresh 过程中会创建并初始化 SpringMVC 中的重要组件， 例如 MultipartResolver，HandlerMapping，HandlerAdapter，HandlerExceptionResolver、ViewResolver 等</p>
+</li>
+<li><p>容器初始化后，会将上一步初始化好的重要组件，赋值给 DispatcherServlet 的成员变量，留待后用</p>
+</li>
+</ol>
+<img src="../../../../_resources/image-20210903140657163.png" alt="image-20210903140657163" style="zoom: 80%;" />
+
+<p><strong>匹配阶段</strong></p>
+<ol>
+<li><p>用户发送的请求统一到达前端控制器 DispatcherServlet</p>
+</li>
+<li><p>DispatcherServlet 遍历所有 HandlerMapping ，找到与路径匹配的处理器</p>
+<p>① HandlerMapping 有多个，每个 HandlerMapping 会返回不同的处理器对象，谁先匹配，返回谁的处理器。其中能识别 @RequestMapping 的优先级最高</p>
+<p>② 对应 @RequestMapping 的处理器是 HandlerMethod，它包含了控制器对象和控制器方法信息</p>
+<p>③ 其中路径与处理器的映射关系在 HandlerMapping 初始化时就会建立好</p>
+</li>
+</ol>
+<img src="../../../../_resources/image-20210903141017502.png" alt="image-20210903141017502" style="zoom:80%;" />
+
+<ol start="3">
+<li>将 HandlerMethod 连同匹配到的拦截器，生成调用链对象 HandlerExecutionChain 返回</li>
+</ol>
+<img src="../../../../_resources/image-20210903141124911.png" alt="image-20210903141124911" style="zoom:80%;" />
+
+<ol start="4">
+<li>遍历HandlerAdapter 处理器适配器，找到能处理 HandlerMethod 的适配器对象，开始调用</li>
+</ol>
+<img src="../../../../_resources/image-20210903141204799.png" alt="image-20210903141204799" style="zoom:80%;" />
+
+<p><strong>调用阶段</strong></p>
+<ol>
+<li>执行拦截器 preHandle</li>
+</ol>
+<img src="../../../../_resources/image-20210903141445870.png" alt="image-20210903141445870" style="zoom: 67%;" />
+
+<ol start="2">
+<li><p>由 HandlerAdapter 调用 HandlerMethod</p>
+<p>① 调用前处理不同类型的参数</p>
+<p>② 调用后处理不同类型的返回值</p>
+</li>
+</ol>
+<img src="../../../../_resources/image-20210903141658199.png" alt="image-20210903141658199" style="zoom:67%;" />
+
+<ol start="3">
+<li><p>第 2 步没有异常</p>
+<p>① 返回 ModelAndView</p>
+<p>② 执行拦截器 postHandle 方法</p>
+<p>③ 解析视图，得到 View 对象，进行视图渲染</p>
+</li>
+</ol>
+<img src="../../../../_resources/image-20210903141749830.png" alt="image-20210903141749830" style="zoom:67%;" />
+
+<ol start="4">
+<li>第 2 步有异常，进入 HandlerExceptionResolver 异常处理流程</li>
+</ol>
+<img src="../../../../_resources/image-20210903141844185.png" alt="image-20210903141844185" style="zoom:67%;" />
+
+<ol start="5">
+<li><p>最后都会执行拦截器的 afterCompletion 方法</p>
+</li>
+<li><p>如果控制器方法标注了 @ResponseBody 注解，则在第 2 步，就会生成 json 结果，并标记 ModelAndView 已处理，这样就不会执行第 3 步的视图渲染</p>
+</li>
+</ol>
+<h2 id="6-Spring-注解"><a href="#6-Spring-注解" class="headerlink" title="6. Spring 注解"></a>6. Spring 注解</h2><p><strong>要求</strong></p>
+<ul>
+<li>掌握 Spring 常见注解</li>
+</ul>
+<blockquote>
+<p><em><strong>提示</strong></em></p>
+<ul>
+<li>注解的详细列表请参考：面试题-spring-注解.xmind</li>
+<li>下面列出了视频中重点提及的注解，考虑到大部分注解同学们已经比较熟悉了，仅对个别的作简要说明</li>
+</ul>
+</blockquote>
+<p><strong>事务注解</strong></p>
+<ul>
+<li>@EnableTransactionManagement，会额外加载 4 个 bean<ul>
+<li>BeanFactoryTransactionAttributeSourceAdvisor 事务切面类</li>
+<li>TransactionAttributeSource 用来解析事务属性</li>
+<li>TransactionInterceptor 事务拦截器</li>
+<li>TransactionalEventListenerFactory 事务监听器工厂</li>
+</ul>
+</li>
+<li>@Transactional</li>
+</ul>
+<p><strong>核心</strong></p>
+<ul>
+<li>@Order</li>
+</ul>
+<p><strong>切面</strong></p>
+<ul>
+<li>@EnableAspectJAutoProxy<ul>
+<li>会加载 AnnotationAwareAspectJAutoProxyCreator，它是一个 bean 后处理器，用来创建代理</li>
+<li>如果没有配置 @EnableAspectJAutoProxy，又需要用到代理（如事务）则会使用 InfrastructureAdvisorAutoProxyCreator 这个 bean 后处理器</li>
+</ul>
+</li>
+</ul>
+<p><strong>组件扫描与配置类</strong></p>
+<ul>
+<li><p>@Component</p>
+</li>
+<li><p>@Controller</p>
+</li>
+<li><p>@Service</p>
+</li>
+<li><p>@Repository</p>
+</li>
+<li><p>@ComponentScan</p>
+</li>
+<li><p>@Conditional </p>
+</li>
+<li><p>@Configuration</p>
+<ul>
+<li>配置类其实相当于一个工厂, 标注 @Bean 注解的方法相当于工厂方法</li>
+<li>@Bean 不支持方法重载, 如果有多个重载方法, 仅有一个能入选为工厂方法</li>
+<li>@Configuration 默认会为标注的类生成代理, 其目的是保证 @Bean 方法相互调用时, 仍然能保证其单例特性</li>
+<li>@Configuration 中如果含有 BeanFactory 后处理器, 则实例工厂方法会导致 MyConfig 提前创建, 造成其依赖注入失败，解决方法是改用静态工厂方法或直接为 @Bean 的方法参数依赖注入, 针对 Mapper 扫描可以改用注解方式</li>
+</ul>
+</li>
+<li><p>@Bean</p>
+</li>
+<li><p>@Import </p>
+<ul>
+<li><p>四种用法</p>
+<p>① 引入单个 bean</p>
+<p>② 引入一个配置类</p>
+<p>③ 通过 Selector 引入多个类</p>
+<p>④ 通过 beanDefinition 注册器</p>
+</li>
+<li><p>解析规则</p>
+<ul>
+<li>同一配置类中, @Import 先解析  @Bean 后解析</li>
+<li>同名定义, 默认后面解析的会覆盖前面解析的</li>
+<li>不允许覆盖的情况下, 如何能够让 MyConfig(主配置类) 的配置优先? (虽然覆盖方式能解决)</li>
+<li>采用 DeferredImportSelector，因为它最后工作, 可以简单认为先解析 @Bean, 再 Import</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>@Lazy</p>
+<ul>
+<li>加在类上，表示此类延迟实例化、初始化</li>
+<li>加在方法参数上，此参数会以代理方式注入</li>
+</ul>
+</li>
+<li><p>@PropertySource</p>
+</li>
+</ul>
+<p><strong>依赖注入</strong></p>
+<ul>
+<li>@Autowired</li>
+<li>@Qualifier</li>
+<li>@Value</li>
+</ul>
+<p><strong>mvc mapping</strong></p>
+<ul>
+<li>@RequestMapping，可以派生多个注解如 @GetMapping 等</li>
+</ul>
+<p><strong>mvc rest</strong></p>
+<ul>
+<li>@RequestBody</li>
+<li>@ResponseBody，组合 @Controller &#x3D;&gt;  @RestController</li>
+<li>@ResponseStatus</li>
+</ul>
+<p><strong>mvc 统一处理</strong></p>
+<ul>
+<li>@ControllerAdvice，组合 @ResponseBody &#x3D;&gt; @RestControllerAdvice</li>
+<li>@ExceptionHandler</li>
+</ul>
+<p><strong>mvc 参数</strong></p>
+<ul>
+<li>@PathVariable</li>
+</ul>
+<p><strong>mvc ajax</strong></p>
+<ul>
+<li>@CrossOrigin</li>
+</ul>
+<p><strong>boot auto</strong></p>
+<ul>
+<li>@SpringBootApplication</li>
+<li>@EnableAutoConfiguration</li>
+<li>@SpringBootConfiguration</li>
+</ul>
+<p><strong>boot condition</strong></p>
+<ul>
+<li>@ConditionalOnClass，classpath 下存在某个 class 时，条件才成立</li>
+<li>@ConditionalOnMissingBean，beanFactory 内不存在某个 bean 时，条件才成立</li>
+<li>@ConditionalOnProperty，配置文件中存在某个 property（键、值）时，条件才成立</li>
+</ul>
+<p><strong>boot properties</strong></p>
+<ul>
+<li>@ConfigurationProperties，会将当前 bean 的属性与配置文件中的键值进行绑定</li>
+<li>@EnableConfigurationProperties，会添加两个较为重要的 bean<ul>
+<li>ConfigurationPropertiesBindingPostProcessor，bean 后处理器，在 bean 初始化前调用下面的 binder</li>
+<li>ConfigurationPropertiesBinder，真正执行绑定操作</li>
+</ul>
+</li>
+</ul>
+<h2 id="7-SpringBoot-自动配置原理"><a href="#7-SpringBoot-自动配置原理" class="headerlink" title="7. SpringBoot 自动配置原理"></a>7. SpringBoot 自动配置原理</h2><p><strong>要求</strong></p>
+<ul>
+<li>掌握 SpringBoot 自动配置原理</li>
+</ul>
+<p><strong>自动配置原理</strong></p>
+<p>@SpringBootConfiguration 是一个组合注解，由 @ComponentScan、@EnableAutoConfiguration 和 @SpringBootConfiguration 组成</p>
+<ol>
+<li><p>@SpringBootConfiguration 与普通 @Configuration 相比，唯一区别是前者要求整个 app 中只出现一次</p>
+</li>
+<li><p>@ComponentScan</p>
+<ul>
+<li>excludeFilters - 用来在组件扫描时进行排除，也会排除自动配置类</li>
+</ul>
+</li>
+<li><p>@EnableAutoConfiguration 也是一个组合注解，由下面注解组成</p>
+<ul>
+<li>@AutoConfigurationPackage – 用来记住扫描的起始包</li>
+<li>@Import(AutoConfigurationImportSelector.class) 用来加载 <code>META-INF/spring.factories</code> 中的自动配置类</li>
+</ul>
+</li>
+</ol>
+<p><strong>为什么不使用 @Import 直接引入自动配置类</strong></p>
+<p>有两个原因：</p>
+<ol>
+<li>让主配置类和自动配置类变成了强耦合，主配置类不应该知道有哪些从属配置</li>
+<li>直接用 <code>@Import(自动配置类.class)</code>，引入的配置解析优先级较高，自动配置类的解析应该在主配置没提供时作为默认配置</li>
+</ol>
+<p>因此，采用了 <code>@Import(AutoConfigurationImportSelector.class)</code></p>
+<ul>
+<li>由 <code>AutoConfigurationImportSelector.class</code> 去读取 <code>META-INF/spring.factories</code> 中的自动配置类，实现了弱耦合。</li>
+<li>另外 <code>AutoConfigurationImportSelector.class</code> 实现了 DeferredImportSelector 接口，让自动配置的解析晚于主配置的解析</li>
+</ul>
+<h2 id="8-Spring-中的设计模式"><a href="#8-Spring-中的设计模式" class="headerlink" title="8. Spring 中的设计模式"></a>8. Spring 中的设计模式</h2><p><strong>要求</strong></p>
+<ul>
+<li>掌握 Spring 中常见的设计模式</li>
+</ul>
+<p><strong>1. Spring 中的 Singleton</strong></p>
+<p>请大家区分 singleton pattern 与 Spring 中的 singleton bean</p>
+<ul>
+<li>根据单例模式的目的 <em>Ensure a class only has one instance, and provide a global point of access to it</em> </li>
+<li>显然 Spring 中的 singleton bean 并非实现了单例模式，singleton bean 只能保证每个容器内，相同 id 的 bean 单实例</li>
+<li>当然 Spring 中也用到了单例模式，例如<ul>
+<li>org.springframework.transaction.TransactionDefinition#withDefaults</li>
+<li>org.springframework.aop.TruePointcut#INSTANCE</li>
+<li>org.springframework.aop.interceptor.ExposeInvocationInterceptor#ADVISOR</li>
+<li>org.springframework.core.annotation.AnnotationAwareOrderComparator#INSTANCE</li>
+<li>org.springframework.core.OrderComparator#INSTANCE</li>
+</ul>
+</li>
+</ul>
+<p><strong>2. Spring 中的 Builder</strong></p>
+<p>定义 <em>Separate the construction of a complex object from its representation so that the same construction process can create different representations</em> </p>
+<p>它的主要亮点有三处：</p>
+<ol>
+<li><p>较为灵活的构建产品对象</p>
+</li>
+<li><p>在不执行最后 build 方法前，产品对象都不可用</p>
+</li>
+<li><p>构建过程采用链式调用，看起来比较爽</p>
+</li>
+</ol>
+<p>Spring 中体现 Builder 模式的地方：</p>
+<ul>
+<li><p>org.springframework.beans.factory.support.BeanDefinitionBuilder</p>
+</li>
+<li><p>org.springframework.web.util.UriComponentsBuilder</p>
+</li>
+<li><p>org.springframework.http.ResponseEntity.HeadersBuilder</p>
+</li>
+<li><p>org.springframework.http.ResponseEntity.BodyBuilder</p>
+</li>
+</ul>
+<p><strong>3. Spring 中的 Factory Method</strong></p>
+<p>定义 <em>Define an interface for creating an object, but let subclasses decide which class to instantiate. Factory Method lets a class defer instantiation to subclasses</em> </p>
+<p>根据上面的定义，Spring 中的 ApplicationContext 与 BeanFactory 中的 getBean 都可以视为工厂方法，它隐藏了 bean （产品）的创建过程和具体实现</p>
+<p>Spring 中其它工厂：</p>
+<ul>
+<li><p>org.springframework.beans.factory.FactoryBean</p>
+</li>
+<li><p>@Bean 标注的静态方法及实例方法</p>
+</li>
+<li><p>ObjectFactory 及 ObjectProvider</p>
+</li>
+</ul>
+<p>前两种工厂主要封装第三方的 bean 的创建过程，后两种工厂可以推迟 bean 创建，解决循环依赖及单例注入多例等问题</p>
+<p><strong>4. Spring 中的 Adapter</strong></p>
+<p>定义 <em>Convert the interface of a class into another interface clients expect. Adapter lets classes work together that couldn’t otherwise because of incompatible interfaces</em> </p>
+<p>典型的实现有两处：</p>
+<ul>
+<li>org.springframework.web.servlet.HandlerAdapter – 因为控制器实现有各种各样，比如有<ul>
+<li>大家熟悉的 @RequestMapping 标注的控制器实现</li>
+<li>传统的基于 Controller 接口（不是 @Controller注解啊）的实现</li>
+<li>较新的基于 RouterFunction 接口的实现</li>
+<li>它们的处理方法都不一样，为了统一调用，必须适配为 HandlerAdapter 接口</li>
+</ul>
+</li>
+<li>org.springframework.beans.factory.support.DisposableBeanAdapter – 因为销毁方法多种多样，因此都要适配为 DisposableBean 来统一调用销毁方法</li>
+</ul>
+<p><strong>5. Spring 中的 Composite</strong></p>
+<p>定义 <em>Compose objects into tree structures to represent part-whole hierarchies. Composite lets clients treat individual objects and compositions of objects uniformly</em> </p>
+<p>典型实现有：</p>
+<ul>
+<li>org.springframework.web.method.support.HandlerMethodArgumentResolverComposite</li>
+<li>org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite</li>
+<li>org.springframework.web.servlet.handler.HandlerExceptionResolverComposite</li>
+<li>org.springframework.web.servlet.view.ViewResolverComposite</li>
+</ul>
+<p>composite 对象的作用是，将分散的调用集中起来，统一调用入口，它的特征是，与具体干活的实现实现同一个接口，当调用 composite 对象的接口方法时，其实是委托具体干活的实现来完成</p>
+<p><strong>6. Spring 中的 Decorator</strong></p>
+<p>定义 <em>Attach additional responsibilities to an object dynamically. Decorators provide a flexible alternative to subclassing for extending functionality</em> </p>
+<p>典型实现：</p>
+<ul>
+<li>org.springframework.web.util.ContentCachingRequestWrapper</li>
+</ul>
+<p><strong>7. Spring 中的 Proxy</strong></p>
+<p>定义 <em>Provide a surrogate or placeholder for another object to control access to it</em> </p>
+<p>装饰器模式注重的是功能增强，避免子类继承方式进行功能扩展，而代理模式更注重控制目标的访问</p>
+<p>典型实现：</p>
+<ul>
+<li>org.springframework.aop.framework.JdkDynamicAopProxy</li>
+<li>org.springframework.aop.framework.ObjenesisCglibAopProxy</li>
+</ul>
+<p><strong>8. Spring 中的 Chain of Responsibility</strong></p>
+<p>定义 <em>Avoid coupling the sender of a request to its receiver by giving more than one object a chance to handle the request. Chain the receiving objects and pass the request along the chain until an object handles it</em> </p>
+<p>典型实现：</p>
+<ul>
+<li>org.springframework.web.servlet.HandlerInterceptor</li>
+</ul>
+<p><strong>9. Spring 中的 Observer</strong></p>
+<p>定义 <em>Define a one-to-many dependency between objects so that when one object changes state, all its dependents are notified and updated automatically</em> </p>
+<p>典型实现：</p>
+<ul>
+<li>org.springframework.context.ApplicationListener</li>
+<li>org.springframework.context.event.ApplicationEventMulticaster</li>
+<li>org.springframework.context.ApplicationEvent</li>
+</ul>
+<p><strong>10. Spring 中的 Strategy</strong></p>
+<p>定义 <em>Define a family of algorithms, encapsulate each one, and make them interchangeable. Strategy lets the algorithm vary independently from clients that use it</em> </p>
+<p>典型实现：</p>
+<ul>
+<li>org.springframework.beans.factory.support.InstantiationStrategy</li>
+<li>org.springframework.core.annotation.MergedAnnotations.SearchStrategy</li>
+<li>org.springframework.boot.autoconfigure.condition.SearchStrategy</li>
+</ul>
+<p><strong>11. Spring 中的 Template Method</strong></p>
+<p>定义 <em>Define the skeleton of an algorithm in an operation, deferring some steps to subclasses. Template Method lets subclasses redefine certain steps of an algorithm without changing the algorithm’s structure</em> </p>
+<p>典型实现：</p>
+<ul>
+<li>大部分以 Template 命名的类，如 JdbcTemplate，TransactionTemplate</li>
+<li>很多以 Abstract 命名的类，如 AbstractApplicationContext</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2021/09/15/%E6%A1%86%E6%9E%B6%E7%AF%87%E8%AE%B2%E4%B9%89/">https://yhao521.github.io/2021/09/15/%E6%A1%86%E6%9E%B6%E7%AF%87%E8%AE%B2%E4%B9%89/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/java-programming/">java/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2021/11/21/%E6%96%B0%E5%BB%BA%E6%96%87%E4%BB%B6/" title="新建文件"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">新建文件</div></div><div class="info-2"><div class="info-item-1">便捷铁路Convenient rail 开源仓库地址：https://github.com/josStorer/RWKV-Runner下载地址（RWKV目录）：https://pan.baidu.com/s/1wchIUHgne3gncIiLIeKBEQ?pwd=1111 RWKV官方仓库：https://github.com/BlinkDL/RWKV-LM </div></div></div></a><a class="pagination-related" href="/2021/09/15/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AF%87%E8%AE%B2%E4%B9%89/" title="虚拟机篇讲义"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">虚拟机篇讲义</div></div><div class="info-2"><div class="info-item-1">虚拟机篇1. JVM 内存结构要求  掌握 JVM 内存结构划分 尤其要知道方法区、永久代、元空间的关系  结合一段 java 代码的执行理解内存划分   执行 javac 命令编译源代码为字节码 执行 java 命令 创建 JVM，调用类加载子系统加载 class，将类的信息存入方法区 创建 main 线程，使用的内存区域是 JVM 虚拟机栈，开始执行 main 方法代码 如果遇到了未见过的类，会继续触发类加载过程，同样会存入方法区 需要创建对象，会使用堆内存来存储对象 不再使用的对象，会由垃圾回收器在内存不足时回收其内存 调用方法时，方法内的局部变量、方法参数所使用的是  JVM 虚拟机栈中的栈帧内存 调用方法时，先要到方法区获得到该方法的字节码指令，由解释器将字节码指令解释为机器码执行 调用方法时，会将要执行的指令行号读到程序计数器，这样当发生了线程切换，恢复时就可以从中断的位置继续 对于非 java 实现的方法调用，使用内存称为本地方法栈（见说明） 对于热点方法调用，或者频繁的循环代码，由 JIT 即时编译器将这些代码编译成机器码缓存，提高执行性能    说明  加粗字体...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/springboot%E9%9B%86%E6%88%90jedis/" title="springboot集成jedis"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">springboot集成jedis</div></div><div class="info-2"><div class="info-item-1"> title: Spring Boot集成Jedis运行问题lang: en-USdate: 2023-09-03 20:17:08category:  开发语言 java springtag: springauthor:   集成运行问题No qualifying bean of type ‘org.springframework.data.redis.connection.RedisC 原因：我们在pom.xml中引入了spring-boot-starter-data-redis却没有引入redis.client;或在打包过程中有其他依赖冲突等问题，造成打包后不存在jedis包 解决方式：增加redis client依赖；版本有重复则需要明确版本，并唯一。 123456&lt;dependency&gt;    &lt;groupId&gt;redis.clients&lt;/groupId&gt;    &lt;artifactId&gt;jedis&lt;/artifactId&gt;    &lt;version&gt;2.10.2&lt;/version&gt;&lt...</div></div></div></a><a class="pagination-related" href="/2024/04/10/%E5%9C%A8Vue%E4%B8%AD%E6%80%8E%E4%B9%88%E4%BD%BF%E7%94%A8cookie%20%E4%B9%8B%20vue-cookies/" title="在Vue中怎么使用cookie 之 vue-cookies"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-10</div><div class="info-item-2">在Vue中怎么使用cookie 之 vue-cookies</div></div><div class="info-2"><div class="info-item-1">cookie 在工作中比较常用, 可以自行封装一些 添加&#x2F;删除&#x2F;获取cookie的方法, 可参考这个在Vue中有个很好用的插件 vue-cookiesgithub地址：https://github.com/cmp-cc/vue-cookies 我们具体来看下怎么使用这个插件的使用 第一步：安装vue-cookie1npm install vue-cookie --save   (a). 默认值设置 1$cookies.config(expireTimes[,path[, domain[, secure[, sameSite]]])  默认: expireTimes &#x3D; 1d, path &#x3D; ‘&#x2F;‘, domain &#x3D; ‘’, secure &#x3D; ‘’, sameSite &#x3D; ‘’  expireTimes: 有效期 默认1d path: cookie 存放的路径 默认 ‘&#x2F;‘ domain: cookie所在的域，默认为请求地址 secure: cookie只能用https协议发送给服务器 s...</div></div></div></a><a class="pagination-related" href="/2023/09/04/nexus3%E6%90%AD%E5%BB%BA%E7%A7%81%E6%9C%89Docker%E4%BB%93%E5%BA%93/" title="nexus3搭建私有Docker仓库"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">nexus3搭建私有Docker仓库</div></div><div class="info-2"><div class="info-item-1"> title: nexus3搭建私有Docker仓库date: 2023-09-03 20:17:08category:  nexustag: nexusauthor:   nexus3搭建私有Docker仓库Nexus3：123456789101112version: &quot;3&quot;services:  nexus:    image: sonatype/nexus3:3.33.0    volumes:      - /home/nexus-data:/nexus-data    restart: always    ports:      - &quot;8081:8081&quot;      # 这两个个端口给docker私有仓库使用，在创建仓库时指定，并且在Dockers中需要添加配置 &quot;insecure-registries&quot;: [&quot;172.18.0.1:8082&quot;]      - &quot;5000:5000&quot;      - &quot;8082:8082&quot;  启动Nexus31docker...</div></div></div></a><a class="pagination-related" href="/2026/05/15/Vite%E4%BC%98%E5%8C%96%E6%96%B9%E6%A1%88%EF%BC%9A%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8Vite%E7%BC%A9%E5%B0%8F%E6%89%93%E5%8C%85%E4%BD%93%E7%A7%AF/" title="Vite优化方案：如何使用Vite缩小打包体积"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-15</div><div class="info-item-2">Vite优化方案：如何使用Vite缩小打包体积</div></div><div class="info-2"><div class="info-item-1">我正在参加「掘金·启航计划」  说到前端性能优化🚀，通过我个人的感觉总体的来说优化的本质就是优化文件的体积，体积小了加载就快了，当然前端性能不光是在体积方面，在代码层面需要去优化，本篇文章主要讲述的是Vite打包优化，下面就跟大家分享一下我总结的一些有关Vite打包的优化方案吧！   下面给大家分享一下我的一些方案，如果文章中存在哪些问题还请指正  分析文件依赖其实也可以使用浏览器自带的lighthouse进行网站检测 其实优化的主要难点还是从哪里开始去优化，如果不清楚自己的项目问题出现在哪里，就显得比较盲目，不知道优化哪里，那在优化之前我们先分析一下我文件依赖   安装插件 rollup-plugin-visualizer  123plugins:[     visualizer(&#123; open: true &#125;) // 自动开启分析页面]   运行打包命令，会自动弹出效果如下    通过该关系图得出依赖之间的关系，与文件大小，可以指定的去优化  指定文件按需加载 比如下面的echarts,这样就不会将整个包加载进来，因为vite自动开启tree-shakin...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E6%97%B6%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6%E7%A9%BA%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6/" title="时间复杂度空间复杂度"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">时间复杂度空间复杂度</div></div><div class="info-2"><div class="info-item-1"> title: 时间复杂度空间复杂度date: 2023-09-03 20:17:08category:  开发语言tag: 开发语言author:   时间复杂度&#x2F;空间复杂度原文链接：https://blog.csdn.net/xueguchen/article/details/108449337 1.名词解析O(x):表示算法时空（时间&#x2F;空间）的复杂度O括号里的函数 x 表示：某个算法的耗时&#x2F;耗空间与数据增长量之间的关系。其中O(n),O(n^2)等的 n 表示输入数据的量 2.O(1)O(1)，即是最低的时空复杂度。即，耗时&#x2F;耗空间与输入数据大小无关，无论输入数据增大多少倍，耗时&#x2F;耗空间都不变例：哈希算法，无论数据规模多大，都可以在一次计算后找到目标（不考虑冲突的话） 3.O(n)时间复杂度为O(n)，就代表数据量增大几倍，耗时也增大几倍例：遍历算法，找数组里最大或最小的值，需要把数组的 n 元素遍历一次，操作 n 次 4.O(n^2)时间复杂度O(n^2)，就代表数据量增大n倍时，耗时增大n的平方倍例：冒泡排序，双重for...</div></div></div></a><a class="pagination-related" href="/2023/09/04/mac%E4%B8%8D%E8%83%BD%E8%AE%BF%E9%97%AEhttps%E7%BD%91%E9%A1%B5/" title="mac不能访问https网页"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">mac不能访问https网页</div></div><div class="info-2"><div class="info-item-1"> title: mac不能访问https网页date: 2023-09-03 20:17:08category:  mactag: macauthor:   mac不能访问https网页mac的Chrome访问https页面显示ERR_CERT_INVALID，且无法跳过继续访问 问题 Chrome访问https页面显示ERR_CERT_INVALID，以往版本可以选择跳过，继续访问，但是新版本Chrome不允许继续，且提示：您的连接不是私密连接攻击者可能会试图从 XX.XX.XX.XX 窃取您的信息（例如：密码、通讯内容或信用卡信息）。了解详情 ，NET::ERR_CERT_INVALID，将您访问的部分网页的网址、有限的系统信息以及部分网页内容发送给 Google，以帮助我们提升 Chrome 的安全性。隐私权政策，如下图所示：  解决证书不受信任问题 问题现象    解决方案从系统的 启动台 中找到 钥匙串 应用：   然后双击打开，找到对应的证书，然后按照下图操作：   在上图中，选择 始终信任 之后，点击左上角的关闭按钮关闭页面，然后就会出现下图中的密码输入框：  点击...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%A1%86%E6%9E%B6%E7%AF%87"><span class="toc-number">1.</span> <span class="toc-text">框架篇</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-Spring-refresh-%E6%B5%81%E7%A8%8B"><span class="toc-number">1.1.</span> <span class="toc-text">1. Spring refresh 流程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-Spring-bean-%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="toc-number">1.2.</span> <span class="toc-text">2. Spring bean 生命周期</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-Spring-bean-%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96"><span class="toc-number">1.3.</span> <span class="toc-text">3. Spring bean 循环依赖</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3-set-%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E7%9A%84%E5%8E%9F%E7%90%86"><span class="toc-number">1.3.1.</span> <span class="toc-text">解决 set 循环依赖的原理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-Spring-%E4%BA%8B%E5%8A%A1%E5%A4%B1%E6%95%88"><span class="toc-number">1.4.</span> <span class="toc-text">4. Spring 事务失效</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-Spring-MVC-%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="toc-number">1.5.</span> <span class="toc-text">5. Spring MVC 执行流程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-Spring-%E6%B3%A8%E8%A7%A3"><span class="toc-number">1.6.</span> <span class="toc-text">6. Spring 注解</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-SpringBoot-%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E5%8E%9F%E7%90%86"><span class="toc-number">1.7.</span> <span class="toc-text">7. SpringBoot 自动配置原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-Spring-%E4%B8%AD%E7%9A%84%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F"><span class="toc-number">1.8.</span> <span class="toc-text">8. Spring 中的设计模式</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

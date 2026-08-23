@@ -1,0 +1,265 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>MySQL 自动清理binlog日志的方法 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="title: MySQL 自动清理binlog日志的方法date: 2023-09-04 17:49:38permalink: &#x2F;pages&#x2F;94ee02&#x2F;category:  数据库 doc_mysqltag: doc_mysqlauthor:   MySQL 自动清理binlog日志的方法说明： 开启MySQL binlog日志的服务器，如果不设置自动清理日志，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL 自动清理binlog日志的方法">
+<meta property="og:url" content="https://yhao521.github.io/2023/09/04/MySQL%20%E8%87%AA%E5%8A%A8%E6%B8%85%E7%90%86binlog%E6%97%A5%E5%BF%97%E7%9A%84%E6%96%B9%E6%B3%95/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="title: MySQL 自动清理binlog日志的方法date: 2023-09-04 17:49:38permalink: &#x2F;pages&#x2F;94ee02&#x2F;category:  数据库 doc_mysqltag: doc_mysqlauthor:   MySQL 自动清理binlog日志的方法说明： 开启MySQL binlog日志的服务器，如果不设置自动清理日志，">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2023-09-04T03:18:09.000Z">
+<meta property="article:modified_time" content="2023-09-04T03:18:27.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="php&#x2F;programming">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "MySQL 自动清理binlog日志的方法",
+  "url": "https://yhao521.github.io/2023/09/04/MySQL%20%E8%87%AA%E5%8A%A8%E6%B8%85%E7%90%86binlog%E6%97%A5%E5%BF%97%E7%9A%84%E6%96%B9%E6%B3%95/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2023-09-04T03:18:09.000Z",
+  "dateModified": "2023-09-04T03:18:27.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2023/09/04/MySQL%20%E8%87%AA%E5%8A%A8%E6%B8%85%E7%90%86binlog%E6%97%A5%E5%BF%97%E7%9A%84%E6%96%B9%E6%B3%95/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'MySQL 自动清理binlog日志的方法',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">MySQL 自动清理binlog日志的方法</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">MySQL 自动清理binlog日志的方法</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-09-04T03:18:09.000Z" title="发表于 2023-09-04 11:18:09">2023-09-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-09-04T03:18:27.000Z" title="更新于 2023-09-04 11:18:27">2023-09-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><hr>
+<p>title: MySQL 自动清理binlog日志的方法<br>date: 2023-09-04 17:49:38<br>permalink: &#x2F;pages&#x2F;94ee02&#x2F;<br>category:</p>
+<ul>
+<li>数据库</li>
+<li>doc_mysql<br>tag:</li>
+<li>doc_mysql<br>author:</li>
+</ul>
+<hr>
+<h1 id="MySQL-自动清理binlog日志的方法"><a href="#MySQL-自动清理binlog日志的方法" class="headerlink" title="MySQL 自动清理binlog日志的方法"></a>MySQL 自动清理binlog日志的方法</h1><p>说明：</p>
+<p>开启MySQL binlog日志的服务器，如果不设置自动清理日志，默认binlog日志一直保留着，时间一长，服务器磁盘空间被binlog日志占满，导致MySQL数据库出错。</p>
+<p>使用下面方法可以安全清理binlog日志</p>
+<p><strong>一、没有主从同步的情况下清理日志</strong></p>
+<p>mysql -uroot -p123456 -e ‘PURGE MASTER LOGS BEFORE DATE_SUB( NOW( ),INTERVAL 5 DAY)’;</p>
+<p>#mysql 定时清理5天前的binlog</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mysql -u root -p <span class="comment">#进入mysql 控制台</span></span><br><span class="line"></span><br><span class="line">reset master; <span class="comment">#重置binlog</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>二、MySQL主从同步下安全清理binlog日志</strong></p>
+<p>1、</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql -u root -p <span class="comment">#进入从服务器mysql控制台</span></span><br><span class="line">show slave statusG; <span class="comment">#检查从服务器正在读取哪个日志，有多个从服务器，选择时间最早的一个做为目标日志。</span></span><br></pre></td></tr></table></figure>
+
+<p>2、进入主服务器mysql控制台</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">show master <span class="built_in">log</span>; <span class="comment">#获得主服务器上的一系列日志</span></span><br><span class="line">PURGE MASTER LOGS TO <span class="string">&#x27;binlog.000058&#x27;</span>; <span class="comment">#删除binlog.000005之前的，不包括binlog.000058</span></span><br><span class="line">PURGE MASTER LOGS BEFORE <span class="string">&#x27;2016-06-22 13:00:00&#x27;</span>; <span class="comment">#清除2016-06-22 13:00:00前binlog日志</span></span><br><span class="line">PURGE MASTER LOGS BEFORE DATE_SUB( NOW( ), INTERVAL 3 DAY); <span class="comment">#清除3天前binlog日志</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>三、设置自动清理MySQL binlog日志</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">vi /etc/my.cnf <span class="comment">#编辑配置</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">expire_logs_days = 15 <span class="comment">#自动删除15天前的日志。默认值为0，表示从不删除。</span></span><br><span class="line">log-bin=mysql-bin <span class="comment">#注释掉之后，会关闭binlog日志</span></span><br><span class="line">binlog_format=mixed <span class="comment">#注释掉之后，会关闭binlog日志</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">:wq! <span class="comment">#保存退出</span></span><br></pre></td></tr></table></figure>
+
+<p>扩展阅读：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; <span class="built_in">help</span> purge;</span><br><span class="line"></span><br><span class="line">Name: <span class="string">&#x27;PURGE BINARY LOGS&#x27;</span></span><br><span class="line"></span><br><span class="line">Description:</span><br><span class="line"></span><br><span class="line">Syntax:</span><br><span class="line"></span><br><span class="line">PURGE &#123; BINARY | MASTER &#125; LOGS</span><br><span class="line"></span><br><span class="line">&#123; TO <span class="string">&#x27;log_name&#x27;</span> | BEFORE datetime_expr &#125;</span><br><span class="line"></span><br><span class="line">The binary <span class="built_in">log</span> is a <span class="built_in">set</span> of files that contain information about data</span><br><span class="line"></span><br><span class="line">modifications made by the MySQL server. The <span class="built_in">log</span> consists of a <span class="built_in">set</span> of</span><br><span class="line"></span><br><span class="line">binary <span class="built_in">log</span> files, plus an index file (see</span><br><span class="line"></span><br><span class="line">http://dev.mysql.com/doc/refman/5.5/en/binary-log.html).</span><br><span class="line"></span><br><span class="line">The PURGE BINARY LOGS statement deletes all the binary <span class="built_in">log</span> files listed</span><br><span class="line"></span><br><span class="line"><span class="keyword">in</span> the <span class="built_in">log</span> index file prior to the specified <span class="built_in">log</span> file name or <span class="built_in">date</span>.</span><br><span class="line"></span><br><span class="line">BINARY and MASTER are synonyms. Deleted <span class="built_in">log</span> files also are removed from</span><br><span class="line"></span><br><span class="line">the list recorded <span class="keyword">in</span> the index file, so that the given <span class="built_in">log</span> file becomes</span><br><span class="line"></span><br><span class="line">the first <span class="keyword">in</span> the list.</span><br><span class="line"></span><br><span class="line">This statement has no effect <span class="keyword">if</span> the server was not started with the</span><br><span class="line"></span><br><span class="line">--log-bin option to <span class="built_in">enable</span> binary logging.</span><br><span class="line"></span><br><span class="line">URL: http://dev.mysql.com/doc/refman/5.5/en/purge-binary-logs.html</span><br><span class="line"></span><br><span class="line">Examples:</span><br><span class="line"></span><br><span class="line">PURGE BINARY LOGS TO <span class="string">&#x27;mysql-bin.010&#x27;</span>;</span><br><span class="line"></span><br><span class="line">PURGE BINARY LOGS BEFORE <span class="string">&#x27;2008-04-02 22:46:26&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>下面是其它网友给出的方法，大家可以参考一下</p>
+<p>MYSQL主从复制(replication)采用 RBR 模式后，binlog的格式为”ROW”，能解决很多原先出现的主键重复问题。<br>在一个繁忙的master db server上，binlog日志文件增长速度很快，如果不定时清除，硬盘空间很快就会被充满。<br>设置自动清理mysql binlog日志，配置my.cnf：</p>
+<p>expire_logs_days &#x3D; 10</p>
+<p>在运行时修改：</p>
+<p>show binary logs;<br>show variables like ‘%log%’;<br>set global expire_logs_days &#x3D; 10;</p>
+<p>清除之前可以采用相应的备份策略。</p>
+<p>手动删除10天前的MySQL binlog日志：</p>
+<p>PURGE MASTER LOGS BEFORE DATE_SUB(CURRENT_DATE, INTERVAL 10 DAY);<br>show master logs;</p>
+<p>MASTER和BINARY是同义词。</p>
+<p>一般情况下，推荐使用MIXED binlog的复制。<a target="_blank" rel="noopener" href="http://dev.mysql.com/doc/refman/5.1/en/open-bugs-general.html%E4%B8%AD%E7%9A%84%E8%AF%B4%E6%98%8E:Replication">http://dev.mysql.com/doc/refman/5.1/en/open-bugs-general.html中的说明:Replication</a> uses query-level logging: The master writes the executed queries to the binary log. This is a very fast, compact, and efficient logging method that works perfectly in most cases.</p>
+<p><strong>附：关于MYSQL复制的几种模式</strong></p>
+<p>从 MySQL 5.1.12 开始，可以用以下三种模式来实现：<br>? 基于SQL语句的复制(statement-based replication, SBR)，<br>? 基于行的复制(row-based replication, RBR)，<br>? 混合模式复制(mixed-based replication, MBR)。<br>相应地，binlog的格式也有三种：STATEMENT，ROW，MIXED。 MBR 模式中，SBR 模式是默认的。</p>
+<p>在运行时可以动态改动 binlog的格式，除了以下几种情况：<br>. 存储流程或者触发器中间<br>. 启用了NDB<br>. 当前会话试用 RBR 模式，并且已打开了临时表</p>
+<p>如果binlog采用了 MIXED 模式，那么在以下几种情况下会自动将binlog的模式由 SBR 模式改成 RBR 模式。<br>. 当DML语句更新一个NDB表时<br>. 当函数中包含 UUID() 时<br>. 2个及以上包含 AUTO_INCREMENT 字段的表被更新时<br>. 行任何 INSERT DELAYED 语句时<br>. 用 UDF 时<br>. 视图中必须要求运用 RBR 时，例如建立视图是运用了 UUID() 函数</p>
+<p>设定主从复制模式：<br>log-bin&#x3D;mysql-bin<br>#binlog_format&#x3D;”STATEMENT”<br>#binlog_format&#x3D;”ROW”<br>binlog_format&#x3D;”MIXED”</p>
+<p>也可以在运行时动态修改binlog的格式。例如<br>mysql&gt; SET SESSION binlog_format &#x3D; ‘STATEMENT’;<br>mysql&gt; SET SESSION binlog_format &#x3D; ‘ROW’;<br>mysql&gt; SET SESSION binlog_format &#x3D; ‘MIXED’;<br>mysql&gt; SET GLOBAL binlog_format &#x3D; ‘STATEMENT’;<br>mysql&gt; SET GLOBAL binlog_format &#x3D; ‘ROW’;<br>mysql&gt; SET GLOBAL binlog_format &#x3D; ‘MIXED’;</p>
+<p><strong>两种模式各自的优缺点：</strong></p>
+<p>SBR 的优点：<br>历史悠久，技能成熟<br>binlog文件较小<br>binlog中包含了所有数据库修改信息，可以据此来审核数据库的安全等情况<br>binlog可以用于实时的还原，而不仅仅用于复制<br>主从版本可以不一样，从服务器版本可以比主服务器版本高<br>SBR 的缺点：<br>不是所有的UPDATE语句都能被复制，尤其是包含不确定操作的时候。<br>调用具有不确定因素的 UDF 时复制也可能出疑问<br>运用以下函数的语句也不能被复制：* LOAD_FILE() * UUID() * USER() * FOUND_ROWS() * SYSDATE() (除非启动时启用了 ?sysdate-is-now 选项)<br>INSERT … SELECT 会产生比 RBR 更多的行级锁<br>复制须要执行 全表扫描(WHERE 语句中没有运用到索引)的 UPDATE 时，须要比 RBR 请求更多的行级锁<br>对于有 AUTO_INCREMENT 字段的 InnoDB表而言，INSERT 语句会阻塞其他 INSERT 语句<br>对于一些复杂的语句，在从服务器上的耗资源情况会更严重，而 RBR 模式下，只会对那个发生变化的记录产生影响<br>存储函数(不是存储流程 )在被调用的同时也会执行一次 NOW() 函数，这个可以说是坏事也可能是好事<br>确定了的 UDF 也须要在从服务器上执行<br>数据表必须几乎和主服务器保持一致才行，否则可能会导致复制出错<br>执行复杂语句如果出错的话，会消耗更多资源</p>
+<p><strong>RBR 的优点：</strong><br>任何情况都可以被复制，这对复制来说是最安全可靠的<br>和其他大多数数据库系统的复制技能一样<br>多数情况下，从服务器上的表如果有主键的话，复制就会快了很多<br>复制以下几种语句时的行锁更少：* INSERT … SELECT * 包含 AUTO<em>INCREMENT 字段的 INSERT * 没有附带条件或者并没有修改很多记录的 UPDATE 或 DELETE 语句<br>执行 INSERT，UPDATE，DELETE 语句时锁更少<br>从服务器上采用多线程来执行复制成为可能<br>RBR 的缺点：<br>binlog 大了很多<br>复杂的回滚时 binlog 中会包含大量的数据<br>主服务器上执行 UPDATE 语句时，所有发生变化的记录都会写到 binlog 中，而 SBR 只会写一次，这会导致频繁发生 binlog 的并发写疑问<br>UDF 产生的大 BLOB 值会导致复制变慢<br>不能从 binlog 中看到都复制了写什么语句(加密过的)<br>当在非事务表上执行一段堆积的SQL语句时，最好采用 SBR 模式，否则很容易导致主从服务器的数据不一致情况发生<br>另外，针对系统库 mysql 里面的表发生变化时的处理准则如下：<br>如果是采用 INSERT，UPDATE，DELETE 直接操作表的情况，则日志格式根据 binlog_format 的设定而记录<br>如果是采用 GRANT，REVOKE，SET PASSWORD 等管理语句来做的话，那么无论如何 都采用 SBR 模式记录。<br>注：采用 RBR 模式后，能处理很多原先出现的主键重复问题。实例:<br>对于insert into db_allot_ids select * from db</em>allot_ids 这个语句:<br>在BINLOG_FORMAT&#x3D;STATEMENT 模式下:<br>BINLOG日志信息为:<br>—————————————?<br>BEGIN<br>&#x2F;<em>!<em>&#x2F;;<br># at 173<br>#090612 16:05:42 server id 1 end_log_pos 288 Query thread_id&#x3D;4 exec_time&#x3D;0 error_code&#x3D;0<br>SET TIMESTAMP&#x3D;1244793942&#x2F;</em>!_&#x2F;;<br>insert into db_allot_ids select _ from db</em>allot_ids<br>&#x2F;*!_&#x2F;;<br>—————————————?</p>
+<p>在BINLOG<em>FORMAT&#x3D;ROW 模式下:<br>BINLOG日志信息为:<br>—————————————?<br>BINLOG ‘<br>hA0yShMBAAAAMwAAAOAAAAAAAA8AAAAAAAAAA1NOUwAMZGJfYWxsb3RfaWRzAAIBAwAA<br>hA0yShcBAAAANQAAABUBAAAQAA8AAAAAAAEAAv&#x2F;8AQEAAAD8AQEAAAD8AQEAAAD8AQEAAAA&#x3D;<br>‘&#x2F;</em>!_&#x2F;;<br>—————————————?</p>
+<p>清理日志步骤1.查找日志档案<br>mysql&gt; show binary logs;<br>+—————-+———–+<br>| Log_name | File_size |<br>+—————-+———–+<br>| ablelee.000001 | 150462942 |<br>| ablelee.000002 | 125 |<br>| ablelee.000003 | 106 |<br>+—————-+———–+ 2.删除bin-log(删除ablelee.000003之前的而没有包含ablelee.000003)<br>mysql&gt; purge binary logs to ‘ablelee.000003’;<br>Query OK, 0 rows affected (0.16 sec)</p>
+<p>\3. 查询结果(现在只有一条记录了.)</p>
+<p>mysql&gt; show binlog eventsG *<strong>*******</strong>****<strong>*******</strong> 1. row *<strong>*******</strong>****<strong>*******</strong><br>Log_name: ablelee.000003<br>Pos: 4<br>Event_type: Format_desc<br>Server_id: 1<br>End_log_pos: 106<br>Info: Server ver: 5.1.26-rc-log, Binlog ver: 4<br>1 row in set (0.01 sec)<br>(ablelee.000001和ablelee.000002已被删除)<br>mysql&gt; show binary logs;<br>+—————-+———–+<br>| Log_name | File_size |<br>+—————-+———–+<br>| ablelee.000003 | 106 |<br>+—————-+———–+<br>1 row in set (0.00 sec)</p>
+<p>(删除的其它格式运用!)<br>　 PURGE {MASTER | BINARY} LOGS TO ‘log_name’<br>　　PURGE {MASTER | BINARY} LOGS BEFORE ‘date’<br>　　用于删除列于在指定的日志或日期之前的日志索引中的所有二进制日志。这些日志也会从记录在日志索引文件中的清单中被删除，这样被给定的日志成为第一个。<br>　　例如：<br>　　PURGE MASTER LOGS TO ‘mysql-bin.010’;<br>　　PURGE MASTER LOGS BEFORE ‘2008-06-22 13:00:00’;<br>清除3天前的 binlog<br>PURGE MASTER LOGS BEFORE DATE_SUB( NOW( ), INTERVAL 3 DAY);<br>　　BEFORE变量的date自变量可以为’YYYY-MM-DD hh:mm:ss’格式。MASTER和BINARY是同义词。<br>　　如果您有一个活性的从属服务器，该服务器当前正在读取您正在试图删除的日志之一，则本语句不会起作用，而是会失败，并伴随一个错误。不过，如果从属服务器是休止的，并且您碰巧清理了其想要读取的日志之一，则从属服务器启动后不能复制。当从属服务器正在复制时，本语句可以安全运行。您不需要停止它们。<br>　　要清理日志，需按照以下步骤：<br>　　1. 在每个从属服务器上，使用SHOW SLAVE STATUS来检查它正在读取哪个日志。<br>　　2. 使用SHOW MASTER LOGS获得主服务器上的一系列日志。<br>　　3. 在所有的从属服务器中判定最早的日志。这个是目标日志。如果所有的从属服务器是更新的，这是清单上的最后一个日志。</p>
+<p>　　4. 制作您将要删除的所有日志的备份。（这个步骤是自选的，但是建议采用。）</p>
+<p>　　5. 清理所有的日志，但是不包括目标日志</p>
+<p><a target="_blank" rel="noopener" href="http://www.gimoo.net/t/1810/5bb968a188bb0.html">mysql出现ERROR 1819 (HY000)的解决方法</a><br>ERROR1819(HY000):Yourpassworddoesnotsatisfythecurrentpolicyrequirements，出现这个问题怎么办？不用着急，下面给出答案。为了加强安全性，MySQL5.7为root用户随机生成了</p>
+<p><a target="_blank" rel="noopener" href="http://www.gimoo.net/t/1810/5bb95a91ec618.html">php mysql访问数据库的步骤详解</a><br>php访问mysql数据库的步骤官方说5.5开始就废弃mysql_query()这块东西很多，当然常用的就几个还是看手册吧。这里简单记录一下。在我失忆之后可以找回一</p>
+<p><a target="_blank" rel="noopener" href="http://www.gimoo.net/t/1810/5bb95569b95f3.html">MYSQL GROUP BY用法详解</a><br>背景介绍最近在设计数据库的时候因为开始考虑不周，所以产生了大量的重复数据。现在需要把这些重复的数据删除掉，使用到的语句就是GroupBy来完成</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2023/09/04/MySQL%20%E8%87%AA%E5%8A%A8%E6%B8%85%E7%90%86binlog%E6%97%A5%E5%BF%97%E7%9A%84%E6%96%B9%E6%B3%95/">https://yhao521.github.io/2023/09/04/MySQL%20%E8%87%AA%E5%8A%A8%E6%B8%85%E7%90%86binlog%E6%97%A5%E5%BF%97%E7%9A%84%E6%96%B9%E6%B3%95/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a><a class="post-meta__tags" href="/tags/php-programming/">php/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2023/09/04/MySQL%E4%BA%8B%E5%8A%A1/" title="MySQL事务"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">MySQL事务</div></div><div class="info-2"><div class="info-item-1"> title: MySQL事务date: 2023-09-04 17:49:38permalink: &#x2F;pages&#x2F;56ff8e&#x2F;category:  数据库 doc_mysqltag: doc_mysqlauthor:   MySQL事务1、定义：Transaction Control Language 事务控制语言　　　　一个或一组sql语句组成一个执行单元，这个执行单元要么全部执行，要么全部不执行。 　　　在mysql中用的最多的存储引擎有：innodb，myisam,memory等，但只有使用了Innodb数据库引擎的数据库或表才支持事务 2、事务的特性：ACID原子性 (Atomicity)：事务是最小单位，一个事务不可再分割。事务作为一个整体被执行，包含在其中的对数据库的操作要么全部被执行，要么都不执行。 一致性 (Consistency)：事务应确保数据库的状态从一个一致状态转变为另一个一致状态 隔离性 (Isolation)：多个事务并发执行时，一个事务的执行不应影响其他事务的执行。 持久性 (Durability)：一 个事务一旦提...</div></div></div></a><a class="pagination-related" href="/2023/09/04/Miniconda3%E5%AE%89%E8%A3%85/" title="Miniconda3安装"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Miniconda3安装</div></div><div class="info-2"><div class="info-item-1"> title: Miniconda3安装date: 2023-09-03 20:17:08category:  mactag: macauthor:   Quick command line installThese quick command line instructions will get you set up quickly with the latest Miniconda installer. For graphical installer (.exe and .pkg) and hash checking instructions, see Installing Miniconda. These four commands quickly and quietly install the latest M1 macOS version of the installer and then clean up after themselves. To install a different version or architecture of Miniconda for ...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/JVM%20%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E5%B7%A5%E5%85%B7/" title="JVM 常见问题排查工具"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">JVM 常见问题排查工具</div></div><div class="info-2"><div class="info-item-1"> title: JVM 常见问题排查工具date: 2023-09-03 20:17:08category: tag: author:  一. 背景 在使用 Java开发的过程中， 可能会碰到 线程卡死，cpu高耗， 内存泄漏OOM等问题， 因此需要一些工具和方法排查相关问题。 二. JDK 自带工具使用介绍 常用的 JDK 自带的工具主要包括 jps， jstat, jstack, jinfo 等。 1. jps主要用来打印主机上运行 Java 进程号， 和 ps -ef |grep xxx 效果是一样的 。  2. jstat一般用来监控 JVM 的 gc情况， class加载情况 。 使用用法 ： (1) 监控 JVM GC 情况 ： jstat -gcutil [pid] 1000 10 监控指定 Java 进程的 gc概况, 每 1000ms 打印一次，一共打印 10次 。  如果需要监控 gc 更详细的信息， 可以将 -gcutil 选项替换为其他参数 ：  -gc -gccapacity -gccause -gcmetacapacity -gcnew -gcnewc...</div></div></div></a><a class="pagination-related" href="/2023/09/04/M1%E8%8A%AF%E7%89%87MAC%E4%BD%BF%E7%94%A8VMwareFusion%E5%AE%89%E8%A3%85Win11/" title="M1芯片MAC使用VMwareFusion安装Win11"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">M1芯片MAC使用VMwareFusion安装Win11</div></div><div class="info-2"><div class="info-item-1"> title: M1芯片MAC使用VMwareFusion安装Win11date: 2023-09-03 20:17:08category:  mactag: macauthor:   M1芯片MAC使用VMware Fusion安装Windows 11最近居家办公，旧笔记本电脑卡的受不了，就买了2020款的MacBook Air，然而有些东西还是避不开要使用Windows系统，安装虚拟机成了最好的选择，通过两天的search和尝试，终于安装成功了Windows 11，之后就写下了一个总结，废话不多说，开始安装。 VMware Fusion13密钥 1HF200-0W05K-089X8-4R1EK-032J0  14C21U-2KK9Q-M8130-4V2QH-CF810  一、首先就是下载虚拟机软件和系统镜像进入VMware官网下载VMware Fusion个人免费版本，只需要注册即可下载安装使用； 获取Windows 11 ARM64镜像，我是直接从微软官方下载的预览版镜像：在Windows Insider Preview点击页面中的「 Windows Client ARM6...</div></div></div></a><a class="pagination-related" href="/2024/07/03/%E9%9D%A2%E8%AF%95%E5%AE%98%EF%BC%9A%E8%AF%B4%E8%AF%B4MySQL%E4%B8%8EPostgreSQL%E4%B9%8B%E9%97%B4%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%8C%E8%AF%A5%E5%A6%82%E4%BD%95%E6%8A%80%E6%9C%AF%E9%80%89%E5%9E%8B%EF%BC%9F/" title="面试官：说说MySQL与PostgreSQL之间的区别，该如何技术选型？"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-03</div><div class="info-item-2">面试官：说说MySQL与PostgreSQL之间的区别，该如何技术选型？</div></div><div class="info-2"><div class="info-item-1">面试官：说说MySQL与PostgreSQL之间的区别，该如何技术选型？发布于 2021-03-03 10:51:37 8.9K1 举报 文章被收录于专栏：业余草 你知道的越多，不知道的就越多，业余的像一棵小草！你来，我们一起精进！你不来，我和你的竞争对手一起精进！ 编辑：业余草blog.csdn.net&#x2F;u012414189&#x2F;article&#x2F;details&#x2F;84064146推荐：https://www.xttblog.com/?p=5155如果你稍微有一点工作经验，那么技术选型，技术比较就是面试中必问的知识点之一了。最近就有粉丝在面试中被问到了MySQL与PostgreSQL之间技术选型与比较的问题，下面是一些总结，希望能对大家有所帮助！ 1.问题如果打算为项目选择一款免费、开源的数据库，那么你可能会在MySQL与PostgreSQL之间犹豫不定。MySQL与PostgreSQL都是免费、开源、强大、且功能丰富的数据库。你主要的问题可能是：哪一个才是最好的开源数据库，MySQL还是PostgreSQL呢？该选择哪一个开源数据库呢？ 在选择...</div></div></div></a><a class="pagination-related" href="/2023/09/04/Sqlite%E5%92%8Cmysql%E7%9A%84%E5%8C%BA%E5%88%AB%E5%8F%8A%E4%BC%98%E7%BC%BA%E7%82%B9/" title="Sqlite和mysql的区别及优缺点"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">Sqlite和mysql的区别及优缺点</div></div><div class="info-2"><div class="info-item-1"> title: Sqlite和mysql的区别及优缺点date: 2023-09-03 20:17:08category:  开发语言 java springboottag: springbootauthor:   Sqlite和mysql的区别及优缺点小型嵌入式，跟mysql差不多，但更小,功能也少，属于本地数据库多用于读多写少，100W以下的数据压力不大，不支持分布式。 真正开源的小型嵌入式数据库，支持事务、触发器器 性能至少优于mysql4.1.0 目前已被几乎所有的高级程序开发语言支持 由于可以自定义数据库函数，尤其在php的扩展中可支持全部php函数，其性能可以说是无上限的 “最主要的是没有 Access 的界面” 有很多用php开发的管理工具，与phpmyadmin的界面很相似 我用的是SQLiteManager SQLite 是一个类似Access的轻量级数据库系统，但是更小、更快、容量更大，并发更高。为什么说 SQLite 最适合做 CMS (内容管理系统)呢?并不是说其他数据库不好, oracle、MySQL、SQLServer 也都是非常优秀的 DBS，只不过...</div></div></div></a><a class="pagination-related" href="/2023/09/04/putty/" title="putty"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">putty</div></div><div class="info-2"><div class="info-item-1"> title: puttydate: 2023-09-03 20:17:08category:  doc_puttytag: doc_puttyauthor:   https://www.jianshu.com/p/d6acf623382b 使用putty&#x2F;ssh 进行端口映射Putty 1.是指将本地端口映射到指定地址2.是指将远程端口映射到指定地址 SSH如果使用 linux&#x2F;mac 下的 ssh 命令 $ ssh -R 9000:127.0.0.1:9000 hostR 代表 remote , 也就是将远程端口9000映射到指定地址127.0.0.1:9000 (本机) $ ssh -L 27018:127.0.0.1:27017 hostL 代表 location ,也就是将本地端口27018映射到指定地址127.0.0.1:9000 (远程服务器的本机) 测试 判断是否映射成功 $ netstat -a -n | grep –color&#x3D;auto 9000 如何选择 L &#x2F; R  当远程服务器上有一个服务, 如 mongodb &...</div></div></div></a><a class="pagination-related" href="/2024/08/03/vue-markdown%E7%BC%96%E8%BE%91%E5%99%A8/" title="vue-markdown编辑器"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-03</div><div class="info-item-2">vue-markdown编辑器</div></div><div class="info-2"><div class="info-item-1">简介一款使用marked和highlight.js开发的一款markdown编辑器，除常见markdown语法外，支持快捷输入、图片粘贴、代码复制、全屏编辑、预览等功能。 使用起来简单方便，只需几行代码，即可在你的页面上引入一个markdown编辑器，编辑区支持像专业编辑器那样。 编辑器涵盖了常用的markdown编辑器功能，可通过已有属性进行配置，对编辑器功能和样式进行基本的配置，也可根据需求进行深度定制。 项目地址文档地址示例    特点 使用简单，只需要安装npm包，引入项目即可使用，不需要繁琐的初始化配置。 方便扩展，根据实际需求，支持常见的功能配置，也可根据实际需求进行深度定制。 体积小，加载速度快，npm包删除了highlight.js和codemirror里的依赖。 灵活的主题，默认支持四种代码块风格，也可根据实际需求定制自己的主题样式 功能强大，支持专业版的编辑器，使用codemirror实现编辑窗口，可识别markdown语法 键盘事件监听，如保存、粘贴、回车时上次输入语法判断等 可扩展性强，除了提供的属性配置编辑器，也可直接在原有组件基础上进行二次开发  实现...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#MySQL-%E8%87%AA%E5%8A%A8%E6%B8%85%E7%90%86binlog%E6%97%A5%E5%BF%97%E7%9A%84%E6%96%B9%E6%B3%95"><span class="toc-number">1.</span> <span class="toc-text">MySQL 自动清理binlog日志的方法</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

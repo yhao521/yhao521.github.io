@@ -1,0 +1,364 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>内网穿透 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="什么是内网穿透？简单的说，内网穿透就是使用一台具有公网 IP 地址的电脑（服务器）作为“中间人”来与没有公网 IP 的设备建立连接，实现数据连通。 现实中，我们一般并没有公网 IP，要想实现内网穿透我提供了下面两种可行的方案：  购买别人提供的内网穿透服务。如花生壳提供的 ddns 动态域名解析服务，好处就是方便不折腾，费用相对也够亲民。对于一部分只想不花钱的小伙伴，这里推荐的是另一种穿透方案 S">
+<meta property="og:type" content="article">
+<meta property="og:title" content="内网穿透">
+<meta property="og:url" content="https://yhao521.github.io/2024/01/09/%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="什么是内网穿透？简单的说，内网穿透就是使用一台具有公网 IP 地址的电脑（服务器）作为“中间人”来与没有公网 IP 的设备建立连接，实现数据连通。 现实中，我们一般并没有公网 IP，要想实现内网穿透我提供了下面两种可行的方案：  购买别人提供的内网穿透服务。如花生壳提供的 ddns 动态域名解析服务，好处就是方便不折腾，费用相对也够亲民。对于一部分只想不花钱的小伙伴，这里推荐的是另一种穿透方案 S">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2024-01-08T16:22:21.000Z">
+<meta property="article:modified_time" content="2024-01-08T16:22:21.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "内网穿透",
+  "url": "https://yhao521.github.io/2024/01/09/%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2024-01-08T16:22:21.000Z",
+  "dateModified": "2024-01-08T16:22:21.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2024/01/09/%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '内网穿透',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">内网穿透</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">内网穿透</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-01-08T16:22:21.000Z" title="发表于 2024-01-09 00:22:21">2024-01-09</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-01-08T16:22:21.000Z" title="更新于 2024-01-09 00:22:21">2024-01-09</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>什么是内网穿透？简单的说，内网穿透就是使用一台具有公网 IP 地址的电脑（服务器）作为“中间人”来与没有公网 IP 的设备建立连接，实现数据连通。</p>
+<p>现实中，我们一般并没有公网 IP，要想实现内网穿透我提供了下面两种可行的方案：</p>
+<ol>
+<li>购买别人提供的内网穿透服务。如花生壳提供的 ddns 动态域名解析服务，好处就是方便不折腾，费用相对也够亲民。对于一部分只想不花钱的小伙伴，这里推荐的是另一种穿透方案 Sakura Frp——花费 1 元 实名认证后可获得两条免费的隧道。（免费版的带宽速度上限10 M，流量一个月 10 GB）</li>
+<li>如果想拥有更好的体验那么就需要花费一定的价钱购买一台具有公网 IP 的云主机部署内网穿透服务，像这种通过自建服务实现内网穿透的方案好处就是有更多的自定义空间，不受服务商的约束。缺点同样也是比较明显的，资费更高同时也受限于云服务器的带宽。</li>
+</ol>
+<p>两种常用的内网穿透方案简单的说了一下，具体怎么去实现我也会在下文配上图文教程，此教程是我写的第一篇教程系列文章，因为缺乏经验会有很多的不足，希望读者朋友能够理并给予指正。 本教程不涉及内网穿透的底层实现方法，如果想要了解内网穿透的底层原理还请自行 Google。</p>
+<h4 id="方案一"><a href="#方案一" class="headerlink" title="方案一"></a>方案一</h4><p>Windows 平台</p>
+<p>通过购买 Sakura Frp 服务来实现内网穿透。Sakura Frp 官方文档其实写的也很详细了，新手朋友也可以直接去官网看文档能获得更好的体验。</p>
+<p>注册 Sakura Frp 账号</p>
+<p>Sakura Frp 注册入口 <code>https://openid.13a.com/register</code></p>
+<p>打开注册页面</p>
+<p><img src="https://cdn.sspai.com/2022/11/03/article/92ad3a2a43794975471bf0d2be91b7b8?imageView2/2/w/1120/q/90/interlace/1/ignore-error/1" alt="screely-1665633364893.png"></p>
+<p>注册页面</p>
+<p>用户中心（在用户中心点击 Sakura Frp 跳转链接）</p>
+<p><img src="https://cdn.sspai.com/2022/11/03/article/b9cbf0fecd582d166fa36954cc51b35f?imageView2/2/w/1120/q/90/interlace/1/ignore-error/1" alt="screely-1665641998416.png"></p>
+<p>用户中心</p>
+<blockquote>
+<p><em>注：要想使用 Sakura Frp 服务需要我们支付 1 元来购买实名认证服务。（只要点击用户菜单下的实名认证就可以跳转到实名认证的页面）</em></p>
+</blockquote>
+<h4 id="进行实名认证"><a href="#进行实名认证" class="headerlink" title="进行实名认证"></a>进行实名认证</h4><p><em>我已经实名认证过了在此就不展示详细的认证的步骤。</em></p>
+<p><img src="https://cdn.sspai.com/2022/11/03/article/4143001c48e8c4e8dd6b37cfc29e298f?imageView2/2/w/1120/q/90/interlace/1/ignore-error/1" alt="screely-1665642047462.png"></p>
+<p>实名认证</p>
+<p>认证成功后可以创建两条免费的隧道了，要想使用隧道还需要在官网下载客户端了，Sakura Frp 的客户端几乎覆盖了当前所有平台（linux mac windows），可以按需下载安装。（教程演示的是官方推荐的 Sakura Frp 启动器）</p>
+<h4 id="安装-Sakura-Frp-启动器"><a href="#安装-Sakura-Frp-启动器" class="headerlink" title="安装 Sakura Frp 启动器"></a>安装 Sakura Frp 启动器</h4><p>下载 Sakura Frp 启动器</p>
+<p><img src="https://cdn.sspai.com/2022/11/03/article/f080740792404f1c2a51b7c0e3bd246a?imageView2/2/w/1120/q/90/interlace/1/ignore-error/1" alt="screely-1665649089053.png"></p>
+<p>下载软件</p>
+<p>我这里下载的是官方推荐的Windows 版 Sakura Frp 启动器，一路回车使用默认配置进行安装。安装完毕后打开。需要输入官网提供的秘钥，然后才能点击登录，秘钥的查看方法如下：</p>
+<h4 id="获取秘钥"><a href="#获取秘钥" class="headerlink" title="获取秘钥"></a>获取秘钥</h4><p>秘钥查看页面！！！</p>
+<p><img src="https://cdn.sspai.com/2022/11/03/article/78ec75ac5177caab558085a6f7d497d1?imageView2/2/w/1120/q/90/interlace/1/ignore-error/1" alt="screely-1665649189806.png"></p>
+<p>查看密钥</p>
+<p>输入秘钥然后登录</p>
+<p><img src="https://cdn.sspai.com/2022/11/03/article/54cfb21c23c949a870bc6256511c7624?imageView2/2/w/1120/q/90/interlace/1/ignore-error/1" alt="screely-1665649298852.png"></p>
+<p>登录界面</p>
+<p>输入秘钥登录后我们就可以试着创建一条隧道了，例如我们在本地搭建了一个博客开启的web端口为 80，现在我们在外面或者在公司想要访问这个博客，我们应该像如下这样配置隧道：</p>
+<h4 id="添加隧道"><a href="#添加隧道" class="headerlink" title="添加隧道"></a>添加隧道</h4><p>按照图文所示添加隧道：</p>
+<p><img src="https://cdn.sspai.com/2022/11/03/article/1d3e27b81ad9f8bf2ef57a6357b25e78?imageView2/2/w/1120/q/90/interlace/1/ignore-error/1" alt="screely-1665650120147.png"></p>
+<p>根据实际填写配置信息，然后点击创建，这样第一条隧道就成功创建好了。</p>
+<p><img src="https://cdn.sspai.com/2022/11/03/article/22f87aa94ec4b425dfe884a9e8fb79b5?imageView2/2/w/1120/q/90/interlace/1/ignore-error/1" alt="screely-1665650321933.png"></p>
+<p>如何使用刚刚创建的隧道？当我们创建好隧道后，在回到隧道的页面发现刚刚创建的隧道已经出现了，但是这时候还不能够使用，需要我们收到点击开启的按钮这条隧道才算是成功开启了。成功开启的隧道也可以在 Sakura Frp 网站 <code>隧道列表</code>菜单下看到。</p>
+<p><img src="https://cdn.sspai.com/2022/11/03/article/2cf0ae234739bd9aec1397e7cb4a18e5?imageView2/2/w/1120/q/90/interlace/1/ignore-error/1" alt="screely-1665650481973.png"></p>
+<h4 id="测试连通性"><a href="#测试连通性" class="headerlink" title="测试连通性"></a>测试连通性</h4><p><img src="https://cdn.sspai.com/2022/11/03/article/c0b25b95fe37808db259e1cfd3fa9afd?imageView2/2/w/1120/q/90/interlace/1/ignore-error/1" alt="screely-1665650491535.png"></p>
+<p>在浏览器输入 <code>cn-zz-bgp-4.natfrp.cloud:43067</code>或者 <code>223.247.140.116:43067</code>可以成功访问内网的博客页面了。</p>
+<h4 id="Linux-平台（这部分教程我写的不够详细，如果有疑问请参考下面链接）"><a href="#Linux-平台（这部分教程我写的不够详细，如果有疑问请参考下面链接）" class="headerlink" title="Linux 平台（这部分教程我写的不够详细，如果有疑问请参考下面链接）"></a>Linux 平台（这部分教程我写的不够详细，如果有疑问请参考下面链接）</h4><p>linux 平台安装时需要注意的是自己平台的架构，正常选择 adm64 即可。</p>
+<ul>
+<li>在软件下载页面选择自己的平台，复制下载链接即可。</li>
+</ul>
+<p><img src="https://cdn.sspai.com/2022/11/03/article/9229003d10f8d91a6303b9cf35c766b1?imageView2/2/w/1120/q/90/interlace/1/ignore-error/1" alt="image.png"></p>
+<ul>
+<li>使用下面的命令进入 <code>/usr/local/bin</code> 目录并下载文件：</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">cd /usr/local/bin</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">一般来说只需要使用这条命令:</span></span><br><span class="line">wget -O frpc &lt;下载地址&gt;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">如果上面的命令报错，请尝试这条:</span></span><br><span class="line">curl -Lo frpc &lt;下载地址&gt;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Linux frpc 通常已经过 UPX 压缩，如需下载未压缩的版本请在下载地址尾部加上 _noupx</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>然后设置权限并校验文件是否有损坏：</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">chmod 755 frpc</span><br><span class="line">ls -ls frpc</span><br><span class="line">md5sum frpc</span><br></pre></td></tr></table></figure>
+
+<h4 id="使用-frpc"><a href="#使用-frpc" class="headerlink" title="使用 frpc"></a>使用 frpc</h4><blockquote>
+<p>通过本文档中介绍的方法安装后，您应该可以在任何目录直接输入 frpc &lt;参数&gt; 运行 frpc ，不需要 输入完整路径。</p>
+</blockquote>
+<h4 id="Systemd-配置-frpc-服务"><a href="#Systemd-配置-frpc-服务" class="headerlink" title="Systemd 配置 frpc 服务"></a>Systemd 配置 frpc 服务</h4><blockquote>
+<p>Systemd 是 Linux 系统的一种初始化系统实现，它管理的各种服务叫做 Unit，每个服务对应一个 Unit 配置文件</p>
+</blockquote>
+<p>在本教程中，frpc 会被注册为一个服务，我们让 Systemd 来自动管理 frpc，借此实现开机自启和后台运行。</p>
+<h4 id="编写启动文件"><a href="#编写启动文件" class="headerlink" title="编写启动文件"></a>编写启动文件</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/systemd/system/frpc@.service</span><br><span class="line"></span><br><span class="line">[Unit]</span><br><span class="line">Description=SakuraFrp Service</span><br><span class="line">After=network.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=idle</span><br><span class="line">User=nobody</span><br><span class="line">Restart=on-failure</span><br><span class="line">RestartSec=60s</span><br><span class="line">ExecStart=/usr/local/bin/frpc -f %i</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br></pre></td></tr></table></figure>
+
+<p>执行下面的命令重载 Systemd，这样服务就配置完成了。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl daemon-reload</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>！！！请记住后续操作中用到的 Unit 名称 是 frpc@&lt;启动参数&gt;，例如 frpc@wdnmdtoken666666:12345</p>
+</blockquote>
+<h4 id="启动-停止-隧道"><a href="#启动-停止-隧道" class="headerlink" title="启动&#x2F;停止 隧道"></a>启动&#x2F;停止 隧道</h4><p>启动&#x2F;停止隧道非常简单，使用下面的命令即可，start 是启动，stop 是停止</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl &lt;start|stop&gt; &lt;Unit名称&gt;</span><br></pre></td></tr></table></figure>
+
+<p>举个例子，开启访问密钥为 wdnmdtoken666666 的用户所拥有的 ID 为 12345 的隧道:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl start frpc@wdnmdtoken666666:12345</span><br></pre></td></tr></table></figure>
+
+<p>查看隧道状态</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl status frpc@wdnmdtoken666666:12345</span><br></pre></td></tr></table></figure>
+
+<p>查看隧道日志信息</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">journalctl -u frpc@wdnmdtoken666666:12345</span><br></pre></td></tr></table></figure>
+
+<p>配置开机自启</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl enable frpc@wdnmdtoken666666:12345</span><br></pre></td></tr></table></figure>
+
+<h3 id="方案二"><a href="#方案二" class="headerlink" title="方案二"></a>方案二</h3><p>第二种方案是购买云服务器自建内网穿透服务，适合一些有点 Linux 基础的，如果教程有写的不明白的地方也可以去官方文档查看。</p>
+<p><img src="https://cdn.sspai.com/2022/11/03/article/97c7162feb9cf1eda2e37443412ec367?imageView2/2/w/1120/q/90/interlace/1/ignore-error/1" alt="frp.drawio.png"></p>
+<p>架构图</p>
+<h4 id="前置条件："><a href="#前置条件：" class="headerlink" title="前置条件："></a>前置条件：</h4><ol>
+<li>拥有公网 IP 的主机（记得在云服务器控制台开启端口策略）</li>
+<li>可以访问 GitHub</li>
+</ol>
+<p>仓库地址<code>https://github.com/fatedier/frp</code></p>
+<p>官方文档<code>https://gofrp.org/docs/</code></p>
+<p>在官方的<a href="https://sspai.com/link?target=https://github.com/fatedier/frp">仓库</a>下载对应自己系统的程序，此教程以 Linux 为例：</p>
+<p><img src="https://cdn.sspai.com/2022/11/03/article/60045abd4cfe51f2489dba7b848cd48b?imageView2/2/w/1120/q/90/interlace/1/ignore-error/1" alt="screely-1665651967022.png"></p>
+<h4 id="服务端配置"><a href="#服务端配置" class="headerlink" title="服务端配置"></a>服务端配置</h4><p>云服务器部署 Frp 服务端</p>
+<ol>
+<li>将下载好的包上传至服务器解压</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">解压上传的 tar 包</span></span><br><span class="line">tar -xzvf frp_0.44.0_darwin_amd64.tar.gz</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">将解压的包重命名为 frp</span></span><br><span class="line">mv frp_0.44.0_darwin_amd64 frp</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">cd</span> 进入目录，目录内容如下：</span></span><br><span class="line">[root@localhost frp]# tree</span><br><span class="line">.</span><br><span class="line">├── frpc</span><br><span class="line">├── frpc_full.ini</span><br><span class="line">├── frpc.ini</span><br><span class="line">├── frps</span><br><span class="line">├── frps_full.ini</span><br><span class="line">├── frps.ini</span><br><span class="line">└── LICENSE</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">frps为可执行程序 frps.ini 为配置文件，服务端我们只需要这两个文件，frpc frpc.ini 为客户端文件。</span></span><br></pre></td></tr></table></figure>
+
+<p>在启动服务端之前我们要去修改一下 frps.ini 配置文件，这里使用了一个最简化的配置，设置了 frp 服务端接收客户端连接的端口：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">vim frps.ini</span><br><span class="line"></span><br><span class="line">[common]</span><br><span class="line">bind_port = 7000</span><br></pre></td></tr></table></figure>
+
+<p>服务端的配置写好后就需要启动 frps 服务器了，但是为了方便控制 frps 的启动和停止我们需要利用 systemd 来管理 frps 服务，下面我们来做一下操作：</p>
+<p>1.使用文本编辑器，如 vim 创建并编辑 frps.service 文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/systemd/system/frps.service</span><br></pre></td></tr></table></figure>
+
+<p>2.写入内容</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[Unit]</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">服务名称，可自定义</span></span><br><span class="line">Description = frp server</span><br><span class="line">After = network.target syslog.target</span><br><span class="line">Wants = network.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type = simple</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">启动frps的命令，需修改为您的frps的安装路径</span></span><br><span class="line">ExecStart = /frp/frps -c /frp/frps.ini</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy = multi-user.target</span><br></pre></td></tr></table></figure>
+
+<p>3.使用 systemd 命令，管理 frps</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">启动frp</span></span><br><span class="line">systemctl start frps</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">停止frp</span></span><br><span class="line">systemctl stop frps</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重启frp</span></span><br><span class="line">systemctl restart frps</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看frp状态</span></span><br><span class="line">systemctl status frps</span><br></pre></td></tr></table></figure>
+
+<p>4.配置 frps 开机自启</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl enable frps</span><br></pre></td></tr></table></figure>
+
+<p>到此服务端的配置已经完成，下面就是客户端的配置过程了。</p>
+<h4 id="客户端配置"><a href="#客户端配置" class="headerlink" title="客户端配置"></a>客户端配置</h4><p>客户端的配置要比服务端的复杂一点，因为针对场景的不同配置文件则也有相应的变化，下面我主要针对 远程 ssh 服务和 web 服务使用场景来做一个配置教学。</p>
+<p>1.通过 ssh 访问内网机器</p>
+<p>客户端的配置和服务端的配置大径相同，重复的操作这里就不演示了简单的用文字描述，将下载的 <code>frp_0.44.0_darwin_amd64.tar.gz</code> 包上传一份到客户端并进行解压，重复服务端的操作——将包重命名——然后编辑配置文件。（注意：客户端需要用到 frpc 和 frpc.ini 两个文件）</p>
+<p>修改 frpc.ini 文件，假设 frps 服务端的公网 IP 为 100.100.1.100</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">vim  frpc.ini</span><br><span class="line"></span><br><span class="line">[common]</span><br><span class="line">server_addr = 100.100.1.100</span><br><span class="line">server_port = 7000</span><br><span class="line"></span><br><span class="line">[ssh]</span><br><span class="line">type = tcp</span><br><span class="line">local_ip = 127.0.0.1</span><br><span class="line">local_port = 22</span><br><span class="line">remote_port = 6000</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>local_ip</code> 和 <code>local_port</code> 配置为本地需要暴露到公网的服务地址和端口。remote_port 表示在 frp 服务端监听的端口，访问此端口的流量将会被转发到本地服务对应的端口。</p>
+</blockquote>
+<p>在启动frpc 客户端之前，我们同样需要 让 systemd 来管理 frpc 的服务。</p>
+<p>1.使用文本编辑器，如 vim 创建并编辑 frpc.service 文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/systemd/system/frpc.service</span><br></pre></td></tr></table></figure>
+
+<p>2.写入内容</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[Unit]</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">服务名称，可自定义</span></span><br><span class="line">Description = frp client</span><br><span class="line">After = network.target syslog.target</span><br><span class="line">Wants = network.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type = simple</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">启动frps的命令，需修改为您的frps的安装路径</span></span><br><span class="line">ExecStart = /frp/frpc -c /frp/frpc.ini</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy = multi-user.target</span><br></pre></td></tr></table></figure>
+
+<p>3.使用 systemd 命令，管理 frps</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">启动frp</span></span><br><span class="line">systemctl start frpc</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">停止frp</span></span><br><span class="line">systemctl stop frpc</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重启frp</span></span><br><span class="line">systemctl restart frpc</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看frp状态</span></span><br><span class="line">systemctl status frpc</span><br></pre></td></tr></table></figure>
+
+<p>4.配置 frpc 开机自启</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl enable frpc</span><br></pre></td></tr></table></figure>
+
+<h4 id="测试连通性-1"><a href="#测试连通性-1" class="headerlink" title="测试连通性"></a>测试连通性</h4><p>至此，服务端和客户端都已经正常启动了，我们可以通过 ssh 访问内网机器，假设用户名为 opus：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -p 6000 opus@100.100.1.100</span><br></pre></td></tr></table></figure>
+
+<p>frp 会将请求 100.100.1.100:6000 的流量转发到内网机器 22 端口。</p>
+<p>示例（更多使用示例请参考文档）</p>
+<ul>
+<li><a href="https://sspai.com/link?target=https://gofrp.org/docs/examples/vhost-http/">通过自定义域名访问内网的 Web 服务</a></li>
+<li><a href="https://sspai.com/link?target=https://gofrp.org/docs/examples/static-file/">对外提供简单的文件访问服务</a></li>
+</ul>
+<p>最后：如果需要完全免费的可以试试<a href="https://sspai.com/link?target=https://tailscale.com/">Tailscale</a>，用它来组建隧道免费的绝对够用，但是我体验了之后发现因为节点都是在国外延迟很高，不介意的可以自己试试。</p>
+<blockquote>
+<p>本文参考文档均来自 Sakura Frp <a href="https://sspai.com/link?target=https://doc.natfrp.com/%23/">官方文档</a> 和 GoFrp <a href="https://sspai.com/link?target=https://gofrp.org/docs/">官方文档</a>。</p>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2024/01/09/%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/">https://yhao521.github.io/2024/01/09/%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/01/09/Flomo%20%E5%92%8C%20Memos%20%E7%9A%84%E5%8A%9F%E8%83%BD%E5%AF%B9%E6%AF%94/" title="Flomo 和 Memos 的功能对比"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Flomo 和 Memos 的功能对比</div></div><div class="info-2"><div class="info-item-1">Hi 大家好呀！我叫 Ask Term 。这是我来少数派写的教程系列文章的第一篇，给大家带来一个开源知识库 Memos 的部署教程，小伙伴们也许会问 Memos 什么？那么我就把官方对 Memos 的定义引用一下：  An open source, self-hosted knowledge base that works with a SQLite db file.  如何还是不太清楚这个是干嘛用的，那么体验一下官方的 Demo，体验过的小伙伴一定会觉得这不就是 Flomo 吗？确实，这算是非官方 Flomo 的开源替代品，鉴于 Memos 的开源特性你可以随意的部署在自己的服务器上去使用。 Memos 的部署也很简单，一条 Docker 命令就能启动，但是对于不熟悉 Docker 的小伙伴或许还是有些难度的，为此我写了这篇入门级的教程，让小伙伴能够轻松完成 Memos 的部署。 Flomo 和 Memos 的功能对比对比FlomoMemos收费方式免费有限制开源自托管API 接口Pro 版免费使用免费开放每日回顾Pro 版支持支持微信输入支持不支持  通过对比我认为 Memo...</div></div></div></a><a class="pagination-related" href="/2024/01/07/%E5%A6%82%E4%BD%95%E5%9C%A8%20macOS%20%E4%BD%BF%E7%94%A8%20AList%20+%20RCLONE%20%E6%8A%8A%E7%BD%91%E7%9B%98%E6%8C%82%E8%BD%BD%E5%88%B0%E6%9C%AC%E5%9C%B0/" title="如何在 macOS 使用 AList + RCLONE 把网盘挂载到本地"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">如何在 macOS 使用 AList + RCLONE 把网盘挂载到本地</div></div><div class="info-2"><div class="info-item-1">之前接触最多的可能还是百度网盘，它的免费容量比较大，我们在下载和分享一些文件的时候经常会用到，但是如果文件比较大，加上限速，使用体验并不算太好。其实除了下载文件，我很少使用百度网盘存储文件，影视资源之类的内容又经常被和谐，所以就觉得网盘似乎也没有太大用处。 直到后来发现大家都开始用阿里云盘了，说阿里云盘不限速，我也就是听听，因为自己需求不多，但是不仅如此，现在我们还可以把阿里云盘挂载到本地，那么网盘就变成我们的“本地硬盘”了，我就试了试，发现挂载到本地使用体验真的提升了好多，首先在访问方面，只要打开本地的文件夹就可以直接读写网盘内容，非常方便，其次是挂载到本地后就可以使用本地应用直接读取文件，如果你没有 NAS，把网盘挂载到本地是存储空间不足的一个很好的解决方案。 挂载到本地的网盘才发挥了它应有的作用，而且阿里云盘的速度确实有惊喜到我，100G 大小的视频文件挂载到本地后播放都非常流畅，不仅在电脑上访问如此，把阿里云盘挂到 Plex 上效果也很好，读取速度与本地文件差距不大，都可以原画直接播放，拖动进度条反应也很快，非常推荐大家试一试。 下面我以 macOS 为例和大家分享一下把...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/Linux%E4%BF%AE%E6%94%B9%E4%B8%BB%E6%9C%BA%E5%90%8D/" title="Linux修改主机名"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">Linux修改主机名</div></div><div class="info-2"><div class="info-item-1"> title: Linux修改主机名date: 2023-09-03 20:17:08category: tag: author:  Linux修改主机名 1[yhao521@hao ~]$ su  密码： 1[root@hao yhao521]# vi /etc/sysconfig/network  进入文件在hostname&#x3D;后面写上修改后的主机名，:wq保存退出 后， 1[root@hao yhao521]# reboot  临时关闭防火墙 1[root@haoEN yhao521]# service iptables stop  永久关闭防火墙 12345[root@haoEN yhao521]# chkconfig iptables off[root@hao yhao521]# reboot </div></div></div></a><a class="pagination-related" href="/2023/09/04/nexus-docker%E4%B8%8B%E8%BD%BD%E4%BD%BF%E7%94%A8/" title="nexus-docker下载使用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">nexus-docker下载使用</div></div><div class="info-2"><div class="info-item-1"> title: nexus下载使用date: 2023-09-03 20:17:08category:  nexustag: nexusauthor:   nexus-docker下载使用参考官网的打包git clone https://github.com/sonatype/docker-nexus3.git docker-compose.yml 1234567891011121314151617181920212223# nexus# docker pull sonatype/nexus3# http://localhost:9011# admin/admin123# docker pull sonatype/nexus3:3.52.0version: &#x27;3&#x27;services:  nexus3:    build: ./build    image: yanghao52/nexus3:3.63.0# 需要拷贝docker-nexus3.git下的rh-docker目录和Dockerfile.rh.centos 到 ./build_centos目录下#   ...</div></div></div></a><a class="pagination-related" href="/2023/09/04/doc2html&md/" title="doc2html&amp;md"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">doc2html&amp;md</div></div><div class="info-2"><div class="info-item-1"> title: doc2html&amp;mddate: 2023-09-03 20:17:08category:  linuxtag: linuxauthor:   yum -y install unoconv yum -y install pandoc 执行word转html命令：unoconv -f html -o doc.html doc.docx  若执行报Error: Unable to connect or start own listener. Aborting. 这个错误，重新执行一遍即可。 执行html转markerdown命令：pandoc -f html -t markdown -o doc.md doc.html #############################################################################################################################################################################...</div></div></div></a><a class="pagination-related" href="/2023/09/04/Mac%E8%A7%A3%E5%86%B3OperationNotPermitted/" title="Mac解决OperationNotPermitted"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">Mac解决OperationNotPermitted</div></div><div class="info-2"><div class="info-item-1"> title: Mac解决OperationNotPermitteddate: 2023-09-03 20:17:08category:  mactag: macauthor:   Mac OS解决Operation Not Permitted开始一段废话：今天用VirtualBox装CentOS安装失败，换Parallels就能行，对它实在不爽就把它卸载了，由于本人电脑洁癖，随手用spotlight搜了下VirtualBox想清理掉它的残余，结果发现有个文件夹死活删不掉（伟大的sudo rm -rf都不行），我就不开心了，搜索引擎找到说要用它的安装包卸载脚本才能删除，然而我忍着厌恶下载了它的安装包，果然有个卸载脚本，然而并没能删掉它，我就命令行求助伟大的sudo rm -rf，当然提示一大串，反正就是不行，一直提示Operation Not Permitted，我又求助搜索引擎，终于找到办法搞定，大家可以同样方法对付别的删不干净的流氓软件，废话结束。 Operation Not Permitted是因为一些mac用户在升级系统之后，电脑启用了SIP（System Integri...</div></div></div></a><a class="pagination-related" href="/2023/09/04/3%E7%A7%8D%E6%9C%AC%E5%9C%B0%E8%BF%90%E8%A1%8CLlama%202%E7%9A%84%E6%96%B9%E6%B3%95/" title="3种本地运行Llama 2的方法"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">3种本地运行Llama 2的方法</div></div><div class="info-2"><div class="info-item-1"> title: 3种本地运行Llama 2的方法date: 2023-09-03 20:17:08category:  mactag: macauthor:   3种本地运行Llama 2的方法我们已经讨论了很多关于如何在 Replicate 上运行和微调 Llama 2。 但你也可以在 M1&#x2F;M2 Mac、Windows、Linux 甚至手机上本地运行 Llama。 在本地运行 Llama 2 的一个很酷的事情是，甚至不需要互联网连接。   推荐：用NSDT设计器快速搭建可编程3D场景。  Llama 2 发布才几天，但已经有一些在本地运行它的技术。 在这篇博文中，我们将介绍三个可用于在你自己的设备上运行 Llama 2 的开源工具：  Llama.cpp (Mac&#x2F;Windows&#x2F;Linux) Ollama (Mac) MLC LLM（iOS&#x2F;Android）  1、Llama.cpp (Mac&#x2F;Windows&#x2F;Linux)Llama.cpp 是 Llama 在 C&#x2F;C++ 中的移植，这使得可以在 Mac ...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E5%AE%89%E8%A3%85mysql%E6%8A%A5%E9%94%99%E9%97%AE%E9%A2%98/" title="安装mysql报错问题"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">安装mysql报错问题</div></div><div class="info-2"><div class="info-item-1"> title: 安装mysql报错问题date: 2023-09-03 20:17:08category: tag: author:  安装mysql报错问题1.问题： 123456789[root@localhost lcl]# rpm -ivh MySQL-server-5.5.23-1.linux2.6.i386.rpmPreparing... ########################################### [100%]ls: /var/lib/mysql/*.err: 没有那个文件或目录ls: /var/lib/mysql/*.err: 没有那个文件或目录1:MySQL-server ########################################### [100%]  解决： 之前或系统自带的文件或目录没有卸载干净，卸载干净后，重新安装就好了。 2.问题： 远程连接：主机连接虚拟机的mysql1.问题： 123456789[root@localhost lcl]# rpm -ivh MySQL-server-5.5.23-1.li...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%B9%E6%A1%88%E4%B8%80"><span class="toc-number">1.</span> <span class="toc-text">方案一</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%9B%E8%A1%8C%E5%AE%9E%E5%90%8D%E8%AE%A4%E8%AF%81"><span class="toc-number">2.</span> <span class="toc-text">进行实名认证</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-Sakura-Frp-%E5%90%AF%E5%8A%A8%E5%99%A8"><span class="toc-number">3.</span> <span class="toc-text">安装 Sakura Frp 启动器</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%8E%B7%E5%8F%96%E7%A7%98%E9%92%A5"><span class="toc-number">4.</span> <span class="toc-text">获取秘钥</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B7%BB%E5%8A%A0%E9%9A%A7%E9%81%93"><span class="toc-number">5.</span> <span class="toc-text">添加隧道</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B5%8B%E8%AF%95%E8%BF%9E%E9%80%9A%E6%80%A7"><span class="toc-number">6.</span> <span class="toc-text">测试连通性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Linux-%E5%B9%B3%E5%8F%B0%EF%BC%88%E8%BF%99%E9%83%A8%E5%88%86%E6%95%99%E7%A8%8B%E6%88%91%E5%86%99%E7%9A%84%E4%B8%8D%E5%A4%9F%E8%AF%A6%E7%BB%86%EF%BC%8C%E5%A6%82%E6%9E%9C%E6%9C%89%E7%96%91%E9%97%AE%E8%AF%B7%E5%8F%82%E8%80%83%E4%B8%8B%E9%9D%A2%E9%93%BE%E6%8E%A5%EF%BC%89"><span class="toc-number">7.</span> <span class="toc-text">Linux 平台（这部分教程我写的不够详细，如果有疑问请参考下面链接）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8-frpc"><span class="toc-number">8.</span> <span class="toc-text">使用 frpc</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Systemd-%E9%85%8D%E7%BD%AE-frpc-%E6%9C%8D%E5%8A%A1"><span class="toc-number">9.</span> <span class="toc-text">Systemd 配置 frpc 服务</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BC%96%E5%86%99%E5%90%AF%E5%8A%A8%E6%96%87%E4%BB%B6"><span class="toc-number">10.</span> <span class="toc-text">编写启动文件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%90%AF%E5%8A%A8-%E5%81%9C%E6%AD%A2-%E9%9A%A7%E9%81%93"><span class="toc-number">11.</span> <span class="toc-text">启动&#x2F;停止 隧道</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%B9%E6%A1%88%E4%BA%8C"><span class="toc-number">12.</span> <span class="toc-text">方案二</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%89%8D%E7%BD%AE%E6%9D%A1%E4%BB%B6%EF%BC%9A"><span class="toc-number">12.1.</span> <span class="toc-text">前置条件：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF%E9%85%8D%E7%BD%AE"><span class="toc-number">12.2.</span> <span class="toc-text">服务端配置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E9%85%8D%E7%BD%AE"><span class="toc-number">12.3.</span> <span class="toc-text">客户端配置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B5%8B%E8%AF%95%E8%BF%9E%E9%80%9A%E6%80%A7-1"><span class="toc-number">12.4.</span> <span class="toc-text">测试连通性</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

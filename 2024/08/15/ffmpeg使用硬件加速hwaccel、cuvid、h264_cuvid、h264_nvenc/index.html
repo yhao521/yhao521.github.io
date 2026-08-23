@@ -1,0 +1,328 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>ffmpeg使用硬件加速hwaccel、cuvid、h264_cuvid、h264_nvenc | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="文章目录 ffmpeg支持硬件加速的原理 所用环境说明 ffmpeg使用硬件加速  安装nvidia驱动 安装cuda 加入header 安装pkgconfig 开始配置   在ffmpeg中看如何使用硬件加速  查看目前可以用的hwaccel选项 普通的解码命令 仅仅是转码，不做缩放 转码，外带一个缩放   题外话，如何使用scale_npp 简单分析一下ffmpeg源码中的硬件加速部分 参考网">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ffmpeg使用硬件加速hwaccel、cuvid、h264_cuvid、h264_nvenc">
+<meta property="og:url" content="https://yhao521.github.io/2024/08/15/ffmpeg%E4%BD%BF%E7%94%A8%E7%A1%AC%E4%BB%B6%E5%8A%A0%E9%80%9Fhwaccel%E3%80%81cuvid%E3%80%81h264_cuvid%E3%80%81h264_nvenc/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="文章目录 ffmpeg支持硬件加速的原理 所用环境说明 ffmpeg使用硬件加速  安装nvidia驱动 安装cuda 加入header 安装pkgconfig 开始配置   在ffmpeg中看如何使用硬件加速  查看目前可以用的hwaccel选项 普通的解码命令 仅仅是转码，不做缩放 转码，外带一个缩放   题外话，如何使用scale_npp 简单分析一下ffmpeg源码中的硬件加速部分 参考网">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2024-08-14T19:30:38.000Z">
+<meta property="article:modified_time" content="2024-08-14T19:30:38.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c++&#x2F;programming">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "ffmpeg使用硬件加速hwaccel、cuvid、h264_cuvid、h264_nvenc",
+  "url": "https://yhao521.github.io/2024/08/15/ffmpeg%E4%BD%BF%E7%94%A8%E7%A1%AC%E4%BB%B6%E5%8A%A0%E9%80%9Fhwaccel%E3%80%81cuvid%E3%80%81h264_cuvid%E3%80%81h264_nvenc/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2024-08-14T19:30:38.000Z",
+  "dateModified": "2024-08-14T19:30:38.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2024/08/15/ffmpeg%E4%BD%BF%E7%94%A8%E7%A1%AC%E4%BB%B6%E5%8A%A0%E9%80%9Fhwaccel%E3%80%81cuvid%E3%80%81h264_cuvid%E3%80%81h264_nvenc/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'ffmpeg使用硬件加速hwaccel、cuvid、h264_cuvid、h264_nvenc',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">ffmpeg使用硬件加速hwaccel、cuvid、h264_cuvid、h264_nvenc</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">ffmpeg使用硬件加速hwaccel、cuvid、h264_cuvid、h264_nvenc</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-08-14T19:30:38.000Z" title="发表于 2024-08-15 03:30:38">2024-08-15</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-08-14T19:30:38.000Z" title="更新于 2024-08-15 03:30:38">2024-08-15</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h4 id="文章目录"><a href="#文章目录" class="headerlink" title="文章目录"></a>文章目录</h4><ul>
+<li><a href="#ffmpeg_1">ffmpeg支持硬件加速的原理</a></li>
+<li><a href="#_5">所用环境说明</a></li>
+<li><a href="#ffmpeg_12">ffmpeg使用硬件加速</a></li>
+<li><ul>
+<li><a href="#nvidia_13">安装nvidia驱动</a></li>
+<li><a href="#cuda_15">安装cuda</a></li>
+<li><a href="#header_36">加入header</a></li>
+<li><a href="#pkgconfig_43">安装pkgconfig</a></li>
+<li><a href="#_48">开始配置</a></li>
+</ul>
+</li>
+<li><a href="#ffmpeg_56">在ffmpeg中看如何使用硬件加速</a></li>
+<li><ul>
+<li><a href="#hwaccel_59">查看目前可以用的hwaccel选项</a></li>
+<li><a href="#_66">普通的解码命令</a></li>
+<li><a href="#_77">仅仅是转码，不做缩放</a></li>
+<li><a href="#_82">转码，外带一个缩放</a></li>
+</ul>
+</li>
+<li><a href="#scale_npp_94">题外话，如何使用scale_npp</a></li>
+<li><a href="#ffmpeg_127">简单分析一下ffmpeg源码中的硬件加速部分</a></li>
+<li><a href="#_154">参考网站</a></li>
+</ul>
+<h2 id="ffmpeg支持硬件加速的原理"><a href="#ffmpeg支持硬件加速的原理" class="headerlink" title="ffmpeg支持硬件加速的原理"></a><a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=ffmpeg&spm=1001.2101.3001.7020">ffmpeg</a>支持硬件加速的原理</h2><p>ffmpeg的硬件加速原理大概就是采用硬件对编解码进行处理，硬件有转码进行解码的sdk，比如nvidia的sdk等</p>
+<h2 id="所用环境说明"><a href="#所用环境说明" class="headerlink" title="所用环境说明"></a>所用环境说明</h2><ul>
+<li>ffmpeg版本：4.2.2</li>
+<li>cuda版本：10.2</li>
+<li>nvidia驱动版本：470.57.02</li>
+</ul>
+<blockquote>
+<p>先放一个结论：GPU的解码肯定是要比CPU快的，但前提是两个都是差不对水平的硬件，而且GPU的成本相对CPU来说要低很多；比如我的测试机，一个GTX970M的显卡，基本跟一个7700k的i7差不多（甚至更好）了；</p>
+</blockquote>
+<h2 id="ffmpeg使用硬件加速"><a href="#ffmpeg使用硬件加速" class="headerlink" title="ffmpeg使用硬件加速"></a>ffmpeg使用硬件加速</h2><h3 id="安装nvidia驱动"><a href="#安装nvidia驱动" class="headerlink" title="安装nvidia驱动"></a>安装nvidia驱动</h3><p>从官网下载NVIDIA-Linux-x86_64-470.57.02.run，直接安装</p>
+<h3 id="安装cuda"><a href="#安装cuda" class="headerlink" title="安装cuda"></a>安装cuda</h3><p>下载cuda_10.2.89_440.33.01_linux.run也是直接安装<br>安装完成后修改profile，将cuda中的bin目录写到path中</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo vi /etc/profile</span><br><span class="line">export PATH=/usr/local/cuda/bin:$PATH</span><br><span class="line">12</span><br></pre></td></tr></table></figure>
+
+<p>让配置生效</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">source /etc/profile</span><br><span class="line">1</span><br></pre></td></tr></table></figure>
+
+<p>验证是否找到了nvcc</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nvcc --version（或者nvcc -V）</span><br><span class="line">1</span><br></pre></td></tr></table></figure>
+
+<p>输出如下内容</p>
+<blockquote>
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/6c3cd4177ec2102ecc416b8f348a5295.png" alt="[外链图片转存失败,源站可能有防盗链机制,建议将图片保存下来直接上传(img-roQQHLnV-1629293917819)(8C612D9AF3484391A6708933FA7F796A)]"></p>
+</blockquote>
+<h3 id="加入header"><a href="#加入header" class="headerlink" title="加入header"></a>加入<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=header&spm=1001.2101.3001.7020">header</a></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">git clone https://git.videolan.org/git/ffmpeg/nv-codec-headers.git</span><br><span class="line">make</span><br><span class="line">sudo make install</span><br><span class="line">123</span><br></pre></td></tr></table></figure>
+
+<h3 id="安装pkgconfig"><a href="#安装pkgconfig" class="headerlink" title="安装pkgconfig"></a>安装pkgconfig</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install pkgconfig</span><br><span class="line">1</span><br></pre></td></tr></table></figure>
+
+<h3 id="开始配置"><a href="#开始配置" class="headerlink" title="开始配置"></a>开始配置</h3><p>由于使用到了硬件加速，那么在配置configure中也需要将其加入进来</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">./configure --prefix=/usr/local/ffmpeg --enable-gpl --enable-nonfree --enable-pthreads --extra-cflags=-g --extra-cflags=-O0 --extra-libs=-lstdc++ --extra-cxxflags=-g --extra-cxxflags=-O0 --extra-cxxflags=-fpermissive --enable-debug=3 --disable-optimizations --disable-stripping --disable-x86asm --enable-cuda-nvcc --enable-cuvid --enable-shared --enable-nvenc --enable-shared</span><br><span class="line">1</span><br></pre></td></tr></table></figure>
+
+<p>接着执行make，产生ffmpeg可执行文件</p>
+<h2 id="在ffmpeg中看如何使用硬件加速"><a href="#在ffmpeg中看如何使用硬件加速" class="headerlink" title="在ffmpeg中看如何使用硬件加速"></a>在ffmpeg中看如何使用硬件加速</h2><p>假设在ffmpeg工程文件夹下有有个1.mp4的文件</p>
+<h3 id="查看目前可以用的hwaccel选项"><a href="#查看目前可以用的hwaccel选项" class="headerlink" title="查看目前可以用的hwaccel选项"></a>查看目前可以用的hwaccel选项</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">./ffmpeg -hwaccels</span><br><span class="line">1</span><br></pre></td></tr></table></figure>
+
+<p>出现如下内容</p>
+<blockquote>
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/e68d3bccb58ea3a9bc4afcb7e56d7f50.png" alt="[外链图片转存失败,源站可能有防盗链机制,建议将图片保存下来直接上传(img-WsVRRXwd-1629293917822)(EB2C095DA5C340ACA62C503935EF7A8F)]"></p>
+</blockquote>
+<h3 id="普通的解码命令"><a href="#普通的解码命令" class="headerlink" title="普通的解码命令"></a>普通的解码命令</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cpu解码</span><br><span class="line">./ffmpeg -i aa.mp4 output2.yuv -y</span><br><span class="line">12</span><br></pre></td></tr></table></figure>
+
+<p>gpu解码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">./ffmpeg -c:v h264_cuvid -i aa.mp4 -c:v h264_nvenc output.yuv -y</span><br><span class="line">1</span><br></pre></td></tr></table></figure>
+
+<h3 id="仅仅是转码，不做缩放"><a href="#仅仅是转码，不做缩放" class="headerlink" title="仅仅是转码，不做缩放"></a>仅仅是转码，不做缩放</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">./ffmpeg -c:v h264_cuvid -i a.mp4 -c:a copy -vf &quot;format=yuv420p,hwupload_cuda&quot; -c:v h264_nvenc 2.mp4 -y</span><br><span class="line">1</span><br></pre></td></tr></table></figure>
+
+<h3 id="转码，外带一个缩放"><a href="#转码，外带一个缩放" class="headerlink" title="转码，外带一个缩放"></a>转码，外带一个缩放</h3><p>cpu操作命令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">./ffmpeg -i a.mp4 -vf scale=1280:720 2.mp4 -y</span><br><span class="line">1</span><br></pre></td></tr></table></figure>
+
+<p>gpu操作命令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">./ffmpeg -c:v h264_cuvid -i a.mp4 -c:a copy -vf &quot;format=yuv420p,hwupload_cuda,scale_cuda=1280:720&quot; -c:v h264_nvenc -b:v 5M 2.mp4 -y</span><br><span class="line">1</span><br></pre></td></tr></table></figure>
+
+<h2 id="题外话，如何使用scale-npp"><a href="#题外话，如何使用scale-npp" class="headerlink" title="题外话，如何使用scale_npp"></a>题外话，如何使用scale_npp</h2><blockquote>
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/0cf377621a6757e8d2deafaab27539d9.png" alt=" [外链图片转存失败,源站可能有防盗链机制,建议将图片保存下来直接上传(img-jDryBXxd-1629293917823)(4E2D1C500D654842A077198013A29B4D)]"></p>
+</blockquote>
+<p>配置configure中需要将其加进来</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">./configure --prefix=/usr/local/ffmpeg --enable-gpl --enable-nonfree --enable-pthreads --extra-cflags=-g --extra-cflags=-O0 --extra-libs=-lstdc++ --extra-cxxflags=-g --extra-cxxflags=-O0 --extra-cxxflags=-fpermissive --enable-debug=3 --disable-optimizations --disable-stripping --disable-x86asm --enable-cuda-nvcc --enable-cuvid --enable-shared --enable-nvenc --enable-shared --enable-libnpp --extra-cflags=-I/usr/local/cuda/include --extra-ldflags=-L/usr/local/cuda/lib64</span><br><span class="line">1</span><br></pre></td></tr></table></figure>
+
+<p>make后得到的ffmpeg，启动这个快速的缩放命令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">./ffmpeg -hwaccel cuvid -c:v h264_cuvid -i aa.mp4 -c:v h264_nvenc -b:v 2048k -vf scale_npp=1280:-1 -y 2.mp4</span><br><span class="line">1</span><br></pre></td></tr></table></figure>
+
+<p>在ffmpeg4.2.2上编译后使用上面的命令会报错，提示找不到npp这个滤镜；重新到GitHub拉去4.4后，重新configure、make后执行通过，测试如下</p>
+<blockquote>
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/4d54b4456305d35f837dc08e57e095af.png" alt="在这里插入图片描述"></p>
+</blockquote>
+<p>同一个视频平均才18.7X，GPU使用率最大不到15%；比使用scale_cuda来做缩放要慢一点，以下是同一个视频采用scale_cuda来缩放的速度</p>
+<blockquote>
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/dcca8dbcb39d6bef5444cd09b28b7049.png" alt="[外链图片转存失败,源站可能有防盗链机制,建议将图片保存下来直接上传(img-wTJCBHtU-1629293917826)(ADE9B1167ADC458FAFCDA36D89AFA2D4)]"></p>
+</blockquote>
+<p>测试的命令分别如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">./ffmpeg -c:v h264_cuvid -i aa.mp4 -c:a copy -vf &quot;format=yuv420p,hwupload_cuda,scale_cuda=1280:720&quot; -c:v h264_nvenc -b:v 2048k 2.mp4 -y</span><br><span class="line">1</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">./ffmpeg -hwaccel cuvid -c:v h264_cuvid -i aa.mp4 -c:a copy -c:v h264_nvenc -b:v 2048k -vf scale_npp=1280:720 2.mp4 -y</span><br><span class="line">1</span><br></pre></td></tr></table></figure>
+
+<h2 id="简单分析一下ffmpeg源码中的硬件加速部分"><a href="#简单分析一下ffmpeg源码中的硬件加速部分" class="headerlink" title="简单分析一下ffmpeg源码中的硬件加速部分"></a>简单分析一下ffmpeg源码中的硬件加速部分</h2><p>在cuviddec.c中的cuvid_decode_packet函数，其中的一行代码是这样的<br>ret &#x3D; CHECK_CU(ctx-&gt;cvdl-&gt;cuvidParseVideoData(ctx-&gt;cuparser, &amp;cupkt));</p>
+<blockquote>
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/8aa3c497d24b9fa4e4fc99b362def66d.png" alt="[外链图片转存失败,源站可能有防盗链机制,建议将图片保存下来直接上传(img-9HBFZo6Z-1629293917827)(97C166D24655438BB69DD1A4BEC0CCBD)]"></p>
+</blockquote>
+<p>这个函数在dynlink_nvcuvid.h中有对应的声明</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">/************************************************************************************************/</span><br><span class="line">//! \ingroup FUNCTS</span><br><span class="line">//! \fn CUresult CUDAAPI cuvidParseVideoData(CUvideoparser obj, CUVIDSOURCEDATAPACKET *pPacket)</span><br><span class="line">//! Parse the video data from source data packet in pPacket</span><br><span class="line">//! Extracts parameter sets like SPS, PPS, bitstream etc. from pPacket and</span><br><span class="line">//! calls back pfnDecodePicture with CUVIDPICPARAMS data for kicking of HW decoding</span><br><span class="line">//! calls back pfnSequenceCallback with CUVIDEOFORMAT data for initial sequence header or when</span><br><span class="line">//! the decoder encounters a video format change</span><br><span class="line">//! calls back pfnDisplayPicture with CUVIDPARSERDISPINFO data to display a video frame</span><br><span class="line">/************************************************************************************************/</span><br><span class="line">typedef CUresult CUDAAPI tcuvidParseVideoData(CUvideoparser obj, CUVIDSOURCEDATAPACKET *pPacket);</span><br><span class="line">1234567891011</span><br></pre></td></tr></table></figure>
+
+<p>整个流程详细的内容差不多都在cuviddec.c中的cuvid_output_frame函数中</p>
+<blockquote>
+<p><img src="https://i-blog.csdnimg.cn/blog_migrate/1490d221dec9203c2a3775bc49d12d79.png" alt="[外链图片转存失败,源站可能有防盗链机制,建议将图片保存下来直接上传(img-F4vemdY9-1629293917827)(9D68A74E86F24E87B7596B178C2A1AF4)]"></p>
+</blockquote>
+<h2 id="参考网站"><a href="#参考网站" class="headerlink" title="参考网站"></a>参考网站</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://www.liangzl.com/get-article-detail-27871.html">ffmpeg安装ERROR: cuvid requested</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/scw2901/p/14853339.html">FFmpeg-Nvidia硬解码</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_43442574/article/details/119540428">ffmpeg4.3 安装 in Ubuntu18.04</a></li>
+<li><a target="_blank" rel="noopener" href="https://developer.nvidia.com/zh-cn/blog/nvidia-ffmpeg-transcoding-guide/">NVIDIA FFmpeg 转码指南</a></li>
+<li><a target="_blank" rel="noopener" href="https://developer.nvidia.com/blog/nvidia-ffmpeg-transcoding-guide/">NVIDIA FFmpeg Transcoding Guide</a></li>
+<li><a target="_blank" rel="noopener" href="https://developer.download.nvidia.cn/designworks/ffmpeg/secure/Using_FFmpeg_with_NVIDIA_GPU_Hardware_Acceleration_v01.4.pdf?ufWt7fP-Fx0qZ4E1voqFeiEWsk8kwR7qrd2YR_bImjMUtqziHej_nIl-bj7dGY0pERQ_fz7_NKGqxt1V6ktkIWdtd651xZKCTx08CnLpJ0q3AG0mQXISk9M1sZOtbh5f_XNnkCeIgkoGQiaNZuRfo6kh18DyUPulSrrLoPE7E6MjiPeK_M4dMVq6ZMvhfNqg3ENw3yM">USING FFMPEG WITH NVIDIA<br>GPU HARDWARE<br>ACCELERATION</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/n66040927/article/details/84525611">ffmpeg命令行使用nvidia CUDA scaling高速转分辨率转码(libnpp)</a></li>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/69192869">视频和视频帧：Intel GPU（核显）的编解码故事</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/liuhengxiao/article/details/105989820">ffmpeg解码的软解及硬解（cuda和qsv）使用方法</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_43360707/article/details/115953209">ffmpeg 采用cuda 硬编解码</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/poweroranger/article/details/77845238">CUDA和FFMPEG硬件解码视频流</a></li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2024/08/15/ffmpeg%E4%BD%BF%E7%94%A8%E7%A1%AC%E4%BB%B6%E5%8A%A0%E9%80%9Fhwaccel%E3%80%81cuvid%E3%80%81h264_cuvid%E3%80%81h264_nvenc/">https://yhao521.github.io/2024/08/15/ffmpeg%E4%BD%BF%E7%94%A8%E7%A1%AC%E4%BB%B6%E5%8A%A0%E9%80%9Fhwaccel%E3%80%81cuvid%E3%80%81h264_cuvid%E3%80%81h264_nvenc/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/c-programming/">c++/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/08/15/%E3%80%90ComfyUI%E3%80%91%E7%88%BD%E7%8E%A9%E5%BF%85%E5%A4%87%EF%BC%816%E5%A4%A7%E6%8F%92%E4%BB%B6%E6%B1%87%E6%80%BB%E6%8E%A8%E8%8D%90/" title="【ComfyUI】爽玩必备！6大插件汇总推荐"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">【ComfyUI】爽玩必备！6大插件汇总推荐</div></div><div class="info-2"><div class="info-item-1">工欲善其事必先利其器，今天来给大家介绍6款ComfyUI中必备的插件，有了它们，你才能真正的享受到连连看的快乐！排名分先后，越往后越重要！   插件安装管理器  SDXL风格样式  ComfyUI界面汉化  中文提示词输入  蟒蛇八卦工具箱  提示词权重调节器   （需要的同学可以文末自行扫描获取） 在webUI中我们安装插件是可以很直观的看到并且使用的，因为它有一个很好的用户界面。但是comfyUI就不一样，可能你安装了插件之后也看不到它在哪，只有通过节点连接之后才能感受到它的功能存在，所以我觉得有必要给大家演示一下用法。 安装方法很简单，就是将解压好的文件夹放入以下目录“E:\ComfyUI_windows_portable\ComfyUI\custom_nodes”就可以了，然后重新启动。  1.插件安装管理器 这个插件安装完成之后，控制面板的最下面会出现一个“管理器”的按钮。  点开之后就能看到“ComfyUI管理器”的界面，“跳过更新检查”我们可以关掉，这样它就能帮我们自动检查是否有插件需要更新。  点击“安装节点”，可以进入到插件的管理界面。在这里，你可以下载到你需要...</div></div></div></a><a class="pagination-related" href="/2024/08/15/%E8%A7%A3%E5%86%B3centos(linux)%20ffmepg%20%E6%94%AF%E6%8C%81%20h264%20mp4%20%E7%BC%96%E7%A0%81%E6%96%B9%E6%B3%95%20Unknown%20en/" title="解决centos(linux) ffmepg 支持 h264 mp4 编码方法 Unknown encoder ‘h264‘"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">解决centos(linux) ffmepg 支持 h264 mp4 编码方法 Unknown encoder ‘h264‘</div></div><div class="info-2"><div class="info-item-1">下载并安装x264123456789git clone https://code.videolan.org/videolan/x264.gitcd x264./configure --help# 报缺少asm 时 可加入--disable-asm./configure --enable-shared --enable-static --disable-asmmake# x264将会安装到 ：/usr/local/ 目录下sudo make install12345678  重新编译 ffmpeg1234567891011121314151617181920212223# 下载ffmpegwget https://ffmpeg.org/releases/ffmpeg-snapshot.tar.bz2 --no-check-certificatetar xjf ffmpeg-snapshot.tar.bz2cd ffmpeg/./configure --prefix=/usr/local/ffmpeg --enable-shared --enable-yasm --enable-li...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/3%E7%A7%8D%E6%9C%AC%E5%9C%B0%E8%BF%90%E8%A1%8CLlama%202%E7%9A%84%E6%96%B9%E6%B3%95/" title="3种本地运行Llama 2的方法"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">3种本地运行Llama 2的方法</div></div><div class="info-2"><div class="info-item-1"> title: 3种本地运行Llama 2的方法date: 2023-09-03 20:17:08category:  mactag: macauthor:   3种本地运行Llama 2的方法我们已经讨论了很多关于如何在 Replicate 上运行和微调 Llama 2。 但你也可以在 M1&#x2F;M2 Mac、Windows、Linux 甚至手机上本地运行 Llama。 在本地运行 Llama 2 的一个很酷的事情是，甚至不需要互联网连接。   推荐：用NSDT设计器快速搭建可编程3D场景。  Llama 2 发布才几天，但已经有一些在本地运行它的技术。 在这篇博文中，我们将介绍三个可用于在你自己的设备上运行 Llama 2 的开源工具：  Llama.cpp (Mac&#x2F;Windows&#x2F;Linux) Ollama (Mac) MLC LLM（iOS&#x2F;Android）  1、Llama.cpp (Mac&#x2F;Windows&#x2F;Linux)Llama.cpp 是 Llama 在 C&#x2F;C++ 中的移植，这使得可以在 Mac ...</div></div></div></a><a class="pagination-related" href="/2023/09/04/sql%E5%AE%A1%E6%A0%B8%E5%B9%B3%E5%8F%B0/" title="sql审核平台"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">sql审核平台</div></div><div class="info-2"><div class="info-item-1"> title: sql审核平台date: 2023-09-03 20:17:08category:  数据库 sql优化工具tag: sql优化工具author:   sql审核工具调研基于soar的sql审核查询平台：1https://github.com/beiketianzhuang/data-platform-soar 　　 1.美团工具sqlAdvisor工具 采用docker去跑centos镜像 1.获取centos镜像 1docker pull centos  2.运行docker镜像 1docker run &lt;IMAGE ID &gt;  3.进入docker容器 1docker attach &lt;容器id&gt;  进入容器后就可以通过官方提供的安装方法安装了(因为直接通过官方的安装出错了，所以后面安装时自己做了一些调整) 4.克隆代码 12cd /usr/local/src/git clone https://github.com/Meituan-Dianping/SQLAdvisor.git  5.安装依赖包 12yum install -y ma...</div></div></div></a><a class="pagination-related" href="/2024/06/27/%E4%BB%8EMac%E5%88%B0Windows%E7%9A%84Go%20%20Golang%E4%BA%A4%E5%8F%89%E7%BC%96%E8%AF%91%EF%BC%9A%E8%87%B4%E5%91%BD%E9%94%99%E8%AF%AF%EF%BC%9A%E6%89%BE%E4%B8%8D%E5%88%B0%E2%80%9C%20windows.h%E2%80%9D%E6%96%87%E4%BB%B6/" title="从Mac到Windows的Go  Golang交叉编译：致命错误：找不到“ windows.h”文件"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-06-27</div><div class="info-item-2">从Mac到Windows的Go  Golang交叉编译：致命错误：找不到“ windows.h”文件</div></div><div class="info-2"><div class="info-item-1">从Mac到Windows的Go &#x2F; Golang交叉编译：致命错误：找不到“ windows.h”文件cross-platformgoheader-files Go&#x2F;Golang Cross-Compile from Mac to Windows: fatal error: ‘windows.h’ file not found摘要：当我尝试交叉编译.go源文件(包括在文件链中某个位置的C文件)，并从Mac主机针对Windows AMD64时，得到：    1 &#x2F;usr&#x2F;local&#x2F;go&#x2F;src&#x2F;runtime&#x2F;cgo&#x2F;gcc_windows_amd64.c:8:10: fatal error: ‘windows.h’ file not found        纯粹的Go代码似乎可以交叉编译而不会出错；当涉及C文件时，有没有办法获取正确的头文件进行交叉编译？ 更多详细信息：我在Mac上安装了LiteIDE，以用于某些.go项目，而LiteIDE使将其他平台作为构建目标相对容易。我仅在Go上的...</div></div></div></a><a class="pagination-related" href="/2023/09/04/pgsql%E6%95%99%E7%A8%8B/" title="pgsql教程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">pgsql教程</div></div><div class="info-2"><div class="info-item-1"> title: pgsql教程date: 2023-09-03 20:17:08category:  数据库 doc_pgsqltag: doc_pgsqlauthor:   [TOC]   postgresql 教程1.源码pgsql安装1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465666768697071727374757677787980818283wget https://ftp.postgresql.org/pub/source/v12.3/postgresql-12.3.tar.gz#解压tar -zxvf postgresql-12.3.tar.gz# 编译./configure --prefix=/home/yhao521/pgsqlmake &amp;&amp; make install#创建目录mkdir -p  pgdata/12/&#123;data,backup...</div></div></div></a><a class="pagination-related" href="/2023/09/04/nginx%E7%BC%96%E8%AF%91%E6%8A%A5%E9%94%99/" title="nginx编译报错"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">nginx编译报错</div></div><div class="info-2"><div class="info-item-1"> title: nginx编译报错date: 2023-09-03 20:17:08category:  nginxtag: nginxauthor:   nginx编译报错 error: C compiler cc is not found安装gcc-c++包,命令： 1yum -y install gcc-c++  error: SSL modules require the OpenSSL library.CentOS 12$ yum -y install openssl openssl-devel  Ubuntu 12$ apt -y install openssl openssl-devel </div></div></div></a><a class="pagination-related" href="/2024/05/21/%E7%9B%98%E7%82%B920%E6%AC%BE%E4%BC%98%E8%B4%A8%E7%9A%84%E5%BC%80%E6%BA%90%E6%B8%B8%E6%88%8F%EF%BC%8C2024%E6%9C%80%E6%96%B0%E6%94%B6%E9%9B%86%EF%BC%81/" title="盘点20款优质的开源游戏，2024最新收集！"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-05-21</div><div class="info-item-2">盘点20款优质的开源游戏，2024最新收集！</div></div><div class="info-2"><div class="info-item-1">本文收集了20款优质的开源游戏，部分还可以点击就可以玩，干货满满，建议先收藏一下。 如果你有值得推荐的开源游戏，欢迎评论中指出！ 1、红警https://github.com/electronicarts/CnC_Remastered_Collection 红警，或者更准确地说，应该称为“红色警戒”，是大多数80后记忆中与游戏最深刻的联系之一。  这款游戏是由当年的Westwood工作室打造的一款即时战略游戏，以至于一提到即时战略游戏，我脑海中浮现的第一个就是红警。 然而，在1998年8月17日，EA收购了Westwood。一般情况下，一旦游戏工作室被EA收购，就意味着走向没落。  这次开源的代码实际上是1996年发布的第一代红警，国内也称之为红警95。  此次开源不涉及游戏素材和游戏引擎，只包括TiberianDawn.DLL和RedAlert.dll的源码，允许Mod社区更好地改变游戏行为。 在6月5日，这两款游戏发布了重制版。 命令与征服系列游戏是用C++实现的，打开代码后可以看到非常规范的代码，令人赞叹不已。  下面是一个示例，展示了飞行器寻找新降落点的函数，函数功能、输...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%87%E7%AB%A0%E7%9B%AE%E5%BD%95"><span class="toc-number">1.</span> <span class="toc-text">文章目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ffmpeg%E6%94%AF%E6%8C%81%E7%A1%AC%E4%BB%B6%E5%8A%A0%E9%80%9F%E7%9A%84%E5%8E%9F%E7%90%86"><span class="toc-number">2.</span> <span class="toc-text">ffmpeg支持硬件加速的原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%80%E7%94%A8%E7%8E%AF%E5%A2%83%E8%AF%B4%E6%98%8E"><span class="toc-number">3.</span> <span class="toc-text">所用环境说明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ffmpeg%E4%BD%BF%E7%94%A8%E7%A1%AC%E4%BB%B6%E5%8A%A0%E9%80%9F"><span class="toc-number">4.</span> <span class="toc-text">ffmpeg使用硬件加速</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85nvidia%E9%A9%B1%E5%8A%A8"><span class="toc-number">4.1.</span> <span class="toc-text">安装nvidia驱动</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85cuda"><span class="toc-number">4.2.</span> <span class="toc-text">安装cuda</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8A%A0%E5%85%A5header"><span class="toc-number">4.3.</span> <span class="toc-text">加入header</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85pkgconfig"><span class="toc-number">4.4.</span> <span class="toc-text">安装pkgconfig</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E5%A7%8B%E9%85%8D%E7%BD%AE"><span class="toc-number">4.5.</span> <span class="toc-text">开始配置</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8ffmpeg%E4%B8%AD%E7%9C%8B%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8%E7%A1%AC%E4%BB%B6%E5%8A%A0%E9%80%9F"><span class="toc-number">5.</span> <span class="toc-text">在ffmpeg中看如何使用硬件加速</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E7%9B%AE%E5%89%8D%E5%8F%AF%E4%BB%A5%E7%94%A8%E7%9A%84hwaccel%E9%80%89%E9%A1%B9"><span class="toc-number">5.1.</span> <span class="toc-text">查看目前可以用的hwaccel选项</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%99%AE%E9%80%9A%E7%9A%84%E8%A7%A3%E7%A0%81%E5%91%BD%E4%BB%A4"><span class="toc-number">5.2.</span> <span class="toc-text">普通的解码命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%85%E4%BB%85%E6%98%AF%E8%BD%AC%E7%A0%81%EF%BC%8C%E4%B8%8D%E5%81%9A%E7%BC%A9%E6%94%BE"><span class="toc-number">5.3.</span> <span class="toc-text">仅仅是转码，不做缩放</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BD%AC%E7%A0%81%EF%BC%8C%E5%A4%96%E5%B8%A6%E4%B8%80%E4%B8%AA%E7%BC%A9%E6%94%BE"><span class="toc-number">5.4.</span> <span class="toc-text">转码，外带一个缩放</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%98%E5%A4%96%E8%AF%9D%EF%BC%8C%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8scale-npp"><span class="toc-number">6.</span> <span class="toc-text">题外话，如何使用scale_npp</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90%E4%B8%80%E4%B8%8Bffmpeg%E6%BA%90%E7%A0%81%E4%B8%AD%E7%9A%84%E7%A1%AC%E4%BB%B6%E5%8A%A0%E9%80%9F%E9%83%A8%E5%88%86"><span class="toc-number">7.</span> <span class="toc-text">简单分析一下ffmpeg源码中的硬件加速部分</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E7%BD%91%E7%AB%99"><span class="toc-number">8.</span> <span class="toc-text">参考网站</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

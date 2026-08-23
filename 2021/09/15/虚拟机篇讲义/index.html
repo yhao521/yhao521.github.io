@@ -1,0 +1,834 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>虚拟机篇讲义 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="虚拟机篇1. JVM 内存结构要求  掌握 JVM 内存结构划分 尤其要知道方法区、永久代、元空间的关系  结合一段 java 代码的执行理解内存划分   执行 javac 命令编译源代码为字节码 执行 java 命令 创建 JVM，调用类加载子系统加载 class，将类的信息存入方法区 创建 main 线程，使用的内存区域是 JVM 虚拟机栈，开始执行 main 方法代码 如果遇到了未见过的类，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="虚拟机篇讲义">
+<meta property="og:url" content="https://yhao521.github.io/2021/09/15/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AF%87%E8%AE%B2%E4%B9%89/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="虚拟机篇1. JVM 内存结构要求  掌握 JVM 内存结构划分 尤其要知道方法区、永久代、元空间的关系  结合一段 java 代码的执行理解内存划分   执行 javac 命令编译源代码为字节码 执行 java 命令 创建 JVM，调用类加载子系统加载 class，将类的信息存入方法区 创建 main 线程，使用的内存区域是 JVM 虚拟机栈，开始执行 main 方法代码 如果遇到了未见过的类，">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2021-09-15T01:44:02.000Z">
+<meta property="article:modified_time" content="2021-09-15T01:44:02.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="java&#x2F;programming">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "虚拟机篇讲义",
+  "url": "https://yhao521.github.io/2021/09/15/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AF%87%E8%AE%B2%E4%B9%89/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2021-09-15T01:44:02.000Z",
+  "dateModified": "2021-09-15T01:44:02.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2021/09/15/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AF%87%E8%AE%B2%E4%B9%89/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '虚拟机篇讲义',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">虚拟机篇讲义</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">虚拟机篇讲义</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-09-15T01:44:02.000Z" title="发表于 2021-09-15 09:44:02">2021-09-15</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-09-15T01:44:02.000Z" title="更新于 2021-09-15 09:44:02">2021-09-15</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="虚拟机篇"><a href="#虚拟机篇" class="headerlink" title="虚拟机篇"></a>虚拟机篇</h1><h2 id="1-JVM-内存结构"><a href="#1-JVM-内存结构" class="headerlink" title="1. JVM 内存结构"></a>1. JVM 内存结构</h2><p><strong>要求</strong></p>
+<ul>
+<li>掌握 JVM 内存结构划分</li>
+<li>尤其要知道方法区、永久代、元空间的关系</li>
+</ul>
+<p><strong>结合一段 java 代码的执行理解内存划分</strong></p>
+<p><img src="/img/image-20210831165728217.png" alt="image-20210831165728217"></p>
+<ul>
+<li>执行 javac 命令编译源代码为字节码</li>
+<li>执行 java 命令<ol>
+<li>创建 JVM，调用类加载子系统加载 class，将类的信息存入<strong>方法区</strong></li>
+<li>创建 main 线程，使用的内存区域是 <strong>JVM 虚拟机栈</strong>，开始执行 main 方法代码</li>
+<li>如果遇到了未见过的类，会继续触发类加载过程，同样会存入<strong>方法区</strong></li>
+<li>需要创建对象，会使用<strong>堆</strong>内存来存储对象</li>
+<li>不再使用的对象，会由<strong>垃圾回收器</strong>在内存不足时回收其内存</li>
+<li>调用方法时，方法内的局部变量、方法参数所使用的是  <strong>JVM 虚拟机栈</strong>中的栈帧内存</li>
+<li>调用方法时，先要到<strong>方法区</strong>获得到该方法的字节码指令，由<strong>解释器</strong>将字节码指令解释为机器码执行</li>
+<li>调用方法时，会将要执行的指令行号读到<strong>程序计数器</strong>，这样当发生了线程切换，恢复时就可以从中断的位置继续</li>
+<li>对于非 java 实现的方法调用，使用内存称为<strong>本地方法栈</strong>（见说明）</li>
+<li>对于热点方法调用，或者频繁的循环代码，由 <strong>JIT 即时编译器</strong>将这些代码编译成机器码缓存，提高执行性能</li>
+</ol>
+</li>
+</ul>
+<p>说明</p>
+<ul>
+<li>加粗字体代表了 JVM 虚拟机组件</li>
+<li>对于 Oracle 的 Hotspot 虚拟机实现，不区分虚拟机栈和本地方法栈</li>
+</ul>
+<p><strong>会发生内存溢出的区域</strong></p>
+<ul>
+<li>不会出现内存溢出的区域 – 程序计数器</li>
+<li>出现 OutOfMemoryError 的情况<ul>
+<li>堆内存耗尽 – 对象越来越多，又一直在使用，不能被垃圾回收</li>
+<li>方法区内存耗尽 – 加载的类越来越多，很多框架都会在运行期间动态产生新的类</li>
+<li>虚拟机栈累积 – 每个线程最多会占用 1 M 内存，线程个数越来越多，而又长时间运行不销毁时</li>
+</ul>
+</li>
+<li>出现 StackOverflowError 的区域<ul>
+<li>JVM 虚拟机栈，原因有方法递归调用未正确结束、反序列化 json 时循环引用</li>
+</ul>
+</li>
+</ul>
+<p><strong>方法区、永久代、元空间</strong></p>
+<ul>
+<li><strong>方法区</strong>是 JVM 规范中定义的一块内存区域，用来存储类元数据、方法字节码、即时编译器需要的信息等</li>
+<li><strong>永久代</strong>是 Hotspot 虚拟机对 JVM 规范的实现（1.8 之前）</li>
+<li><strong>元空间</strong>是 Hotspot 虚拟机对 JVM 规范的另一种实现（1.8 以后），使用本地内存作为这些信息的存储空间</li>
+</ul>
+<p><img src="/img/image-20210831170457337.png" alt="image-20210831170457337"></p>
+<p>从这张图学到三点</p>
+<ul>
+<li>当第一次用到某个类是，由类加载器将 class 文件的类元信息读入，并存储于元空间</li>
+<li>X，Y 的类元信息是存储于元空间中，无法直接访问</li>
+<li>可以用 X.class，Y.class 间接访问类元信息，它们俩属于 java 对象，我们的代码中可以使用</li>
+</ul>
+<p><img src="/img/image-20210831170512418.png" alt="image-20210831170512418"></p>
+<p>从这张图可以学到</p>
+<ul>
+<li>堆内存中：当一个<strong>类加载器对象</strong>，这个类加载器对象加载的所有<strong>类对象</strong>，这些类对象对应的所有<strong>实例对象</strong>都没人引用时，GC 时就会对它们占用的对内存进行释放</li>
+<li>元空间中：内存释放<strong>以类加载器为单位</strong>，当堆中类加载器内存释放时，对应的元空间中的类元信息也会释放</li>
+</ul>
+<h2 id="2-JVM-内存参数"><a href="#2-JVM-内存参数" class="headerlink" title="2. JVM 内存参数"></a>2. JVM 内存参数</h2><p><strong>要求</strong> </p>
+<ul>
+<li>熟悉常见的 JVM 参数，尤其和大小相关的</li>
+</ul>
+<p><strong>堆内存，按大小设置</strong></p>
+<p><img src="/img/image-20210831173130717.png" alt="image-20210831173130717"></p>
+<p>解释：</p>
+<ul>
+<li>-Xms 最小堆内存（包括新生代和老年代）</li>
+<li>-Xmx 最大对内存（包括新生代和老年代）</li>
+<li>通常建议将 -Xms 与 -Xmx 设置为大小相等，即不需要保留内存，不需要从小到大增长，这样性能较好</li>
+<li>-XX:NewSize 与 -XX:MaxNewSize 设置新生代的最小与最大值，但一般不建议设置，由 JVM 自己控制</li>
+<li>-Xmn 设置新生代大小，相当于同时设置了 -XX:NewSize 与 -XX:MaxNewSize 并且取值相等</li>
+<li>保留是指，一开始不会占用那么多内存，随着使用内存越来越多，会逐步使用这部分保留内存。下同</li>
+</ul>
+<p><strong>堆内存，按比例设置</strong></p>
+<p><img src="/img/image-20210831173045700.png" alt="image-20210831173045700"></p>
+<p>解释：</p>
+<ul>
+<li>-XX:NewRatio&#x3D;2:1 表示老年代占两份，新生代占一份</li>
+<li>-XX:SurvivorRatio&#x3D;4:1 表示新生代分成六份，伊甸园占四份，from 和 to 各占一份</li>
+</ul>
+<p><strong>元空间内存设置</strong></p>
+<p><img src="/img/image-20210831173118634.png" alt="image-20210831173118634"></p>
+<p>解释：</p>
+<ul>
+<li>class space 存储类的基本信息，最大值受 -XX:CompressedClassSpaceSize 控制</li>
+<li>non-class space 存储除类的基本信息以外的其它信息（如方法字节码、注解等）</li>
+<li>class space 和 non-class space 总大小受 -XX:MaxMetaspaceSize 控制</li>
+</ul>
+<p>注意：</p>
+<ul>
+<li>这里 -XX:CompressedClassSpaceSize 这段空间还与是否开启了指针压缩有关，这里暂不深入展开，可以简单认为指针压缩默认开启</li>
+</ul>
+<p><strong>代码缓存内存设置</strong></p>
+<p><img src="/img/image-20210831173148816.png" alt="image-20210831173148816"></p>
+<p>解释：</p>
+<ul>
+<li>如果 -XX:ReservedCodeCacheSize &lt; 240m，所有优化机器代码不加区分存在一起</li>
+<li>否则，分成三个区域（图中笔误 mthod 拼写错误，少一个 e）<ul>
+<li>non-nmethods - JVM 自己用的代码</li>
+<li>profiled nmethods - 部分优化的机器码</li>
+<li>non-profiled nmethods - 完全优化的机器码</li>
+</ul>
+</li>
+</ul>
+<p><strong>线程内存设置</strong></p>
+<p><img src="/img/image-20210831173155481.png" alt="image-20210831173155481"></p>
+<blockquote>
+<p><em><strong>官方参考文档</strong></em></p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://docs.oracle.com/en/java/javase/11/tools/java.html#GUID-3B1CE181-CD30-4178-9602-230B800D4FAE">https://docs.oracle.com/en/java/javase/11/tools/java.html#GUID-3B1CE181-CD30-4178-9602-230B800D4FAE</a></li>
+</ul>
+</blockquote>
+<h2 id="3-JVM-垃圾回收"><a href="#3-JVM-垃圾回收" class="headerlink" title="3. JVM 垃圾回收"></a>3. JVM 垃圾回收</h2><p><strong>要求</strong></p>
+<ul>
+<li>掌握垃圾回收算法</li>
+<li>掌握分代回收思想</li>
+<li>理解三色标记及漏标处理</li>
+<li>了解常见垃圾回收器</li>
+</ul>
+<p><strong>三种垃圾回收算法</strong></p>
+<p>标记清除法</p>
+<p><img src="/img/image-20210831211008162.png" alt="image-20210831211008162"></p>
+<p>解释：</p>
+<ol>
+<li>找到 GC Root 对象，即那些一定不会被回收的对象，如正执行方法内局部变量引用的对象、静态变量引用的对象</li>
+<li>标记阶段：沿着 GC Root 对象的引用链找，直接或间接引用到的对象加上标记</li>
+<li>清除阶段：释放未加标记的对象占用的内存</li>
+</ol>
+<p>要点：</p>
+<ul>
+<li>标记速度与存活对象线性关系</li>
+<li>清除速度与内存大小线性关系</li>
+<li>缺点是会产生内存碎片</li>
+</ul>
+<p>标记整理法</p>
+<p><img src="/img/image-20210831211641241.png" alt="image-20210831211641241"></p>
+<p>解释：</p>
+<ol>
+<li>前面的标记阶段、清理阶段与标记清除法类似</li>
+<li>多了一步整理的动作，将存活对象向一端移动，可以避免内存碎片产生</li>
+</ol>
+<p>特点：</p>
+<ul>
+<li><p>标记速度与存活对象线性关系</p>
+</li>
+<li><p>清除与整理速度与内存大小成线性关系</p>
+</li>
+<li><p>缺点是性能上较慢</p>
+</li>
+</ul>
+<p>标记复制法</p>
+<p><img src="/img/image-20210831212125813.png" alt="image-20210831212125813"></p>
+<p>解释：</p>
+<ol>
+<li>将整个内存分成两个大小相等的区域，from 和 to，其中 to 总是处于空闲，from 存储新创建的对象</li>
+<li>标记阶段与前面的算法类似</li>
+<li>在找出存活对象后，会将它们从 from 复制到 to 区域，复制的过程中自然完成了碎片整理</li>
+<li>复制完成后，交换 from 和 to 的位置即可</li>
+</ol>
+<p>特点：</p>
+<ul>
+<li>标记与复制速度与存活对象成线性关系</li>
+<li>缺点是会占用成倍的空间</li>
+</ul>
+<p><strong>GC 与分代回收算法</strong></p>
+<p>GC 的目的在于实现无用对象内存自动释放，减少内存碎片、加快分配速度</p>
+<p>GC 要点：</p>
+<ul>
+<li>回收区域是<strong>堆内存</strong>，不包括虚拟机栈</li>
+<li>判断无用对象，使用<strong>可达性分析算法</strong>，<strong>三色标记法</strong>标记存活对象，回收未标记对象</li>
+<li>GC 具体的实现称为<strong>垃圾回收器</strong></li>
+<li>GC 大都采用了<strong>分代回收思想</strong><ul>
+<li>理论依据是大部分对象朝生夕灭，用完立刻就可以回收，另有少部分对象会长时间存活，每次很难回收</li>
+<li>根据这两类对象的特性将回收区域分为<strong>新生代</strong>和<strong>老年代</strong>，新生代采用标记复制法、老年代一般采用标记整理法</li>
+</ul>
+</li>
+<li>根据 GC 的规模可以分成 <strong>Minor GC</strong>，<strong>Mixed GC</strong>，<strong>Full GC</strong></li>
+</ul>
+<p><strong>分代回收</strong></p>
+<ol>
+<li>伊甸园 eden，最初对象都分配到这里，与幸存区 survivor（分成 from 和 to）合称新生代，</li>
+</ol>
+<p><img src="/img/image-20210831213622704.png" alt="image-20210831213622704"></p>
+<ol start="2">
+<li>当伊甸园内存不足，标记伊甸园与 from（现阶段没有）的存活对象</li>
+</ol>
+<p><img src="/img/image-20210831213640110.png" alt="image-20210831213640110"></p>
+<ol start="3">
+<li>将存活对象采用复制算法复制到 to 中，复制完毕后，伊甸园和 from 内存都得到释放</li>
+</ol>
+<p><img src="/img/image-20210831213657861.png" alt="image-20210831213657861"></p>
+<ol start="4">
+<li>将 from 和 to 交换位置</li>
+</ol>
+<p><img src="/img/image-20210831213708776.png" alt="image-20210831213708776"></p>
+<ol start="5">
+<li>经过一段时间后伊甸园的内存又出现不足</li>
+</ol>
+<p><img src="/img/image-20210831213724858.png" alt="image-20210831213724858"></p>
+<ol start="6">
+<li>标记伊甸园与 from（现阶段没有）的存活对象</li>
+</ol>
+<p><img src="/img/image-20210831213737669.png" alt="image-20210831213737669"></p>
+<ol start="7">
+<li>将存活对象采用复制算法复制到 to 中</li>
+</ol>
+<p><img src="/img/image-20210831213804315.png" alt="image-20210831213804315"></p>
+<ol start="8">
+<li>复制完毕后，伊甸园和 from 内存都得到释放</li>
+</ol>
+<p><img src="/img/image-20210831213815371.png" alt="image-20210831213815371"></p>
+<ol start="9">
+<li>将 from 和 to 交换位置</li>
+</ol>
+<p><img src="/img/image-20210831213826017.png" alt="image-20210831213826017"></p>
+<ol start="10">
+<li>老年代 old，当幸存区对象熬过几次回收（最多15次），晋升到老年代（幸存区内存不足或大对象会导致提前晋升）</li>
+</ol>
+<p><strong>GC 规模</strong></p>
+<ul>
+<li><p>Minor GC 发生在新生代的垃圾回收，暂停时间短</p>
+</li>
+<li><p>Mixed GC 新生代 + 老年代部分区域的垃圾回收，G1 收集器特有</p>
+</li>
+<li><p>Full GC 新生代 + 老年代完整垃圾回收，暂停时间长，<strong>应尽力避免</strong></p>
+</li>
+</ul>
+<p><strong>三色标记</strong></p>
+<p>即用三种颜色记录对象的标记状态</p>
+<ul>
+<li>黑色 – 已标记</li>
+<li>灰色 – 标记中</li>
+<li>白色 – 还未标记</li>
+</ul>
+<ol>
+<li>起始的三个对象还未处理完成，用灰色表示</li>
+</ol>
+<img src="../../../../_resources/image-20210831215016566.png" alt="image-20210831215016566" style="zoom:50%;" />
+
+<ol start="2">
+<li>该对象的引用已经处理完成，用黑色表示，黑色引用的对象变为灰色</li>
+</ol>
+<img src="../../../../_resources/image-20210831215033510.png" alt="image-20210831215033510" style="zoom:50%;" />
+
+<ol start="3">
+<li>依次类推</li>
+</ol>
+<img src="../../../../_resources/image-20210831215105280.png" alt="image-20210831215105280" style="zoom:50%;" />
+
+<ol start="4">
+<li>沿着引用链都标记了一遍</li>
+</ol>
+<img src="../../../../_resources/image-20210831215146276.png" alt="image-20210831215146276" style="zoom:50%;" />
+
+<ol start="5">
+<li>最后为标记的白色对象，即为垃圾</li>
+</ol>
+<img src="../../../../_resources/image-20210831215158311.png" alt="image-20210831215158311" style="zoom:50%;" />
+
+<p><strong>并发漏标问题</strong></p>
+<p>比较先进的垃圾回收器都支持<strong>并发标记</strong>，即在标记过程中，用户线程仍然能工作。但这样带来一个新的问题，如果用户线程修改了对象引用，那么就存在漏标问题。例如：</p>
+<ol>
+<li>如图所示标记工作尚未完成</li>
+</ol>
+<img src="../../../../_resources/image-20210831215846876.png" alt="image-20210831215846876" style="zoom:50%;" />
+
+<ol start="2">
+<li>用户线程同时在工作，断开了第一层 3、4 两个对象之间的引用，这时对于正在处理 3 号对象的垃圾回收线程来讲，它会将 4 号对象当做是白色垃圾</li>
+</ol>
+<img src="../../../../_resources/image-20210831215904073.png" alt="image-20210831215904073" style="zoom:50%;" />
+
+<ol start="3">
+<li>但如果其他用户线程又建立了 2、4 两个对象的引用，这时因为 2 号对象是黑色已处理对象了，因此垃圾回收线程不会察觉到这个引用关系的变化，从而产生了漏标</li>
+</ol>
+<img src="../../../../_resources/image-20210831215919493.png" alt="image-20210831215919493" style="zoom:50%;" />
+
+<ol start="4">
+<li>如果用户线程让黑色对象引用了一个新增对象，一样会存在漏标问题</li>
+</ol>
+<img src="../../../../_resources/image-20210831220004062.png" alt="image-20210831220004062" style="zoom:50%;" />
+
+<p>因此对于<strong>并发标记</strong>而言，必须解决漏标问题，也就是要记录标记过程中的变化。有两种解决方法：</p>
+<ol>
+<li>Incremental Update 增量更新法，CMS 垃圾回收器采用<ul>
+<li>思路是拦截每次赋值动作，只要赋值发生，被赋值的对象就会被记录下来，在重新标记阶段再确认一遍</li>
+</ul>
+</li>
+<li>Snapshot At The Beginning，SATB 原始快照法，G1 垃圾回收器采用<ul>
+<li>思路也是拦截每次赋值动作，不过记录的对象不同，也需要在重新标记阶段对这些对象二次处理</li>
+<li>新加对象会被记录</li>
+<li>被删除引用关系的对象也被记录</li>
+</ul>
+</li>
+</ol>
+<p><strong>垃圾回收器 - Parallel GC</strong></p>
+<ul>
+<li><p>eden 内存不足发生 Minor GC，采用标记复制算法，需要暂停用户线程</p>
+</li>
+<li><p>old 内存不足发生 Full GC，采用标记整理算法，需要暂停用户线程</p>
+</li>
+<li><p><strong>注重吞吐量</strong></p>
+</li>
+</ul>
+<p><strong>垃圾回收器 - ConcurrentMarkSweep GC</strong></p>
+<ul>
+<li><p>它是工作在 old 老年代，支持<strong>并发标记</strong>的一款回收器，采用<strong>并发清除</strong>算法</p>
+<ul>
+<li>并发标记时不需暂停用户线程</li>
+<li>重新标记时仍需暂停用户线程</li>
+</ul>
+</li>
+<li><p>如果并发失败（即回收速度赶不上创建新对象速度），会触发 Full GC</p>
+</li>
+<li><p><strong>注重响应时间</strong></p>
+</li>
+</ul>
+<p><strong>垃圾回收器 - G1 GC</strong></p>
+<ul>
+<li><strong>响应时间与吞吐量兼顾</strong></li>
+<li>划分成多个区域，每个区域都可以充当 eden，survivor，old， humongous，其中 humongous 专为大对象准备</li>
+<li>分成三个阶段：新生代回收、并发标记、混合收集</li>
+<li>如果并发失败（即回收速度赶不上创建新对象速度），会触发 Full GC</li>
+</ul>
+<p><strong>G1 回收阶段 - 新生代回收</strong></p>
+<ol>
+<li>初始时，所有区域都处于空闲状态</li>
+</ol>
+<img src="../../../../_resources/image-20210831222639754.png" alt="image-20210831222639754" style="zoom:50%;" />
+
+<ol start="2">
+<li>创建了一些对象，挑出一些空闲区域作为伊甸园区存储这些对象</li>
+</ol>
+<img src="../../../../_resources/image-20210831222653802.png" alt="image-20210831222653802" style="zoom:50%;" />
+
+<ol start="3">
+<li>当伊甸园需要垃圾回收时，挑出一个空闲区域作为幸存区，用复制算法复制存活对象，需要暂停用户线程</li>
+</ol>
+<img src="../../../../_resources/image-20210831222705814.png" alt="image-20210831222705814" style="zoom:50%;" />
+
+<ol start="4">
+<li>复制完成，将之前的伊甸园内存释放</li>
+</ol>
+<img src="../../../../_resources/image-20210831222724999.png" alt="image-20210831222724999" style="zoom:50%;" />
+
+<ol start="5">
+<li>随着时间流逝，伊甸园的内存又有不足</li>
+</ol>
+<img src="../../../../_resources/image-20210831222737928.png" alt="image-20210831222737928" style="zoom:50%;" />
+
+<ol start="6">
+<li>将伊甸园以及之前幸存区中的存活对象，采用复制算法，复制到新的幸存区，其中较老对象晋升至老年代</li>
+</ol>
+<img src="../../../../_resources/image-20210831222752787.png" alt="image-20210831222752787" style="zoom:50%;" />
+
+<ol start="7">
+<li>释放伊甸园以及之前幸存区的内存</li>
+</ol>
+<img src="../../../../_resources/image-20210831222803281.png" alt="image-20210831222803281" style="zoom:50%;" />
+
+<p><strong>G1 回收阶段 - 并发标记与混合收集</strong></p>
+<ol>
+<li>当老年代占用内存超过阈值后，触发并发标记，这时无需暂停用户线程</li>
+</ol>
+<img src="../../../../_resources/image-20210831222813959.png" alt="image-20210831222813959" style="zoom:50%;" />
+
+<ol start="2">
+<li>并发标记之后，会有重新标记阶段解决漏标问题，此时需要暂停用户线程。这些都完成后就知道了老年代有哪些存活对象，随后进入混合收集阶段。此时不会对所有老年代区域进行回收，而是根据<strong>暂停时间目标</strong>优先回收价值高（存活对象少）的区域（这也是 Gabage First 名称的由来）。</li>
+</ol>
+<img src="../../../../_resources/image-20210831222828104.png" alt="image-20210831222828104" style="zoom:50%;" />
+
+<ol start="3">
+<li>混合收集阶段中，参与复制的有 eden、survivor、old，下图显示了伊甸园和幸存区的存活对象复制</li>
+</ol>
+<img src="../../../../_resources/image-20210831222841096.png" alt="image-20210831222841096" style="zoom:50%;" />
+
+<ol start="4">
+<li>下图显示了老年代和幸存区晋升的存活对象的复制</li>
+</ol>
+<img src="../../../../_resources/image-20210831222859760.png" alt="image-20210831222859760" style="zoom:50%;" />
+
+<ol start="5">
+<li>复制完成，内存得到释放。进入下一轮的新生代回收、并发标记、混合收集</li>
+</ol>
+<img src="../../../../_resources/image-20210831222919182.png" alt="image-20210831222919182" style="zoom:50%;" />
+
+<h2 id="4-内存溢出"><a href="#4-内存溢出" class="headerlink" title="4. 内存溢出"></a>4. 内存溢出</h2><p><strong>要求</strong></p>
+<ul>
+<li>能够说出几种典型的导致内存溢出的情况</li>
+</ul>
+<p><strong>典型情况</strong></p>
+<ul>
+<li>误用线程池导致的内存溢出<ul>
+<li>参考 day03.TestOomThreadPool</li>
+</ul>
+</li>
+<li>查询数据量太大导致的内存溢出<ul>
+<li>参考 day03.TestOomTooManyObject</li>
+</ul>
+</li>
+<li>动态生成类导致的内存溢出<ul>
+<li>参考 day03.TestOomTooManyClass</li>
+</ul>
+</li>
+</ul>
+<h2 id="5-类加载"><a href="#5-类加载" class="headerlink" title="5. 类加载"></a>5. 类加载</h2><p><strong>要求</strong></p>
+<ul>
+<li>掌握类加载阶段</li>
+<li>掌握类加载器</li>
+<li>理解双亲委派机制</li>
+</ul>
+<p><strong>类加载过程的三个阶段</strong></p>
+<ol>
+<li><p>加载</p>
+<ol>
+<li><p>将类的字节码载入方法区，并创建类.class 对象</p>
+</li>
+<li><p>如果此类的父类没有加载，先加载父类</p>
+</li>
+<li><p>加载是懒惰执行</p>
+</li>
+</ol>
+</li>
+<li><p>链接</p>
+<ol>
+<li>验证 – 验证类是否符合 Class 规范，合法性、安全性检查</li>
+<li>准备 – 为 static 变量分配空间，设置默认值</li>
+<li>解析 – 将常量池的符号引用解析为直接引用</li>
+</ol>
+</li>
+<li><p>初始化</p>
+<ol>
+<li>静态代码块、static 修饰的变量赋值、static final 修饰的引用类型变量赋值，会被合并成一个 <code>&lt;cinit&gt;</code> 方法，在初始化时被调用</li>
+<li>static final 修饰的基本类型变量赋值，在链接阶段就已完成</li>
+<li>初始化是懒惰执行</li>
+</ol>
+</li>
+</ol>
+<blockquote>
+<p><em><strong>验证手段</strong></em></p>
+<ul>
+<li>使用 jps 查看进程号</li>
+<li>使用 jhsdb 调试，执行命令 <code>jhsdb.exe hsdb</code> 打开它的图形界面<ul>
+<li>Class Browser 可以查看当前 jvm 中加载了哪些类</li>
+<li>控制台的 universe 命令查看堆内存范围</li>
+<li>控制台的 g1regiondetails 命令查看 region 详情</li>
+<li><code>scanoops 起始地址 结束地址 对象类型</code> 可以根据类型查找某个区间内的对象地址</li>
+<li>控制台的 <code>inspect 地址</code> 指令能够查看这个地址对应的对象详情</li>
+</ul>
+</li>
+<li>使用 javap 命令可以查看 class 字节码</li>
+</ul>
+</blockquote>
+<blockquote>
+<p><em><strong>代码说明</strong></em></p>
+<ul>
+<li>day03.loader.TestLazy - 验证类的加载是懒惰的，用到时才触发类加载</li>
+<li>day03.loader.TestFinal - 验证使用 final 修饰的变量不会触发类加载</li>
+</ul>
+</blockquote>
+<p><strong>jdk 8 的类加载器</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>名称</strong></th>
+<th><strong>加载哪的类</strong></th>
+<th><strong>说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Bootstrap ClassLoader</td>
+<td>JAVA_HOME&#x2F;jre&#x2F;lib</td>
+<td>无法直接访问</td>
+</tr>
+<tr>
+<td>Extension ClassLoader</td>
+<td>JAVA_HOME&#x2F;jre&#x2F;lib&#x2F;ext</td>
+<td>上级为 Bootstrap，显示为  null</td>
+</tr>
+<tr>
+<td>Application ClassLoader</td>
+<td>classpath</td>
+<td>上级为 Extension</td>
+</tr>
+<tr>
+<td>自定义类加载器</td>
+<td>自定义</td>
+<td>上级为 Application</td>
+</tr>
+</tbody></table>
+<p><strong>双亲委派机制</strong></p>
+<p>所谓的双亲委派，就是指优先委派上级类加载器进行加载，如果上级类加载器</p>
+<ul>
+<li>能找到这个类，由上级加载，加载后该类也对下级加载器可见</li>
+<li>找不到这个类，则下级类加载器才有资格执行加载</li>
+</ul>
+<p>双亲委派的目的有两点</p>
+<ol>
+<li><p>让上级类加载器中的类对下级共享（反之不行），即能让你的类能依赖到 jdk 提供的核心类</p>
+</li>
+<li><p>让类的加载有优先次序，保证核心类优先加载</p>
+</li>
+</ol>
+<p><strong>对双亲委派的误解</strong></p>
+<p>下面面试题的回答是错误的</p>
+<p><img src="/img/image-20210901110910016.png" alt="image-20210901110910016"></p>
+<p>错在哪了？</p>
+<ul>
+<li><p>自己编写类加载器就能加载一个假冒的 java.lang.System 吗? 答案是不行。</p>
+</li>
+<li><p>假设你自己的类加载器用双亲委派，那么优先由启动类加载器加载真正的 java.lang.System，自然不会加载假冒的</p>
+</li>
+<li><p>假设你自己的类加载器不用双亲委派，那么你的类加载器加载假冒的 java.lang.System 时，它需要先加载父类 java.lang.Object，而你没有用委派，找不到 java.lang.Object 所以加载会失败</p>
+</li>
+<li><p><strong>以上也仅仅是假设</strong>。事实上操作你就会发现，自定义类加载器加载以 java. 打头的类时，会抛安全异常，在 jdk9 以上版本这些特殊包名都与模块进行了绑定，更连编译都过不了</p>
+</li>
+</ul>
+<blockquote>
+<p><em><strong>代码说明</strong></em></p>
+<ul>
+<li>day03.loader.TestJdk9ClassLoader - 演示类加载器与模块的绑定关系</li>
+</ul>
+</blockquote>
+<h2 id="6-四种引用"><a href="#6-四种引用" class="headerlink" title="6. 四种引用"></a>6. 四种引用</h2><p><strong>要求</strong></p>
+<ul>
+<li>掌握四种引用</li>
+</ul>
+<p><strong>强引用</strong></p>
+<ol>
+<li><p>普通变量赋值即为强引用，如 A a &#x3D; new A();</p>
+</li>
+<li><p>通过 GC Root 的引用链，如果强引用不到该对象，该对象才能被回收</p>
+</li>
+</ol>
+<img src="../../../../_resources/image-20210901111903574.png" alt="image-20210901111903574" style="zoom:80%;" />
+
+<p><strong>软引用（SoftReference）</strong></p>
+<ol>
+<li><p>例如：SoftReference a &#x3D; new SoftReference(new A());</p>
+</li>
+<li><p>如果仅有软引用该对象时，首次垃圾回收不会回收该对象，如果内存仍不足，再次回收时才会释放对象</p>
+</li>
+<li><p>软引用自身需要配合引用队列来释放</p>
+</li>
+<li><p>典型例子是反射数据</p>
+</li>
+</ol>
+<img src="../../../../_resources/image-20210901111957328.png" alt="image-20210901111957328" style="zoom:80%;" />
+
+
+
+<p><strong>弱引用（WeakReference）</strong></p>
+<ol>
+<li><p>例如：WeakReference a &#x3D; new WeakReference(new A());</p>
+</li>
+<li><p>如果仅有弱引用引用该对象时，只要发生垃圾回收，就会释放该对象</p>
+</li>
+<li><p>弱引用自身需要配合引用队列来释放</p>
+</li>
+<li><p>典型例子是 ThreadLocalMap 中的 Entry 对象</p>
+</li>
+</ol>
+<img src="../../../../_resources/image-20210901112107707.png" alt="image-20210901112107707" style="zoom:80%;" />
+
+
+
+<p><strong>虚引用（PhantomReference）</strong></p>
+<ol>
+<li><p>例如： PhantomReference a &#x3D; new PhantomReference(new A(), referenceQueue);</p>
+</li>
+<li><p>必须配合引用队列一起使用，当虚引用所引用的对象被回收时，由 Reference Handler 线程将虚引用对象入队，这样就可以知道哪些对象被回收，从而对它们关联的资源做进一步处理</p>
+</li>
+<li><p>典型例子是 Cleaner 释放 DirectByteBuffer 关联的直接内存</p>
+</li>
+</ol>
+<img src="../../../../_resources/image-20210901112157901.png" alt="image-20210901112157901" style="zoom:80%;" />
+
+
+
+
+
+<blockquote>
+<p><em><strong>代码说明</strong></em></p>
+<ul>
+<li>day03.reference.TestPhantomReference - 演示虚引用的基本用法</li>
+<li>day03.reference.TestWeakReference - 模拟 ThreadLocalMap, 采用引用队列释放 entry 内存</li>
+</ul>
+</blockquote>
+<h2 id="7-finalize"><a href="#7-finalize" class="headerlink" title="7. finalize"></a>7. finalize</h2><p><strong>要求</strong></p>
+<ul>
+<li>掌握 finalize 的工作原理与缺点</li>
+</ul>
+<p><strong>finalize</strong></p>
+<ul>
+<li>它是 Object 中的一个方法，如果子类重写它，垃圾回收时此方法会被调用，可以在其中进行资源释放和清理工作</li>
+<li>将资源释放和清理放在 finalize 方法中非常不好，非常影响性能，严重时甚至会引起 OOM，从 Java9 开始就被标注为 @Deprecated，不建议被使用了</li>
+</ul>
+<p><strong>finalize 原理</strong></p>
+<ol>
+<li>对 finalize 方法进行处理的核心逻辑位于 java.lang.ref.Finalizer 类中，它包含了名为 unfinalized 的静态变量（双向链表结构），Finalizer 也可被视为另一种引用对象（地位与软、弱、虚相当，只是不对外，无法直接使用）</li>
+<li>当重写了 finalize 方法的对象，在构造方法调用之时，JVM 都会将其包装成一个 Finalizer 对象，并加入 unfinalized 链表中</li>
+</ol>
+<p><img src="/img/image-20210901121032813.png" alt="image-20210901121032813"></p>
+<ol start="3">
+<li>Finalizer 类中还有另一个重要的静态变量，即 ReferenceQueue 引用队列，刚开始它是空的。当狗对象可以被当作垃圾回收时，就会把这些狗对象对应的 Finalizer 对象加入此引用队列</li>
+<li>但此时 Dog 对象还没法被立刻回收，因为 unfinalized -&gt; Finalizer 这一引用链还在引用它嘛，为的是【先别着急回收啊，等我调完 finalize 方法，再回收】</li>
+<li>FinalizerThread 线程会从 ReferenceQueue 中逐一取出每个 Finalizer 对象，把它们从链表断开并真正调用 finallize 方法</li>
+</ol>
+<p><img src="/img/image-20210901122228916.png" alt="image-20210901122228916"></p>
+<ol start="6">
+<li>由于整个 Finalizer 对象已经从 unfinalized 链表中断开，这样没谁能引用到它和狗对象，所以下次 gc 时就被回收了</li>
+</ol>
+<p><strong>finalize 缺点</strong></p>
+<ul>
+<li>无法保证资源释放：FinalizerThread 是守护线程，代码很有可能没来得及执行完，线程就结束了</li>
+<li>无法判断是否发生错误：执行 finalize 方法时，会吞掉任意异常（Throwable）</li>
+<li>内存释放不及时：重写了 finalize 方法的对象在第一次被 gc 时，并不能及时释放它占用的内存，因为要等着 FinalizerThread 调用完 finalize，把它从 unfinalized 队列移除后，第二次 gc 时才能真正释放内存</li>
+<li>有的文章提到【Finalizer 线程会和我们的主线程进行竞争，不过由于它的优先级较低，获取到的CPU时间较少，因此它永远也赶不上主线程的步伐】这个显然是错误的，FinalizerThread 的优先级较普通线程更高，原因应该是 finalize 串行执行慢等原因综合导致</li>
+</ul>
+<blockquote>
+<p><em><strong>代码说明</strong></em></p>
+<ul>
+<li>day03.reference.TestFinalize - finalize 的测试代码</li>
+</ul>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2021/09/15/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AF%87%E8%AE%B2%E4%B9%89/">https://yhao521.github.io/2021/09/15/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AF%87%E8%AE%B2%E4%B9%89/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/java-programming/">java/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2021/09/15/%E6%A1%86%E6%9E%B6%E7%AF%87%E8%AE%B2%E4%B9%89/" title="框架篇讲义"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">框架篇讲义</div></div><div class="info-2"><div class="info-item-1">框架篇1. Spring refresh 流程要求  掌握 refresh 的 12 个步骤  Spring refresh 概述 refresh 是 AbstractApplicationContext 中的一个方法，负责初始化 ApplicationContext 容器，容器必须调用 refresh 才能正常工作。它的内部主要会调用 12 个方法，我们把它们称为 refresh 的 12 个步骤：  prepareRefresh  obtainFreshBeanFactory  prepareBeanFactory  postProcessBeanFactory  invokeBeanFactoryPostProcessors  registerBeanPostProcessors  initMessageSource  initApplicationEventMulticaster  onRefresh  registerListeners  finishBeanFactoryInitialization  finishRefresh    功能分类  1 为准备环境  2...</div></div></div></a><a class="pagination-related" href="/2021/09/15/%E5%B9%B6%E5%8F%91%E7%AF%87%E8%AE%B2%E4%B9%89/" title="并发篇讲义"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">并发篇讲义</div></div><div class="info-2"><div class="info-item-1">并发篇1. 线程状态要求  掌握 Java 线程六种状态 掌握 Java 线程状态转换 能理解五种状态与六种状态两种说法的区别  六种状态及转换 分别是  新建 当一个线程对象被创建，但还未调用 start 方法时处于新建状态 此时未与操作系统底层线程关联   可运行 调用了 start 方法，就会由新建进入可运行 此时与底层线程关联，由操作系统调度执行   终结 线程内代码已经执行完毕，由可运行进入终结 此时会取消与底层线程关联   阻塞 当获取锁失败后，由可运行进入 Monitor 的阻塞队列阻塞，此时不占用 cpu 时间 当持锁线程释放锁时，会按照一定规则唤醒阻塞队列中的阻塞线程，唤醒后的线程进入可运行状态   等待 当获取锁成功后，但由于条件不满足，调用了 wait() 方法，此时从可运行状态释放锁进入 Monitor 等待集合等待，同样不占用 cpu 时间 当其它持锁线程调用 notify() 或 notifyAll() 方法，会按照一定规则唤醒等待集合中的等待线程，恢复为可运行状态   有时限等待 当获取锁成功后，但由于条件不满足，调用了 wait(long) 方法，...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2024/10/05/Vite%202%20+%20Vue%203%20%E5%BC%95%E5%85%A5%20TypeScript%20(%E5%92%8C%20JavaScript%20%E6%B7%B7%E5%90%88%E5%BC%80%E5%8F%91)-1/" title="Vite 2 + Vue 3 引入 TypeScript (和 JavaScript 混合开发)-1"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-10-05</div><div class="info-item-2">Vite 2 + Vue 3 引入 TypeScript (和 JavaScript 混合开发)-1</div></div><div class="info-2"><div class="info-item-1">最近在迁移一个 Vue 2 项目，弄得差不多想起还是有必要整上 TypeScript，但改的过程中并不想一下子把所有文件从.js改成.ts，那么我们可以在tsconfig.json文件的&quot;compilerOptions&quot;配置上 “allowJs”: true，”noEmit”: true。  前提是已经安装了 typescript，没有的话可以全局npm install -g typescript，或者安装在项目本地。  具体上完整干货：  cd 到项目根目录，命令行敲上tsc –init，生成tsconfig.json文件，然后修改如下(部分选项根据自己需要来)：  📃tsconfig.json 123456789101112131415161718192021222324252627282930313233&#123;  &quot;compilerOptions&quot;: &#123;    &quot;target&quot;: &quot;esnext&quot;,    &quot;useDefineForClassFields&quot;:...</div></div></div></a><a class="pagination-related" href="/2025/03/18/Cypress%20vs%20Playwright%E2%80%94%E2%80%94%E5%93%AA%E4%B8%AA%20JavaScript%20%E6%B5%8B%E8%AF%95%E6%A1%86%E6%9E%B6%E6%9B%B4%E5%A5%BD%EF%BC%9F/" title="Cypress vs Playwright——哪个 JavaScript 测试框架更好？"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-18</div><div class="info-item-2">Cypress vs Playwright——哪个 JavaScript 测试框架更好？</div></div><div class="info-2"><div class="info-item-1"> 10 年前，自动化测试人员如果要编写 E2E 测试，主要使用 Selenium。每个有机会使用该解决方案的人都应该会记得设置、编写和调试是多么不愉快。在此过程中还创建了一些更有趣的自动化工具，例如 Webdriver.io、TestCafe、Nightwatch.js 和 Puppeteer。但是我们今天不会关注那些，因为我想谈谈Cypress和Playwright中测试自动化的几个问题。Cypress 和 Playwright是目前为测试实现创建理想工具的顶级框架。 两个框架，相似……  Cypress 是一种基于 JavaScript 的前端测试工具。设计为对开发人员友好，它直接在浏览器中运行。 Cypress 的第一个版本于 2015 年发布，并于 2018 年开始真正流行，并于 2020 年筹集了 4000 万美元的 B 轮融资。他们以开源为荣，他们相信这将帮助他们在竞争中取得领先。Playwright（微软），于2020年发布。它是一个用于端到端测试的跨浏览器自动化库，也是开源的。它最初是一个 JavaScript 库，但现在已经扩展到还支持 Python、NET 和...</div></div></div></a><a class="pagination-related" href="/2023/09/04/05_GC%E5%92%8CGC%E8%B0%83%E4%BC%98/" title="05_GC和GC调优"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">05_GC和GC调优</div></div><div class="info-2"><div class="info-item-1"> title: 05_GC和GC调优date: 2023-09-03 20:17:08category:  开发语言 javatag: javaauthor:   GC和GC Tuning作者：马士兵教育 http://mashibing.com GC的基础知识1.什么是垃圾 C语言申请内存：malloc free C++： new delete c&#x2F;C++ 手动回收内存 Java: new ？ 自动内存回收，编程上简单，系统不容易出错，手动释放内存，容易出两种类型的问题：  忘记回收 多次回收   没有任何引用指向的一个对象或者多个对象（循环引用） 2.如何定位垃圾 引用计数（ReferenceCount） 根可达算法(RootSearching)  3.常见的垃圾回收算法 标记清除(mark sweep) - 位置不连续 产生碎片 效率偏低（两遍扫描） 拷贝算法 (copying) - 没有碎片，浪费空间 标记压缩(mark compact) - 没有碎片，效率偏低（两遍扫描，指针需要调整）  4.JVM内存分代模型（用于分代垃圾回收算法） 部分垃圾回收器使用的模型...</div></div></div></a><a class="pagination-related" href="/2021/09/15/%E5%9F%BA%E7%A1%80%E7%AF%87%E8%AE%B2%E4%B9%89/" title="基础篇讲义"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2021-09-15</div><div class="info-item-2">基础篇讲义</div></div><div class="info-2"><div class="info-item-1">基础篇 基础篇要点：算法、数据结构、基础设计模式  1. 二分查找要求  能够用自己语言描述二分查找算法 能够手写二分查找代码 能够解答一些变化后的考法  算法描述  前提：有已排序数组 A（假设已经做好）  定义左边界 L、右边界 R，确定搜索范围，循环执行二分查找（3、4两步）  获取中间索引 M &#x3D; Floor((L+R) &#x2F;2)  中间索引的值  A[M] 与待搜索的值 T 进行比较 ① A[M] &#x3D;&#x3D; T 表示找到，返回中间索引 ② A[M] &gt; T，中间值右侧的其它元素都大于 T，无需比较，中间索引左边去找，M - 1 设置为右边界，重新查找 ③ A[M] &lt; T，中间值左侧的其它元素都小于 T，无需比较，中间索引右边去找， M + 1 设置为左边界，重新查找  当 L &gt; R 时，表示没有找到，应结束循环    更形象的描述请参考：binary_search.html  算法实现 1234567891011121314public static int binarySearch(int[] a, int t)...</div></div></div></a><a class="pagination-related" href="/2023/09/04/win/" title="win"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">win</div></div><div class="info-2"><div class="info-item-1"> title: windate: 2023-09-03 20:17:08category:  wintag: winauthor:   Win10-Win+E快捷键失效1.新建x.reg文件，加入4个注册表项12345678910111213Windows Registry Editor Version 5.00[HKEY_CLASSES_ROOT\Folder\shell\explore\command]&quot;DelegateExecute&quot;=&quot;&#123;11dbb47c-a525-400b-9e80-a54615a090c0&#125;&quot;[HKEY_CLASSES_ROOT\Folder\shell\open\command]&quot;DelegateExecute&quot;=&quot;&#123;11dbb47c-a525-400b-9e80-a54615a090c0&#125;&quot;[HKEY_CLASSES_ROOT\Folder\shell\opennewprocess\command]&quot;DelegateEx...</div></div></div></a><a class="pagination-related" href="/2023/09/04/mac%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7/" title="mac命令行工具"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">mac命令行工具</div></div><div class="info-2"><div class="info-item-1"> title: mac命令行工具date: 2023-09-03 20:17:08category:  mactag: macauthor:   8个不可不知的Mac OS X专用命令行工具OS X的终端下通用很多Unix的工具和脚本。如果从Linux迁移到OS X会发现很多熟悉的命令和脚本工具，其实并没有任何区别。 但是OS X也提供了很多其他系统所没有的特别的命令行工具。我们推荐8个这类的工具，希望有助于提高在Mac的命令行环境下的效率。 1. openopen命令用于打开文件、目录或执行程序。就等同于在命令行模式下，重复图形界面“双击”的动作。例如这个命令与在Finder中双击Safari是一样的： 1$ open /Applications/Safari.app/  如果open一个文件，则会使用关联的程序打开之。例如open screenshot.png会在Preview中查看图片。 可以使用-a选项要求自行选择打开的程序，或使用-e强制在TextEdit中编辑此文件。 open一个目录会在Finder窗口中打开此目录。一个很有用的技巧是open .打开当前目录。 Fi...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AF%87"><span class="toc-number">1.</span> <span class="toc-text">虚拟机篇</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-JVM-%E5%86%85%E5%AD%98%E7%BB%93%E6%9E%84"><span class="toc-number">1.1.</span> <span class="toc-text">1. JVM 内存结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-JVM-%E5%86%85%E5%AD%98%E5%8F%82%E6%95%B0"><span class="toc-number">1.2.</span> <span class="toc-text">2. JVM 内存参数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-JVM-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6"><span class="toc-number">1.3.</span> <span class="toc-text">3. JVM 垃圾回收</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA"><span class="toc-number">1.4.</span> <span class="toc-text">4. 内存溢出</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E7%B1%BB%E5%8A%A0%E8%BD%BD"><span class="toc-number">1.5.</span> <span class="toc-text">5. 类加载</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E5%9B%9B%E7%A7%8D%E5%BC%95%E7%94%A8"><span class="toc-number">1.6.</span> <span class="toc-text">6. 四种引用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-finalize"><span class="toc-number">1.7.</span> <span class="toc-text">7. finalize</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

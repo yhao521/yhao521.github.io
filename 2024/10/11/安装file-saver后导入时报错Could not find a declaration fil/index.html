@@ -1,0 +1,208 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>安装file-saver后导入时报错Could not find a declaration file for module ‘file-saver‘ | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="背景：npm install file-saver安装后，import FileSaver from &#39;file-saver&#39;;导入报错Could not find a declaration file for module ‘file-saver’ 原因： TypeScript 没有找到 file-saver 的类型声明文件。 解决：安装 @types&#x2F;file-sav">
+<meta property="og:type" content="article">
+<meta property="og:title" content="安装file-saver后导入时报错Could not find a declaration file for module ‘file-saver‘">
+<meta property="og:url" content="https://yhao521.github.io/2024/10/11/%E5%AE%89%E8%A3%85file-saver%E5%90%8E%E5%AF%BC%E5%85%A5%E6%97%B6%E6%8A%A5%E9%94%99Could%20not%20find%20a%20declaration%20fil/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="背景：npm install file-saver安装后，import FileSaver from &#39;file-saver&#39;;导入报错Could not find a declaration file for module ‘file-saver’ 原因： TypeScript 没有找到 file-saver 的类型声明文件。 解决：安装 @types&#x2F;file-sav">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2024-10-11T05:37:44.000Z">
+<meta property="article:modified_time" content="2024-10-11T05:37:44.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "安装file-saver后导入时报错Could not find a declaration file for module ‘file-saver‘",
+  "url": "https://yhao521.github.io/2024/10/11/%E5%AE%89%E8%A3%85file-saver%E5%90%8E%E5%AF%BC%E5%85%A5%E6%97%B6%E6%8A%A5%E9%94%99Could%20not%20find%20a%20declaration%20fil/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2024-10-11T05:37:44.000Z",
+  "dateModified": "2024-10-11T05:37:44.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2024/10/11/%E5%AE%89%E8%A3%85file-saver%E5%90%8E%E5%AF%BC%E5%85%A5%E6%97%B6%E6%8A%A5%E9%94%99Could%20not%20find%20a%20declaration%20fil/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '安装file-saver后导入时报错Could not find a declaration file for module ‘file-saver‘',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">安装file-saver后导入时报错Could not find a declaration file for module ‘file-saver‘</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">安装file-saver后导入时报错Could not find a declaration file for module ‘file-saver‘</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-10-11T05:37:44.000Z" title="发表于 2024-10-11 13:37:44">2024-10-11</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-10-11T05:37:44.000Z" title="更新于 2024-10-11 13:37:44">2024-10-11</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>背景：<code>npm install file-saver</code>安装后，<code>import FileSaver from &#39;file-saver&#39;;</code>导入报错Could not find a declaration file for module ‘<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=file-saver&spm=1001.2101.3001.7020">file-saver</a>’</p>
+<p>原因： TypeScript 没有找到 file-saver 的类型声明文件。</p>
+<p>解决：安装 @types&#x2F;file-saver 包，该包提供了 file-saver 的类型声明。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npm install --save-dev @types/file-saver</span><br><span class="line">1</span><br></pre></td></tr></table></figure></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2024/10/11/%E5%AE%89%E8%A3%85file-saver%E5%90%8E%E5%AF%BC%E5%85%A5%E6%97%B6%E6%8A%A5%E9%94%99Could%20not%20find%20a%20declaration%20fil/">https://yhao521.github.io/2024/10/11/%E5%AE%89%E8%A3%85file-saver%E5%90%8E%E5%AF%BC%E5%85%A5%E6%97%B6%E6%8A%A5%E9%94%99Could%20not%20find%20a%20declaration%20fil/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/10/11/%E8%81%8A%E8%81%8AJS%E7%9A%84%E4%BA%8C%E8%BF%9B%E5%88%B6%E5%AE%B6%E6%97%8F%EF%BC%9ABlob%E3%80%81ArrayBuffer%E5%92%8CBuffer/" title="聊聊JS的二进制家族：Blob、ArrayBuffer和Buffer"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">聊聊JS的二进制家族：Blob、ArrayBuffer和Buffer</div></div><div class="info-2"><div class="info-item-1">正文事实上，前端很少涉及对二进制数据的处理，但即便如此，我们偶尔总能在角落里看见它们的身影。 今天我们就来聊一聊前端的二进制家族：Blob、ArrayBuffer和Buffer 概述 Blob: 前端的一个专门用于支持文件操作的二进制对象 ArrayBuffer：前端的一个通用的二进制缓冲区，类似数组，但在API和特性上却有诸多不同 Buffer：Node.js提供的一个二进制缓冲区，常用来处理I&#x2F;O操作  Blob我们首先来介绍Blob，Blob是用来支持文件操作的。简单的说：在JS中，有两个构造函数 File 和 Blob, 而File继承了所有Blob的属性。 所以在我们看来，File对象可以看作一种特殊的Blob对象。在前端工程中，我们在哪些操作中可以获得File对象呢？ 请看： （备注：目前 File API规范的状态为Working Draft） 我们上面说了，File对象是一种特殊的Blob对象，那么它自然就可以直接调用Blob对象的方法。让我们看一看Blob具体有哪些方法，以及能够用它们实现哪些功能  Blob实战通过window.URL.createO...</div></div></div></a><a class="pagination-related" href="/2024/10/11/vue%E4%B8%AD%EF%BC%8C%E4%BD%BF%E7%94%A8file-saver%E5%AF%BC%E5%87%BA%E6%96%87%E4%BB%B6%EF%BC%8C%E4%B8%8B%E8%BD%BDExcel%E6%96%87%E4%BB%B6%E3%80%81%E4%B8%8B%E8%BD%BD%E5%9B%BE%E7%89%87%E3%80%81%E4%B8%8B%E8%BD%BD%E6%96%87%E6%9C%AC/" title="vue中，使用file-saver导出文件，下载Excel文件、下载图片、下载文本"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">vue中，使用file-saver导出文件，下载Excel文件、下载图片、下载文本</div></div><div class="info-2"><div class="info-item-1">vue中，使用file-saver导出文件，下载Excel文件、下载图片、下载文本1、基本介绍npm地址：https://www.npmjs.com/package/file-saver 安装1234567# Basic Node.JS installationnpm install file-saver --savebower install file-saver# Additional typescript definitionsnpm install @types/file-saver --save-dev123456  语法saveAs()从文件保存器导入 123import &#123; saveAs &#125; from &#x27;file-saver&#x27;;FileSaver saveAs(Blob/File/Url, optional DOMString filename, optional Object &#123; autoBom &#125;)12  传递{ autoBom: true }如果你想FileSaver.js自动提供Unicode文本编...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/git%E9%A1%B9%E7%9B%AE%E6%8B%86%E5%88%86%E4%BF%9D%E7%95%99git%E8%AE%B0%E5%BD%95%E6%8B%86%E5%88%86/" title="git项目拆分保留git记录拆分"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">git项目拆分保留git记录拆分</div></div><div class="info-2"><div class="info-item-1"> title: git项目拆分保留git记录拆分date: 2023-09-03 20:17:08category:  gittag: gitauthor:   git项目拆分保留git记录拆分需求 现在有如下需求，之前多个项目（Project A,Project B,Project C）混在了一个大的Project里面，不便于管理。 现在需要把Project C 单独拆分出来，并保留该项目之前的git记录。 解决 在此我们使用 git subtree 工具 来进行拆分，简单来说就是先把Project C的所有提交抽离成一个单独的分支，然后把该分支merge到一个全新的仓库。 1git subtree split --prefix=&lt;prefix&gt; [OPTIONS] [&lt;commit&gt;]  Step1: 拆分项目Project C到 branchC分支 123456789git subtree split -P ProjectC -b branchC# 切换到新的分支git checkout branchCgit subtree split -P crd...</div></div></div></a><a class="pagination-related" href="/2023/09/04/linux%E5%91%BD%E4%BB%A4/" title="linux命令"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">linux命令</div></div><div class="info-2"><div class="info-item-1"> title: linux命令date: 2023-09-03 20:17:08category:  linux centostag: centosauthor:   替换文件packages.json中字符3.0.8为3.0.9sed -i “s&#x2F;3.0.8&#x2F;3.0.9&#x2F;g” package.json [[_resources&#x2F;67740ad87040afa595f4cdb8f4dd10b7_MD5.sh|Open: install_tools.sh]]![[_resources&#x2F;67740ad87040afa595f4cdb8f4dd10b7_MD5.sh]] </div></div></div></a><a class="pagination-related" href="/2024/03/09/Redis%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF%E7%9F%A5%E8%AF%86%E7%82%B9%E5%85%A8%E9%9B%86/" title="Redis核心技术知识点全集"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-09</div><div class="info-item-2">Redis核心技术知识点全集</div></div><div class="info-2"><div class="info-item-1">   Redis数据结构和常用命令 1.  String字符串 2. Hash哈希 3. List列表 4. Set集合 5. Sorted Set有序集合 6. Redis常用命令参考   Redis事务机制 1. Redis事务生命周期 2. Redis事务到底是不是原子性的？ 3. Redis为什么不支持回滚（roll back）？ 4. Redis事务失败场景 5. Redis事务相关命令 （1）WATCH （2）MULTI （3）UNWATCH （4）DISCARD （5）EXEC     Redis持久化策略 什么是持久化？ Redis为什么要持久化？ Redis如何实现持久化？ RDB持久化 AOF持久化 RDB和AOF的优缺点   Redis内存淘汰策略 什么是淘汰策略？ 如何配置最大内存？ 淘汰策略的分类 noeviction allkeys-lru volatile-lru allkeys-random volatile-random volatile-ttl allkeys-lfu volatile-lfu   LRU算法 LFU算法   Redis内存失效...</div></div></div></a><a class="pagination-related" href="/2024/03/09/%E9%9D%A2%E8%AF%95%E5%AE%98%EF%BC%9A%E8%AF%B4%E8%AF%B4Atomic%E5%8E%9F%E5%AD%90%E7%B1%BB%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/" title="面试官：说说Atomic原子类的实现原理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-09</div><div class="info-item-2">面试官：说说Atomic原子类的实现原理</div></div><div class="info-2"><div class="info-item-1"> 本文首发我的微信公众号『爱笑的架构师』，欢迎大家关注。     线程安全真的是线程的安全吗？ 什么是 Atomic？ 实现一个计数器 AtomicInteger 源码分析 AtomicLong 和 LongAdder 谁更牛？ 总结    当我们谈论『线程安全』的时候，肯定都会想到 Atomic 类。不错，Atomic 相关类都是线程安全的，在讲 Atomic 类之前我想再聊聊『线程安全』这个概念。 线程安全真的是线程的安全吗？初看『线程安全』这几个字，很容易望文生义，这不就是线程的安全吗？其实不是，线程本身没有好坏，没有『安全的线程』和『不安全的线程』之分，俗话说：人之初性本善，线程天生也是纯洁善良的，真正让线程变坏是因为访问的变量的原因，变量对于操作系统来说其实就是内存块，所以绕了这么一大圈，线程安全称为『内存的安全』可能更为贴切。 简而言之，线程访问的内存决定了这个线程是否是安全的。 变量大致可以分为局部变量和共享变量，局部变量对于 JVM 来说是栈空间，大家都背过八股文，栈是线程私有的是非共享的，那自然也是内存安全的；共享变量对于 JVM 来说一般是存在于堆上，堆上的东...</div></div></div></a><a class="pagination-related" href="/2024/01/10/Windows%E7%89%88mysql5.7%E5%85%8D%E5%AE%89%E8%A3%85%E6%9D%BF%E6%95%99%E7%A8%8B/" title="Windows版mysql5.7免安装板教程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-10</div><div class="info-item-2">Windows版mysql5.7免安装板教程</div></div><div class="info-2"><div class="info-item-1">Windows10版mysql5.7免安装版的配置教程1 安装第一步，官方下载地址：https://dev.mysql.com/downloads/mysql/ 第二步解压（安装）：将下载的ZIP Archive压缩包解压到任意盘，（这里我解压到d盘，路径为：D:\Program Files\mysql-5.6.25-winx64，接下来需要将其”瘦身”，当然不做这一步也没有关系，就是臃肿让人心里不爽。找到其各级目录下的.pbd和.lib文件以及debug文件夹，这个mysql调试时产生的文件，没有多大用处。） 第三步配置默认文件：因为现在mysql是默认配置，在使用的过程中会出现很多问题，如汉字是乱码等。我们新建配置文件my.ini，放在mysql的根目录下，键入如下代码： 1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465666768697071# For advice on how t...</div></div></div></a><a class="pagination-related" href="/2026/05/15/SUPPORT-Haoyun-Music/" title="SUPPORT-Haoyun-Music"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-15</div><div class="info-item-2">SUPPORT-Haoyun-Music</div></div><div class="info-2"><div class="info-item-1">☕ 支持 Haoyun Music Player 开发Haoyun Music Player 是一个开源免费的音乐播放器，如果您觉得它对您有帮助，欢迎通过以下方式支持开发者继续改进！  💳 捐赠方式💙 支付宝扫描下方二维码即可捐赠：  💚 微信支付扫描下方二维码即可捐赠：   🙏 感谢您的支持每一份支持都是对我们最大的鼓励！您的捐赠将用于：  ✨ 持续功能开发和优化 🐛 Bug 修复和性能提升 🎨 更好的用户体验设计   📝 关于项目Haoyun Music Player 基于以下技术构建：  Go 1.25 - 高性能后端 Wails v3 - 跨平台桌面应用框架 Vue 3 - 现代化前端框架 Oto v3 - 音频播放库 FFmpeg - 多媒体处理    💝 Haoyun Music Player | Made with ❤️ for music lovers   📊 项目信息 版本: 0.0.X 许可证: 开源免费 技术支持: Go + Wails3 + Vue 3 平台: macOS &#x2F; Windows &#x2F; Linux   感谢您...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

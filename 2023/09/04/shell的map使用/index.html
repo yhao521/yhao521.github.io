@@ -1,0 +1,243 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>shell的map使用 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="title: shell的map使用date: 2023-09-03 20:17:08category: tag: author:  Shell中map的使用Shell中的map与array有很多的相似之处，array操作：https:&#x2F;&#x2F;www.cnblogs.com&#x2F;qq931399960&#x2F;p&#x2F;10786111.html 一、在使用map时，需要先声明，否则结果可能与预期不同，array可以">
+<meta property="og:type" content="article">
+<meta property="og:title" content="shell的map使用">
+<meta property="og:url" content="https://yhao521.github.io/2023/09/04/shell%E7%9A%84map%E4%BD%BF%E7%94%A8/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="title: shell的map使用date: 2023-09-03 20:17:08category: tag: author:  Shell中map的使用Shell中的map与array有很多的相似之处，array操作：https:&#x2F;&#x2F;www.cnblogs.com&#x2F;qq931399960&#x2F;p&#x2F;10786111.html 一、在使用map时，需要先声明，否则结果可能与预期不同，array可以">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2023-09-04T03:18:09.000Z">
+<meta property="article:modified_time" content="2023-09-04T03:18:27.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "shell的map使用",
+  "url": "https://yhao521.github.io/2023/09/04/shell%E7%9A%84map%E4%BD%BF%E7%94%A8/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2023-09-04T03:18:09.000Z",
+  "dateModified": "2023-09-04T03:18:27.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2023/09/04/shell%E7%9A%84map%E4%BD%BF%E7%94%A8/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'shell的map使用',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">shell的map使用</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">shell的map使用</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-09-04T03:18:09.000Z" title="发表于 2023-09-04 11:18:09">2023-09-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-09-04T03:18:27.000Z" title="更新于 2023-09-04 11:18:27">2023-09-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><hr>
+<p>title: shell的map使用<br>date: 2023-09-03 20:17:08<br>category:</p>
+<p>tag:</p>
+<p>author:</p>
+<hr>
+<h1 id="Shell中map的使用"><a href="#Shell中map的使用" class="headerlink" title="Shell中map的使用"></a><a target="_blank" rel="noopener" href="https://www.cnblogs.com/qq931399960/p/10786362.html">Shell中map的使用</a></h1><p>Shell中的map与array有很多的相似之处，array操作：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/qq931399960/p/10786111.html">https://www.cnblogs.com/qq931399960/p/10786111.html</a></p>
+<p>一、在使用map时，需要先声明，否则结果可能与预期不同，array可以不声明</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">declare -A map</span><br></pre></td></tr></table></figure>
+
+<p>二、初始化map</p>
+<p>与array类似，可以使用括号直接初始化，也可以通过添加的方式来初始化数据，与array不同的是，括号直接初始化时使用的为一个键值对，添加元素时，下标可以不是整数</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">map=([&quot;aa&quot;]=&quot;11&quot; [&quot;bb&quot;]=&quot;22&quot;)</span><br><span class="line">map[&quot;name&quot;]=&quot;val&quot;</span><br><span class="line">map[&quot;apple&quot;]=&quot;pen&quot;</span><br></pre></td></tr></table></figure>
+
+<p>三、输出所有的key</p>
+<p>若未使用declare声明map，则此处将输出0，与预期输出不符，此处输出语句格式比arry多了一个！</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo $&#123;!map[@]&#125;</span><br></pre></td></tr></table></figure>
+
+<p>四、输出所有value</p>
+<p>与array输出格式相同</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo $&#123;map[@]&#125;</span><br></pre></td></tr></table></figure>
+
+<p>五、输出map长度</p>
+<p>与array输出格式相同</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo $&#123;#map[@]&#125;</span><br></pre></td></tr></table></figure>
+
+<p>六、遍历，根据key找到对应的value</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">for key in $&#123;!map[*]&#125;;do</span><br><span class="line">    echo $&#123;map[$key]&#125;</span><br><span class="line">done</span><br></pre></td></tr></table></figure>
+
+<p>七、遍历所有的key</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">for key in $&#123;!map[@]&#125;;do</span><br><span class="line">    echo $key</span><br><span class="line">done</span><br></pre></td></tr></table></figure>
+
+<p>八、遍历所有的value</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">for val in $&#123;map[@]&#125;;do</span><br><span class="line">    echo $val</span><br><span class="line">done</span><br></pre></td></tr></table></figure>
+
+<p>如上，可以发现，map与arry有很多的相似之处，在存储上两者最大的区别可能是array的key只能为整数，而map的key则可以为任何值</p>
+<p><strong>实际应用</strong></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2023/09/04/shell%E7%9A%84map%E4%BD%BF%E7%94%A8/">https://yhao521.github.io/2023/09/04/shell%E7%9A%84map%E4%BD%BF%E7%94%A8/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2023/09/04/springboot%E9%9B%86%E6%88%90jedis/" title="springboot集成jedis"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">springboot集成jedis</div></div><div class="info-2"><div class="info-item-1"> title: Spring Boot集成Jedis运行问题lang: en-USdate: 2023-09-03 20:17:08category:  开发语言 java springtag: springauthor:   集成运行问题No qualifying bean of type ‘org.springframework.data.redis.connection.RedisC 原因：我们在pom.xml中引入了spring-boot-starter-data-redis却没有引入redis.client;或在打包过程中有其他依赖冲突等问题，造成打包后不存在jedis包 解决方式：增加redis client依赖；版本有重复则需要明确版本，并唯一。 123456&lt;dependency&gt;    &lt;groupId&gt;redis.clients&lt;/groupId&gt;    &lt;artifactId&gt;jedis&lt;/artifactId&gt;    &lt;version&gt;2.10.2&lt;/version&gt;&lt...</div></div></div></a><a class="pagination-related" href="/2023/09/04/pgsql%E6%95%99%E7%A8%8B/" title="pgsql教程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">pgsql教程</div></div><div class="info-2"><div class="info-item-1"> title: pgsql教程date: 2023-09-03 20:17:08category:  数据库 doc_pgsqltag: doc_pgsqlauthor:   [TOC]   postgresql 教程1.源码pgsql安装1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465666768697071727374757677787980818283wget https://ftp.postgresql.org/pub/source/v12.3/postgresql-12.3.tar.gz#解压tar -zxvf postgresql-12.3.tar.gz# 编译./configure --prefix=/home/yhao521/pgsqlmake &amp;&amp; make install#创建目录mkdir -p  pgdata/12/&#123;data,backup...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/idea%20%E6%8F%92%E4%BB%B6%E4%BD%BF%E7%94%A8/" title="idea 插件使用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">idea 插件使用</div></div><div class="info-2"><div class="info-item-1"> title: idea 插件使用date: 2023-09-03 20:17:08category:  ideatag: ideaauthor:   idea插件使用一、前言今年Idea对盗版软件打击力度加大，朋友们会发现，旗舰版自己激活使用，过几天就会失效，需要重新激活，有的小伙伴就会选择去淘宝花钱买个教育邮箱注册，这个方法我使用过，过了两三个月就不能用了，着实让人头疼。如何解决呢？我想到了Idea社区版本，下载一个使用，将我的Spring boot项目导入，启动下试试，不出所料，报错了。好啦！步入正题。 社区版Idea相比旗舰版少了很多功能，包括Java开发最重要的Web开发能力！Spring项目没有Tomcat插件，不能在Idea启动。Spring Boot项目没有相应提示。 可是这难不倒强大的社区，我想到了Idea提供了插件机制，或许会有大神做出来了好用的Tomcat插件。 二、IDEA 插件安装在使用插件之前，你需要了解 IDEA 的插件安装方式，安装 IDEA 插件是非常方便的，你只要知道插件的名字就可以直接安装， IDEA 插件安装有两种方式： 1、在线安装在 I...</div></div></div></a><a class="pagination-related" href="/2023/09/04/windows%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E8%AE%BE%E7%BD%AE/" title="windows环境变量设置"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">windows环境变量设置</div></div><div class="info-2"><div class="info-item-1"> title: windows环境变量设置date: 2023-09-03 20:17:08category:  wintag: winauthor:   windows环境变量设置nodejs npm 环境变量解压安装；node-v12.8.0-win-x64.zip 123【NODE_HOME】=【D:\Develop\node-v12.8.0-win-x64\node_global】【NODE_PATH】=【%NODE_HOME%\node_modules】【Path】增加【%NODE_HOME%】  测试 命令行执行 12npm -vnode -v  JDK环境变量123【JAVA_HOME】=【E:\jdk\jdk1.7.0_80】【Path】增加【%JAVA_HOME%\bin;%JAVA_HOME%\jre\bin】【CLASSPATH】=【%JAVA_HOME%\lib\dt.jar;%JAVA_HOME%\lib\tools.jar】  测试 命令行执行 1java --version  linux 配置jdk环境变量vim &#x2F;etc&#x2F;pro...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E5%8D%87%E7%BA%A7sshd%E6%9C%8D%E5%8A%A1/" title="升级sshd服务"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">升级sshd服务</div></div><div class="info-2"><div class="info-item-1"> title: 升级sshd服务date: 2023-09-03 20:17:08category:  linux centostag: centosauthor:   下载 wget https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-8.4p1.tar.gz tar -zxvf openssh-8.4p1.tar.gz cd openssh-8.4p1 .&#x2F;configure –prefix&#x3D;&#x2F;usr&#x2F; –sysconfdir&#x3D;&#x2F;etc&#x2F;ssh&#x2F; –with-ssl –with-md5-passwords mandir&#x3D;&#x2F;usr&#x2F;share&#x2F;man&#x2F; make &amp;&amp; make install 缺少依赖： yum install -y openssl-devel zlib-devel gcc 删除&#x2F;etc&#x2F;ssh&#x2F;下的密钥对，rm -f...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E5%B8%B8%E7%94%A8%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" title="常用正则表达式"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">常用正则表达式</div></div><div class="info-2"><div class="info-item-1"> title: 常用正则表达式date: 2023-09-03 20:17:08category:  开发语言 正则tag: 正则author:   如果激活 UNIX_LINES 模式，则新行符是唯一识别的行结束符。 如果未指定 DOTALL 标志，则正则表达式 . 可以与任何字符（行结束符除外）匹配。 默认情况下，正则表达式 ^ 和 $ 忽略行结束符，仅分别与整个输入序列的开头和结尾匹配。如果激活 MULTILINE 模式，则 ^ 在输入的开头和行结束符之后（输入的结尾）才发生匹配。处于 MULTILINE 模式中时，$ 仅在行结束符之前或输入序列的结尾处匹配。 12345678// . 匹配除换行符以外的任意字符// \w 匹配字母或数字或下划线或汉字 等价于 &#x27;[^A-Za-z0-9_]&#x27;。// \s 匹配任意的空白符// \d 匹配数字// \b 匹配单词的开始或结束// ^ 匹配字符串的开始// $ 匹配字符串的结束// \w能不能匹配汉字要视你的操作系统和你的应用环境而定  一、校验数字的表达式 1234567891011121314151617...</div></div></div></a><a class="pagination-related" href="/2024/01/20/SkyWalking/" title="SkyWalking"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-20</div><div class="info-item-2">SkyWalking</div></div><div class="info-2"><div class="info-item-1">1. SkyWalking是什么？skywalking 是一个国产开源框架，2015年由个人吴晟（华为开发者）开源 ， 2017年加入Apache孵化器，skywalking是分布式系统的应用程序性能监视工具，专为微服务、云原生架构和基于容器（Docker、K8s、Mesos）架构而设计。SkyWalking 是观察性分析平台和应用性能管理系统。提供分布式追踪、服务网格遥测分析、度量聚合和可视化一体化解决方案 官网：Apache SkyWalking 下载：Downloads Github: https://github.com/apache/skywalking 文档：Welcome 1.2 链路追踪框架对比​ 1.Zipkin是Twitter开源的调用链分析工具，目前基于springcloud sleuth得到了广泛的使用，特点是轻量，使用部署简单。 ​ 2.Pinpoint是韩国人开源的基于字节码注入的调用链分析，以及应用监控分析工具，特点是支持多种插件，UI功能强大，接入端无代码侵入。 ​ 3.SkyWalking是本土开源的基于字节码注入的调用链分析，以及应用监控分析工...</div></div></div></a><a class="pagination-related" href="/2023/09/04/electron%E5%AE%89%E8%A3%85&%E4%BD%BF%E7%94%A8/" title="electron安装&amp;使用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">electron安装&amp;使用</div></div><div class="info-2"><div class="info-item-1"> title: electron安装&amp;使用date: 2023-09-03 20:17:08category:  mactag: macauthor:   yarn config set registry https://registry.npm.taobao.org/yarn config set registry https://registry.npm.taobao.orgyarn config set PHANTOMJS_CDNURL http://npm.taobao.org/mirrors/phantomjsyarn config set ELECTRON_MIRROR http://npm.taobao.org/mirrors/electron/yarn config set electron_mirror https://npm.taobao.org/mirrors/electron/yarn config set sass_binary_site http://npm.taobao.org/mirrors/node-sassyarn config set...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Shell%E4%B8%ADmap%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="toc-number">1.</span> <span class="toc-text">Shell中map的使用</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>zsh 配置 docker 自动补全 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="zsh 配置 docker 自动补全在终端中使用 docker 的命令的时候必须要全部手敲，没有提示，于是就在找是否有自动补全的脚本，搜索了一圈踩了一些坑总结了一下具体的步骤。 首先执行如下命令： 123mkdir -p ~&#x2F;.zsh&#x2F;completioncurl -L https:&#x2F;&#x2F;raw.githubusercontent.com&#x2F;docker&#x2F;docker-ce&#x2F;master&#x2F;compon">
+<meta property="og:type" content="article">
+<meta property="og:title" content="zsh 配置 docker 自动补全">
+<meta property="og:url" content="https://yhao521.github.io/2025/03/18/zsh%20%E9%85%8D%E7%BD%AE%20docker%20%E8%87%AA%E5%8A%A8%E8%A1%A5%E5%85%A8/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="zsh 配置 docker 自动补全在终端中使用 docker 的命令的时候必须要全部手敲，没有提示，于是就在找是否有自动补全的脚本，搜索了一圈踩了一些坑总结了一下具体的步骤。 首先执行如下命令： 123mkdir -p ~&#x2F;.zsh&#x2F;completioncurl -L https:&#x2F;&#x2F;raw.githubusercontent.com&#x2F;docker&#x2F;docker-ce&#x2F;master&#x2F;compon">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2025-03-17T19:00:32.000Z">
+<meta property="article:modified_time" content="2025-03-17T19:00:32.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "zsh 配置 docker 自动补全",
+  "url": "https://yhao521.github.io/2025/03/18/zsh%20%E9%85%8D%E7%BD%AE%20docker%20%E8%87%AA%E5%8A%A8%E8%A1%A5%E5%85%A8/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2025-03-17T19:00:32.000Z",
+  "dateModified": "2025-03-17T19:00:32.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2025/03/18/zsh%20%E9%85%8D%E7%BD%AE%20docker%20%E8%87%AA%E5%8A%A8%E8%A1%A5%E5%85%A8/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'zsh 配置 docker 自动补全',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">zsh 配置 docker 自动补全</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">zsh 配置 docker 自动补全</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-03-17T19:00:32.000Z" title="发表于 2025-03-18 03:00:32">2025-03-18</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-03-17T19:00:32.000Z" title="更新于 2025-03-18 03:00:32">2025-03-18</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h3 id="zsh-配置-docker-自动补全"><a href="#zsh-配置-docker-自动补全" class="headerlink" title="zsh 配置 docker 自动补全"></a>zsh 配置 docker 自动补全</h3><p>在终端中使用 docker 的命令的时候必须要全部手敲，没有提示，于是就在找是否有自动补全的脚本，搜索了一圈踩了一些坑总结了一下具体的步骤。</p>
+<p>首先执行如下命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -p ~/.zsh/completion</span><br><span class="line">curl -L https://raw.githubusercontent.com/docker/docker-ce/master/components/cli/contrib/completion/zsh/_docker &gt; ~/.zsh/completion/_docker </span><br><span class="line">12</span><br></pre></td></tr></table></figure>
+
+<p>注意这里下载的文件是 _docker 不是 _docker-compose，下错了就还是用不了，好多教程都是下的后者</p>
+<p>然后将如下两条命令加到 .zshrc 中去</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&quot;fpath=(~/.zsh/completion <span class="variable">$fpath</span>)&quot;</span> &gt;&gt; ~/.zshrc</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;autoload -Uz compinit &amp;&amp; compinit -i&quot;</span> &gt;&gt; ~/.zshrc</span><br><span class="line">12</span><br></pre></td></tr></table></figure>
+
+<p>然后重启 <a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=shell&spm=1001.2101.3001.7020">shell</a> 或者 source 一下即可</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">source</span> ~/.zshrc</span><br><span class="line">1</span><br></pre></td></tr></table></figure>
+
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2025/03/18/zsh%20%E9%85%8D%E7%BD%AE%20docker%20%E8%87%AA%E5%8A%A8%E8%A1%A5%E5%85%A8/">https://yhao521.github.io/2025/03/18/zsh%20%E9%85%8D%E7%BD%AE%20docker%20%E8%87%AA%E5%8A%A8%E8%A1%A5%E5%85%A8/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/03/18/Cypress%20vs%20Playwright%E2%80%94%E2%80%94%E5%93%AA%E4%B8%AA%20JavaScript%20%E6%B5%8B%E8%AF%95%E6%A1%86%E6%9E%B6%E6%9B%B4%E5%A5%BD%EF%BC%9F/" title="Cypress vs Playwright——哪个 JavaScript 测试框架更好？"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Cypress vs Playwright——哪个 JavaScript 测试框架更好？</div></div><div class="info-2"><div class="info-item-1"> 10 年前，自动化测试人员如果要编写 E2E 测试，主要使用 Selenium。每个有机会使用该解决方案的人都应该会记得设置、编写和调试是多么不愉快。在此过程中还创建了一些更有趣的自动化工具，例如 Webdriver.io、TestCafe、Nightwatch.js 和 Puppeteer。但是我们今天不会关注那些，因为我想谈谈Cypress和Playwright中测试自动化的几个问题。Cypress 和 Playwright是目前为测试实现创建理想工具的顶级框架。 两个框架，相似……  Cypress 是一种基于 JavaScript 的前端测试工具。设计为对开发人员友好，它直接在浏览器中运行。 Cypress 的第一个版本于 2015 年发布，并于 2018 年开始真正流行，并于 2020 年筹集了 4000 万美元的 B 轮融资。他们以开源为荣，他们相信这将帮助他们在竞争中取得领先。Playwright（微软），于2020年发布。它是一个用于端到端测试的跨浏览器自动化库，也是开源的。它最初是一个 JavaScript 库，但现在已经扩展到还支持 Python、NET 和...</div></div></div></a><a class="pagination-related" href="/2025/03/17/ffmpeg%E7%9A%84%E5%AE%89%E8%A3%85%E6%96%B9%E6%B3%95/" title="ffmpeg的安装方法"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">ffmpeg的安装方法</div></div><div class="info-2"><div class="info-item-1">卸载之前的安装  pip uninstall ffmpeg-python pip uninstall ffmpeg  然后再安装:  conda install -c menpo ffmpeg pip install ffmpeg-python  </div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/go%E8%AF%AD%E8%A8%80/" title="go语言"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">go语言</div></div><div class="info-2"><div class="info-item-1"> title: go语言date: 2023-09-03 20:17:08category:  开发语言 gotag: goauthor:   go 常用指令常用指令：    命令 说明    go build -a -x -v 构建 强制重新 打印信息   go clean 清理构建包   go run main.go 运行有main的文件   go env 查看环境变量   go build -ldflags -w 压缩   go mod dowload 下载依赖   go mod vendor vendor 文件夹就缓存了依赖包，然后直接在代码中使用。   set GOOS&#x3D;windows windows主机设置go编译、运行环境为windows   ​ go build -ldflags -w 压缩构建包 https://blog.justwe.site/post/go-build-compress/ 压缩可执行文件(终极压缩)我们使用第三方的压缩工具https://github.com/upx/upx/releases 构建或下载依赖失败dial tcp 17...</div></div></div></a><a class="pagination-related" href="/2024/08/15/ffmpeg%E4%BD%BF%E7%94%A8%E7%A1%AC%E4%BB%B6%E5%8A%A0%E9%80%9Fhwaccel%E3%80%81cuvid%E3%80%81h264_cuvid%E3%80%81h264_nvenc/" title="ffmpeg使用硬件加速hwaccel、cuvid、h264_cuvid、h264_nvenc"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-15</div><div class="info-item-2">ffmpeg使用硬件加速hwaccel、cuvid、h264_cuvid、h264_nvenc</div></div><div class="info-2"><div class="info-item-1">文章目录 ffmpeg支持硬件加速的原理 所用环境说明 ffmpeg使用硬件加速  安装nvidia驱动 安装cuda 加入header 安装pkgconfig 开始配置   在ffmpeg中看如何使用硬件加速  查看目前可以用的hwaccel选项 普通的解码命令 仅仅是转码，不做缩放 转码，外带一个缩放   题外话，如何使用scale_npp 简单分析一下ffmpeg源码中的硬件加速部分 参考网站  ffmpeg支持硬件加速的原理ffmpeg的硬件加速原理大概就是采用硬件对编解码进行处理，硬件有转码进行解码的sdk，比如nvidia的sdk等 所用环境说明 ffmpeg版本：4.2.2 cuda版本：10.2 nvidia驱动版本：470.57.02   先放一个结论：GPU的解码肯定是要比CPU快的，但前提是两个都是差不对水平的硬件，而且GPU的成本相对CPU来说要低很多；比如我的测试机，一个GTX970M的显卡，基本跟一个7700k的i7差不多（甚至更好）了；  ffmpeg使用硬件加速安装nvidia驱动从官网下载NVIDIA-Linux-x86_64-470.57.02...</div></div></div></a><a class="pagination-related" href="/2024/01/09/%E6%95%B0%E6%8D%AE%E9%87%87%E9%9B%86/" title="数据采集"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-09</div><div class="info-item-2">数据采集</div></div><div class="info-2"><div class="info-item-1">Matrix 首页推荐  Matrix 是少数派的写作社区，我们主张分享真实的产品体验，有实用价值的经验与思考。我们会不定期挑选 Matrix 最优质的文章，展示来自用户的最真实的体验和观点。 文章代表作者个人观点，少数派仅对标题和排版略作修改。  21 年的时候曾写过 一篇文章 分享了自己的知识管理方案，其中我将个人数据都存储在了第三方服务上。虽然第三方的服务很好用，但终究存在关服或无法访问导致的数据丢失风险，始终让我感到不放心；同时数据散落在各处，也没法进行统一备份管理、数据应用和数据可视化。 本着数据拿在自己手上才算安全的原则，同时也期望将数据汇聚在一起进行统一的访问存取使用，我动手构建了一套自己的数据中心解决方案，实现了对现有使用中的第三方数据服务的采集，以及数据采集以后的应用和可视化功能。在此基础上我还开发了一些属于我自己的数据产品，将某些不方便采集的第三方服务替代掉。  系统架构本文将以阅读记录数据为例，分享系统的架构设计和技术选型，为大家提供一种方案思路，具体的实现方案可以参考文末的开发文档，关键的系统代码也都将开源，以供大家进行复现。  我首先将服务划分为第三方服...</div></div></div></a><a class="pagination-related" href="/2023/09/04/npm%E5%8D%87%E7%BA%A7/" title="npm升级"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">npm升级</div></div><div class="info-2"><div class="info-item-1"> title: npm升级date: 2023-09-03 20:17:08category:  开发语言 doc_nodejstag: doc_nodejsauthor:   npm install -g npm-check命令行npm-check -u会出现更新列表，选择后升级 https://www.cnblogs.com/xxflz/p/9835344.html 就算之前你装了webpack，那肯定是非全局安装 所以要全局安装 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273npm-check -u❤️  Your modules look amazing. Keep up the great work. ❤️E:\vscodeProjects_sitech\crds_base_web_view_pack&gt;npm run devnpm WARN...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E9%98%B2%E7%81%AB%E5%A2%99yum/" title="防火墙yum"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">防火墙yum</div></div><div class="info-2"><div class="info-item-1"> title: 防火墙yumdate: 2023-09-03 20:17:08category:  linuxtag: linuxauthor:   entOS 7.0默认使用的是firewall作为防火墙 查看防火墙状态 firewall-cmd –state 停止firewall systemctl stop firewalld.service 禁止firewall开机启动 systemctl disable firewalld.service 转自：CentOS 6和CentOS 7防火墙的关闭 关闭selinux进入到&#x2F;etc&#x2F;selinux&#x2F;config文件 vi &#x2F;etc&#x2F;selinux&#x2F;config 将SELINUX&#x3D;enforcing改为SELINUX&#x3D;disabled ######################################################################################## 超简单CentOS7 配置阿里云yum源...</div></div></div></a><a class="pagination-related" href="/2024/04/17/Mac%E5%AE%89%E8%A3%85%E5%A4%9A%E4%B8%AAXcode%E7%89%88%E6%9C%AC/" title="Mac安装多个Xcode版本"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-17</div><div class="info-item-2">Mac安装多个Xcode版本</div></div><div class="info-2"><div class="info-item-1">1. 安装多个版本的Xcode一般首个Xcode直接到AppStore安装了，更多版本的Xcode可以到开发者后台下载安装。 根据Mac系统版本，下载安装兼容的Xcode版本。注意，需要安装对应版本的Command Line Tools。 Xcode下载链接   2. 管理多个Xcode版本主要通过终端的xcode-select命令操作： 1234567891011Usage: xcode-select [options]Print or change the path to the active developer directory. This directory controls which tools are used for the Xcode command line tools (for example, xcodebuild) as well as the BSD development commands (such as cc and make).Options:-h, --help                  print this help messag...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#zsh-%E9%85%8D%E7%BD%AE-docker-%E8%87%AA%E5%8A%A8%E8%A1%A5%E5%85%A8"><span class="toc-number">1.</span> <span class="toc-text">zsh 配置 docker 自动补全</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

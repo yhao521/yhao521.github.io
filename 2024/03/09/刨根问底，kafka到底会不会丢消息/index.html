@@ -1,0 +1,305 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>刨根问底，kafka到底会不会丢消息 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="本文首发我的微信公众号『爱笑的架构师』，欢迎大家关注。     认识Kafka Kafka到底会不会丢失消息？ 生产者丢失消息 Kafka Broker丢失消息 消费者丢失消息 总结 公众号    大型互联网公司一般都会要求消息传递最大限度的不丢失，比如用户服务给代金券服务发送一个消息，如果消息丢失会造成用户未收到应得的代金券，最终用户会投诉。 ??为避免上面类似情况的发生，除了做好补偿措施，更">
+<meta property="og:type" content="article">
+<meta property="og:title" content="刨根问底，kafka到底会不会丢消息">
+<meta property="og:url" content="https://yhao521.github.io/2024/03/09/%E5%88%A8%E6%A0%B9%E9%97%AE%E5%BA%95%EF%BC%8Ckafka%E5%88%B0%E5%BA%95%E4%BC%9A%E4%B8%8D%E4%BC%9A%E4%B8%A2%E6%B6%88%E6%81%AF/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="本文首发我的微信公众号『爱笑的架构师』，欢迎大家关注。     认识Kafka Kafka到底会不会丢失消息？ 生产者丢失消息 Kafka Broker丢失消息 消费者丢失消息 总结 公众号    大型互联网公司一般都会要求消息传递最大限度的不丢失，比如用户服务给代金券服务发送一个消息，如果消息丢失会造成用户未收到应得的代金券，最终用户会投诉。 ??为避免上面类似情况的发生，除了做好补偿措施，更">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2024-03-08T17:29:28.000Z">
+<meta property="article:modified_time" content="2024-03-08T17:29:28.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "刨根问底，kafka到底会不会丢消息",
+  "url": "https://yhao521.github.io/2024/03/09/%E5%88%A8%E6%A0%B9%E9%97%AE%E5%BA%95%EF%BC%8Ckafka%E5%88%B0%E5%BA%95%E4%BC%9A%E4%B8%8D%E4%BC%9A%E4%B8%A2%E6%B6%88%E6%81%AF/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2024-03-08T17:29:28.000Z",
+  "dateModified": "2024-03-08T17:29:28.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2024/03/09/%E5%88%A8%E6%A0%B9%E9%97%AE%E5%BA%95%EF%BC%8Ckafka%E5%88%B0%E5%BA%95%E4%BC%9A%E4%B8%8D%E4%BC%9A%E4%B8%A2%E6%B6%88%E6%81%AF/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '刨根问底，kafka到底会不会丢消息',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">刨根问底，kafka到底会不会丢消息</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">刨根问底，kafka到底会不会丢消息</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-03-08T17:29:28.000Z" title="发表于 2024-03-09 01:29:28">2024-03-09</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-03-08T17:29:28.000Z" title="更新于 2024-03-09 01:29:28">2024-03-09</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p>本文首发我的微信公众号『<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzIwODI1OTk1Nw==&mid=2650321970&idx=1&sn=3a26ed6f0323c945c1eacb05c758cd62&chksm=8f09ca28b87e433e657fca2ffd9d45a74453ffeb17ee76a9bac8f2a7cfd3a0e6ac936396812c&token=1553501157&lang=zh_CN#rd">爱笑的架构师</a>』，欢迎大家关注。</p>
+</blockquote>
+<!-- MarkdownTOC -->
+
+<ul>
+<li><a href="#%E8%AE%A4%E8%AF%86kafka">认识Kafka</a></li>
+<li><a href="#kafka%E5%88%B0%E5%BA%95%E4%BC%9A%E4%B8%8D%E4%BC%9A%E4%B8%A2%E5%A4%B1%E6%B6%88%E6%81%AF">Kafka到底会不会丢失消息？</a></li>
+<li><a href="#%E7%94%9F%E4%BA%A7%E8%80%85%E4%B8%A2%E5%A4%B1%E6%B6%88%E6%81%AF">生产者丢失消息</a></li>
+<li><a href="#kafka-broker%E4%B8%A2%E5%A4%B1%E6%B6%88%E6%81%AF">Kafka Broker丢失消息</a></li>
+<li><a href="#%E6%B6%88%E8%B4%B9%E8%80%85%E4%B8%A2%E5%A4%B1%E6%B6%88%E6%81%AF">消费者丢失消息</a></li>
+<li><a href="#%E6%80%BB%E7%BB%93">总结</a></li>
+<li><a href="#%E5%85%AC%E4%BC%97%E5%8F%B7">公众号</a></li>
+</ul>
+<!-- /MarkdownTOC -->
+
+<p>大型互联网公司一般都会要求消息传递最大限度的不丢失，比如用户服务给代金券服务发送一个消息，如果消息丢失会造成用户未收到应得的代金券，最终用户会投诉。</p>
+<p>??为避免上面类似情况的发生，除了做好补偿措施，更应该在系设计的时候充分考虑各种异常，设计一个稳定、高可用的消息系统。</p>
+<h1 id="认识Kafka"><a href="#认识Kafka" class="headerlink" title="认识Kafka"></a>认识Kafka</h1><p>看一下维基百科的定义</p>
+<blockquote>
+<p>Kafka是分布式发布-订阅消息系统。<br>它最初由LinkedIn公司开发，之后成为Apache项目的一部分。<br>Kafka是一个分布式的，可划分的，冗余备份的持久性的日志服务。它主要用于处理活跃的流式数据。</p>
+</blockquote>
+<p><strong>kafka架构</strong></p>
+<p>Kafka的整体架构非常简单，是显式分布式架构，主要由producer、broker（kafka）和consumer组成。</p>
+<p>​        <img src="https://cdn.jsdelivr.net/gh/smileArchitect/assets@main/202012/20201202235323.png" alt="img" style="zoom:67%;" />      </p>
+<p><strong>Producer</strong>（生产者）可以将数据发布到所选择的topic（主题）中。生产者负责将记录分配到topic的哪一个 partition（分区）中。可以使用循环的方式来简单地实现负载均衡，也可以根据某些语义分区函数(如记录中的key)来完成。</p>
+<p><strong>Consumer</strong>（消费者）使用一个consumer group（消费组）名称来进行标识，发布到topic中的每条记录被分配给订阅消费组中的一个消费者实例。消费者实例可以分布在多个进程中或者多个机器上。</p>
+<h1 id="Kafka到底会不会丢失消息？"><a href="#Kafka到底会不会丢失消息？" class="headerlink" title="Kafka到底会不会丢失消息？"></a>Kafka到底会不会丢失消息？</h1><p>在讨论kafka是否丢消息前先来了解一下什么是<strong>消息传递语义</strong>。</p>
+<img src="https://cdn.jsdelivr.net/gh/smileArchitect/assets@main/202012/20201202235521.png" alt="图片" style="zoom:50%;" />
+
+<p>message delivery semantic 也就是消息传递语义，简单说就是消息传递过程中消息传递的保证性。主要分为三种：</p>
+<ul>
+<li><strong>at most once</strong>：最多一次。消息可能丢失也可能被处理，但最多只会被处理一次。</li>
+<li><strong>at least once</strong>：至少一次。消息不会丢失，但可能被处理多次。可能重复，不会丢失。</li>
+<li><strong>exactly once</strong>：精确传递一次。消息被处理且只会被处理一次。不丢失不重复就一次。</li>
+</ul>
+<p>理想情况下肯定是希望系统的消息传递是严格exactly once，也就是保证不丢失、只会被处理一次，但是很难做到。</p>
+<p>回到主角Kafka，Kafka有三次消息传递的过程：</p>
+<ol>
+<li>生产者发消息给Kafka Broker。</li>
+<li>Kafka Broker 消息同步和持久化</li>
+<li>Kafka Broker 将消息传递给消费者。</li>
+</ol>
+<p>在这三步中每一步都有可能会丢失消息，下面详细分析为什么会丢消息，如何最大限度避免丢失消息。</p>
+<h1 id="生产者丢失消息"><a href="#生产者丢失消息" class="headerlink" title="生产者丢失消息"></a>生产者丢失消息</h1><p>先介绍一下生产者发送消息的一般流程（部分流程与具体配置项强相关，这里先忽略）：</p>
+<ol>
+<li>生产者是与leader直接交互，所以先从集群获取topic对应分区的leader元数据；</li>
+<li>获取到leader分区元数据后直接将消息发给过去；</li>
+<li>Kafka Broker对应的leader分区收到消息后写入文件持久化；</li>
+<li>Follower拉取Leader消息与Leader的数据保持一致；</li>
+<li>Follower消息拉取完毕需要给Leader回复ACK确认消息；</li>
+<li>Kafka Leader和Follower分区同步完，Leader分区会给生产者回复ACK确认消息。</li>
+</ol>
+<img src="https://cdn.jsdelivr.net/gh/smileArchitect/assets@main/202012/20201202235556.png" alt="图片" style="zoom:80%;" />
+
+<p>生产者采用push模式将数据发布到broker，每条消息追加到分区中，顺序写入磁盘。消息写入Leader后，Follower是主动与Leader进行同步。</p>
+<p>Kafka消息发送有两种方式：同步（sync）和异步（async），默认是同步方式，可通过producer.type属性进行配置。</p>
+<p>Kafka通过配置request.required.acks属性来确认消息的生产：</p>
+<ul>
+<li>0表示不进行消息接收是否成功的确认；不能保证消息是否发送成功，生成环境基本不会用。</li>
+<li>1表示当Leader接收成功时确认；只要Leader存活就可以保证不丢失，保证了吞吐量。</li>
+<li>-1或者all表示Leader和Follower都接收成功时确认；可以最大限度保证消息不丢失，但是吞吐量低。</li>
+</ul>
+<p>kafka producer 的参数acks 的默认值为1，所以默认的producer级别是at least once，并不能exactly once。</p>
+<p><strong>敲黑板了，这里可能会丢消息的！</strong></p>
+<ul>
+<li>如果acks配置为0，发生网络抖动消息丢了，生产者不校验ACK自然就不知道丢了。</li>
+<li>如果acks配置为1保证leader不丢，但是如果leader挂了，恰好选了一个没有ACK的follower，那也丢了。</li>
+<li>all：保证leader和follower不丢，但是如果网络拥塞，没有收到ACK，会有重复发的问题。</li>
+</ul>
+<h1 id="Kafka-Broker丢失消息"><a href="#Kafka-Broker丢失消息" class="headerlink" title="Kafka Broker丢失消息"></a>Kafka Broker丢失消息</h1><p>Kafka Broker 接收到数据后会将数据进行持久化存储，你以为是下面这样的：</p>
+<img src="https://cdn.jsdelivr.net/gh/smileArchitect/assets@main/202012/20201202235645.png" alt="图片" width="400" />
+
+<p>没想到是这样的：</p>
+<img src="https://cdn.jsdelivr.net/gh/smileArchitect/assets@main/202012/20201202235719.png" alt="图片" width="400" />
+
+<p>操作系统本身有一层缓存，叫做 Page Cache，当往磁盘文件写入的时候，系统会先将数据流写入缓存中，至于什么时候将缓存的数据写入文件中是由操作系统自行决定。</p>
+<p>Kafka提供了一个参数 producer.type 来控制是不是主动flush，如果Kafka写入到mmap之后就立即 flush 然后再返回 Producer 叫同步 (sync)；写入mmap之后立即返回 Producer 不调用 flush 叫异步 (async)。</p>
+<p><strong>敲黑板了，这里可能会丢消息的！</strong></p>
+<p>Kafka通过多分区多副本机制中已经能最大限度保证数据不会丢失，如果数据已经写入系统 cache 中但是还没来得及刷入磁盘，此时突然机器宕机或者掉电那就丢了，当然这种情况很极端。</p>
+<h1 id="消费者丢失消息"><a href="#消费者丢失消息" class="headerlink" title="消费者丢失消息"></a>消费者丢失消息</h1><p>消费者通过pull模式主动的去 kafka 集群拉取消息，与producer相同的是，消费者在拉取消息的时候也是找leader分区去拉取。</p>
+<p>多个消费者可以组成一个消费者组（consumer group），每个消费者组都有一个组id。同一个消费组者的消费者可以消费同一topic下不同分区的数据，但是不会出现多个消费者消费同一分区的数据。</p>
+<img src="https://cdn.jsdelivr.net/gh/smileArchitect/assets@main/202012/20201203000402.png" alt="图片" style="zoom: 80%;" />
+
+<p>消费者消费的进度通过offset保存在kafka集群的__consumer_offsets这个topic中。</p>
+<p>消费消息的时候主要分为两个阶段：</p>
+<p>1、标识消息已被消费，commit offset坐标；</p>
+<p>2、处理消息。</p>
+<p><strong>敲黑板了，这里可能会丢消息的！</strong></p>
+<p>场景一：先commit再处理消息。如果在处理消息的时候异常了，但是offset 已经提交了，这条消息对于该消费者来说就是丢失了，再也不会消费到了。</p>
+<p>场景二：先处理消息再commit。如果在commit之前发生异常，下次还会消费到该消息，重复消费的问题可以通过业务保证消息幂等性来解决。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>那么问题来了，kafka到底会不会丢消息？答案是：会！</p>
+<p>Kafka可能会在三个阶段丢失消息：</p>
+<p>（1）生产者发送数据；</p>
+<p>（2）Kafka Broker 存储数据；</p>
+<p>（3）消费者消费数据；</p>
+<p>在生产环境中严格做到exactly once其实是难的，同时也会牺牲效率和吞吐量，最佳实践是业务侧做好补偿机制，万一出现消息丢失可以兜底。</p>
+<h1 id="公众号"><a href="#公众号" class="headerlink" title="公众号"></a>公众号</h1><p>公众号比Github早一到两天更新，如果大家想要实时关注我更新的文章以及分享的干货，可以关注我的公众号。</p>
+<div align="center">  <img src="https://cdn.jsdelivr.net/gh/SmileLionCoder/assets@main/wechat-01.jpg" width=""/> </div><br>
+
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2024/03/09/%E5%88%A8%E6%A0%B9%E9%97%AE%E5%BA%95%EF%BC%8Ckafka%E5%88%B0%E5%BA%95%E4%BC%9A%E4%B8%8D%E4%BC%9A%E4%B8%A2%E6%B6%88%E6%81%AF/">https://yhao521.github.io/2024/03/09/%E5%88%A8%E6%A0%B9%E9%97%AE%E5%BA%95%EF%BC%8Ckafka%E5%88%B0%E5%BA%95%E4%BC%9A%E4%B8%8D%E4%BC%9A%E4%B8%A2%E6%B6%88%E6%81%AF/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/03/09/%E5%8C%85%E5%AD%A6%E4%BC%9A%EF%BC%8C%E6%95%99%E4%BD%A0%E7%94%A8Java%E5%87%BD%E6%95%B0%E5%BC%8F%E7%BC%96%E7%A8%8B%E9%87%8D%E6%9E%84%E7%83%82%E4%BB%A3%E7%A0%81/" title="包学会，教你用Java函数式编程重构烂代码"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">包学会，教你用Java函数式编程重构烂代码</div></div><div class="info-2"><div class="info-item-1"> 本文首发我的微信公众号『爱笑的架构师』，欢迎大家关注。     烂代码登场 开始重构烂代码 第一步：定义函数式接口 第二步：定义模板方法 第三步：传递lambda表达式   总结 公众号       Java8 由Oracle在2014年发布，是继Java5之后最具革命性的版本。Java8吸收其他语言的精髓带来了函数式编程，lambda表达式，Stream流等一系列新特性，学会了这些新特性，可以让你实现高效编码优雅编码。  烂代码登场首先引入一个实际的例子，我们常常会写一个dao类来操作数据库，比如查询记录，插入记录等。 下面的代码中实现了查询和插入功能（引入Mybatis三方件）： 123456789101112131415161718192021222324252627282930313233343536373839public class StudentDao &#123;    /**     * 根据学生id查询记录     * @param id 学生id     * @return 返回学生对象     */    public Student queryOne(...</div></div></div></a><a class="pagination-related" href="/2024/03/09/%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2%E7%9A%84%E5%8E%9F%E5%9B%A0%E6%89%BE%E5%88%B0%E4%BA%86%EF%BC%8C%E7%BD%AA%E9%AD%81%E7%A5%B8%E9%A6%96%E5%B1%85%E7%84%B6%E6%98%AFJava%20TheadLocal/" title="内存泄露的原因找到了，罪魁祸首居然是Java TheadLocal"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">内存泄露的原因找到了，罪魁祸首居然是Java TheadLocal</div></div><div class="info-2"><div class="info-item-1"> 本文首发我的微信公众号『爱笑的架构师』，欢迎大家关注。     ThreadLocal的value值存在哪里？ ThreadLocal类set方法 ThreadLocal类get方法   ThreadLocal相关类的关系总结 ThreadLocal内存模型原理 强引用弱引用的概念 强引用 弱引用 软引用 虚引用   内存泄露是不是弱引用的锅？ ThreadLocal最佳实践    组内来了一个实习生，看这小伙子春光满面、精神抖擞、头发微少，我心头一喜：绝对是个潜力股。于是我找经理申请亲自来带他，为了帮助小伙子快速成长，我给他分了一个需求，这不需求刚上线几天就出网上问题了😭后台监控服务发现内存一直在缓慢上升，初步怀疑是内存泄露。 把实习生的PR都找出来仔细review，果然发现问题了。由于公司内部代码是保密的，这里简单写一个demo还原场景（忽略代码风格问题）。 1234567891011121314151617181920public class ThreadPoolDemo &#123;    private static final ThreadPoolExecutor...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2024/10/07/Vue.js%20%E5%A6%82%E4%BD%95%E5%9C%A8Vue.js%E4%B8%AD%E5%AF%BC%E5%85%A5%E5%92%8C%E4%BD%BF%E7%94%A8%E6%9C%AC%E5%9C%B0.csv%E6%96%87%E4%BB%B6/" title="Vue.js 如何在Vue.js中导入和使用本地.csv文件"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-10-07</div><div class="info-item-2">Vue.js 如何在Vue.js中导入和使用本地.csv文件</div></div><div class="info-2"><div class="info-item-1">Vue.js 如何在Vue.js中导入和使用本地.csv文件在本文中，我们将介绍在Vue.js中如何导入和使用本地.csv文件的方法。我们将使用CSV文件作为示例，展示如何将其导入到Vue.js项目中，并在应用中使用该文件的数据。 阅读更多：Vue.js 教程 使用CSV文件CSV文件是一种常用的数据文件格式，通常用于存储表格数据。Vue.js可以很方便地处理和操作CSV文件。 导入CSV文件要导入CSV文件，我们可以使用Vue.js的文件导入功能。首先，我们需要在Vue组件中添加一个文件输入字段，以允许用户选择要导入的CSV文件。例如： 123456789101112131415161718192021222324252627282930313233343536373839404142434445464748&lt;template&gt;  &lt;input type=&quot;file&quot; @change=&quot;handleFileUpload&quot;&gt;&lt;/template&gt;&lt;script&gt;export default &...</div></div></div></a><a class="pagination-related" href="/2025/03/19/%E5%9F%BA%E4%BA%8EElement%E6%9E%84%E5%BB%BA%E8%87%AA%E5%B7%B1%E7%9A%84ui%E7%BB%84%E4%BB%B6%E5%BA%93%E7%9A%84%E6%B5%81%E7%A8%8B/" title="基于Element构建自己的ui组件库的流程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-19</div><div class="info-item-2">基于Element构建自己的ui组件库的流程</div></div><div class="info-2"><div class="info-item-1">摘要 最近萌发要做一个自己的基于Vue的组件库的想法，尝试下自己去造一些轮子；于是翻了下业内的标杆element-ui组件库的设计，在此基础上去构建自己的ui库（站在巨人的肩膀上成功）。注：项目是基于vue-cli@3.x的；  组件库的基础工程要完成的几个目标 项目的整体结构设计 实现组件按需加载 项目文档的管理（随后将单独写一篇来介绍） 发布npm  基于element的目录设计1├─build // 构建相关的脚本和配置├─docs // 打包后的静态文件├─examples // 用于展示Element组件的demo├─lib // 构建后生成的文件，发布到npm包├─packages // 组件代码|   ├── button|   |     ├── button.vue //组件文件|   |     └── index.js // 导出Button组件以及处理供按需加载的方法|   ├── .. 各个组件|   └── theme-chalk // 这里存放所有的组件样式.scss├─public // index.html└─package.json  注：这里...</div></div></div></a><a class="pagination-related" href="/2023/09/04/vue%E5%AF%BC%E5%87%BAexcel/" title="vue导出excel"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">vue导出excel</div></div><div class="info-2"><div class="info-item-1"> title: vue导出exceldate: 2023-09-03 20:17:08category:  开发语言 doc_nodejstag: doc_nodejsauthor:   vue导出excel安装依赖1234npm install file-saver -Snpm install xlsx -Snpm install -D script-loadernpm i xlsx-style -S  导入两个文件在src目录下新建一个vendor(可以是别的名字,但是导入时需注意,没事别改,大神请忽略)目录,目录下放新建两个文件Blob.js和Export2Excel.js Blob.js1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465666768697071727374757677787980818283848586878889909192939495969798991001011...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E5%89%8D%E7%AB%AF%E5%85%A5%E9%97%A8%E6%89%8B%E5%86%8C/" title="前端入门手册"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">前端入门手册</div></div><div class="info-2"><div class="info-item-1"> title: 前端入门手册date: 2023-09-03 20:17:08category:  开发语言tag: 开发语言author:   前端入门手册blossom html css JavaScript程序员入门的时候整理的一份学习笔记,见证了我的成长备份 HTML视频音频标签带控制器的视频标签, 不同浏览器有不同的文件格式要求所以用 2 个 source 标签指定不同的视频格式 1234&lt;video width=&quot;300&quot; height=&quot;200&quot; controls=&quot;controls&quot;&gt;  &lt;source src=&quot;movie.mp4&quot; /&gt;  &lt;source src=&quot;movie.ogv&quot; /&gt;&lt;/video&gt;  带控制器的音频标签, 不同浏览器有不同的文件格式要求所以用 2 个 source 标签指定不同的音频格式 1234&lt;audio id=&quot;id-audio-player&quot; contro...</div></div></div></a><a class="pagination-related" href="/2024/07/12/%E3%80%90Golang%E3%80%91Golang%E4%BD%BF%E7%94%A8embed%E5%8A%A0%E8%BD%BD%E3%80%81%E6%89%93%E5%8C%85%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E6%96%87%E4%BB%B6-1/" title="【Golang】Golang使用embed加载、打包静态资源文件-1"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-12</div><div class="info-item-2">【Golang】Golang使用embed加载、打包静态资源文件-1</div></div><div class="info-2"><div class="info-item-1">【Golang】Golang使用embed加载、打包静态资源文件 大家好 我是寸铁👊总结了一篇Golang使用embed加载静态资源文件的文章✨喜欢的小伙伴可以点点关注 💝  前言事情是这样的：前不久，有同学问我,golang怎么把静态资源文件打包成一个可执行文件呢？便于后序服务器资源的部署！  经本人同意授权，图像码掉。 这不今天这个问题的答案就来啦！ 背景Go编译的程序非常适合部署，如果没有通过CGO引用其它的库的话，我们一般编译出来的可执行二进制文件都是单个的文件，非常适合复制和部署。在实际使用中，除了二进制文件，可能还需要一些配置文件，或者静态文件，比如html模板、静态的图片、CSS、javascript等文件，如何这些文件也能嵌入到二进制文件中，那就太美妙，我们只需复制、执行单个的可执行文件即可。 一些开源的项目很久以前就开始做这方面的工作，比如gobuffalo/packr、markbates/pkger、rakyll/statik、knadh/stuffbin等等，但是不管怎么说这些都是第三方提供的功能，如果Go官方能内建支持就好了。2019末一个提案被提出i...</div></div></div></a><a class="pagination-related" href="/2024/08/12/Java%E5%85%AB%E8%82%A1%E6%96%87%E5%90%88%E9%9B%86%EF%BC%882024%E5%B9%B45%E6%9C%8828%E6%8C%81%E7%BB%AD%E6%9B%B4%E6%96%B0%EF%BC%89/" title="Java八股文合集（2024年5月28持续更新）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-12</div><div class="info-item-2">Java八股文合集（2024年5月28持续更新）</div></div><div class="info-2"><div class="info-item-1">一、java基础1、java有哪几种数据类型？ 基本数据类型：byte（1），char（2），short（2），int（4），long（8），double（8），float（4），boolean（1） 引用数据类型：各种类和接口，枚举，数组  2、 面向对象和面向过程的区别？面向对象和面向过程都是一种开发思想。  面向过程就是根据解决问题所需要的步骤，具体化的一步一步的去实现。 面向对象就是把数据及对数据的操作方法放在一起，作为一个整体，也就是对象，若干个这样的整体组成一个系统去解决实际问题。 面向过程只用函数实现，性能比较快因为不需要进行实例化，但是不容易扩展、维护，复用 面向对象通过类去实现功能模块，代码安全性高，容易扩展和复用，比较灵活且便于维护   篇幅限制下面就只能给大家展示小册部分内容了。这份面试笔记包括了：Java面试、Spring、JVM、MyBatis、Redis、MySQL、并发编程、微服务、Linux、Springboot、SpringCloud、MQ、Kafka 面试专题 需要全套面试笔记的【点击此处即可】即可免费获取  3、JDK&#x2F;JRE&#x...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%AE%A4%E8%AF%86Kafka"><span class="toc-number">1.</span> <span class="toc-text">认识Kafka</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Kafka%E5%88%B0%E5%BA%95%E4%BC%9A%E4%B8%8D%E4%BC%9A%E4%B8%A2%E5%A4%B1%E6%B6%88%E6%81%AF%EF%BC%9F"><span class="toc-number">2.</span> <span class="toc-text">Kafka到底会不会丢失消息？</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%94%9F%E4%BA%A7%E8%80%85%E4%B8%A2%E5%A4%B1%E6%B6%88%E6%81%AF"><span class="toc-number">3.</span> <span class="toc-text">生产者丢失消息</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Kafka-Broker%E4%B8%A2%E5%A4%B1%E6%B6%88%E6%81%AF"><span class="toc-number">4.</span> <span class="toc-text">Kafka Broker丢失消息</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%B6%88%E8%B4%B9%E8%80%85%E4%B8%A2%E5%A4%B1%E6%B6%88%E6%81%AF"><span class="toc-number">5.</span> <span class="toc-text">消费者丢失消息</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">6.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%85%AC%E4%BC%97%E5%8F%B7"><span class="toc-number">7.</span> <span class="toc-text">公众号</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

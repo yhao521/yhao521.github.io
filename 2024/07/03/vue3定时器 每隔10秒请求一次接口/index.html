@@ -1,0 +1,207 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>vue3定时器 每隔10秒请求一次接口 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152&lt;script lang&#x3D;&quot;ts&quot; setup&gt;&#x2F;&#x2F; 引入swiper组件import &#123; Swiper, SwiperSlide &#125; from &quot;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="vue3定时器 每隔10秒请求一次接口">
+<meta property="og:url" content="https://yhao521.github.io/2024/07/03/vue3%E5%AE%9A%E6%97%B6%E5%99%A8%20%E6%AF%8F%E9%9A%9410%E7%A7%92%E8%AF%B7%E6%B1%82%E4%B8%80%E6%AC%A1%E6%8E%A5%E5%8F%A3/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152&lt;script lang&#x3D;&quot;ts&quot; setup&gt;&#x2F;&#x2F; 引入swiper组件import &#123; Swiper, SwiperSlide &#125; from &quot;">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2024-07-02T18:52:20.000Z">
+<meta property="article:modified_time" content="2024-07-02T18:52:20.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="vue">
+<meta property="article:tag" content="web&#x2F;frontend">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "vue3定时器 每隔10秒请求一次接口",
+  "url": "https://yhao521.github.io/2024/07/03/vue3%E5%AE%9A%E6%97%B6%E5%99%A8%20%E6%AF%8F%E9%9A%9410%E7%A7%92%E8%AF%B7%E6%B1%82%E4%B8%80%E6%AC%A1%E6%8E%A5%E5%8F%A3/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2024-07-02T18:52:20.000Z",
+  "dateModified": "2024-07-02T18:52:20.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2024/07/03/vue3%E5%AE%9A%E6%97%B6%E5%99%A8%20%E6%AF%8F%E9%9A%9410%E7%A7%92%E8%AF%B7%E6%B1%82%E4%B8%80%E6%AC%A1%E6%8E%A5%E5%8F%A3/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'vue3定时器 每隔10秒请求一次接口',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">vue3定时器 每隔10秒请求一次接口</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">vue3定时器 每隔10秒请求一次接口</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-07-02T18:52:20.000Z" title="发表于 2024-07-03 02:52:20">2024-07-03</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-07-02T18:52:20.000Z" title="更新于 2024-07-03 02:52:20">2024-07-03</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">&lt;script lang=<span class="string">&quot;ts&quot;</span> setup&gt;</span><br><span class="line"><span class="comment">// 引入swiper组件</span></span><br><span class="line"><span class="keyword">import</span> &#123; <span class="title class_">Swiper</span>, <span class="title class_">SwiperSlide</span> &#125; <span class="keyword">from</span> <span class="string">&quot;swiper/vue&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; ref,onUnmounted &#125; <span class="keyword">from</span> <span class="string">&quot;vue&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; getCompanyNameList &#125; <span class="keyword">from</span> <span class="string">&quot;@/api/auth&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; <span class="title class_">ElMessage</span>,<span class="title class_">ElLoading</span>  &#125; <span class="keyword">from</span> <span class="string">&quot;element-plus&quot;</span>;</span><br><span class="line"><span class="keyword">const</span> listData = <span class="title function_">ref</span>([]);</span><br><span class="line"><span class="keyword">const</span> timer = <span class="title function_">ref</span>(); <span class="comment">// 定时器</span></span><br><span class="line"><span class="keyword">let</span> count = <span class="title function_">ref</span>(<span class="number">0</span>); <span class="comment">// 倒计时</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="title function_">getDetailsList</span> = <span class="keyword">async</span> (<span class="params"></span>) =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> loading = <span class="title class_">ElLoading</span>.<span class="title function_">service</span>(&#123;</span><br><span class="line">    <span class="attr">lock</span>: <span class="literal">true</span>,</span><br><span class="line">    <span class="attr">text</span>: <span class="string">&#x27;Loading&#x27;</span>,</span><br><span class="line">    <span class="attr">background</span>: <span class="string">&#x27;rgba(0, 0, 0, 0.7)&#x27;</span>,</span><br><span class="line">  &#125;)</span><br><span class="line">  <span class="keyword">const</span> &#123; data &#125; = <span class="keyword">await</span> <span class="title function_">getCompanyNameList</span>();</span><br><span class="line">  <span class="keyword">if</span> (data.<span class="property">length</span> &gt; <span class="number">0</span>) &#123;</span><br><span class="line">    data.<span class="title function_">forEach</span>(<span class="function">(<span class="params"><span class="attr">element</span>: &#123; bgColor: <span class="built_in">string</span> &#125;, <span class="attr">i</span>: <span class="built_in">number</span></span>) =&gt;</span> &#123;</span><br><span class="line">      element.<span class="property">bgColor</span> = bgColor.<span class="property">value</span>[i];</span><br><span class="line">    &#125;);</span><br><span class="line">    listData.<span class="property">value</span> = data;</span><br><span class="line">    count.<span class="property">value</span> = <span class="number">10</span>;<span class="comment">//成功时设置count.value = 10;并调用Verification 新一轮的倒计时</span></span><br><span class="line">    loading.<span class="title function_">close</span>()</span><br><span class="line">    <span class="title class_">Verification</span>();</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="title class_">ElMessage</span>(&#123;</span><br><span class="line">      <span class="attr">message</span>: <span class="string">&quot;暂无数据&quot;</span>,</span><br><span class="line">      <span class="attr">type</span>: <span class="string">&quot;warning&quot;</span>,</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">//循环请求接口</span></span><br><span class="line"><span class="keyword">const</span> <span class="title function_">Verification</span> = (<span class="params"></span>) =&gt; &#123;</span><br><span class="line">  timer.<span class="property">value</span> = <span class="built_in">setInterval</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (count.<span class="property">value</span> &gt; <span class="number">0</span> &amp;&amp; count.<span class="property">value</span> &lt;= <span class="number">10</span>) &#123;</span><br><span class="line">      <span class="comment">// loading.value = false</span></span><br><span class="line">      count.<span class="property">value</span>--;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (count.<span class="property">value</span> === <span class="number">0</span>) &#123;</span><br><span class="line">      <span class="title function_">getDetailsList</span>();<span class="comment">// 请求数据 </span></span><br><span class="line">      <span class="built_in">clearInterval</span>(timer.<span class="property">value</span>);</span><br><span class="line">      timer.<span class="property">value</span> = <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;, <span class="number">1000</span>);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="title function_">onUnmounted</span>(<span class="function">()=&gt;</span>&#123;</span><br><span class="line">  <span class="built_in">clearInterval</span>(timer.<span class="property">value</span>);</span><br><span class="line">      timer.<span class="property">value</span> = <span class="literal">null</span>;</span><br><span class="line">&#125;)</span><br><span class="line">&lt;/script&gt;</span><br><span class="line"><span class="number">123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051</span></span><br></pre></td></tr></table></figure></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2024/07/03/vue3%E5%AE%9A%E6%97%B6%E5%99%A8%20%E6%AF%8F%E9%9A%9410%E7%A7%92%E8%AF%B7%E6%B1%82%E4%B8%80%E6%AC%A1%E6%8E%A5%E5%8F%A3/">https://yhao521.github.io/2024/07/03/vue3%E5%AE%9A%E6%97%B6%E5%99%A8%20%E6%AF%8F%E9%9A%9410%E7%A7%92%E8%AF%B7%E6%B1%82%E4%B8%80%E6%AC%A1%E6%8E%A5%E5%8F%A3/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/web-frontend/">web/frontend</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/vue/">vue</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/07/04/%E3%80%90Element-plus%E3%80%91%E5%A6%82%E4%BD%95%E8%AE%A9%E6%BB%9A%E5%8A%A8%E6%9D%A1%E6%B0%B8%E8%BF%9C%E5%9C%A8%E6%9C%80%E5%BA%95%E9%83%A8%EF%BC%88%E6%94%AF%E6%8C%81%E5%9C%A8%E7%BA%BF%E6%BC%94%E7%A4%BA%EF%BC%89/" title="【Element-plus】如何让滚动条永远在最底部（支持在线演示）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">【Element-plus】如何让滚动条永远在最底部（支持在线演示）</div></div><div class="info-2"><div class="info-item-1">如何让滚动条永远在最底部 一、适用场景 二、实现思路 三、效果图 四、在线演示 五、完整代码  一、适用场景在某些场景下，你可能希望滚动条保持在最底部，以确保用户始终看到最新的内容或信息。如：在实时聊天应用程序中，当新消息到达时，滚动条自动滚动到最底部，方便用户立即看到最新的对话。 二、实现思路 使用 nextTick 等待 DOM 更新完成，然后计算出内部容器的总高度 max（如：当前可视区只有第4、5、6项，前面的3项已经由于滚动的关系不可见了。我们需要获取的总高度是包含 1~6 项的总高，而不仅是可视的高度）； 当出现滚动条时，因为滚动条到容器顶部的距离，一定恒小于在第一步计算出来的内部容器的总高度 max。 所以，每当新增一项或者删除一项时，我设置滚动条到顶部的距离为第一步计算出来的内部容器的总高度 max，就可以让滚动条滚动到底部了。  三、效果图 四、在线演示点击此处即可跳转到 Element Plus Playground 五、完整代码下面使用的是vue3语法： 12345678910111213&lt;template&gt;  &lt;div class=&qu...</div></div></div></a><a class="pagination-related" href="/2024/07/03/%E9%9D%A2%E8%AF%95%E5%AE%98%EF%BC%9A%E8%AF%B4%E8%AF%B4MySQL%E4%B8%8EPostgreSQL%E4%B9%8B%E9%97%B4%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%8C%E8%AF%A5%E5%A6%82%E4%BD%95%E6%8A%80%E6%9C%AF%E9%80%89%E5%9E%8B%EF%BC%9F/" title="面试官：说说MySQL与PostgreSQL之间的区别，该如何技术选型？"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">面试官：说说MySQL与PostgreSQL之间的区别，该如何技术选型？</div></div><div class="info-2"><div class="info-item-1">面试官：说说MySQL与PostgreSQL之间的区别，该如何技术选型？发布于 2021-03-03 10:51:37 8.9K1 举报 文章被收录于专栏：业余草 你知道的越多，不知道的就越多，业余的像一棵小草！你来，我们一起精进！你不来，我和你的竞争对手一起精进！ 编辑：业余草blog.csdn.net&#x2F;u012414189&#x2F;article&#x2F;details&#x2F;84064146推荐：https://www.xttblog.com/?p=5155如果你稍微有一点工作经验，那么技术选型，技术比较就是面试中必问的知识点之一了。最近就有粉丝在面试中被问到了MySQL与PostgreSQL之间技术选型与比较的问题，下面是一些总结，希望能对大家有所帮助！ 1.问题如果打算为项目选择一款免费、开源的数据库，那么你可能会在MySQL与PostgreSQL之间犹豫不定。MySQL与PostgreSQL都是免费、开源、强大、且功能丰富的数据库。你主要的问题可能是：哪一个才是最好的开源数据库，MySQL还是PostgreSQL呢？该选择哪一个开源数据库呢？ 在选择...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2024/08/04/Vue3%E4%BD%BF%E7%94%A8vue-meta/" title="Vue3使用vue-meta"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-04</div><div class="info-item-2">Vue3使用vue-meta</div></div><div class="info-2"><div class="info-item-1">Vue3使用vue-meta安装 vue-meta1npm i -S vue-meta@next   目前 vue-meta3 还是处于 alpha 阶段，不要低于 3.0.0-alpha.7  项目结构123456789101112.src├── App.vue├── global│   └── vue-meta│       ├── component.tsx│       └── index.ts├── main.ts├── router│   └── index.ts└── views    ├── About.vue    └── Home.vue  开发创建一个vue-meta的管理器，并 use 到 app 中 12345678910111213141516// global/vue-meta/index.tsimport &#123; createMetaManager &#125; from &#x27;vue-meta&#x27;export default createMetaManager(false, &#123;&#125;)// main.tsimp...</div></div></div></a><a class="pagination-related" href="/2024/11/07/%E3%80%90%E5%B7%B2%E8%A7%A3%E5%86%B3%E3%80%91Vue%E9%A1%B9%E7%9B%AE%E4%B8%ADVite%E4%BB%A5%E5%8F%8AWebpack%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86%E5%A4%84%E7%90%86/" title="【已解决】Vue项目中Vite以及Webpack代码混淆处理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-11-07</div><div class="info-item-2">【已解决】Vue项目中Vite以及Webpack代码混淆处理</div></div><div class="info-2"><div class="info-item-1"> 🐱 个人主页：不叫猫先生，公众号：前端舵手🙋‍♂️ 作者简介：前端领域优质作者、阿里云专家博主，共同学习共同进步，一起加油呀！📢 资料领取：前端进阶资料可以找我免费领取🔥 摸鱼学习交流：我们的宗旨是在「工作中摸鱼，摸鱼中进步」，期待大佬一起来摸鱼(文末有我wx或者私信)   目录 前言 一、插件介绍  1、原理和工作方式： 2、特点：   二、Vite混淆处理  1、安装 2、引入 3、配置项解释   三、Vite混淆处理可能会出现的异常问题  1、Uncaught SyntaxError: Unexpected token ‘&lt;’   四、webpack混淆处理  1、查看`Webpack`的版本 2、安装 3、配置    前言关于代码混淆网上案例铺天盖地，90%以上都是Webpack相关来处理代码混淆，对于Vite的案例少之又少，在解决vite项目代码混淆我花了一些时间来找合适的插件区处理这个问题，最终选择rollup-plugin-obfuscator。另外第四章节介绍了Webpack 处理代码混淆方案。 rollup-plugin-obfuscator 的...</div></div></div></a><a class="pagination-related" href="/2024/09/10/Cordova%E6%89%93%E5%8C%85%E5%AE%89%E5%8D%93APP%E6%95%99%E7%A8%8B%E4%BB%A5%E5%8F%8A%E5%87%BA%E7%8E%B0%E7%9A%84%E9%97%AE%E9%A2%98/" title="Cordova打包安卓APP教程以及出现的问题"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-09-10</div><div class="info-item-2">Cordova打包安卓APP教程以及出现的问题</div></div><div class="info-2"><div class="info-item-1">Cordova打包安卓APP教程以及出现的问题=&#x3D;官网地址 &#x3D;&#x3D; 我的环境：cordova：10.0.0Android studio：3.4.1JDK：jdk1.8.0_301  本文章作为自己参考之用  打包vue项目使用 npm run build 打包vue项目，生成dist文件夹。 打包完成之后，将dist下的index.html文件和static文件夹放入www文件夹中 新建Cordova项目安装cordova在vue项目的根目录命令行执行 npm install -g cordova 使用Cordova新建一个项目，命令执行 cordova create hello com.example.hello HelloWorldhello 是项目名称，com.example.hello是包名，HelloWorld是程序的标题(也就是安装的时候显示界面的app名字) cordova的目录结构如下所示： 检查环境cd hello 进入生成的项目中，命令执行 cordova requirements 查看安装环境是否OK 1234567891011R...</div></div></div></a><a class="pagination-related" href="/2024/09/16/vue3%20%E9%A1%B9%E7%9B%AE%E6%90%AD%E5%BB%BA%E6%95%99%E7%A8%8B%EF%BC%88%E5%9F%BA%E4%BA%8Ecreate-vue%EF%BC%8Cvite%EF%BC%8CVite%20+%20Vue%EF%BC%89/" title="vue3 项目搭建教程（基于create-vue，vite，Vite + Vue）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-09-16</div><div class="info-item-2">vue3 项目搭建教程（基于create-vue，vite，Vite + Vue）</div></div><div class="info-2"><div class="info-item-1">vue3 项目搭建教程（基于create-vue，vite，Vite + Vue）目录 一、搭建vue3 项目前提条件 二、通过create-vue搭建vue3 项目 三、搭建一个 Vite 项目 四、构建一个 Vite + Vue 项目 五、打开Vue 项目管理器 六、Vite + Vue 项目目录结构 七、Vite.config.ts配置  一、搭建vue3 项目前提条件 前提条件  熟悉命令行 已安装 16.0 或更高版本的 Node.js   （1）、检查node 和npm版本信息 同时按window+R键,输入cmd,打开命令提示符窗口    输入： node –v　（查看本机安装的node版本）     输入： npm –v　（查看本机安装的npm版本）   （2）、升级你的 Node 版本  如果提示没有安装node或Node.js 版本 较低，请升级你的 Node 版本。 详细教程可参阅下面链接文章：  Vue3安装配置、开发环境搭建(组件安装卸载)（图文详细）https://blog.csdn.net/weixin_69553582&#x2F;article&#...</div></div></div></a><a class="pagination-related" href="/2024/04/14/Vue3+TypeScript%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E8%BF%9B%E9%98%B6%EF%BC%88%E5%9B%9B%EF%BC%89%E2%80%94%E2%80%94Vue3%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%82%B9%EF%BC%88%E4%B8%AD%EF%BC%89/" title="Vue3+TypeScript从入门到进阶（四）——Vue3基础知识点（中）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-14</div><div class="info-item-2">Vue3+TypeScript从入门到进阶（四）——Vue3基础知识点（中）</div></div><div class="info-2"><div class="info-item-1">文章目录   一、简介 二、Vue2和Vue3区别 三、Vue知识点学习   1、v-model 2、组件化开发   六、Webpack和VueCLI学习  1、Webpack学习 2、Webpack中的Vue 3、VueCLI 4、Vite学习   七、Vue3组件化开发  1、组件的嵌套和拆分 2、父子组件的通信 3、非父子组件的通信 4、插槽Slot 5、切换组件案例 6、Vue中实现异步组件 7、引用元素和组件 8、生命周期 9、v-model   八、Vue3过渡&amp;动画实现  1、transition和animation动画 2、animate.css和gsap 3、列表过渡     四、TypeScript知识点 五、项目实战 六、项目打包和自动化部署 七、沿途学习代码地址及案例地址  1、沿途学习代码地址 2、项目案例地址   八、知识拓展  1、ES6数组与对象的解构赋值详解  数组的解构赋值 对象的解构赋值 字符串的解构赋值   2、JavaScript的 …（展开运算符） 3、export ‘defineEmit’ (imported as ‘defi...</div></div></div></a><a class="pagination-related" href="/2024/09/04/Cordova%20+%20vue%20%E6%89%93%E5%8C%85%E5%AE%89%E5%8D%93(Android)%20apk%20%E5%8F%8A%20Apk%E7%89%88%E6%9C%AC%E8%87%AA%E5%8A%A8%E5%8D%87%E7%BA%A7%E5%8F%8A%E5%AE%89%E8%A3%85%EF%BC%88%E5%AE%9E%E6%97%B6%E8%8E%B7/" title="Cordova + vue 打包安卓(Android) apk 及 Apk版本自动升级及安装（实时获取下载进度）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-09-04</div><div class="info-item-2">Cordova + vue 打包安卓(Android) apk 及 Apk版本自动升级及安装（实时获取下载进度）</div></div><div class="info-2"><div class="info-item-1">提示：文章写完后，目录可以自动生成，如何生成可参考右边的帮助文档 Cordova + vue 打包安卓[Android] apk 及 Apk版本自动升级及安装[实时获取下载进度] 准备 一、Cordova + vue 打包安卓(Android) apk  1.安装Cordova环境 2.新建Cordova项目（建议放在英文目录下） 3.Vue项目打包放入cordova项目 4.调试打包apk软件 5.打包成安卓apk 6.APK签名 7.常见的问题   二、Apk版本自动升级及安装（实时获取下载进度）  1.安装安卓插件 2.添加cordova.js 3.创建版本更新js 4.调用版本更新 5.打包注意事项 6.其他注意事项     准备环境：node.js , 安卓sbk , jdk , npmnode.js官网: https://nodejs.org/zh-cn/ 下载安装node.js , 安装完成后在命令行（cmd）中使用“node -v”，检验是否安装成功。npm：新版node已经集成了npm，在命令行输入“npm -v”，测试是否安装成功。  一、Cordova + ...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

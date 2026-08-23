@@ -1,0 +1,423 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>mysql5.7单实例安装 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="1.检查环境  [root@lxd-vm1 data]# rpm -qa | grep mysql  mysql-5.1.71-1.el6.x86_64  mysql-libs-5.1.71-1.el6.x86_64  qt-mysql-4.6.2-26.el6_4.x86_64  mysql-devel-5.1.71-1.el6.x86_64  mysql-server-5.1.71-1.el6">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql5.7单实例安装">
+<meta property="og:url" content="https://yhao521.github.io/2024/01/10/mysql5.7%E5%8D%95%E5%AE%9E%E4%BE%8B%E5%AE%89%E8%A3%85/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="1.检查环境  [root@lxd-vm1 data]# rpm -qa | grep mysql  mysql-5.1.71-1.el6.x86_64  mysql-libs-5.1.71-1.el6.x86_64  qt-mysql-4.6.2-26.el6_4.x86_64  mysql-devel-5.1.71-1.el6.x86_64  mysql-server-5.1.71-1.el6">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2024-01-10T07:10:10.000Z">
+<meta property="article:modified_time" content="2024-01-10T07:26:20.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "mysql5.7单实例安装",
+  "url": "https://yhao521.github.io/2024/01/10/mysql5.7%E5%8D%95%E5%AE%9E%E4%BE%8B%E5%AE%89%E8%A3%85/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2024-01-10T07:10:10.000Z",
+  "dateModified": "2024-01-10T07:26:20.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2024/01/10/mysql5.7%E5%8D%95%E5%AE%9E%E4%BE%8B%E5%AE%89%E8%A3%85/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'mysql5.7单实例安装',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">mysql5.7单实例安装</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">mysql5.7单实例安装</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-01-10T07:10:10.000Z" title="发表于 2024-01-10 15:10:10">2024-01-10</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-01-10T07:26:20.000Z" title="更新于 2024-01-10 15:26:20">2024-01-10</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>1.检查环境</p>
+<ol>
+<li><p>[root@lxd-vm1 data]# rpm -qa | grep mysql</p>
+</li>
+<li><p>mysql-5.1.71-1.el6.x86_64</p>
+</li>
+<li><p>mysql-libs-5.1.71-1.el6.x86_64</p>
+</li>
+<li><p>qt-mysql-4.6.2-26.el6_4.x86_64</p>
+</li>
+<li><p>mysql-devel-5.1.71-1.el6.x86_64</p>
+</li>
+<li><p>mysql-server-5.1.71-1.el6.x86_64</p>
+</li>
+<li><p>[root@lxd-vm1 data]#</p>
+</li>
+</ol>
+<p>发现当前环境中在操作系统安装阶段已经安装默认的5.1的mysql，建议删除掉，避免不必要的影响。</p>
+<p>2.清理自带的mysql环境</p>
+<ol>
+<li><p>[root@lxd-vm1 data]# rpm -e mysql-5.1.71-1.el6.x86_64 –nodeps</p>
+</li>
+<li><p>[root@lxd-vm1 data]# rpm -e mysql-libs-5.1.71-1.el6.x86_64 –nodeps</p>
+</li>
+<li><p>[root@lxd-vm1 data]# rpm -e qt-mysql-4.6.2-26.el6_4.x86_64 –nodeps</p>
+</li>
+<li><p>[root@lxd-vm1 data]# rpm -e mysql-devel-5.1.71-1.el6.x86_64 –nodeps</p>
+</li>
+<li><p>[root@lxd-vm1 data]# rpm -e mysql-server-5.1.71-1.el6.x86_64 –nodeps</p>
+</li>
+<li><p>[root@lxd-vm1 data]#</p>
+</li>
+<li><p>[root@lxd-vm1 data]# rpm -qa | grep mysql | wc -l</p>
+</li>
+<li><p>0</p>
+</li>
+<li><p>[root@lxd-vm1 data]#</p>
+</li>
+</ol>
+<p>3.创建组和用户</p>
+<ol>
+<li><p>[root@lxd-vm1 ~]# groupadd -g 700 mysql</p>
+</li>
+<li><p>[root@lxd-vm1 ~]# useradd -g mysql -u 700 mysql</p>
+</li>
+<li><p>[root@lxd-vm1 ~]# passwd mysql</p>
+</li>
+<li><p>Changing password for user mysql.</p>
+</li>
+<li><p>New password:</p>
+</li>
+<li><p>BAD PASSWORD: it is too short</p>
+</li>
+<li><p>BAD PASSWORD: is too simple</p>
+</li>
+<li><p>Retype new password:</p>
+</li>
+<li><p>passwd: all authentication tokens updated successfully.</p>
+</li>
+<li><p>[root@lxd-vm1 ~]#</p>
+</li>
+</ol>
+<p>4.创建目录结构</p>
+<ol>
+<li><p>[root@lxd-vm1 ~]# cd &#x2F;opt</p>
+</li>
+<li><p>[root@lxd-vm1 opt]# mkdir mysql</p>
+</li>
+<li><p>[root@lxd-vm1 opt]# mkdir -p &#x2F;data&#x2F;mysql</p>
+</li>
+<li><p>[root@lxd-vm1 opt]# mkdir -p &#x2F;data&#x2F;mysql&#x2F;mysql3306</p>
+</li>
+<li><p>[root@lxd-vm1 opt]# mkdir -p &#x2F;data&#x2F;mysql&#x2F;mysql3306&#x2F;{data,logs,tmp,binlog}</p>
+</li>
+<li><p>[root@lxd-vm1 opt]# chown -R mysql:mysql &#x2F;data&#x2F;mysql&#x2F;mysql3306</p>
+</li>
+</ol>
+<p>5.上传软件并解压</p>
+<ol>
+<li><p>[root@lxd-vm1 mysql]# pwd</p>
+</li>
+<li><p>&#x2F;opt&#x2F;mysql</p>
+</li>
+<li><p>[root@lxd-vm1 mysql]# ll</p>
+</li>
+<li><p>total 627632</p>
+</li>
+<li><p>-rw-r–r– 1 root root 642694570 Aug 10 16:25 mysql-5.7.14-linux-glibc2.5-x86_64.tar.gz</p>
+</li>
+<li><p>[root@lxd-vm1 mysql]# tar -zxvf mysql-5.7.14-linux-glibc2.5-x86_64.tar.gz</p>
+</li>
+</ol>
+<p>6.创建软链接</p>
+<ol>
+<li><p>[root@lxd-vm1 local]# pwd</p>
+</li>
+<li><p>&#x2F;usr&#x2F;local</p>
+</li>
+<li><p>[root@lxd-vm1 local]# ln -s &#x2F;opt&#x2F;mysql&#x2F;mysql-5.7.14-linux-glibc2.5-x86_64 &#x2F;usr&#x2F;local&#x2F;mysql</p>
+</li>
+<li><p>[root@lxd-vm1 local]# ls -l mysql</p>
+</li>
+<li><p>lrwxrwxrwx 1 root root 45 Aug 10 16:48 mysql -&gt; &#x2F;opt&#x2F;mysql&#x2F;mysql-5.7.14-linux-glibc2.5-x86_64</p>
+</li>
+<li><p>[root@lxd-vm1 local]#</p>
+</li>
+</ol>
+<p>7.编辑参数文件</p>
+<p>8.初始化数据库</p>
+<ol>
+<li><p>[root@lxd-vm1 ~]# &#x2F;usr&#x2F;local&#x2F;mysql&#x2F;bin&#x2F;mysqld –defaults-file&#x3D;&#x2F;data&#x2F;mysql&#x2F;mysql3306&#x2F;my3306.cnf –initialize</p>
+</li>
+<li><p>[root@lxd-vm1 ~]# grep password &#x2F;data&#x2F;mysql&#x2F;mysql3306&#x2F;logs&#x2F;error.log</p>
+</li>
+<li><p>2016-08-10T13:34:41.861545Z 1 [Note] A temporary password is generated for root@localhost: lKa!lSipc8hd</p>
+</li>
+<li><p>[root@lxd-vm1 ~]#</p>
+</li>
+</ol>
+<p>注意从5.7开始</p>
+<p>（1）初始化使用的是mysqld</p>
+<p>（2）以不报错，什么都不提示，为正常，初始化完成后，生成随机的‘root‘@’localhost’的密码,输出到错误日志。</p>
+<p>9.启动数据库</p>
+<ol>
+<li><p>[mysql@lxd-vm1 ~]$ &#x2F;usr&#x2F;local&#x2F;mysql&#x2F;bin&#x2F;mysqld –defaults-file&#x3D;&#x2F;data&#x2F;mysql&#x2F;mysql3306&#x2F;my3306.cnf &amp;</p>
+</li>
+<li><p>[1] 2431</p>
+</li>
+<li><p>[mysql@lxd-vm1 ~]$ ps -ef | grep -w mysqld | grep -v grep</p>
+</li>
+<li><p>mysql 2431 2372 0 21:44 pts&#x2F;1 00:00:00 &#x2F;usr&#x2F;local&#x2F;mysql&#x2F;bin&#x2F;mysqld –defaults-file&#x3D;&#x2F;data&#x2F;mysql&#x2F;mysql3306&#x2F;my3306.cnf</p>
+</li>
+<li><p>[mysql@lxd-vm1 ~]$</p>
+</li>
+</ol>
+<p>10.安装后首次登录数据库</p>
+<ol>
+<li><p>[mysql@lxd-vm1 ~]$ mysql -uroot -p -S &#x2F;data&#x2F;mysql&#x2F;mysql3306&#x2F;my3306.sock</p>
+</li>
+<li><p>Enter password:</p>
+</li>
+<li><p>Welcome to the MySQL monitor. Commands end with ; or \g.</p>
+</li>
+<li><p>Your MySQL connection id is 2</p>
+</li>
+<li><p>Server version: 5.7.14-log</p>
+</li>
+<li></li>
+<li><p>Copyright (c) 2000, 2016, Oracle and&#x2F;or its affiliates. All rights reserved.</p>
+</li>
+<li></li>
+<li><p>Oracle is a registered trademark of Oracle Corporation and&#x2F;or its</p>
+</li>
+<li><p>affiliates. Other names may be trademarks of their respective</p>
+</li>
+<li><p>owners.</p>
+</li>
+<li></li>
+<li><p>Type ‘help;’ or ‘\h’ for help. Type ‘\c’ to clear the current input statement.</p>
+</li>
+<li></li>
+<li><p>root@localhost [(none)]&gt;use mysql</p>
+</li>
+<li><p>ERROR 1820 (HY000): You must reset your password using ALTER USER statement before executing this statement.</p>
+</li>
+<li><p>root@localhost [(none)]&gt;alter user user() identified by ‘root’;</p>
+</li>
+<li><p>Query OK, 0 rows affected (0.00 sec)</p>
+</li>
+<li></li>
+<li><p>root@localhost [(none)]&gt;flush privileges;</p>
+</li>
+<li><p>Query OK, 0 rows affected (0.00 sec)</p>
+</li>
+<li></li>
+<li><p>root@localhost [(none)]&gt;use mysql</p>
+</li>
+<li><p>Database changed</p>
+</li>
+<li><p>root@localhost [mysql]&gt;select user,host,authentication_string from user;</p>
+</li>
+<li><p>+———–+———–+——————————————-+</p>
+</li>
+<li><p>| user | host | authentication_string |</p>
+</li>
+<li><p>+———–+———–+——————————————-+</p>
+</li>
+<li><p>| root | localhost | *81F5E21E35407D884A6CD4A731AEBFB6AF209E1B |</p>
+</li>
+<li><p>| mysql.sys | localhost | *THISISNOTAVALIDPASSWORDTHATCANBEUSEDHERE |</p>
+</li>
+<li><p>+———–+———–+——————————————-+</p>
+</li>
+<li><p>2 rows in set (0.00 sec)</p>
+</li>
+<li></li>
+</ol>
+<p>说明：首次登录时候使用初始化生成的密码，登录后，会强制修改当前用户的密码，修改后才可以进行其他操作。</p>
+<p>11.注意8.8.8.%，并不包含localhost，如果创建了用户，在本地测试，还需要授权给localhost</p>
+<p>12.查看进程</p>
+<ol>
+<li><p>[mysql@lxd-vm1 bin]$ ps -ef | grep -w mysqld | grep -v grep</p>
+</li>
+<li><p>mysql 2184 1 0 10:24 ? 00:00:14 &#x2F;usr&#x2F;local&#x2F;mysql&#x2F;bin&#x2F;mysqld –defaults-file&#x3D;&#x2F;data&#x2F;mysql&#x2F;mysql3306&#x2F;my3306.cnf</p>
+</li>
+<li><p>[mysql@lxd-vm1 bin]</p>
+</li>
+</ol>
+<p>13.查看端口</p>
+<ol>
+<li><p>[mysql@lxd-vm1 bin]$ netstat -nltp 2&gt;&#x2F;dev&#x2F;null | grep 3306</p>
+</li>
+<li><p>tcp 0 0 :::3306 :::* LISTEN 2184&#x2F;mysqld</p>
+</li>
+<li><p>[mysql@lxd-vm1 bin]$</p>
+</li>
+</ol>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2024/01/10/mysql5.7%E5%8D%95%E5%AE%9E%E4%BE%8B%E5%AE%89%E8%A3%85/">https://yhao521.github.io/2024/01/10/mysql5.7%E5%8D%95%E5%AE%9E%E4%BE%8B%E5%AE%89%E8%A3%85/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/01/10/mysql5.7%E8%A7%A3%E5%8E%8B%E7%89%88%E5%AE%89%E8%A3%85%E6%AD%A5%E9%AA%A4/" title="mysql5.7解压版安装步骤"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">mysql5.7解压版安装步骤</div></div><div class="info-2"><div class="info-item-1">1、下载，到MySQL官网：http://dev.mysql.com/  点击Downloads&#x3D;&gt;Community&#x3D;&gt;MySQL Community Server 选中上图的版本，开始下载。   2、解压安装包 解压下载的安装包，放到你的电脑路径，我放置的是E:\mysql   3、配置my.ini文件 解压后，根目录下，有一个my-default.ini文件，这是官方的配置文件样版， 我们把这个文件拷贝一份在同一个目录，名字改为my.ini 用txt打开编辑，把原本的说明内容清空，修改后如下：（再次说明，这是从参考网址拷贝的） [mysql] ; 设置mysql客户端默认字符集 default-character-set&#x3D;utf8 [mysqld] ;设置3306端口 port &#x3D; 3306  ; 设置mysql的安装目录 basedir&#x3D;E:\mysql5.7 ; 设置mysql数据库的数据的存放目录 datadir&#x3D;E:\mysql5.7\data ; 允许最大连接数 max_connections...</div></div></div></a><a class="pagination-related" href="/2024/01/10/linux%E4%B8%8B%E7%9A%84mysql%E5%AE%89%E8%A3%85(%E4%B8%80%E4%B8%AAIP%E5%A4%9A%E7%AB%AF%E5%8F%A3)/" title="linux下的mysql安装(一个IP多端口)"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">linux下的mysql安装(一个IP多端口)</div></div><div class="info-2"><div class="info-item-1">一、首先卸载之前的mysqlyum方式安装的MySQL 1、yum remove mysql mysql-server mysql-libs compat-mysql51 2、rm -rf &#x2F;var&#x2F;lib&#x2F;mysql 3、rm &#x2F;etc&#x2F;my.cnf 查看是否还有mysql软件：rpm -qa|grep mysql 如果存在的话，继续删除即可。 rpm方式安装的mysql a）查看系统中是否以rpm包安装的mysql： [root@localhost opt]# rpm -qa | grep -i mysqlMySQL-server-5.5.28-1.el6.x86_64.rpmMySQL-client-5.5.28-1.el6.x86_64 b)卸载mysql [root@localhost local]# rpm -e MySQL-server-5.5.28-1.el6.x86_64.rpm[root@localhost local]# rpm -e MySQL-client-5.5.28-1.el6.x86_64 c)删除...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/starUML%E6%BF%80%E6%B4%BB/" title="starUML激活"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">starUML激活</div></div><div class="info-2"><div class="info-item-1"> title: starUML激活date: 2023-09-03 20:17:08category:  UML类图tag: UML类图author:   StarUML（一） —— 简介和破解（一） 刀客传奇关注 0.1232022.01.03 17:34:47字数 795阅读 1,289 版本记录   版本号 时间    V1.0 2022.01.03 星期一   前言 StarUML(简称SU)，是一种创建UML类图，生成类图和其他类型的统一建模语言(UML)图表的工具。StarUML是一个开源项目之一发展快、灵活、可扩展性强。我们一般都是使用这个软件画一个时序图和软件图等，特别是软件图是我们常用的，用来反映各个模块各个类之间的关系。  简介StarUML是一款开放源码的UML开发工具，是由韩国公司主导开发出来的产品，可以直接到StarUML网站下载。可以用来创建UML类图。  可绘制9款UML图：用例图、类图、序列图、状态图、活动图、通信图、构件图、部署图以及复合结构图等。  完全免费：StarUML是一套开放源码的软件，不仅免费自由下载，连代码都免费开放。 多种格式影像...</div></div></div></a><a class="pagination-related" href="/2023/09/04/mac%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7/" title="mac命令行工具"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">mac命令行工具</div></div><div class="info-2"><div class="info-item-1"> title: mac命令行工具date: 2023-09-03 20:17:08category:  mactag: macauthor:   8个不可不知的Mac OS X专用命令行工具OS X的终端下通用很多Unix的工具和脚本。如果从Linux迁移到OS X会发现很多熟悉的命令和脚本工具，其实并没有任何区别。 但是OS X也提供了很多其他系统所没有的特别的命令行工具。我们推荐8个这类的工具，希望有助于提高在Mac的命令行环境下的效率。 1. openopen命令用于打开文件、目录或执行程序。就等同于在命令行模式下，重复图形界面“双击”的动作。例如这个命令与在Finder中双击Safari是一样的： 1$ open /Applications/Safari.app/  如果open一个文件，则会使用关联的程序打开之。例如open screenshot.png会在Preview中查看图片。 可以使用-a选项要求自行选择打开的程序，或使用-e强制在TextEdit中编辑此文件。 open一个目录会在Finder窗口中打开此目录。一个很有用的技巧是open .打开当前目录。 Fi...</div></div></div></a><a class="pagination-related" href="/2023/09/04/influxdb%E5%AE%89%E8%A3%85/" title="influxdb安装"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">influxdb安装</div></div><div class="info-2"><div class="info-item-1"> title: influxdb安装date: 2023-09-03 20:17:08category:  数据库 doc_influxdbtag: doc_influxdbauthor:   1. influxdb 安装安装位置：    主机 172.18.231.119    位置 &#x2F;paas&#x2F;iddbs&#x2F;a-tools&#x2F;influxdb1.7.4&#x2F;usr&#x2F;bin   端口 25001   客户端连接命令 .&#x2F;influx -precision rfc3339 -host 172.18.231.123 -port 25001    .&#x2F;influx -precision rfc3339 -host 172.18.231.123 -port 25001 -precision rfc3339 时间格式是字符串 -precision rfc333 时间格式是时间戳 启动&amp;停止 nohup &#x2F;paas&#x2F;iddbs&#x2F;crds_web&#x2F;influxdb1.7.4...</div></div></div></a><a class="pagination-related" href="/2022/08/02/%E7%AE%A1%E6%8E%A7%E5%B9%B3%E5%8F%B0@nginx%E6%BC%8F%E6%B4%9E%E4%BF%AE%E5%A4%8D&%E5%8D%87%E7%BA%A7%E6%AD%A5%E9%AA%A4/" title="管控平台@nginx漏洞修复&amp;升级步骤"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2022-08-02</div><div class="info-item-2">管控平台@nginx漏洞修复&amp;升级步骤</div></div><div class="info-2"><div class="info-item-1">管控平台@nginx漏洞修复&amp;升级步骤1.下载nginx  http://nginx.org/download/nginx-1.22.0.tar.gz 2.上传到平台安装目录的soft目录下 3.修改app.sh脚本中如下nginx-1.20.1 为 nginx-1.22.0 cat app.sh |grep nginx-1.20.1 123456if [ ! -f &quot;$&#123;DEPLOY_DIR&#125;/soft/nginx-1.20.1.tar.gz&quot; ]; thenecho &quot;ERROR: The $&#123;DEPLOY_DIR&#125;/soft/nginx-1.20.1.tar.gz file does not exist!&quot;echo &quot;Please upload the installation package: $&#123;DEPLOY_DIR&#125;/soft/nginx-1.20.1.tar.gz&quot;tar -zxvf $&#123;DEPLOY_DIR&#125;/soft...</div></div></div></a><a class="pagination-related" href="/2024/01/13/MySQL%E5%8D%87%E7%BA%A7/" title="MySQL升级"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-13</div><div class="info-item-2">MySQL升级</div></div><div class="info-2"><div class="info-item-1">MySQL升级一、升级要求1．支持从MySQL5.7升级到8.0，注意仅支持GA版本之间的升级，并且要求版本为5.7.9或者更高（此句未测试） 2．不支持跨大版本的升级，如从5.6升级到8.0是不支持的 3．建议升级大版本前先升级到当前版本的最近小版本，如5.7先升级到5.7.35后再升级到8.0 4．在大版本内部GA的小版本可以直接升级，如从8.0.9直接升级到8.0.26 二、升级内容1．升级数据字典表的版本：升级数据字典包括升级mysql schema中的数据字典表，以及performance schema，information_schema。升级数据字典表时，如当前版本低于期望版本，则服务器将创建新版本的数据字典表并将持久化的元数据拷贝到新表，在新旧表做原子性替换后重新初始化数据字典。服务器启动后会按需执行，可以使用 –upgrade&#x3D;NONE（8.0.16以后）或–no-dd-upgrade （8.0.16之前）参数启动MySQL，阻止数据字典表的升级 2．升级MySQL server 版本，主要包括system表以及其他schema对象：在8.0.16之前...</div></div></div></a><a class="pagination-related" href="/2023/09/04/granfana%E4%BD%BF%E7%94%A8/" title="granfana使用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">granfana使用</div></div><div class="info-2"><div class="info-item-1"> title: granfana使用date: 2023-09-03 20:17:08category:  mactag: macauthor:   Grafana使用安装https://grafana.com/tutorials/grafana-fundamentals/?utm_source=grafana_gettingstarted https://grafana.com/docs/grafana/latest/getting-started/getting-started/ docker安装Start the Docker container by binding Grafana to external port 3000. 1234docker pull grafana/grafanadocker pull grafana/grafana-ossdocker run -d --name=grafana -p 3000:3000 grafana/grafana  Try it out, default admin user credentials are admin&#...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

@@ -1,0 +1,384 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>nginx 开启目录浏览功能及主题美化 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="[图片] 1.开启目录浏览功能 Nginx 提供了相应的 ngx_http_autoindex_module 模块 该模块有以下几个命令： 命令 默认值 值域 作用域 EG autoindex off on：开启目录浏览；off：关闭目录浏览 http, server, location autoindex on; 打">
+<meta property="og:type" content="article">
+<meta property="og:title" content="nginx 开启目录浏览功能及主题美化">
+<meta property="og:url" content="https://yhao521.github.io/2025/05/13/nginx%20%E5%BC%80%E5%90%AF%E7%9B%AE%E5%BD%95%E6%B5%8F%E8%A7%88%E5%8A%9F%E8%83%BD%E5%8F%8A%E4%B8%BB%E9%A2%98%E7%BE%8E%E5%8C%96/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="[图片] 1.开启目录浏览功能 Nginx 提供了相应的 ngx_http_autoindex_module 模块 该模块有以下几个命令： 命令 默认值 值域 作用域 EG autoindex off on：开启目录浏览；off：关闭目录浏览 http, server, location autoindex on; 打">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2025-05-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-17T16:00:00.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="php&#x2F;programming">
+<meta property="article:tag" content="swift&#x2F;programming">
+<meta property="article:tag" content="摘录">
+<meta property="article:tag" content="教程">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "nginx 开启目录浏览功能及主题美化",
+  "url": "https://yhao521.github.io/2025/05/13/nginx%20%E5%BC%80%E5%90%AF%E7%9B%AE%E5%BD%95%E6%B5%8F%E8%A7%88%E5%8A%9F%E8%83%BD%E5%8F%8A%E4%B8%BB%E9%A2%98%E7%BE%8E%E5%8C%96/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2025-05-12T16:00:00.000Z",
+  "dateModified": "2026-05-17T16:00:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2025/05/13/nginx%20%E5%BC%80%E5%90%AF%E7%9B%AE%E5%BD%95%E6%B5%8F%E8%A7%88%E5%8A%9F%E8%83%BD%E5%8F%8A%E4%B8%BB%E9%A2%98%E7%BE%8E%E5%8C%96/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'nginx 开启目录浏览功能及主题美化',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">nginx 开启目录浏览功能及主题美化</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">nginx 开启目录浏览功能及主题美化</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-05-12T16:00:00.000Z" title="发表于 2025-05-13 00:00:00">2025-05-13</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-17T16:00:00.000Z" title="更新于 2026-05-18 00:00:00">2026-05-18</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>![[_resources&#x2F;46515eaf0d7b8037451bd4cc691c1efa_MD5.png]]</p>
+<h2 id="1-开启目录浏览功能"><a href="#1-开启目录浏览功能" class="headerlink" title="1.开启目录浏览功能"></a>1.开启目录浏览功能</h2><p>Nginx 提供了相应的 <code>ngx_http_autoindex_module</code> 模块<br>该模块有以下几个命令：</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>默认值</th>
+<th>值域</th>
+<th>作用域</th>
+<th>EG</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>autoindex</td>
+<td>off</td>
+<td>on：开启目录浏览；off：关闭目录浏览</td>
+<td>http, server, location</td>
+<td><code>autoindex on;</code> 打开目录浏览功能</td>
+</tr>
+<tr>
+<td>autoindex_format</td>
+<td>html</td>
+<td>html、xml、json、jsonp 分别用这几个风格展示目录</td>
+<td>http, server, location</td>
+<td><code>autoindex_format html; </code> 以网页的风格展示目录内容。该属性在 1.7.9 及以上适用</td>
+</tr>
+<tr>
+<td>autoindex_exact_size</td>
+<td>on</td>
+<td>on：展示文件字节数； off：以可读的方式显示文件大小</td>
+<td>http, server, location</td>
+<td><code>autoindex_exact_size off;</code> 以可读的方式显示文件大小，单位为 KB、MB 或者 GB，autoindex_format 为 html 时有效</td>
+</tr>
+<tr>
+<td>autoindex_localtime</td>
+<td>off</td>
+<td>on、off：是否以服务器的文件时间作为显示的时间</td>
+<td>http, server, location</td>
+<td><code>autoindex_localtime on;</code> 以服务器的文件时间作为显示的时间,autoindex_format 为 html 时有效</td>
+</tr>
+</tbody></table>
+<h3 id="1-1-浏览目录基本配置"><a href="#1-1-浏览目录基本配置" class="headerlink" title="1.1 浏览目录基本配置"></a>1.1 浏览目录基本配置</h3><p>在 http 下添加参数即可</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">http &#123;</span><br><span class="line">    autoindex on;   #开启nginx目录浏览功能  </span><br><span class="line">    autoindex_exact_size off;   #文件大小从KB开始显示  </span><br><span class="line">    autoindex_localtime on;   #显示文件修改时间为服务器本地时间</span><br><span class="line">    charset utf-8,gbk;     #防止中文目录出现乱码</span><br><span class="line">    include       /etc/nginx/mime.types;</span><br><span class="line">    default_type  application/octet-stream;</span><br><span class="line"></span><br><span class="line">    log_format  main  &#x27;$remote_addr - $remote_user [$time_local] &quot;$request&quot; &#x27;</span><br><span class="line">                      &#x27;$status $body_bytes_sent &quot;$http_referer&quot; &#x27;</span><br><span class="line">                      &#x27;&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot;&#x27;;</span><br><span class="line"></span><br><span class="line">    access_log  /var/log/nginx/access.log  main;</span><br><span class="line"></span><br><span class="line">    sendfile        on;</span><br><span class="line">    #tcp_nopush     on;</span><br><span class="line"></span><br><span class="line">    keepalive_timeout  65;</span><br><span class="line"></span><br><span class="line">    #gzip  on;</span><br><span class="line"></span><br><span class="line">    include /etc/nginx/conf.d/*.conf;</span><br><span class="line">&#125;</span><br><span class="line">​</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-2-使配置生效"><a href="#1-2-使配置生效" class="headerlink" title="1.2 使配置生效"></a>1.2 使配置生效</h3><p>重新加载 nginx 配置文件即可</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nginx -s reload</span><br><span class="line">​</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意：ubuntu 下的 nginx 配置文件有两个，一个是 <code>/etc/nginx/nginx.conf</code> ，还有一个是 <code>/etc/nginx/conf.d/default.conf</code></p>
+</blockquote>
+<h3 id="1-3-补充"><a href="#1-3-补充" class="headerlink" title="1.3 补充"></a>1.3 补充</h3><p>若只想部分目录提供文件浏览功能，则：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">location /downloads &#123;</span><br><span class="line">    autoindex on;   #开启nginx目录浏览功能</span><br><span class="line">    autoindex_exact_size off;   #文件大小从KB开始显示</span><br><span class="line">    autoindex_localtime on;   #显示文件修改时间为服务器本地时间</span><br><span class="line">    charset utf-8,gbk;  #设置文件名编码，防止乱码</span><br><span class="line">    root /usr/local/src; #文件目录</span><br><span class="line">&#125;</span><br><span class="line">​</span><br></pre></td></tr></table></figure>
+
+<p>附目录结构：<br>![[_resources&#x2F;b76ca59a9b22d11ea3671a1029306179_MD5.jpg]]</p>
+<blockquote>
+<p>注意：上面配置中的 root 一项可以改写为：</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">alias /usr/local/src/downloads;</span><br><span class="line">​</span><br></pre></td></tr></table></figure>
+
+<p>关于 <code>alias</code> 和 <code>root</code> 的区别参看： <a target="_blank" rel="noopener" href="https://ld246.com/forward?goto=https://leif.fun/articles/2019/09/25/1569374756088.html">https://leif.fun/articles/2019/09/25/1569374756088.html</a></p>
+<h2 id="2-主题美化"><a href="#2-主题美化" class="headerlink" title="2.主题美化"></a>2.主题美化</h2><p>nginx 开启文件浏览功能之后是这个样子的</p>
+<p>![[_resources&#x2F;f36f2ed36a304afe750f9892653ef638_MD5.jpg]]</p>
+<p>感觉很丑有没有，而且字体很小，我们使用开源的 FancyIndex 来美化页面，然后默认安装的 nginx 是不支持 fancyindex 参数的，故需要重新编译安装 nginx。</p>
+<h3 id="2-1-查看编译参数"><a href="#2-1-查看编译参数" class="headerlink" title="2.1 查看编译参数"></a>2.1 查看编译参数</h3><p>先弄清楚 nginx 已经编译了哪些模块，使用 <code>2&gt;&amp;1 nginx -V | tr &#39; &#39; &#39;\n&#39;|grep module</code> 命令查看：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">[root@centos ~]# 2&gt;&amp;1 nginx -V | tr &#x27; &#x27; &#x27;\n&#x27;|grep module</span><br><span class="line">--modules-path=/usr/lib64/nginx/modules</span><br><span class="line">--with-http_auth_request_module</span><br><span class="line">--with-http_ssl_module</span><br><span class="line">--with-http_v2_module</span><br><span class="line">--with-http_realip_module</span><br><span class="line">--with-http_addition_module</span><br><span class="line">--with-http_xslt_module=dynamic</span><br><span class="line">--with-http_image_filter_module=dynamic</span><br><span class="line">--with-http_geoip_module=dynamic</span><br><span class="line">--with-http_sub_module</span><br><span class="line">--with-http_dav_module</span><br><span class="line">--with-http_flv_module</span><br><span class="line">--with-http_mp4_module</span><br><span class="line">--with-http_gunzip_module</span><br><span class="line">--with-http_gzip_static_module</span><br><span class="line">--with-http_random_index_module</span><br><span class="line">--with-http_secure_link_module</span><br><span class="line">--with-http_degradation_module</span><br><span class="line">--with-http_slice_module</span><br><span class="line">--with-http_stub_status_module</span><br><span class="line">--with-http_perl_module=dynamic</span><br><span class="line">--with-mail_ssl_module</span><br><span class="line">--with-stream_ssl_module</span><br><span class="line">--with-google_perftools_module</span><br><span class="line">--add-module=ngx-fancyindex-0.4.3</span><br><span class="line">​</span><br></pre></td></tr></table></figure>
+
+<p>查看完整的编译参数： <code>nginx -V</code>:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@entos ~]# nginx -V</span><br><span class="line">nginx version: nginx/1.17.4</span><br><span class="line">built by gcc 4.8.5 20150623 (Red Hat 4.8.5-39) (GCC)</span><br><span class="line">built with OpenSSL 1.0.2k-fips  26 Jan 2017</span><br><span class="line">TLS SNI support enabled</span><br><span class="line">configure arguments: --prefix=/usr/share/nginx --sbin-path=/usr/sbin/nginx --modules-path=/usr/lib64/nginx/modules --conf-path=/etc/nginx/nginx.conf --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --http-client-body-temp-path=/var/lib/nginx/tmp/client_body --http-proxy-temp-path=/var/lib/nginx/tmp/proxy --http-fastcgi-temp-path=/var/lib/nginx/tmp/fastcgi --http-uwsgi-temp-path=/var/lib/nginx/tmp/uwsgi --http-scgi-temp-path=/var/lib/nginx/tmp/scgi --pid-path=/run/nginx.pid --lock-path=/run/lock/subsys/nginx --user=nginx --group=nginx --with-file-aio --with-ipv6 --with-http_auth_request_module --with-http_ssl_module --with-http_v2_module --with-http_realip_module --with-http_addition_module --with-http_xslt_module=dynamic --with-http_image_filter_module=dynamic --with-http_geoip_module=dynamic --with-http_sub_module --with-http_dav_module --with-http_flv_module --with-http_mp4_module --with-http_gunzip_module --with-http_gzip_static_module --with-http_random_index_module --with-http_secure_link_module --with-http_degradation_module --with-http_slice_module --with-http_stub_status_module --with-http_perl_module=dynamic --with-mail=dynamic --with-mail_ssl_module --with-pcre --with-pcre-jit --with-stream=dynamic --with-stream_ssl_module --with-google_perftools_module --with-debug --with-cc-opt=&#x27;-O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector-strong --param=ssp-buffer-size=4 -grecord-gcc-switches -specs=/usr/lib/rpm/redhat/redhat-hardened-cc1 -m64 -mtune=generic&#x27; --with-ld-opt=&#x27;-Wl,-z,relro -specs=/usr/lib/rpm/redhat/redhat-hardened-ld -Wl,-E&#x27;</span><br><span class="line">​</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-2-动态编译添加-Nginx-模块"><a href="#2-2-动态编译添加-Nginx-模块" class="headerlink" title="2.2 动态编译添加 Nginx 模块"></a>2.2 动态编译添加 Nginx 模块</h3><p>1.下载最新 nginx 源码： <a target="_blank" rel="noopener" href="https://ld246.com/forward?goto=https://nginx.org/en/download.html">nginx-download</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">wget https://nginx.org/download/nginx-1.17.4.tar.gz</span><br><span class="line">​</span><br></pre></td></tr></table></figure>
+
+<p>2.在 github 上下载源码： <a target="_blank" rel="noopener" href="https://ld246.com/forward?goto=https://github.com/aperezdc/ngx-fancyindex/releases">ngx-fancyindex</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">wget https://github.com/aperezdc/ngx-fancyindex/archive/v0.4.3.zip</span><br><span class="line">​</span><br></pre></td></tr></table></figure>
+
+<p>3.将 nginx 源码压缩包解压（目录随意）,然后将 fancyindex 的源码压缩包解压到 nginx 的源码目录里<br>![[_resources&#x2F;b28586dca7aa3daa1910013b6be23002_MD5.jpg]]<br>4.到这里先暂时不要 make，先解决一下依赖问题(依赖包非常多，我当时也是一步一步找了好久)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum -y install redhat-rpm-config pcre-devel zlib zlib-devel openssl openssl-devel perl-devel perl-ExtUtils-Embed gd-devel GeoIP GeoIP-devel GeoIP-data libxslt-devel gperftools</span><br><span class="line">​</span><br></pre></td></tr></table></figure>
+
+<p>5.cd 进 nginx 源码目录，准备编译参数。因为上一步执行 <code>nginx -V</code> 的时候得到了众多参数，这次需要在上面的参数基础上新增一个 fancyindex 的参数，添加到末尾即可（实际上就是添加的目录文件夹）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">./configure --prefix=/usr/share/nginx --sbin-path=/usr/sbin/nginx --modules-path=/usr/lib64/nginx/modules --conf-path=/etc/nginx/nginx.conf --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --http-client-body-temp-path=/var/lib/nginx/tmp/client_body --http-proxy-temp-path=/var/lib/nginx/tmp/proxy --http-fastcgi-temp-path=/var/lib/nginx/tmp/fastcgi --http-uwsgi-temp-path=/var/lib/nginx/tmp/uwsgi --http-scgi-temp-path=/var/lib/nginx/tmp/scgi --pid-path=/run/nginx.pid --lock-path=/run/lock/subsys/nginx --user=nginx --group=nginx --with-file-aio --with-ipv6 --with-http_auth_request_module --with-http_ssl_module --with-http_v2_module --with-http_realip_module --with-http_addition_module --with-http_xslt_module=dynamic --with-http_image_filter_module=dynamic --with-http_geoip_module=dynamic --with-http_sub_module --with-http_dav_module --with-http_flv_module --with-http_mp4_module --with-http_gunzip_module --with-http_gzip_static_module --with-http_random_index_module --with-http_secure_link_module --with-http_degradation_module --with-http_slice_module --with-http_stub_status_module --with-http_perl_module=dynamic --with-mail=dynamic --with-mail_ssl_module --with-pcre --with-pcre-jit --with-stream=dynamic --with-stream_ssl_module --with-google_perftools_module --with-debug --with-cc-opt=&#x27;-O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector-strong --param=ssp-buffer-size=4 -grecord-gcc-switches -specs=/usr/lib/rpm/redhat/redhat-hardened-cc1 -m64 -mtune=generic&#x27; --with-ld-opt=&#x27;-Wl,-z,relro -specs=/usr/lib/rpm/redhat/redhat-hardened-ld -Wl,-E&#x27; --add-module=ngx-fancyindex-0.4.3</span><br><span class="line">​</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意:若你的 fancyindex 是直接用 <code>git clone</code> 的，则最后的参数不会有 <code>-0.4.3</code> ，直接 clone 是不会有版本号的。</p>
+</blockquote>
+<p>6.编译</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">make</span><br><span class="line">​</span><br></pre></td></tr></table></figure>
+
+<p>7.安装</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">make install</span><br><span class="line">​</span><br></pre></td></tr></table></figure>
+
+<p>8.停止正在运行的 nginx 服务</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop nginx</span><br><span class="line">​</span><br></pre></td></tr></table></figure>
+
+<p>9.进入 nginx 源码目录下的 <code>objs</code> 目录，执行 <code>2&gt;&amp;1 ./nginx -V | tr &#39; &#39; &#39;\n&#39;|grep fan</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@centos objs]# 2&gt;&amp;1 ./nginx -V | tr &#x27; &#x27; &#x27;\n&#x27;|grep fan</span><br><span class="line">--add-module=ngx-fancyindex-0.4.3</span><br><span class="line">​</span><br></pre></td></tr></table></figure>
+
+<p>10.查看 nginx 的可执行文件路径</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@centos nginx-1.17.4]# which nginx</span><br><span class="line">/usr/sbin/nginx</span><br><span class="line">​</span><br></pre></td></tr></table></figure>
+
+<p>11.用 <code>objs</code> 目录下的 <code>nginx</code> 文件替换 <code>/usr/sbin</code> 下面的 <code>nginx</code> 即可</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@centos objs]# cp nginx /usr/sbin/nginx</span><br><span class="line">​</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-3-Fancy-Index-配置"><a href="#2-3-Fancy-Index-配置" class="headerlink" title="2.3 Fancy Index 配置"></a>2.3 Fancy Index 配置</h3><p>1.不使用主题<br>走到这一步，你已经成功一大半了，若你不想使用第三方 fancyindex 主题，可以直接在 nginx 中这样设置：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">location /downloads &#123;</span><br><span class="line">            fancyindex on;</span><br><span class="line">            fancyindex_localtime on;</span><br><span class="line">            fancyindex_exact_size off;</span><br><span class="line">#            autoindex on;   #开启nginx目录浏览功能</span><br><span class="line">#            autoindex_exact_size off;   #文件大小从KB开始显示</span><br><span class="line">#            autoindex_localtime on;   #显示文件修改时间为服务器本地时间</span><br><span class="line">            charset utf-8,gbk;  #设置文件名编码，防止乱码</span><br><span class="line">        alias /usr/local/src/downloads;</span><br><span class="line">        &#125;</span><br><span class="line">​</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意：安装 fancyindex 过后是可以直接替换掉 autoindex 配置的，它们的功能一样，只不过是主题样式不同而已。</p>
+</blockquote>
+<p>重启 nginx(上一步因为替换 nginx 可执行文件将 nginx 服务停止了)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systemctl start nginx</span><br><span class="line">​</span><br></pre></td></tr></table></figure>
+
+<p>效果如下：<br>![[_resources&#x2F;3aa824a2682e93005f3673451b766775_MD5.jpg]]</p>
+<p>![[_resources&#x2F;f24aaab9258e776aba342e8fdf6c2b18_MD5.jpg]]</p>
+<blockquote>
+<p>细心的同学可能会发现，由于 Linux 这本书名字太长，导致了文件名出现截断现象，原因是 Ngx-FancyIndex 将文件名截断为 50 个字符减去 3，然后在截断的名称后附加了 <code>..&gt;</code> 符号，解决办法是指定最大文件名长度:</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">fancyindex_name_length 500;</span><br><span class="line">​</span><br></pre></td></tr></table></figure>
+
+<p>效果：<br>![[_resources&#x2F;1d8e66c243eafecec165797ab5ca6d32_MD5.jpg]]</p>
+<p>2.使用主题<br>下载主题：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git clone  https://github.com/TheInsomniac/Nginx-Fancyindex-Theme.git</span><br><span class="line">​</span><br></pre></td></tr></table></figure>
+
+<p>将下载好的主题复制到 <code>/usr/share/nginx/html</code> 中并重命名为 fancyindex</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cp -r Nginx-Fancyindex-Theme /usr/share/nginx/html/fancyindex</span><br><span class="line">​</span><br></pre></td></tr></table></figure>
+
+<p>3.配置 nginx<br>方法一：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">location /downloads &#123;</span><br><span class="line">            fancyindex on;</span><br><span class="line">            fancyindex_localtime on;</span><br><span class="line">            fancyindex_exact_size off;</span><br><span class="line">            fancyindex_header &quot;/usr/share/nginx/html/fancyindex/header.html&quot;;</span><br><span class="line">            fancyindex_footer &quot;/usr/share/nginx/html/fancyindex/footer.html&quot;;</span><br><span class="line">            fancyindex_ignore &quot;fancyindex&quot;;</span><br><span class="line">            charset utf-8,gbk;  #设置文件名编码，防止乱码</span><br><span class="line">        alias /usr/local/src/downloads;</span><br><span class="line">        &#125;</span><br><span class="line">​</span><br></pre></td></tr></table></figure>
+
+<p>方法二：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">location /downloads &#123;</span><br><span class="line">            include /usr/share/nginx/html/Nginx-Fancyindex-Theme/fancyindex.conf;</span><br><span class="line">            charset utf-8,gbk;  #设置文件名编码，防止乱码</span><br><span class="line">        alias /usr/local/src/downloads;</span><br><span class="line">        &#125;</span><br><span class="line">​</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>fancyindex.conf 中的配置包含了方法一中的配置</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"># Include in location directive</span><br><span class="line">  fancyindex on;</span><br><span class="line">  fancyindex_localtime on; #on for local time zone. off for GMT</span><br><span class="line">  fancyindex_exact_size off; #off for human-readable. on for exact size in bytes</span><br><span class="line">  fancyindex_header &quot;/fancyindex/header.html&quot;;</span><br><span class="line">  fancyindex_footer &quot;/fancyindex/footer.html&quot;;</span><br><span class="line">  fancyindex_ignore &quot;fancyindex&quot;; #ignore this directory when showing list</span><br><span class="line"># end include</span><br><span class="line">​</span><br></pre></td></tr></table></figure>
+
+<p>4.重启 nginx</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nginx -s reload</span><br><span class="line">​</span><br></pre></td></tr></table></figure>
+
+<p>5.效果：<br>![[_resources&#x2F;41ea827f947096a9ddc76f3946abd7aa_MD5.jpg]]</p>
+<p>![[_resources&#x2F;207bbbb66759a21857326ec20cfab15c_MD5.jpg]]</p>
+<p>![[_resources&#x2F;5bbb5fe6eb0494a0a6eb3da1ab87f117_MD5.jpg]]</p>
+<p>参考：<br><a target="_blank" rel="noopener" href="https://ld246.com/forward?goto=https://segmentfault.com/a/1190000012606305">Nginx 浏览目录配置及美化</a><br><a target="_blank" rel="noopener" href="https://ld246.com/forward?goto=http://www.swiftyper.com/2016/12/08/nginx-autoindex-configuration/">配置 Nginx 的目录浏览功能</a><br><a target="_blank" rel="noopener" href="https://ld246.com/forward?goto=https://perso.crans.org/besson/publis/Nginx-Fancyindex-Theme/?C=S;O=D">Nginx-Fancyindex-Theme</a></p>
+<h2 id="3-注意点"><a href="#3-注意点" class="headerlink" title="3.注意点"></a>3.注意点</h2><h3 id="3-1-ubuntu-下-nginx-的安装"><a href="#3-1-ubuntu-下-nginx-的安装" class="headerlink" title="3.1 ubuntu 下 nginx 的安装"></a>3.1 ubuntu 下 nginx 的安装</h3><p>ubuntu 下 nginx 请下载安装 <a target="_blank" rel="noopener" href="https://ld246.com/forward?goto=https://leif.fun/downloads/tools/linux/nginx_1.16.1-1_xenial_amd64.deb">https://leif.fun/downloads/tools/linux/nginx_1.16.1-1_xenial_amd64.deb</a></p>
+<p>安装完成后，配置文件路径与 centos 下的有些许不同，centos 的主要配置文件在 <code>/etc/nginx/nginx.conf</code> 下，用户也可以在 <code>/etc/nginx/conf.d</code> 下新建 <code>端口号.conf</code> 文件，使用 <code>nginx -c /etc/nginx/nginx.conf</code> 命令启动 nginx,刷新配置使用 <code>nginx -s reload</code></p>
+<p>![[_resources&#x2F;ad9331909b77a0ec2ad3cff47d6c02f7_MD5.jpg]]</p>
+<p>而 ubuntu 在安装完 nginx 后，除了 <code>/etc/nginx/nginx.conf</code> 主配置文件外，还会在 <code>conf.d</code> 下自动生成一个 <code>default.conf</code> 文件，内容默认为 <code>80</code> 的配置</p>
+<p>![[_resources&#x2F;0e22c3215611ba96b6378c99f95dc26f_MD5.jpg]]</p>
+<p>我们只需要将配置写到 default.conf 这个文件中即可，之后使用 <code>systemctl start nginx</code> 启动 nginx 即可，刷新配置也使用 <code>nginx -s reload</code></p>
+<h3 id="3-2-ubuntu-下-nginx-编译"><a href="#3-2-ubuntu-下-nginx-编译" class="headerlink" title="3.2 ubuntu 下 nginx 编译"></a>3.2 ubuntu 下 nginx 编译</h3><p>上述 centos 下 nginx 编译需要安装众多依赖环境，而在 ubuntu 下貌似无需安装（我编译的时候没有提示依赖问题，若有问题的同学请在下方留言，我会补充进去）</p>
+<h3 id="3-3-ubuntu-下-nginx-配置"><a href="#3-3-ubuntu-下-nginx-配置" class="headerlink" title="3.3 ubuntu 下 nginx 配置"></a>3.3 ubuntu 下 nginx 配置</h3><p><strong>nginx.conf</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">user  nginx;</span><br><span class="line">worker_processes  1;</span><br><span class="line"></span><br><span class="line">error_log  /var/log/nginx/error.log warn;</span><br><span class="line">pid        /var/run/nginx.pid;</span><br><span class="line"></span><br><span class="line">events &#123;</span><br><span class="line">    worker_connections  1024;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">http &#123;</span><br><span class="line">    include       /etc/nginx/mime.types;</span><br><span class="line">    default_type  application/octet-stream;</span><br><span class="line"></span><br><span class="line">    log_format  main  &#x27;$remote_addr - $remote_user [$time_local] &quot;$request&quot; &#x27;</span><br><span class="line">                      &#x27;$status $body_bytes_sent &quot;$http_referer&quot; &#x27;</span><br><span class="line">                      &#x27;&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot;&#x27;;</span><br><span class="line"></span><br><span class="line">    access_log  /var/log/nginx/access.log  main;</span><br><span class="line"></span><br><span class="line">    sendfile        on;</span><br><span class="line">    #tcp_nopush     on;</span><br><span class="line"></span><br><span class="line">    keepalive_timeout  65;</span><br><span class="line"></span><br><span class="line">    #gzip  on;</span><br><span class="line"></span><br><span class="line">    include /etc/nginx/conf.d/*.conf;</span><br><span class="line">&#125;</span><br><span class="line">​</span><br></pre></td></tr></table></figure>
+
+<p><strong>default.conf</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">    listen       80;</span><br><span class="line"></span><br><span class="line">    location / &#123;</span><br><span class="line">        root   /home/medcaptain/sketch;</span><br><span class="line">        fancyindex on;</span><br><span class="line">        fancyindex_localtime on;</span><br><span class="line">        fancyindex_exact_size off;</span><br><span class="line">        charset utf-8,gbk;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    error_page   500 502 503 504  /50x.html;</span><br><span class="line">    location = /50x.html &#123;</span><br><span class="line">        root   /usr/share/nginx/html;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line">​</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p><a target="_blank" rel="noopener" href="https://ld246.com/forward?goto=http://nginx.org">NGINX</a> 是一个高性能的 HTTP 和反向代理服务器，也是一个 IMAP&#x2F;POP3&#x2F;SMTP 代理服务器。 NGINX 是由 Igor Sysoev 为俄罗斯访问量第二的 Rambler.ru 站点开发的，第一个公开版本 0.1.0 发布于 2004 年 10 月 4 日。<br>  315 引用 • 547 回帖</p>
+</li>
+<li><h2 id="搭建-http-服务器"><a href="#搭建-http-服务器" class="headerlink" title="搭建 http 服务器"></a>搭建 http 服务器</h2><p>  <a target="_blank" rel="noopener" href="https://ld246.com/article/1738894474447">安装 安装 nginx yum -y install nginx 这一步可能会遇到 ‘No package nginx available.’ 问题，解决方法如下： 问题描述： 见下图 [图片] 问题原因： nginx 位于第三方的 yum 源里面，而不在 centos 官方 yum 源里面 解决方法（一）： 安装 e..</a></p>
+</li>
+<li><h2 id="在阿里云服务器上部署-nginx"><a href="#在阿里云服务器上部署-nginx" class="headerlink" title="在阿里云服务器上部署 nginx"></a>在阿里云服务器上部署 nginx</h2><p>  <a target="_blank" rel="noopener" href="https://ld246.com/article/1737101095569">先使用 yum install nginx -y 命令下载 nginx -y 当安装过程提示选择全部为 ‘yes’ -q 不显示安装的过程 [图片] 在使用 rpm 命令查找 nginx 安装路径 我这里是先查询了安装的 nginx 的全称，包括版本号，这样才可以精确定位到安装路径。 rpm -qa | grep ng..</a></p>
+</li>
+<li><h2 id="nginx-反爬"><a href="#nginx-反爬" class="headerlink" title="nginx 反爬"></a>nginx 反爬</h2><p>  <a target="_blank" rel="noopener" href="https://ld246.com/article/1733975107992">### 一、基于 IP 访问频率限制 1. **配置示例**： ```nginx http { # 定义一个名为 anti_spider_zone 的共享内存区域，用于存储 IP 访问频率信息 limit_req_zone $binary_remote_addr zone&#x3D;anti_spider_zone:10m..</a></p>
+</li>
+<li><h2 id="webman-之-nginx-配置"><a href="#webman-之-nginx-配置" class="headerlink" title="webman 之 nginx 配置"></a>webman 之 nginx 配置</h2><p>  <a target="_blank" rel="noopener" href="https://ld246.com/article/1733059653341">upstream webman { server php82:8787; keepalive 10240; } upstream webman_ws { server php82:3131; keepalive 10240; } server { listen 80; listen [::]:80; listen 44..</a></p>
+</li>
+<li><h2 id="负载均衡-Nginx"><a href="#负载均衡-Nginx" class="headerlink" title="负载均衡 [Nginx]"></a>负载均衡 [Nginx]</h2><p>  <a target="_blank" rel="noopener" href="https://ld246.com/article/1710409068467">文献： nginx 官网 中文文档 英文文档 Windows 我用的版本号： nginx&#x2F;Windows-1.20.1 1、解压后的文件夹： [图片] 2、进入到 conf 文件夹。我们的配置是 nginx.conf [图片] 3、添加如下的配置 [图片] 3.1 配置代码： upstream localhost_se..</a></p>
+</li>
+<li><h2 id="nginx-配置-https-重定向"><a href="#nginx-配置-https-重定向" class="headerlink" title="nginx 配置 https 重定向"></a>nginx 配置 https 重定向</h2><p>  <a target="_blank" rel="noopener" href="https://ld246.com/article/1697003701362">配置 HTTPS 重定向 我们建议您安装从 HTTP 到 HTTPS 的重定向。这样，您的网站访问者将只能访问您网站的安全版本。 为此，您需要在配置文件中添加一行，其中包含端口 80 的服务器块。 尖端： *您可以使用以下命令之一来查找现在启用的配置文件： sudo nginx -T | grep -iw ‘confi..</a></p>
+</li>
+<li><h2 id="ubuntu-20-04-自定义编译-Nginx-问题以及解决方法"><a href="#ubuntu-20-04-自定义编译-Nginx-问题以及解决方法" class="headerlink" title="ubuntu 20.04 自定义编译 Nginx 问题以及解决方法"></a>ubuntu 20.04 自定义编译 Nginx 问题以及解决方法</h2><p>  <a target="_blank" rel="noopener" href="https://ld246.com/article/1695730474149">[图片] 问题 1.&#x2F;configure: error: the HTTP rewrite module requires the PCRE library sudo apt-get update sudo apt-get install libpcre3 libpcre3-dev 问题 2.&#x2F;configure:..</a></p>
+</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2025/05/13/nginx%20%E5%BC%80%E5%90%AF%E7%9B%AE%E5%BD%95%E6%B5%8F%E8%A7%88%E5%8A%9F%E8%83%BD%E5%8F%8A%E4%B8%BB%E9%A2%98%E7%BE%8E%E5%8C%96/">https://yhao521.github.io/2025/05/13/nginx%20%E5%BC%80%E5%90%AF%E7%9B%AE%E5%BD%95%E6%B5%8F%E8%A7%88%E5%8A%9F%E8%83%BD%E5%8F%8A%E4%B8%BB%E9%A2%98%E7%BE%8E%E5%8C%96/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/%E6%95%99%E7%A8%8B/">教程</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a><a class="post-meta__tags" href="/tags/%E6%91%98%E5%BD%95/">摘录</a><a class="post-meta__tags" href="/tags/php-programming/">php/programming</a><a class="post-meta__tags" href="/tags/swift-programming/">swift/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/05/13/%E3%80%90%E8%87%AA%E5%8A%A8%E5%8C%96%E6%B5%8B%E8%AF%95%E3%80%91%E5%87%A0%E7%A7%8D%E5%B8%B8%E8%A7%81%E7%9A%84%E8%87%AA%E5%8A%A8%E5%8C%96%E6%B5%8B%E8%AF%95%E6%A1%86%E6%9E%B6-CSDN%E5%8D%9A%E5%AE%A2/" title="【自动化测试】几种常见的自动化测试框架-CSDN博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">【自动化测试】几种常见的自动化测试框架-CSDN博客</div></div><div class="info-2"><div class="info-item-1">在 软件测试 领域，自动化测试框架有很多，这里主要介绍几种常用的自动化测试框架。![[_resources&#x2F;7bfb7786c74ff3259b48a5bd58e72fae_MD5.png]] 1.pytestpytest 是 Python 的一种单元测试框架，与 Python 自带的 unittest 测试框架类似，但是比 unittest 框架使用起来更简洁，效率更高。主要有以下几个特点：  简单灵活，容易上手。 支持参数化。 能够支持简单的单元测试和复杂的功能测试，还可以用来做 selenium &#x2F; appnium 等自动化测试、接口自动化测试（pytest+requests)。 pytest 不是 python 内置库，需要单独安装。  使用 pytest 编写用例，必须遵守以下规则：  测试文件名必须以 test_ 开头或者 _test 结尾(如： test_ab.py) 测试方法必须以 test 开头。 测试类命名以 Test 开头。  2.JunitJunit 是一个 Java 语言的单元测试框架。它由 Kent Beck 和 Erich Gam...</div></div></div></a><a class="pagination-related" href="/2025/05/13/8%E6%AC%BE%E5%BC%80%E6%BA%90%E8%87%AA%E5%8A%A8%E5%8C%96%E6%B5%8B%E8%AF%95%E6%A1%86%E6%9E%B6%20-%20%E5%B0%8F%E5%BC%BA%E6%89%BEBUG%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD/" title="8款开源自动化测试框架 - 小强找BUG - 博客园"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">8款开源自动化测试框架 - 小强找BUG - 博客园</div></div><div class="info-2"><div class="info-item-1">[![[_resources&#x2F;92442b0eb6563aee8410c83388de292d_MD5.jpg]]](https://www.doubao.com/?channel=cnblogs&amp;source=hw_db_cnblogs&amp;type=lunt&amp;theme=bianc) 在如今开源的时代，我们就不要再闭门造车了，热烈的拥抱开源吧！本文针对性能测试、Web UI 测试、API 测试、数据库测试、接口测试、单元测试等方面，为大家整理了github或码云上优秀的自动化测试开源项目，希望能给大家带来一点帮助。 一、性能自动化测试1、项目名称：基于Jmeter实现的在线压测平台和在线管理Jmeter脚本系统 ![[_resources&#x2F;ec84e1ab1778a07ca7e9b3519408a643_MD5.png]] 项目简介：  本项目基于renren-fast Java开发平台开发，内核基于Jmeter-Api和Jmeter脚本实现在线性能压测。  具有如下特点  友好的代码结构及注释，便于阅读及二次开发 实现前后端分离，通过...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/03/19/OpenClaw%20%E6%9C%AC%E5%9C%B0%E6%A8%A1%E5%9E%8B%E6%9C%80%E4%BD%B3%E6%96%B9%E6%A1%88%EF%BC%9A%E6%A8%A1%E5%9E%8B%E6%8E%A8%E8%8D%90%20+%20vLLM%20%E9%83%A8%E7%BD%B2%E4%BC%98%E5%8C%96%E5%AE%8C%E6%95%B4%E6%95%99%E7%A8%8B%EF%BC%81/" title="OpenClaw 本地模型最佳方案：模型推荐 + vLLM 部署优化完整教程！"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-19</div><div class="info-item-2">OpenClaw 本地模型最佳方案：模型推荐 + vLLM 部署优化完整教程！</div></div><div class="info-2"><div class="info-item-1">OpenClaw 如何切换到本地模型？如果希望在执行自动化任务时保持流畅、不出现卡顿，同时避免频繁触发上下文长度限制，那么选择一个合适的开源模型就非常关键。 对于 OpenClaw 来说，模型不仅需要具备良好的推理能力和语言理解能力，还需要拥有稳定的 工具调用（Tool Calling）能力。因为在自动化任务中，模型需要频繁调用各种工具完成操作，因此工具调用能力往往是选择模型时最重要的指标之一。  很多人在第一次尝试本地部署模型时，往往会选择 Ollama。它的优点确实很明显：安装简单、配置方便，几乎可以做到“傻瓜式”部署。 开发工具 但在 OpenClaw 这种自动化任务场景下，Ollama 的调用方式和推理速度并不理想。实际使用中往往会遇到两个问题：  推理速度较慢 上下文长度很容易被耗尽  在连续运行多个任务后，经常会出现上下文不够用的情况。 因此，如果你希望获得更稳定、更高效的本地部署体验，就需要选择更合适的推理框架。 一般来说：  远程集群 &#x2F; 多 Agent 场景 ：推荐使用 SGLang 单卡本地部署 ：强烈推荐 vLLM  目前来看，vLLM 可以说是单...</div></div></div></a><a class="pagination-related" href="/2025/08/07/Ollama%E8%BF%9B%E9%98%B6%EF%BC%8C%E5%9C%A8Python%E3%80%81Java%E3%80%81Go%E9%A1%B9%E7%9B%AE%E4%B8%AD%E9%9B%86%E6%88%90Deepseek%E3%80%81QWQ%E5%A4%A7%E6%A8%A1%E5%9E%8B/" title="Ollama进阶，在Python、Java、Go项目中集成Deepseek、QWQ大模型"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-08-07</div><div class="info-item-2">Ollama进阶，在Python、Java、Go项目中集成Deepseek、QWQ大模型</div></div><div class="info-2"><div class="info-item-1">Ollama系列文章：Ollama入门，一键启动本地DeepSeek大模型Ollama入门，Ollama技术架构与原理Ollama进阶，在Python、Java、Go项目中集成Deepseek、QWQ大模型Ollama进阶，在Javascript(nodejs)前后端项目中集成Deepseek、QWQ大模型Ollama高手，玩转本地自定义大模型（LLM）Ollama高手，调优Ollama环境变量，提高性能与安全性Ollama高手，调优Ollama模型参数，提高模型输出质量  在“ Ollama入门，一键启动本地DeepSeek大模型 ”一文中，我们介绍了Ollama的基本使用方法，同时也推荐了ChatBox、Cherry Studio等AI智能客户端来完成文字、图片、语音等多模态输入，实现与 AI 的交互。 但是，仅仅这样常常不足以满足实际的需要，而在线版的Deepseek、ChatGPT、豆包往往可以提供更好功能，这样在本地部署DeepSeek大模型就成了geek的自娱自乐了，因此我们必须将Ollama整合到项目中去，让它与自有系统整合起来，实现更加丰富的功能。 1、如何调用O...</div></div></div></a><a class="pagination-related" href="/2025/05/29/Hygen/" title="Hygen"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-29</div><div class="info-item-2">Hygen</div></div><div class="info-2"><div class="info-item-1">[TOC] 起步安装12345npm i -g hygen或cnpm i -g hygen  初始化1234567进入项目地址cd /projects/demo初始化模板hygen init self  初始化成功后，会自动在项目根目录下生成 _templates 文件夹，并且默认生成了一个名为 generator 的生成器及其工作目录。后续会依托该生成器，派生出更多的生成器来满足需求。  注意 不要删除 _templates/generator 文件夹，否则会导致无法创建 Generator 。   提示 后续的所有命令行操作，如无特殊说明，都在项目根目录。  创建第一个生成器1hygen generator new component  执行后会生成一个生成器 component 及其工作目录，目录中默认存在一个示例文件 hello.ejs.t 。 12345678910111213141516171819---to: app/hello.js---const hello = \`\`\`Hello!This is your first hygen template.Lear...</div></div></div></a><a class="pagination-related" href="/2025/06/24/docker%20%E5%AE%89%E8%A3%85%E5%8F%AF%E8%A7%86%E5%8C%96%E5%B7%A5%E5%85%B7%20Portainer%20%E4%BB%A5%E5%8F%8A%20%E6%B1%89%E5%8C%96_portainer%E8%AE%BE%E7%BD%AE%E4%B8%AD%E6%96%87-CSDN%E5%8D%9A%E5%AE%A2/" title="docker 安装可视化工具 Portainer 以及 汉化_portainer设置中文-CSDN博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-06-24</div><div class="info-item-2">docker 安装可视化工具 Portainer 以及 汉化_portainer设置中文-CSDN博客</div></div><div class="info-2"><div class="info-item-1">本文详细指导如何在Linux上安装Portainer的最新汉化版2.9.1，包括拉取镜像、创建容器、开放端口以及汉化步骤，最后展示汉化后的界面。 摘要生成于 C知道 ，由 DeepSeek-R1 满血版支持， 前往体验 &gt;  安装 portainer 是最新版本， 汉化 指定版本2.9.1 。如果要安装汉化版，可直接跳转步骤四  一、拉去镜像 安装网址： Install Portainer BE with Docker on Linux - Portainer Documentation  12docker pull portainer/portainerXML  二、根据portainer镜像创建容器1234567891011121314docker run -d -p 8000:8000 -p 9000:9000\--name portainer --restart=always \-v /var/run/docker.sock:/var/run/docker.sock \-v portainer_data:/data \portainer/portainer  XML...</div></div></div></a><a class="pagination-related" href="/2025/06/30/docker%E3%80%81containerd%E3%80%81runc%E3%80%81shim...%20%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E5%90%8D%E8%AF%8D%E5%85%A8%E8%A7%A3%E6%9E%90-CSDN%E5%8D%9A%E5%AE%A2/" title="docker、containerd、runc、shim... 容器技术名词全解析-CSDN博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-06-30</div><div class="info-item-2">docker、containerd、runc、shim... 容器技术名词全解析-CSDN博客</div></div><div class="info-2"><div class="info-item-1">docker、containerd、runc、shim… 容器技术名词全解析本文链接： https://blog.csdn.net/dillanzhou/article/details/116505401 云原生的概念在最近两年得到了广泛的关注，各大云厂商和技术团队都纷纷推出了各种“云原生”的技术和产品。虽然云原生到底包括哪些概念和技术并没有一个公认的答案，但容器技术是云原生的基础和核心应该是现阶段的一个共识。 但是容器技术经过多年的发展和演变，各种实现方案和早期版本相比已经有了巨大的差异，而且仍然在不断演进的过程中。各种组件的产生、随之而来的接口规范、基于接口规范实现的新可选组件让相关的名称和概念更加复杂。新的开发使用者很难全面理解容器相关的各类名词和概念，以及这些名词和概念在真实的容器部署环境中的作用和关系。 笔者作为容器运行时开发人员，对于容器相关的概念仍然经常犯迷糊。 docker 、libcontainer、containerd、shim、runc分别起什么作用？CRI、OCI是什么层次的规范、有什么区别？各个组件的功能和协作方式是怎样的？使用k8s管理容器后相关组件和...</div></div></div></a><a class="pagination-related" href="/2025/06/11/ComfyUI%E4%B8%80%E9%94%AE%E6%89%B9%E9%87%8F%E9%AB%98%E6%B8%85%E6%97%A0%E6%8D%9F%E6%94%BE%E5%A4%A7%E5%9B%BE%E7%89%87%EF%BC%8CFor%E5%BE%AA%E7%8E%AF%E5%AE%9E%E7%8E%B0%E5%9B%BE%E7%89%87%E6%89%B9%E9%87%8F%E5%A4%84%E7%90%86%20-%20%E8%85%BE%E8%AE%AF%E4%BA%91%E5%BC%80%E5%8F%91%E8%80%85%E7%A4%BE%E5%8C%BA-%E8%85%BE%E8%AE%AF%E4%BA%91%202/" title="ComfyUI一键批量高清无损放大图片，For循环实现图片批量处理 - 腾讯云开发者社区-腾讯云"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-06-11</div><div class="info-item-2">ComfyUI一键批量高清无损放大图片，For循环实现图片批量处理 - 腾讯云开发者社区-腾讯云</div></div><div class="info-2"><div class="info-item-1">精选内容&#x2F;技术社群&#x2F;优惠产品,尽在小程序 立即前往 ComfyUI一键批量高清无损放大图片，For循环实现图片批量处理文章来源：企鹅号 - 橙色C 举报 前几天跟大家介绍了在ComfyUI中如何用4种方法对图片进行高清放大，具体方法请见文章：4种方法，ComfyUI最强图片高清放大工作流，无损放大，细节补全 ，轻松将图片完美修复至4K8K壁纸级别！ 今天跟大家介绍如何对图片进行批量放大。 批量放大功能可以通过Easy-Use插件的for循环节点来实现，它能够给我们的工作带来很多便利性，非常实用。 ![[_resources&#x2F;60cf0ba1ff4a0978986e80bfeeb8371c_MD5.png]] 这里需要用到几个插件： Easy-Use插件 https://github.com/yolain/ComfyUI-Easy-Use KJNodes插件 https://github.com/kijai/ComfyUI-KJNodes 一、for循环的基础操作 先在ComfyUI中添加两个For循环节点，让它来帮助我们执行一些重复的操作。 ![[_...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E5%BC%80%E5%90%AF%E7%9B%AE%E5%BD%95%E6%B5%8F%E8%A7%88%E5%8A%9F%E8%83%BD"><span class="toc-number">1.</span> <span class="toc-text">1.开启目录浏览功能</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E6%B5%8F%E8%A7%88%E7%9B%AE%E5%BD%95%E5%9F%BA%E6%9C%AC%E9%85%8D%E7%BD%AE"><span class="toc-number">1.1.</span> <span class="toc-text">1.1 浏览目录基本配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E4%BD%BF%E9%85%8D%E7%BD%AE%E7%94%9F%E6%95%88"><span class="toc-number">1.2.</span> <span class="toc-text">1.2 使配置生效</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-%E8%A1%A5%E5%85%85"><span class="toc-number">1.3.</span> <span class="toc-text">1.3 补充</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E4%B8%BB%E9%A2%98%E7%BE%8E%E5%8C%96"><span class="toc-number">2.</span> <span class="toc-text">2.主题美化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E6%9F%A5%E7%9C%8B%E7%BC%96%E8%AF%91%E5%8F%82%E6%95%B0"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 查看编译参数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E5%8A%A8%E6%80%81%E7%BC%96%E8%AF%91%E6%B7%BB%E5%8A%A0-Nginx-%E6%A8%A1%E5%9D%97"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 动态编译添加 Nginx 模块</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-Fancy-Index-%E9%85%8D%E7%BD%AE"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 Fancy Index 配置</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E6%B3%A8%E6%84%8F%E7%82%B9"><span class="toc-number">3.</span> <span class="toc-text">3.注意点</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-ubuntu-%E4%B8%8B-nginx-%E7%9A%84%E5%AE%89%E8%A3%85"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 ubuntu 下 nginx 的安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-ubuntu-%E4%B8%8B-nginx-%E7%BC%96%E8%AF%91"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 ubuntu 下 nginx 编译</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-ubuntu-%E4%B8%8B-nginx-%E9%85%8D%E7%BD%AE"><span class="toc-number">3.3.</span> <span class="toc-text">3.3 ubuntu 下 nginx 配置</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%90%AD%E5%BB%BA-http-%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="toc-number">4.</span> <span class="toc-text">搭建 http 服务器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8%E9%98%BF%E9%87%8C%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%B8%8A%E9%83%A8%E7%BD%B2-nginx"><span class="toc-number">5.</span> <span class="toc-text">在阿里云服务器上部署 nginx</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#nginx-%E5%8F%8D%E7%88%AC"><span class="toc-number">6.</span> <span class="toc-text">nginx 反爬</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#webman-%E4%B9%8B-nginx-%E9%85%8D%E7%BD%AE"><span class="toc-number">7.</span> <span class="toc-text">webman 之 nginx 配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1-Nginx"><span class="toc-number">8.</span> <span class="toc-text">负载均衡 [Nginx]</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#nginx-%E9%85%8D%E7%BD%AE-https-%E9%87%8D%E5%AE%9A%E5%90%91"><span class="toc-number">9.</span> <span class="toc-text">nginx 配置 https 重定向</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ubuntu-20-04-%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BC%96%E8%AF%91-Nginx-%E9%97%AE%E9%A2%98%E4%BB%A5%E5%8F%8A%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95"><span class="toc-number">10.</span> <span class="toc-text">ubuntu 20.04 自定义编译 Nginx 问题以及解决方法</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

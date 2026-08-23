@@ -1,0 +1,769 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>实践云笔记 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="title: 实践云笔记date: 2023-09-03 20:17:08category:  othertag: otherauthor:   实践云原生25步@学习笔记其实我们在很多的技术大会上，看到的都是分层架构图，就像上一节我们分的六个层次一样，这容易给希望落地云原生的企业造成误解，因为大部分公司的云原生体系的建设都不是按层次来建设的，不会IaaS完全建设完毕，再建设PaaS，一定是根据">
+<meta property="og:type" content="article">
+<meta property="og:title" content="实践云笔记">
+<meta property="og:url" content="https://yhao521.github.io/2023/09/04/%E5%AE%9E%E8%B7%B5%E4%BA%91%E7%AC%94%E8%AE%B0/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="title: 实践云笔记date: 2023-09-03 20:17:08category:  othertag: otherauthor:   实践云原生25步@学习笔记其实我们在很多的技术大会上，看到的都是分层架构图，就像上一节我们分的六个层次一样，这容易给希望落地云原生的企业造成误解，因为大部分公司的云原生体系的建设都不是按层次来建设的，不会IaaS完全建设完毕，再建设PaaS，一定是根据">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2023-09-04T03:18:09.000Z">
+<meta property="article:modified_time" content="2023-09-04T03:18:27.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="java&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="python&#x2F;programming">
+<meta property="article:tag" content="web&#x2F;frontend">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "实践云笔记",
+  "url": "https://yhao521.github.io/2023/09/04/%E5%AE%9E%E8%B7%B5%E4%BA%91%E7%AC%94%E8%AE%B0/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2023-09-04T03:18:09.000Z",
+  "dateModified": "2023-09-04T03:18:27.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2023/09/04/%E5%AE%9E%E8%B7%B5%E4%BA%91%E7%AC%94%E8%AE%B0/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '实践云笔记',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">实践云笔记</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">实践云笔记</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-09-04T03:18:09.000Z" title="发表于 2023-09-04 11:18:09">2023-09-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-09-04T03:18:27.000Z" title="更新于 2023-09-04 11:18:27">2023-09-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><hr>
+<p>title: 实践云笔记<br>date: 2023-09-03 20:17:08<br>category:</p>
+<ul>
+<li>other<br>tag:</li>
+<li>other<br>author:</li>
+</ul>
+<hr>
+<h1 id="实践云原生25步-学习笔记"><a href="#实践云原生25步-学习笔记" class="headerlink" title="实践云原生25步@学习笔记"></a>实践云原生25步@学习笔记</h1><p>其实我们在很多的技术大会上，看到的都是分层架构图，就像上一节我们分的六个层次一样，这容易给希望落地云原生的企业造成误解，因为大部分公司的云原生体系的建设都不是按层次来建设的，不会IaaS完全建设完毕，再建设PaaS，一定是根据业务的演进，交替迭代出来的。</p>
+<p>一定是业务遇到问题了，需要底层的技术，底层技术提升了，促进业务的发展。如下图所示，应用层和技术底座之间的良性循环，才是云原生这个词的本质，我把他称为云原生怪圈。</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/HO2NI1o25ZasTKHKjaFcw8euWNbC7RmUa8gaCzUO90MRpaRRuS8tEtg6nCgxHzCibVXWMGIBibMicQLIlexRXamxg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+<p>虽然按照这个顺序来讲，你会感觉体系有点乱，但是才是最落地的演进路径。而沿着这个演进路径发展，你才能感受到“云原生”三个字的准确含义。</p>
+<p>很多企业应用层服务化或者微服务化，而技术底座没有跟上，从而系统陷入混乱，没日没夜加班，却怪服务化不好，另外一些企业花了大价钱卖了一个技术底座平台，但是应用层没有跟上，无法促进业务发展，嫌技术底座白花了钱，这两个误区都在于没有沿着这个怪圈逐渐演进。</p>
+<p>为了解决体系混乱的问题，所以在展开落地篇之前，先来一个总论，整体梳理一下。</p>
+<p>对于每一个落地的步骤，四项基本问题：</p>
+<ul>
+<li>遇到什么样的问题？</li>
+<li>应该采取什么样的技术解决这个问题？如何解决这个问题的？</li>
+<li>这个技术的实现有很多种，应该如何选型？</li>
+<li>使用这个技术有没有最佳实践，能不能形成企业的相关规范？</li>
+</ul>
+<p>整个落地的演进过程要有一个起点：</p>
+<ul>
+<li>在应用层，是一个单体应用，主要包含Online服务，他是对外提供服务的，Offline服务，他是一些定时任务的，MS服务，他是一些后台服务，这基本是一个单体应用，因为对外服务是Online，接下来的拆分也是围绕这个服务展开。</li>
+<li>对于数据库，使用的是Oracle，部署在物理机上</li>
+<li>在基础实施层，用的是Vmware虚拟化</li>
+<li>部署上线方式是脚本化</li>
+</ul>
+<p>就像前面我们讲过，构建中台的企业都是有一定积累的企业，而非创业企业，因而不可能没有任何计划的的盲人摸象，这是很多企业的管理层不允许的。所以在动手之前，要有一个总的地图，就是规划，当然真正云原生演进的时候，我们不建议使用瀑布模型，而是迭代模型，但是迭代模型不代表漫无目的的迭代，而是地图要在心中，所以落地的第一个阶段是规划。</p>
+<h1 id="第一：规划——在架构委员会领导下的梳理与规划"><a href="#第一：规划——在架构委员会领导下的梳理与规划" class="headerlink" title="第一：规划——在架构委员会领导下的梳理与规划"></a><strong>第一：规划——在架构委员会领导下的梳理与规划</strong></h1><p>首先，组织架构先行：成立架构师组。哪怕人很少，只有两三个人，但是这个组织一定要有，这是将来的军机处，是架构委员会的发起者，是横向拉通各个组，并落地规范与最佳实践的负责人。</p>
+<p>有了人以后，接下来，我们应该从业务架构出发：进行业务流程和领域梳理。在云原生怪圈的循环中，我建议从业务层出发，因为IT是为业务服务的，只有业务方的需求，才是真正应该服务和花钱建设的地方。</p>
+<p><strong>（步骤1）从1到2：领域驱动建模</strong></p>
+<p>从标题你可以看出，这是按照领域驱动设计的方式来进行规划的。 这里很多技术人员都会犯的错误是，从数据库出发，看数据库结构如何设计的，按照数据库最容易拆分的方式进行拆分。这样是不对的，没有站在业务的角度去考虑问题。应该借鉴领域驱动设计的思路，从业务流程的梳理和业务领域的划分出发，来划分不同的服务，虽然最后映射到数据库可能会拆分的比较难受，但是方向是对的，只有这样才能适应未来业务的快速变化。 我个人认为，方向比手段要重要，方向对，当前痛一点没什么，但是当前不痛，方向错了，还是解决不了问题。 首先，我们要做的是梳理业务流程，通过这个流程，可以了解业务运行的逻辑，使得技术人员对于业务模式有所理解。 这里主要梳理的是电商业务，也许你对电商业务不是非常感兴趣，但是仍然建议你把这一节看完。因为后面在架构设计的部分，都要基于对于业务流程的理解。其实作为一个架构师，越是到后期，越是要距离业务要近，而不仅仅是单点做一部分的技术。电商平台是一个典型的应用云原生架构的案例。虽然你当前所在的行业。有可能是金融，制造，或者零售。对于方法论来讲，你总能从电商平台的流程和业务模式中，找到类似的部分。他山之石，可以攻玉。 下面是电商平台的一个典型的业务流程图。 <img src="https://mmbiz.qpic.cn/mmbiz_png/HO2NI1o25ZasTKHKjaFcw8euWNbC7RmUopJA4BEHSdm5Y744bLicBpH1qU73yKM67fQXRhIPnyFQVWfgpGhXDwg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"> 具体的业务流程，我们另外解析，这里不赘述。</p>
+<p>接下来就是，划分业务领域。梳理好了业务流程，我们就可以根据他来划分业务领域。这里不必严格按照DDD的图，为了方便，我这里用了脑图。</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/HO2NI1o25ZasTKHKjaFcw8euWNbC7RmUqJwtqBDibfDiajRar5hjARnD9OGRfsOJbpxGISvKcG3SCORCjVqjFhIg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+<p>另外，对于每一个服务，我都起了名字，这里先不用管它，后面自然有用。</p>
+<p>在实践中，你在这个阶段可能没必要划分的这么细。这些服务都是在后期的逐渐拆分过程中演进出来的。</p>
+<p>那接下来后台技术部门不应该闷头开始就按这个拆了？其实不是的！</p>
+<p>传统的领域驱动设计是瀑布式的模型，经过长时间的闭门讨论，贴纸条，最终输出各种架构图，但是当落地的时候，发现情况变了，因为领域知识从业务部门到技术部门的传递一定有信息的丢失，这也是DDD落地被诟病的地方，就是业务方规划的时候是这样说的，落地来需求的时候，却是另外一种说法，导致根据DDD落地好的领域，接需求接的更加困难了。</p>
+<p>所以一个更加落地的方式是，随着新需求的不断到来，渐进的进行拆分，而变化多，复用性是两大考虑要素。</p>
+<p>所以赵本山说，不看广告，看疗效。对于服务拆分，DDD是一个完整的地图，但是具体怎么走，要不要调整，需要随着新需求的不断到来，渐进的进行拆分，DDD领域设计的时候，业务方会说不清，但是真的需求来的时候，却是实实在在的，甚至接口和原型都能做出来跟业务看。</p>
+<p>这么说有点虚，我们举个现实的例子。例如按照领域的划分，对于电商业务来讲，一个单体的电商服务，应该拆分成下面这些服务。</p>
+<p>​ <img src="https://mmbiz.qpic.cn/mmbiz_png/HO2NI1o25ZasTKHKjaFcw8euWNbC7RmU9bvKEwfZC68vJ9ia92U3r8LzcXDESHRucmTFicibUHQmFOVxEH0viadDqQ/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+<p>需求到来的时候，技术部门是能感受到上一篇文章讲过的架构耦合导致的两个现象：</p>
+<ul>
+<li>耦合现象一：你改代码，你要上线，要我配合</li>
+<li>耦合现象二：明明有某个功能，却拿不出来</li>
+</ul>
+<p>第一个现象就是变化多，在业务的某个阶段，有的领域的确比其他的领域有更多的变化，如果耦合在一起，上线，稳定性都会相互影响。例如图中，供应链越来越多，活动方式越来越多，物流越来越多，如果都耦合在Online里面，每对接一家物流公司，都会影响下单，那太恐怖了。</p>
+<p>第二个现象就是可复用，例如用户中心和认证中心，根本整个公司应该只有一套。</p>
+<p>在《重构：改善代码的既有设计》有一个三次法则——事不过三，三则重构。</p>
+<p>​ <img src="https://mmbiz.qpic.cn/mmbiz_png/HO2NI1o25ZasTKHKjaFcw8euWNbC7RmUUyaBS4SrektyVt3DD8fLCrhYuiaeHwa0UmNK49XIMiaqNPBRrLdUf6Rg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+<p>这个原则也可以用作服务化上，也即当物流模块的负责人发现自己接到第三家物流公司的时候，应该就考虑要从原来的单体应用中拆分出来了。另外就是，当有一个功能，领导或者业务方发现明明有，还需要再做一遍，这种现象出现第三次的时候，就应该拆分出来作为一个独立的服务了。</p>
+<p>这种根据业务需求逐渐拆分的过程，会使得系统的修改一定是能够帮助到业务方的，同时系统处在一种可控的状态，随着工具链，流程、团队、员工能力的增强慢慢匹配到服务化的状态。</p>
+<p>那你可能会问，如果有个系统，里面的代码已经垃圾的一塌糊涂，我都看不下去了，但是暂时没有新需求进来，那应不应该拆分呢？</p>
+<p>不！没有需求不拆！再烂也不拆！我们不是要解决所有的腐化问题，别按DDD的理想情况来。</p>
+<p>至此，理论的划分基本就结束了，接下来，咱们就要动代码啦！</p>
+<h1 id="第二：试点——选一个项目试点，汲取经验，培养团队，建立规范"><a href="#第二：试点——选一个项目试点，汲取经验，培养团队，建立规范" class="headerlink" title="第二：试点——选一个项目试点，汲取经验，培养团队，建立规范"></a><strong>第二：试点——选一个项目试点，汲取经验，培养团队，建立规范</strong></h1><p><strong>（步骤2）从1到2：选取试点业务进行拆分</strong></p>
+<p>我们来选择一个领域将他拆分出来，我们就选择最核心的交易领域吧。</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/HO2NI1o25ZasTKHKjaFcw8euWNbC7RmUql9o2qhX85RNY27HBc7JYPDDFY7TicSYTy02lehA65o1Jfia8j7fV1Vg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+<p>在上面这个庞大的单体应用中，我们将订单拆分出来，需要考虑以下几个事情：</p>
+<ul>
+<li>在诸多的功能中，将属于订单的功能梳理出来</li>
+<li>梳理订单和其他模块之间的关系，从而知道将来会和哪些模块进行相互调用</li>
+<li>将订单模块中的不同功能也进行划分，虽然目前不用拆分，为了将来拆分做准备</li>
+</ul>
+<p>第一件事情，我们从上面的图中可以看出，黄色底色的就是属于订单的功能。</p>
+<p>第二件事情，我们需要梳理一个关系图，如下所示。</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/HO2NI1o25ZasTKHKjaFcw8euWNbC7RmUSdpF20e7l7mtAwGzsNCKIBjqdr4Y4ADc0nEyibFEQ3HHoZVrhiaKicQibw/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+<p>第三件事情，将订单内部的功能也划分一下，因为将来可能会因为性能问题，进一步的划分。</p>
+<p>​ <img src="https://mmbiz.qpic.cn/mmbiz_png/HO2NI1o25ZasTKHKjaFcw8euWNbC7RmUt7TLHzRr7YlBCcBwSXib4cysnq8VWliboETfbpVoESUcZG55qf98zwZw/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+<p>接下来马上应该找拆分了，先别忙，你会不会拆出一堆Bug来，让原来单体应用玩儿挺好的，后来Bug成堆呢？这也是经常服务化被诟病的地方，Bug更多更不稳定。</p>
+<p>所以首先要有持续集成，这是云原生架构的基石。</p>
+<p><strong>（步骤3）从1到2：持续集成平台建设</strong></p>
+<p>持续集成就是制定一系列流程，或者一个系列规则，将需要在一起的各个层次规范起来，方便大家在一起，强迫大家在一起。</p>
+<p>接下来，我们一起来搭建一个持续集成的系统。</p>
+<p>​ <img src="https://mmbiz.qpic.cn/mmbiz_png/HO2NI1o25ZasTKHKjaFcw8euWNbC7RmUlTnbJRhavTTEr75KjF2W6GgBa1wF7W8QIMfIXlNicMJkzPIosaULCOA/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+<p>上面的这幅图呢，是一个持续集成的总体流程图，里面包含非常多的工具，这些工具呢，有非常多的选型。下面的这个脑图，就总结了持续集成中所常用到的主流工具。你可以根据自己公司的情况。来选择合适的工具。</p>
+<p>​ <img src="https://mmbiz.qpic.cn/mmbiz_png/HO2NI1o25ZasTKHKjaFcw8euWNbC7RmU0WCN2EL68ehWHWpYlCvg0NIctKSibibXvML3RJvNpr7Iuwu4sfYq3DGw/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+<p>系统的搭建只是其中一部分，要做好持续集成，还需要有规范，还需要配合敏捷开发的流程。</p>
+<p>持续集成的规范都有哪些呢？</p>
+<ul>
+<li>工程名规范：这个名称非常关键，以后在公司内部所有的系统中，只要看到这个名称，无论是开发，运维，发布人员，QA任何角色，在持续集成平台，云平台，容器平台，微服务平台等任何平台，都以这个名称为准绳，这样所有人看到名称，马上就知道这个工程什么功能以及应该如何操作他，如果是一个核心交易的前台工程，就应该小心一点，如果是一个后台的管理系统，则小的功能白天也可以发布。</li>
+<li>代码结构规范：代码结构规范希望达到的效果是所有人打开一份代码，都能看到熟悉的结构，以及有大概的思路如何入手，这在快速迭代的场景下很重要，因为人员也可能在不同的团队频繁的调动。</li>
+<li>代码设计规范：包括命名规范，例如package, class, interface，变量的命名；包括注释规范，我们要根据注释生成文档，这在注册中心和知识库还会提到；资源管理规范，例如对于文件，线程，网络，数据库连接等的使用；异常管理规范，如何捕捉异常和处理异常；日志规范，日志的分级，敏感信息过滤，格式规约；多线程规范，并发，加锁，线程安全；数据库操作规范；编码规范，例如方法长度，类长度，数据模型定义，相等判断，异常抛出等；</li>
+<li>代码提交规范：提供注释规范，冲突处理规范，warning处理规范，格式化代码规范等。</li>
+<li>单元测试规范：单元测试覆盖率，有效性，Mock规范。</li>
+</ul>
+<p><strong>（步骤4）从2到10：构建注册中心与知识库</strong></p>
+<p>我们构建了持续集成的系统，规范，流程，还有一个问题没有解决。</p>
+<p>一旦订单中心从电商的单体应用中拆分出去了，这就存在当订单中心和其他业务相互调用的时候，如何知道订单中心在哪里的问题。我们假设原来的单体应用为Online，而新的订单中心称为Order。</p>
+<p>因而这里我们需要配备一个工具链，那就是注册中心。</p>
+<p>​ <img src="https://mmbiz.qpic.cn/mmbiz_png/HO2NI1o25ZasTKHKjaFcw8euWNbC7RmUPkciaNibtPpBjW6LbYw9yq6DYtmdxFcCdxxOg48VBscoWbPqk6cWO2Vg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+<p>如果我们要构建一个注册中心需要考虑哪些方面呢？</p>
+<p>高可用性和一致性：注册中心是服务的中心管理节点，他的高可用是非常重要的。注册中心的节点上维护着注册上了的服务列表，因而是有状态的，这就涉及到一致性的问题。说到一致性问题，就要说一说著名的CAP理论，也即在一个分布式系统中，Consistency（一致性）、 Availability（可用性）、Partition tolerance（分区容错性），三者不可同时获得。在三个属性中，P也即分区容错性是必须能够保证的，接下来就要在C和A里面选择一个了，选择C，表示不同节点的列表是一致的，而牺牲可用性。如果选择A，也即根据节点自己的列表马上返回，而牺牲一致性。 健康检查：注册中心既然保存了服务的列表，就需要实时跟踪和更新这个服务列表。当已经注册上来的服务出现问题而下线的时候，注册中心应该能够及时发现并进行摘除，这就是所谓的健康检查。 负载均衡：注册中心要实现客户端在多个服务端之间进行负载均衡，当然轮询是最常见的，也是最容易实现的。其实还有很多其他的负载均衡方式，例如随机 (Random)，轮询 (RoundRobin)，一致性哈希 (ConsistentHash)，哈希 (Hash)，加权（Weighted）。 数据中心感知：有时候，我们的服务会将服务部署在多个数据中心，这就要求注册中心也能感知多个数据中心，本地数据中心肯定速度快，异地数据中心速度慢，应该有所区分。 开放与生态：微服务往往不是一个组件就能搞定的事情，因而需要生态的配合，例如Dubbo，SpringCloud，Kubernetes，Service Mesh等都是使用广泛的生态。所以注册中心能不能和他们搞到一起，这些生态能不能兼容注册中心，也是一个很重要的考量。 如何选择注册中心呢，我这里列了一个表格，供您参考。 ZookeeperConsulEurekaNacos一致性CPCPAPCP+AP健康检查心跳通知TCP,HTTP,GRP,命令行客户端健康检查TCP,HTTP,客户端健康检查负载均衡由Dubbo提供FabioRibbon权重，Metadata, CMDB自我保护机制无无支持支持数据中心感知不支持支持支持支持生态DubboSpringCloud,KubernetesSpringCloudSpringCloud,Dubbo,Kubernetes</p>
+<p><strong>仅有注册中心就够了吗？</strong></p>
+<p>仅仅注册还不够，别忘了咱们的使命。前面咱们讲过了。我们之所以将服务拆分出来。是为了解决架构腐化问题。仅仅拆分本身不能够解决这个问题。因而需要一定的工具来帮我们做到这件事情。</p>
+<p>注册中心是每一个程序员都知道的事情。他可以非常的方便提供服务之间注册发现和调用。</p>
+<p>但是他没有解决我们想解决的第一个问题，就是可观测性。接口是否符合规范，架构是否腐化，架构委员会有没有一个地方可以集中Review。注册中心显然没有解决可观测性的问题。</p>
+<p>另外还有一个问题就是可复用性。将来我们将一个服务注册到注册中心。就是为了这个服务里面的功能，可以通过接口的方式。让其他服务进行调用。这个时候带来的问题就是。如果开发某个接口。并且注册到注册中心的是一个团队。而要调用这个接口。从注册中心获取这个接口的是另外一个团队。注册中心里面是没有一个文档告诉调用方，如何调用这个接口。这时候可复用性就带来了问题。将来谁想用某个接口，是通过文档还是找人。</p>
+<p>为了解决上面的两个问题。仅仅有一个注册中心还是不够的。我们一定要在注册中心之上再封装一层。有一个可以适配多租户，多权限的管理界面。我们对于所有注册到注册中心上的接口都要制定。制定API接口规范。所有接口都要符合这些规范，并且每个接口都要配备相应的文档，文档与运行时一致。这样就形成了统一API知识库。</p>
+<p><strong>（步骤5）从2到10：构建API网关</strong></p>
+<p>注册中心主要用于多个服务之间相互调用的时候，知道对方在哪里？这其实还没有解决另外一个问题，也即和前端的沟通问题。</p>
+<p>如果前端页面或者APP直接连接后端的服务，在服务化拆分的场景下，就感觉比较痛苦了，原来只需要连接一个URL，突然后端变成了四个服务，要配置四个URL了，可是前端没有变，为什么要前端改？这也是一种耦合。</p>
+<p>这个时候，我们就需要另一个技术组件，API网关。当一个服务拆分称为多个服务的时候， API网关对前端应用屏蔽服务拆分，前端无感知。</p>
+<p>​ <img src="https://mmbiz.qpic.cn/mmbiz_png/HO2NI1o25ZYHynM9Lw5hepOUWQyugN7zpAxk3iby9hicqXjibGLffDnvXETbsnjwibvT7ibZicbsJrKqicoXCB49H1Fmw/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+<p>就像图中所示的一样，当服务从Online里面分离出来后，前端的请求仍然到API网关，由API网关做转发到后端拆分后的各个服务。</p>
+<p>当然API网关所能做的事情绝不止这些。还有另外一个场景，当一个服务新从单体应用中拆分出来的时候，你肯定不放心，为了稳定性，API网关提供灰度能力。</p>
+<p>​ <img src="https://mmbiz.qpic.cn/mmbiz_png/HO2NI1o25ZYHynM9Lw5hepOUWQyugN7zUUKDUdlFibtGsFF7V5PjRia0oua7Njgv6tA5DZUlOPTJxg9cuUOhHnHw/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+<p>如图中，新的订单中心从Online里面拆分出来之后，你可能不敢马上让他替换你的老订单中心，稳妥的做法是切一小部分流量过来，例如非VIP的客户，或者随机抽取百分之几的客户，如果发现有问题，可以马上切回去。</p>
+<p>那设计一个API网关，我们都需要考虑哪些方面呢？</p>
+<p>第一就是高可用和性能。</p>
+<p>API网关多是无状态的，因而高可用可以通过部署多个节点达到，但是作为所有服务的入口，性能就十分关键了。当然性能也可以部分通过横向扩展去解决，但是我们往往不希望在这一层耗费太多的服务器资源，因而单节点的性能也是非常重要的。</p>
+<p>第二就是安全问题，API网关是对外服务的大门，因而要有良好的安全策略，将非法访问拦截在外面。例如认证鉴权，黑白名单等。</p>
+<p>第三是调用轨迹与调用监控，API网关应该对于所有的API访问所耗费的时间有监控，及时发现有性能问题的调用。</p>
+<p>第四是请求代理，路由，负载均衡。API可以将外面来的请求，转发给不同的后端，这叫路由，例如上面我们讲的对前端透明，就是路由功能。另外对于相同类型的后端的多个实例，例如订单中心部署了三个实例，在这三个实例之间，可以进行负载均衡。</p>
+<p>第五是灰度发布，分流。将流量在多个实例之间进行按照比例或者某种特征进行分发。</p>
+<p>第六是流量控制。API网关作为微服务最外面的屏障，需要对于后端的服务做一定的保护，例如有熔断机制，有限流机制，当后端服务有问题，或者外部流量过大的时候，可以有一定的策略进行处理。</p>
+<p>如何选择API网关呢，我这里列了一个表格，供您参考。</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Kong</th>
+<th>Ambassador</th>
+<th>Spring Cloud Gateway</th>
+<th>Zuul</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>配置语言</td>
+<td>Admin Rest api, Text file(nginx.conf 等)</td>
+<td>YAML(kubernetes annotation)</td>
+<td>REST API，YAML静态配置</td>
+<td>REST API，YAML静态配置</td>
+</tr>
+<tr>
+<td>state</td>
+<td>postgres,cassandra</td>
+<td>kubernetes</td>
+<td>内存，文件</td>
+<td>内存，文件</td>
+</tr>
+<tr>
+<td>扩展功能</td>
+<td>插件</td>
+<td>插件</td>
+<td>自己实现</td>
+<td>自己实现</td>
+</tr>
+<tr>
+<td>扩展方法</td>
+<td>水平</td>
+<td>水平</td>
+<td>水平</td>
+<td>水平</td>
+</tr>
+<tr>
+<td>服务发现</td>
+<td>动态</td>
+<td>动态</td>
+<td>动态</td>
+<td>动态</td>
+</tr>
+<tr>
+<td>协议</td>
+<td>http,https,websocket</td>
+<td>http,https,grpc,websocket</td>
+<td>http,https,websocket</td>
+<td>http,https</td>
+</tr>
+<tr>
+<td>基于</td>
+<td>kong+nginx</td>
+<td>envoy</td>
+<td>基于 Spring Framework 5，Project Reactor 和 Spring Boot 2.0</td>
+<td>zuul</td>
+</tr>
+<tr>
+<td>ssl 终止</td>
+<td>yes</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
+</tr>
+<tr>
+<td>websocket</td>
+<td>yes</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
+</tr>
+<tr>
+<td>routing</td>
+<td>host,path,method</td>
+<td>host,path,header</td>
+<td>host,path,method,header,cookie</td>
+<td>path</td>
+</tr>
+<tr>
+<td>限流</td>
+<td>yes</td>
+<td>yes</td>
+<td>yes</td>
+<td>需要开发</td>
+</tr>
+<tr>
+<td>熔断</td>
+<td>yes</td>
+<td>no</td>
+<td>yes</td>
+<td>需要其他组件</td>
+</tr>
+<tr>
+<td>重试</td>
+<td>yes</td>
+<td>no</td>
+<td>yes</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>健康检查</td>
+<td>yes</td>
+<td>no</td>
+<td>yes</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>负载均衡算法</td>
+<td>加权轮询，哈希</td>
+<td>加权轮询</td>
+<td>ribbon，轮询，随机，加权轮询，自定义</td>
+<td>轮询，随机，加权轮询，自定义</td>
+</tr>
+<tr>
+<td>权限</td>
+<td>Basic Auth, HMAC, JWT, Key, LDAP, OAuth 2.0, PASETO, plus paid Kong Enterprise options like OpenID Connect</td>
+<td>yes</td>
+<td>开发实现</td>
+<td>开发实现</td>
+</tr>
+<tr>
+<td>tracing</td>
+<td>yes</td>
+<td>yes</td>
+<td>需要其他组件</td>
+<td>需要其他组件</td>
+</tr>
+</tbody></table>
+<p><strong>（步骤6）从2到10：试点业务服务拆分最佳实践</strong></p>
+<p>代码的迁移是一个细活，需要逐渐迁移，有以下的最佳实践。</p>
+<p>第一，原有工程代码的标准化。</p>
+<p>第二，先独立功能模块，规范输入输出，形成服务内部的分离</p>
+<p>第三，先分离出新的jar，实现松耦合</p>
+<p>当一个工程的结构非常标准化之后，接下来在原有服务中，先独立功能模块 ，规范输入输出，形成服务内部的分离。在分离出新的进程之前，先分离出新的jar，只要能够分离出新的jar，基本也就实现了松耦合。</p>
+<p>第四，应该新建工程，新启动一个进程，尽早的注册到注册中心，开始提供服务，这个时候，新的工程中的代码逻辑可以先没有，只是转调用原来的进程接口。</p>
+<p>接下来，应该新建工程，新启动一个进程，尽早的注册到注册中心，开始提供服务，这个时候，新的工程中的代码逻辑可以先没有，只是转调用原来的进程接口。</p>
+<p>为什么要越早独立越好呢？哪怕还没实现逻辑先独立呢？因为服务拆分的过程是渐进的，伴随着新功能的开发，新需求的引入，这个时候，对于原来的接口，也会有新的需求进行修改，如果你想把业务逻辑独立出来，独立了一半，新需求来了，改旧的，改新的都不合适，新的还没独立提供服务，旧的如果改了，会造成从旧工程迁移到新工程，边迁移边改变，合并更加困难。如果尽早独立，所有的新需求都进入新的工程，所有调用方更新的时候，都改为调用新的进程，对于老进程的调用会越来越少，最终新进程将老进程全部代理。</p>
+<p>第五，将老工程中的逻辑逐渐迁移到新工程，这个过程需要持续集成，灰度发布，微服务框架能够在新老接口之间切换。</p>
+<p>第六，当新工程稳定运行，并且在调用监控中，已经没有对于老工程的调用的时候，就可以将老工程下线</p>
+<p><strong>（步骤7）从2到10：服务分层拆分</strong></p>
+<p><strong>（步骤8）从10到50：可扩展性架构——数据库最佳实践</strong></p>
+<p>数据库永远是应用最关键的一环，同时越到高并发阶段，数据库往往成为瓶颈，如果数据库表和索引不在一开始就进行良好的设计，则后期数据库横向扩展，分库分表都会遇到困难。</p>
+<p>对于数据库的最佳实践，我画了一个脑图如下。</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/HO2NI1o25ZZWZWeoKTI0Sb8xCsGdyJs33QraWMV6lvMQwcdn1ibfpetBlnpOKvRlFfVsQsJHjczsWshswAFWdVg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+<p><strong>(步骤9) 从10到50**</strong>：可扩展性架构——缓存最佳实践**</p>
+<p>对于高并发架构，数据库是中军大帐，之前要有缓存做保护，缓存的最佳实践，我也画了一个脑图。 <img src="https://mmbiz.qpic.cn/mmbiz_png/HO2NI1o25ZZWZWeoKTI0Sb8xCsGdyJs3UWj4rz5ib2K5Hea9OXPYJSibr3FkfibjrR5oAkx4KWzYHDWZRK62hTvdQ/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"> 试点业务拆分完毕，总结服务化规范，建立《服务化拆分规范》，《服务化流程规范》，《接口定义，修改规范》，《日志规范》，《数据库设计规范》，《监控规范》，《工程规范》，《日志打点规范》，《质量平台规范》等，并有工具保障落地。</p>
+<h1 id="第三：服务化——试点结束，在架构委员会的领导下，在服务化规范的指引下，各组制定里程碑计划，逐步拆分"><a href="#第三：服务化——试点结束，在架构委员会的领导下，在服务化规范的指引下，各组制定里程碑计划，逐步拆分" class="headerlink" title="第三：服务化——试点结束，在架构委员会的领导下，在服务化规范的指引下，各组制定里程碑计划，逐步拆分"></a><strong>第三：服务化——试点结束，在架构委员会的领导下，在服务化规范的指引下，各组制定里程碑计划，逐步拆分</strong></h1><p><strong>（步骤10）从50到500：全面服务化开始</strong></p>
+<p>试点完毕之后，架构开始全面服务化历程，组织架构也应该进行调整，建设中台开发组，业务开发组，基础底座组。</p>
+<p>前面咱们讲过，很多企业微服务化之所以失败，是因为：</p>
+<ul>
+<li>组织不具备，没有适合微服务架构的组织架构，也没有熟悉微服务化经验的架构师和团队。</li>
+<li>工具不具备，没有能够良好的管理微服务的工具链</li>
+<li>流程不具备，没有能够良好管理微服务架构的流程和规范</li>
+</ul>
+<p>现在看来，这些已经都具备了。</p>
+<ul>
+<li>首先我们成立了架构委员会，而且已经拆分了核心交易链路，积累了一定的微服务化的经验，有了这些经验，再拆分其他的领域，应该会驾轻就熟。</li>
+<li>在工具链方面，我们配备了持续集成，注册中心，API网关，发布平台等，并且都配备有知识库，可以良好的管理微服务。</li>
+<li>在流程方面，我们已经积累了以下的流程和规范：《内部接口规范》《外部接口规范》《工程规范》《服务化流程规范》《接口修改规范》《日志规范》《数据库设计规范》《持续集成规范》</li>
+</ul>
+<p>为了保证这些流程和规范能够执行，我们在持续集成流程中，加入质量卡点，在这些卡点上，都有相应的绩效看板，能够尽早的发现质量缺陷，并且和绩效进行关联。这样就能够保证微服务化在有序的进行。</p>
+<p>接下来，万事俱备，只欠东风了。 架构委员会按照领域进行服务化的分组，然后分组进行服务化的拆分。 这个时候，每个组都有代表的架构师，每个组都要制定里程碑计划，计划多久拆分完毕，并且定时在架构委员会会议上进行review，就可以保证服务拆分有条不紊的进行。 随着服务化的不断展开，对运维组造成了压力，很多运维说，看着服务数目的不断增多，要开始失眠了。 这种压力主要来自于两个方面，第一是资源请求的频率增高，第二是线上SLA维护的压力增大。 我们先来看第一个压力，应用逐渐拆分，服务数量增多。随着服务的拆分，不同的业务开发组会接到不同的需求，并行开发功能增多，发布频繁，会造成测试环境，生产环境更加频繁的部署。而频繁的部署，就需要频繁创建和删除虚拟机。 然而在此之前，企业一直采取的资源层的管理方式是虚拟化，到了这个阶段，我们会发现资源申请的速度明显跟不上了。 如果还是采用原来审批的模式，运维部就会成为瓶颈，要不就是影响开发进度，要不就是被各种部署累死。 我们再来看第二方面的压力，也即SLA的压力。 首先是上线的时候，容易出错，上线依赖于人工和脚本，人是最不靠谱的，很容易犯错误，造成发布事故。而发布脚本、逻辑相对复杂，时间长了以后，逻辑是难以掌握的。而且，如果你想把一个脚本交给另外一个人，也很难交代清楚。 另外，并且脚本多样，不成体系，难以维护。线上系统会有Bug，其实发布脚本也会有Bug。 所以如果你上线的时候，发现运维人员对着一百项配置和Checklist，看半天，或者对着发布脚本多次审核，都不敢运行他，就说明出了问题。 再者，多种多样的中间件，每个团队独立选型中间件，没有统一的维护，没有统一的知识积累，无法统一保障SLA 那应该怎么办呢？这就需要进行运维模式的改变，也即基础设施层云化。</p>
+<ul>
+<li><p><strong>（步骤11）从50到500</strong>：大规模云平台建设** 大规模云平台建设还是一件很复杂的事情，脑图如下： <img src="https://mmbiz.qpic.cn/mmbiz_png/HO2NI1o25ZZWZWeoKTI0Sb8xCsGdyJs39l5AhVhC3PYlYMgU37EaIQFmhWicqQDhjOqSzWWem159p9prH2zQsicA/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+</li>
+<li><p><strong>（步骤12）从50到500：IaC对接云平台</strong></p>
+<p>接下来，我们就要好好利用云平台的三大特性：统一接口，抽象概念，租户自助。 为了做到这一点，无论是基于公有云的统一接口也可以，基于私有云的OpenStack接口也可以，或者基于采购的云管平台的接口也是可以的，有了这些接口，就可以和发布平台做对接，来达到我们建设或者使用云平台之后，解放运维，加速开发的目标。 因为有了接口，我们就可以像调用代码一样操作这些基础设施，而不是靠人来配置，这就是我们常听到的Infrastructure as Code，IaC。当然这里的代码不是指脚本或者编程语言，而往往是一个编排的文本。 这里我们列举几个常用的IaC工具。 第一个是Terraform：他的理念是”Write, Plan, and create Infrastructure as Code”，他可以对接所有主流云平台的接口，也即如果你用的是主流云平台的接口，你可以很顺利是使用它。但是如果你自己采购的云管平台，那就需要自己开发和对接了。 第二是Vagrant，他可以对接各种各样的云平台，用于创建虚拟机。他本身可以作为IaC工具的组件来使用。 第三是Puppet和Chef，这两者比较像，都是使用类似Ruby语言的编排语言，对于应用做统一的安装，配置，更新。他们其实不算完整的IaC工具，因为虚拟机的创建和生命周期管理，他们不管，但是他们可以和Vagrant结合起来，变成完整的IaC工具。 第四是Saltstack，他做的事情和Chef和Puppet很像，但是基于python语言的，不需要重新学一门编排语言，而且他还支持通过远程执行命令来安装和配置软件，而非通过拉取的方式。 第五是Ansible，他是使用YAML语言作为编排语言的，同样使用远程执行命令的方式来安装和配置软件，这样使得使用门槛比较低，而且可以开发很多插件，来对接公有云，实现虚拟机的生命周期的管理。 第六是Juju，他是Ubuntu社区的IaC工具，和Ubuntu集成的比较好，可以对接各种云平台实现虚拟机和应用的整个生命周期管理，生态比较丰富。 第七是NixOS，他其实更像是一个纯粹的Linux配置工具，主要用于管理Linux各种包冲突，升级，回滚的问题，他将原来散落各处的配置文件、系统文件(可执行文件和库)等，变为只由&#x2F;etc&#x2F;nixos&#x2F;里的文件决定。系统更新和迁移比较省心，更新原子化，要么成功，要么回滚，多版本软件共存方便。但是如果将他作为一个IaC工具，还比较单薄，比较适合作为底层的工具。 第八，如果你用公有云的话，每个云都有自己的IaC工具，例如AWS CloudFormation，Azure Resource Manager，Google Cloud Deployment Manager。 第九，如果你用私有云，是OpenStack的话，OpenStack Heat也是一个IaC工具。 *</p>
+</li>
+</ul>
+<ul>
+<li><p><strong>（步骤13）从50到500：搭建并对接日志中心</strong></p>
+<p>日志向来都是运维以及开发人员最关心的问题。运维人员可以及时的通过相关日志信息发现系统隐患、系统故障并及时安排人员处理解决问题。开发人员解决问题离不开日志信息的协助定位。 第一，日志采集。 日志采集有很多的工具可以选择，这里列举一些Logstash、Filebeat、Fluentd、Logagent、rsyslog、syslog-ng。 Logstash插件多，灵活性高，基于JVM运行，性能以及资源消耗（默认的堆大小是 1GB）比较大，如果每台机器都安装则服务多了，占用资源比较多，如果是容器场景则更加明显的缺点。 Filebeat 就非常的轻量级，他只是一个二进制文件没有任何依赖，占用资源极少，可以解决Logstash的问题，但是相对的应用场景就要少很多，因而需要配合其他的工具进行配合，例如将所有节点的日志内容通过filebeat送到kafka消息队列，然后使用logstash集群读取消息队列内容，根据配置文件进行过滤。然后将过滤之后的文件输送到elasticsearch中，通过kibana去展示。 Fluentd 插件是用 Ruby 语言开发的，数量很多，几乎所有的源和目标存储都有插件，可以用 Fluentd 来串联所有的东西。Fluentd 创建的初衷是尽可能的使用 JSON 作为日志输出，因而会损失一定的灵活性，尤其是遇到大量非结构化数据的时候，虽然也提供了用正则表达式解析非结构化数据的方法。 rsyslog是Linux 的 syslog 守护进程，rsyslog 可以做的不仅仅是将日志从 syslog socket 读取并写入 &#x2F;var&#x2F;log&#x2F;messages， rsyslog 是经测试过的最快的传输工具。它非常擅长处理解析多个规则，随着规则数目的增加，它的处理速度始终是线性增长的。但是他的缺点是灵活性不足，配置难度比较高，适合做底层资源的日志监控。 第二，缓冲。 很多日志收集组件都可以将ElasticSearch作为存储目标，当日志收集组件接收数据的能力超过了ES集群处理数据的能力时，你可以使用消息队列来作为缓冲。 使用消息队列，对数据丢失也提供了一定的保护。 对于日志收集这种数据量比较大的消息，我们使用Kafka作为消息队列选型。 第三，筛选（Logstash） 日志数据默认是无结构化的，经常包含一些无用信息，Logstash虽然对于日志的收集有点重，但是对于日志的过滤，因为插件丰富，还是非常好的。你可以使用Logstash的FILTER插件来解析你的日志，从中提取有效字段，剔除无用的信息，还可以从有效字段中衍生出额外信息。 第四，存储(ES) 选用ElasticSearch的原因主要为：可分布式的部署，方便拓展；处理海量数据可以应对多种需求；强大的搜索功能，基于Lucene可以实现快速搜索；活跃的开发社区，资料多、上手简单。 第五，展现（Kibana） 需要通过精简提炼日志信息，对日志信息进行整合分析，以图表的形式将日志信息进行展示。</p>
+</li>
+</ul>
+<ul>
+<li><strong>（步骤14）从50到500：搭建并对接配置中心</strong></li>
+</ul>
+<p>日常开发中我们的应用中一般都会有数据库相关的配置，redis相关的配置，log4j相关的配置 等常用配置，这些我们称为静态配置，在应用启动的时候就需要加载，修改配置需要重启应用。 还有一类配置和业务密切相关，应用在运行过程中需要监听这些配置的变化以方便修改运行模式或者响应对应的策略，例如并发控制数，业务开关等，可以用来做服务降级和限流，例如在数据库新老表做迁移的时候，我们可以用来配置进行动态切换模式：同步双写读老表，同步双写读新表，写新表读新表。 如果这些配置不能进行集中式管理，那么当我们的服务部署有成千上万的实例后，即使借助ansible这些运维工具，那么修改配置也将是一件超级麻烦而且极容易出错的事情，在做发布的时候也不在敏捷。 微服务架构下，我们需要一个集中式的配置管理系统，那么这个系统需要提供哪些功能才能解决上面的问题。 1、权限控制，当然不能所有的人都可以修改配置，如果能够继承公司的SSO或者LDAP当然更好。 2、审计日志，所有的修改需要记录操作日志，方便后续出现异议能够找到对应的操作人，也可以提供审批流程。 3、环境管理，开发，测试，生成环境下的配置肯定要做隔离，相同group内的配置可能大多相同，例如同一个IDC机房的应用也可以有namespace做区分。 4、配置回滚，当发现配置错误，或者在该配置下程序发生异常可以立即回滚到之前的版本，这需要该系统能够有版本管理的功能。 5、灰度发布，有时候我们新上线一个功能，想先通过少部分流量测试下，这个时候我们可以随机只修改部分应用的配置，当测试正常后在推送到所有的应用。 6、高可用，配置中心需要高可用，所以最好能支持集群部署，同时配置中心系统挂了之后最好能不影响应用，应用能够继续使用本地缓存的配置。 7、配置中心，应该能够在配置发生变更后实时通知到应用，应用端可能是一个监听器，配置也可能就是一个普通bean里面的属性，需要自动监听到变化并进行调整。 对于配置中心的选型，我列了一个表格如下。 Spring Cloud ConfigApolloDisconf静态配置管理基于文件支持支持动态配置管理支持支持支持统一管控基于Git支持支持多环境管理基于Git支持支持变更管理基于Git无无本地配置缓存无支持支持配置更新策略(指定时间)无无无配置锁支持无无配置校验(IP地址校验)无无无配置生效时间重启，手动刷新实时实时配置更新推送手工触发支持支持配置定时拉取无支持依赖事件驱动用户权限管理基于Git支持支持授权，审核，审计基于Git支持无配置版本管理基于Git提供发布历史和回滚功能数据库中有操作记录，但无接口实例配置监控需要spring admin支持支持灰度发布不支持支持不支持部分更新告警通知不支持支持支持支持Spring boot支持支持Java即可支持Spring Cloud支持支持Java即可客户端语言JavaJava, .NetJava依赖组件EurekaEurekaZookeeper高可用部署支持支持支持多数据中心支持支持支持</p>
+<h1 id="第四：微服务化——互联网场景，遭遇性能问题，进一步拆分"><a href="#第四：微服务化——互联网场景，遭遇性能问题，进一步拆分" class="headerlink" title="第四：微服务化——互联网场景，遭遇性能问题，进一步拆分"></a><strong>第四：微服务化——互联网场景，遭遇性能问题，进一步拆分</strong></h1><p><strong>（**步骤15**）从500到2000：全面实施微服务化***</strong>* *<strong>**</strong>* ****一个经典的服务化已经差不多告一段落，系统耦合的问题，快速迭代的问题，都已经基本得到解决，如果没有高并发流量的压力，其实系统已经处于一种不错的状态，没必要进一步拆分了。 再进一步的拆分，就不是领域划分的问题了，而是为了承载高并发流量，如果有某部分逻辑是性能瓶颈，则就应该进一步将这部分独立出来，尽管从业务领域看来，他应该属于另外一个进程。 虽然前面云和IaC已经使得我们的迭代速度适应了服务化，而且实现了一定程度的租户自助。 但是前面为了高并发的一系列拆分，一顿操作猛如虎，又对基础设施层造成了压力。 微服务场景下，进程多，更新快，于是出现100个进程，每天一个镜像。虚拟机哭了，因为虚拟机每个镜像太大了。 VMs有客户机内核，隔离性更好，但是占用资源多，性能低。一般一个虚拟机镜像都在几百G，如果100个进程，每天一个镜像，直接就耗尽你左右的存储资源。 容器乐了，每个容器镜像小，每个镜像都在几百M的级别，没啥问题。 虚拟机怒了，老子不用容器了，微服务拆分之后，用Ansible自动部署是一样的。 这样说从技术角度来讲没有任何问题。 然而问题是从组织角度出现的。 一般的公司，开发会比运维多的多，开发写完代码就不用管了，环境的部署完全是运维负责，运维为了自动化，写Ansible脚本来解决问题。 然而这么多进程，又拆又合并的，更新这么快，配置总是变，Ansible脚本也要常改，每天都上线，不得累死运维。 所以这如此大的工作量情况下，运维很容易出错，哪怕通过自动化脚本。这个时候，容器就可以作为一个非常好的工具运用起来。 除了容器从技术角度，能够使得大部分的内部配置可以放在镜像里面之外，更重要的是从流程角度，将环境配置这件事情，往前推了，推到了开发这里，要求开发完毕之后，就需要考虑环境部署的问题，而不能当甩手掌柜。 这样做的好处就是，虽然进程多，配置变化多，更新频繁，但是对于某个模块的开发团队来讲，这个量是很小的，因为5-10个人专门维护这个模块的配置和更新，不容易出错。 如果这些工作量全交给少数的运维团队，不但信息传递会使得环境配置不一致，部署量会大非常多。 容器是一个非常好的工具，就是让每个开发仅仅多做5%的工作，就能够节约运维200%的工作，并且不容易出错。 然而本来原来运维该做的事情开发做了，开发的老大愿意么？开发的老大会投诉运维的老大么？ 这就不是技术问题了，其实这就是DevOps，DevOps不是不区分开发和运维，而是公司从组织到流程，能够打通，看如何合作，边界如何划分，对系统的稳定性更有好处。 所以，容器的本质是基于镜像的跨环境迁移。 镜像是容器的根本性发明，是封装和运行的标准，其他什么namespace，cgroup，早就有了。这是技术方面。 在流程方面，镜像是DevOps的良好工具。 容器是为了跨环境迁移的，第一种迁移的场景是开发，测试，生产环境之间的迁移。如果不需要迁移，或者迁移不频繁，虚拟机镜像也行，但是总是要迁移，带着几百G的虚拟机镜像，太大了。 第二种迁移的场景是跨云迁移，跨公有云，跨Region，跨两个OpenStack的虚拟机迁移都是非常麻烦，甚至不可能的，因为公有云不提供虚拟机镜像的下载和上传功能，而且虚拟机镜像太大了，一传传一天。 业内没有标准的虚拟机镜像，跨云迁移容易出问题。而且IaC工具不同的云平台也不一样，也会阻碍迁移，而基于容器的编排，就可以改变这一点。 所以跨云场景下，混合云场景下，容器也是很好的使用场景。这也同时解决了仅仅私有云资源不足，扛不住流量的问题。</p>
+<p><strong>**(步骤16) 从500到2000****：大规模容器平台建设**</strong></p>
+<p>对于大规模容器平台建设，我画了一个脑图。</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/HO2NI1o25ZYQwJ6SF5PbDgzfMJl2xct7zCJQN9icYjTWj9u8WJmIGDibjQGVibiaysbYENbZoXsTKL490d0sibibz2QQ/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+<p><strong>**<br>**</strong></p>
+<p><strong>**<br>**</strong></p>
+<p><strong>（**步骤17**）从500到2000：应用容器化最佳实践</strong></p>
+<p><strong>******<br>******</strong></p>
+<p><strong>******<br>******</strong></p>
+<p>如果一个应用要容器化，应该符合以下的规范。</p>
+<p>每个容器应该只包含一个应用程序，如果有其他辅助应用程序，请使用pod。</p>
+<p>容器是有主进程的，也即Entrypoint，只有主进程完全启动起来了，容器才算真正的启动起来，一个比喻是容器更像人的衣服，人站起来了，衣服才站起来，人躺下了，衣服也躺下了。衣服有一定的隔离性，但是隔离性没那么好。衣服没有根(内核)，但是衣服可以随着人到处走。因而一个容器应该只包含一个应用程序，并和应用程序的周期完全一致，才方便管理，应该防止容器挂了，应用没挂，或者应用挂了容器没挂的情况，这样就很难发挥容器的优势。例如副本数，明明有三个副本，其中两个副本里面有应用挂了，而不可知，无法达到横向扩展的效果。</p>
+<p>Docker中的应用程序应该支持健康检查(readiness、liveness)和优雅关机。</p>
+<p>容器通过 Linux 信号来控制其内部进程的生命周期。为了将应用的生命周期与容器联系起来，需要确保应用能够正确处理 Linux 信号。</p>
+<p>Linux 内核使用了诸如 SIGTERM、SIGKILL 和 SIGINIT 等信号来终止进程。但是，容器内的 Linux 会使用不同的方式来执行这些常见信号，如果执行结果同信号默认结果不符，将会导致错误和中断发生。</p>
+<p>Dockerfile和Docker图像应该用层来组织，以简化开发人员的Dockerfile。</p>
+<p>对于容器镜像，我们应该充分利用容器镜像分层的优势，将容器镜像分层构建，在最里面的OS和系统工具层，由运维来构建，中间层的JDK和运行环境，由核心开发人员构建，而最外层的Dockerfile就会非常简单，只要将jar或者war放到指定位置就可以了。</p>
+<p>这样可以降低Dockerfile和容器化的门槛，促进DevOps的进度。</p>
+<p>将共享层和命令放在Dockerfile的前面，这样就可以更快地构建docker映像，因为共享。</p>
+<p>容器镜像由一系列镜像层组成，这些镜像层通过模板或 Dockerfile 中的指令生成。这些层以及构建顺序通常被容器平台缓存。例如，Docker 就有一个可以被不同层复用的构建缓存。这个缓存可以使构建更快，但是要确保当前层的所有父节点都保存了构建缓存，并且这些缓存没有被改变过。简单来讲，需要把不变的层放在前面，而把频繁改变的层放在后面。</p>
+<p>例如，假设有一个包含步骤 X、Y 和 Z 的构建文件，对步骤 Z 进行了更改，构建文件可以在缓存中重用步骤 X 和 Y，因为这些层在更改 Z 之前就已经存在，这样可以加速构建过程。但是，如果改变了步骤 X，缓存中的层就不能再被复用。</p>
+<p>删除Docker映像中的不需要的工具，这使映像更加安全，如果您想调试，可以使用ephemeral containers。</p>
+<p>当由于容器崩溃或容器镜像不包含调试实用程序而导致 kubectl exec 无用时，临时容器对于交互式故障排查很有用。</p>
+<p>尤其是，distroless 镜像能够使得部署最小的容器镜像，从而减少攻击面并减少故障和漏洞的暴露。由于 distroless 镜像不包含 shell 或任何的调试工具，因此很难单独使用 kubectl exec 命令进行故障排查。</p>
+<p>使用临时容器时，启用进程命名空间共享很有帮助，可以查看其他容器中的进程。</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/HO2NI1o25ZYQwJ6SF5PbDgzfMJl2xct735chzwXjPQwVL4MrRR0hSGKMG3lGpRnibYYaz9ERQRfVSMb66JbaXeg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+<p>如果你想初始化一些东西，使用 init containers。</p>
+<p>Init 容器可以包含一些安装过程中应用容器中不存在的实用工具或个性化代码。例如，没有必要仅为了在安装过程中使用类似 sed、 awk、 python 或 dig 这样的工具而去FROM 一个镜像来生成一个新的镜像。</p>
+<p>Init 容器可以安全地运行这些工具，避免这些工具导致应用镜像的安全性降低。</p>
+<p>应用镜像的创建者和部署者可以各自独立工作，而没有必要联合构建一个单独的应用镜像。</p>
+<p>Init 容器能以不同于Pod内应用容器的文件系统视图运行。因此，Init容器可具有访问 Secrets 的权限，而应用容器不能够访问。</p>
+<p>由于 Init 容器必须在应用容器启动之前运行完成，因此 Init 容器提供了一种机制来阻塞或延迟应用容器的启动，直到满足了一组先决条件。一旦前置条件满足，Pod内的所有的应用容器会并行启动。</p>
+<p>构建尽可能小的图像。</p>
+<p>通过使用较小的基础镜像（如Alpine），您可以显著减少容器的大小。Alpine Linux是一款体积小，轻量级的Linux发行版，在Docker用户中非常受欢迎，因为它与许多应用程序兼容，同时仍然保持小体积。</p>
+<p>在图片上加上规定的标签，不要使用latest。</p>
+<p>在使用公共镜像之前，先扫描它。</p>
+<p><strong>******<br>******</strong></p>
+<p><strong>（步骤18）从500到2000：搭建并接入应用性能管理</strong></p>
+<p><strong>**********<br>**********</strong></p>
+<p>微服务架构下，由于进行了服务拆分，一次请求往往需要涉及多个服务，每个服务可能是由不同的团队开发，使用了不同的编程语言，还有可能部署在不同的机器上，分布在不同的数据中心。因而需要链路追踪和应用性能管理，可以起到以下的作用。</p>
+<p>第一，优化系统瓶颈。</p>
+<p>通过记录调用经过的每一条链路上的耗时，我们能快速定位整个系统的瓶颈点在哪里。比如你访问微博首页发现很慢，肯定是由于某种原因造成的，有可能是运营商网络延迟，有可能是网关系统异常，有可能是某个服务异常，还有可能是缓存或者数据库异常。通过服务追踪，可以从全局视角上去观察，找出整个系统的瓶颈点所在，然后做出针对性的优化。</p>
+<p>第二，优化链路调用。</p>
+<p>通过服务追踪可以分析调用所经过的路径，然后评估是否合理。比如一个服务调用下游依赖了多个服务，通过调用链分析，可以评估是否每个依赖都是必要的，是否可以通过业务优化来减少服务依赖。</p>
+<p>还有就是，一般业务都会在多个数据中心都部署服务，以实现异地容灾，这个时候经常会出现一种状况就是服务 A 调用了另外一个数据中心的服务 B，而没有调用同处于一个数据中心的服务 B。</p>
+<p>跨数据中心的调用视距离远近都会有一定的网络延迟，像北京和广州这种几千公里距离的网络延迟可能达到 30ms 以上，这对于有些业务几乎是不可接受的。通过对调用链路进行分析，可以找出跨数据中心的服务调用，从而进行优化，尽量规避这种情况出现。</p>
+<p>第三，生成网络拓扑。</p>
+<p>通过服务追踪系统中记录的链路信息，可以生成一张系统的网络调用拓扑图，它可以反映系统都依赖了哪些服务，以及服务之间的调用关系是什么样的，可以一目了然。除此之外，在网络拓扑图上还可以把服务调用的详细信息也标出来，也能起到服务监控的作用。</p>
+<p>第四，透明传输数据。</p>
+<p>除了服务追踪，业务上经常有一种需求，期望能把一些用户数据，从调用的开始一直往下传递，以便系统中的各个服务都能获取到这个信息。比如业务想做一些 A&#x2F;B 测试，这时候就想通过服务追踪系统，把 A&#x2F;B 测试的开关逻辑一直往下传递，经过的每一层服务都能获取到这个开关值，就能够统一进行 A&#x2F;B 测试。</p>
+<p>对于应用性能管理，我列了一个表格。</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Pinpoint</th>
+<th>Zipkin</th>
+<th>Skywalking</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>采集方式</td>
+<td>Java Agent</td>
+<td>Annotation</td>
+<td>Java Agent</td>
+</tr>
+<tr>
+<td>采集开销</td>
+<td>5%到10%</td>
+<td>小于5%</td>
+<td>小于3%</td>
+</tr>
+<tr>
+<td>日志上报</td>
+<td>上报</td>
+<td>依赖库支持HTTP，Kafka，Log上报</td>
+<td>HTTP, GRPC</td>
+</tr>
+<tr>
+<td>聚合清洗</td>
+<td>Flink</td>
+<td>Spark</td>
+<td>无</td>
+</tr>
+<tr>
+<td>日志存储</td>
+<td>Hbase</td>
+<td>内存，Mysql，Cassandra，ES</td>
+<td>ES，Mysql，TiDB</td>
+</tr>
+</tbody></table>
+<p><strong>（**步骤19**）从500到2000：服务治理最佳实践</strong></p>
+<p><strong>**********************<br>**********************</strong></p>
+<p>当服务数目很多的时候，服务之间的调用关系会比较复杂，调用链会比较长，就需要一个统一的服务治理平台。</p>
+<p>一个服务治理平台应该需要包括以下几个部分：</p>
+<p>第一部分：服务管理平台。</p>
+<p>服务管理平台的首先要管理的是服务依赖的管理，就是一个服务到底调用了哪些，被哪些服务调用，如果依赖管理比较混乱，就会比较痛苦，比如说你要发布一个应用，你可能不知道这个应用被谁依赖了，有没有有一个特别关键的应用在依赖于我这个应用，会不会我升级了以后是否会引发关键业务的不稳定，是应该白天发布，还是凌晨发布，这个时候我们就特别需要希望有一个系统能够看到任何一个服务都被哪些服务依赖以及依赖于哪些服务。</p>
+<p>服务依赖关系可以以关系图的形式展现，也可以以列表的形式展现，关系图看起来会比较酷，但是真正实用的是列表，可以搜索任何一个服务的名称，来看他上下游的依赖关系。还记得咱们一开始给各个服务命名吗？这里就可以根据那个名称进行搜索和过滤了。</p>
+<p>在服务管理平台上，每个服务都要有负责人进行认领，这样有了紧急情况，可以联系这个人。</p>
+<p>对于每一个服务的上线下线的审批，也在服务管理平台上进行。</p>
+<p>另外对于每一个服务的性能和SLA，也在这个平台上有所约定，例如某个服务能够承载的TPS，服务的相应时间等，这个在单独测试某个服务的时候，可以得到一些数据，如果超出了这个值，要么是服务的实现有问题，要么是需要进行一定的治理，都应该进行报警。</p>
+<p>还有就是调用统计问题，对于调用记录有一个统计和告警，例如有没有接口突然调用失败率增高，有没有接口突然时延增长，都应该及早发现，而不能因为因为一次发布引入一个bug，导致时延变长但无人知晓，等到流量一来，直接就可能压挂了。再就是有没有接口再也没有人调用，这个接口是否可以下线，这在接口升级的时候，常常采取先添加接口，再下线接口的方式，就需要这样一个统计系统。</p>
+<p>再就是安全管理，很多企业往往通过白名单通过配置中心配到各个服务里面去的，比如说支付这个服务不是所有服务都能调用的，只有部分服务可以调用他。这些配置原来都是散落在这个服务里面去的，各自为站，有可能一不小心就配置错了或者漏了，应该能访问的访问不了，不该访问的能够访问了，但是没有人察觉。</p>
+<p>第二部分：服务稳定性平台。</p>
+<p>要保持服务的文档性，首先要有一个线上分流的机制，也即可以实现多个版本同时在线，并且能够灰度发布，随时在多个版本之间进行流量切换的机制。</p>
+<p>例如可以根据权重，HTTP头，HTTP Body，HTTP querystring里面的关键字进行分流。</p>
+<p>另外要防止请求堆积，也即一个请求慢，拖累整个链路都慢。为什么会出现请求堆积呢，我们知道微服务都是多线程进行调用的，而每一个服务都有一个线程池，当一个请求在一个线程池里面阻塞着出不来，那其他的请求也就别想进来，如果一个服务D处理某个请求慢了，会导致调用他的C服务中的一个线程在等待，也即占用C的线程不会释放，则会导致调用C的B服务的一个线程也在等待，无法释放。这样整个链路就慢了。所以应该有超时机制和failfast和failover机制，这个同管理平台上的每个服务约定的服务响应时间结合起来，一旦C服务调用D的某一个副本超时了，就快速失败，重试另一个副本，让C尽快做完，释放资源。</p>
+<p>另外要防止服务雪崩，也即一个服务挂了，流量压倒一片。例如还是上面的例子，D不是一个副本异常，而是所有的副本都时灵时不灵的，那就应该对D服务进行熔断，也即C服务监控D接口的健康值，在达到熔断条件时，自动开启熔断，开启熔断之后，如何实现自动恢复？每隔一段时间，释放一个请求到服务端进行探测，如果后端服务已经恢复，则自动恢复。</p>
+<p>这当然要求D服务不是核心服务，如果我们对于所有的服务进行梳理，我们会发现，核心交易链路是很短的，大部分的请求都是分支服务，而核心交易链路是会进行压力测试的，而我们往往没有太多的时间，对于所有的分支进行压力测试，因而要对分支服务进行熔断措施。</p>
+<p>其实我们可以根据规划，主动的对于一些分支服务进行降级，而非出现错误的时候，再进行熔断式降级，例如评论服务，获取精准库存数目等。</p>
+<p>当熔断，降级都启用了以后，我们就可以进行压力测试，发现核心交易链路的性能极限，接下来就需要进行限流了，也即将超过系统容量的请求阻挡在外面，保证已有的请求能够顺利处理，外加前端可以进行友好的提示和重试，使得请求分批进入系统处理。</p>
+<p>第三部分是故障测试和演练，也即人为制造一些故障场景，从而看整个系统的反应，是否能够平滑处理。</p>
+<p>故障类型包括以下几大类：</p>
+<p>（1）依赖服务故障，即服务依赖为维度，对服务依赖的中间件、数据库、缓存、依赖服务等实施一些网络丢包、网络延时、服务failover等系统层的故障注入模式。目前我们的重点在这种类型的异常模拟，在保证底层依赖的故障演练覆盖度后，也要结合业务进行，观察业务的故障表现。</p>
+<p>（2）应用层故障，即应用本身故障，如宕机、假死、重启等</p>
+<p>（3）系统层故障，为系统资源方面的故障，系统资源主要包括CPU、内存、磁盘、网络，系统故障演练主要是在这四个方面进行。</p>
+<p>对于服务治理中心，我列了一个表格如下。</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Sentinel</th>
+<th>Hystrix</th>
+<th>resilience4j</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>隔离策略</td>
+<td>信号量隔离（并发线程数限流）</td>
+<td>线程池隔离&#x2F;信号量隔离</td>
+<td>信号量隔离</td>
+</tr>
+<tr>
+<td>熔断降级策略</td>
+<td>基于响应时间、异常比率、异常数</td>
+<td>基于异常比率</td>
+<td>基于异常比率、响应时间</td>
+</tr>
+<tr>
+<td>实时统计实现</td>
+<td>滑动窗口（LeapArray）</td>
+<td>滑动窗口（基于 RxJava）</td>
+<td>Ring Bit Buffer</td>
+</tr>
+<tr>
+<td>动态规则配置</td>
+<td>支持多种数据源</td>
+<td>支持多种数据源</td>
+<td>有限支持</td>
+</tr>
+<tr>
+<td>扩展性</td>
+<td>多个扩展点</td>
+<td>插件的形式</td>
+<td>接口的形式</td>
+</tr>
+<tr>
+<td>基于注解的支持</td>
+<td>支持</td>
+<td>支持</td>
+<td>支持</td>
+</tr>
+<tr>
+<td>限流</td>
+<td>基于 QPS，支持基于调用关系的限流</td>
+<td>有限的支持</td>
+<td>Rate Limiter</td>
+</tr>
+<tr>
+<td>流量整形</td>
+<td>支持预热模式、匀速器模式、预热排队模式</td>
+<td>不支持</td>
+<td>简单的 Rate Limiter 模式</td>
+</tr>
+<tr>
+<td>系统自适应保护</td>
+<td>支持</td>
+<td>不支持</td>
+<td>不支持</td>
+</tr>
+<tr>
+<td>控制台</td>
+<td>提供开箱即用的控制台，可配置规则、查看秒级监控、机器发现等</td>
+<td>简单的监控查看</td>
+<td>不提供控制台，可对接其它监控系统</td>
+</tr>
+</tbody></table>
+<p><strong>（步骤20）从500到2000：搭建并接入分布式事务</strong></p>
+<p><strong>**********************************<br>**********************************</strong></p>
+<p>微服务拆分之后，服务调用过程很难保证事务特性，尤其是对于类似交易和支付等，原子性需求对业务逻辑最重要，调用要么全部失败，要么全面成功。</p>
+<p>用户在页面下单作为一个完整的分布式事务，订单创建在订单中心，优惠券扣减在优惠券系统，库存扣减在库存中心。一个大的操作由不同的小操作组成，这些小的操作分布在不同的服务器上，且属于不同的应用，分布式事务需要保证这些小操作要么全部成功，要么全部失败。本质上来说，分布式事务就是为了保证不同数据库的数据一致性。</p>
+<p>方式一：XA与两阶段提交</p>
+<p>XA是业界的一个分布式事务协议。XA中大致分为两部分：事务管理器和本地资源管理器。其中本地资源管理器往往由数据库实现，比如Oracle、DB2这些商业数据库都实现了XA接口，而事务管理器作为全局的调度者，负责各个本地资源的提交和回滚。</p>
+<p>XA是一套两阶段提交协议，只要实现了协议的数据库都可以很方便的支撑分布式事务，不过XA有一个致命缺点，在一阶段时候会锁定数据库资源，导致整体性能会非常差，目前似乎大公司很少有使用XA来做分布式事务的。</p>
+<p>方式二：TCC、Saga</p>
+<p>Try 预留 + Confirm 提交 + Cancel 还预留</p>
+<p>Try 操作 + Confirm 无操作 + Cancel 补偿</p>
+<p>TCC适用于需要同步返回的场景，例如下单扣减库存优惠券需要当时给用户返回。</p>
+<p>方式三：事务消息</p>
+<p>TCC对于应用侵入性比较大，本地事务表需要业务设计</p>
+<p>TCC需要同步返回，如果可以接收异步场景，可以采用事务消息</p>
+<p>事务本地表无需业务方干预，异步化，拆分大事务为小事务提高性能</p>
+<p><strong>（步骤21）2000以上：搭建并接入GitOps</strong></p>
+<p><strong>**********************************************<br>**********************************************</strong></p>
+<p>从这一节之后，我们就进入了超大规模微服务的场景了。</p>
+<p>在这种场景下，给下面的基础设施层又有了新的压力，第一个压力就是持续发布和部署问题。</p>
+<p>尽管我们已经有了持续集成系统，并且和云平台以及容器平台进行了对接，通过K8S编排文件进行发布和部署。</p>
+<p>但是当服务越来越多的时候，我们会发现，K8S编排文件的维护也是一件十分困难的事情，有时候我们会发现编排文件满天飞，甚至都不知道哪个编排文件是正确的，是对应线上环境的。</p>
+<p>另外到底编排文件谁改了，改了哪些地方，也不是很清楚，版本也没有一个地方进行维护。</p>
+<p>另外对于编排文件的修改往往是一部分，如果存在多个人同时修改的情况，谁来合并，最后以谁为准，如果在2000个服务中，修改了5个，发现不对，想回滚的时候，谁能精准的把这5个挑出来。</p>
+<p>但是你有没有发现，有一个工具非常适合做上面的这些事情，就是Git。使用了Git，我们就可以像对待代码一样对待编排文件了。</p>
+<p>这个时候，真正的实现了一切即代码，代码是代码，配置是代码，单实例运行环境Dockerfile是代码，多实例运行环境编排文件是代码。</p>
+<p>以Git的作为事实的唯一真实来源，解决了上述的问题：</p>
+<p>行为可审计 ：使用 Git 工作流管理集群，天然能够获得所有变更的审计日志，满足合规性需求，提升系统的安全与稳定性。</p>
+<p>更高的可靠性：借助 Git 的还原（revert）、分叉（fork）功能，可以实现稳定且可重现的回滚。由于整个系统的描述都存放在 Git 中，我们有了唯一的真实来源，这能大大缩短集群完全崩溃后的恢复时间。</p>
+<p>一致性和标准化：由于 GitOps 为基础设置、应用程序、Kubernetes 插件的部署变更提供了统一的模型，因此我们可以在整个组织中实现一致的端到端工作流。不仅仅是 CI&#x2F;CD 流水线由 pull request 驱动，运维任务也可以通过 Git 完全重现。</p>
+<p>更强的安全保证：得益于 Git 内置的安全特性，保障了存放在 Git 中的集群目标状态声明的安全性。</p>
+<p><strong>****(步骤22) 2000以上****：灰度发布与流量染色****</strong></p>
+<p><strong>****<br>****</strong></p>
+<p><strong>****<br>****</strong></p>
+<p>有了GitOps之后，发布起来容易多了，尤其是对于普通的开发人员，对于测试环境的部署，可谓每个组一套，因为谁也不想和其他人共用一个测试环境，以免相互影响，而这种便捷的方式使得开发人员会滥用底层的灵活性。</p>
+<p>这个时候，测试环境就会出现指数性的增长，例如一套完整的环境全部单节点，假设需要1000个容器，则如果三个组同时开发，每个组都是独立的测试环境，则需要3000个容器，如果有更多的组，那无论多大的集群，都会被耗尽。</p>
+<p>因而我们有了流量染色的机制，这就体现了统一API网关和统一微服务框架的好处了，有了统一的框架，就可以下发统一的策略，上线统一的机制。</p>
+<p>​ <img src="https://mmbiz.qpic.cn/mmbiz_png/HO2NI1o25ZYQwJ6SF5PbDgzfMJl2xct7iboD0Fd2xlicHBzfxzwNm9eB6G2C18peh7erRuHXGDcW9thK0ibsJM6wg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+<p>整个测试环境共享一套基准环境，部署所有应用。这里面的应用和master环境的一致。里面所有的服务都有单节点，整个一套。</p>
+<p>接下来，API网关层进行流量染色。API网关可识别流量来源，从哪个测试客户端来的流量，或者可根据HTTP头里面的字段，判断从哪个测试客户端来的流量，在调用下发的过程中，给流量统一带上相应测试组的Tag，也即染色。</p>
+<p>对于服务之间的相互调用，微服务框架的Agent会携带染色消息，并且染色在调用链上持续传递，按照同环境优先的策略进行路由和消费。也即每次调用一个服务，从服务治理中心获取服务列表的时候，优先选择属于同一环境的服务，也即染色相同的服务。</p>
+<p>若分支环境缺失相关服务，则路由到基准环境进行调用。调用后，在下一个调用环节，发现分支环境有了相关服务，由于调用链的染色不变，还是会回到分支环境中。</p>
+<p>这样就实现了，如果分支环境里面有相应的服务，优先在分支环境里面调用，如果没有，再去基准环境里面调用。这样假设基准环境1000个服务，测试组A修改了5个服务，测试组B修改了6个服务，则不用部署3000个服务，而是部署1011个服务即可，大大缩减了测试环境。</p>
+<p><strong>****<br>****</strong></p>
+<p><strong>（步骤23）2000以上：服务网格最佳实践</strong></p>
+<p>在微服务化的研发的角度来讲，Kubernetes 虽然复杂，但是设计的都是有道理的，符合微服务的思想。</p>
+<p>Service Mesh是Kubernetes支撑微服务能力拼图的最后一块，Kubernetes的服务发现是通过Service来实现的，服务之间的转发是通过kube-proxy下发iptables规则来实现的，这个只能实现最基本的服务发现和转发能力，不能满足高并发应用下的高级的服务特性，比较SpringCloud和Dubbo有一定的差距，于是Service Mesh诞生了，他期望讲熔断，限流，降级等特性，从应用层，下沉到基础设施层去实现，从而使得Kubernetes和容器全面接管微服务。</p>
+<p><strong>**********<br>**********</strong></p>
+<p><strong>（步骤24）2000以上：全链路压测</strong></p>
+<p>一般来说，性能问题往往通过线上性能压测发现的。一般大促之前，提前一段时间，就要开始进行压测。压的时候就会涉及到从前往后，从底到上的所有的系统和部门，都要派代表去参加，哪一块出现了问题，哪一个环节出现了性能瓶颈，哪一块就要改。</p>
+<p>线上压力测试需要有一个性能测试的平台，做多种形式的压力测试。例如容量测试，通过梯度的加压，看到什么时候实在不行。摸高测试，测试在最大的限度之上还能承受多大的量，有一定的余量会保险一些，心里相对比较有底。再就是稳定性测试，测试峰值的稳定性，看这个峰值能够撑一分钟，两分钟还是30分钟。还有秒杀场景测试，限流降级演练测试等。</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/HO2NI1o25ZYQwJ6SF5PbDgzfMJl2xct7o50qwkHK6h5QguibqnP6G0lBVzCiaSL28B8171jmTmheQicxibIebTHHrA/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="img"></p>
+<p><strong>（**步骤25**）2000以上：多机房单元化</strong></p>
+<p><strong>**********************<br>**********************</strong></p>
+<p>说到大规模微服务系统，往往是一些7*24时不间断运行的在线系统，这样的系统往往有以下的要求：</p>
+<p>第一，高可用。这类的系统往往需要保持一定的SLA的，7*24时不间断运行不代表完全不挂，而是有一定的百分比的。例如我们常说的可用性需达到4个9（99.99%），全年停机总计不能超过1小时，约为53分钟，也即服务停用时间小于53分钟，就说明高可用设计合格。</p>
+<p>第二，用户分布在全国。大规模微服务系统所支撑的用户一般在全国各地，因而每个地区的人，都希望能够就近访问，所以一般不会一套系统服务全国，而是每个地区都要有相应的业务单元，使得用户可以就近访问。</p>
+<p>第三，并发量大，存在波峰波谷。微服务之所以规模比较大，其实是承载的压力比较大，而且需要根据请求的波峰波谷进行弹性伸缩。</p>
+<p>第四，有故障性能诊断和快速恢复的机制。大规模微服务场景下，运维人员很难进行命令式手动运维来控制应用的生命周期，应该采用声明式的运维方法。另外一旦有了性能瓶颈或者故障点，应该有自动发现定位的机制，迅速找到瓶颈点和故障点，及时修复，才能保障SLA。</p>
+<p><strong>为了满足以上的要求，这个系统绝不是运维组努力一把，或者开发组努力一把，就能解决的，是一个端到端的，各个部门共同完成的一个目标，所以我们常称为战略设计。</strong></p>
+<h2 id="第一，研发"><a href="#第一，研发" class="headerlink" title="第一，研发"></a>第一，研发</h2><p>首先，每一个微服务都有实现良好的无状态化处理，幂等服务接口设计。</p>
+<p>其次，根据服务重要度实现熔断降级、限流保护策略</p>
+<p>其三，每个服务都要设计有效探活接口，以便健康检查感知到服务状态</p>
+<p>其四，通过制定良好的代码检查规范和静态扫描工具，最大化限制因为代码问题造成的系统不可用</p>
+<h2 id="第二，高可用架构设计"><a href="#第二，高可用架构设计" class="headerlink" title="第二，高可用架构设计"></a>第二，高可用架构设计</h2><p>在系统的每一个部分，都要避免单点。系统冗余往往分管控面和数据面，而且分多个层次，往往每一个层次都需要进行高可用的设计。</p>
+<p>在机房层面，为了高可用应该部署在多个区域，或者多个云，每个区域分多个可用区进行部署。</p>
+<p>对于云来讲，云的管控要多机房高可用部署，使得任何一个机房故障，都会使得管控依然可以使用，这就需要管控的组件分布于至少两个机房，管控的数据库和消息队列跨机房进行数据同步。</p>
+<p>对于云的数据面来讲，入口的网关要和机房网络配合做跨机房的高可用，使得入口公网IP和负载均衡器，在一个机房故障的情况下，可以切换至另一个机房。</p>
+<p>在云之上要部署Kubernetes平台，管控层面Kubernetes要实现高可用部署，etcd要跨机房高可用部署，Kubernetes的管控组件也要跨机房部署。当然还有一种情况是机房之间距离比较远，需要在每一个机房各部署一套Kubernetes，这种情况下，Kubernetes的管控依然要实现高可用，只不过跨机房的高可用就需要应用层来实现了。</p>
+<p>在应用层，微服务的治理平台，例如注册发现，zookeeper或者Euraka，APM，配置中心等都需要实现跨机房的高可用。另外就是服务要跨机房部署，实现城市级机房故障迁移能力</p>
+<h2 id="第三，运维"><a href="#第三，运维" class="headerlink" title="第三，运维"></a>第三，运维</h2><p>首先建议使用的是Kubernetes编排的声明式的运维方式，而非ansible之类命令式的运维方式。</p>
+<p>另外对于系统的发布，要进行灰度、蓝绿发布，降低系统上线发布风险。要有这样的理念，任何一个新上线的系统，都是不可靠的。所以可以通过流量分发的模式，逐渐切换到新的服务，从而保障系统的稳定。</p>
+<p>其三，完善监控及应对机制，对系统各节点、应用、组件全面地监控，能够第一时间快速发现并解决问题。</p>
+<p>其四，持续关注线上系统网络使用、服务器性能、硬件存储、中间件、数据库灯指标，重点关注临界状态，也即当前还健康，但是马上可能出问题的状态。例如网关pps达到临界值，下一步就要开始丢包了，数据库快满了，消息出现大量堆积等等。</p>
+<h2 id="第四，DBA"><a href="#第四，DBA" class="headerlink" title="第四，DBA"></a>第四，DBA</h2><p>对于一个在线业务系统来讲，数据库是重中之重，很多的性能瓶颈定位到最后，都可能是数据库的问题。所以DBA团队要对数据库的使用，进行把关。</p>
+<h2 id="第五，故障演练和性能压测"><a href="#第五，故障演练和性能压测" class="headerlink" title="第五，故障演练和性能压测"></a>第五，故障演练和性能压测</h2></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2023/09/04/%E5%AE%9E%E8%B7%B5%E4%BA%91%E7%AC%94%E8%AE%B0/">https://yhao521.github.io/2023/09/04/%E5%AE%9E%E8%B7%B5%E4%BA%91%E7%AC%94%E8%AE%B0/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/web-frontend/">web/frontend</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/java-programming/">java/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a><a class="post-meta__tags" href="/tags/python-programming/">python/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2023/09/04/%E5%BC%80%E5%90%AF%E7%BB%84%E7%AD%96%E7%95%A5/" title="开启组策略"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">开启组策略</div></div><div class="info-2"><div class="info-item-1"> title: 开启组策略date: 2023-09-03 20:17:08category:  wintag: winauthor:   win10家庭版本身不提供组策略的功能 1 个人使用的是win10家庭版，如下图所示，运行gpedit.msc直接提示找到gpedit.msc(组策略）。   运行MMC，在“添加删除单元“中也找不到组策略编辑器。   本身win10家庭版本不提供组策略编辑器功能。这个不提供不是说没有此功能，而是对此功能进行了限制，具体可以继续参考下面的开启方法。  END   二、开启win10家庭版的组策略功能 首先同时按键盘上的WIN+R键，打开运行对话框，输入notepad打开记事本。   然后在记事本中保存如下批处理内容。 123456@echo off    　　pushd &quot;%~dp0&quot;    　　dir /b %systemroot%\Windows\servicing\Packages\Microsoft-Windows-GroupPolicy-ClientExtensions-Package~3*.mum &gt;gp...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E5%B8%B8%E7%94%A8%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" title="常用正则表达式"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">常用正则表达式</div></div><div class="info-2"><div class="info-item-1"> title: 常用正则表达式date: 2023-09-03 20:17:08category:  开发语言 正则tag: 正则author:   如果激活 UNIX_LINES 模式，则新行符是唯一识别的行结束符。 如果未指定 DOTALL 标志，则正则表达式 . 可以与任何字符（行结束符除外）匹配。 默认情况下，正则表达式 ^ 和 $ 忽略行结束符，仅分别与整个输入序列的开头和结尾匹配。如果激活 MULTILINE 模式，则 ^ 在输入的开头和行结束符之后（输入的结尾）才发生匹配。处于 MULTILINE 模式中时，$ 仅在行结束符之前或输入序列的结尾处匹配。 12345678// . 匹配除换行符以外的任意字符// \w 匹配字母或数字或下划线或汉字 等价于 &#x27;[^A-Za-z0-9_]&#x27;。// \s 匹配任意的空白符// \d 匹配数字// \b 匹配单词的开始或结束// ^ 匹配字符串的开始// $ 匹配字符串的结束// \w能不能匹配汉字要视你的操作系统和你的应用环境而定  一、校验数字的表达式 1234567891011121314151617...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/%E5%89%8D%E7%AB%AF%E5%85%A5%E9%97%A8%E6%89%8B%E5%86%8C/" title="前端入门手册"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">前端入门手册</div></div><div class="info-2"><div class="info-item-1"> title: 前端入门手册date: 2023-09-03 20:17:08category:  开发语言tag: 开发语言author:   前端入门手册blossom html css JavaScript程序员入门的时候整理的一份学习笔记,见证了我的成长备份 HTML视频音频标签带控制器的视频标签, 不同浏览器有不同的文件格式要求所以用 2 个 source 标签指定不同的视频格式 1234&lt;video width=&quot;300&quot; height=&quot;200&quot; controls=&quot;controls&quot;&gt;  &lt;source src=&quot;movie.mp4&quot; /&gt;  &lt;source src=&quot;movie.ogv&quot; /&gt;&lt;/video&gt;  带控制器的音频标签, 不同浏览器有不同的文件格式要求所以用 2 个 source 标签指定不同的音频格式 1234&lt;audio id=&quot;id-audio-player&quot; contro...</div></div></div></a><a class="pagination-related" href="/2026/05/15/%E6%A6%82%E8%A6%81%E8%AE%BE%E8%AE%A1/" title="概要设计"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-15</div><div class="info-item-2">概要设计</div></div><div class="info-2"><div class="info-item-1">深度与广度的平衡：Java继续保持深度（JVM调优、并发编程），Go扩展广度（云原生、高并发），Python&#x2F;Shell作为工具链补充 简历项目描述示例：不要写：“用Java开发了一个监控系统”要写：“设计并实现混合架构监控平台，采用Go处理高频指标数据（10w+ QPS），Java实现复杂告警规则引擎，性能较纯Java方案提升40%，资源消耗降低30%” 混合技术栈监控告警平台概要设计📊 平台整体架构12345678910111213141516171819202122232425262728┌─────────────────────────────────────────────────────────────────┐│                        展示层 (Vue + Java API)                    │├─────────────────────────────────────────────────────────────────┤│       API网关/负载均衡 (Go/Java)  │  配置中心 (Ja...</div></div></div></a><a class="pagination-related" href="/2023/09/04/npm&yarn/" title="npm&amp;yarn"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">npm&amp;yarn</div></div><div class="info-2"><div class="info-item-1"> title: npm&amp;yarnlang: en-USdate: 2023-09-03 20:17:08category:  开发语言 doc_nodejstag: doc_nodejsauthor:   1. centos7 npm安装——CentOS7常用软件官网下载npm安装包， https://nodejs.org/en/ ，左边是稳定版右边是最新版。  推荐个 https://npm.taobao.org/mirrors/可以下载想要的node版本 2. 首先安装必要的环境(推荐方式一安装)yum install gcc gcc-c++  3. 一、方式一wget https://npm.taobao.org/mirrors/node/v12.8.0/node-v12.8.0-linux-x64.tar.gz  然后执行下面命令 tar -zxvf node-v12.8.0-linux-x64.tar.gz mv node-v12.8.0-linux-x64 node  配置环境变量 vim /etc/profile vi .bash_profile  在文件中...</div></div></div></a><a class="pagination-related" href="/2024/08/01/Monaco%20Editor%E4%BD%BF%E7%94%A8%E7%BB%8F%E9%AA%8C%E6%80%BB%E7%BB%93/" title="Monaco Editor使用经验总结"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-01</div><div class="info-item-2">Monaco Editor使用经验总结</div></div><div class="info-2"><div class="info-item-1">Monaco Editor使用经验总结11   最近做的是后端的低代码平台构建工作，功能界面主体是类Eclipse风格的，其中文件夹内创建内容可以通过可视化操作创建功能代码，也可以后期编辑已生成的代码。因为后者涉及到网页版编辑器，所以我最近就一直和monaco-editor打交道了。  首先就是老生常谈的入门问题，那就是如何创建一个monaco编辑器。在此就以monaco-editor集成到vue项目中为例，为大家解决此类问题，以及期望能够帮助大家快速入手实践。  如上图所示，是该项目的前端部分界面展示。右侧文本编辑器就是monaco-editor。接下来的内容并不是最基础的逐个js的分析教学，而是直接使用插件代替部分基础配置。如果需要学习更多细节，可以去阅读其他网友的文章，这里并不过多分析。 PS：贴个Monaco Editor官方文档地址：https://microsoft.github.io/monaco-editor/ 一、安装  基础的安装只需要两个： 123npm install monaco-editor -Snpm install monaco-editor-we...</div></div></div></a><a class="pagination-related" href="/2025/03/16/%E5%9C%A8%E6%B5%8F%E8%A7%88%E5%99%A8%E4%B8%AD%E5%BF%AB%E9%80%9F%E6%8E%A2%E6%B5%8BIP%E7%AB%AF%E5%8F%A3%E6%98%AF%E5%90%A6%E5%BC%80%E6%94%BE/" title="在浏览器中快速探测IP端口是否开放"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-16</div><div class="info-item-2">在浏览器中快速探测IP端口是否开放</div></div><div class="info-2"><div class="info-item-1">0×00 前言前两天 freebuf上的的XSS到内网的公开课很受启发，从一个页面到局域网，威力着实增强不少 公开课上检测内网 IP 实现方式用的是 img 标签，加载网站的 favicon.ico 图标，然后监听 onload 事件，看图片能不能加载成功简单易用，就是太慢了 –  0×02 分析浏览器有几秒的尝试容错时间，对于媒体资源，浏览器限制同一域名并发请求为个位数（一般为 6 个），也就是说，把图片全放到页面上，也不能同时开始检测，只能一点一点来，扫端口的时候会非常慢。 管理员在内网搭建的东西也可能没有图标。。。 探测 IP 端口开放原理就是向目标发送请求，看是否有回应。在上面的 img 中是在加载成功和失败体现出来的。img 嫌慢也可以试试别的嘛，经过一番搜索找到了这个，这个和这个。 第一个页面:1document.getElementById(&quot;testdiv&quot;).innerHTML = &#x27;&lt;img src=&quot;http://&#x27; + ip + &#x27;:&#x27; + port + &#x27;&quot; ...</div></div></div></a><a class="pagination-related" href="/2023/09/04/vscode%E4%BD%BF%E7%94%A8/" title="vscode使用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">vscode使用</div></div><div class="info-2"><div class="info-item-1"> title: vscode的使用lang: en-USdate: 2023-09-03 20:17:08category:  vscodetag: vscodeauthor:   1. vscode的使用1.1. 插件位置更改参考：https://blog.csdn.net/zhaojunwei08/article/details/86021665 https://blog.csdn.net/u011127019/article/details/86737308#comments mklink使用 https://www.icoa.cn/a/910.html set oldDir&#x3D;%UserProfile%.vscode\extensions mklink &#x2F;D “%oldDir%” “E:\eclipse-hao\HTML\extensions” 确保有 这个 .vscode 空目录  bat方式： 123456789@echo offif &quot;%1&quot; == &quot;h&quot; goto beginmshta vbscript:c...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%9E%E8%B7%B5%E4%BA%91%E5%8E%9F%E7%94%9F25%E6%AD%A5-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0"><span class="toc-number">1.</span> <span class="toc-text">实践云原生25步@学习笔记</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%EF%BC%9A%E8%A7%84%E5%88%92%E2%80%94%E2%80%94%E5%9C%A8%E6%9E%B6%E6%9E%84%E5%A7%94%E5%91%98%E4%BC%9A%E9%A2%86%E5%AF%BC%E4%B8%8B%E7%9A%84%E6%A2%B3%E7%90%86%E4%B8%8E%E8%A7%84%E5%88%92"><span class="toc-number">2.</span> <span class="toc-text">第一：规划——在架构委员会领导下的梳理与规划</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%EF%BC%9A%E8%AF%95%E7%82%B9%E2%80%94%E2%80%94%E9%80%89%E4%B8%80%E4%B8%AA%E9%A1%B9%E7%9B%AE%E8%AF%95%E7%82%B9%EF%BC%8C%E6%B1%B2%E5%8F%96%E7%BB%8F%E9%AA%8C%EF%BC%8C%E5%9F%B9%E5%85%BB%E5%9B%A2%E9%98%9F%EF%BC%8C%E5%BB%BA%E7%AB%8B%E8%A7%84%E8%8C%83"><span class="toc-number">3.</span> <span class="toc-text">第二：试点——选一个项目试点，汲取经验，培养团队，建立规范</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%EF%BC%9A%E6%9C%8D%E5%8A%A1%E5%8C%96%E2%80%94%E2%80%94%E8%AF%95%E7%82%B9%E7%BB%93%E6%9D%9F%EF%BC%8C%E5%9C%A8%E6%9E%B6%E6%9E%84%E5%A7%94%E5%91%98%E4%BC%9A%E7%9A%84%E9%A2%86%E5%AF%BC%E4%B8%8B%EF%BC%8C%E5%9C%A8%E6%9C%8D%E5%8A%A1%E5%8C%96%E8%A7%84%E8%8C%83%E7%9A%84%E6%8C%87%E5%BC%95%E4%B8%8B%EF%BC%8C%E5%90%84%E7%BB%84%E5%88%B6%E5%AE%9A%E9%87%8C%E7%A8%8B%E7%A2%91%E8%AE%A1%E5%88%92%EF%BC%8C%E9%80%90%E6%AD%A5%E6%8B%86%E5%88%86"><span class="toc-number">4.</span> <span class="toc-text">第三：服务化——试点结束，在架构委员会的领导下，在服务化规范的指引下，各组制定里程碑计划，逐步拆分</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC%E5%9B%9B%EF%BC%9A%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%8C%96%E2%80%94%E2%80%94%E4%BA%92%E8%81%94%E7%BD%91%E5%9C%BA%E6%99%AF%EF%BC%8C%E9%81%AD%E9%81%87%E6%80%A7%E8%83%BD%E9%97%AE%E9%A2%98%EF%BC%8C%E8%BF%9B%E4%B8%80%E6%AD%A5%E6%8B%86%E5%88%86"><span class="toc-number">5.</span> <span class="toc-text">第四：微服务化——互联网场景，遭遇性能问题，进一步拆分</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%EF%BC%8C%E7%A0%94%E5%8F%91"><span class="toc-number">5.1.</span> <span class="toc-text">第一，研发</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%EF%BC%8C%E9%AB%98%E5%8F%AF%E7%94%A8%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1"><span class="toc-number">5.2.</span> <span class="toc-text">第二，高可用架构设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%EF%BC%8C%E8%BF%90%E7%BB%B4"><span class="toc-number">5.3.</span> <span class="toc-text">第三，运维</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E5%9B%9B%EF%BC%8CDBA"><span class="toc-number">5.4.</span> <span class="toc-text">第四，DBA</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%BA%94%EF%BC%8C%E6%95%85%E9%9A%9C%E6%BC%94%E7%BB%83%E5%92%8C%E6%80%A7%E8%83%BD%E5%8E%8B%E6%B5%8B"><span class="toc-number">5.5.</span> <span class="toc-text">第五，故障演练和性能压测</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

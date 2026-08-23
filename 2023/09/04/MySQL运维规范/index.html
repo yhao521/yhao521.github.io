@@ -1,0 +1,436 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>MySQL运维规范 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="title: MySQL运维规范date: 2023-09-04 17:49:38permalink: &#x2F;pages&#x2F;1530f0&#x2F;category:  数据库 doc_mysqltag: doc_mysqlauthor:   数据库运维必备：非常完整的 MySQL 规范一、数据库命令规范 所有数据库对象名称必须使用小写字母并用下划线分割 所有数据库对象名称禁止使用">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL运维规范">
+<meta property="og:url" content="https://yhao521.github.io/2023/09/04/MySQL%E8%BF%90%E7%BB%B4%E8%A7%84%E8%8C%83/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="title: MySQL运维规范date: 2023-09-04 17:49:38permalink: &#x2F;pages&#x2F;1530f0&#x2F;category:  数据库 doc_mysqltag: doc_mysqlauthor:   数据库运维必备：非常完整的 MySQL 规范一、数据库命令规范 所有数据库对象名称必须使用小写字母并用下划线分割 所有数据库对象名称禁止使用">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2023-09-04T03:18:09.000Z">
+<meta property="article:modified_time" content="2023-09-04T03:18:27.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "MySQL运维规范",
+  "url": "https://yhao521.github.io/2023/09/04/MySQL%E8%BF%90%E7%BB%B4%E8%A7%84%E8%8C%83/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2023-09-04T03:18:09.000Z",
+  "dateModified": "2023-09-04T03:18:27.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2023/09/04/MySQL%E8%BF%90%E7%BB%B4%E8%A7%84%E8%8C%83/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'MySQL运维规范',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">MySQL运维规范</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">MySQL运维规范</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-09-04T03:18:09.000Z" title="发表于 2023-09-04 11:18:09">2023-09-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-09-04T03:18:27.000Z" title="更新于 2023-09-04 11:18:27">2023-09-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><hr>
+<p>title: MySQL运维规范<br>date: 2023-09-04 17:49:38<br>permalink: &#x2F;pages&#x2F;1530f0&#x2F;<br>category:</p>
+<ul>
+<li>数据库</li>
+<li>doc_mysql<br>tag:</li>
+<li>doc_mysql<br>author:</li>
+</ul>
+<hr>
+<h2 id="数据库运维必备：非常完整的-MySQL-规范"><a href="#数据库运维必备：非常完整的-MySQL-规范" class="headerlink" title="数据库运维必备：非常完整的 MySQL 规范"></a>数据库运维必备：非常完整的 MySQL 规范</h2><h4 id="一、数据库命令规范"><a href="#一、数据库命令规范" class="headerlink" title="一、数据库命令规范"></a>一、数据库命令规范</h4><ul>
+<li>所有数据库对象名称必须使用小写字母并用下划线分割</li>
+<li>所有数据库对象名称禁止使用mysql保留关键字（如果表名中包含关键字查询时，需要将其用单引号括起来）</li>
+<li>数据库对象的命名要能做到见名识意，并且最后不要超过32个字符</li>
+<li>临时库表必须以tmp<em>为前缀并以日期为后缀，备份表必须以bak</em>为前缀并以日期(时间戳)为后缀</li>
+<li>所有存储相同数据的列名和列类型必须一致（一般作为关联列，如果查询时关联列类型不一致会自动进行数据类型隐式转换，会造成列上的索引失效，导致查询效率降低）</li>
+</ul>
+<h4 id="二、数据库基本设计规范"><a href="#二、数据库基本设计规范" class="headerlink" title="二、数据库基本设计规范"></a>二、数据库基本设计规范</h4><p>1、所有表必须使用Innodb存储引擎</p>
+<p>没有特殊要求（即Innodb无法满足的功能如：列存储，存储空间数据等）的情况下，所有表必须使用Innodb存储引擎（mysql5.5之前默认使用Myisam，5.6以后默认的为Innodb）Innodb 支持事务，支持行级锁，更好的恢复性，高并发下性能更好</p>
+<p>2、数据库和表的字符集统一使用UTF8</p>
+<p>兼容性更好，统一字符集可以避免由于字符集转换产生的乱码，不同的字符集进行比较前需要进行转换会造成索引失效</p>
+<p>3、所有表和字段都需要添加注释</p>
+<p>使用comment从句添加表和列的备注 从一开始就进行数据字典的维护</p>
+<p>4、尽量控制单表数据量的大小，建议控制在500万以内</p>
+<p>500万并不是MySQL数据库的限制，过大会造成修改表结构，备份，恢复都会有很大的问题</p>
+<p>可以用历史数据归档（应用于日志数据），分库分表（应用于业务数据）等手段来控制数据量大小</p>
+<p>5、谨慎使用MySQL分区表</p>
+<p>分区表在物理上表现为多个文件，在逻辑上表现为一个表 谨慎选择分区键，跨分区查询效率可能更低 建议采用物理分表的方式管理大数据</p>
+<p>6、尽量做到冷热数据分离，减小表的宽度</p>
+<p>MySQL限制每个表最多存储4096列，并且每一行数据的大小不能超过65535字节 减少磁盘IO,保证热数据的内存缓存命中率（表越宽，把表装载进内存缓冲池时所占用的内存也就越大,也会消耗更多的IO） 更有效的利用缓存，避免读入无用的冷数据 经常一起使用的列放到一个表中（避免更多的关联操作）</p>
+<p>7、禁止在表中建立预留字段</p>
+<p>预留字段的命名很难做到见名识义 预留字段无法确认存储的数据类型，所以无法选择合适的类型 对预留字段类型的修改，会对表进行锁定</p>
+<p>8、禁止在数据库中存储图片，文件等大的二进制数据</p>
+<p>通常文件很大，会短时间内造成数据量快速增长，数据库进行数据库读取时，通常会进行大量的随机IO操作，文件很大时，IO操作很耗时 通常存储于文件服务器，数据库只存储文件地址信息</p>
+<p>9、禁止在线上做数据库压力测试</p>
+<p>10、禁止从开发环境，测试环境直接连接生成环境数据库</p>
+<h4 id="三、数据库字段设计规范"><a href="#三、数据库字段设计规范" class="headerlink" title="三、数据库字段设计规范"></a>三、数据库字段设计规范</h4><p>1、优先选择符合存储需要的最小的数据类型</p>
+<ul>
+<li>原因</li>
+</ul>
+<p>列的字段越大，建立索引时所需要的空间也就越大，这样一页中所能存储的索引节点的数量也就越少也越少，在遍历时所需要的IO次数也就越多， 索引的性能也就越差</p>
+<ul>
+<li>方法</li>
+</ul>
+<p>1）将字符串转换成数字类型存储，如：将IP地址转换成整形数据。</p>
+<p>mysql提供了两个方法来处理ip地址：</p>
+<p>inet_aton 把ip转为无符号整型(4-8位)</p>
+<p>inet_ntoa 把整型的ip转为地址</p>
+<p>插入数据前，先用inet_aton把ip地址转为整型，可以节省空间。显示数据时，使用inet_ntoa把整型的ip地址转为地址显示即可。</p>
+<p>2）对于非负型的数据（如自增ID、整型IP）来说，要优先使用无符号整型来存储</p>
+<p>因为：无符号相对于有符号可以多出一倍的存储空间</p>
+<p>SIGNED INT -2147483648~2147483647</p>
+<p>UNSIGNED INT 0~4294967295</p>
+<p>VARCHAR(N)中的N代表的是字符数，而不是字节数</p>
+<p>使用UTF8存储255个汉字 Varchar(255)&#x3D;765个字节。过大的长度会消耗更多的内存</p>
+<p>2、避免使用TEXT、BLOB数据类型，最常见的TEXT类型可以存储64k的数据</p>
+<ul>
+<li>建议把BLOB或是TEXT列分离到单独的扩展表中</li>
+</ul>
+<p>Mysql内存临时表不支持TEXT、BLOB这样的大数据类型，如果查询中包含这样的数据，在排序等操作时，就不能使用内存临时表，必须使用磁盘临时表进行。</p>
+<p>而且对于这种数据，Mysql还是要进行二次查询，会使sql性能变得很差，但是不是说一定不能使用这样的数据类型。</p>
+<p>如果一定要使用，建议把BLOB或是TEXT列分离到单独的扩展表中，查询时一定不要使用select * 而只需要取出必要的列，不需要TEXT列的数据时不要对该列进行查询。</p>
+<ul>
+<li>TEXT或BLOB类型只能使用前缀索引</li>
+</ul>
+<p>因为MySQL对索引字段长度是有限制的，所以TEXT类型只能使用前缀索引，并且TEXT列上是不能有默认值的。</p>
+<p>3、避免使用ENUM类型</p>
+<ul>
+<li>修改ENUM值需要使用ALTER语句</li>
+<li>ENUM类型的ORDER BY操作效率低，需要额外操作</li>
+<li>禁止使用数值作为ENUM的枚举值</li>
+</ul>
+<p>4、尽可能把所有列定义为NOT NULL</p>
+<p>原因：</p>
+<ul>
+<li>索引NULL列需要额外的空间来保存，所以要占用更多的空间；</li>
+<li>进行比较和计算时要对NULL值做特别的处理</li>
+</ul>
+<p>5、使用TIMESTAMP（4个字节）或DATETIME类型（8个字节）存储时间</p>
+<p>TIMESTAMP 存储的时间范围 1970-01-01 00:00:01 ~ 2038-01-19-03:14:07。</p>
+<p>TIMESTAMP 占用4字节和INT相同，但比INT可读性高</p>
+<p>超出TIMESTAMP取值范围的使用DATETIME类型存储。</p>
+<p>经常会有人用字符串存储日期型的数据（不正确的做法）：</p>
+<ul>
+<li>缺点1：无法用日期函数进行计算和比较</li>
+<li>缺点2：用字符串存储日期要占用更多的空间</li>
+</ul>
+<p>6、同财务相关的金额类数据必须使用decimal类型</p>
+<ul>
+<li>非精准浮点：float,double</li>
+<li>精准浮点：decimal</li>
+</ul>
+<p>Decimal类型为精准浮点数，在计算时不会丢失精度。占用空间由定义的宽度决定，每4个字节可以存储9位数字，并且小数点要占用一个字节。可用于存储比bigint更大的整型数据。</p>
+<h4 id="四、索引设计规范"><a href="#四、索引设计规范" class="headerlink" title="四、索引设计规范"></a>四、索引设计规范</h4><p>1、限制每张表上的索引数量，建议单张表索引不超过5个</p>
+<p>索引并不是越多越好！索引可以提高效率同样可以降低效率。</p>
+<p>索引可以增加查询效率，但同样也会降低插入和更新的效率，甚至有些情况下会降低查询效率。</p>
+<p>因为mysql优化器在选择如何优化查询时，会根据统一信息，对每一个可以用到的索引来进行评估，以生成出一个最好的执行计划，如果同时有很多个索引都可以用于查询，就会增加mysql优化器生成执行计划的时间，同样会降低查询性能。</p>
+<p>2、禁止给表中的每一列都建立单独的索引</p>
+<p>5.6版本之前，一个sql只能使用到一个表中的一个索引，5.6以后，虽然有了合并索引的优化方式，但是还是远远没有使用一个联合索引的查询方式好</p>
+<p>3、每个Innodb表必须有个主键</p>
+<p>Innodb是一种索引组织表：数据的存储的逻辑顺序和索引的顺序是相同的。</p>
+<p>每个表都可以有多个索引，但是表的存储顺序只能有一种 Innodb是按照主键索引的顺序来组织表的。</p>
+<p>不要使用更新频繁的列作为主键，不适用多列主键（相当于联合索引） 不要使用UUID、MD5、HASH、字符串列作为主键（无法保证数据的顺序增长）。</p>
+<p>主键建议使用自增ID值。</p>
+<h4 id="五、常见索引列建议"><a href="#五、常见索引列建议" class="headerlink" title="五、常见索引列建议"></a>五、常见索引列建议</h4><ul>
+<li>出现在SELECT、UPDATE、DELETE语句的WHERE从句中的列</li>
+<li>包含在ORDER BY、GROUP BY、DISTINCT中的字段</li>
+<li>并不要将符合1和2中的字段的列都建立一个索引，通常将1、2中的字段建立联合索引效果更好</li>
+<li>多表join的关联列</li>
+</ul>
+<h4 id="六、如何选择索引列的顺序"><a href="#六、如何选择索引列的顺序" class="headerlink" title="六、如何选择索引列的顺序"></a>六、如何选择索引列的顺序</h4><p>建立索引的目的是：希望通过索引进行数据查找，减少随机IO，增加查询性能 ，索引能过滤出越少的数据，则从磁盘中读入的数据也就越少。</p>
+<ul>
+<li>区分度最高的放在联合索引的最左侧（区分度&#x3D;列中不同值的数量&#x2F;列的总行数）；</li>
+<li>尽量把字段长度小的列放在联合索引的最左侧（因为字段长度越小，一页能存储的数据量越大，IO性能也就越好）；</li>
+<li>使用最频繁的列放到联合索引的左侧（这样可以比较少的建立一些索引）。</li>
+</ul>
+<h4 id="七、避免建立冗余索引和重复索引"><a href="#七、避免建立冗余索引和重复索引" class="headerlink" title="七、避免建立冗余索引和重复索引"></a>七、避免建立冗余索引和重复索引</h4><p>因为这样会增加查询优化器生成执行计划的时间。</p>
+<p>重复索引示例：primary key(id)、index(id)、unique index(id)<br>冗余索引示例：index(a,b,c)、index(a,b)、index(a)</p>
+<h4 id="八、优先考虑覆盖索引"><a href="#八、优先考虑覆盖索引" class="headerlink" title="八、优先考虑覆盖索引"></a>八、优先考虑覆盖索引</h4><p>对于频繁的查询优先考虑使用覆盖索引。</p>
+<p>覆盖索引：就是包含了所有查询字段(where,select,ordery by,group by包含的字段)的索引</p>
+<p>覆盖索引的好处：</p>
+<ul>
+<li>避免Innodb表进行索引的二次查询</li>
+</ul>
+<p>Innodb是以聚集索引的顺序来存储的，对于Innodb来说，二级索引在叶子节点中所保存的是行的主键信息，</p>
+<p>如果是用二级索引查询数据的话，在查找到相应的键值后，还要通过主键进行二次查询才能获取我们真实所需要的数据。而在覆盖索引中，二级索引的键值中可以获取所有的数据，避免了对主键的二次查询 ，减少了IO操作，提升了查询效率。</p>
+<ul>
+<li>可以把随机IO变成顺序IO加快查询效率</li>
+</ul>
+<p>由于覆盖索引是按键值的顺序存储的，对于IO密集型的范围查找来说，对比随机从磁盘读取每一行的数据IO要少的多，因此利用覆盖索引在访问时也可以把磁盘的随机读取的IO转变成索引查找的顺序IO。</p>
+<h4 id="九、索引SET规范"><a href="#九、索引SET规范" class="headerlink" title="九、索引SET规范"></a>九、索引SET规范</h4><p>尽量避免使用外键约束</p>
+<ul>
+<li>不建议使用外键约束（foreign key），但一定要在表与表之间的关联键上建立索引；</li>
+<li>外键可用于保证数据的参照完整性，但建议在业务端实现；</li>
+<li>外键会影响父表和子表的写操作从而降低性能。</li>
+</ul>
+<h4 id="十、数据库SQL开发规范"><a href="#十、数据库SQL开发规范" class="headerlink" title="十、数据库SQL开发规范"></a>十、数据库SQL开发规范</h4><p>1、建议使用预编译语句进行数据库操作</p>
+<p>预编译语句可以重复使用这些计划，减少SQL编译所需要的时间，还可以解决动态SQL所带来的SQL注入的问题 只传参数，比传递SQL语句更高效 相同语句可以一次解析，多次使用，提高处理效率。</p>
+<p>2、避免数据类型的隐式转换</p>
+<p>隐式转换会导致索引失效。如：select name,phone from customer where id &#x3D; ‘111’;</p>
+<p>3、充分利用表上已经存在的索引</p>
+<ul>
+<li>避免使用双%号的查询条件。</li>
+</ul>
+<p>如a like ‘%123%’，（如果无前置%,只有后置%，是可以用到列上的索引的）</p>
+<p>一个SQL只能利用到复合索引中的一列进行范围查询<br>如：有 a,b,c列的联合索引，在查询条件中有a列的范围查询，则在b,c列上的索引将不会被用到，在定义联合索引时，如果a列要用到范围查找的话，就要把a列放到联合索引的右侧。</p>
+<p>使用left join或 not exists来优化not in操作<br>因为not in 也通常会使用索引失效。</p>
+<p>4、数据库设计时，应该要对以后扩展进行考虑</p>
+<p>5、程序连接不同的数据库使用不同的账号，进制跨库查询</p>
+<ul>
+<li>为数据库迁移和分库分表留出余地</li>
+<li>降低业务耦合度</li>
+<li>避免权限过大而产生的安全风险</li>
+</ul>
+<p>6、禁止使用SELECT * 必须使用SELECT &lt;字段列表&gt; 查询</p>
+<p>原因：</p>
+<ul>
+<li>消耗更多的CPU和IO以网络带宽资源</li>
+<li>无法使用覆盖索引</li>
+<li>可减少表结构变更带来的影响</li>
+</ul>
+<p>7、禁止使用不含字段列表的INSERT语句</p>
+<p>如：insert into values (‘a’,’b’,’c’);</p>
+<p>应使用insert into t(c1,c2,c3) values (‘a’,’b’,’c’);</p>
+<p>8、避免使用子查询，可以把子查询优化为join操作</p>
+<p>通常子查询在in子句中，且子查询中为简单SQL(不包含union、group by、order by、limit从句)时，才可以把子查询转化为关联查询进行优化。</p>
+<p>子查询性能差的原因：</p>
+<ul>
+<li>子查询的结果集无法使用索引，通常子查询的结果集会被存储到临时表中，不论是内存临时表还是磁盘临时表都不会存在索引，所以查询性能会受到一定的影响；</li>
+<li>特别是对于返回结果集比较大的子查询，其对查询性能的影响也就越大；</li>
+<li>由于子查询会产生大量的临时表也没有索引，所以会消耗过多的CPU和IO资源，产生大量的慢查询。</li>
+</ul>
+<p>9、避免使用JOIN关联太多的表</p>
+<p>对于Mysql来说，是存在关联缓存的，缓存的大小可以由join_buffer_size参数进行设置。</p>
+<p>在Mysql中，对于同一个SQL多关联（join）一个表，就会多分配一个关联缓存，如果在一个SQL中关联的表越多，所占用的内存也就越大。</p>
+<p>如果程序中大量的使用了多表关联的操作，同时join_buffer_size设置的也不合理的情况下，就容易造成服务器内存溢出的情况，就会影响到服务器数据库性能的稳定性。</p>
+<p>同时对于关联操作来说，会产生临时表操作，影响查询效率Mysql最多允许关联61个表，建议不超过5个。</p>
+<p>10、减少同数据库的交互次数</p>
+<p>数据库更适合处理批量操作 合并多个相同的操作到一起，可以提高处理效率</p>
+<p>11、对应同一列进行or判断时，使用in代替or</p>
+<p>in的值不要超过500个in操作可以更有效的利用索引，or大多数情况下很少能利用到索引。</p>
+<p>12、禁止使用order by rand() 进行随机排序</p>
+<p>会把表中所有符合条件的数据装载到内存中，然后在内存中对所有数据根据随机生成的值进行排序，并且可能会对每一行都生成一个随机值，如果满足条件的数据集非常大，就会消耗大量的CPU和IO及内存资源。</p>
+<p>推荐在程序中获取一个随机值，然后从数据库中获取数据的方式</p>
+<p>13、WHERE从句中禁止对列进行函数转换和计算</p>
+<p>对列进行函数转换或计算时会导致无法使用索引。</p>
+<ul>
+<li>不推荐：</li>
+</ul>
+<p>where date(create_time)&#x3D;’20190101′</p>
+<ul>
+<li>推荐：</li>
+</ul>
+<p>where create_time &gt;&#x3D; ‘20190101’ and create_time &lt; ‘20190102’</p>
+<p>14、在明显不会有重复值时使用UNION ALL而不是UNION</p>
+<ul>
+<li>UNION会把两个结果集的所有数据放到临时表中后再进行去重操作</li>
+<li>UNION ALL不会再对结果集进行去重操作</li>
+</ul>
+<p>15、拆分复杂的大SQL为多个小SQL</p>
+<ul>
+<li>大SQL：逻辑上比较复杂，需要占用大量CPU进行计算的SQL</li>
+<li>MySQL：一个SQL只能使用一个CPU进行计算</li>
+<li>SQL拆分后可以通过并行执行来提高处理效率</li>
+</ul>
+<h4 id="十一、数据库操作行为规范"><a href="#十一、数据库操作行为规范" class="headerlink" title="十一、数据库操作行为规范"></a>十一、数据库操作行为规范</h4><p>1、超100万行的批量写（UPDATE、DELETE、INSERT）操作，要分批多次进行操作</p>
+<ul>
+<li>大批量操作可能会造成严重的主从延迟</li>
+</ul>
+<p>主从环境中，大批量操作可能会造成严重的主从延迟，大批量的写操作一般都需要执行一定长的时间，而只有当主库上执行完成后，才会在其他从库上执行，所以会造成主库与从库长时间的延迟情况</p>
+<ul>
+<li>binlog日志为row格式时会产生大量的日志</li>
+</ul>
+<p>大批量写操作会产生大量日志，特别是对于row格式二进制数据而言，由于在row格式中会记录每一行数据的修改，我们一次修改的数据越多，产生的日志量也就会越多，日志的传输和恢复所需要的时间也就越长，这也是造成主从延迟的一个原因。</p>
+<ul>
+<li>避免产生大事务操作</li>
+</ul>
+<p>大批量修改数据，一定是在一个事务中进行的，这就会造成表中大批量数据进行锁定，从而导致大量的阻塞，阻塞会对MySQL的性能产生非常大的影响。</p>
+<p>特别是长时间的阻塞会占满所有数据库的可用连接，这会使生产环境中的其他应用无法连接到数据库，因此一定要注意大批量写操作要进行分批。</p>
+<p>2、对于大表使用pt-online-schema-change修改表结构</p>
+<ul>
+<li>避免大表修改产生的主从延迟</li>
+<li>避免在对表字段进行修改时进行锁表</li>
+</ul>
+<p>对大表数据结构的修改一定要谨慎，会造成严重的锁表操作，尤其是生产环境，是不能容忍的。</p>
+<p>pt-online-schema-change它会首先建立一个与原表结构相同的新表，并且在新表上进行表结构的修改，然后再把原表中的数据复制到新表中，并在原表中增加一些触发器。</p>
+<p>把原表中新增的数据也复制到新表中，在行所有数据复制完成之后，把新表命名成原表，并把原来的表删除掉。</p>
+<p>把原来一个DDL操作，分解成多个小的批次进行。</p>
+<p>3、禁止为程序使用的账号赋予super权限</p>
+<p>当达到最大连接数限制时，还运行1个有super权限的用户连接super权限只能留给DBA处理问题的账号使用。</p>
+<p>4、对于程序连接数据库账号，遵循权限最小原则</p>
+<p>程序使用数据库账号只能在一个DB下使用，不准跨库 程序使用的账号原则上不准有drop权限</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2023/09/04/MySQL%E8%BF%90%E7%BB%B4%E8%A7%84%E8%8C%83/">https://yhao521.github.io/2023/09/04/MySQL%E8%BF%90%E7%BB%B4%E8%A7%84%E8%8C%83/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2023/09/04/Mysql%E5%A4%A7%E8%A1%A8%E6%95%B0%E6%8D%AE%E6%B8%85%E7%90%86/" title="Mysql大表数据清理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Mysql大表数据清理</div></div><div class="info-2"><div class="info-item-1"> title: Mysql大表数据清理date: 2023-09-04 17:49:38permalink: &#x2F;pages&#x2F;2d270e&#x2F;category:  数据库 doc_mysqltag: doc_mysqlauthor:   Mysql大表数据清理假设大表表名：tlogdelete操作会记录mysql日志，大数据量的清理会耗费大量时间，所以一般得用其他方式。1、如果大表数据对我们来说不重要，完全可以直接清理，那么可以用truncatetruncate table tlog;truncate的操作不记录mysql日志，所以数据是不能恢复的。？2、如果需要保留部分数据创建表并直接保留需要的数据create table t_log_2019 as select * from?tlog?where create_time&gt;’2019-01-01 00:00:00’;删除数据truncate table t_log;恢复保留的数据insert into t_log select * from t_log_2019;删除临时表drop table ...</div></div></div></a><a class="pagination-related" href="/2023/09/04/Mysql_online_DDL/" title="Mysql_online_DDL"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Mysql_online_DDL</div></div><div class="info-2"><div class="info-item-1"> title: Mysql_online_DDLdate: 2023-09-03 20:17:08category:  数据库 MySQL监控和运维tag: MySQL监控和运维author:   参考： https://www.cnblogs.com/mysql-dba/p/6192897.html 建议： 1、尽量不要在业务高峰期间进行DDL，即使是online DDL; 2、对于大表（G级别）DDL，最好在测试库上做一遍，预估下时间，不至于到线上执行时心慌手乱；（线上和测试环境数据量差不多） </div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/03/06/Electron%E5%BA%94%E7%94%A8%E4%BB%A3%E7%A0%81%E7%AD%BE%E5%90%8D%E5%8F%8A%E6%89%93%E5%8C%85/" title="Electron应用代码签名及打包"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-06</div><div class="info-item-2">Electron应用代码签名及打包</div></div><div class="info-2"><div class="info-item-1"> Electron应用内更新本文参考：electron-builderhttps://segmentfault.com/a/1190000012902525https://kilianvalkhof.com/2019/electron/notarizing-your-electron-application/  项目中引入electron-builder  在package.json添加build块  1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162&quot;build&quot;: &#123;  &quot;productName&quot;: &quot;啥㕣啥&quot;,  &quot;appId&quot;: &quot;org.dignyue.write_helper_mazimao&quot;,  &quot;directories&quot;: &#123;    &quot;ou...</div></div></div></a><a class="pagination-related" href="/2025/03/16/%E5%9C%A8%E6%B5%8F%E8%A7%88%E5%99%A8%E4%B8%AD%E5%BF%AB%E9%80%9F%E6%8E%A2%E6%B5%8BIP%E7%AB%AF%E5%8F%A3%E6%98%AF%E5%90%A6%E5%BC%80%E6%94%BE/" title="在浏览器中快速探测IP端口是否开放"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-16</div><div class="info-item-2">在浏览器中快速探测IP端口是否开放</div></div><div class="info-2"><div class="info-item-1">0×00 前言前两天 freebuf上的的XSS到内网的公开课很受启发，从一个页面到局域网，威力着实增强不少 公开课上检测内网 IP 实现方式用的是 img 标签，加载网站的 favicon.ico 图标，然后监听 onload 事件，看图片能不能加载成功简单易用，就是太慢了 –  0×02 分析浏览器有几秒的尝试容错时间，对于媒体资源，浏览器限制同一域名并发请求为个位数（一般为 6 个），也就是说，把图片全放到页面上，也不能同时开始检测，只能一点一点来，扫端口的时候会非常慢。 管理员在内网搭建的东西也可能没有图标。。。 探测 IP 端口开放原理就是向目标发送请求，看是否有回应。在上面的 img 中是在加载成功和失败体现出来的。img 嫌慢也可以试试别的嘛，经过一番搜索找到了这个，这个和这个。 第一个页面:1document.getElementById(&quot;testdiv&quot;).innerHTML = &#x27;&lt;img src=&quot;http://&#x27; + ip + &#x27;:&#x27; + port + &#x27;&quot; ...</div></div></div></a><a class="pagination-related" href="/2023/09/04/mysql%E5%87%BA%E7%8E%B0ERROR%20%20(2006,%20%E2%80%98MySQL%20server%20has%20gone%20away%E2%80%98)/" title="mysql出现ERROR  (2006, ‘MySQL server has gone away‘)"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">mysql出现ERROR  (2006, ‘MySQL server has gone away‘)</div></div><div class="info-2"><div class="info-item-1"> title: mysql出现ERROR (2006, ‘MySQL server has gone away‘)date: 2023-09-04 17:49:38permalink: &#x2F;pages&#x2F;a04f1d&#x2F;category:  数据库 doc_mysqltag: doc_mysqlauthor:   mysql出现ERROR(2006, ‘MySQL server has gone away‘)一、问题分析：    mysql出现ERROR : (2006, &#39;MySQL server has gone away&#39;) 的问题意思就是指client和MySQL server之间的链接断开了。  二、原因：     造成这样的原因，最常见的就是采集或者新旧数据转化：  一般说sql操作的时间过长，或者是传送的数据太大(例如使用insert … values的语句过长， 这种情况可以通过修改max_allowed_packed的配置参数来避免，也可以在程序中将数据分批插入(使用mysql limit进行分页，循环分批处理数据))； ...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E5%BC%80%E5%90%AF%E7%BB%84%E7%AD%96%E7%95%A5/" title="开启组策略"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">开启组策略</div></div><div class="info-2"><div class="info-item-1"> title: 开启组策略date: 2023-09-03 20:17:08category:  wintag: winauthor:   win10家庭版本身不提供组策略的功能 1 个人使用的是win10家庭版，如下图所示，运行gpedit.msc直接提示找到gpedit.msc(组策略）。   运行MMC，在“添加删除单元“中也找不到组策略编辑器。   本身win10家庭版本不提供组策略编辑器功能。这个不提供不是说没有此功能，而是对此功能进行了限制，具体可以继续参考下面的开启方法。  END   二、开启win10家庭版的组策略功能 首先同时按键盘上的WIN+R键，打开运行对话框，输入notepad打开记事本。   然后在记事本中保存如下批处理内容。 123456@echo off    　　pushd &quot;%~dp0&quot;    　　dir /b %systemroot%\Windows\servicing\Packages\Microsoft-Windows-GroupPolicy-ClientExtensions-Package~3*.mum &gt;gp...</div></div></div></a><a class="pagination-related" href="/2023/09/04/vue%E7%A6%BB%E7%BA%BF%E4%BD%BF%E7%94%A8%E9%A1%B9%E7%9B%AE%E6%A8%A1%E7%89%88/" title="vue离线使用项目模版"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">vue离线使用项目模版</div></div><div class="info-2"><div class="info-item-1"> title: vue离线使用项目模版date: 2023-09-03 20:17:08category:  开发语言 vuetag: vueauthor:   Electron+Vue+ElementUI开发环境搭建 Node环境搭建本文假定你完成了nodejs的环境基础搭建：镜像配置（暂时只配置node包镜像源，部分包的二进制镜像源后续讨论）、全局以及缓存路径配置，全局路径加入到了环境变量 12345678910 $ node -v v12.18.1 $ npm -v 6.14.5 $ yarn -v 1.22.4 $ npm list -g --depth 0 +-- hexo@4.2.1 // 忽略Hexo，本人写博用的`-- yarn@1.22.4  vue脚手架安装为了更加便捷的创建一个vue项目，我们安装脚手架@vue&#x2F;cli和@vue&#x2F;init（vue-cli已经deprecated了）。之所以要安装@vue&#x2F;init，是因为@vue&#x2F;cli是3的版本，创建项目使用命令vue create app-name，且无法暂时无法使...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E6%95%8F%E6%8D%B7%E5%BC%80%E5%8F%91%E4%B9%8Bscrum%E6%A8%A1%E5%9E%8B/" title="敏捷开发之scrum模型"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">敏捷开发之scrum模型</div></div><div class="info-2"><div class="info-item-1"> title: 敏捷开发之scrum模型date: 2023-09-03 20:17:08category: tag: author:  敏捷开发之scrum模型什么是敏捷开发？ 敏捷开发(Agile Development)是一种以人为核心、迭代、循序渐进的开发方法。 怎么理解呢？首先，我们要理解它不是一门技术，它是一种开发方法，也就是一种软件开发的流程，它会指导我们用规定的环节去一步一步完成项目的开发；而这种开发方式的主要驱动核心是人；它采用的是迭代式开发； 为什么说是以人为核心？ 我们大部分人都学过瀑布开发模型，它是以文档为驱动的，为什么呢？因为在瀑布的整个开发过程中，要写大量的文档，把需求文档写出来后，开发人员都是根据文档进行开发的，一切以文档为依据；而敏捷开发它只写有必要的文档，或尽量少写文档，敏捷开发注重的是人与人之间，面对面的交流，所以它强调以人为核心。 什么是迭代？ 迭代是指把一个复杂且开发周期很长的开发任务，分解为很多小周期可完成的任务，这样的一个周期就是一次迭代的过程；同时每一次迭代都可以生产或开发出一个可以交付的软件产品。 关于Scrum和XP 前面说了敏捷...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%90%E7%BB%B4%E5%BF%85%E5%A4%87%EF%BC%9A%E9%9D%9E%E5%B8%B8%E5%AE%8C%E6%95%B4%E7%9A%84-MySQL-%E8%A7%84%E8%8C%83"><span class="toc-number">1.</span> <span class="toc-text">数据库运维必备：非常完整的 MySQL 规范</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E6%95%B0%E6%8D%AE%E5%BA%93%E5%91%BD%E4%BB%A4%E8%A7%84%E8%8C%83"><span class="toc-number">1.1.</span> <span class="toc-text">一、数据库命令规范</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E6%95%B0%E6%8D%AE%E5%BA%93%E5%9F%BA%E6%9C%AC%E8%AE%BE%E8%AE%A1%E8%A7%84%E8%8C%83"><span class="toc-number">1.2.</span> <span class="toc-text">二、数据库基本设计规范</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E6%95%B0%E6%8D%AE%E5%BA%93%E5%AD%97%E6%AE%B5%E8%AE%BE%E8%AE%A1%E8%A7%84%E8%8C%83"><span class="toc-number">1.3.</span> <span class="toc-text">三、数据库字段设计规范</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E7%B4%A2%E5%BC%95%E8%AE%BE%E8%AE%A1%E8%A7%84%E8%8C%83"><span class="toc-number">1.4.</span> <span class="toc-text">四、索引设计规范</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E5%B8%B8%E8%A7%81%E7%B4%A2%E5%BC%95%E5%88%97%E5%BB%BA%E8%AE%AE"><span class="toc-number">1.5.</span> <span class="toc-text">五、常见索引列建议</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E7%B4%A2%E5%BC%95%E5%88%97%E7%9A%84%E9%A1%BA%E5%BA%8F"><span class="toc-number">1.6.</span> <span class="toc-text">六、如何选择索引列的顺序</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E9%81%BF%E5%85%8D%E5%BB%BA%E7%AB%8B%E5%86%97%E4%BD%99%E7%B4%A2%E5%BC%95%E5%92%8C%E9%87%8D%E5%A4%8D%E7%B4%A2%E5%BC%95"><span class="toc-number">1.7.</span> <span class="toc-text">七、避免建立冗余索引和重复索引</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E4%BC%98%E5%85%88%E8%80%83%E8%99%91%E8%A6%86%E7%9B%96%E7%B4%A2%E5%BC%95"><span class="toc-number">1.8.</span> <span class="toc-text">八、优先考虑覆盖索引</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B9%9D%E3%80%81%E7%B4%A2%E5%BC%95SET%E8%A7%84%E8%8C%83"><span class="toc-number">1.9.</span> <span class="toc-text">九、索引SET规范</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8D%81%E3%80%81%E6%95%B0%E6%8D%AE%E5%BA%93SQL%E5%BC%80%E5%8F%91%E8%A7%84%E8%8C%83"><span class="toc-number">1.10.</span> <span class="toc-text">十、数据库SQL开发规范</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8D%81%E4%B8%80%E3%80%81%E6%95%B0%E6%8D%AE%E5%BA%93%E6%93%8D%E4%BD%9C%E8%A1%8C%E4%B8%BA%E8%A7%84%E8%8C%83"><span class="toc-number">1.11.</span> <span class="toc-text">十一、数据库操作行为规范</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

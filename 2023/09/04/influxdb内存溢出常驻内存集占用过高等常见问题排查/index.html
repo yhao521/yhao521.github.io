@@ -1,0 +1,251 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>influxdb内存溢出常驻内存集占用过高等常见问题排查 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="title: influxdb内存溢出常驻内存集占用过高等常见问题排查date: 2023-09-03 20:17:08category:  数据库 doc_influxdbtag: doc_influxdbauthor:   influxdb 内存溢出，常驻内存集占用过高等常见问题排查一，influxdb内存溢出，启动报错现象：检查influxdb.log文件，看到如下错误： 12345678">
+<meta property="og:type" content="article">
+<meta property="og:title" content="influxdb内存溢出常驻内存集占用过高等常见问题排查">
+<meta property="og:url" content="https://yhao521.github.io/2023/09/04/influxdb%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%E5%B8%B8%E9%A9%BB%E5%86%85%E5%AD%98%E9%9B%86%E5%8D%A0%E7%94%A8%E8%BF%87%E9%AB%98%E7%AD%89%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="title: influxdb内存溢出常驻内存集占用过高等常见问题排查date: 2023-09-03 20:17:08category:  数据库 doc_influxdbtag: doc_influxdbauthor:   influxdb 内存溢出，常驻内存集占用过高等常见问题排查一，influxdb内存溢出，启动报错现象：检查influxdb.log文件，看到如下错误： 12345678">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2023-09-04T03:18:09.000Z">
+<meta property="article:modified_time" content="2023-09-04T03:18:27.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "influxdb内存溢出常驻内存集占用过高等常见问题排查",
+  "url": "https://yhao521.github.io/2023/09/04/influxdb%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%E5%B8%B8%E9%A9%BB%E5%86%85%E5%AD%98%E9%9B%86%E5%8D%A0%E7%94%A8%E8%BF%87%E9%AB%98%E7%AD%89%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2023-09-04T03:18:09.000Z",
+  "dateModified": "2023-09-04T03:18:27.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2023/09/04/influxdb%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%E5%B8%B8%E9%A9%BB%E5%86%85%E5%AD%98%E9%9B%86%E5%8D%A0%E7%94%A8%E8%BF%87%E9%AB%98%E7%AD%89%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'influxdb内存溢出常驻内存集占用过高等常见问题排查',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">influxdb内存溢出常驻内存集占用过高等常见问题排查</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">influxdb内存溢出常驻内存集占用过高等常见问题排查</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-09-04T03:18:09.000Z" title="发表于 2023-09-04 11:18:09">2023-09-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-09-04T03:18:27.000Z" title="更新于 2023-09-04 11:18:27">2023-09-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><hr>
+<p>title: influxdb内存溢出常驻内存集占用过高等常见问题排查<br>date: 2023-09-03 20:17:08<br>category:</p>
+<ul>
+<li>数据库</li>
+<li>doc_influxdb<br>tag:</li>
+<li>doc_influxdb<br>author:</li>
+</ul>
+<hr>
+<h1 id="influxdb-内存溢出，常驻内存集占用过高等常见问题排查"><a href="#influxdb-内存溢出，常驻内存集占用过高等常见问题排查" class="headerlink" title="influxdb 内存溢出，常驻内存集占用过高等常见问题排查"></a>influxdb 内存溢出，常驻内存集占用过高等常见问题排查</h1><h2 id="一，influxdb内存溢出，启动报错"><a href="#一，influxdb内存溢出，启动报错" class="headerlink" title="一，influxdb内存溢出，启动报错"></a>一，influxdb内存溢出，启动报错</h2><p>现象：<br>检查influxdb.log文件，看到如下错误：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">fatal error: runtime: out of memory</span><br><span class="line"></span><br><span class="line">runtime stack:</span><br><span class="line">runtime.throw(0x12dae55, 0x16)</span><br><span class="line">	/usr/local/go/src/runtime/panic.go:608 +0x72</span><br><span class="line">runtime.sysMap(0xc480000000, 0x164000000, 0x21cb618)</span><br><span class="line">	/usr/local/go/src/runtime/mem_linux.go:156 +0xc7</span><br><span class="line">runtime.(*mheap).sysAlloc(0x21b1860, 0x164000000, 0x300097199d, 0x7ffd97731560)</span><br><span class="line">	/usr/local/go/src/runtime/malloc.go:619 +0x1c7</span><br><span class="line">runtime.(*mheap).grow(0x21b1860, 0xb1487, 0x0)</span><br><span class="line">	/usr/local/go/src/runtime/mheap.go:920 +0x42</span><br><span class="line">runtime.(*mheap).allocSpanLocked(0x21b1860, 0xb1487, 0x21cb628, 0x0)</span><br><span class="line">.....</span><br></pre></td></tr></table></figure>
+
+<p>原因：<br>很明显内存不够了，那么内存为什么不够了呢？<br>经查，原因在于influxdb在启动时，需要将索引加入到内存中。由于我的环境中存在80GB左右的数据，并且使用了大量的tag，索引数据超过了机器内存，所以就报oom了。</p>
+<p>解决办法：<br>改内存索引为磁盘索引</p>
+<p>操作步骤：1.首先将配置（influxdb.conf）中的索引类型进行修改<br>使以后的数据使用磁盘索引。如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[data]</span><br><span class="line"></span><br><span class="line">  # The type of shard index to use for new shards.  The default is an in-memory index that is</span><br><span class="line"></span><br><span class="line">  # recreated at startup.  A value of &quot;tsi1&quot; will use a disk based index that supports higher</span><br><span class="line"></span><br><span class="line">  # cardinality datasets.</span><br><span class="line"></span><br><span class="line">  //将#去掉，将值改为tsi1</span><br><span class="line">  index-version = &quot;tsi1&quot;</span><br></pre></td></tr></table></figure>
+
+<p>2.将已存在的tsm索引改为tsi磁盘索引</p>
+<p>1.停止InfluxDB服务2.删除所有_series文件夹<br>默认情况下,_series保存在&#x2F;data&#x2F;&#x2F;_series,检查并删除&#x2F;data目录下所有_series</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find . -name &quot;_series&quot; | xargs rm -rf</span><br></pre></td></tr></table></figure>
+
+<p>3.删除所有index文件夹</p>
+<p>默认情况下,index文件夹在&#x2F;data&#x2F;&lt;dbName&#x2F;&#x2F;&#x2F;index使用</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find . -name &quot;index&quot; | xargs rm -rf</span><br></pre></td></tr></table></figure>
+
+<p>4.influx_inspect重构TSI index,此步可能会很耗时</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"># 格式</span><br><span class="line"></span><br><span class="line">influx_inspect buildtsi -datadir &lt;data_dir&gt; -waldir &lt;wal_dir&gt;</span><br><span class="line"></span><br><span class="line"># 示例</span><br><span class="line"></span><br><span class="line">influx_inspect buildtsi -datadir /data -waldir /wal</span><br></pre></td></tr></table></figure>
+
+<p>5.启动influxDB服务</p>
+<h2 id="二，常驻内存集占用过高"><a href="#二，常驻内存集占用过高" class="headerlink" title="二，常驻内存集占用过高"></a>二，常驻内存集占用过高</h2><p>通过top命令查看，发现influxdb RES占用15个G,几乎占满了机器内存。<br>需要排查原因，使用下述命令，查看influxdb状态</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">./influx -host 10.x.xx.xx -port xx -username &#x27;x&#x27; -password &#x27;x&#x27; -execute &quot;show stats&quot;  |less</span><br><span class="line"></span><br><span class="line">name: runtime</span><br><span class="line">Alloc    Frees    HeapAlloc HeapIdle  HeapInUse HeapObjects HeapReleased HeapSys   Lookups Mallocs  NumGC NumGoroutine PauseTotalNs Sys       TotalAlloc</span><br><span class="line"></span><br><span class="line">-----    -----    --------- --------  --------- ----------- ------------ -------   ------- -------  ----- ------------ ------------ ---       ----------</span><br><span class="line"></span><br><span class="line">99709592 12749096 99709592  165896192 101621760 2492153     1104644608    267517952 0       15241249 206   27           36862171     284375288 2197223664</span><br></pre></td></tr></table></figure>
+
+<p>如果发现runtime下HeapIdle+HeapInUse 与RES相差较大，且HeapReleased值特别大，很可能就是influxdb已标记释放的内存，未及时给系统回收导致的。<br>使用env GODEBUG&#x3D;madvdontneed&#x3D;1参数，强制每次释放内存时，将内存交给系统。如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">env GODEBUG=madvdontneed=1 /usr/bin/influxd  -config  /usr/bin/influxdb.conf</span><br></pre></td></tr></table></figure>
+
+<p>重启influx服务，再看RES占用，发现大幅下降，只有一百多M了，约等于HeapIdle+HeapInUse。</p>
+<h2 id="三，GODEBUG"><a href="#三，GODEBUG" class="headerlink" title="三，GODEBUG"></a>三，GODEBUG</h2><p>GODEBUG&#x3D;madvdontneed&#x3D;1 配置仍不能解决内存占用过高的问题</p>
+<p>如果不是内存释放不及时导致的问题，那么上述配置几乎没有作用。<br>那么就要注意monitor配置，也就是默认的_internal库，用户influxdb服务的监控，如果我们的数据量很大，需要监控指标很多，也会造成很大的压力。<br>所以如果不是必要的情况，可以禁用此功能。<br>在Influxdb.conf 修改配置</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[monitor]</span><br><span class="line"></span><br><span class="line">  # Whether to record statistics internally.</span><br><span class="line"></span><br><span class="line">  #将这行的#号去掉，并将值改为true</span><br><span class="line">   store-enabled = false</span><br></pre></td></tr></table></figure>
+
+<h2 id="四，tag数量超出限制，导致数据无法入库"><a href="#四，tag数量超出限制，导致数据无法入库" class="headerlink" title="四，tag数量超出限制，导致数据无法入库"></a>四，tag数量超出限制，导致数据无法入库</h2><p>修改influxdb.conf中相应限制，改大点即可。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">max-values-per-tag = 100000</span><br></pre></td></tr></table></figure>
+
+<p>1</p>
+<h2 id="五，插入数据时报类型错误"><a href="#五，插入数据时报类型错误" class="headerlink" title="五，插入数据时报类型错误"></a>五，插入数据时报类型错误</h2><p>报已存在某类型数据，类型错误本来是比较简单，改数据类型就可以了。<br>但是，有些表明明没有数据，依然会报类型错误。这时要删除series和measurement,并重启influxdb，即可解决。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2023/09/04/influxdb%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%E5%B8%B8%E9%A9%BB%E5%86%85%E5%AD%98%E9%9B%86%E5%8D%A0%E7%94%A8%E8%BF%87%E9%AB%98%E7%AD%89%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/">https://yhao521.github.io/2023/09/04/influxdb%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%E5%B8%B8%E9%A9%BB%E5%86%85%E5%AD%98%E9%9B%86%E5%8D%A0%E7%94%A8%E8%BF%87%E9%AB%98%E7%AD%89%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2023/09/04/influxdb%E5%AE%89%E8%A3%85/" title="influxdb安装"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">influxdb安装</div></div><div class="info-2"><div class="info-item-1"> title: influxdb安装date: 2023-09-03 20:17:08category:  数据库 doc_influxdbtag: doc_influxdbauthor:   1. influxdb 安装安装位置：    主机 172.18.231.119    位置 &#x2F;paas&#x2F;iddbs&#x2F;a-tools&#x2F;influxdb1.7.4&#x2F;usr&#x2F;bin   端口 25001   客户端连接命令 .&#x2F;influx -precision rfc3339 -host 172.18.231.123 -port 25001    .&#x2F;influx -precision rfc3339 -host 172.18.231.123 -port 25001 -precision rfc3339 时间格式是字符串 -precision rfc333 时间格式是时间戳 启动&amp;停止 nohup &#x2F;paas&#x2F;iddbs&#x2F;crds_web&#x2F;influxdb1.7.4...</div></div></div></a><a class="pagination-related" href="/2023/09/04/idea%20%E6%8F%92%E4%BB%B6%E4%BD%BF%E7%94%A8/" title="idea 插件使用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">idea 插件使用</div></div><div class="info-2"><div class="info-item-1"> title: idea 插件使用date: 2023-09-03 20:17:08category:  ideatag: ideaauthor:   idea插件使用一、前言今年Idea对盗版软件打击力度加大，朋友们会发现，旗舰版自己激活使用，过几天就会失效，需要重新激活，有的小伙伴就会选择去淘宝花钱买个教育邮箱注册，这个方法我使用过，过了两三个月就不能用了，着实让人头疼。如何解决呢？我想到了Idea社区版本，下载一个使用，将我的Spring boot项目导入，启动下试试，不出所料，报错了。好啦！步入正题。 社区版Idea相比旗舰版少了很多功能，包括Java开发最重要的Web开发能力！Spring项目没有Tomcat插件，不能在Idea启动。Spring Boot项目没有相应提示。 可是这难不倒强大的社区，我想到了Idea提供了插件机制，或许会有大神做出来了好用的Tomcat插件。 二、IDEA 插件安装在使用插件之前，你需要了解 IDEA 的插件安装方式，安装 IDEA 插件是非常方便的，你只要知道插件的名字就可以直接安装， IDEA 插件安装有两种方式： 1、在线安装在 I...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/nginx%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85/" title="nginx编译安装"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">nginx编译安装</div></div><div class="info-2"><div class="info-item-1"> title: nginx编译安装date: 2023-09-03 20:17:08category:  nginxtag: nginxauthor:   nginx编译安装[]: nginx.sh [[_resources&#x2F;4fd211c2eed24c20f48e08d12fe5ea95_MD5.sh|Open: nginx.sh]]![[_resources&#x2F;4fd211c2eed24c20f48e08d12fe5ea95_MD5.sh]] 前提： 安装编译环境，执行 yum -y install make zlib zlib-devel gcc-c++ libtool openssl openssl-devel pcre-devel 1.下载nginx http://nginx.org/download/nginx-1.22.0.tar.gz 2.上传到nginx.sh所在同级目录soft下 4.执行 sh app.sh stop_ui 停止 5.进入平台安装目录下，如果存在，清理已存在目录，执行 rm -r nginx &amp;&amp; rm -r...</div></div></div></a><a class="pagination-related" href="/2023/09/04/npm%E5%8D%87%E7%BA%A7/" title="npm升级"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">npm升级</div></div><div class="info-2"><div class="info-item-1"> title: npm升级date: 2023-09-03 20:17:08category:  开发语言 doc_nodejstag: doc_nodejsauthor:   npm install -g npm-check命令行npm-check -u会出现更新列表，选择后升级 https://www.cnblogs.com/xxflz/p/9835344.html 就算之前你装了webpack，那肯定是非全局安装 所以要全局安装 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273npm-check -u❤️  Your modules look amazing. Keep up the great work. ❤️E:\vscodeProjects_sitech\crds_base_web_view_pack&gt;npm run devnpm WARN...</div></div></div></a><a class="pagination-related" href="/2023/09/04/docker/" title="docker"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">docker</div></div><div class="info-2"><div class="info-item-1"> title: dockerdate: 2023-09-03 20:17:08category:  doc_dockertag: doc_dockerauthor:   Docker创建镜像、怎么修改、上传镜像等详细介绍: https://www.jb51.net/article/100942.htm centos7 安装docker使用 yum 安装Docker 要求 CentOS 系统的内核版本高于 3.10 ，查看本页面的前提条件来验证你的CentOS 版本是否支持 Docker 。通过 uname -r 命令查看你当前的内核版本 $ uname -r 3.10.0-957.5.1.el7.x86_64  安装 Docker从 2017 年 3 月开始 docker 在原来的基础上分为两个分支版本: Docker CE 和 Docker EE。Docker CE 即社区免费版，Docker EE 即企业版，强调安全，但需付费使用。 仅介绍 Docker CE 的安装使用。移除旧的版本 sudo yum remove -y docker \               doc...</div></div></div></a><a class="pagination-related" href="/2024/08/11/golang%E6%96%87%E4%BB%B6%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%96%B9%E5%BC%8F(%E5%8F%AF%E4%BB%A5%E8%AE%BF%E9%97%AE%E4%BB%BB%E4%BD%95%E7%9B%AE%E5%BD%95)/" title="golang文件服务器的两种方式(可以访问任何目录)"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-11</div><div class="info-item-2">golang文件服务器的两种方式(可以访问任何目录)</div></div><div class="info-2"><div class="info-item-1">一、方法1： 主要用到的方法是http包的FileServer,参数很简单,就是要路由的文件夹的路径。 12345678910111213package main&nbsp;import (&nbsp;&nbsp;"fmt"&nbsp;&nbsp;"net/http")&nbsp;func main() {&nbsp;&nbsp;http.Handle("/", http.FileServer(http.Dir("./")))&nbsp;&nbsp;&nbsp;e := http.ListenAndServe(":8080", nil)&nbsp;&nbsp;fmt.Println(e)}  上面例子的路由只能把根目录也就是“&#x2F;”目录映射出来,例如你写成”http.Handle(“&#x2F;files”, http.FileServer(http.Dir(“.&#x2F;“)))“，就无法把通过访问”&#x2F;files“把当前路径下的文件映射出来。于是就有了http包的StripPrefix方法。 二、方法2： 实现访问任意文件夹下面的文件。 1234567891...</div></div></div></a><a class="pagination-related" href="/2026/05/15/Android%20armeabiarm64x86%20%E4%B8%8D%E5%90%8CCPU%E6%9E%B6%E6%9E%84%E6%89%93%E5%8C%85%E9%85%8D%E7%BD%AE/" title="Android armeabiarm64x86 不同CPU架构打包配置"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-15</div><div class="info-item-2">Android armeabiarm64x86 不同CPU架构打包配置</div></div><div class="info-2"><div class="info-item-1">谷歌规定：自 2019 年 8 月 1 日起，在 Google Play 上发布的应用必须支持 64 位架构。 64 位 CPU 能够为您的用户提供更快、更丰富的体验。如何查看自己的设备和应用是32位还是64位。 一、查看自己的设备CPU架构类型手机开启USB调试后，连上电脑，在Windows CMD窗口中输入命令： 1、adb devices 查看设备是否连接上 2、adb shell getprop ro.product.cpu.abi 查看手机的CPU架构类型  总结一下，现在市面上常见的CPU架构类型如下： 1、armeabi-v7a: 第7代及以上的 32位ARM 处理器 2、arm64-v8a: ****第8代、64位ARM处理器 3、armeabi: ****第5代、第6代的32位ARM处理器，早期的手机在使用，现在基本很少了。 4、x86: Intel 32位处理器，在平板、模拟器用得比较多。 5、x86_64: Intel 64位处理器，在平板、模拟器用得比较多。 如何查看应用安装包是32位还是64位查看应用文件中是否包含相应的库文件即可。对于 ARM 架构，3...</div></div></div></a><a class="pagination-related" href="/2023/09/04/Alertmanager%E7%AF%87/" title="Alertmanager篇"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">Alertmanager篇</div></div><div class="info-2"><div class="info-item-1"> title: Alertmanager篇date: 2023-09-03 20:17:08category: tag: author:  Alertmanager篇报一直是整个监控系统中的重要组成部分，Prometheus监控系统中，采集与警报是分离的。警报规则在 Prometheus 定义，警报规则触发以后，才会将信息转发到给独立的组件 Alertmanager ，经过 Alertmanager r对警报的信息处理后，最终通过接收器发送给指定用户，另外在 Alertmanager 中没有通知组的概念，只能自己对软件重新Coding，或者使用第三方插件来实现。 注意，这个通知组不是Alertmanager中的group概念，下面会详细讲 Group ，不要混淆哦。 前面已经介绍过一些关于 Alertmanager 知识点，本章开始针通过安装 Alertmanager 组件，对配置文件做详细说明，同时介绍 Prometheus 的警报规则的定义，最后使用Email、Wechat（Robot）、Dingtalk（webhook）来接受警报通知。 Alertmanager工作机制 在...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#influxdb-%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%EF%BC%8C%E5%B8%B8%E9%A9%BB%E5%86%85%E5%AD%98%E9%9B%86%E5%8D%A0%E7%94%A8%E8%BF%87%E9%AB%98%E7%AD%89%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5"><span class="toc-number">1.</span> <span class="toc-text">influxdb 内存溢出，常驻内存集占用过高等常见问题排查</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%EF%BC%8Cinfluxdb%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%EF%BC%8C%E5%90%AF%E5%8A%A8%E6%8A%A5%E9%94%99"><span class="toc-number">1.1.</span> <span class="toc-text">一，influxdb内存溢出，启动报错</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%EF%BC%8C%E5%B8%B8%E9%A9%BB%E5%86%85%E5%AD%98%E9%9B%86%E5%8D%A0%E7%94%A8%E8%BF%87%E9%AB%98"><span class="toc-number">1.2.</span> <span class="toc-text">二，常驻内存集占用过高</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%EF%BC%8CGODEBUG"><span class="toc-number">1.3.</span> <span class="toc-text">三，GODEBUG</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%EF%BC%8Ctag%E6%95%B0%E9%87%8F%E8%B6%85%E5%87%BA%E9%99%90%E5%88%B6%EF%BC%8C%E5%AF%BC%E8%87%B4%E6%95%B0%E6%8D%AE%E6%97%A0%E6%B3%95%E5%85%A5%E5%BA%93"><span class="toc-number">1.4.</span> <span class="toc-text">四，tag数量超出限制，导致数据无法入库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%EF%BC%8C%E6%8F%92%E5%85%A5%E6%95%B0%E6%8D%AE%E6%97%B6%E6%8A%A5%E7%B1%BB%E5%9E%8B%E9%94%99%E8%AF%AF"><span class="toc-number">1.5.</span> <span class="toc-text">五，插入数据时报类型错误</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

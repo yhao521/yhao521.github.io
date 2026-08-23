@@ -1,0 +1,265 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>ComfyUI_修复面部与手部 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="在 WebUI 中，有个 ADetailer 插件可修复人物面部，只需点下相应选项即可。ComfyUI 中至今没有同款插件，但有几个替代。本篇分享其中两个我使用中觉得不错的面部修复插件，以及坏手的修复方法，仅限 AI 生图，真实…">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ComfyUI_修复面部与手部">
+<meta property="og:url" content="https://yhao521.github.io/2025/06/12/ComfyUI_%E4%BF%AE%E5%A4%8D%E9%9D%A2%E9%83%A8%E4%B8%8E%E6%89%8B%E9%83%A8/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="在 WebUI 中，有个 ADetailer 插件可修复人物面部，只需点下相应选项即可。ComfyUI 中至今没有同款插件，但有几个替代。本篇分享其中两个我使用中觉得不错的面部修复插件，以及坏手的修复方法，仅限 AI 生图，真实…">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2025-06-11T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-17T16:00:00.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="摘录">
+<meta property="article:tag" content="教程">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "ComfyUI_修复面部与手部",
+  "url": "https://yhao521.github.io/2025/06/12/ComfyUI_%E4%BF%AE%E5%A4%8D%E9%9D%A2%E9%83%A8%E4%B8%8E%E6%89%8B%E9%83%A8/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2025-06-11T16:00:00.000Z",
+  "dateModified": "2026-05-17T16:00:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2025/06/12/ComfyUI_%E4%BF%AE%E5%A4%8D%E9%9D%A2%E9%83%A8%E4%B8%8E%E6%89%8B%E9%83%A8/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'ComfyUI_修复面部与手部',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">ComfyUI_修复面部与手部</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">ComfyUI_修复面部与手部</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-06-11T16:00:00.000Z" title="发表于 2025-06-12 00:00:00">2025-06-12</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-17T16:00:00.000Z" title="更新于 2026-05-18 00:00:00">2026-05-18</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>![[_resources&#x2F;74328415ceb130e3bed9a2be41ea7754_MD5.webp]]</p>
+<p>ComfyUI_修复面部与手部</p>
+<p>在 WebUI 中，有个 <a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=253706645&content_type=Article&match_order=1&q=ADetailer&zd_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ6aGlkYV9zZXJ2ZXIiLCJleHAiOjE3NDk4NjM5ODgsInEiOiJBRGV0YWlsZXIiLCJ6aGlkYV9zb3VyY2UiOiJlbnRpdHkiLCJjb250ZW50X2lkIjoyNTM3MDY2NDUsImNvbnRlbnRfdHlwZSI6IkFydGljbGUiLCJtYXRjaF9vcmRlciI6MSwiemRfdG9rZW4iOm51bGx9.R6D6JK6GTm5oP06I14wdQXqAw7i_a4il-p-N5_KYP5Y&zhida_source=entity">ADetailer</a> 插件可修复人物面部，只需点下相应选项即可。ComfyUI 中至今没有同款插件，但有几个替代。本篇分享其中两个我使用中觉得不错的面部修复插件，以及坏手的修复方法，仅限 AI 生图，真实照片的修复方法会另开一篇。</p>
+<hr>
+<p>![[_resources&#x2F;1fb3533f462c0804000868cd2511376a_MD5.jpg]]</p>
+<h2 id="Impact-Pack"><a href="#Impact-Pack" class="headerlink" title="Impact-Pack"></a>Impact-Pack</h2><p>最基础的 <a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=253706645&content_type=Article&match_order=1&q=FaceDetailer&zd_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ6aGlkYV9zZXJ2ZXIiLCJleHAiOjE3NDk4NjM5ODgsInEiOiJGYWNlRGV0YWlsZXIiLCJ6aGlkYV9zb3VyY2UiOiJlbnRpdHkiLCJjb250ZW50X2lkIjoyNTM3MDY2NDUsImNvbnRlbnRfdHlwZSI6IkFydGljbGUiLCJtYXRjaF9vcmRlciI6MSwiemRfdG9rZW4iOm51bGx9.nKp7b5Ykj9sa3xlG_BoglqltVktpzurRUmkYwkFM024&zhida_source=entity">FaceDetailer</a> 用法很简单，效果明显，能满足大多数需求。虽比不过 WebUI 的 ADetailer 那般一个选项就可以搞定，但 ComfyUI 的修复面部方法让学习者明白其工作流程，对我们更好的理解 AI 及其运作原理非常有益。</p>
+<p>另外，拥用同款节点的插件不止 Impact-Pack 这一个，但它是目前更新比较有保障的。</p>
+<p>![[_resources&#x2F;889dde82b046b4e5a4d35c91fb810342_MD5.jpg]]</p>
+<p>插件地址：<br><a target="_blank" rel="noopener" href="https://github.com/ltdrdata/ComfyUI-Impact-Pack">github.com&#x2F;ltdrdata&#x2F;Com</a></p>
+<p>但是一个插件并不够，需要安装另一个同作者的插件来读取必要模型用：<br><a target="_blank" rel="noopener" href="https://github.com/ltdrdata/ComfyUI-Impact-Subpack">github.com&#x2F;ltdrdata&#x2F;Com</a></p>
+<p>安装好插件和必要文件后，还要下载一些模型：<br><a target="_blank" rel="noopener" href="https://hf-mirror.com/Bingsu/adetailer/tree/main">hf-mirror.com&#x2F;Bingsu&#x2F;ad</a></p>
+<p>△ 将这些模型放入.\ComfyUI\models\ultralytics\bbox</p>
+<p><a target="_blank" rel="noopener" href="https://hf-mirror.com/ybelkada/segment-anything/tree/main/checkpoints">hf-mirror.com&#x2F;ybelkada&#x2F;</a></p>
+<p>△ 将这些模型放入.\ComfyUI\models\sams</p>
+<p>基础工作流下载:<br><a target="_blank" rel="noopener" href="https://www.alipan.com/s/GNUhdyuf6ux">alipan.com&#x2F;s&#x2F;GNUhdyuf6u</a><br><a target="_blank" rel="noopener" href="https://pan.quark.cn/s/84a1149ea667">pan.quark.cn&#x2F;s&#x2F;84a1149e</a></p>
+<h2 id="FaceTools"><a href="#FaceTools" class="headerlink" title="FaceTools"></a>FaceTools</h2><p>![[_resources&#x2F;817ac7ab488c30316d10cc8013d734f5_MD5.jpg]]</p>
+<p>该插件修复面部的步骤分的更详细，虽然连的节点较多，但也较完整的展现了面部修复是怎样的一个过程。</p>
+<p>FaceTools 插件文件中带有一个较为复杂的工作流，一般使用中是不会用到那么多步骤的。需要注意的是，此种复面部的方法需要使用 ControlNet，否则可能会造成重绘后的人像面部边缘融合不佳。自带工作流使用的是 Advanced-ControlNet 插件的节点，但改为 ComfyUI 自带的 ContrlNet 也一样用。</p>
+<p>插件下载：<br><a target="_blank" rel="noopener" href="https://github.com/dchatel/comfyui_facetools">github.com&#x2F;dchatel&#x2F;comf</a></p>
+<p>landmarks 模型下载：<br><a target="_blank" rel="noopener" href="https://hf-mirror.com/bluefoxcreation/FaceAlignment/tree/main">hf-mirror.com&#x2F;bluefoxcr</a><br>△ 将这些模型放入.\ComfyUI\models\landmarks</p>
+<p>bisenet 模型下载，该模型原址是谷歌网盘，我上传到阿里和 夸克 网盘：<br><a target="_blank" rel="noopener" href="https://www.alipan.com/s/j7d9LEHUqFB">alipan.com&#x2F;s&#x2F;j7d9LEHUqF</a><br><a target="_blank" rel="noopener" href="https://pan.quark.cn/s/1079203900f3">pan.quark.cn&#x2F;s&#x2F;10792039</a></p>
+<p>△ 将该模型放入.\ComfyUI\models\bisenet</p>
+<p>另外在使用 CropFaces 节点的 jonathandinu 时，需要从 huggingface 缓存模型。如果连不上 huggingface，可以查看我的另一篇文章来将 huggingface 的连接导向其在国内的镜像网。</p>
+<p>基础工作流分享：<br><a target="_blank" rel="noopener" href="https://www.alipan.com/s/GNUhdyuf6ux">alipan.com&#x2F;s&#x2F;GNUhdyuf6u</a><br><a target="_blank" rel="noopener" href="https://pan.quark.cn/s/84a1149ea667">pan.quark.cn&#x2F;s&#x2F;84a1149e</a></p>
+<p>做个 FaceDetailer 与 FaceTools 的对比图，个人感觉 FaceTools 效果要好于 FaceDetailer。例图用哩布上下的一个免费模型生成的，从我接触 SD 之初的使用经历来看，那里的很多模型跑出坏图的几率极高，非常适合做反例。</p>
+<p>![[_resources&#x2F;8fe58351fd9ebaeeb5fd495476434a8f_MD5.jpg]]</p>
+<p>另外多说几句，我是真不知道哩布上那些例图精美的模型除了在线生图外怎样才能跑出效果相近的图。好在上面的模型除了早期的几乎都要付费才能下载了，也免去了我尝试的想法，倒省了不少时间。</p>
+<hr>
+<p>![[_resources&#x2F;3e65e166afc510e8b2cd404aa5ca05f1_MD5.jpg]]</p>
+<p>目前的文生图模型中，人物手部崩坏的几率极高，甚至超过了面部崩坏。虽然有负向的 <a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=253706645&content_type=Article&match_order=1&q=Embedding&zd_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ6aGlkYV9zZXJ2ZXIiLCJleHAiOjE3NDk4NjM5ODgsInEiOiJFbWJlZGRpbmciLCJ6aGlkYV9zb3VyY2UiOiJlbnRpdHkiLCJjb250ZW50X2lkIjoyNTM3MDY2NDUsImNvbnRlbnRfdHlwZSI6IkFydGljbGUiLCJtYXRjaF9vcmRlciI6MSwiemRfdG9rZW4iOm51bGx9.e4zfNDD4L_c2qZwKMu7ppTIIy2s2ASaiqgotxpvpNlw&zhida_source=entity">Embedding</a> 可以一定程度上改善手部状况，但其效果其实并不理想。目前比较好的方法是使用 ControlNet 和手部修复类的 <a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=253706645&content_type=Article&match_order=1&q=Lora&zd_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ6aGlkYV9zZXJ2ZXIiLCJleHAiOjE3NDk4NjM5ODgsInEiOiJMb3JhIiwiemhpZGFfc291cmNlIjoiZW50aXR5IiwiY29udGVudF9pZCI6MjUzNzA2NjQ1LCJjb250ZW50X3R5cGUiOiJBcnRpY2xlIiwibWF0Y2hfb3JkZXIiOjEsInpkX3Rva2VuIjpudWxsfQ.gFCtwXijkD473lFQT-yp6sLRbSBTnOt801AUiEfsZHY&zhida_source=entity">Lora</a> ，本节来做几个演示。</p>
+<h2 id="ControlNet-HandRefiner"><a href="#ControlNet-HandRefiner" class="headerlink" title="ControlNet-HandRefiner"></a>ControlNet-HandRefiner</h2><p>此方法需要使用 ControlNet:</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/Fannovel16/comfyui_controlnet_aux">github.com&#x2F;Fannovel16&#x2F;c</a></p>
+<p>![[_resources&#x2F;0e4c7416d3b8e962dea3e74cff6f4159_MD5.jpg]]</p>
+<p>在生成图片后，通过 HandeRefiner 预处理器识别图片中的手部，并进行正确修复，之后通过 control_sd15_inpaint_depth_hand 对手部进行内部重绘。ContrlNet 的权重最好在 0.4-0.8 之间。</p>
+<p>![[_resources&#x2F;25a81f449d4732d41121988d1f655200_MD5.jpg]]</p>
+<p>在图片中手部比较明显的情况下，这种方法可以进行比较好的修复。如果原图中手部不太明显，或者崩坏的严重，就可能会识别不到。</p>
+<p>在初次使用时会自动下载预处理模型，如果你的 ComfyUI 连不上 huggingface，会导致下载失败。可以查看我的另一篇文章，讲解如何在 ComfyUI 中连接 huggingface 的镜像网。你也可以使用 huggingface 的镜像网手动下载这些预处理文件到.\ComfyUI\custom_nodes\comfyui_controlnet_aux\ckpts\hr16\ControlNet-HandRefiner-pruned 目录下。</p>
+<p>huggingface 镜像网：<br><a target="_blank" rel="noopener" href="http://www.hf-mirror.com/">www.hf-mirror.com</a></p>
+<p>![[_resources&#x2F;266cea46533d05b4c98cc11b7606b833_MD5.jpg]]</p>
+<p>另外，目前 ControlNet 插件用于对手部进行预处理的节点是有漏洞的，如果出现以下报错，则需要对相关节点的代码进行修改：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cannot import name &#x27;BertConfig&#x27; from &#x27;custom_mesh_graphormer.modeling.bert.modeling_bert&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>需要修改的文件：custom_nodes&#x2F;comfyui_controlnet_aux&#x2F;src&#x2F;custom_mesh_graphormer&#x2F;modeling&#x2F;bert&#x2F;modeling_bert.py  </p>
+<p>将其内容替换并保存：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># from transformers.models.bert.modeling_bert import *</span><br><span class="line">from transformers.models.bert import modeling_bert</span><br><span class="line"></span><br><span class="line">for symbol in dir(modeling_bert):</span><br><span class="line">    if not symbol.startswith(&quot;_&quot;):</span><br><span class="line">        globals()[symbol] = getattr(modeling_bert, symbol)</span><br></pre></td></tr></table></figure>
+
+<p>此问题出现已久，插件的开发者们也知道，但似乎不太想继续维护了。</p>
+<h2 id="Lora修复手部"><a href="#Lora修复手部" class="headerlink" title="Lora修复手部"></a>Lora修复手部</h2><p>平日逛模型网站时遇到过几个修复手部的 Lora，使用下来，其效果也还过的去，相比 Embedding 好多了。</p>
+<p>![[_resources&#x2F;af7a666ecc52522f80fb5eda1855d46b_MD5.jpg]]</p>
+<p>例图中使用了 3 个修手 Lora作对比，这些 Lora 在修手的同时，或多或少的对原图造成了一些的改变。Lora 修手不如 ContrlNet 效果稳定，还要看运气，也有可能出来的图崩的更严重。</p>
+<p>需要注意的是，如果基础模型太差，那么用了这些修复手段也很难有理想效果。最好的办法就是用比较优秀的模型，比如上面的例图中，人物脸部已经很不错了，手部虽依旧不行，但其崩坏程度也易于修复。</p>
+<p>Lora 下载：<br><a target="_blank" rel="noopener" href="https://www.alipan.com/s/4evtjH5i3wL">alipan.com&#x2F;s&#x2F;4evtjH5i3w</a><br><a target="_blank" rel="noopener" href="https://pan.quark.cn/s/a51e67d34219">pan.quark.cn&#x2F;s&#x2F;a51e67d3</a></p>
+<p><strong>EnvyBetterHandsLoCon:</strong> 关键词 nicehands; 权重 1。</p>
+<p><strong>RealHands_v2:</strong> 关键词 realhands; 权重 0.4-0.7。</p>
+<p><strong>GoodHands_0.1:</strong> 关键词 good hands。</p>
+<p>上面那些方法均是针对 <a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=253706645&content_type=Article&match_order=1&q=SD1.5&zd_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ6aGlkYV9zZXJ2ZXIiLCJleHAiOjE3NDk4NjM5ODgsInEiOiJTRDEuNSIsInpoaWRhX3NvdXJjZSI6ImVudGl0eSIsImNvbnRlbnRfaWQiOjI1MzcwNjY0NSwiY29udGVudF90eXBlIjoiQXJ0aWNsZSIsIm1hdGNoX29yZGVyIjoxLCJ6ZF90b2tlbiI6bnVsbH0.gSLOyBpac277HGI-3FbJ9kVf3PmFnQTdXp2xWfKYUIw&zhida_source=entity">SD1.5</a> 的，SDXL 的图片效果已经远优于 SD1.5，如果使用的是精心训练的大模型，坏手率也会有较大的降低。ControlNet 修手方法也可以修复 SDXL 生成的图片，但要用 SD1.5 的模型，使用 ComfyUI 就是要灵活。</p>
+<p>此处也分享一个用于 SDXL 的修手 Lora，但其训练数据小，效果不能保证。无提示词，只能连接到负提示词中：<br><a target="_blank" rel="noopener" href="https://www.alipan.com/s/X58kiHjoRQW">alipan.com&#x2F;s&#x2F;X58kiHjoRQ</a><br><a target="_blank" rel="noopener" href="https://pan.quark.cn/s/d87bc7062965">pan.quark.cn&#x2F;s&#x2F;d87bc706</a></p>
+<p>发布于 2025-02-13 11:31・广东<a target="_blank" rel="noopener" href="https://www.zhihu.com/topic/27445052">comfyUI</a><a target="_blank" rel="noopener" href="https://www.zhihu.com/topic/19636088">SD</a><a target="_blank" rel="noopener" href="https://www.zhihu.com/topic/26072993">Stable Diffusion</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2025/06/12/ComfyUI_%E4%BF%AE%E5%A4%8D%E9%9D%A2%E9%83%A8%E4%B8%8E%E6%89%8B%E9%83%A8/">https://yhao521.github.io/2025/06/12/ComfyUI_%E4%BF%AE%E5%A4%8D%E9%9D%A2%E9%83%A8%E4%B8%8E%E6%89%8B%E9%83%A8/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/%E6%95%99%E7%A8%8B/">教程</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a><a class="post-meta__tags" href="/tags/%E6%91%98%E5%BD%95/">摘录</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/06/16/%E5%A6%82%E4%BD%95%E5%88%A9%E7%94%A8ollama%E5%92%8CObsidian%E6%9E%84%E5%BB%BA%E6%9C%AC%E5%9C%B0AI%E5%86%99%E4%BD%9C%E5%8A%A9%E6%89%8B%20%20%20-%20WMW/" title="如何利用ollama和Obsidian构建本地AI写作助手   - WMW"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">如何利用ollama和Obsidian构建本地AI写作助手   - WMW</div></div><div class="info-2"><div class="info-item-1">Published on 2024-09-15 &#x2F; 626 Visits 如何利用ollama和Obsidian构建本地AI写作助手ollama与Obsidian的结合可以有效读取Obsidian中的所有文档，实现本地知识库的问答以及与大型模型的对话。这种方式相较于我之前介绍的 ollama+MaxKB，构建本地AI知识库 而言，无需进行额外的部署和上传文档到其他平台。这种组合对于像我这样使用Obsidian作为写作工具的文字工作者尤为实用。在撰写 Macbook Pro M2 Max 96G 8TB性能测试，成功运行Llama 70B和Mistral 8x7B（4位量化） 时，我下载了ollama及其4位量化的Llama 70B模型，该模型仅占30G内存，并且运行速度极快。ollama的配置可以在官方页面找到下载教程。首先下载应用程序，然后在终端运行 ollama run llama3:70b 。不同模型的内容质量有所差异，作为示例，这里使用ollama。如果中文笔记数量较多，建议寻找一个开源的中文LLM，如最近表现较好的Qwen，详情见下图。 ![[_resourc...</div></div></div></a><a class="pagination-related" href="/2025/06/11/%E3%80%9013%E3%80%91ComfyUI%E9%AB%98%E7%BA%A7%20-%20%E4%B8%80%E6%96%87%E6%8E%8C%E6%8F%A1ComfyUI%E4%B8%AD%E7%9A%84%E7%BC%96%E7%A8%8B%E5%BC%8F/" title="【13】ComfyUI高级 - 一文掌握ComfyUI中的编程式"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">【13】ComfyUI高级 - 一文掌握ComfyUI中的编程式</div></div><div class="info-2"><div class="info-item-1">![[_resources&#x2F;9104e9d22fb062e8a369c7864192e44b_MD5.webp]] 【13】ComfyUI高级 - 一文掌握ComfyUI中的编程式 目录 收起 插件安装 Derfuu插件 Impact插件 Easy-Use插件 Custom-Scripts插件 KJNodes插件 变量定义（浮点数&#x2F;整数&#x2F;字符串&#x2F;布尔值） 常量定义（整数&#x2F;浮点&#x2F;布尔&#x2F;字符串） 数学运算（加减乘除&#x2F;幂运算&#x2F;平方根运算&#x2F;三角函数） 字符串操作（字符串拼接&#x2F;替换&#x2F;搜索&#x2F;合并&#x2F;比较） 逻辑运算 循环 案例说明：整数累加 案例说明：批量图像处理 切换&#x2F;反转切换 切换节点 反转切换 综合实战案例：动态选择图像放大策略 先说一下，我们为什么要熟悉comfyui中的编程式，简单来说，可以将我们的工作流自动化和智能化。掌握下面相关基础知识，对于后面高级进阶的工作流，才能游刃有余，一定不要小看基础知识，很多人都像一下子精通comfyui...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/06/18/Activiti%208.x%20%E5%B7%A5%E4%BD%9C%E6%B5%81%E5%85%A5%E9%97%A8%EF%BC%88%E5%90%ABdemo%EF%BC%89/" title="Activiti 8.x 工作流入门（含demo）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-06-18</div><div class="info-item-2">Activiti 8.x 工作流入门（含demo）</div></div><div class="info-2"><div class="info-item-1">目录 1. 简介 2. BPMN2.0 3. SpringBoot集成Activiti8 3.1. 关键依赖 3.2. 完整pom文件 3.3. 关键配置 3.4. 配置SpringSecurity 3.5. 表解读 3.5.1. 全局通用表 3.5.2. 历史数据表 3.5.3. 静态资源表 3.5.4. 运行时数据表 4. 基本操作 4.1. 流程部署 4.1.1. 部署流程 4.1.2. 查询流程定义 4.2. 流程实例 4.2.1. 发起流程实例 4.2.2. 查询流程实例 4.2.3. 流程实例的挂起与激活 4.2.4. 删除流程实例 4.3. 任务管理 4.3.1. 查询任务 4.3.2. 执行任务 4.3.3. 添加批注 4.3.4. 任务的拾取与归还 4.3.5. 任务的交办&#x2F;转办 4.3.6. 任务的委派 4.4. 历史记录 4.5. UEL表达式 4.6. BPMN2.0网关 4.6.1. 并行网关（Parallel Gateway） 4.6.2. 排他网关（Exclusive gateway） 1. 简介Activiti 是一个 工作流引擎 ，它可...</div></div></div></a><a class="pagination-related" href="/2025/06/25/Go-Faker%20%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE%E6%95%99%E7%A8%8B/" title="Go-Faker 开源项目教程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-06-25</div><div class="info-item-2">Go-Faker 开源项目教程</div></div><div class="info-2"><div class="info-item-1">项目地址:https://gitcode.com/gh_mirrors&#x2F;faker3&#x2F;faker 项目介绍Go-Faker 是一个用 Go 语言编写的开源库，旨在生成各种类型的假数据。这个库可以用于测试、开发和演示等多种场景，帮助开发者快速生成模拟数据，从而提高开发效率。Go-Faker 支持多种数据类型，包括但不限于姓名、地址、电子邮件、电话号码等。 项目快速启动要开始使用 Go-Faker，首先需要确保你已经安装了 Go 语言环境。然后，你可以通过以下步骤快速启动项目：  安装 Go-Faker 打开终端并运行以下命令来安装 Go-Faker： 12go get github.com/go-faker/faker/v4bash 编写示例代码 创建一个新的 Go 文件（例如 main.go ），并添加以下代码： 123456789101112131415161718192021package main import (    &quot;fmt&quot;    &quot;github.com/go-faker/faker/v4&quot;) func m...</div></div></div></a><a class="pagination-related" href="/2025/06/30/docker%E3%80%81containerd%E3%80%81runc%E3%80%81shim...%20%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E5%90%8D%E8%AF%8D%E5%85%A8%E8%A7%A3%E6%9E%90-CSDN%E5%8D%9A%E5%AE%A2/" title="docker、containerd、runc、shim... 容器技术名词全解析-CSDN博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-06-30</div><div class="info-item-2">docker、containerd、runc、shim... 容器技术名词全解析-CSDN博客</div></div><div class="info-2"><div class="info-item-1">docker、containerd、runc、shim… 容器技术名词全解析本文链接： https://blog.csdn.net/dillanzhou/article/details/116505401 云原生的概念在最近两年得到了广泛的关注，各大云厂商和技术团队都纷纷推出了各种“云原生”的技术和产品。虽然云原生到底包括哪些概念和技术并没有一个公认的答案，但容器技术是云原生的基础和核心应该是现阶段的一个共识。 但是容器技术经过多年的发展和演变，各种实现方案和早期版本相比已经有了巨大的差异，而且仍然在不断演进的过程中。各种组件的产生、随之而来的接口规范、基于接口规范实现的新可选组件让相关的名称和概念更加复杂。新的开发使用者很难全面理解容器相关的各类名词和概念，以及这些名词和概念在真实的容器部署环境中的作用和关系。 笔者作为容器运行时开发人员，对于容器相关的概念仍然经常犯迷糊。 docker 、libcontainer、containerd、shim、runc分别起什么作用？CRI、OCI是什么层次的规范、有什么区别？各个组件的功能和协作方式是怎样的？使用k8s管理容器后相关组件和...</div></div></div></a><a class="pagination-related" href="/2025/06/11/Comfyui%E5%88%B6%E4%BD%9CAI%E8%A7%86%E9%A2%91%EF%BC%8C%E6%94%AF%E6%8C%81%E6%96%87%E7%94%9F%E8%A7%86%E9%A2%91%E3%80%81%E5%9B%BE%E7%94%9F%E8%A7%86%E9%A2%91%E3%80%81%E8%A7%86%E9%A2%91%E7%94%9F%E8%A7%86%E9%A2%91%EF%BC%8C%E4%B8%87%E7%9B%B82.1%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2%E8%AF%A6%E7%BB%86%E6%96%B9%E6%B3%95%20-%20%E8%85%BE%E8%AE%AF%E4%BA%91%E5%BC%80%E5%8F%91%E8%80%85%E7%A4%BE%E5%8C%BA-%E8%85%BE%E8%AE%AF%E4%BA%91/" title="Comfyui制作AI视频，支持文生视频、图生视频、视频生视频，万相2.1本地部署详细方法 - 腾讯云开发者社区-腾讯云"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-06-11</div><div class="info-item-2">Comfyui制作AI视频，支持文生视频、图生视频、视频生视频，万相2.1本地部署详细方法 - 腾讯云开发者社区-腾讯云</div></div><div class="info-2"><div class="info-item-1">精选内容&#x2F;技术社群&#x2F;优惠产品,尽在小程序 立即前往 Comfyui制作AI视频，支持文生视频、图生视频、视频生视频，万相2.1本地部署详细方法文章来源：企鹅号 - 橙色C 举报 万相2.1可以在comfyui上自由调用，支持文生视频、图生视频和视频生视频，而且现在还出现了很多wan2.1的lora，今天我们一起来学习wan2.1的本地部署。 一、安装插件 在comfyui中调用万相2.1模型需要用到WanVideoWrapper插件 插件地址：https://github.com/kijai/ComfyUI-WanVideoWrapper 进入comfyui的节点文件夹“custom_nodes”，在地址栏输入”cmd”，然后敲回车，调出命令行 在命令行内输入指令： git clone https://github.com/kijai/ComfyUI-WanVideoWrapper.git ![[_resources&#x2F;6da78af2836a3a963c8c0a5da7520b4d_MD5.png]] 插件安装完成后关闭命令行 二、模型下载 （1）模...</div></div></div></a><a class="pagination-related" href="/2025/10/08/Redis%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E2%80%94SETNX+Lua%E8%84%9A%E6%9C%AC%E5%AE%9E%E7%8E%B0%E7%AF%87/" title="Redis分布式锁—SETNX+Lua脚本实现篇"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-10-08</div><div class="info-item-2">Redis分布式锁—SETNX+Lua脚本实现篇</div></div><div class="info-2"><div class="info-item-1">前言平时的工作中，由于生产环境中的项目是需要部署在多台服务器中的，所以经常会面临解决分布式场景下数据一致性的问题，那么就需要引入分布式锁来解决这一问题。 针对分布式锁的实现，目前比较常用的就如下几种方案：  基于数据库实现分布式锁 基于Redis实现分布式锁 【本文】 基于Zookeeper实现分布式锁  接下来这个系列文章会跟大家一块探讨这三种方案，本篇为Redis实现分布式锁篇。 Redis分布式环境搭建推荐： 基于Docker的Redis集群搭建 Redis分布式锁一览说到 redis 锁，能搜到的，或者说常用的无非就下面这两个：  setNX + Lua脚本 【本文】 Redisson + RLock可重入锁  接下来我们一一探索这两个的实现，本文为 setNX + Lua脚本 实现篇。 1、setNX完整语法：SET key value [EX seconds|PX milliseconds] [NX|XX] [KEEPTTL] 必选参数说明：  SET：命令 key：待设置的key value：设置的key的value，最好为随机字符串  可选参数说明：  NX：表示...</div></div></div></a><a class="pagination-related" href="/2025/06/11/ComfyUI%20%E5%87%A0%E7%A7%8D%E2%80%9C%E5%9B%BE%E5%83%8F%E5%8F%8D%E6%8E%A8+%E6%96%87%E6%9C%AC%E6%B6%A6%E8%89%B2%E2%80%9D%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%8F%92%E4%BB%B6%E4%BB%8B%E7%BB%8D/" title="ComfyUI 几种“图像反推+文本润色”提示词插件介绍"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-06-11</div><div class="info-item-2">ComfyUI 几种“图像反推+文本润色”提示词插件介绍</div></div><div class="info-2"><div class="info-item-1"> ComfyUI 几种“图像反推+文本润色”提示词插件介绍 目录 收起 一、安装工具插件 二、相关节点详解 1.（推荐）Florence2Image2Prompt 2. QWenImage2Prompt 3. LlamaVision 4. JoyCaption2 5. Micrisoft Phi 3.5（PhiPrompt） 6. Gemini 7. SmolLM2 + SmolVLM 8. PromptTagger 9. PromptEmbellish 一、安装工具插件在 ComfyUI 中安装 chflame163 大佬提供的插件包 ComfyUI Layer Style Advance github 地址： github.com&#x2F;chflame163&#x2F;C 工作流示例 在 workflow 目录下有 json 格式的工作流示例文件，示范了如何在 ComfyUI 中使用这些节点。 安装方法 ( 以 ComfyUI 官方便携包和秋叶整合包为例，其他 ComfyUI 环境请修改依赖环境目录 ) 安装插件  推荐使用 ComfyUI Manager 安装。 或者在...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Impact-Pack"><span class="toc-number">1.</span> <span class="toc-text">Impact-Pack</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#FaceTools"><span class="toc-number">2.</span> <span class="toc-text">FaceTools</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ControlNet-HandRefiner"><span class="toc-number">3.</span> <span class="toc-text">ControlNet-HandRefiner</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lora%E4%BF%AE%E5%A4%8D%E6%89%8B%E9%83%A8"><span class="toc-number">4.</span> <span class="toc-text">Lora修复手部</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

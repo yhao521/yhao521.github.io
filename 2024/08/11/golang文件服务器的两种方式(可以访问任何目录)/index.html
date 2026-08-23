@@ -1,0 +1,234 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>golang文件服务器的两种方式(可以访问任何目录) | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="一、方法1： 主要用到的方法是http包的FileServer,参数很简单,就是要路由的文件夹的路径。 12345678910111213package main&nbsp;import (&nbsp;&nbsp;&quot;fmt&quot;&nbsp;&nbsp;&quot;net&#x2F;http&quot;)&nbsp;func main() {&nbsp;&nbsp;http.Handle(&quot;&#x2F;&quot;, http.FileServer(h">
+<meta property="og:type" content="article">
+<meta property="og:title" content="golang文件服务器的两种方式(可以访问任何目录)">
+<meta property="og:url" content="https://yhao521.github.io/2024/08/11/golang%E6%96%87%E4%BB%B6%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%96%B9%E5%BC%8F(%E5%8F%AF%E4%BB%A5%E8%AE%BF%E9%97%AE%E4%BB%BB%E4%BD%95%E7%9B%AE%E5%BD%95)/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="一、方法1： 主要用到的方法是http包的FileServer,参数很简单,就是要路由的文件夹的路径。 12345678910111213package main&nbsp;import (&nbsp;&nbsp;&quot;fmt&quot;&nbsp;&nbsp;&quot;net&#x2F;http&quot;)&nbsp;func main() {&nbsp;&nbsp;http.Handle(&quot;&#x2F;&quot;, http.FileServer(h">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2024-08-10T17:17:16.000Z">
+<meta property="article:modified_time" content="2024-08-10T17:17:16.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="golang&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "golang文件服务器的两种方式(可以访问任何目录)",
+  "url": "https://yhao521.github.io/2024/08/11/golang%E6%96%87%E4%BB%B6%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%96%B9%E5%BC%8F(%E5%8F%AF%E4%BB%A5%E8%AE%BF%E9%97%AE%E4%BB%BB%E4%BD%95%E7%9B%AE%E5%BD%95)/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2024-08-10T17:17:16.000Z",
+  "dateModified": "2024-08-10T17:17:16.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2024/08/11/golang%E6%96%87%E4%BB%B6%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%96%B9%E5%BC%8F(%E5%8F%AF%E4%BB%A5%E8%AE%BF%E9%97%AE%E4%BB%BB%E4%BD%95%E7%9B%AE%E5%BD%95)/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'golang文件服务器的两种方式(可以访问任何目录)',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">golang文件服务器的两种方式(可以访问任何目录)</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">golang文件服务器的两种方式(可以访问任何目录)</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-08-10T17:17:16.000Z" title="发表于 2024-08-11 01:17:16">2024-08-11</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-08-10T17:17:16.000Z" title="更新于 2024-08-11 01:17:16">2024-08-11</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p><strong>一、方法1：</strong></p>
+<p>主要用到的方法是http包的FileServer,参数很简单,就是要路由的文件夹的路径。</p>
+<table border="0" cellpadding="0" cellspacing="0"><tbody><tr><td><p>1</p><p>2</p><p>3</p><p>4</p><p>5</p><p>6</p><p>7</p><p>8</p><p>9</p><p>10</p><p>11</p><p>12</p><p>13</p></td><td><p><code>package main</code></p><p>&nbsp;</p><p><code>import (</code></p><p><code>&nbsp;&nbsp;</code><code>"fmt"</code></p><p><code>&nbsp;&nbsp;</code><code>"net/http"</code></p><p><code>)</code></p><p>&nbsp;</p><p><code>func main() {</code></p><p><code>&nbsp;&nbsp;</code><code>http.Handle("/", http.FileServer(http.Dir("./")))</code></p><p>&nbsp;</p><p><code>&nbsp;&nbsp;</code><code>e := http.ListenAndServe(":8080", nil)</code></p><p><code>&nbsp;&nbsp;</code><code>fmt.Println(e)</code></p><p><code>}</code></p></td></tr></tbody></table>
+
+<p>上面例子的路由只能把根目录也就是“&#x2F;”目录映射出来,例如你写成”http.Handle(“&#x2F;files”, http.FileServer(http.Dir(“.&#x2F;“)))“，就无法把通过访问”&#x2F;files“把当前路径下的文件映射出来。于是就有了http包的StripPrefix方法。</p>
+<p><strong>二、方法2：</strong></p>
+<p>实现访问任意文件夹下面的文件。</p>
+<table border="0" cellpadding="0" cellspacing="0"><tbody><tr><td><p>1</p><p>2</p><p>3</p><p>4</p><p>5</p><p>6</p><p>7</p><p>8</p><p>9</p><p>10</p><p>11</p><p>12</p><p>13</p><p>14</p><p>15</p><p>16</p><p>17</p></td><td><p><code>package main</code></p><p>&nbsp;</p><p><code>import (</code></p><p><code>&nbsp;&nbsp;</code><code>"fmt"</code></p><p><code>&nbsp;&nbsp;</code><code>"net/http"</code></p><p><code>)</code></p><p>&nbsp;</p><p><code>func main() {</code></p><p><code>&nbsp;&nbsp;</code><code>mux := http.NewServeMux()</code></p><p><code>&nbsp;&nbsp;</code><code>mux.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir("/"))))</code></p><p><code>&nbsp;&nbsp;</code><code>mux.Handle("/c/", http.StripPrefix("/c/", http.FileServer(http.Dir("c:"))))</code></p><p><code>&nbsp;&nbsp;</code><code>mux.Handle("/d/", http.StripPrefix("/d/", http.FileServer(http.Dir("d:"))))</code></p><p><code>&nbsp;&nbsp;</code><code>mux.Handle("/e/", http.StripPrefix("/e/", http.FileServer(http.Dir("e:"))))</code></p><p><code>&nbsp;&nbsp;</code><code>if err := http.ListenAndServe(":3008", mux); err != nil {</code></p><p><code>&nbsp;&nbsp;&nbsp;&nbsp;</code><code>log.Fatal(err)</code></p><p><code>&nbsp;&nbsp;</code><code>}</code></p><p><code>}</code></p></td></tr></tbody></table>
+
+<p>这里生成了一个ServeMux，与文件服务器无关，可以先不用关注。用这种方式，就可以把任意文件夹下的文件路由出来了。</p>
+<p><strong>ps：golang实现的文件服务器</strong></p>
+<p>最近在学习golang，使用golang实现了一个最简单的文件服务器，程序只有简单的十多行代码，可以编译成windows, linux, mac多平台可执行文件。</p>
+<p><strong>源码</strong></p>
+<table border="0" cellpadding="0" cellspacing="0"><tbody><tr><td><p>1</p><p>2</p><p>3</p><p>4</p><p>5</p><p>6</p><p>7</p><p>8</p><p>9</p><p>10</p><p>11</p><p>12</p><p>13</p><p>14</p><p>15</p><p>16</p><p>17</p></td><td><p><code>package main</code></p><p>&nbsp;</p><p><code>import (</code></p><p><code>&nbsp;</code><code>"fmt"</code></p><p><code>&nbsp;</code><code>"net/http"</code></p><p><code>&nbsp;</code><code>"os"</code></p><p><code>&nbsp;</code><code>"path/filepath"</code></p><p><code>)</code></p><p>&nbsp;</p><p><code>func main() {</code></p><p><code>&nbsp;</code><code>p, _ := filepath.Abs(filepath.Dir(os.Args[0]))</code></p><p><code>&nbsp;</code><code>http.Handle("/", http.FileServer(http.Dir(p)))</code></p><p><code>&nbsp;</code><code>err := http.ListenAndServe(":8088", nil)</code></p><p><code>&nbsp;</code><code>if err != nil {</code></p><p><code>&nbsp;</code><code>fmt.Println(err)</code></p><p><code>&nbsp;</code><code>}</code></p><p><code>}</code></p></td></tr></tbody></table>
+
+<p><strong>源码解释</strong></p>
+<p>os.Args[0]获取的是执行程序时的第一个参数，默认第一个参数是程序所在的目录<br>filepath.Abs(filepath.Dir(os.Args[0]))是获取当前可执行程序所在的绝对路径<br>http.Handle(“&#x2F;“, http.FileServer(http.Dir(p)))是开启一个文件服务器，使用当前可执行文件所在的路径<br>http.ListenAndServe(“:8088”, nil)是监听8088端口并开启文件服务器</p>
+<p><strong>编译</strong></p>
+<p>要将源码编译成不同平台的可执行文件，需要使用gox工具，使用下面的命令安装gox：</p>
+<p>go get github.com&#x2F;mitchellh&#x2F;gox</p>
+<p>执行成功之后，使用gox命令即可自动编译出各个平台的可执行文件，如果想为某个平台单独编译，可以使用如下方式：</p>
+<p>gox -os “windows linux” -arch amd64</p>
+<p>-os参数指定了编译平台，-arch参数指定了处理器架构</p>
+<p><strong>运行</strong></p>
+<p>直接打开编译出来的可执行程序，即可运行，在浏览器中访问<a target="_blank" rel="noopener" href="http://ip:8088/">http://ip:8088</a>即可看到可执行文件所在的目录下的所有文件。</p>
+<p>本文转载自:<a target="_blank" rel="noopener" href="https://www.jb51.net/article/185513.htm">https://www.jb51.net/article/185513.htm</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2024/08/11/golang%E6%96%87%E4%BB%B6%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%96%B9%E5%BC%8F(%E5%8F%AF%E4%BB%A5%E8%AE%BF%E9%97%AE%E4%BB%BB%E4%BD%95%E7%9B%AE%E5%BD%95)/">https://yhao521.github.io/2024/08/11/golang%E6%96%87%E4%BB%B6%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%96%B9%E5%BC%8F(%E5%8F%AF%E4%BB%A5%E8%AE%BF%E9%97%AE%E4%BB%BB%E4%BD%95%E7%9B%AE%E5%BD%95)/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a><a class="post-meta__tags" href="/tags/golang-programming/">golang/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/08/11/%E3%80%90Python%E3%80%91ImportError_%20No%20module%20named%20%E2%80%98google%E2%80%98%E6%9C%80%E5%85%A8%E8%A7%A3%E5%86%B3%E6%96%B9/" title="【Python】ImportError_ No module named ‘google‘最全解决方法"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">【Python】ImportError_ No module named ‘google‘最全解决方法</div></div><div class="info-2"><div class="info-item-1">跑程序遇到了这个问题，改了好久才解决，由于每个人实际情况不同，现列出各种解决办法：我的环境：pycharm python3.7首先确定是否装了google这个包，如果依然报错再找问题 1这是我成功解决的方法安装这两个包，然后继续执行Python代码： 123pip install -i https://mirrors.aliyun.com/pypi/simple/ google-cloudpip install -i https://mirrors.aliyun.com/pypi/simple/ google-cloud-vision12  平时安装从清华大学镜像下载更快，避免了timed out报错import失败解决方法 导入包Read timed out解决方法 2安装protobuf 12pip install protobuf  3升级版本 12pip install --upgrade google-api-python-client  4安装这两个包 123pip install google.cloud.bigquerypip install google.clo...</div></div></div></a><a class="pagination-related" href="/2024/08/09/vue%E4%B8%AD%E4%BD%BF%E7%94%A8aplayer%E6%8F%92%E4%BB%B6%E5%81%9A%E4%B8%80%E4%B8%AA%E7%BD%91%E9%A1%B5%E9%9F%B3%E4%B9%90%E6%92%AD%E6%94%BE%E5%99%A8/" title="vue中使用aplayer插件做一个网页音乐播放器"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">vue中使用aplayer插件做一个网页音乐播放器</div></div><div class="info-2"><div class="info-item-1"> 我们在浏览网页的时候，时常会看到一些网页音乐播放器，本文以vue为例，使用aplayer插件，做一个简单的网页播放器。我们先看一下效果图  效果图正常模式 吸底模式  当然还有迷你模式，就是能隐藏的都隐藏，这里不赘述，做相应配置就会出现对应效果。  注意，吸底模式会出现上一曲下一曲按钮，以及歌词按钮。正常模式是没这个的。不过我个人更加喜欢正常模式。 使用步骤第一步，npm下载aplayer插件：cnpm install aplayer --save 第二步，搭配下载hls.js：cnpm i hls.js --save 第三步，在需要使用的页面引入插件，也要引入插件的样式** 代码如下直接复制粘贴即可看到效果： 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273747576777879808182&lt;template&gt;  &lt;div id=&q...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2024/06/27/%E4%BB%8EMac%E5%88%B0Windows%E7%9A%84Go%20%20Golang%E4%BA%A4%E5%8F%89%E7%BC%96%E8%AF%91%EF%BC%9A%E8%87%B4%E5%91%BD%E9%94%99%E8%AF%AF%EF%BC%9A%E6%89%BE%E4%B8%8D%E5%88%B0%E2%80%9C%20windows.h%E2%80%9D%E6%96%87%E4%BB%B6/" title="从Mac到Windows的Go  Golang交叉编译：致命错误：找不到“ windows.h”文件"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-06-27</div><div class="info-item-2">从Mac到Windows的Go  Golang交叉编译：致命错误：找不到“ windows.h”文件</div></div><div class="info-2"><div class="info-item-1">从Mac到Windows的Go &#x2F; Golang交叉编译：致命错误：找不到“ windows.h”文件cross-platformgoheader-files Go&#x2F;Golang Cross-Compile from Mac to Windows: fatal error: ‘windows.h’ file not found摘要：当我尝试交叉编译.go源文件(包括在文件链中某个位置的C文件)，并从Mac主机针对Windows AMD64时，得到：    1 &#x2F;usr&#x2F;local&#x2F;go&#x2F;src&#x2F;runtime&#x2F;cgo&#x2F;gcc_windows_amd64.c:8:10: fatal error: ‘windows.h’ file not found        纯粹的Go代码似乎可以交叉编译而不会出错；当涉及C文件时，有没有办法获取正确的头文件进行交叉编译？ 更多详细信息：我在Mac上安装了LiteIDE，以用于某些.go项目，而LiteIDE使将其他平台作为构建目标相对容易。我仅在Go上的...</div></div></div></a><a class="pagination-related" href="/2023/09/04/Prometheus%E7%89%B9%E7%82%B9%EF%BC%8C%E6%9E%B6%E6%9E%84%EF%BC%8C%E7%BB%84%E4%BB%B6%EF%BC%8C%E5%B1%80%E9%99%90%E4%BB%8B%E7%BB%8D/" title="Prometheus特点，架构，组件，局限介绍"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">Prometheus特点，架构，组件，局限介绍</div></div><div class="info-2"><div class="info-item-1"> title: Prometheus特点，架构，组件，局限介绍date: 2023-09-03 20:17:08category: tag: author:  Prometheus特点，架构，组件，局限介绍https://baijiahao.baidu.com/s?id=1705607085545361413&amp;wfr=spider&amp;for=pc Prometheus的主要特点Prometheus官网上的自述是：“From metrics to insight.Power your metrics and alerting with a leading open-source monitoring solution.”翻译过来就是：从指标到洞察力，Prometheus通过领先的开源监控解决方案为用户的指标和告警提供强大的支持。 Prometheus的特点 通过PromQL实现多维度数据模型的灵活查询。 定义了开放指标数据的标准，自定义探针（如Exporter等），编写简单方便。 PushGateway组件让这款监控系统可以接收监控数据。 提供了VM和容器化的版本。 ...</div></div></div></a><a class="pagination-related" href="/2024/07/31/golang%E7%9A%84sqlite%E9%A9%B1%E5%8A%A8%E4%B8%8D%E4%BD%BF%E7%94%A8cgo%E5%AE%9E%E7%8E%B0%20%E6%9B%B4%E6%8D%A2gorm%E9%BB%98%E8%AE%A4%E7%9A%84SQLite%E9%A9%B1%E5%8A%A8/" title="golang的sqlite驱动不使用cgo实现 更换gorm默认的SQLite驱动"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-31</div><div class="info-item-2">golang的sqlite驱动不使用cgo实现 更换gorm默认的SQLite驱动</div></div><div class="info-2"><div class="info-item-1">golang的sqlite驱动不使用cgo实现 更换gorm默认的SQLite驱动最近在开发一个边缘物联网程序时使用Golang开发，用到GORM来操作SQLite数据库，GORM默认使用gorm.io&#x2F;driver&#x2F;sqlite这个库作为SQLite驱动，该库用CGO实现，在使用过程中遇到一些问题，编译好二进制程序放到资源受限的设备中运行，报错如下；最后更换第三方SQLite驱动解决。 github.com&#x2F;mattn&#x2F;go-sqlite3 这个库现在在 go 项目当中，引用最多，应用最广;俨然成为这一方面的标准，但有一个最大的问题就是，这是一个 C 语言实现的库，如果要应用这个库，那么你的环境就需要解决这个 CGO 依赖。 报错如下,正是因为GORM官方SQLite驱动使用CGO实现，因此我在使用过程中遇到以下错误： 12[error] failed to initialize database, got error Binary was compiled with &#x27;CGO_ENABLED=0&#x27;, go-sqlit...</div></div></div></a><a class="pagination-related" href="/2024/03/18/wails%E6%A1%8C%E9%9D%A2%E6%A1%86%E6%9E%B6%E5%AE%89%E8%A3%85/" title="wails桌面框架安装"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-18</div><div class="info-item-2">wails桌面框架安装</div></div><div class="info-2"><div class="info-item-1">wails桌面框架安装支持的平台 Windows 10&#x2F;11 AMD64&#x2F;ARM64 MacOS 10.13+ AMD64 MacOS 11.0+ ARM64 Linux AMD64&#x2F;ARM64  依赖Wails 有许多安装前需要的常见依赖项：  Go 1.18+ NPM (Node 15+)  Go从 Go 下载页面 下载 Go。 确保您遵守官方的 Go 安装说明。 您还需要确保您的 PATH 环境变量包含您的 ~/go/bin 目录路径。 重启终端并执行以下命令检查：  检查 Go 是否安装正确： go version 检查 “~&#x2F;go&#x2F;bin” 是否在您的 PATH 变量中： echo $PATH | grep go/bin  NPM从 Node 下载页面 下载 NPM。 最好使用最新版本，因为这是我们通常会测试的版本。 运行 npm --version 进行验证。 平台特定依赖关系您还需要安装平台特定的依赖项：  Windows MacOS Linux  Wails 要求安装 xcode 命令行工具。 这可以通过运行 xc...</div></div></div></a><a class="pagination-related" href="/2023/09/04/go%E8%AF%AD%E8%A8%80/" title="go语言"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">go语言</div></div><div class="info-2"><div class="info-item-1"> title: go语言date: 2023-09-03 20:17:08category:  开发语言 gotag: goauthor:   go 常用指令常用指令：    命令 说明    go build -a -x -v 构建 强制重新 打印信息   go clean 清理构建包   go run main.go 运行有main的文件   go env 查看环境变量   go build -ldflags -w 压缩   go mod dowload 下载依赖   go mod vendor vendor 文件夹就缓存了依赖包，然后直接在代码中使用。   set GOOS&#x3D;windows windows主机设置go编译、运行环境为windows   ​ go build -ldflags -w 压缩构建包 https://blog.justwe.site/post/go-build-compress/ 压缩可执行文件(终极压缩)我们使用第三方的压缩工具https://github.com/upx/upx/releases 构建或下载依赖失败dial tcp 17...</div></div></div></a><a class="pagination-related" href="/2023/09/04/nexus/" title="nexus"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">nexus</div></div><div class="info-2"><div class="info-item-1"> title: nexus简要说明lang: en-USdate: 2023-09-03 20:17:08category:  nexustag: nexusauthor:   1. 简要说明：搭建maven私服主要是为了方便在一个团队中使用maven中央仓库没有的jar包，这些非中央仓库的jar包可能是自己团队开发的公共依赖jar包，可能是第三方私有的认证相关jar包，特殊的还有oracle的驱动jar包，下面是使用Nexus搭建maven私服及私服使用 nexus3.现在可以作为docker的镜像仓库 1.1. Nexus3.x安装及配置前置条件要求存在jdk1.8的环境 1.1.1. 下载官方下载页： https://www.sonatype.com/download-oss-sonatype linux资源地址 wget https://sonatype-download.global.ssl.fastly.net/repository/repositoryManager/3/nexus-3.15.2-01-unix.tar.gz  1.1.2. 安装及配置#解压  ta...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

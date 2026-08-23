@@ -1,0 +1,454 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>redis | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="title: redisdate: 2023-09-03 20:17:08category:  数据库 doc_redistag: doc_redisauthor:   教程： https:&#x2F;&#x2F;www.runoob.com&#x2F;redis&#x2F;redis-conf.html Redis 安装Windows 下安装**下载地址：**https:&#x2F;&#x2F;github.com&#x2F;tporadowski&#x2F;redis&#x2F;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="redis">
+<meta property="og:url" content="https://yhao521.github.io/2023/09/04/redis/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="title: redisdate: 2023-09-03 20:17:08category:  数据库 doc_redistag: doc_redisauthor:   教程： https:&#x2F;&#x2F;www.runoob.com&#x2F;redis&#x2F;redis-conf.html Redis 安装Windows 下安装**下载地址：**https:&#x2F;&#x2F;github.com&#x2F;tporadowski&#x2F;redis&#x2F;">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2023-09-04T03:18:09.000Z">
+<meta property="article:modified_time" content="2023-09-04T03:18:27.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "redis",
+  "url": "https://yhao521.github.io/2023/09/04/redis/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2023-09-04T03:18:09.000Z",
+  "dateModified": "2023-09-04T03:18:27.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2023/09/04/redis/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'redis',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">redis</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">redis</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-09-04T03:18:09.000Z" title="发表于 2023-09-04 11:18:09">2023-09-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-09-04T03:18:27.000Z" title="更新于 2023-09-04 11:18:27">2023-09-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><hr>
+<p>title: redis<br>date: 2023-09-03 20:17:08<br>category:</p>
+<ul>
+<li>数据库</li>
+<li>doc_redis<br>tag:</li>
+<li>doc_redis<br>author:</li>
+</ul>
+<hr>
+<p>教程： <a target="_blank" rel="noopener" href="https://www.runoob.com/redis/redis-conf.html">https://www.runoob.com/redis/redis-conf.html</a></p>
+<h1 id="Redis-安装"><a href="#Redis-安装" class="headerlink" title="Redis 安装"></a>Redis 安装</h1><h2 id="Windows-下安装"><a href="#Windows-下安装" class="headerlink" title="Windows 下安装"></a>Windows 下安装</h2><p>**下载地址：**<a target="_blank" rel="noopener" href="https://github.com/tporadowski/redis/releases%E3%80%82">https://github.com/tporadowski/redis/releases。</a></p>
+<p>Redis 支持 32 位和 64 位。这个需要根据你系统平台的实际情况选择，这里我们下载 <strong>Redis-x64-xxx.zip</strong>压缩包到 C 盘，解压后，将文件夹重新命名为 <strong>redis</strong>。</p>
+<p><img src="https://www.runoob.com/wp-content/uploads/2014/11/3B8D633F-14CE-42E3-B174-FCCD48B11FF3.jpg" alt="img"></p>
+<p>打开文件夹，内容如下：</p>
+<p><img src="https://www.runoob.com/wp-content/uploads/2014/11/C2CEBAA0-30B9-4340-8D23-78F6FEB8CBE2.png%22" alt="img"></p>
+<p>打开一个 <strong>cmd</strong> 窗口 使用 cd 命令切换目录到 <strong>C:\redis</strong> 运行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-server.exe redis.windows.conf</span><br></pre></td></tr></table></figure>
+
+<p>如果想方便的话，可以把 redis 的路径加到系统的环境变量里，这样就省得再输路径了，后面的那个 redis.windows.conf 可以省略，如果省略，会启用默认的。输入之后，会显示如下界面：</p>
+<p><img src="https://www.runoob.com/wp-content/uploads/2014/11/redis-install1.png" alt="Redis 安装"></p>
+<p>这时候另启一个 cmd 窗口，原来的不要关闭，不然就无法访问服务端了。</p>
+<p>切换到 redis 目录下运行:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-cli.exe -h 127.0.0.1 -p 6379</span><br></pre></td></tr></table></figure>
+
+<p>设置键值对:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">set myKey abc</span><br></pre></td></tr></table></figure>
+
+<p>取出键值对:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">get myKey</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://www.runoob.com/wp-content/uploads/2014/11/redis-install2.jpg" alt="Redis 安装"></p>
+<h2 id="Linux-源码安装"><a href="#Linux-源码安装" class="headerlink" title="Linux 源码安装"></a>Linux 源码安装</h2><p>**下载地址：**<a target="_blank" rel="noopener" href="http://redis.io/download%EF%BC%8C%E4%B8%8B%E8%BD%BD%E6%9C%80%E6%96%B0%E7%A8%B3%E5%AE%9A%E7%89%88%E6%9C%AC%E3%80%82">http://redis.io/download，下载最新稳定版本。</a></p>
+<p>本教程使用的最新文档版本为 2.8.17，下载并安装：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># wget http://download.redis.io/releases/redis-6.0.8.tar.gz</span><br><span class="line"># tar xzf redis-6.0.8.tar.gz</span><br><span class="line"># cd redis-6.0.8</span><br><span class="line"># make</span><br></pre></td></tr></table></figure>
+
+<p>执行完 <strong>make</strong> 命令后，redis-6.0.8 的 <strong>src</strong> 目录下会出现编译后的 redis 服务程序 redis-server，还有用于测试的客户端程序 redis-cli：</p>
+<p>下面启动 redis 服务：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># cd src</span><br><span class="line"># ./redis-server</span><br></pre></td></tr></table></figure>
+
+<p>注意这种方式启动 redis 使用的是默认配置。也可以通过启动参数告诉 redis 使用指定配置文件使用下面命令启动。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># cd src</span><br><span class="line"># ./redis-server ../redis.conf</span><br></pre></td></tr></table></figure>
+
+<p><strong>redis.conf</strong> 是一个默认的配置文件。我们可以根据需要使用自己的配置文件。</p>
+<p>启动 redis 服务进程后，就可以使用测试客户端程序 redis-cli 和 redis 服务交互了。 比如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># cd src</span><br><span class="line"># ./redis-cli</span><br><span class="line">redis&gt; set foo bar</span><br><span class="line">OK</span><br><span class="line">redis&gt; get foo</span><br><span class="line">&quot;bar&quot;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Ubuntu-apt-命令安装"><a href="#Ubuntu-apt-命令安装" class="headerlink" title="Ubuntu apt 命令安装"></a>Ubuntu apt 命令安装</h2><p>在 Ubuntu 系统安装 Redis 可以使用以下命令:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># sudo apt update</span><br><span class="line"># sudo apt install redis-server</span><br></pre></td></tr></table></figure>
+
+<h3 id="启动-Redis"><a href="#启动-Redis" class="headerlink" title="启动 Redis"></a>启动 Redis</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># redis-server</span><br></pre></td></tr></table></figure>
+
+<h3 id="查看-redis-是否启动？"><a href="#查看-redis-是否启动？" class="headerlink" title="查看 redis 是否启动？"></a>查看 redis 是否启动？</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># redis-cli</span><br></pre></td></tr></table></figure>
+
+<p>以上命令将打开以下终端：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis 127.0.0.1:6379&gt;</span><br></pre></td></tr></table></figure>
+
+<p>127.0.0.1 是本机 IP ，6379 是 redis 服务端口。现在我们输入 PING 命令。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">redis 127.0.0.1:6379&gt; ping</span><br><span class="line">PONG</span><br></pre></td></tr></table></figure>
+
+<h1 id="Redis-配置"><a href="#Redis-配置" class="headerlink" title="Redis 配置"></a>Redis 配置</h1><p>Redis 的配置文件位于 Redis 安装目录下，文件名为 <strong>redis.conf</strong>(Windows 名为 redis.windows.conf)。</p>
+<p>你可以通过 <strong>CONFIG</strong> 命令查看或设置配置项。</p>
+<hr>
+<h3 id="语法Redis-CONFIG-命令格式如下：redis-127-0-0-1-6379-CONFIG-GET-CONFIG-SETTING-NAME"><a href="#语法Redis-CONFIG-命令格式如下：redis-127-0-0-1-6379-CONFIG-GET-CONFIG-SETTING-NAME" class="headerlink" title="语法Redis CONFIG 命令格式如下：redis 127.0.0.1:6379&gt; CONFIG GET CONFIG_SETTING_NAME"></a>语法Redis CONFIG 命令格式如下：<code>redis 127.0.0.1:6379&gt; CONFIG GET CONFIG_SETTING_NAME</code></h3><h3 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">redis 127.0.0.1:6379&gt; CONFIG GET loglevel</span><br><span class="line"></span><br><span class="line">1) &quot;loglevel&quot;</span><br><span class="line">2) &quot;notice&quot;</span><br></pre></td></tr></table></figure>
+
+<p>使用 <strong>*</strong> 号获取所有配置项：</p>
+<h3 id="实例-1"><a href="#实例-1" class="headerlink" title="实例"></a>实例</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br></pre></td><td class="code"><pre><span class="line">redis 127.0.0.1:6379&gt; CONFIG GET *</span><br><span class="line"></span><br><span class="line">  1) &quot;dbfilename&quot;</span><br><span class="line">  2) &quot;dump.rdb&quot;</span><br><span class="line">  3) &quot;requirepass&quot;</span><br><span class="line">  4) &quot;&quot;</span><br><span class="line">  5) &quot;masterauth&quot;</span><br><span class="line">  6) &quot;&quot;</span><br><span class="line">  7) &quot;unixsocket&quot;</span><br><span class="line">  8) &quot;&quot;</span><br><span class="line">  9) &quot;logfile&quot;</span><br><span class="line"> 10) &quot;&quot;</span><br><span class="line"> 11) &quot;pidfile&quot;</span><br><span class="line"> 12) &quot;/var/run/redis.pid&quot;</span><br><span class="line"> 13) &quot;maxmemory&quot;</span><br><span class="line"> 14) &quot;0&quot;</span><br><span class="line"> 15) &quot;maxmemory-samples&quot;</span><br><span class="line"> 16) &quot;3&quot;</span><br><span class="line"> 17) &quot;timeout&quot;</span><br><span class="line"> 18) &quot;0&quot;</span><br><span class="line"> 19) &quot;tcp-keepalive&quot;</span><br><span class="line"> 20) &quot;0&quot;</span><br><span class="line"> 21) &quot;auto-aof-rewrite-percentage&quot;</span><br><span class="line"> 22) &quot;100&quot;</span><br><span class="line"> 23) &quot;auto-aof-rewrite-min-size&quot;</span><br><span class="line"> 24) &quot;67108864&quot;</span><br><span class="line"> 25) &quot;hash-max-ziplist-entries&quot;</span><br><span class="line"> 26) &quot;512&quot;</span><br><span class="line"> 27) &quot;hash-max-ziplist-value&quot;</span><br><span class="line"> 28) &quot;64&quot;</span><br><span class="line"> 29) &quot;list-max-ziplist-entries&quot;</span><br><span class="line"> 30) &quot;512&quot;</span><br><span class="line"> 31) &quot;list-max-ziplist-value&quot;</span><br><span class="line"> 32) &quot;64&quot;</span><br><span class="line"> 33) &quot;set-max-intset-entries&quot;</span><br><span class="line"> 34) &quot;512&quot;</span><br><span class="line"> 35) &quot;zset-max-ziplist-entries&quot;</span><br><span class="line"> 36) &quot;128&quot;</span><br><span class="line"> 37) &quot;zset-max-ziplist-value&quot;</span><br><span class="line"> 38) &quot;64&quot;</span><br><span class="line"> 39) &quot;hll-sparse-max-bytes&quot;</span><br><span class="line"> 40) &quot;3000&quot;</span><br><span class="line"> 41) &quot;lua-time-limit&quot;</span><br><span class="line"> 42) &quot;5000&quot;</span><br><span class="line"> 43) &quot;slowlog-log-slower-than&quot;</span><br><span class="line"> 44) &quot;10000&quot;</span><br><span class="line"> 45) &quot;latency-monitor-threshold&quot;</span><br><span class="line"> 46) &quot;0&quot;</span><br><span class="line"> 47) &quot;slowlog-max-len&quot;</span><br><span class="line"> 48) &quot;128&quot;</span><br><span class="line"> 49) &quot;port&quot;</span><br><span class="line"> 50) &quot;6379&quot;</span><br><span class="line"> 51) &quot;tcp-backlog&quot;</span><br><span class="line"> 52) &quot;511&quot;</span><br><span class="line"> 53) &quot;databases&quot;</span><br><span class="line"> 54) &quot;16&quot;</span><br><span class="line"> 55) &quot;repl-ping-slave-period&quot;</span><br><span class="line"> 56) &quot;10&quot;</span><br><span class="line"> 57) &quot;repl-timeout&quot;</span><br><span class="line"> 58) &quot;60&quot;</span><br><span class="line"> 59) &quot;repl-backlog-size&quot;</span><br><span class="line"> 60) &quot;1048576&quot;</span><br><span class="line"> 61) &quot;repl-backlog-ttl&quot;</span><br><span class="line"> 62) &quot;3600&quot;</span><br><span class="line"> 63) &quot;maxclients&quot;</span><br><span class="line"> 64) &quot;4064&quot;</span><br><span class="line"> 65) &quot;watchdog-period&quot;</span><br><span class="line"> 66) &quot;0&quot;</span><br><span class="line"> 67) &quot;slave-priority&quot;</span><br><span class="line"> 68) &quot;100&quot;</span><br><span class="line"> 69) &quot;min-slaves-to-write&quot;</span><br><span class="line"> 70) &quot;0&quot;</span><br><span class="line"> 71) &quot;min-slaves-max-lag&quot;</span><br><span class="line"> 72) &quot;10&quot;</span><br><span class="line"> 73) &quot;hz&quot;</span><br><span class="line"> 74) &quot;10&quot;</span><br><span class="line"> 75) &quot;no-appendfsync-on-rewrite&quot;</span><br><span class="line"> 76) &quot;no&quot;</span><br><span class="line"> 77) &quot;slave-serve-stale-data&quot;</span><br><span class="line"> 78) &quot;yes&quot;</span><br><span class="line"> 79) &quot;slave-read-only&quot;</span><br><span class="line"> 80) &quot;yes&quot;</span><br><span class="line"> 81) &quot;stop-writes-on-bgsave-error&quot;</span><br><span class="line"> 82) &quot;yes&quot;</span><br><span class="line"> 83) &quot;daemonize&quot;</span><br><span class="line"> 84) &quot;no&quot;</span><br><span class="line"> 85) &quot;rdbcompression&quot;</span><br><span class="line"> 86) &quot;yes&quot;</span><br><span class="line"> 87) &quot;rdbchecksum&quot;</span><br><span class="line"> 88) &quot;yes&quot;</span><br><span class="line"> 89) &quot;activerehashing&quot;</span><br><span class="line"> 90) &quot;yes&quot;</span><br><span class="line"> 91) &quot;repl-disable-tcp-nodelay&quot;</span><br><span class="line"> 92) &quot;no&quot;</span><br><span class="line"> 93) &quot;aof-rewrite-incremental-fsync&quot;</span><br><span class="line"> 94) &quot;yes&quot;</span><br><span class="line"> 95) &quot;appendonly&quot;</span><br><span class="line"> 96) &quot;no&quot;</span><br><span class="line"> 97) &quot;dir&quot;</span><br><span class="line"> 98) &quot;/home/deepak/Downloads/redis-2.8.13/src&quot;</span><br><span class="line"> 99) &quot;maxmemory-policy&quot;</span><br><span class="line">100) &quot;volatile-lru&quot;</span><br><span class="line">101) &quot;appendfsync&quot;</span><br><span class="line">102) &quot;everysec&quot;</span><br><span class="line">103) &quot;save&quot;</span><br><span class="line">104) &quot;3600 1 300 100 60 10000&quot;</span><br><span class="line">105) &quot;loglevel&quot;</span><br><span class="line">106) &quot;notice&quot;</span><br><span class="line">107) &quot;client-output-buffer-limit&quot;</span><br><span class="line">108) &quot;normal 0 0 0 slave 268435456 67108864 60 pubsub 33554432 8388608 60&quot;</span><br><span class="line">109) &quot;unixsocketperm&quot;</span><br><span class="line">110) &quot;0&quot;</span><br><span class="line">111) &quot;slaveof&quot;</span><br><span class="line">112) &quot;&quot;</span><br><span class="line">113) &quot;notify-keyspace-events&quot;</span><br><span class="line">114) &quot;&quot;</span><br><span class="line">115) &quot;bind&quot;</span><br><span class="line">116) &quot;&quot;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="编辑配置"><a href="#编辑配置" class="headerlink" title="编辑配置"></a>编辑配置</h2><p>你可以通过修改 redis.conf 文件或使用 <strong>CONFIG set</strong> 命令来修改配置。</p>
+<h3 id="语法"><a href="#语法" class="headerlink" title="语法"></a>语法</h3><p><strong>CONFIG SET</strong> 命令基本语法：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis 127.0.0.1:6379&gt; CONFIG SET CONFIG_SETTING_NAME NEW_CONFIG_VALUE</span><br></pre></td></tr></table></figure>
+
+<h3 id="实例-2"><a href="#实例-2" class="headerlink" title="实例"></a>实例</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">redis 127.0.0.1:6379&gt; CONFIG SET loglevel &quot;notice&quot;</span><br><span class="line">OK</span><br><span class="line">redis 127.0.0.1:6379&gt; CONFIG GET loglevel</span><br><span class="line"></span><br><span class="line">1) &quot;loglevel&quot;</span><br><span class="line">2) &quot;notice&quot;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="参数说明"><a href="#参数说明" class="headerlink" title="参数说明"></a>参数说明</h2><p>redis.conf 配置项说明如下：</p>
+<table>
+<thead>
+<tr>
+<th align="left">序号</th>
+<th align="left">配置项</th>
+<th align="left">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">1</td>
+<td align="left"><code>daemonize no</code></td>
+<td align="left">Redis 默认不是以守护进程的方式运行，可以通过该配置项修改，使用 yes 启用守护进程（Windows 不支持守护线程的配置为 no ）</td>
+</tr>
+<tr>
+<td align="left">2</td>
+<td align="left"><code>pidfile /var/run/redis.pid</code></td>
+<td align="left">当 Redis 以守护进程方式运行时，Redis 默认会把 pid 写入 &#x2F;var&#x2F;run&#x2F;redis.pid 文件，可以通过 pidfile 指定</td>
+</tr>
+<tr>
+<td align="left">3</td>
+<td align="left"><code>port 6379</code></td>
+<td align="left">指定 Redis 监听端口，默认端口为 6379，作者在自己的一篇博文中解释了为什么选用 6379 作为默认端口，因为 6379 在手机按键上 MERZ 对应的号码，而 MERZ 取自意大利歌女 Alessia Merz 的名字</td>
+</tr>
+<tr>
+<td align="left">4</td>
+<td align="left"><code>bind 127.0.0.1</code></td>
+<td align="left">绑定的主机地址</td>
+</tr>
+<tr>
+<td align="left">5</td>
+<td align="left"><code>timeout 300</code></td>
+<td align="left">当客户端闲置多长秒后关闭连接，如果指定为 0 ，表示关闭该功能</td>
+</tr>
+<tr>
+<td align="left">6</td>
+<td align="left"><code>loglevel notice</code></td>
+<td align="left">指定日志记录级别，Redis 总共支持四个级别：debug、verbose、notice、warning，默认为 notice</td>
+</tr>
+<tr>
+<td align="left">7</td>
+<td align="left"><code>logfile stdout</code></td>
+<td align="left">日志记录方式，默认为标准输出，如果配置 Redis 为守护进程方式运行，而这里又配置为日志记录方式为标准输出，则日志将会发送给 &#x2F;dev&#x2F;null</td>
+</tr>
+<tr>
+<td align="left">8</td>
+<td align="left"><code>databases 16</code></td>
+<td align="left">设置数据库的数量，默认数据库为0，可以使用SELECT 命令在连接上指定数据库id</td>
+</tr>
+<tr>
+<td align="left">9</td>
+<td align="left"><code>save &lt;seconds&gt; &lt;changes&gt;</code>Redis 默认配置文件中提供了三个条件：<strong>save 900 1**<strong>save 300 10*</strong>*save 60 10000</strong>分别表示 900 秒（15 分钟）内有 1 个更改，300 秒（5 分钟）内有 10 个更改以及 60 秒内有 10000 个更改。</td>
+<td align="left">指定在多长时间内，有多少次更新操作，就将数据同步到数据文件，可以多个条件配合</td>
+</tr>
+<tr>
+<td align="left">10</td>
+<td align="left"><code>rdbcompression yes</code></td>
+<td align="left">指定存储至本地数据库时是否压缩数据，默认为 yes，Redis 采用 LZF 压缩，如果为了节省 CPU 时间，可以关闭该选项，但会导致数据库文件变的巨大</td>
+</tr>
+<tr>
+<td align="left">11</td>
+<td align="left"><code>dbfilename dump.rdb</code></td>
+<td align="left">指定本地数据库文件名，默认值为 dump.rdb</td>
+</tr>
+<tr>
+<td align="left">12</td>
+<td align="left"><code>dir ./</code></td>
+<td align="left">指定本地数据库存放目录</td>
+</tr>
+<tr>
+<td align="left">13</td>
+<td align="left"><code>slaveof &lt;masterip&gt; &lt;masterport&gt;</code></td>
+<td align="left">设置当本机为 slave 服务时，设置 master 服务的 IP 地址及端口，在 Redis 启动时，它会自动从 master 进行数据同步</td>
+</tr>
+<tr>
+<td align="left">14</td>
+<td align="left"><code>masterauth &lt;master-password&gt;</code></td>
+<td align="left">当 master 服务设置了密码保护时，slav 服务连接 master 的密码</td>
+</tr>
+<tr>
+<td align="left">15</td>
+<td align="left"><code>requirepass foobared</code></td>
+<td align="left">设置 Redis 连接密码，如果配置了连接密码，客户端在连接 Redis 时需要通过 AUTH [password] 命令提供密码，默认关闭</td>
+</tr>
+<tr>
+<td align="left">16</td>
+<td align="left"><code> maxclients 128</code></td>
+<td align="left">设置同一时间最大客户端连接数，默认无限制，Redis 可以同时打开的客户端连接数为 Redis 进程可以打开的最大文件描述符数，如果设置 maxclients 0，表示不作限制。当客户端连接数到达限制时，Redis 会关闭新的连接并向客户端返回 max number of clients reached 错误信息</td>
+</tr>
+<tr>
+<td align="left">17</td>
+<td align="left"><code>maxmemory &lt;bytes&gt;</code></td>
+<td align="left">指定 Redis 最大内存限制，Redis 在启动时会把数据加载到内存中，达到最大内存后，Redis 会先尝试清除已到期或即将到期的 Key，当此方法处理 后，仍然到达最大内存设置，将无法再进行写入操作，但仍然可以进行读取操作。Redis 新的 vm 机制，会把 Key 存放内存，Value 会存放在 swap 区</td>
+</tr>
+<tr>
+<td align="left">18</td>
+<td align="left"><code>appendonly no</code></td>
+<td align="left">指定是否在每次更新操作后进行日志记录，Redis 在默认情况下是异步的把数据写入磁盘，如果不开启，可能会在断电时导致一段时间内的数据丢失。因为 redis 本身同步数据文件是按上面 save 条件来同步的，所以有的数据会在一段时间内只存在于内存中。默认为 no</td>
+</tr>
+<tr>
+<td align="left">19</td>
+<td align="left"><code>appendfilename appendonly.aof</code></td>
+<td align="left">指定更新日志文件名，默认为 appendonly.aof</td>
+</tr>
+<tr>
+<td align="left">20</td>
+<td align="left"><code>appendfsync everysec</code></td>
+<td align="left">指定更新日志条件，共有 3 个可选值：<strong>no</strong>：表示等操作系统进行数据缓存同步到磁盘（快）<strong>always</strong>：表示每次更新操作后手动调用 fsync() 将数据写到磁盘（慢，安全）<strong>everysec</strong>：表示每秒同步一次（折中，默认值）</td>
+</tr>
+<tr>
+<td align="left">21</td>
+<td align="left"><code>vm-enabled no</code></td>
+<td align="left">指定是否启用虚拟内存机制，默认值为 no，简单的介绍一下，VM 机制将数据分页存放，由 Redis 将访问量较少的页即冷数据 swap 到磁盘上，访问多的页面由磁盘自动换出到内存中（在后面的文章我会仔细分析 Redis 的 VM 机制）</td>
+</tr>
+<tr>
+<td align="left">22</td>
+<td align="left"><code>vm-swap-file /tmp/redis.swap</code></td>
+<td align="left">虚拟内存文件路径，默认值为 &#x2F;tmp&#x2F;redis.swap，不可多个 Redis 实例共享</td>
+</tr>
+<tr>
+<td align="left">23</td>
+<td align="left"><code>vm-max-memory 0</code></td>
+<td align="left">将所有大于 vm-max-memory 的数据存入虚拟内存，无论 vm-max-memory 设置多小，所有索引数据都是内存存储的(Redis 的索引数据 就是 keys)，也就是说，当 vm-max-memory 设置为 0 的时候，其实是所有 value 都存在于磁盘。默认值为 0</td>
+</tr>
+<tr>
+<td align="left">24</td>
+<td align="left"><code>vm-page-size 32</code></td>
+<td align="left">Redis swap 文件分成了很多的 page，一个对象可以保存在多个 page 上面，但一个 page 上不能被多个对象共享，vm-page-size 是要根据存储的 数据大小来设定的，作者建议如果存储很多小对象，page 大小最好设置为 32 或者 64bytes；如果存储很大大对象，则可以使用更大的 page，如果不确定，就使用默认值</td>
+</tr>
+<tr>
+<td align="left">25</td>
+<td align="left"><code>vm-pages 134217728</code></td>
+<td align="left">设置 swap 文件中的 page 数量，由于页表（一种表示页面空闲或使用的 bitmap）是在放在内存中的，，在磁盘上每 8 个 pages 将消耗 1byte 的内存。</td>
+</tr>
+<tr>
+<td align="left">26</td>
+<td align="left"><code>vm-max-threads 4</code></td>
+<td align="left">设置访问swap文件的线程数,最好不要超过机器的核数,如果设置为0,那么所有对swap文件的操作都是串行的，可能会造成比较长时间的延迟。默认值为4</td>
+</tr>
+<tr>
+<td align="left">27</td>
+<td align="left"><code>glueoutputbuf yes</code></td>
+<td align="left">设置在向客户端应答时，是否把较小的包合并为一个包发送，默认为开启</td>
+</tr>
+<tr>
+<td align="left">28</td>
+<td align="left"><code>hash-max-zipmap-entries 64 hash-max-zipmap-value 512</code></td>
+<td align="left">指定在超过一定的数量或者最大的元素超过某一临界值时，采用一种特殊的哈希算法</td>
+</tr>
+<tr>
+<td align="left">29</td>
+<td align="left"><code>activerehashing yes</code></td>
+<td align="left">指定是否激活重置哈希，默认为开启（后面在介绍 Redis 的哈希算法时具体介绍）</td>
+</tr>
+<tr>
+<td align="left">30</td>
+<td align="left"><code>include /path/to/local.conf</code></td>
+<td align="left">指定包含其它的配置文件，可以在同一主机上多个Redis实例之间使用同一份配置文件，而同时各个实例又拥有自己的特定配置文件</td>
+</tr>
+</tbody></table>
+<h1 id="redis设置远程连接"><a href="#redis设置远程连接" class="headerlink" title="redis设置远程连接"></a><a target="_blank" rel="noopener" href="https://www.cnblogs.com/liuxiutianxia/p/11057120.html">redis设置远程连接</a></h1><h4 id="1、修改redis服务器的配置文件"><a href="#1、修改redis服务器的配置文件" class="headerlink" title="1、修改redis服务器的配置文件"></a>1、修改redis服务器的配置文件</h4><p>　　本机安装的redis-4.0.14默认的配置文件 redis.conf 设置</p>
+<p>　　绑定本机地址：bind 127.0.0.1</p>
+<p>　　开启保护模式：protected-mode yes</p>
+<p>　　此时连接，服务器是拒绝的</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@fjgh redis]# ./redis-cli -h 192.168.100.109 -p 6379``Could not connect to Redis at 192.168.100.109:6379: Connection refused``Could not connect to Redis at 192.168.100.109:6379: Connection refused``not connected&gt; eixt</span><br></pre></td></tr></table></figure>
+
+<p>　　</p>
+<p>​ 配置文件比较大，我们通过ctrl + F 查找关键字修改为：</p>
+<p>　　bind 0.0.0.0</p>
+<p>　　protected-mode no</p>
+<h3 id="设置后台启动redis"><a href="#设置后台启动redis" class="headerlink" title="设置后台启动redis"></a>设置后台启动redis</h3><p>​ 1）、首先编辑conf文件，将daemonize属性改为yes（表明需要在后台运行）</p>
+<p>​ cd etc&#x2F;<br>​ vim redis.conf</p>
+<p>daemonize ye</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2023/09/04/redis/">https://yhao521.github.io/2023/09/04/redis/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2023/09/04/sqladvice/" title="sqladvice"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">sqladvice</div></div><div class="info-2"><div class="info-item-1"> title: sqladvicedate: 2023-09-03 20:17:08category:  数据库 MySQL监控和运维tag: MySQL监控和运维author:   快速教程 https://github.com/Meituan-Dianping/SQLAdvisor/blob/master/doc/QUICK_START.md 1. SQLAdvisor安装1.1 拉取最新代码centos7安装 1git clone https://github.com/Meituan-Dianping/SQLAdvisor.git  若有失败，多试几次  1.2 安装依赖项12345sudo yum install -y cmake libaio-devel libffi-devel glib2 glib2-develsudo yum install http://www.percona.com/downloads/percona-release/redhat/0.1-3/percona-release-0.1-3.noarch.rpmsudo yum install -y...</div></div></div></a><a class="pagination-related" href="/2023/09/04/springboot%E9%9B%86%E6%88%90jedis/" title="springboot集成jedis"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">springboot集成jedis</div></div><div class="info-2"><div class="info-item-1"> title: Spring Boot集成Jedis运行问题lang: en-USdate: 2023-09-03 20:17:08category:  开发语言 java springtag: springauthor:   集成运行问题No qualifying bean of type ‘org.springframework.data.redis.connection.RedisC 原因：我们在pom.xml中引入了spring-boot-starter-data-redis却没有引入redis.client;或在打包过程中有其他依赖冲突等问题，造成打包后不存在jedis包 解决方式：增加redis client依赖；版本有重复则需要明确版本，并唯一。 123456&lt;dependency&gt;    &lt;groupId&gt;redis.clients&lt;/groupId&gt;    &lt;artifactId&gt;jedis&lt;/artifactId&gt;    &lt;version&gt;2.10.2&lt;/version&gt;&lt...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/JVM%20%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E5%B7%A5%E5%85%B7/" title="JVM 常见问题排查工具"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">JVM 常见问题排查工具</div></div><div class="info-2"><div class="info-item-1"> title: JVM 常见问题排查工具date: 2023-09-03 20:17:08category: tag: author:  一. 背景 在使用 Java开发的过程中， 可能会碰到 线程卡死，cpu高耗， 内存泄漏OOM等问题， 因此需要一些工具和方法排查相关问题。 二. JDK 自带工具使用介绍 常用的 JDK 自带的工具主要包括 jps， jstat, jstack, jinfo 等。 1. jps主要用来打印主机上运行 Java 进程号， 和 ps -ef |grep xxx 效果是一样的 。  2. jstat一般用来监控 JVM 的 gc情况， class加载情况 。 使用用法 ： (1) 监控 JVM GC 情况 ： jstat -gcutil [pid] 1000 10 监控指定 Java 进程的 gc概况, 每 1000ms 打印一次，一共打印 10次 。  如果需要监控 gc 更详细的信息， 可以将 -gcutil 选项替换为其他参数 ：  -gc -gccapacity -gccause -gcmetacapacity -gcnew -gcnewc...</div></div></div></a><a class="pagination-related" href="/2024/07/17/Docker%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%20(28)%20-%20%E5%9C%A8%20Dockerfile%20%E4%B8%AD%E4%BB%A5%20scratch%20%E4%B8%BA%E5%9F%BA%E7%A1%80%E9%95%9C%E5%83%8F%20(F/" title="Docker基础知识 (28) - 在 Dockerfile 中以 scratch 为基础镜像 (FROM scratch)"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-17</div><div class="info-item-2">Docker基础知识 (28) - 在 Dockerfile 中以 scratch 为基础镜像 (FROM scratch)</div></div><div class="info-2"><div class="info-item-1">Docker基础知识 (28) - 在 Dockerfile 中以 scratch 为基础镜像 (FROM scratch)通常使用 Docker 镜像时会以一个已存在的镜像为基础，在其上进行定制，这个已存在的镜像就是基础镜像。 在 DockerFile 中必须指定基础镜像，FROM 指令就是用于指定基础镜像，因此一个 Dockerfile 中 FROM 是必备的指令，并且必须是第一条指令。 Docker 还存在一个特殊的镜像，名为 scratch。这个镜像是虚拟的概念，并不实际存在，它表示一个空白的镜像。在 Dockerfile 中以 scratch 为基础镜像 (FROM scratch)，意味着不以任何镜像为基础，接下来所写的指令将作为镜像第一层开始存在。 对于 Linux 下静态编译的程序来说，并不需要有操作系统提供运行时支持，所需的一切库都已经在可执行文件里了，因此直接 FROM scratch 会让镜像体积更加小巧。使用 Go 语言开发的应用很多会使用这种方式来制作镜像，这也是为什么有人认为 Go 是特别适合容器微服务架构的语言的原因之一。 1. 创建基于静态编译的 ...</div></div></div></a><a class="pagination-related" href="/2024/03/09/%E4%BF%9D%E5%A7%86%E7%BA%A7Git%E6%95%99%E7%A8%8B%EF%BC%8C10000%E5%AD%97%E8%AF%A6%E8%A7%A3/" title="保姆级Git教程，10000字详解"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-09</div><div class="info-item-2">保姆级Git教程，10000字详解</div></div><div class="info-2"><div class="info-item-1">大家好，我是雷小帅。 最近群里有几位老哥私我，有没有好的 git 入门资料，想学一下。 偶然看到这个很棒的教程推荐给大家，大家可以看一下，另外还有一个不错的 git 入门网站，也推荐给大家，可以搭配使用。 https://learngitbranching.js.org/?locale=zh_CN    Git简介 实用主义 准备阶段 常用操作 git clone git config git branch git checkout git status git add git commit git push git pull git log git tag .gitignore 小结     深入探索 基本概念 工作区（Working Directory） 本地版本库（Local Repository） 暂存区（stage） 远程版本库（Remote Repository） 以上概念之间的关系 分支（Branch） 主分支（Master） 标签（Tag） HEAD   操作文件 git add git commit git mv git rm git status   操作分支...</div></div></div></a><a class="pagination-related" href="/2023/09/04/influxdb%E5%AE%89%E8%A3%85/" title="influxdb安装"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">influxdb安装</div></div><div class="info-2"><div class="info-item-1"> title: influxdb安装date: 2023-09-03 20:17:08category:  数据库 doc_influxdbtag: doc_influxdbauthor:   1. influxdb 安装安装位置：    主机 172.18.231.119    位置 &#x2F;paas&#x2F;iddbs&#x2F;a-tools&#x2F;influxdb1.7.4&#x2F;usr&#x2F;bin   端口 25001   客户端连接命令 .&#x2F;influx -precision rfc3339 -host 172.18.231.123 -port 25001    .&#x2F;influx -precision rfc3339 -host 172.18.231.123 -port 25001 -precision rfc3339 时间格式是字符串 -precision rfc333 时间格式是时间戳 启动&amp;停止 nohup &#x2F;paas&#x2F;iddbs&#x2F;crds_web&#x2F;influxdb1.7.4...</div></div></div></a><a class="pagination-related" href="/2023/09/04/java%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86/" title="java代码混淆"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">java代码混淆</div></div><div class="info-2"><div class="info-item-1"> title: java代码混淆date: 2023-09-03 20:17:08category: tag: author:  java代码混淆Spring Boot使用Allatori代码混淆的方法商业收费，不考虑 Allatori混淆技术介绍 :Allatori是一个Java 混淆器，它属于第二代混淆器，因此它能够全方位地保护你的知识产权。 Allatori具有以下几种保护方式：命名混淆，流混淆，调试信息混淆，字符串混淆，以及水印技术。对于教育和非商业项目来说这个混淆器是免费的。支持war和jar文件格式，并且允许对需要混淆代码的应用程序添加有效日期。 有项目需要对代码进行保护，比较初级的方案就是对代码进行混淆，打包之后的文件进行反编译后，就可以看到效果。此外，使用Allatori打的包体积也会小一点。 jni 加密一款软件工具 工具是对java class文件进行加密保护防止反编译的工具！本工具全面支持linux&#x2F;unix&#x2F;windows操作系统。继推出v1.0版本后，获得了用户大量的支持与的反馈，我们再次推出本v2.0版，对加密算法进行了更大的改进，...</div></div></div></a><a class="pagination-related" href="/2025/03/16/%E5%9C%A8%E6%B5%8F%E8%A7%88%E5%99%A8%E4%B8%AD%E5%BF%AB%E9%80%9F%E6%8E%A2%E6%B5%8BIP%E7%AB%AF%E5%8F%A3%E6%98%AF%E5%90%A6%E5%BC%80%E6%94%BE/" title="在浏览器中快速探测IP端口是否开放"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-16</div><div class="info-item-2">在浏览器中快速探测IP端口是否开放</div></div><div class="info-2"><div class="info-item-1">0×00 前言前两天 freebuf上的的XSS到内网的公开课很受启发，从一个页面到局域网，威力着实增强不少 公开课上检测内网 IP 实现方式用的是 img 标签，加载网站的 favicon.ico 图标，然后监听 onload 事件，看图片能不能加载成功简单易用，就是太慢了 –  0×02 分析浏览器有几秒的尝试容错时间，对于媒体资源，浏览器限制同一域名并发请求为个位数（一般为 6 个），也就是说，把图片全放到页面上，也不能同时开始检测，只能一点一点来，扫端口的时候会非常慢。 管理员在内网搭建的东西也可能没有图标。。。 探测 IP 端口开放原理就是向目标发送请求，看是否有回应。在上面的 img 中是在加载成功和失败体现出来的。img 嫌慢也可以试试别的嘛，经过一番搜索找到了这个，这个和这个。 第一个页面:1document.getElementById(&quot;testdiv&quot;).innerHTML = &#x27;&lt;img src=&quot;http://&#x27; + ip + &#x27;:&#x27; + port + &#x27;&quot; ...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Redis-%E5%AE%89%E8%A3%85"><span class="toc-number">1.</span> <span class="toc-text">Redis 安装</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Windows-%E4%B8%8B%E5%AE%89%E8%A3%85"><span class="toc-number">1.1.</span> <span class="toc-text">Windows 下安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Linux-%E6%BA%90%E7%A0%81%E5%AE%89%E8%A3%85"><span class="toc-number">1.2.</span> <span class="toc-text">Linux 源码安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Ubuntu-apt-%E5%91%BD%E4%BB%A4%E5%AE%89%E8%A3%85"><span class="toc-number">1.3.</span> <span class="toc-text">Ubuntu apt 命令安装</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%AF%E5%8A%A8-Redis"><span class="toc-number">1.3.1.</span> <span class="toc-text">启动 Redis</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B-redis-%E6%98%AF%E5%90%A6%E5%90%AF%E5%8A%A8%EF%BC%9F"><span class="toc-number">1.3.2.</span> <span class="toc-text">查看 redis 是否启动？</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Redis-%E9%85%8D%E7%BD%AE"><span class="toc-number">2.</span> <span class="toc-text">Redis 配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%AD%E6%B3%95Redis-CONFIG-%E5%91%BD%E4%BB%A4%E6%A0%BC%E5%BC%8F%E5%A6%82%E4%B8%8B%EF%BC%9Aredis-127-0-0-1-6379-CONFIG-GET-CONFIG-SETTING-NAME"><span class="toc-number">2.1.</span> <span class="toc-text">语法Redis CONFIG 命令格式如下：redis 127.0.0.1:6379&gt; CONFIG GET CONFIG_SETTING_NAME</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E4%BE%8B"><span class="toc-number">2.2.</span> <span class="toc-text">实例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E4%BE%8B-1"><span class="toc-number">2.3.</span> <span class="toc-text">实例</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%96%E8%BE%91%E9%85%8D%E7%BD%AE"><span class="toc-number">2.4.</span> <span class="toc-text">编辑配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%AD%E6%B3%95"><span class="toc-number">2.4.1.</span> <span class="toc-text">语法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E4%BE%8B-2"><span class="toc-number">2.4.2.</span> <span class="toc-text">实例</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E6%95%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">2.5.</span> <span class="toc-text">参数说明</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#redis%E8%AE%BE%E7%BD%AE%E8%BF%9C%E7%A8%8B%E8%BF%9E%E6%8E%A5"><span class="toc-number">3.</span> <span class="toc-text">redis设置远程连接</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1%E3%80%81%E4%BF%AE%E6%94%B9redis%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="toc-number">3.1.</span> <span class="toc-text">1、修改redis服务器的配置文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%BE%E7%BD%AE%E5%90%8E%E5%8F%B0%E5%90%AF%E5%8A%A8redis"><span class="toc-number">3.2.</span> <span class="toc-text">设置后台启动redis</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

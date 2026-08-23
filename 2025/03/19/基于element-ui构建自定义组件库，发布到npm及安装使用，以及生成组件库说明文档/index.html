@@ -1,0 +1,320 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>基于element-ui构建自定义组件库，发布到npm及安装使用，以及生成组件库说明文档 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="叙述说明为了更易于多个项目使用同一套组件库，基于element-ui封装了一套常用组件的组件库。  ps：我的组件库是基于vue-cli4，element-ui 14.1版本构建的  构建自定义组件库src&#x2F;packages组件库创建1.项目目录结构介绍(1)创建组件所需要的文件夹，创建注册自定义组件文件index.js (2)在组件文件夹下创建src，安装导出文件index.js (3">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于element-ui构建自定义组件库，发布到npm及安装使用，以及生成组件库说明文档">
+<meta property="og:url" content="https://yhao521.github.io/2025/03/19/%E5%9F%BA%E4%BA%8Eelement-ui%E6%9E%84%E5%BB%BA%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BB%84%E4%BB%B6%E5%BA%93%EF%BC%8C%E5%8F%91%E5%B8%83%E5%88%B0npm%E5%8F%8A%E5%AE%89%E8%A3%85%E4%BD%BF%E7%94%A8%EF%BC%8C%E4%BB%A5%E5%8F%8A%E7%94%9F%E6%88%90%E7%BB%84%E4%BB%B6%E5%BA%93%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="叙述说明为了更易于多个项目使用同一套组件库，基于element-ui封装了一套常用组件的组件库。  ps：我的组件库是基于vue-cli4，element-ui 14.1版本构建的  构建自定义组件库src&#x2F;packages组件库创建1.项目目录结构介绍(1)创建组件所需要的文件夹，创建注册自定义组件文件index.js (2)在组件文件夹下创建src，安装导出文件index.js (3">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2025-03-18T19:20:40.000Z">
+<meta property="article:modified_time" content="2025-03-18T19:20:40.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="vue">
+<meta property="article:tag" content="web&#x2F;frontend">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "基于element-ui构建自定义组件库，发布到npm及安装使用，以及生成组件库说明文档",
+  "url": "https://yhao521.github.io/2025/03/19/%E5%9F%BA%E4%BA%8Eelement-ui%E6%9E%84%E5%BB%BA%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BB%84%E4%BB%B6%E5%BA%93%EF%BC%8C%E5%8F%91%E5%B8%83%E5%88%B0npm%E5%8F%8A%E5%AE%89%E8%A3%85%E4%BD%BF%E7%94%A8%EF%BC%8C%E4%BB%A5%E5%8F%8A%E7%94%9F%E6%88%90%E7%BB%84%E4%BB%B6%E5%BA%93%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2025-03-18T19:20:40.000Z",
+  "dateModified": "2025-03-18T19:20:40.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2025/03/19/%E5%9F%BA%E4%BA%8Eelement-ui%E6%9E%84%E5%BB%BA%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BB%84%E4%BB%B6%E5%BA%93%EF%BC%8C%E5%8F%91%E5%B8%83%E5%88%B0npm%E5%8F%8A%E5%AE%89%E8%A3%85%E4%BD%BF%E7%94%A8%EF%BC%8C%E4%BB%A5%E5%8F%8A%E7%94%9F%E6%88%90%E7%BB%84%E4%BB%B6%E5%BA%93%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '基于element-ui构建自定义组件库，发布到npm及安装使用，以及生成组件库说明文档',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">基于element-ui构建自定义组件库，发布到npm及安装使用，以及生成组件库说明文档</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">基于element-ui构建自定义组件库，发布到npm及安装使用，以及生成组件库说明文档</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-03-18T19:20:40.000Z" title="发表于 2025-03-19 03:20:40">2025-03-19</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-03-18T19:20:40.000Z" title="更新于 2025-03-19 03:20:40">2025-03-19</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h2 id="叙述说明"><a href="#叙述说明" class="headerlink" title="叙述说明"></a>叙述说明</h2><p><strong>为了更易于多个项目使用同一套组件库，基于element-ui封装了一套常用组件的组件库。</strong></p>
+<blockquote>
+<p>ps：我的组件库是基于<a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=163134969&content_type=Article&match_order=1&q=vue-cli4&zd_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ6aGlkYV9zZXJ2ZXIiLCJleHAiOjE3NDI1MjY4ODUsInEiOiJ2dWUtY2xpNCIsInpoaWRhX3NvdXJjZSI6ImVudGl0eSIsImNvbnRlbnRfaWQiOjE2MzEzNDk2OSwiY29udGVudF90eXBlIjoiQXJ0aWNsZSIsIm1hdGNoX29yZGVyIjoxLCJ6ZF90b2tlbiI6bnVsbH0.IAYtp5YAB0J2dQmvazZd8pjjxTE6-XOR65SgmewcW9U&zhida_source=entity">vue-cli4</a>，element-ui 14.1版本构建的</p>
+</blockquote>
+<h2 id="构建自定义组件库"><a href="#构建自定义组件库" class="headerlink" title="构建自定义组件库"></a><strong>构建自定义组件库</strong></h2><h2 id="src-packages组件库创建"><a href="#src-packages组件库创建" class="headerlink" title="src&#x2F;packages组件库创建"></a><strong>src&#x2F;packages组件库创建</strong></h2><h3 id="1-项目目录结构介绍"><a href="#1-项目目录结构介绍" class="headerlink" title="1.项目目录结构介绍"></a><strong>1.项目<a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=163134969&content_type=Article&match_order=1&q=%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84&zd_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ6aGlkYV9zZXJ2ZXIiLCJleHAiOjE3NDI1MjY4ODUsInEiOiLnm67lvZXnu5PmnoQiLCJ6aGlkYV9zb3VyY2UiOiJlbnRpdHkiLCJjb250ZW50X2lkIjoxNjMxMzQ5NjksImNvbnRlbnRfdHlwZSI6IkFydGljbGUiLCJtYXRjaF9vcmRlciI6MSwiemRfdG9rZW4iOm51bGx9.hD6QUbjJL9RbDdR3oXhbsuPMYveRaLA-RxdpjsA6X6c&zhida_source=entity">目录结构</a>介绍</strong></h3><p>(1)创建组件所需要的文件夹，创建注册自定义组件文件index.js</p>
+<p>(2)在组件文件夹下创建src，安装导出文件index.js</p>
+<p>(3)将组件放入src下</p>
+<p><img src="https://picx.zhimg.com/v2-d48530479bd8d115ddcac8f0564ea209_1440w.jpg"></p>
+<p>整体构建项目工程示例图</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&lt;!-- 目录结构如下  --&gt;</span><br><span class="line">src</span><br><span class="line">├── packages</span><br><span class="line">│   ├── component1 自定义组件1</span><br><span class="line">│   │   ├── src</span><br><span class="line">│   │   │   ├── component-name.vue 组件文件</span><br><span class="line">│   │   └── index.js 安装导出组件文件</span><br><span class="line">│   └── index.js 注册自定义组件文件</span><br><span class="line">│   ├──  component2 自定义组件2</span><br><span class="line">│   └── ...</span><br><span class="line">└── ...</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-封装组件示例"><a href="#2-封装组件示例" class="headerlink" title="2.封装组件示例"></a>2.封装组件示例</h3><blockquote>
+<p>以封装dialog组件为例，作简单说明：</p>
+</blockquote>
+<p><img src="https://pic4.zhimg.com/v2-c5dd8d4f914a9bea62b302a9888ace75_r.jpg"></p>
+<p>src&#x2F;packages&#x2F;dialog&#x2F;src&#x2F;my-dialog.vue</p>
+<p><img src="https://pic4.zhimg.com/v2-ca4be69fc859b5985d657e621c638df3_r.jpg"></p>
+<p>src&#x2F;packages&#x2F;dialog&#x2F;index.js</p>
+<p><img src="https://pic3.zhimg.com/v2-d14ba91ce18e7b647a9cd97f664d6d2a_r.jpg"></p>
+<p>src&#x2F;packages&#x2F;index.js</p>
+<h3 id="3-其他配置说明"><a href="#3-其他配置说明" class="headerlink" title="3.其他配置说明"></a>3.其他配置说明</h3><blockquote>
+<p>具体的组件封装细节请根据业务实际去做逻辑处理，这里不多说啦。这里主要描述些配置以及相关步骤命令</p>
+</blockquote>
+<p>(1)package.json添加相关配置</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">相关配置添加在 package.json 文件</span><br><span class="line"> &quot;name&quot;: &quot;xxx-component&quot;, # 包名，即对应发布到npm上的包名</span><br><span class="line"> &quot;version&quot;: &quot;0.1.0&quot;, # 版本号</span><br><span class="line"> &quot;private&quot;: false, # 是否私有化，发布到npm的话建议是改为false</span><br><span class="line"> &quot;main&quot;: &quot;dist/my-component-ui.js&quot;, # 入口文件</span><br><span class="line"></span><br><span class="line"> &quot;scripts&quot;: &#123;</span><br><span class="line">     #新增执行命令方式</span><br><span class="line">     &quot;lib&quot;: &quot;vue-cli-service build --target lib --name my-component --dest lib ./src/packages/index.js&quot;</span><br><span class="line"> &#125;,</span><br></pre></td></tr></table></figure>
+
+<p>(2)组件库开发完成后 执行 npm run lib 即可打包编译</p>
+<hr>
+<h2 id="发布、更新自定义组件库的版本与撤销"><a href="#发布、更新自定义组件库的版本与撤销" class="headerlink" title="发布、更新自定义组件库的版本与撤销"></a>发布、更新<strong>自定义组件库的版本与撤销</strong></h2><p>前提：需要注册有npm的账号(<a target="_blank" rel="noopener" href="https://www.npmjs.com/">npm | build amazing things</a>)，同时需要有node以及npm的运行环境。控制台进入项目根目录下操作</p>
+<blockquote>
+<p>首次发布可到npm官网上(<a target="_blank" rel="noopener" href="https://www.npmjs.com/">npm | build amazing things</a>)搜索下是否与自己命名的包名重名，包名需唯一才可发布； npm login 登录 <a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=163134969&content_type=Article&match_order=1&q=npm+publish&zd_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ6aGlkYV9zZXJ2ZXIiLCJleHAiOjE3NDI1MjY4ODUsInEiOiJucG0gcHVibGlzaCIsInpoaWRhX3NvdXJjZSI6ImVudGl0eSIsImNvbnRlbnRfaWQiOjE2MzEzNDk2OSwiY29udGVudF90eXBlIjoiQXJ0aWNsZSIsIm1hdGNoX29yZGVyIjoxLCJ6ZF90b2tlbiI6bnVsbH0._8nBFI3PfnXTJbIKVWP4XrIy8zAgmOdahUmf4B32xSQ&zhida_source=entity">npm publish</a> 发布</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">检测 npm 环境</span><br><span class="line"> npm config get registry   </span><br><span class="line">    </span><br><span class="line"> 若安装了nrm工具，可用nrm工具切换，如果没有安装，可用以下的方式进行切换</span><br><span class="line"> 切换至npm</span><br><span class="line"> npm config set registry https://registry.npmjs.org</span><br><span class="line">   </span><br><span class="line"> 切换至cnpm</span><br><span class="line"> npm config set registry https://registry.npm.taobao.org</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-更新步骤"><a href="#1-更新步骤" class="headerlink" title="1.更新步骤"></a>1.更新步骤</h3><p>(1) 查看当前已发布的包版本</p>
+<blockquote>
+<p>npm view xxx-component versions</p>
+</blockquote>
+<p>(2) 发布前需更新发布的本地包的版本号</p>
+<blockquote>
+<p>npm version &lt;version_type&gt;</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">自动修改package.json版本号，version_type参数：</span><br><span class="line"> patch：这个是小修补，补丁版本，如：V1.0.1</span><br><span class="line"> minor：这个是修改较小或新增些小功能，次版本，如：V1.1.1</span><br><span class="line"> major：这个是大改，主版本，如：V2.1.1</span><br><span class="line"> preminor：这个是预发布，后面多了个0，如：V1.1.0-0  </span><br></pre></td></tr></table></figure>
+
+<p>(3) 发布更新npm组件库，登录npm</p>
+<blockquote>
+<p>npm login 输入账号、密码、以及关联的邮箱</p>
+</blockquote>
+<p>(4) 发布 npm publish，注意：发布需要在npm环境下才可，如不是，请切换</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">ps: 撤销发布的命令为 npm unpublish，不允许撤销发布已经超过24小时的包</span><br><span class="line"></span><br><span class="line"> ps：加 --force参数重新撤销发布，在24小时内撤销</span><br><span class="line"> npm unpublish xxx-component --force</span><br><span class="line"></span><br><span class="line"> ps：即使撤销了发布的包，再次发布的时候也不能与之前被撤销的包的名称/版本其中之一相同，因为这两者构成的唯一性已经被占用，官方并没有随着撤销而删除</span><br><span class="line"></span><br><span class="line"> ※ npm unpublish的推荐替代命令：npm deprecate &lt;pkg&gt;[@&lt;version&gt;] &lt;message&gt;</span><br><span class="line"> 这个命令，并不会在npm上里撤销已有的包，但会在任何人尝试安装这个包的时候得到deprecated的警告，例如：</span><br><span class="line"> npm deprecate xxx-component &#x27;this package is no longer maintained&#x27; </span><br></pre></td></tr></table></figure>
+
+<h3 id="2-发布成功示例"><a href="#2-发布成功示例" class="headerlink" title="2.发布成功示例"></a>2.发布成功示例</h3><p>发布成功后可去npm官网查看发布的库</p>
+<p><img src="https://picx.zhimg.com/v2-2f9d611539feb7098ff5110e8c9773c3_r.jpg"></p>
+<p>npm成功发布示例图</p>
+<p>耶~成功啦</p>
+<hr>
+<h2 id="xxx-component自定义组件的引用及使用说明"><a href="#xxx-component自定义组件的引用及使用说明" class="headerlink" title="xxx-component自定义组件的引用及使用说明"></a><strong>xxx-component自定义组件的引用及使用说明</strong></h2><blockquote>
+<p>本组件是基于<a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=163134969&content_type=Article&match_order=3&q=element-ui&zd_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ6aGlkYV9zZXJ2ZXIiLCJleHAiOjE3NDI1MjY4ODUsInEiOiJlbGVtZW50LXVpIiwiemhpZGFfc291cmNlIjoiZW50aXR5IiwiY29udGVudF9pZCI6MTYzMTM0OTY5LCJjb250ZW50X3R5cGUiOiJBcnRpY2xlIiwibWF0Y2hfb3JkZXIiOjMsInpkX3Rva2VuIjpudWxsfQ._bvlMZG-uIe_HuzXWRedBfMSZrMwNr0CiM03sxel3_Y&zhida_source=entity">element-ui</a> 14.1版本封装并发布到npm上的自定义组件库，同时也需要安装并使用element-ui</p>
+</blockquote>
+<h3 id="示例：my-dialog-调用方式"><a href="#示例：my-dialog-调用方式" class="headerlink" title="示例：my-dialog 调用方式"></a>示例：my-dialog 调用方式</h3><blockquote>
+<p>在你的项目中通过npm安装，在项目中引入使用即可</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1. 全局安装注册使用 </span><br><span class="line">    npm i xxx-component -S，</span><br><span class="line">2. main.js引入使用</span><br><span class="line">    import MyComponent from &quot;xxx-component/lib/my-component.umd.js&quot;;</span><br><span class="line">    Vue.use(MyComponent);</span><br><span class="line"></span><br><span class="line">3. 页面使用所需要的组件 </span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>代码示例</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">&lt;template&gt;</span><br><span class="line">    &lt;div&gt;</span><br><span class="line">   &lt;el-button@click=&quot;dialogVisible=true&quot;&gt;demo&lt;/el-button&gt;</span><br><span class="line">    &lt;my-dialog</span><br><span class="line">        :dialogTitle.sync=&quot;dialogTitle&quot;</span><br><span class="line">        :dialogVisible.sync=&quot;dialogVisible&quot;</span><br><span class="line">        :confirmCss=&quot;&#123; background: &#x27;#081f5b&#x27; &#125;&quot;</span><br><span class="line">        :footerBtnPosition=&quot;&#x27;left&#x27;&quot;</span><br><span class="line">        @handleConfirm=&quot;handleConfirm&quot;</span><br><span class="line">    &gt;</span><br><span class="line">        &lt;div slot=&quot;modal-search&quot;&gt;</span><br><span class="line">            &lt;el-input size=&quot;small&quot;&gt;&lt;/el-input&gt;</span><br><span class="line">        &lt;/div&gt;</span><br><span class="line">        &lt;span ref=&quot;dialogRef&quot; slot=&quot;modal-body&quot;&gt;111111111111111111111111111&lt;/span&gt;</span><br><span class="line">    &lt;/my-dialog&gt;</span><br><span class="line">    &lt;/div&gt;</span><br><span class="line">&lt;/template&gt;</span><br><span class="line">&lt;script&gt;</span><br><span class="line">    data() &#123;</span><br><span class="line">        return &#123;</span><br><span class="line">            dialogTitle: &quot;测试弹窗&quot;,</span><br><span class="line">            dialogVisible: false</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;,</span><br><span class="line">    methods: &#123;</span><br><span class="line">        handleConfirm() &#123;</span><br><span class="line">            // this.dialogVisible = false;</span><br><span class="line">            console.log(&quot;--&quot;, this.$refs);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&lt;/script&gt; </span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>成功示例界面</p>
+</blockquote>
+<p><img src="https://picx.zhimg.com/v2-23b8744f11479fb57952c013f9cda2f7_r.jpg"></p>
+<p>调用demo组件成功示例图</p>
+<hr>
+<h2 id="生成组件库Md使用文档"><a href="#生成组件库Md使用文档" class="headerlink" title="生成组件库Md使用文档"></a><strong>生成</strong>组件库Md使用<strong>文档</strong></h2><p>基于vue项目，尝试使用github-markdown-css和vue-markdown-loader两个插件来实现预览MD文档说明</p>
+<p><img src="https://pic1.zhimg.com/v2-9e9db5646524875f6af29a35f40be4f4_r.jpg"></p>
+<p>md文档转换示例效果</p>
+<h3 id="主要实现的步骤流程如下："><a href="#主要实现的步骤流程如下：" class="headerlink" title="主要实现的步骤流程如下："></a>主要实现的步骤流程如下：</h3><h3 id="1-安装github-markdown-css和vue-markdown-loader"><a href="#1-安装github-markdown-css和vue-markdown-loader" class="headerlink" title="1.安装github-markdown-css和vue-markdown-loader"></a>1.安装github-markdown-css和vue-markdown-loader</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npm install -D vue-markdown-loader</span><br><span class="line">npm install -S github-markdown-css</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-安装成功后，在main-js文件中引入使用github-markdown-css"><a href="#2-安装成功后，在main-js文件中引入使用github-markdown-css" class="headerlink" title="2.安装成功后，在main.js文件中引入使用github-markdown-css"></a>2.安装成功后，在main.js文件中引入使用github-markdown-css</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">import &quot;github-markdown-css&quot;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-vue-config-js配置vue-markdown-loader"><a href="#3-vue-config-js配置vue-markdown-loader" class="headerlink" title="3.vue.config.js配置vue-markdown-loader"></a>3.vue.config.js配置vue-markdown-loader</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">const path = require(&quot;path&quot;);</span><br><span class="line">function resolve(dir) &#123;</span><br><span class="line"> return path.join(__dirname, dir);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">module.exports = &#123;</span><br><span class="line"> publicPath: &quot;/component-demo/&quot;,</span><br><span class="line"> chainWebpack: config =&gt; &#123;</span><br><span class="line"> config.resolve.alias</span><br><span class="line">      .set(&quot;src&quot;, resolve(&quot;src&quot;))</span><br><span class="line">      .set(&quot;components&quot;, resolve(&quot;src/components&quot;));</span><br><span class="line"> config.module</span><br><span class="line">      .rule(&quot;md&quot;)</span><br><span class="line">      .test(/\.md/)</span><br><span class="line">      .use(&quot;vue-loader&quot;)</span><br><span class="line">      .loader(&quot;vue-loader&quot;)</span><br><span class="line">      .end()</span><br><span class="line">      .use(&quot;vue-markdown-loader&quot;)</span><br><span class="line">      .loader(&quot;vue-markdown-loader/lib/markdown-compiler&quot;)</span><br><span class="line">      .options(&#123;</span><br><span class="line"> raw: true</span><br><span class="line">      &#125;);</span><br><span class="line">  &#125;,</span><br><span class="line"> devServer: &#123;</span><br><span class="line"> open: true,</span><br><span class="line"> host: &quot;0.0.0.0&quot;,</span><br><span class="line"> port: &quot;9021&quot;,</span><br><span class="line"> hotOnly: true</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-动态配置router-js加载配置文件"><a href="#4-动态配置router-js加载配置文件" class="headerlink" title="4.动态配置router.js加载配置文件"></a>4.动态配置router.js加载配置文件</h3><p>主要是在route文件中动态引入md文件，目的是方便修改以及管理</p>
+<p><img src="https://pic2.zhimg.com/v2-6e56b91744125c7a5f8789568559d7fb_r.jpg"></p>
+<p>router动态配置md文件地址</p>
+<h3 id="5-md文件的引入以及添加至配置"><a href="#5-md文件的引入以及添加至配置" class="headerlink" title="(5)md文件的引入以及添加至配置"></a>(5)md文件的引入以及添加至配置</h3><p>这里我是将所有的md文件和相关的入口配置文件放在了src&#x2F;assets目录下，方便查找以及管理</p>
+<p><img src="https://pic2.zhimg.com/v2-60c063e95edd7f92c24c0ec66bc71aa3_1440w.jpg"></p>
+<p>md文件及配置文件目录</p>
+<p><img src="https://pic4.zhimg.com/v2-bd14cd939d1ecf8e84b5ec4d103408ff_r.jpg"></p>
+<p>mdConfig配置相关写法</p>
+<blockquote>
+<p>mdConfig文件主要有name和path两个属性，name是文件名称，path是文件的访问路由。写好相关配置后，我们即可专注在写md文档即可。</p>
+</blockquote>
+<h3 id="6-实际页面使用"><a href="#6-实际页面使用" class="headerlink" title="(6)实际页面使用"></a>(6)实际页面使用</h3><p>Home.vue由于我这个项目是专做组件库说明的项目，相对简单，所以我直接在Home.vue文件直接调用了，没搞得过于复杂，具体示例代码如下：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">&lt;template&gt;</span><br><span class="line">  &lt;div class=&quot;home&quot;&gt;</span><br><span class="line">    &lt;el-header&gt;</span><br><span class="line">      &lt;span @click=&quot;handleHome&quot;&gt;自定义组件库说明文档&lt;/span&gt;</span><br><span class="line">    &lt;/el-header&gt;</span><br><span class="line">    &lt;el-container class=&quot;box-container&quot;&gt;</span><br><span class="line">      &lt;el-aside width=&quot;220px&quot;&gt;</span><br><span class="line">        &lt;el-menu class=&quot;el-menu-vertical-demo&quot; :default-active=&quot;defaultActive&quot;&gt;</span><br><span class="line">          &lt;template v-for=&quot;(item, index) in mdMenu&quot;&gt;</span><br><span class="line">            &lt;el-menu-item</span><br><span class="line">              :index=&quot;item.path&quot;</span><br><span class="line">              :key=&quot;index&quot;</span><br><span class="line">              @click.native=&quot;handleLink(item)&quot;</span><br><span class="line">            &gt;</span><br><span class="line">              &lt;span slot=&quot;title&quot;&gt;&#123;&#123; item.name &#125;&#125;&lt;/span&gt;</span><br><span class="line">            &lt;/el-menu-item&gt;</span><br><span class="line">          &lt;/template&gt;</span><br><span class="line">        &lt;/el-menu&gt;</span><br><span class="line">      &lt;/el-aside&gt;</span><br><span class="line">      &lt;el-main class=&quot;main&quot;&gt;</span><br><span class="line">        &lt;!- class=&quot;markdown-body&quot;这个是结合了github-markdown-css插件做渲染的节点类名，必须要添加的类名，否则样式是不生效的 -&gt;</span><br><span class="line">        &lt;div class=&quot;markdown-body&quot;&gt;</span><br><span class="line">          &lt;router-view v-if=&quot;isComponent&quot;&gt;&lt;/router-view&gt;</span><br><span class="line">          &lt;MdComponent v-else&gt; &lt;/MdComponent&gt;</span><br><span class="line">        &lt;/div&gt;</span><br><span class="line">      &lt;/el-main&gt;</span><br><span class="line">    &lt;/el-container&gt;</span><br><span class="line">  &lt;/div&gt;</span><br><span class="line">&lt;/template&gt;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>js相关代码</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">export default &#123;</span><br><span class="line">  name: &quot;Home&quot;,</span><br><span class="line">  components: &#123;</span><br><span class="line">    MdComponent: () =&gt; import(`src/assets/md/Default.md`)</span><br><span class="line">  &#125;,</span><br><span class="line">  data() &#123;</span><br><span class="line">    return &#123;</span><br><span class="line">      mdMenu: [],</span><br><span class="line">      isComponent: false,</span><br><span class="line">      defaultActive: null</span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;,</span><br><span class="line">  watch: &#123;</span><br><span class="line">    $route(to) &#123;</span><br><span class="line">      this.defaultActive = to.path.split(&quot;/&quot;)[1];</span><br><span class="line">      if (to.path === &quot;/&quot;) &#123;</span><br><span class="line">        this.isComponent = false;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  mounted() &#123;</span><br><span class="line">    // 这里是做高亮处理的简单逻辑，如果想更好可自行优化</span><br><span class="line">    if (window.location.hash != &quot;#/&quot;) &#123;</span><br><span class="line">      this.isComponent = true;</span><br><span class="line">      this.defaultActive = window.location.hash.split(&quot;#/&quot;)[1];</span><br><span class="line">    &#125;</span><br><span class="line">    this.mdMenu = this.$router.options.routes[0].children;</span><br><span class="line">  &#125;,</span><br><span class="line">  methods: &#123;</span><br><span class="line">    handleHome() &#123;</span><br><span class="line">      this.$router.push(&#123;</span><br><span class="line">        path: &quot;/&quot;</span><br><span class="line">      &#125;);</span><br><span class="line">    &#125;,</span><br><span class="line">    handleLink(val) &#123;</span><br><span class="line">      if (this.$route.path != &quot;/&quot; + val.path) &#123;</span><br><span class="line">        this.isComponent = true;</span><br><span class="line">        this.$router.push(&#123;</span><br><span class="line">          path: val.path</span><br><span class="line">        &#125;);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>css相关代码</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">.home &#123;</span><br><span class="line">  overflow: hidden;</span><br><span class="line">&#125;</span><br><span class="line">.el-header &#123;</span><br><span class="line">  line-height: 60px;</span><br><span class="line">  width: 100%;</span><br><span class="line">  position: fixed;</span><br><span class="line">  top: 0;</span><br><span class="line">  z-index: 100;</span><br><span class="line">  box-shadow: 0px 0px 5px rgba(171, 171, 172, 0.3);</span><br><span class="line">  span &#123;</span><br><span class="line">    cursor: pointer;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">.box-container &#123;</span><br><span class="line">  margin: 60px 0 90px;</span><br><span class="line">  position: fixed;</span><br><span class="line">  width: 100%;</span><br><span class="line">  height: 100%;</span><br><span class="line">  padding-bottom: 60px;</span><br><span class="line">&#125;</span><br><span class="line">.el-menu &#123;</span><br><span class="line">  border: none;</span><br><span class="line">&#125;</span><br><span class="line">.el-aside &#123;</span><br><span class="line">  // background-color: rgb(238, 241, 246);</span><br><span class="line">  overflow: hidden;</span><br><span class="line">  height: 100%;</span><br><span class="line">&#125;</span><br><span class="line">.el-aside:hover &#123;</span><br><span class="line">  overflow: auto;</span><br><span class="line">&#125;</span><br><span class="line">/* 修改滚动条样式 */</span><br><span class="line">::-webkit-scrollbar &#123;</span><br><span class="line">  width: 10px;</span><br><span class="line">  height: 1px;</span><br><span class="line">&#125;</span><br><span class="line">::-webkit-scrollbar-thumb &#123;</span><br><span class="line">  //滑块部分</span><br><span class="line">  border-radius: 5px;</span><br><span class="line">  background-color: #e3e3e3;</span><br><span class="line">&#125;</span><br><span class="line">::-webkit-scrollbar-track &#123;</span><br><span class="line">  //轨道部分</span><br><span class="line">  background: rgba(237, 237, 237, 0.3);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-Md文档成功示例"><a href="#7-Md文档成功示例" class="headerlink" title="(7)Md文档成功示例"></a>(7)Md文档成功示例</h3><p><img src="https://pic3.zhimg.com/v2-45fd92ab6188407d1aa263d18dd27a76_r.jpg"></p>
+<p>成功示例</p>
+<h2 id="结束"><a href="#结束" class="headerlink" title="结束"></a>结束</h2><blockquote>
+<p>ps：如果需要更漂亮的说明文档可采用其他方法，方法千千万，这个仅是我学习到的成果记录~<br>如果有更快捷更简易的方法亦可分享下哟~若有建议或者疑问可留言相互探讨下哟 ~~</p>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2025/03/19/%E5%9F%BA%E4%BA%8Eelement-ui%E6%9E%84%E5%BB%BA%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BB%84%E4%BB%B6%E5%BA%93%EF%BC%8C%E5%8F%91%E5%B8%83%E5%88%B0npm%E5%8F%8A%E5%AE%89%E8%A3%85%E4%BD%BF%E7%94%A8%EF%BC%8C%E4%BB%A5%E5%8F%8A%E7%94%9F%E6%88%90%E7%BB%84%E4%BB%B6%E5%BA%93%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3/">https://yhao521.github.io/2025/03/19/%E5%9F%BA%E4%BA%8Eelement-ui%E6%9E%84%E5%BB%BA%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BB%84%E4%BB%B6%E5%BA%93%EF%BC%8C%E5%8F%91%E5%B8%83%E5%88%B0npm%E5%8F%8A%E5%AE%89%E8%A3%85%E4%BD%BF%E7%94%A8%EF%BC%8C%E4%BB%A5%E5%8F%8A%E7%94%9F%E6%88%90%E7%BB%84%E4%BB%B6%E5%BA%93%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/web-frontend/">web/frontend</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/vue/">vue</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/03/19/%E7%94%A8Element%20Plus%E6%89%93%E9%80%A0%E5%91%BD%E4%BB%A4%E5%BC%8FModal%E5%BC%B9%E7%AA%97%20-%20%E4%BB%BFArco%20Design%20Vue%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/" title="用Element Plus打造命令式Modal弹窗 - 仿Arco Design Vue最佳实践"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">用Element Plus打造命令式Modal弹窗 - 仿Arco Design Vue最佳实践</div></div><div class="info-2"><div class="info-item-1">在开发管理后台时，我们常遇到需要快速调用确认框的场景。Element Plus默认的ElDialog采用声明式写法，需要维护v-model状态，而Arco Design Vue的命令式调用方式（如Modal.open()）明显更高效 由于公司的项目是Element Plus，在开发过程中，为了提高开发效率和维护，封装了一个仿Arco Design Vue的Modal命令弹窗，实现函数调用 Arco Design Vue的Modal命令式弹窗个人觉得设计很不错，下面展示下Arco组件库Modal的一些使用示例：   虽然目前Element Plus也可以使用ElMessageBox来实现命令式弹窗，但是无法自定义底部插槽，也无法全屏等等，最好办法是基于el-dialog实现命令式弹窗  下面是基于Element Plus的el-dialog封装的命令式弹窗组件 index.ts  DialogFooter.vue  使用示例  演示效果  源码 index.ts 123456789101112131415161718192021222324252627282930313233343...</div></div></div></a><a class="pagination-related" href="/2025/03/18/Cypress%20vs%20Playwright%E2%80%94%E2%80%94%E5%93%AA%E4%B8%AA%20JavaScript%20%E6%B5%8B%E8%AF%95%E6%A1%86%E6%9E%B6%E6%9B%B4%E5%A5%BD%EF%BC%9F/" title="Cypress vs Playwright——哪个 JavaScript 测试框架更好？"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Cypress vs Playwright——哪个 JavaScript 测试框架更好？</div></div><div class="info-2"><div class="info-item-1"> 10 年前，自动化测试人员如果要编写 E2E 测试，主要使用 Selenium。每个有机会使用该解决方案的人都应该会记得设置、编写和调试是多么不愉快。在此过程中还创建了一些更有趣的自动化工具，例如 Webdriver.io、TestCafe、Nightwatch.js 和 Puppeteer。但是我们今天不会关注那些，因为我想谈谈Cypress和Playwright中测试自动化的几个问题。Cypress 和 Playwright是目前为测试实现创建理想工具的顶级框架。 两个框架，相似……  Cypress 是一种基于 JavaScript 的前端测试工具。设计为对开发人员友好，它直接在浏览器中运行。 Cypress 的第一个版本于 2015 年发布，并于 2018 年开始真正流行，并于 2020 年筹集了 4000 万美元的 B 轮融资。他们以开源为荣，他们相信这将帮助他们在竞争中取得领先。Playwright（微软），于2020年发布。它是一个用于端到端测试的跨浏览器自动化库，也是开源的。它最初是一个 JavaScript 库，但现在已经扩展到还支持 Python、NET 和...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2024/11/07/%E3%80%90%E5%B7%B2%E8%A7%A3%E5%86%B3%E3%80%91Vue%E9%A1%B9%E7%9B%AE%E4%B8%ADVite%E4%BB%A5%E5%8F%8AWebpack%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86%E5%A4%84%E7%90%86/" title="【已解决】Vue项目中Vite以及Webpack代码混淆处理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-11-07</div><div class="info-item-2">【已解决】Vue项目中Vite以及Webpack代码混淆处理</div></div><div class="info-2"><div class="info-item-1"> 🐱 个人主页：不叫猫先生，公众号：前端舵手🙋‍♂️ 作者简介：前端领域优质作者、阿里云专家博主，共同学习共同进步，一起加油呀！📢 资料领取：前端进阶资料可以找我免费领取🔥 摸鱼学习交流：我们的宗旨是在「工作中摸鱼，摸鱼中进步」，期待大佬一起来摸鱼(文末有我wx或者私信)   目录 前言 一、插件介绍  1、原理和工作方式： 2、特点：   二、Vite混淆处理  1、安装 2、引入 3、配置项解释   三、Vite混淆处理可能会出现的异常问题  1、Uncaught SyntaxError: Unexpected token ‘&lt;’   四、webpack混淆处理  1、查看`Webpack`的版本 2、安装 3、配置    前言关于代码混淆网上案例铺天盖地，90%以上都是Webpack相关来处理代码混淆，对于Vite的案例少之又少，在解决vite项目代码混淆我花了一些时间来找合适的插件区处理这个问题，最终选择rollup-plugin-obfuscator。另外第四章节介绍了Webpack 处理代码混淆方案。 rollup-plugin-obfuscator 的...</div></div></div></a><a class="pagination-related" href="/2024/07/04/%E3%80%90Element-plus%E3%80%91%E5%A6%82%E4%BD%95%E8%AE%A9%E6%BB%9A%E5%8A%A8%E6%9D%A1%E6%B0%B8%E8%BF%9C%E5%9C%A8%E6%9C%80%E5%BA%95%E9%83%A8%EF%BC%88%E6%94%AF%E6%8C%81%E5%9C%A8%E7%BA%BF%E6%BC%94%E7%A4%BA%EF%BC%89/" title="【Element-plus】如何让滚动条永远在最底部（支持在线演示）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-04</div><div class="info-item-2">【Element-plus】如何让滚动条永远在最底部（支持在线演示）</div></div><div class="info-2"><div class="info-item-1">如何让滚动条永远在最底部 一、适用场景 二、实现思路 三、效果图 四、在线演示 五、完整代码  一、适用场景在某些场景下，你可能希望滚动条保持在最底部，以确保用户始终看到最新的内容或信息。如：在实时聊天应用程序中，当新消息到达时，滚动条自动滚动到最底部，方便用户立即看到最新的对话。 二、实现思路 使用 nextTick 等待 DOM 更新完成，然后计算出内部容器的总高度 max（如：当前可视区只有第4、5、6项，前面的3项已经由于滚动的关系不可见了。我们需要获取的总高度是包含 1~6 项的总高，而不仅是可视的高度）； 当出现滚动条时，因为滚动条到容器顶部的距离，一定恒小于在第一步计算出来的内部容器的总高度 max。 所以，每当新增一项或者删除一项时，我设置滚动条到顶部的距离为第一步计算出来的内部容器的总高度 max，就可以让滚动条滚动到底部了。  三、效果图 四、在线演示点击此处即可跳转到 Element Plus Playground 五、完整代码下面使用的是vue3语法： 12345678910111213&lt;template&gt;  &lt;div class=&qu...</div></div></div></a><a class="pagination-related" href="/2023/09/04/vue%E7%A6%BB%E7%BA%BF%E4%BD%BF%E7%94%A8%E9%A1%B9%E7%9B%AE%E6%A8%A1%E7%89%88/" title="vue离线使用项目模版"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">vue离线使用项目模版</div></div><div class="info-2"><div class="info-item-1"> title: vue离线使用项目模版date: 2023-09-03 20:17:08category:  开发语言 vuetag: vueauthor:   Electron+Vue+ElementUI开发环境搭建 Node环境搭建本文假定你完成了nodejs的环境基础搭建：镜像配置（暂时只配置node包镜像源，部分包的二进制镜像源后续讨论）、全局以及缓存路径配置，全局路径加入到了环境变量 12345678910 $ node -v v12.18.1 $ npm -v 6.14.5 $ yarn -v 1.22.4 $ npm list -g --depth 0 +-- hexo@4.2.1 // 忽略Hexo，本人写博用的`-- yarn@1.22.4  vue脚手架安装为了更加便捷的创建一个vue项目，我们安装脚手架@vue&#x2F;cli和@vue&#x2F;init（vue-cli已经deprecated了）。之所以要安装@vue&#x2F;init，是因为@vue&#x2F;cli是3的版本，创建项目使用命令vue create app-name，且无法暂时无法使...</div></div></div></a><a class="pagination-related" href="/2024/10/07/Vue.js%20%E5%A6%82%E4%BD%95%E5%9C%A8Vue.js%E4%B8%AD%E5%AF%BC%E5%85%A5%E5%92%8C%E4%BD%BF%E7%94%A8%E6%9C%AC%E5%9C%B0.csv%E6%96%87%E4%BB%B6/" title="Vue.js 如何在Vue.js中导入和使用本地.csv文件"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-10-07</div><div class="info-item-2">Vue.js 如何在Vue.js中导入和使用本地.csv文件</div></div><div class="info-2"><div class="info-item-1">Vue.js 如何在Vue.js中导入和使用本地.csv文件在本文中，我们将介绍在Vue.js中如何导入和使用本地.csv文件的方法。我们将使用CSV文件作为示例，展示如何将其导入到Vue.js项目中，并在应用中使用该文件的数据。 阅读更多：Vue.js 教程 使用CSV文件CSV文件是一种常用的数据文件格式，通常用于存储表格数据。Vue.js可以很方便地处理和操作CSV文件。 导入CSV文件要导入CSV文件，我们可以使用Vue.js的文件导入功能。首先，我们需要在Vue组件中添加一个文件输入字段，以允许用户选择要导入的CSV文件。例如： 123456789101112131415161718192021222324252627282930313233343536373839404142434445464748&lt;template&gt;  &lt;input type=&quot;file&quot; @change=&quot;handleFileUpload&quot;&gt;&lt;/template&gt;&lt;script&gt;export default &...</div></div></div></a><a class="pagination-related" href="/2025/03/05/%E6%89%8B%E6%8A%8A%E6%89%8B%E5%B8%A6%E4%BD%A0%E6%8A%8A%E9%A1%B9%E7%9B%AE%E6%94%B9%E4%B8%BA%E7%A7%BB%E5%8A%A8%E7%AB%AF%E9%80%82%E9%85%8D%EF%BD%9C%E6%8A%80%E6%9C%AF%E7%82%B9%E8%AF%84/" title="手把手带你把项目改为移动端适配｜技术点评"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-05</div><div class="info-item-2">手把手带你把项目改为移动端适配｜技术点评</div></div><div class="info-2"><div class="info-item-1">前言不知道大家在工作中是否遇到需要把一个非移动端的项目快速改造成为移动端适配的需求 此篇以 理论+实战演示 快速分析改造一个项目使其能进行移动端适配 同时对移动端适配方案也进行了总结 妈妈再也不用担心 一套代码兼容不同终端了 哈哈 开始吧  自适应网站是什么？ 响应式网站，h5 网站，宽屏网站，这些都可以称为自适应网站，简单的说就是一个网站可以兼容不同的终端，比如：电脑、ipad、手机等。不需要为每个设备制作一个版本的网站，网站自动识别、兼容，完成电脑网站，手机网站、微网站。同时电脑网站、手机网站、微网站统一后台、数据同步，便于管理。   正文1.常见的适配方案 media queries(媒体查询) 这套方案估计大家都比较熟悉了 主要就是运用 css3 新特性媒体查询 分别判断设备宽度在不同的区间运用不同的样式 个性化定制会比较高 这里看一下例子 pc 端样式如下  移动端样式如下   rem（font size of the root element） 相对于根元素的字体大小的单位。简单的说它就是一个相对单位，rem 计算的规则是依赖根元素。原理是先按定高宽设计出来页面，然后...</div></div></div></a><a class="pagination-related" href="/2024/12/09/Element%20Plus%20%E5%AF%B9%E6%AF%94%20Arco%20design/" title="Element Plus 对比 Arco design"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-12-09</div><div class="info-item-2">Element Plus 对比 Arco design</div></div><div class="info-2"><div class="info-item-1">本文主要是对 Element Plus 和 Arco Design Vue 两个组件库的简单对比，可能对你的技术选型有帮助，本文的主观成分比较多 CSS设计变量Element Plus 12345--el-text-color-primary: #303133;--el-text-color-regular: #606266;--el-text-color-secondary: #909399;--el-text-color-placeholder: #a8abb2;--el-text-color-disabled: #c0c4cc;  Arco Design Vue 1234--color-text-1: #121314; // 标题、重点文本--color-text-2: #5c5c5c; // 常规正文--color-text-3: #909399; // 次要正文、提示文本--color-text-4: #c2c2c2; // 辅助文本、禁用文本、占位符placeholder、提示文本  相比之下，个人比较喜欢arco的命名方式，简单、易记、简短、优雅 按钮 Button...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%99%E8%BF%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">叙述说明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9E%84%E5%BB%BA%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BB%84%E4%BB%B6%E5%BA%93"><span class="toc-number">2.</span> <span class="toc-text">构建自定义组件库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#src-packages%E7%BB%84%E4%BB%B6%E5%BA%93%E5%88%9B%E5%BB%BA"><span class="toc-number">3.</span> <span class="toc-text">src&#x2F;packages组件库创建</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E9%A1%B9%E7%9B%AE%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84%E4%BB%8B%E7%BB%8D"><span class="toc-number">3.1.</span> <span class="toc-text">1.项目目录结构介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%B0%81%E8%A3%85%E7%BB%84%E4%BB%B6%E7%A4%BA%E4%BE%8B"><span class="toc-number">3.2.</span> <span class="toc-text">2.封装组件示例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%85%B6%E4%BB%96%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E"><span class="toc-number">3.3.</span> <span class="toc-text">3.其他配置说明</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%91%E5%B8%83%E3%80%81%E6%9B%B4%E6%96%B0%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BB%84%E4%BB%B6%E5%BA%93%E7%9A%84%E7%89%88%E6%9C%AC%E4%B8%8E%E6%92%A4%E9%94%80"><span class="toc-number">4.</span> <span class="toc-text">发布、更新自定义组件库的版本与撤销</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%9B%B4%E6%96%B0%E6%AD%A5%E9%AA%A4"><span class="toc-number">4.1.</span> <span class="toc-text">1.更新步骤</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%8F%91%E5%B8%83%E6%88%90%E5%8A%9F%E7%A4%BA%E4%BE%8B"><span class="toc-number">4.2.</span> <span class="toc-text">2.发布成功示例</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#xxx-component%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BB%84%E4%BB%B6%E7%9A%84%E5%BC%95%E7%94%A8%E5%8F%8A%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E"><span class="toc-number">5.</span> <span class="toc-text">xxx-component自定义组件的引用及使用说明</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A4%BA%E4%BE%8B%EF%BC%9Amy-dialog-%E8%B0%83%E7%94%A8%E6%96%B9%E5%BC%8F"><span class="toc-number">5.1.</span> <span class="toc-text">示例：my-dialog 调用方式</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%9F%E6%88%90%E7%BB%84%E4%BB%B6%E5%BA%93Md%E4%BD%BF%E7%94%A8%E6%96%87%E6%A1%A3"><span class="toc-number">6.</span> <span class="toc-text">生成组件库Md使用文档</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BB%E8%A6%81%E5%AE%9E%E7%8E%B0%E7%9A%84%E6%AD%A5%E9%AA%A4%E6%B5%81%E7%A8%8B%E5%A6%82%E4%B8%8B%EF%BC%9A"><span class="toc-number">6.1.</span> <span class="toc-text">主要实现的步骤流程如下：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%AE%89%E8%A3%85github-markdown-css%E5%92%8Cvue-markdown-loader"><span class="toc-number">6.2.</span> <span class="toc-text">1.安装github-markdown-css和vue-markdown-loader</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%AE%89%E8%A3%85%E6%88%90%E5%8A%9F%E5%90%8E%EF%BC%8C%E5%9C%A8main-js%E6%96%87%E4%BB%B6%E4%B8%AD%E5%BC%95%E5%85%A5%E4%BD%BF%E7%94%A8github-markdown-css"><span class="toc-number">6.3.</span> <span class="toc-text">2.安装成功后，在main.js文件中引入使用github-markdown-css</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-vue-config-js%E9%85%8D%E7%BD%AEvue-markdown-loader"><span class="toc-number">6.4.</span> <span class="toc-text">3.vue.config.js配置vue-markdown-loader</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%8A%A8%E6%80%81%E9%85%8D%E7%BD%AErouter-js%E5%8A%A0%E8%BD%BD%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="toc-number">6.5.</span> <span class="toc-text">4.动态配置router.js加载配置文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-md%E6%96%87%E4%BB%B6%E7%9A%84%E5%BC%95%E5%85%A5%E4%BB%A5%E5%8F%8A%E6%B7%BB%E5%8A%A0%E8%87%B3%E9%85%8D%E7%BD%AE"><span class="toc-number">6.6.</span> <span class="toc-text">(5)md文件的引入以及添加至配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-%E5%AE%9E%E9%99%85%E9%A1%B5%E9%9D%A2%E4%BD%BF%E7%94%A8"><span class="toc-number">6.7.</span> <span class="toc-text">(6)实际页面使用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-Md%E6%96%87%E6%A1%A3%E6%88%90%E5%8A%9F%E7%A4%BA%E4%BE%8B"><span class="toc-number">6.8.</span> <span class="toc-text">(7)Md文档成功示例</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%93%E6%9D%9F"><span class="toc-number">7.</span> <span class="toc-text">结束</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

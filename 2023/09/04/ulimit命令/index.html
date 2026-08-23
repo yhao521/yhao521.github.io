@@ -1,0 +1,285 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>ulimit命令 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="title: ulimit命令date: 2023-09-03 20:17:08category: tag: author:  ulimit 命令。ulimit用于shell启动进程所占用的资源. 12345678910111213141516-H 设置硬资源限制.-S 设置软资源限制.-a 显示当前所有的资源限制.-c size:设置core文件的最大值.单位:blocks-d size:设置">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ulimit命令">
+<meta property="og:url" content="https://yhao521.github.io/2023/09/04/ulimit%E5%91%BD%E4%BB%A4/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="title: ulimit命令date: 2023-09-03 20:17:08category: tag: author:  ulimit 命令。ulimit用于shell启动进程所占用的资源. 12345678910111213141516-H 设置硬资源限制.-S 设置软资源限制.-a 显示当前所有的资源限制.-c size:设置core文件的最大值.单位:blocks-d size:设置">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2023-09-04T03:18:09.000Z">
+<meta property="article:modified_time" content="2023-09-04T03:18:27.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="java&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "ulimit命令",
+  "url": "https://yhao521.github.io/2023/09/04/ulimit%E5%91%BD%E4%BB%A4/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2023-09-04T03:18:09.000Z",
+  "dateModified": "2023-09-04T03:18:27.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2023/09/04/ulimit%E5%91%BD%E4%BB%A4/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'ulimit命令',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">ulimit命令</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">ulimit命令</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-09-04T03:18:09.000Z" title="发表于 2023-09-04 11:18:09">2023-09-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-09-04T03:18:27.000Z" title="更新于 2023-09-04 11:18:27">2023-09-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><hr>
+<p>title: ulimit命令<br>date: 2023-09-03 20:17:08<br>category:</p>
+<p>tag:</p>
+<p>author:</p>
+<hr>
+<h1 id="ulimit-命令。"><a href="#ulimit-命令。" class="headerlink" title="ulimit 命令。"></a>ulimit 命令。</h1><p>ulimit用于shell启动进程所占用的资源.</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">-H 设置硬资源限制.</span><br><span class="line">-S 设置软资源限制.</span><br><span class="line">-a 显示当前所有的资源限制.</span><br><span class="line">-c size:设置core文件的最大值.单位:blocks</span><br><span class="line">-d size:设置数据段的最大值.单位:kbytes</span><br><span class="line">-f size:设置创建文件的最大值.单位:blocks</span><br><span class="line">-l size:设置在内存中锁定进程的最大值.单位:kbytes</span><br><span class="line">-m size:设置可以使用的常驻内存的最大值.单位:kbytes</span><br><span class="line">-n size:设置内核可以同时打开的文件描述符的最大值.单位:n</span><br><span class="line">-p size:设置管道缓冲区的最大值.单位:kbytes</span><br><span class="line">-s size:设置堆栈的最大值.单位:kbytes</span><br><span class="line">-t size:设置CPU使用时间的最大上限.单位:seconds</span><br><span class="line">-v size:设置虚拟内存的最大值.单位:kbytes</span><br><span class="line">-u &lt;程序数目&gt; 　用户最多可开启的程序数目</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>ulimit 命令详解</p>
+<p>Linux对于每个用户，系统限制其最大进程数。为提高性能，可以根据设备资源情况，设置各linux 用户的最大进程数<br>可以用ulimit -a 来显示当前的各种用户进程限制。<br>下面我把某linux用户的最大进程数设为10000个：<br>ulimit -u 10240<br>对于需要做许多 socket 连接并使它们处于打开状态的 Java 应用程序而言，<br>最好通过使用 ulimit -n xx 修改每个进程可打开的文件数，缺省值是 1024。<br>ulimit -n 4096 将每个进程可以打开的文件数目加大到4096，缺省为1024<br>其他建议设置成无限制（unlimited）的一些重要设置是：<br>数据段长度：ulimit -d unlimited<br>最大内存大小：ulimit -m unlimited<br>堆栈大小：ulimit -s unlimited<br>CPU 时间：ulimit -t unlimited<br>虚拟内存：ulimit -v unlimited</p>
+<p>　　<br>暂时地，适用于通过 ulimit 命令登录 shell 会话期间。<br>永久地，通过将一个相应的 ulimit 语句添加到由登录 shell 读取的文件中， 即特定于 shell 的用户资源文件，如：1)、解除 Linux 系统的最大进程数和最大文件打开数限制：<br>vi &#x2F;etc&#x2F;security&#x2F;limits.conf # 添加如下的行<br>_ soft noproc 11000<br>_ hard noproc 11000<br>_ soft nofile 4100<br>_ hard nofile 4100<br>说明：* 代表针对所有用户，noproc 是代表最大进程数，nofile 是代表最大文件打开数 2)、让 SSH 接受 Login 程式的登入，方便在 ssh 客户端查看 ulimit -a 资源限制：<br>a、vi &#x2F;etc&#x2F;ssh&#x2F;sshd_config<br>把 UserLogin 的值改为 yes，并把 # 注释去掉<br>b、重启 sshd 服务：<br>&#x2F;etc&#x2F;init.d&#x2F;sshd restart 3)、修改所有 linux 用户的环境变量文件：<br>vi &#x2F;etc&#x2F;profile<br>ulimit -u 10000<br>ulimit -n 4096<br>ulimit -d unlimited<br>ulimit -m unlimited<br>ulimit -s unlimited<br>ulimit -t unlimited<br>ulimit -v unlimited<br>保存后运行#source &#x2F;etc&#x2F;profile 使其生效<br>&#x2F;<strong>****</strong>**<strong>****</strong>**<strong>****</strong>**<strong>****</strong><br>有时候在程序里面需要打开多个文件，进行分析，系统一般默认数量是1024，（用ulimit -a可以看到）对于正常使用是够了，但是对于程序来讲，就太少了。<br>修改2个文件。</p>
+<p>1.&#x2F;etc&#x2F;security&#x2F;limits.conf<br>vi &#x2F;etc&#x2F;security&#x2F;limits.conf<br>加上：</p>
+<ul>
+<li><p>soft nofile 8192</p>
+</li>
+<li><p>hard nofile 20480</p>
+<p>2.&#x2F;etc&#x2F;pam.d&#x2F;login<br>session required &#x2F;lib&#x2F;security&#x2F;pam_limits.so<br>&#x2F;*<strong>*****</strong><br>另外确保&#x2F;etc&#x2F;pam.d&#x2F;system-auth文件有下面内容<br>session required &#x2F;lib&#x2F;security&#x2F;$ISA&#x2F;pam_limits.so<br>这一行确保系统会执行这个限制。</p>
+</li>
+</ul>
+<p>&#x2F;*<strong>******</strong> 3.一般用户的.bash_profile<br>ulimit -n 1024<br>重新登陆ok</p>
+<h1 id="ulimit-的作用"><a href="#ulimit-的作用" class="headerlink" title="ulimit 的作用"></a>ulimit 的作用</h1><p>ulimit：显示（或设置）用户可以使用的资源的限制（limit），这限制分为软限制（当前限制）和硬限制（上限），其中硬限制是软限制的上限值，应用程序在运行过程中使用的系统资源不超过相应的软限制，任何的超越都导致进程的终止。</p>
+<p>参数 描述<br>ulimited 不限制用户可以使用的资源，但本设置对可打开的最大文件数（max open files）<br>和可同时运行的最大进程数（max user processes）无效</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">-a 列出所有当前资源极限</span><br><span class="line">-c 设置core文件的最大值.单位:blocks</span><br><span class="line">-d 设置一个进程的数据段的最大值.单位:kbytes</span><br><span class="line">-f Shell 创建文件的文件大小的最大值，单位：blocks</span><br><span class="line">-h 指定设置某个给定资源的硬极限。如果用户拥有 root 用户权限，可以增大硬极限。任何用户均可减少硬极限</span><br><span class="line">-l 可以锁住的物理内存的最大值</span><br><span class="line">-m 可以使用的常驻内存的最大值,单位：kbytes</span><br><span class="line">-n 每个进程可以同时打开的最大文件数</span><br><span class="line">-p 设置管道的最大值，单位为block，1block=512bytes</span><br><span class="line">-s 指定堆栈的最大值：单位：kbytes</span><br><span class="line">-S 指定为给定的资源设置软极限。软极限可增大到硬极限的值。如果 -H 和 -S 标志均未指定，极限适用于以上二者</span><br><span class="line">-t 指定每个进程所使用的秒数,单位：seconds</span><br><span class="line">-u 可以运行的最大并发进程数</span><br><span class="line">-v Shell可使用的最大的虚拟内存，单位：kbytes</span><br><span class="line">-x</span><br></pre></td></tr></table></figure>
+
+<p>范例1：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost proc]# <span class="built_in">ulimit</span> -a</span><br><span class="line">core file size (blocks, -c) 100</span><br><span class="line">data seg size (kbytes, -d) unlimited</span><br><span class="line">file size (blocks, -f) unlimited</span><br><span class="line">pending signals (-i) 2047</span><br><span class="line">max locked memory (kbytes, -l) 32</span><br><span class="line">max memory size (kbytes, -m) unlimited</span><br><span class="line">open files (-n) 1024</span><br><span class="line">pipe size (512 bytes, -p) 8</span><br><span class="line">POSIX message queues (bytes, -q) 819200</span><br><span class="line">stack size (kbytes, -s) 8192</span><br><span class="line">cpu <span class="keyword">time</span> (seconds, -t) unlimited</span><br><span class="line">max user processes (-u) 2047</span><br><span class="line">virtual memory (kbytes, -v) unlimited</span><br><span class="line">file locks (-x) unlimited</span><br><span class="line">[root@localhost proc]#</span><br></pre></td></tr></table></figure>
+
+<p>输出的每一行由资源名字、（单位，ulimit命令的参数）、软限制组成。详细解释：<br>参数 描述<br>core file size core文件的最大值为100 blocks，<br>data seg size 进程的数据段可以任意大<br>file size 文件可以任意大<br>pending signals 最多有2047个待处理的信号<br>max locked memory 一个任务锁住的物理内存的最大值为32kB<br>max memory size 一个任务的常驻物理内存的最大值<br>open files 一个任务最多可以同时打开1024的文件<br>pipe size 管道的最大空间为4096字节<br>POSIX message queues POSIX的消息队列的最大值为819200字节<br>stack size 进程的栈的最大值为8192字节<br>cpu time 进程使用的CPU时间<br>max user processes 当前用户同时打开的进程(包括线程)的最大个数为2047<br>virtual memory 没有限制进程的最大地址空间<br>file locks 所能锁住的文件的最大个数没有限制<br>范例2：通过ulimit命令来限制文件的大小，从而导致拷贝命令的失败<br>[root@localhost]ls temp.txt<br>ls: temp.txt: 没有那个文件或目录</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost]<span class="built_in">ulimit</span> -f 1 <span class="comment">#设置创建文件的最大块(一块=512字节)</span></span><br><span class="line">[root@localhost]<span class="built_in">cat</span> a.c &gt; temp.txt</span><br></pre></td></tr></table></figure>
+
+<p>文件大小超出限制<br>文件a.c的大小是5002字节,而我们设定的创建文件的大小是512字节x1块&#x3D;512字节</p>
+<p>1、修改用戶進程可打開文件數限制</p>
+<p>在Linux平台上，無論編寫客戶端程序還是服務端程序，在進行高並發TCP連接處理時，最高的並發數量都要受到系統對用戶單一進程同時可打開文件數量的限制(這是因為系統為每個TCP連接都要創建一個socket句柄，每個socket句柄同時也是一個文件句柄)。可使用ulimit命令查看系統允許當前用戶進程打開的文件數限制：</p>
+<p>[speng@as4 ~]$ ulimit -n</p>
+<p>1024</p>
+<p>這表示當前用戶的每個進程最多允許同時打開1024個文件，這1024個文件中還得除去每個進程必然打開的標準輸入，標準輸出，標準錯誤，服務器監聽socket，進程間通訊的unix域socket等文件，那麼剩下的可用於客戶端socket連接的文件數就只有大概1024-10&#x3D;1014個左右。也就是說缺省情況下，基於Linux的通訊程序最多允許同時1014個TCP並發連接。</p>
+<p>對於想支持更高數量的TCP並發連接的通訊處理程序，就必須修改Linux對當前用戶的進程同時打開的文件數量的軟限制(soft limit)和硬限制(hardlimit)。其中軟限制是指Linux在當前系統能夠承受的範圍內進一步限制用戶同時打開的文件數；硬限制則是根據系統硬件資源狀況(主要是系統內存)計算出來的系統最多可同時打開的文件數量。通常軟限制小於或等於硬限制。</p>
+<p>修改上述限制的最簡單的辦法就是使用ulimit命令：</p>
+<p>[speng@as4 ~]$ ulimit -n<file_num></p>
+<p>上述命令中，在<file_num>中指定要設置的單一進程允許打開的最大文件數。如果系統回顯類似於”Operation notpermitted”之類的話，說明上述限制修改失敗，實際上是因為在<file_num>中指定的數值超過了Linux系統對該用戶打開文件數的軟限製或硬限制。因此，就需要修改Linux系統對用戶的關於打開文件數的軟限制和硬限制。</p>
+<p>第一步，修改&#x2F;etc&#x2F;security&#x2F;limits.conf文件，在文件中添加如下行：</p>
+<p>speng soft nofile 10240</p>
+<p>speng hard nofile 10240</p>
+<p>其中speng指定了要修改哪個用戶的打開文件數限制，可用’*‘號表示修改所有用戶的限制；soft或hard指定要修改軟限制還是硬限制；10240則指定了想要修改的新的限制值，即最大打開文件數(請注意軟限制值要小於或等於硬限制)。修改完後保存文件。</p>
+<p>第二步，修改&#x2F;etc&#x2F;pam.d&#x2F;login文件，在文件中添加如下行：</p>
+<p>session required &#x2F;lib&#x2F;security&#x2F;pam_limits.so</p>
+<p>這是告訴Linux在用戶完成系統登錄後，應該調用pam_limits.so模塊來設置系統對該用戶可使用的各種資源數量的最大限制(包括用戶可打開的最大文件數限制)，而pam_limits.so模塊就會從&#x2F;etc&#x2F;security&#x2F;limits.conf文件中讀取配置來設置這些限制值。修改完後保存此文件。</p>
+<p>第三步，查看Linux系統級的最大打開文件數限制，使用如下命令：</p>
+<p>[speng@as4 ~]$ cat &#x2F;proc&#x2F;sys&#x2F;fs&#x2F;file-max</p>
+<p>12158</p>
+<p>這表明這台Linux系統最多允許同時打開(即包含所有用戶打開文件數總和)12158個文件，是Linux系統級硬限制，所有用戶級的打開文件數限制都不應超過這個數值。通常這個系統級硬限制是Linux系統在啟動時根據系統硬件資源狀況計算出來的最佳的最大同時打開文件數限制，如果沒有特殊需要，不應該修改此限制，除非想為用戶級打開文件數限制設置超過此限制的值。修改此硬限制的方法是修改&#x2F;etc&#x2F;rc.local腳本，在腳本中添加如下行：</p>
+<p>echo 22158 &gt; &#x2F;proc&#x2F;sys&#x2F;fs&#x2F;file-max</p>
+<p>這是讓Linux在啟動完成後強行將系統級打開文件數硬限制設置為22158。修改完後保存此文件。</p>
+<p>完成上述步驟後重啟系統，一般情況下就可以將Linux系統對指定用戶的單一進程允許同時打開的最大文件數限制設為指定的數值。如果重啟後用ulimit-n命令查看用戶可打開文件數限制仍然低於上述步驟中設置的最大值，這可能是因為在用戶登錄腳本&#x2F;etc&#x2F;profile中使用ulimit -n命令已經將用戶可同時打開的文件數做了限制。由於通過ulimit-n修改系統對用戶可同時打開文件的最大數限制時，新修改的值只能小於或等於上次ulimit-n設置的值，因此想用此命令增大這個限制值是不可能的。所以，如果有上述問題存在，就只能去打開&#x2F;etc&#x2F;profile腳本文件，在文件中查找是否使用了ulimit-n限制了用戶可同時打開的最大文件數量，如果找到，則刪除這行命令，或者將其設置的值改為合適的值，然後保存文件，用戶退出並重新登錄系統即可。</p>
+<p>通過上述步驟，就為支持高並發TCP連接處理的通訊處理程序解除關於打開文件數量方面的系統限制。</p>
+<p>2、修改網絡內核對TCP連接的有關限制</p>
+<p>在Linux上編寫支持高並發TCP連接的客戶端通訊處理程序時，有時會發現儘管已經解除了系統對用戶同時打開文件數的限制，但仍會出現並發TCP連接數增加到一定數量時，再也無法成功建立新的TCP連接的現象。出現這種現在的原因有多種。</p>
+<p>第一種原因可能是因為Linux網絡內核對本地端口號範圍有限制。此時，進一步分析為什麼無法建立TCP連接，會發現問題出在connect()調用返回失敗，查看系統錯誤提示消息是”Can’t assign requestedaddress”。同時，如果在此時用tcpdump工具監視網絡，會發現根本沒有TCP連接時客戶端發SYN包的網絡流量。這些情況說明問題在於本地Linux系統內核中有限制。其實，問題的根本原因在於Linux內核的TCP&#x2F;IP協議實現模塊對系統中所有的客戶端TCP連接對應的本地端口號的範圍進行了限制(例如，內核限製本地端口號的範圍為1024~32768之間)。當系統中某一時刻同時存在太多的TCP客戶端連接時，由於每個TCP客戶端連接都要佔用一個唯一的本地端口號(此端口號在系統的本地端口號範圍限制中)，如果現有的TCP客戶端連接已將所有的本地端口號佔滿，則此時就無法為新的TCP客戶端連接分配一個本地端口號了，因此系統會在這種情況下在connect()調用中返回失敗，並將錯誤提示消息設為”Can’t assignrequested address”。有關這些控制邏輯可以查看Linux內核源代碼，以linux2.6內核為例，可以查看tcp_ipv4.c文件中如下函數：</p>
+<p>static int tcp_v4_hash_connect(struct sock *sk)</p>
+<p>請注意上述函數中對變量sysctl_local_port_range的訪問控制。變量sysctl_local_port_range的初始化則是在tcp.c文件中的如下函數中設置：</p>
+<p>void __init tcp_init(void)</p>
+<p>內核編譯時默認設置的本地端口號範圍可能太小，因此需要修改此本地端口範圍限制。</p>
+<p>第一步，修改&#x2F;etc&#x2F;sysctl.conf文件，在文件中添加如下行：</p>
+<p>net.ipv4.ip_local_port_range &#x3D; 1024 65000</p>
+<p>這表明將系統對本地端口範圍限制設置為1024~65000之間。請注意，本地端口範圍的最小值必須大於或等於1024；而端口範圍的最大值則應小於或等於65535。修改完後保存此文件。</p>
+<p>第二步，執行sysctl命令：</p>
+<p>[speng@as4 ~]$ sysctl -p</p>
+<p>如果系統沒有錯誤提示，就表明新的本地端口範圍設置成功。如果按上述端口範圍進行設置，則理論上單獨一個進程最多可以同時建立60000多個TCP客戶端連接。</p>
+<p>第二種無法建立TCP連接的原因可能是因為Linux網絡內核的IP_TABLE防火牆對最大跟踪的TCP連接數有限制。此時程序會表現為在connect()調用中阻塞，如同死機，如果用tcpdump工具監視網絡，也會發現根本沒有TCP連接時客戶端發SYN包的網絡流量。由於IP_TABLE防火牆在內核中會對每個TCP連接的狀態進行跟踪，跟踪信息將會放在位於內核內存中的conntrackdatabase中，這個數據庫的大小有限，當系統中存在過多的TCP連接時，數據庫容量不足，IP_TABLE無法為新的TCP連接建立跟踪信息，於是表現為在connect()調用中阻塞。此時就必須修改內核對最大跟踪的TCP連接數的限制，方法同修改內核對本地端口號範圍的限制是類似的：</p>
+<p>第一步，修改&#x2F;etc&#x2F;sysctl.conf文件，在文件中添加如下行：</p>
+<p>net.ipv4.ip_conntrack_max &#x3D; 10240</p>
+<p>這表明將系統對最大跟踪的TCP連接數限制設置為10240。請注意，此限制值要盡量小，以節省對內核內存的佔用。</p>
+<p>第二步，執行sysctl命令：</p>
+<p>[speng@as4 ~]$ sysctl -p</p>
+<p>如果系統沒有錯誤提示，就表明系統對新的最大跟踪的TCP連接數限制修改成功。如果按上述參數進行設置，則理論上單獨一個進程最多可以同時建立10000多個TCP客戶端連接。</p>
+<p><strong>***<strong>注意</strong>***</strong></p>
+<p>sysctl -p 報錯net.ipv4.ip_conntrack_max” is an unknown key 則：modprobe ip_conntrack</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2023/09/04/ulimit%E5%91%BD%E4%BB%A4/">https://yhao521.github.io/2023/09/04/ulimit%E5%91%BD%E4%BB%A4/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/java-programming/">java/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2023/09/04/vscode%E4%BD%BF%E7%94%A8/" title="vscode使用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">vscode使用</div></div><div class="info-2"><div class="info-item-1"> title: vscode的使用lang: en-USdate: 2023-09-03 20:17:08category:  vscodetag: vscodeauthor:   1. vscode的使用1.1. 插件位置更改参考：https://blog.csdn.net/zhaojunwei08/article/details/86021665 https://blog.csdn.net/u011127019/article/details/86737308#comments mklink使用 https://www.icoa.cn/a/910.html set oldDir&#x3D;%UserProfile%.vscode\extensions mklink &#x2F;D “%oldDir%” “E:\eclipse-hao\HTML\extensions” 确保有 这个 .vscode 空目录  bat方式： 123456789@echo offif &quot;%1&quot; == &quot;h&quot; goto beginmshta vbscript:c...</div></div></div></a><a class="pagination-related" href="/2023/09/04/tomcat-%E7%94%9F%E6%88%90https%E6%96%B9%E6%B3%95/" title="tomcat-生成https方法"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">tomcat-生成https方法</div></div><div class="info-2"><div class="info-item-1"> title: tomcat配置https方法lang: en-USdate: 2022-11-04 00:00:00sidebar: autocategories: tags:  tomcatcategory: tag: author:    tomcat配置https方法利用tomcat服务器配置https双向认证 步骤 1、为服务器生成证书进入控制台，切换到%JAVA_HOME%&#x2F;bin目录，具体操作略。 使用keytool为Tomcat生成证书，假定目标机器的域名是“localhost”，keystore文件想要存放在“D:\home\tomcat.keystore”，口令为“password”，使用如下命令生成： keytool -genkey -v -alias tomcat -keyalg RSA -keystore D:\tomcat.keystore -validity 36500  keytool -genkey -v -alias tomcat -keyalg RSA -keystore ~/myhost-tomcat.keystore -vali...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2021/09/15/%E5%9F%BA%E7%A1%80%E7%AF%87%E8%AE%B2%E4%B9%89/" title="基础篇讲义"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2021-09-15</div><div class="info-item-2">基础篇讲义</div></div><div class="info-2"><div class="info-item-1">基础篇 基础篇要点：算法、数据结构、基础设计模式  1. 二分查找要求  能够用自己语言描述二分查找算法 能够手写二分查找代码 能够解答一些变化后的考法  算法描述  前提：有已排序数组 A（假设已经做好）  定义左边界 L、右边界 R，确定搜索范围，循环执行二分查找（3、4两步）  获取中间索引 M &#x3D; Floor((L+R) &#x2F;2)  中间索引的值  A[M] 与待搜索的值 T 进行比较 ① A[M] &#x3D;&#x3D; T 表示找到，返回中间索引 ② A[M] &gt; T，中间值右侧的其它元素都大于 T，无需比较，中间索引左边去找，M - 1 设置为右边界，重新查找 ③ A[M] &lt; T，中间值左侧的其它元素都小于 T，无需比较，中间索引右边去找， M + 1 设置为左边界，重新查找  当 L &gt; R 时，表示没有找到，应结束循环    更形象的描述请参考：binary_search.html  算法实现 1234567891011121314public static int binarySearch(int[] a, int t)...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E9%98%B2%E7%81%AB%E5%A2%99yum/" title="防火墙yum"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">防火墙yum</div></div><div class="info-2"><div class="info-item-1"> title: 防火墙yumdate: 2023-09-03 20:17:08category:  linuxtag: linuxauthor:   entOS 7.0默认使用的是firewall作为防火墙 查看防火墙状态 firewall-cmd –state 停止firewall systemctl stop firewalld.service 禁止firewall开机启动 systemctl disable firewalld.service 转自：CentOS 6和CentOS 7防火墙的关闭 关闭selinux进入到&#x2F;etc&#x2F;selinux&#x2F;config文件 vi &#x2F;etc&#x2F;selinux&#x2F;config 将SELINUX&#x3D;enforcing改为SELINUX&#x3D;disabled ######################################################################################## 超简单CentOS7 配置阿里云yum源...</div></div></div></a><a class="pagination-related" href="/2023/09/04/starUML%E6%BF%80%E6%B4%BB/" title="starUML激活"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">starUML激活</div></div><div class="info-2"><div class="info-item-1"> title: starUML激活date: 2023-09-03 20:17:08category:  UML类图tag: UML类图author:   StarUML（一） —— 简介和破解（一） 刀客传奇关注 0.1232022.01.03 17:34:47字数 795阅读 1,289 版本记录   版本号 时间    V1.0 2022.01.03 星期一   前言 StarUML(简称SU)，是一种创建UML类图，生成类图和其他类型的统一建模语言(UML)图表的工具。StarUML是一个开源项目之一发展快、灵活、可扩展性强。我们一般都是使用这个软件画一个时序图和软件图等，特别是软件图是我们常用的，用来反映各个模块各个类之间的关系。  简介StarUML是一款开放源码的UML开发工具，是由韩国公司主导开发出来的产品，可以直接到StarUML网站下载。可以用来创建UML类图。  可绘制9款UML图：用例图、类图、序列图、状态图、活动图、通信图、构件图、部署图以及复合结构图等。  完全免费：StarUML是一套开放源码的软件，不仅免费自由下载，连代码都免费开放。 多种格式影像...</div></div></div></a><a class="pagination-related" href="/2024/05/21/%E7%9B%98%E7%82%B920%E6%AC%BE%E4%BC%98%E8%B4%A8%E7%9A%84%E5%BC%80%E6%BA%90%E6%B8%B8%E6%88%8F%EF%BC%8C2024%E6%9C%80%E6%96%B0%E6%94%B6%E9%9B%86%EF%BC%81/" title="盘点20款优质的开源游戏，2024最新收集！"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-05-21</div><div class="info-item-2">盘点20款优质的开源游戏，2024最新收集！</div></div><div class="info-2"><div class="info-item-1">本文收集了20款优质的开源游戏，部分还可以点击就可以玩，干货满满，建议先收藏一下。 如果你有值得推荐的开源游戏，欢迎评论中指出！ 1、红警https://github.com/electronicarts/CnC_Remastered_Collection 红警，或者更准确地说，应该称为“红色警戒”，是大多数80后记忆中与游戏最深刻的联系之一。  这款游戏是由当年的Westwood工作室打造的一款即时战略游戏，以至于一提到即时战略游戏，我脑海中浮现的第一个就是红警。 然而，在1998年8月17日，EA收购了Westwood。一般情况下，一旦游戏工作室被EA收购，就意味着走向没落。  这次开源的代码实际上是1996年发布的第一代红警，国内也称之为红警95。  此次开源不涉及游戏素材和游戏引擎，只包括TiberianDawn.DLL和RedAlert.dll的源码，允许Mod社区更好地改变游戏行为。 在6月5日，这两款游戏发布了重制版。 命令与征服系列游戏是用C++实现的，打开代码后可以看到非常规范的代码，令人赞叹不已。  下面是一个示例，展示了飞行器寻找新降落点的函数，函数功能、输...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E6%89%8B%E6%8A%8A%E6%89%8B%E6%95%99%E4%BD%A0%E4%BD%BF%E7%94%A8Electron5+vue-cli3%E5%BC%80%E5%8F%91%E8%B7%A8%E5%B9%B3%E5%8F%B0%E6%A1%8C%E9%9D%A2%E5%BA%94%E7%94%A8/" title="手把手教你使用Electron5+vue-cli3开发跨平台桌面应用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">手把手教你使用Electron5+vue-cli3开发跨平台桌面应用</div></div><div class="info-2"><div class="info-item-1"> title: 手把手教你使用Electron5+vue-cli3开发跨平台桌面应用date: 2023-09-03 20:17:08category:  mactag: macauthor:   手把手教你使用Electron5+vue-cli3开发跨平台桌面应用Electron是一个基于Chromium和 Node.js，可以使用 HTML、CSS和JavaScript构建跨平台应用的技术框架，兼容 Mac、Windows 和 Linux。虽然B&#x2F;S是目前开发的主流，但是C&#x2F;S仍然有很大的市场需求。受限于浏览器的沙盒限制，网页应用无法满足某些场景下的使用需求，而桌面应用可以读写本地文件、调用更多系统资源，再加上Web开发的低成本、高效率的优势，这种方式越来越受到开发者的喜爱。 本文一步一步教你如何使用Electron5和vue-cli3，在完全保留vue开发web应用的习惯下，搭建桌面应用。 本文不涉及Electron和vue的开发教程，仅以实现两者结合为目的，如深入学习Electron和vue，请访问官方： Electron: https://elect...</div></div></div></a><a class="pagination-related" href="/2023/09/04/nexus-docker%E4%B8%8B%E8%BD%BD%E4%BD%BF%E7%94%A8/" title="nexus-docker下载使用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">nexus-docker下载使用</div></div><div class="info-2"><div class="info-item-1"> title: nexus下载使用date: 2023-09-03 20:17:08category:  nexustag: nexusauthor:   nexus-docker下载使用参考官网的打包git clone https://github.com/sonatype/docker-nexus3.git docker-compose.yml 1234567891011121314151617181920212223# nexus# docker pull sonatype/nexus3# http://localhost:9011# admin/admin123# docker pull sonatype/nexus3:3.52.0version: &#x27;3&#x27;services:  nexus3:    build: ./build    image: yanghao52/nexus3:3.63.0# 需要拷贝docker-nexus3.git下的rh-docker目录和Dockerfile.rh.centos 到 ./build_centos目录下#   ...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#ulimit-%E5%91%BD%E4%BB%A4%E3%80%82"><span class="toc-number">1.</span> <span class="toc-text">ulimit 命令。</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#ulimit-%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="toc-number">2.</span> <span class="toc-text">ulimit 的作用</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

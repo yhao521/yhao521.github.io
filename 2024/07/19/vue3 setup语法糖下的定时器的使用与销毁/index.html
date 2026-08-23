@@ -1,0 +1,209 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>vue3 setup语法糖下的定时器的使用与销毁 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="如果在组件中需要使用定时器，注意在销毁组件的时候，要对定时器进行销毁，否则时间长了会导致页面卡顿。 123456789101112131415&lt;script setup&gt;onMounted(() &#x3D;&gt; &#123;  let timer &#x3D; null;&#x2F;&#x2F;每5s刷新数据  timer &#x3D; setInterval(() &#x3D;&gt; &#123;    getAmount();  &amp;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="vue3 setup语法糖下的定时器的使用与销毁">
+<meta property="og:url" content="https://yhao521.github.io/2024/07/19/vue3%20setup%E8%AF%AD%E6%B3%95%E7%B3%96%E4%B8%8B%E7%9A%84%E5%AE%9A%E6%97%B6%E5%99%A8%E7%9A%84%E4%BD%BF%E7%94%A8%E4%B8%8E%E9%94%80%E6%AF%81/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="如果在组件中需要使用定时器，注意在销毁组件的时候，要对定时器进行销毁，否则时间长了会导致页面卡顿。 123456789101112131415&lt;script setup&gt;onMounted(() &#x3D;&gt; &#123;  let timer &#x3D; null;&#x2F;&#x2F;每5s刷新数据  timer &#x3D; setInterval(() &#x3D;&gt; &#123;    getAmount();  &amp;">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2024-07-18T21:30:52.000Z">
+<meta property="article:modified_time" content="2024-07-18T21:32:58.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="java&#x2F;programming">
+<meta property="article:tag" content="javascript">
+<meta property="article:tag" content="js&#x2F;programming">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "vue3 setup语法糖下的定时器的使用与销毁",
+  "url": "https://yhao521.github.io/2024/07/19/vue3%20setup%E8%AF%AD%E6%B3%95%E7%B3%96%E4%B8%8B%E7%9A%84%E5%AE%9A%E6%97%B6%E5%99%A8%E7%9A%84%E4%BD%BF%E7%94%A8%E4%B8%8E%E9%94%80%E6%AF%81/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2024-07-18T21:30:52.000Z",
+  "dateModified": "2024-07-18T21:32:58.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2024/07/19/vue3%20setup%E8%AF%AD%E6%B3%95%E7%B3%96%E4%B8%8B%E7%9A%84%E5%AE%9A%E6%97%B6%E5%99%A8%E7%9A%84%E4%BD%BF%E7%94%A8%E4%B8%8E%E9%94%80%E6%AF%81/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'vue3 setup语法糖下的定时器的使用与销毁',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">vue3 setup语法糖下的定时器的使用与销毁</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">vue3 setup语法糖下的定时器的使用与销毁</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-07-18T21:30:52.000Z" title="发表于 2024-07-19 05:30:52">2024-07-19</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-07-18T21:32:58.000Z" title="更新于 2024-07-19 05:32:58">2024-07-19</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>如果在组件中需要使用定时器，注意在销毁组件的时候，要对定时器进行销毁，否则时间长了会导致页面卡顿。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&lt;script setup&gt;</span><br><span class="line"><span class="title function_">onMounted</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">let</span> timer = <span class="literal">null</span>;</span><br><span class="line"><span class="comment">//每5s刷新数据</span></span><br><span class="line">  timer = <span class="built_in">setInterval</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">    <span class="title function_">getAmount</span>();</span><br><span class="line">  &#125;, <span class="number">5000</span>);</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="title function_">onBeforeUnmount</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">  <span class="built_in">clearInterval</span>(timer)</span><br><span class="line">  timer = <span class="literal">null</span>;</span><br><span class="line">&#125;)</span><br><span class="line">&lt;/script&gt;</span><br><span class="line"><span class="number">1234567891011121314</span></span><br></pre></td></tr></table></figure></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2024/07/19/vue3%20setup%E8%AF%AD%E6%B3%95%E7%B3%96%E4%B8%8B%E7%9A%84%E5%AE%9A%E6%97%B6%E5%99%A8%E7%9A%84%E4%BD%BF%E7%94%A8%E4%B8%8E%E9%94%80%E6%AF%81/">https://yhao521.github.io/2024/07/19/vue3%20setup%E8%AF%AD%E6%B3%95%E7%B3%96%E4%B8%8B%E7%9A%84%E5%AE%9A%E6%97%B6%E5%99%A8%E7%9A%84%E4%BD%BF%E7%94%A8%E4%B8%8E%E9%94%80%E6%AF%81/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/java-programming/">java/programming</a><a class="post-meta__tags" href="/tags/javascript/">javascript</a><a class="post-meta__tags" href="/tags/js-programming/">js/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/07/23/Mac%20Android%20studio%20%E4%B8%8B%E8%BD%BD%E5%AE%89%E8%A3%85%20Google%20APIs%20System%20Image%20%E6%85%A2/" title="Mac Android studio 下载安装 Google APIs System Image 慢"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Mac Android studio 下载安装 Google APIs System Image 慢</div></div><div class="info-2"><div class="info-item-1">问题初始化Android studio里面的Android app 需要下载 google APIs system image, 比如说 Pie 28 x86. 但是通常下载会非常慢 原因下载链接跟域名是 dl.google.com，所以很可能很慢 解决方法 打开任何可以ping的工具: 比如这个站长工具， ping dl.google.com 选取下面列出的延迟较小的一个,例如 203.208.43.98 切换到root vim /etc/hosts 添加一行 203.208.43.98 dl.google.com再测试一边应该好了  </div></div></div></a><a class="pagination-related" href="/2024/07/19/Vue3%20setup%E8%AF%AD%E6%B3%95%E7%B3%96%E9%94%80%E6%AF%81%E4%B8%80%E4%B8%AA%E6%88%96%E5%A4%9A%E4%B8%AA%E5%AE%9A%E6%97%B6%E5%99%A8%EF%BC%88setTimeout%E6%88%96setInterval%EF%BC%89/" title="Vue3 setup语法糖销毁一个或多个定时器（setTimeout或setInterval）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Vue3 setup语法糖销毁一个或多个定时器（setTimeout或setInterval）</div></div><div class="info-2"><div class="info-item-1">背景如果在页面&#x2F;组件增加了定时器，就算跳转到其他页面，定时器也不会被清理，这时候就需要手动清理，不然会有意想不到的bug，也会影响性能。 提示 setTimeout是只执行一次，setInterval是循环执行，以下是用setTimeout举例子，如果想要用setInterval，替换一次方法就行。  setTimeout替换成setInterval clearTimeout替换成clearInterval   销毁一个定时器1&lt;script setup&gt;import &#123;onMounted, onUnmounted&#125; from &quot;vue&quot;; //注意哈，这里是个空const timer = ref() //先创建一个定时器onMounted(() =&gt; &#123;  timer.value=setTimeout(() =&gt; &#123;    // do something  &#125;, 1500)&#125;) //在页面销毁之前先销毁定时器onUnmounted(() =&gt; &#123;  ...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2024/09/10/Vite%202%20+%20Vue%203%20%E5%BC%95%E5%85%A5%20TypeScript%20(%E5%92%8C%20JavaScript%20%E6%B7%B7%E5%90%88%E5%BC%80%E5%8F%91)/" title="Vite 2 + Vue 3 引入 TypeScript (和 JavaScript 混合开发)"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-09-10</div><div class="info-item-2">Vite 2 + Vue 3 引入 TypeScript (和 JavaScript 混合开发)</div></div><div class="info-2"><div class="info-item-1">最近在迁移一个 Vue 2 项目，弄得差不多想起还是有必要整上 TypeScript，但改的过程中并不想一下子把所有文件从.js改成.ts，那么我们可以在tsconfig.json文件的&quot;compilerOptions&quot;配置上 “allowJs”: true，”noEmit”: true。  前提是已经安装了 typescript，没有的话可以全局npm install -g typescript，或者安装在项目本地。  具体上完整干货：  cd 到项目根目录，命令行敲上tsc –init，生成tsconfig.json文件，然后修改如下(部分选项根据自己需要来)：  📃tsconfig.json 123456789101112131415161718192021222324252627282930313233&#123;  &quot;compilerOptions&quot;: &#123;    &quot;target&quot;: &quot;esnext&quot;,    &quot;useDefineForClassFields&quot;:...</div></div></div></a><a class="pagination-related" href="/2024/04/14/vite%20+%20vue3%20+%20setup%20+%20pinia%20+%20ts%20%E9%A1%B9%E7%9B%AE%E5%AE%9E%E6%88%98/" title="vite + vue3 + setup + pinia + ts 项目实战"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-14</div><div class="info-item-2">vite + vue3 + setup + pinia + ts 项目实战</div></div><div class="info-2"><div class="info-item-1">介绍一个使用 vite + vue3 + pinia + ant-design-vue + typescript 完整技术路线开发的项目，秒级开发更新启动、新的vue3 composition api 结合 setup纵享丝滑般的开发体验、全新的 pinia状态管理器和优秀的设计体验（1k的size）、antd无障碍过渡使用UI组件库 ant-design-vue、安全高效的 typescript类型支持、代码规范验证、多级别的权限管理~ 前言前两天接到了一个需求，就是把原来的一个项目的主要功能模块和用户模块权限系统抽出来做一个新后台项目，并迭代新增一些新功能，看起来好像也没啥东西 拿到源码看了下项目，好家伙，原项目是个微应用项目，主应用用户模块是react技术栈，子应用模块是vue2技术栈，这直接 CV大法看样子是不行了👀，我这要做的毕竟是个单页面应用，确定一个技术路线即可，具体看下代码逻辑并跑起来看看 跑起来试了下，两个项目基本都是1分钟左右启动，看代码vue项目整个业务逻辑代码都拧在一块写了 想到之前问老大要源码的时候，说那个是老项目了，重新搭一个写应该会快点 这话没毛病...</div></div></div></a><a class="pagination-related" href="/2024/11/07/vue3+vite%E9%A1%B9%E7%9B%AE%E6%89%93%E5%8C%85%E6%96%87%E4%BB%B6%E6%B7%B7%E6%B7%86%E5%8A%A0%E5%AF%86/" title="vue3+vite项目打包文件混淆加密"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-11-07</div><div class="info-item-2">vue3+vite项目打包文件混淆加密</div></div><div class="info-2"><div class="info-item-1">给JS文件进行混淆加密的主要原因是为了增加代码的安全性并保护知识产权。具体来说，混淆加密技术通过改变JS代码的语法形式、增加多余的代码结构、添加无用的标识符、重命名变量等方式，使代码变得混乱无序，难以被理解和分析。 这种处理可以有效地防止黑客攻击和非法访问，因为混淆加密后的代码使得攻击者难以阅读和理解代码的逻辑和结构，从而增加了破解代码的难度。同时，混淆加密还可以防止其他人轻易窃取和复制这些代码，从而保护软件开发者和企业的知识产权，防止他们的代码被恶意篡改、复制或盗用。 总的来说，JS文件的混淆加密是一种重要的技术，它不仅可以提高Web应用程序的安全性，还可以保护代码的知识产权。然而，开发人员在使用混淆加密时应该谨慎，确保不影响代码的性能和可维护性，并定期更新和强化安全性措施，以全面保护Web应用程序的安全。 一、vue工程中的文件，打包进行文件混淆加密1// 安装混淆加密插件npm install --save-dev vite-plugin-obfuscator  在vite.config.ts文件配置混淆加密 1import &#123; viteObfuscateFile...</div></div></div></a><a class="pagination-related" href="/2024/01/09/%E5%BC%80%E5%90%AFNginx%E7%9A%84%E7%9B%AE%E5%BD%95%E6%96%87%E4%BB%B6%E5%88%97%E8%A1%A8%E5%8A%9F%E8%83%BD/" title="开启Nginx的目录文件列表功能"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-09</div><div class="info-item-2">开启Nginx的目录文件列表功能</div></div><div class="info-2"><div class="info-item-1">开启Nginx的目录文件列表功能ngx_http_autoindex_module  此模块用于自动生成目录列表，ngx_http_autoindex_module只在 ngx_http_index_module模块未找到索引文件时发出请求. nginx默认是不允许列出整个目录的。 开启目录列表：打开nginx.conf文件，在location server 或 http段中加入 autoindex on; 复制代码 &#123;12345678910111213141516171819202122232425262728293031    include       mime.types;    default_type  application/octet-stream;    autoindex on;//自动显示目录    autoindex_exact_size off;//人性化方式显示文件大小否则以byte显示    autoindex_localtime on;//按服务器时间显示，否则以gmt时间显示    server_names_hash_bucket_si...</div></div></div></a><a class="pagination-related" href="/2024/09/16/vue3%20%E9%A1%B9%E7%9B%AE%E6%90%AD%E5%BB%BA%E6%95%99%E7%A8%8B%EF%BC%88%E5%9F%BA%E4%BA%8Ecreate-vue%EF%BC%8Cvite%EF%BC%8CVite%20+%20Vue%EF%BC%89/" title="vue3 项目搭建教程（基于create-vue，vite，Vite + Vue）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-09-16</div><div class="info-item-2">vue3 项目搭建教程（基于create-vue，vite，Vite + Vue）</div></div><div class="info-2"><div class="info-item-1">vue3 项目搭建教程（基于create-vue，vite，Vite + Vue）目录 一、搭建vue3 项目前提条件 二、通过create-vue搭建vue3 项目 三、搭建一个 Vite 项目 四、构建一个 Vite + Vue 项目 五、打开Vue 项目管理器 六、Vite + Vue 项目目录结构 七、Vite.config.ts配置  一、搭建vue3 项目前提条件 前提条件  熟悉命令行 已安装 16.0 或更高版本的 Node.js   （1）、检查node 和npm版本信息 同时按window+R键,输入cmd,打开命令提示符窗口    输入： node –v　（查看本机安装的node版本）     输入： npm –v　（查看本机安装的npm版本）   （2）、升级你的 Node 版本  如果提示没有安装node或Node.js 版本 较低，请升级你的 Node 版本。 详细教程可参阅下面链接文章：  Vue3安装配置、开发环境搭建(组件安装卸载)（图文详细）https://blog.csdn.net/weixin_69553582&#x2F;article&#...</div></div></div></a><a class="pagination-related" href="/2024/09/08/%E4%BD%BF%E7%94%A8%20Vue3%20%E5%92%8C%20Vite%20%E5%88%9B%E5%BB%BA%20SQLite%20%E6%95%B0%E6%8D%AE%E5%BA%93%E5%B9%B6%E8%BF%9B%E8%A1%8C%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/" title="使用 Vue3 和 Vite 创建 SQLite 数据库并进行数据存储"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-09-08</div><div class="info-item-2">使用 Vue3 和 Vite 创建 SQLite 数据库并进行数据存储</div></div><div class="info-2"><div class="info-item-1">本篇文章将介绍如何在 Vue3 和 Vite 项目中使用 SQLite 数据库进行数据存储。我们将使用 better-sqlite3 库来创建和管理 SQLite 数据库，并将使用 Vue3 来开发前端界面。  创建项目  首先，我们需要创建一个新的 Vue3 项目。可以使用以下命令创建一个名为 vue-sqlite 的新项目： 12vue create vue-sqlite1  然后，安装所需的依赖项，包括 better-sqlite3： 12npm install better-sqlite31   创建 SQLite 数据库  接下来，我们需要创建 SQLite 数据库。可以在项目根目录下创建一个名为 database.js 的文件，并将以下代码添加到文件中： 123456789101112131415161718192021const sqlite = require(&#x27;better-sqlite3&#x27;)const path = require(&#x27;path&#x27;)const dbPath = path.join(__dirname, &#...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

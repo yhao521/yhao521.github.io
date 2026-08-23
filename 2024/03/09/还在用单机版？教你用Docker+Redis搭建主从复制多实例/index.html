@@ -1,0 +1,293 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>还在用单机版？教你用Docker+Redis搭建主从复制多实例 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="本文首发我的微信公众号『爱笑的架构师』，欢迎大家关注。     0. 目标 1. 安装docker，运行docker 2. 拉取redis镜像文件 3. 准备好redis配置文件redis.conf 4. 启动redis实例 5. 配置主从复制集群 6. 测试主从复制效果 总结      0. 目标本地搭建三个redis实例（一主两备），实现效果：主实例插入数据备实例可以复制同步过去。 1. 安">
+<meta property="og:type" content="article">
+<meta property="og:title" content="还在用单机版？教你用Docker+Redis搭建主从复制多实例">
+<meta property="og:url" content="https://yhao521.github.io/2024/03/09/%E8%BF%98%E5%9C%A8%E7%94%A8%E5%8D%95%E6%9C%BA%E7%89%88%EF%BC%9F%E6%95%99%E4%BD%A0%E7%94%A8Docker+Redis%E6%90%AD%E5%BB%BA%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%A4%9A%E5%AE%9E%E4%BE%8B/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="本文首发我的微信公众号『爱笑的架构师』，欢迎大家关注。     0. 目标 1. 安装docker，运行docker 2. 拉取redis镜像文件 3. 准备好redis配置文件redis.conf 4. 启动redis实例 5. 配置主从复制集群 6. 测试主从复制效果 总结      0. 目标本地搭建三个redis实例（一主两备），实现效果：主实例插入数据备实例可以复制同步过去。 1. 安">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2024-03-08T17:29:28.000Z">
+<meta property="article:modified_time" content="2024-03-08T17:29:28.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "还在用单机版？教你用Docker+Redis搭建主从复制多实例",
+  "url": "https://yhao521.github.io/2024/03/09/%E8%BF%98%E5%9C%A8%E7%94%A8%E5%8D%95%E6%9C%BA%E7%89%88%EF%BC%9F%E6%95%99%E4%BD%A0%E7%94%A8Docker+Redis%E6%90%AD%E5%BB%BA%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%A4%9A%E5%AE%9E%E4%BE%8B/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2024-03-08T17:29:28.000Z",
+  "dateModified": "2024-03-08T17:29:28.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2024/03/09/%E8%BF%98%E5%9C%A8%E7%94%A8%E5%8D%95%E6%9C%BA%E7%89%88%EF%BC%9F%E6%95%99%E4%BD%A0%E7%94%A8Docker+Redis%E6%90%AD%E5%BB%BA%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%A4%9A%E5%AE%9E%E4%BE%8B/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '还在用单机版？教你用Docker+Redis搭建主从复制多实例',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">还在用单机版？教你用Docker+Redis搭建主从复制多实例</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">还在用单机版？教你用Docker+Redis搭建主从复制多实例</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-03-08T17:29:28.000Z" title="发表于 2024-03-09 01:29:28">2024-03-09</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-03-08T17:29:28.000Z" title="更新于 2024-03-09 01:29:28">2024-03-09</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p>本文首发我的微信公众号『<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzIwODI1OTk1Nw==&mid=2650321391&idx=1&sn=0aea8b119ccee60a1366fffb9c040695&chksm=8f09cff5b87e46e33555e89a7d4929e4b184563b11f3cbfb7b834510c68708b125f128830acf&token=875646549&lang=zh_CN#rd">爱笑的架构师</a>』，欢迎大家关注。</p>
+</blockquote>
+<!-- TOC -->
+
+<ul>
+<li><a href="#0-%E7%9B%AE%E6%A0%87">0. 目标</a></li>
+<li><a href="#1-%E5%AE%89%E8%A3%85docker%E8%BF%90%E8%A1%8Cdocker">1. 安装docker，运行docker</a></li>
+<li><a href="#2-%E6%8B%89%E5%8F%96redis%E9%95%9C%E5%83%8F%E6%96%87%E4%BB%B6">2. 拉取redis镜像文件</a></li>
+<li><a href="#3-%E5%87%86%E5%A4%87%E5%A5%BDredis%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6redisconf">3. 准备好redis配置文件redis.conf</a></li>
+<li><a href="#4-%E5%90%AF%E5%8A%A8redis%E5%AE%9E%E4%BE%8B">4. 启动redis实例</a></li>
+<li><a href="#5-%E9%85%8D%E7%BD%AE%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E9%9B%86%E7%BE%A4">5. 配置主从复制集群</a></li>
+<li><a href="#6-%E6%B5%8B%E8%AF%95%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%95%88%E6%9E%9C">6. 测试主从复制效果</a></li>
+<li><a href="#%E6%80%BB%E7%BB%93">总结</a></li>
+</ul>
+<!-- /TOC -->
+
+<img src="https://cdn.jsdelivr.net/gh/CoderLeixiaoshuai/assets/202102/20210504214729-2021-05-04-21-47-29.png" alt="20210504214729-2021-05-04-21-47-29">
+
+<h1 id="0-目标"><a href="#0-目标" class="headerlink" title="0. 目标"></a>0. 目标</h1><p>本地搭建三个redis实例（一主两备），实现效果：主实例插入数据备实例可以复制同步过去。</p>
+<h1 id="1-安装docker，运行docker"><a href="#1-安装docker，运行docker" class="headerlink" title="1. 安装docker，运行docker"></a>1. 安装docker，运行docker</h1><p>docker安装步骤省略，大家可以从官网下载并安装。</p>
+<p>检查docker是否运行成功：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker info</span><br></pre></td></tr></table></figure>
+<p>出现回显表示运行成功，可以做下一步操作了。</p>
+<h1 id="2-拉取redis镜像文件"><a href="#2-拉取redis镜像文件" class="headerlink" title="2. 拉取redis镜像文件"></a>2. 拉取redis镜像文件</h1><p>执行以下命令默认拉取tag为latest的官方redis镜像</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull redis</span><br></pre></td></tr></table></figure>
+
+<h1 id="3-准备好redis配置文件redis-conf"><a href="#3-准备好redis配置文件redis-conf" class="headerlink" title="3. 准备好redis配置文件redis.conf"></a>3. 准备好redis配置文件redis.conf</h1><p>下载地址：</p>
+<blockquote>
+<p>链接:<a target="_blank" rel="noopener" href="https://pan.baidu.com/s/14tWHtk3mch3e3VlT9TYX1A">https://pan.baidu.com/s/14tWHtk3mch3e3VlT9TYX1A</a>  </p>
+<p>提取密码:q3uk</p>
+</blockquote>
+<p>拷贝为3三份，如：redis01.conf, redis02.conf, redis03.conf</p>
+<p>打开所有的配置文件，修改如下配置项：</p>
+<ul>
+<li>注释只监听本地选项，可以远程连接。#bind 127.0.0.1</li>
+<li>关闭保护模式 protected-mode no</li>
+<li>打开AOF持久化开关 appendonly yes</li>
+</ul>
+<h1 id="4-启动redis实例"><a href="#4-启动redis实例" class="headerlink" title="4. 启动redis实例"></a>4. 启动redis实例</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">实例1</span></span><br><span class="line">docker run -p 6381:6379 --name redis-server-01 -v /your/path/redis/conf/redis01.conf:/etc/redis/redis.conf -v /your/path/redis/data01:/data -d redis redis-server /etc/redis/redis.conf</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">实例2</span></span><br><span class="line">docker run -p 6382:6379 --name redis-server-02 -v /your/path/redis/redis/conf/redis02.conf:/etc/redis/redis.conf -v /your/path/redis/data02:/data -d redis redis-server /etc/redis/redis.conf</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">实例3</span></span><br><span class="line">docker run -p 6383:6379 --name redis-server-03 -v /your/path/redis/conf/redis03.conf:/etc/redis/redis.conf -v /your/path/redis/data03:/data -d redis redis-server /etc/redis/redis.conf</span><br></pre></td></tr></table></figure>
+
+
+
+<p>对以上命令简单解释：</p>
+<ul>
+<li>参数-p 6381:6379，6381表示宿主机端口，6379表示容器实例端口，意思是将容器实例端口映射到宿主机端口。</li>
+<li>参数–name redis-server-01，给容器实例命名。</li>
+<li>参数-v &#x2F;your&#x2F;path&#x2F;redis&#x2F;conf&#x2F;redis01.conf:&#x2F;etc&#x2F;redis&#x2F;redis.conf，冒号前是宿主机配置文件路径，冒号后是容器的配置文件路径，意思是将容器实例的配置路径映射到宿主机的路径。</li>
+<li>参数-v &#x2F;your&#x2F;path&#x2F;redis&#x2F;data01:&#x2F;data，如上面意思相同。</li>
+<li>选项-d表示以后台形式运行实例。</li>
+<li>参数redis-server &#x2F;etc&#x2F;redis&#x2F;redis.conf表示执行redis-server命令， &#x2F;etc&#x2F;redis&#x2F;redis.conf表示以该配置文件启动redis实例，注意配置文件必须为redis-server命令的第一个参数。</li>
+</ul>
+<h1 id="5-配置主从复制集群"><a href="#5-配置主从复制集群" class="headerlink" title="5. 配置主从复制集群"></a>5. 配置主从复制集群</h1><p>检查实例运行状态：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker ps</span><br></pre></td></tr></table></figure>
+
+
+<p>回显有三个redis实例即为正常。 查询实例1：redis-server-01 运行的内部ip</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker inspect redis-server-01</span><br></pre></td></tr></table></figure>
+
+
+<p>通过回显可以看到：”IPAddress”: “172.17.0.4” 我们将实例1规划为主，另外两个实例自然为备了，通过将主的ip和port配置在备的配置文件中即可实现主从复制的效果。</p>
+<p>修改redis02.conf和redis03.conf配置文件，找到replicaof选项（redis5.0之前是slaveof），修改为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">replicaof 172.17.0.4 6379</span><br></pre></td></tr></table></figure>
+
+
+<p>修改完毕，重启实例2和实例3：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker restart redis-server-02</span><br><span class="line">docker restart redis-server-03</span><br></pre></td></tr></table></figure>
+
+
+<p>检查实例1的状态是否为主，并且挂载两个备实例：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it redis-server-01 redis-cli</span><br><span class="line">127.0.0.1:6379&gt; info</span><br></pre></td></tr></table></figure>
+
+
+<p>回显如下表示主从复制配置成功：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># Replication</span><br><span class="line">role:master</span><br><span class="line">connected_slaves:2</span><br><span class="line">slave0:ip=172.17.0.3,port=6379,state=online,offset=84,lag=1</span><br><span class="line">slave1:ip=172.17.0.2,port=6379,state=online,offset=84,lag=1</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="6-测试主从复制效果"><a href="#6-测试主从复制效果" class="headerlink" title="6. 测试主从复制效果"></a>6. 测试主从复制效果</h1><p>连接redis实例1插入一条记录：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it redis-server-01 redis-cli # 连接实例1</span><br><span class="line">127.0.0.1:6379&gt; set name ray  # 插入一条数据</span><br><span class="line">OK  # 插入成功</span><br></pre></td></tr></table></figure>
+
+
+<p>连接redis实例2和实例3查看是否复制成功：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it redis-server-02 redis-cli # 连接实例2</span><br><span class="line">127.0.0.1:6379&gt; get name</span><br><span class="line">&quot;ray&quot;   # 可以查到，表明从实例已经将主实例的数据同步过来了</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>搭建Redis主从复制实例需要有一点docker的基础，如果你对docker比较熟悉了，那搭建过程实在太容易了。没有docker基础，只要按照上面的命令逐个运行也可以100%成功哦。</p>
+<p>下一篇带大家手把手搭建Redis主从复制+哨兵模式，尽请期待。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2024/03/09/%E8%BF%98%E5%9C%A8%E7%94%A8%E5%8D%95%E6%9C%BA%E7%89%88%EF%BC%9F%E6%95%99%E4%BD%A0%E7%94%A8Docker+Redis%E6%90%AD%E5%BB%BA%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%A4%9A%E5%AE%9E%E4%BE%8B/">https://yhao521.github.io/2024/03/09/%E8%BF%98%E5%9C%A8%E7%94%A8%E5%8D%95%E6%9C%BA%E7%89%88%EF%BC%9F%E6%95%99%E4%BD%A0%E7%94%A8Docker+Redis%E6%90%AD%E5%BB%BA%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%A4%9A%E5%AE%9E%E4%BE%8B/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/03/09/%E9%9D%A2%E8%AF%95%E5%AE%98%E5%86%8D%E9%97%AERedis%E4%BA%8B%E5%8A%A1%E6%8A%8A%E8%BF%99%E7%AF%87%E6%96%87%E7%AB%A0%E6%89%94%E7%BB%99%E4%BB%96/" title="面试官再问Redis事务把这篇文章扔给他"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">面试官再问Redis事务把这篇文章扔给他</div></div><div class="info-2"><div class="info-item-1"> 本文首发我的微信公众号『爱笑的架构师』，欢迎大家关注。  1. Redis事务生命周期 开启事务：使用MULTI开启一个事务 命令入队列：每次操作的命令都会加入到一个队列中，但命令此时不会真正被执行 提交事务：使用EXEC命令提交事务，开始顺序执行队列中的命令  2. Redis事务到底是不是原子性的？先看关系型数据库ACID 中关于原子性的定义： **原子性：**一个事务(transaction)中的所有操作，要么全部完成，要么全部不完成，不会结束在中间某个环节。事务在执行过程中发生错误，会被恢复(Rollback)到事务开始前的状态，就像这个事务从来没有执行过一样。 官方文档对事务的定义：  事务是一个单独的隔离操作：事务中的所有命令都会序列化、按顺序地执行。事务在执行的过程中，不会被其他客户端发送来的命令请求所打断。 事务是一个原子操作：事务中的命令要么全部被执行，要么全部都不执行。EXEC 命令负责触发并执行事务中的所有命令：如果客户端在使用 MULTI 开启了一个事务之后，却因为断线而没有成功执行 EXEC ，那么事务中的所有命令都不会被执行。另一方面，如果客户端成功...</div></div></div></a><a class="pagination-related" href="/2024/03/09/%E8%AF%B7%E9%81%BF%E5%BC%80Stream%E6%B5%81%E5%BC%8F%E7%BC%96%E7%A8%8B%E5%B8%B8%E8%A7%81%E7%9A%84%E5%9D%91/" title="请避开Stream流式编程常见的坑"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">请避开Stream流式编程常见的坑</div></div><div class="info-2"><div class="info-item-1"> 本文首发我的微信公众号『爱笑的架构师』，欢迎大家关注。     1. Stream是什么？ 2. Stream的特点 3. 创建Stream实例的方法 4. Stream常用操作 5. 实战：使用Stream重构老代码 6. 使用Stream常见的误区 公众号     Java8 由Oracle在2014年发布，是继Java5之后最具革命性的版本了。Java8吸收其他语言的精髓带来了函数式编程，lambda表达式，Stream流等一系列新特性，学会了这些新特性，可以让你实现高效编码优雅编码。  1. Stream是什么？Stream是Java8新增的一个接口，允许以声明性方式处理数据集合。Stream不是一个集合类型不保存数据，可以把它看作是遍历数据集合的高级迭代器（Iterator）。 Stream操作可以像Builder一样逐步叠加，形成一条流水线。流水线一般由数据源+零或者多个中间操作+一个终端操作所构成。中间操作可以将流转换成另外一个流，比如使用filter过滤元素，使用map映射提取值。 Stream与lambda表达式密不可分，本文默认你已经掌握了lambda基础知...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/MySQL%E5%90%AF%E7%94%A8SSL%E8%BF%9E%E6%8E%A5/" title="MySQL启用SSL连接"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">MySQL启用SSL连接</div></div><div class="info-2"><div class="info-item-1"> title: MySQL启用SSL连接date: 2023-09-04 17:49:38permalink: &#x2F;pages&#x2F;5b9111&#x2F;category:  数据库 doc_mysqltag: doc_mysqlauthor:   #####MySQL启用SSL连接 1.手动创建自认证证书 1.1 创建CA证书 openssl genrsa 2048 &gt; ca-key.pem  openssl req -new -x509 -nodes -days 3600 \  -key ca-key.pem -out ca.pem  1.2 创建服务端证书，去除加密，使用CA签名 server-cert.pem = public key, server-key.pem = private key  openssl req -newkey rsa:2048 -days 3600 \  -nodes -keyout server-key.pem -out server-req.pem openssl rsa -in server-key.pem -out ...</div></div></div></a><a class="pagination-related" href="/2023/09/04/Jenkins%E7%9A%84%E4%BD%BF%E7%94%A8%E5%92%8C%E5%AE%89%E8%A3%85/" title="Jenkins的使用和安装"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">Jenkins的使用和安装</div></div><div class="info-2"><div class="info-item-1"> title: Jenkins的使用和安装date: 2023-09-03 20:17:08category:  doc_jenkinstag: doc_jenkinsauthor:   1. Jenkins的使用和安装1.1. 用途现状：现状的对比 工具：流程、优势、特点；解决的问题；先介绍 工具的方式 项目持续化集成；自动化部署； 1.2. 安装jenkins1） 下载jenkins.war ，可以直接运行，也可以放在tomcat下运行； 2） 运行需要jdk1.8环境; 3） 使用jdk生成ssl需要的秘钥(tomcat下运行时，若需要https方式访问) 4） 制作jenkins的docker镜像（或直接下载jenkins镜像），准备maven、ant、jdk、tomcat、centos的jenkins镜像、dockerfile，制作docker运行； 3.1）导入jenkins镜像；新建docker-compose.yml，使用docker-compose up -d 启动 version: ‘2’services: jenkins: image: jenkins:ht...</div></div></div></a><a class="pagination-related" href="/2023/09/04/M1%E8%8A%AF%E7%89%87MAC%E4%BD%BF%E7%94%A8VMwareFusion%E5%AE%89%E8%A3%85Win11/" title="M1芯片MAC使用VMwareFusion安装Win11"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">M1芯片MAC使用VMwareFusion安装Win11</div></div><div class="info-2"><div class="info-item-1"> title: M1芯片MAC使用VMwareFusion安装Win11date: 2023-09-03 20:17:08category:  mactag: macauthor:   M1芯片MAC使用VMware Fusion安装Windows 11最近居家办公，旧笔记本电脑卡的受不了，就买了2020款的MacBook Air，然而有些东西还是避不开要使用Windows系统，安装虚拟机成了最好的选择，通过两天的search和尝试，终于安装成功了Windows 11，之后就写下了一个总结，废话不多说，开始安装。 VMware Fusion13密钥 1HF200-0W05K-089X8-4R1EK-032J0  14C21U-2KK9Q-M8130-4V2QH-CF810  一、首先就是下载虚拟机软件和系统镜像进入VMware官网下载VMware Fusion个人免费版本，只需要注册即可下载安装使用； 获取Windows 11 ARM64镜像，我是直接从微软官方下载的预览版镜像：在Windows Insider Preview点击页面中的「 Windows Client ARM6...</div></div></div></a><a class="pagination-related" href="/2024/03/15/%E4%B8%80%E5%A4%A7%E6%B3%A2%20AppleScript%20%E6%9D%A5%E8%A2%AD%EF%BC%9A%E6%89%93%E5%BC%80%20Chrome%20%E7%AA%97%E5%8F%A3%E3%80%81%E8%B0%83%E6%95%B4%20DevTool%20%E4%BD%8D%E7%BD%AE%E3%80%81%E8%BD%BD%E5%85%A5%20S/" title="一大波 AppleScript 来袭：打开 Chrome 窗口、调整 DevTool 位置、载入 Sublime 项目、执行 ITerm 命令 等等..."><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-15</div><div class="info-item-2">一大波 AppleScript 来袭：打开 Chrome 窗口、调整 DevTool 位置、载入 Sublime 项目、执行 ITerm 命令 等等...</div></div><div class="info-2"><div class="info-item-1">前言前阵子说过，发现了 Mac 调度中心的正确用法，在三屏显示器下很酷，后来又实现了让 mac 和外联的显示器一起随机成同一个壁纸，真是赏心悦目。 想要更高效然而，如何在桌面空间里为一堆项目窗口进行自动化布局这件事一直让我念念不忘，好在现在有了收获。 一大波 Applescript 脚本此处只分享脚本和用法，具体组装需要各人自行领会，菜端上来了，怎么吃，请自行动筷。 我的工作环境里，主要涉及 Chrome Sublime iTerm 等软件，以下代码供参考。 开一个新窗口（不是新标签）方法： 1234567891011121314151617181920212223242526272829303132on newWindow(name, openStr, newWindowStr)    tell application &quot;Dock&quot;        activate    end tell    tell application &quot;System Events&quot;        tell process &quot;Dock&quot;    ...</div></div></div></a><a class="pagination-related" href="/2023/09/04/electron%E5%AE%89%E8%A3%85&%E4%BD%BF%E7%94%A8/" title="electron安装&amp;使用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">electron安装&amp;使用</div></div><div class="info-2"><div class="info-item-1"> title: electron安装&amp;使用date: 2023-09-03 20:17:08category:  mactag: macauthor:   yarn config set registry https://registry.npm.taobao.org/yarn config set registry https://registry.npm.taobao.orgyarn config set PHANTOMJS_CDNURL http://npm.taobao.org/mirrors/phantomjsyarn config set ELECTRON_MIRROR http://npm.taobao.org/mirrors/electron/yarn config set electron_mirror https://npm.taobao.org/mirrors/electron/yarn config set sass_binary_site http://npm.taobao.org/mirrors/node-sassyarn config set...</div></div></div></a><a class="pagination-related" href="/2022/05/30/%E7%AE%A1%E6%8E%A7%E5%B9%B3%E5%8F%B0@Fastjson%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%E4%BF%AE%E5%A4%8D@20220530/" title="管控平台@Fastjson反序列化漏洞修复@20220530"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2022-05-30</div><div class="info-item-2">管控平台@Fastjson反序列化漏洞修复@20220530</div></div><div class="info-2"><div class="info-item-1">管控平台@Fastjson反序列化漏洞修复@20220530关于Fastjson反序列化漏洞的安全通告Fastjson是阿里巴巴公司的一个开源java库，可用于将Java对象转换为其JSON表示，还可用于将JSON字符串转换为等效的Java对象，其性能从未被其他Java实现的JSON库超越。近日，Fastjson官方发布了安全公告，解决了在Fastjson中存在的一个反序列化漏洞，请受影响用户尽快安装更新补丁，避免受到影响。 一、 漏洞详情该漏洞是由于Fastjson在1.2.80及以下版本中使用黑白名单用于防御反序列化漏洞，但是该防御策略在特定条件下可绕过默认 autoType。恶意攻击者通过发送特制的反序列化数据至服务器，能够在目标系统上执行任意代码。 二、 影响范围Fastjson &lt;&#x3D; 1.2.80 三、 漏洞等级高危 四、 修复建议漏洞检测 相关用户可使用以下命令检测当前使用的Fastjson版本：lsof | grep fastjson 官方补丁 目前官方已发布更新补丁，请受影响用户及时关注并尽快更新，官方链接：https://github.com/a...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#0-%E7%9B%AE%E6%A0%87"><span class="toc-number">1.</span> <span class="toc-text">0. 目标</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E5%AE%89%E8%A3%85docker%EF%BC%8C%E8%BF%90%E8%A1%8Cdocker"><span class="toc-number">2.</span> <span class="toc-text">1. 安装docker，运行docker</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E6%8B%89%E5%8F%96redis%E9%95%9C%E5%83%8F%E6%96%87%E4%BB%B6"><span class="toc-number">3.</span> <span class="toc-text">2. 拉取redis镜像文件</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E5%87%86%E5%A4%87%E5%A5%BDredis%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6redis-conf"><span class="toc-number">4.</span> <span class="toc-text">3. 准备好redis配置文件redis.conf</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E5%90%AF%E5%8A%A8redis%E5%AE%9E%E4%BE%8B"><span class="toc-number">5.</span> <span class="toc-text">4. 启动redis实例</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#5-%E9%85%8D%E7%BD%AE%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E9%9B%86%E7%BE%A4"><span class="toc-number">6.</span> <span class="toc-text">5. 配置主从复制集群</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#6-%E6%B5%8B%E8%AF%95%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E6%95%88%E6%9E%9C"><span class="toc-number">7.</span> <span class="toc-text">6. 测试主从复制效果</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">8.</span> <span class="toc-text">总结</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

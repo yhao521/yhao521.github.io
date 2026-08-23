@@ -1,0 +1,247 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>使用Golang实现高效的交互式命令行提示工具 - 云原生实践 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="引言 在软件开发领域，命令行工具（CLI）一直是开发者不可或缺的工具之一。它们简洁、高效，能够快速完成各种任务。随着技术的发展，交互式命令行工具（Interactive CLI）逐渐成为新的趋势，它们通过提供自动补全、语法高亮等功能，极大地提升了用户体验。本文将探讨如何使用Golang实现一个高效的交互式命令行提示工具，并结合一些流行的库和框架，展示其强大功能和灵活性。 Golang简介">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用Golang实现高效的交互式命令行提示工具 - 云原生实践">
+<meta property="og:url" content="https://yhao521.github.io/2025/07/10/%E4%BD%BF%E7%94%A8Golang%E5%AE%9E%E7%8E%B0%E9%AB%98%E6%95%88%E7%9A%84%E4%BA%A4%E4%BA%92%E5%BC%8F%E5%91%BD%E4%BB%A4%E8%A1%8C%E6%8F%90%E7%A4%BA%E5%B7%A5%E5%85%B7%20-%20%E4%BA%91%E5%8E%9F%E7%94%9F%E5%AE%9E%E8%B7%B5/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="引言 在软件开发领域，命令行工具（CLI）一直是开发者不可或缺的工具之一。它们简洁、高效，能够快速完成各种任务。随着技术的发展，交互式命令行工具（Interactive CLI）逐渐成为新的趋势，它们通过提供自动补全、语法高亮等功能，极大地提升了用户体验。本文将探讨如何使用Golang实现一个高效的交互式命令行提示工具，并结合一些流行的库和框架，展示其强大功能和灵活性。 Golang简介">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2025-07-09T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-17T16:00:00.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="Go">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="golang&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="python&#x2F;programming">
+<meta property="article:tag" content="摘录">
+<meta property="article:tag" content="教程">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "使用Golang实现高效的交互式命令行提示工具 - 云原生实践",
+  "url": "https://yhao521.github.io/2025/07/10/%E4%BD%BF%E7%94%A8Golang%E5%AE%9E%E7%8E%B0%E9%AB%98%E6%95%88%E7%9A%84%E4%BA%A4%E4%BA%92%E5%BC%8F%E5%91%BD%E4%BB%A4%E8%A1%8C%E6%8F%90%E7%A4%BA%E5%B7%A5%E5%85%B7%20-%20%E4%BA%91%E5%8E%9F%E7%94%9F%E5%AE%9E%E8%B7%B5/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2025-07-09T16:00:00.000Z",
+  "dateModified": "2026-05-17T16:00:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2025/07/10/%E4%BD%BF%E7%94%A8Golang%E5%AE%9E%E7%8E%B0%E9%AB%98%E6%95%88%E7%9A%84%E4%BA%A4%E4%BA%92%E5%BC%8F%E5%91%BD%E4%BB%A4%E8%A1%8C%E6%8F%90%E7%A4%BA%E5%B7%A5%E5%85%B7%20-%20%E4%BA%91%E5%8E%9F%E7%94%9F%E5%AE%9E%E8%B7%B5/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '使用Golang实现高效的交互式命令行提示工具 - 云原生实践',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">使用Golang实现高效的交互式命令行提示工具 - 云原生实践</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">使用Golang实现高效的交互式命令行提示工具 - 云原生实践</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-07-09T16:00:00.000Z" title="发表于 2025-07-10 00:00:00">2025-07-10</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-17T16:00:00.000Z" title="更新于 2026-05-18 00:00:00">2026-05-18</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h3 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h3><p>在软件开发领域，命令行工具（CLI）一直是开发者不可或缺的工具之一。它们简洁、高效，能够快速完成各种任务。随着技术的发展，交互式命令行工具（Interactive CLI）逐渐成为新的趋势，它们通过提供自动补全、语法高亮等功能，极大地提升了用户体验。本文将探讨如何使用Golang实现一个高效的交互式命令行提示工具，并结合一些流行的库和框架，展示其强大功能和灵活性。</p>
+<h3 id="Golang简介"><a href="#Golang简介" class="headerlink" title="Golang简介"></a>Golang简介</h3><p>Golang，也被称为Go语言，是由Google开发的一种开源编程语言。它以其简洁、直观和高效的语法而受到广泛喜爱。Golang具有静态类型、垃圾回收、并发编程和内存安全等特性，特别适合用于开发高性能的网络工具和命令行应用程序。</p>
+<h3 id="交互式命令行工具的需求"><a href="#交互式命令行工具的需求" class="headerlink" title="交互式命令行工具的需求"></a>交互式命令行工具的需求</h3><p>传统的命令行工具通常缺乏交互性，用户需要手动输入完整的命令和参数，这不仅效率低下，还容易出错。交互式命令行工具通过提供自动补全、语法高亮和历史记录等功能，极大地提升了用户体验和工作效率。</p>
+<h3 id="关键技术"><a href="#关键技术" class="headerlink" title="关键技术"></a>关键技术</h3><h4 id="1-Go-prompt库"><a href="#1-Go-prompt库" class="headerlink" title="1. Go-prompt库"></a>1. Go-prompt库</h4><p><code>go-prompt</code> 是一个功能强大的Golang库，用于构建交互式命令行界面。它提供了类似于Python的 <code>prompt_toolkit</code> 的体验，支持自动补全、语法高亮和多行编辑等功能。</p>
+<h4 id="2-Grumble框架"><a href="#2-Grumble框架" class="headerlink" title="2. Grumble框架"></a>2. Grumble框架</h4><p><code>grumble</code> 是一个Golang的交互式命令行框架，它基于 <code>go-prompt</code> ，但提供了更高级的命令管理和参数解析功能。 <code>grumble</code> 的命令语法类似于 <code>cobra</code> ，适合构建复杂的命令行应用程序。</p>
+<h3 id="实现步骤"><a href="#实现步骤" class="headerlink" title="实现步骤"></a>实现步骤</h3><h4 id="1-安装Go语言环境"><a href="#1-安装Go语言环境" class="headerlink" title="1. 安装Go语言环境"></a>1. 安装Go语言环境</h4><p>首先，确保你的系统中已安装Go语言环境。可以从Go官网下载并安装最新版本的Go。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">wget https://golang.org/dl/go1.20.1.linux-amd64.tar.gz</span><br><span class="line"><span class="built_in">sudo</span> tar -xvf go1.20.1.linux-amd64.tar.gz</span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">mv</span> go /usr/local</span><br><span class="line"><span class="built_in">export</span> GOROOT=/usr/local/go</span><br><span class="line"><span class="built_in">export</span> GOPATH=<span class="variable">$HOME</span>/go</span><br><span class="line"><span class="built_in">export</span> PATH=<span class="variable">$GOPATH</span>/bin:<span class="variable">$GOROOT</span>/bin:<span class="variable">$PATH</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="2-安装go-prompt库"><a href="#2-安装go-prompt库" class="headerlink" title="2. 安装go-prompt库"></a>2. 安装go-prompt库</h4><p>使用 <code>go get</code> 命令安装 <code>go-prompt</code> 库：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go get -u github.com/c-bata/go-prompt</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-创建交互式命令行工具"><a href="#3-创建交互式命令行工具" class="headerlink" title="3. 创建交互式命令行工具"></a>3. 创建交互式命令行工具</h4><p>以下是一个简单的示例，展示如何使用 <code>go-prompt</code> 创建一个交互式命令行工具：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">    &quot;fmt&quot;</span><br><span class="line">    &quot;github.com/c-bata/go-prompt&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">func executor(in string) &#123;</span><br><span class="line">    fmt.Println(&quot;You entered:&quot;, in)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func completer(d prompt.Document) []prompt.Suggest &#123;</span><br><span class="line">    suggestions := []prompt.Suggest&#123;</span><br><span class="line">        &#123;Text: &quot;hello&quot;, Description: &quot;Greet someone&quot;&#125;,</span><br><span class="line">        &#123;Text: &quot;exit&quot;, Description: &quot;Exit the program&quot;&#125;,</span><br><span class="line">    &#125;</span><br><span class="line">    return prompt.FilterHasPrefix(suggestions, d.GetWordBeforeCursor(), true)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">    p := prompt.New(</span><br><span class="line">        executor,</span><br><span class="line">        completer,</span><br><span class="line">        prompt.OptionPrefix(&quot;&gt;&gt;&gt; &quot;),</span><br><span class="line">        prompt.OptionTitle(&quot;My Interactive CLI&quot;),</span><br><span class="line">    )</span><br><span class="line">    p.Run()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="4-使用Grumble框架"><a href="#4-使用Grumble框架" class="headerlink" title="4. 使用Grumble框架"></a>4. 使用Grumble框架</h4><p>安装 <code>grumble</code> 框架：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go get -u github.com/desertbit/grumble</span><br></pre></td></tr></table></figure>
+
+<p>以下是一个使用 <code>grumble</code> 的示例：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">    &quot;github.com/desertbit/grumble&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">    app := grumble.New(&amp;grumble.Config&#123;</span><br><span class="line">        Name:        &quot;myapp&quot;,</span><br><span class="line">        Description: &quot;A simple interactive CLI app&quot;,</span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">    app.AddCommand(&amp;grumble.Command&#123;</span><br><span class="line">        Name:    &quot;greet&quot;,</span><br><span class="line">        Help:    &quot;greet someone&quot;,</span><br><span class="line">        Args:    grumble.MinimumNArgs(1),</span><br><span class="line">        Handler: func(c *grumble.Context) error &#123;</span><br><span class="line">            c.App.Println(&quot;Hello,&quot;, c.Args[0])</span><br><span class="line">            return nil</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">    app.AddCommand(&amp;grumble.Command&#123;</span><br><span class="line">        Name:    &quot;exit&quot;,</span><br><span class="line">        Help:    &quot;exit the program&quot;,</span><br><span class="line">        Handler: func(c *grumble.Context) error &#123;</span><br><span class="line">            c.App.Exit(0)</span><br><span class="line">            return nil</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">    grumble.Main(app)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="高级功能"><a href="#高级功能" class="headerlink" title="高级功能"></a>高级功能</h3><h4 id="1-自动补全"><a href="#1-自动补全" class="headerlink" title="1. 自动补全"></a>1. 自动补全</h4><p><code>go-prompt</code> 和 <code>grumble</code> 都支持自动补全功能。你可以通过自定义补全逻辑，提供更智能的提示。</p>
+<h4 id="2-语法高亮"><a href="#2-语法高亮" class="headerlink" title="2. 语法高亮"></a>2. 语法高亮</h4><p><code>go-prompt</code> 支持语法高亮，可以通过配置不同的颜色和样式，提升用户体验。</p>
+<h4 id="3-历史记录"><a href="#3-历史记录" class="headerlink" title="3. 历史记录"></a>3. 历史记录</h4><p><code>go-prompt</code> 内置了历史记录功能，用户可以方便地查看和重用之前的命令。</p>
+<h3 id="性能优化"><a href="#性能优化" class="headerlink" title="性能优化"></a>性能优化</h3><p>在使用Golang开发交互式命令行工具时，性能优化是一个重要的考虑因素。以下是一些优化建议：</p>
+<ol>
+<li><strong>避免不必要的内存分配</strong> ：Golang的垃圾回收机制虽然高效，但频繁的内存分配和释放会影响性能。尽量重用对象，减少内存分配。</li>
+<li><strong>并发处理</strong> ：利用Golang的并发特性，将耗时的操作异步执行，提升响应速度。</li>
+<li><strong>优化算法</strong> ：选择高效的算法和数据结构，减少计算复杂度。</li>
+</ol>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>使用Golang实现高效的交互式命令行提示工具，不仅可以提升开发效率，还能提供更好的用户体验。通过结合 <code>go-prompt</code> 和 <code>grumble</code> 等强大的库和框架，可以轻松构建功能丰富、性能优越的命令行应用程序。希望本文的介绍和示例代码能够帮助你快速上手，并激发你更多的创意和灵感。</p>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><ol>
+<li>Go语言官网</li>
+<li>go-prompt库</li>
+<li>grumble框架</li>
+</ol>
+<p>通过不断学习和实践，你将能够在Golang的世界中探索更多的可能性，创造出更多优秀的命令行工具。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2025/07/10/%E4%BD%BF%E7%94%A8Golang%E5%AE%9E%E7%8E%B0%E9%AB%98%E6%95%88%E7%9A%84%E4%BA%A4%E4%BA%92%E5%BC%8F%E5%91%BD%E4%BB%A4%E8%A1%8C%E6%8F%90%E7%A4%BA%E5%B7%A5%E5%85%B7%20-%20%E4%BA%91%E5%8E%9F%E7%94%9F%E5%AE%9E%E8%B7%B5/">https://yhao521.github.io/2025/07/10/%E4%BD%BF%E7%94%A8Golang%E5%AE%9E%E7%8E%B0%E9%AB%98%E6%95%88%E7%9A%84%E4%BA%A4%E4%BA%92%E5%BC%8F%E5%91%BD%E4%BB%A4%E8%A1%8C%E6%8F%90%E7%A4%BA%E5%B7%A5%E5%85%B7%20-%20%E4%BA%91%E5%8E%9F%E7%94%9F%E5%AE%9E%E8%B7%B5/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/%E6%95%99%E7%A8%8B/">教程</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a><a class="post-meta__tags" href="/tags/%E6%91%98%E5%BD%95/">摘录</a><a class="post-meta__tags" href="/tags/python-programming/">python/programming</a><a class="post-meta__tags" href="/tags/golang-programming/">golang/programming</a><a class="post-meta__tags" href="/tags/Go/">Go</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/07/23/%E5%A6%82%E4%BD%95%E7%8E%A9%E8%BD%ACObsidian%EF%BC%9F%E6%88%91%E7%9A%84%E5%85%8D%E8%B4%B9%E5%90%8C%E6%AD%A5%E6%96%B9%E6%A1%88+%E6%87%92%E4%BA%BA%E6%95%B4%E7%90%86%E6%9C%AF/" title="如何玩转Obsidian？我的免费同步方案+懒人整理术"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">如何玩转Obsidian？我的免费同步方案+懒人整理术</div></div><div class="info-2"><div class="info-item-1">今天想和大家聊聊我用得比较爽的笔记工具——Obsidian。 它不是什么新鲜玩意儿，也不是我的“生产力神器”，但就像一张越用越顺手的草稿纸，陪我写日记、整理灵感、甚至规划生活。最关键的是，我一分钱没花，还摸索出了一套适合自己的“野生用法”。如果你也喜欢折腾工具但预算有限，或许我的经验能给你一点启发。  一、为什么选择Obsidian？我是个“工具控”，但更是个“实用主义者”。试用过有道云、石墨、MarkEditor2、Notion、Evernote、OneNote，最后留在电脑里的还是Obsidian。原因很简单：  1. 数据完全属于我：所有笔记都以Markdown文件存在本地，不用担心服务商倒闭或涨价； 2. 极简却灵活：没有花哨界面，但插件和自定义功能深不见底； 3. 强迫症友好：文件夹结构清晰，找笔记像翻实体笔记本一样顺手。  不过，真正让我离不开它的，是下面这两个“私房功能”。  二、我的“零成本”同步方案Obsidian官方同步服务要8美元&#x2F;月，而我……选择自己动手。 最初用谷歌云同步（我相信任何网盘都可以），但偶尔遇到手机和电脑内容冲突，或者丢失。我后来发...</div></div></div></a><a class="pagination-related" href="/2025/07/04/%E3%80%90Go%E3%80%91%E8%8E%B7%E5%8F%96%E7%AB%99%E7%82%B9%E6%A0%87%E9%A2%98%E5%92%8C%E5%9B%BE%E6%A0%87_golang%E9%80%9A%E8%BF%87url%E8%8E%B7%E5%8F%96%E6%A0%87%E9%A2%98-CSDN%E5%8D%9A%E5%AE%A2/" title="【Go】获取站点标题和图标_golang通过url获取标题-CSDN博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">【Go】获取站点标题和图标_golang通过url获取标题-CSDN博客</div></div><div class="info-2"><div class="info-item-1">【Go】获取站点标题和图标芒果黑 于 2021-04-22 22:19:14 发布 CC 4.0 BY-SA版权 分类专栏： 版权声明：本文为博主原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接和本声明。 本文链接： https://blog.csdn.net/a137748099/article/details/116034018 该博客介绍了如何利用Go语言和goscraper库从网站中抓取标题、图标和其他元信息。通过示例代码展示了如何导入和使用goscraper包，以及如何处理可能的错误。示例展示了从GitHub官网获取信息，包括图标URL、网站名称、标题、描述和预览图片。 摘要生成于 C知道 ，由 DeepSeek-R1 满血版支持， 前往体验 &gt; 在 github 上找到了go获取站点标题和图标的代码，地址为： https://github.com/badoux/goscraper github上也提供了调用的例子 使用的话把goscraper.go拿到项目中，创建名为goscraper的文件夹，做成包调用的方式，工程执行 1go mod...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/08/07/Ollama%E8%BF%9B%E9%98%B6%EF%BC%8C%E5%9C%A8Python%E3%80%81Java%E3%80%81Go%E9%A1%B9%E7%9B%AE%E4%B8%AD%E9%9B%86%E6%88%90Deepseek%E3%80%81QWQ%E5%A4%A7%E6%A8%A1%E5%9E%8B/" title="Ollama进阶，在Python、Java、Go项目中集成Deepseek、QWQ大模型"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-08-07</div><div class="info-item-2">Ollama进阶，在Python、Java、Go项目中集成Deepseek、QWQ大模型</div></div><div class="info-2"><div class="info-item-1">Ollama系列文章：Ollama入门，一键启动本地DeepSeek大模型Ollama入门，Ollama技术架构与原理Ollama进阶，在Python、Java、Go项目中集成Deepseek、QWQ大模型Ollama进阶，在Javascript(nodejs)前后端项目中集成Deepseek、QWQ大模型Ollama高手，玩转本地自定义大模型（LLM）Ollama高手，调优Ollama环境变量，提高性能与安全性Ollama高手，调优Ollama模型参数，提高模型输出质量  在“ Ollama入门，一键启动本地DeepSeek大模型 ”一文中，我们介绍了Ollama的基本使用方法，同时也推荐了ChatBox、Cherry Studio等AI智能客户端来完成文字、图片、语音等多模态输入，实现与 AI 的交互。 但是，仅仅这样常常不足以满足实际的需要，而在线版的Deepseek、ChatGPT、豆包往往可以提供更好功能，这样在本地部署DeepSeek大模型就成了geek的自娱自乐了，因此我们必须将Ollama整合到项目中去，让它与自有系统整合起来，实现更加丰富的功能。 1、如何调用O...</div></div></div></a><a class="pagination-related" href="/2025/06/30/docker%E3%80%81containerd%E3%80%81runc%E3%80%81shim...%20%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E5%90%8D%E8%AF%8D%E5%85%A8%E8%A7%A3%E6%9E%90-CSDN%E5%8D%9A%E5%AE%A2/" title="docker、containerd、runc、shim... 容器技术名词全解析-CSDN博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-06-30</div><div class="info-item-2">docker、containerd、runc、shim... 容器技术名词全解析-CSDN博客</div></div><div class="info-2"><div class="info-item-1">docker、containerd、runc、shim… 容器技术名词全解析本文链接： https://blog.csdn.net/dillanzhou/article/details/116505401 云原生的概念在最近两年得到了广泛的关注，各大云厂商和技术团队都纷纷推出了各种“云原生”的技术和产品。虽然云原生到底包括哪些概念和技术并没有一个公认的答案，但容器技术是云原生的基础和核心应该是现阶段的一个共识。 但是容器技术经过多年的发展和演变，各种实现方案和早期版本相比已经有了巨大的差异，而且仍然在不断演进的过程中。各种组件的产生、随之而来的接口规范、基于接口规范实现的新可选组件让相关的名称和概念更加复杂。新的开发使用者很难全面理解容器相关的各类名词和概念，以及这些名词和概念在真实的容器部署环境中的作用和关系。 笔者作为容器运行时开发人员，对于容器相关的概念仍然经常犯迷糊。 docker 、libcontainer、containerd、shim、runc分别起什么作用？CRI、OCI是什么层次的规范、有什么区别？各个组件的功能和协作方式是怎样的？使用k8s管理容器后相关组件和...</div></div></div></a><a class="pagination-related" href="/2025/09/10/%E9%B8%BF%E8%92%99next%E5%BC%80%E5%8F%91%E9%85%8D%E7%BD%AE%E6%89%8B%E5%8A%A8%E7%AD%BE%E5%90%8D/" title="鸿蒙next开发配置手动签名"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-09-10</div><div class="info-item-2">鸿蒙next开发配置手动签名</div></div><div class="info-2"><div class="info-item-1">最新推荐文章于 2025-06-05 11:56:16 发布 原创 于 2025-03-21 10:26:12 发布 · 1.2k 阅读 · 11 · CC 4.0 BY-SA版权 版权声明：本文为博主原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接和本声明。 由于项目中要使用 推送服务 ，需要配置手动签名，整体配置签名的流程如下 ![[_resources&#x2F;37bbe47b36f84fa67dca09340bd60d95_MD5.png]] 1.生成密钥和证书请求文件使用DevEco Studio来生成密钥（存储在格式为.p12的密钥 库文件 中）和证书请求文件（.csr文件）。 在主菜单栏单击 Build &gt; Generate Key and CSR 。 ![[_resources&#x2F;44361608fc12fc4b1ccef108ff289121_MD5.png]] 在 Key Store File 中，单击 New 进行创建。 选择文件路径和填写密码 ![[_resources&#x2F;a377604224c6e12de...</div></div></div></a><a class="pagination-related" href="/2025/06/11/ComfyUI%20%E5%87%A0%E7%A7%8D%E2%80%9C%E5%9B%BE%E5%83%8F%E5%8F%8D%E6%8E%A8+%E6%96%87%E6%9C%AC%E6%B6%A6%E8%89%B2%E2%80%9D%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%8F%92%E4%BB%B6%E4%BB%8B%E7%BB%8D/" title="ComfyUI 几种“图像反推+文本润色”提示词插件介绍"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-06-11</div><div class="info-item-2">ComfyUI 几种“图像反推+文本润色”提示词插件介绍</div></div><div class="info-2"><div class="info-item-1"> ComfyUI 几种“图像反推+文本润色”提示词插件介绍 目录 收起 一、安装工具插件 二、相关节点详解 1.（推荐）Florence2Image2Prompt 2. QWenImage2Prompt 3. LlamaVision 4. JoyCaption2 5. Micrisoft Phi 3.5（PhiPrompt） 6. Gemini 7. SmolLM2 + SmolVLM 8. PromptTagger 9. PromptEmbellish 一、安装工具插件在 ComfyUI 中安装 chflame163 大佬提供的插件包 ComfyUI Layer Style Advance github 地址： github.com&#x2F;chflame163&#x2F;C 工作流示例 在 workflow 目录下有 json 格式的工作流示例文件，示范了如何在 ComfyUI 中使用这些节点。 安装方法 ( 以 ComfyUI 官方便携包和秋叶整合包为例，其他 ComfyUI 环境请修改依赖环境目录 ) 安装插件  推荐使用 ComfyUI Manager 安装。 或者在...</div></div></div></a><a class="pagination-related" href="/2025/05/15/Flux%E2%80%9C%E7%82%BC%E4%B8%B9%E7%82%89%E2%80%9D%E2%80%94%E2%80%94fluxgym%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B-CSDN%E5%8D%9A%E5%AE%A2/" title="Flux“炼丹炉”——fluxgym安装教程-CSDN博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-15</div><div class="info-item-2">Flux“炼丹炉”——fluxgym安装教程-CSDN博客</div></div><div class="info-2"><div class="info-item-1">一、介绍这个炼丹炉目前可以训练除了 flux -dev之外的其它模型，只需更改一个配置文件内容即可。重要的是训练时不需要提前进行图片裁剪、打标等前置工作，只需下图的三个步骤即可开始训练。它就是——fluxgym。 ![[_resources&#x2F;df2678e42e581944c5c0fb9d9966148e_MD5.png]] fluxgym：用于训练具有低 VRAM （12GB&#x2F;16GB&#x2F;20GB） 支持的 FLUX LoRA 的简单 Web UI，它具有 AI-Toolkit WebUI 的简单性和 Kohya Scripts 的 灵活性 。  前端：是从 AI-Toolkit（ https://x.com/multimodalart 创建的 Gradio UI）分叉而来的 WebUI) 后端**：** 由 Kohya Scripts 提供支持的训练脚本  它通过默认隐藏的 Advanced 选项卡支持 100% 的 Kohya sd-scripts 功能。 二、怎么安装？介绍完丹炉，我们来看看如何获取吧，本安装教程属于手把手教学，因为网络问题无法...</div></div></div></a><a class="pagination-related" href="/2025/05/28/Go%E8%AE%BE%E7%BD%AEGOPROXY%E5%9B%BD%E5%86%85%E5%8A%A0%E9%80%9F/" title="Go设置GOPROXY国内加速"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-28</div><div class="info-item-2">Go设置GOPROXY国内加速</div></div><div class="info-2"><div class="info-item-1"> 身体健康！快乐开心！每一天都开心有意义！ | 收藏 闪存 小组 博问 ShengOasis 园龄：3年2个月 粉丝：1 关注：0 在 Linux 或 macOS 上面需要运行下面命令（或者，可以把以下命令写到.bashrc 或.bash_profile 文件中）： 123456789101112131415161718192021222324252627282930313233343536373839# 启用 Go Modules 功能go env -w GO111MODULE=on # 配置 GOPROXY 环境变量，以下三选一 # 1. 七牛 CDN go env -w  GOPROXY=https://goproxy.cn,direct # 2. 阿里云 go env -w GOPROXY=https://mirrors.aliyun.com/goproxy/,direct # 3. 官方 go env -w  GOPROXY=https://goproxy.io,direct # 确认一下：$ go env | grep GOPROXYGOPROXY=&quot;[ht...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%95%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">引言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Golang%E7%AE%80%E4%BB%8B"><span class="toc-number">2.</span> <span class="toc-text">Golang简介</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%A4%E4%BA%92%E5%BC%8F%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7%E7%9A%84%E9%9C%80%E6%B1%82"><span class="toc-number">3.</span> <span class="toc-text">交互式命令行工具的需求</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF"><span class="toc-number">4.</span> <span class="toc-text">关键技术</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-Go-prompt%E5%BA%93"><span class="toc-number">4.1.</span> <span class="toc-text">1. Go-prompt库</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-Grumble%E6%A1%86%E6%9E%B6"><span class="toc-number">4.2.</span> <span class="toc-text">2. Grumble框架</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0%E6%AD%A5%E9%AA%A4"><span class="toc-number">5.</span> <span class="toc-text">实现步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E5%AE%89%E8%A3%85Go%E8%AF%AD%E8%A8%80%E7%8E%AF%E5%A2%83"><span class="toc-number">5.1.</span> <span class="toc-text">1. 安装Go语言环境</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E5%AE%89%E8%A3%85go-prompt%E5%BA%93"><span class="toc-number">5.2.</span> <span class="toc-text">2. 安装go-prompt库</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E5%88%9B%E5%BB%BA%E4%BA%A4%E4%BA%92%E5%BC%8F%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7"><span class="toc-number">5.3.</span> <span class="toc-text">3. 创建交互式命令行工具</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-%E4%BD%BF%E7%94%A8Grumble%E6%A1%86%E6%9E%B6"><span class="toc-number">5.4.</span> <span class="toc-text">4. 使用Grumble框架</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%AB%98%E7%BA%A7%E5%8A%9F%E8%83%BD"><span class="toc-number">6.</span> <span class="toc-text">高级功能</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E8%87%AA%E5%8A%A8%E8%A1%A5%E5%85%A8"><span class="toc-number">6.1.</span> <span class="toc-text">1. 自动补全</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E8%AF%AD%E6%B3%95%E9%AB%98%E4%BA%AE"><span class="toc-number">6.2.</span> <span class="toc-text">2. 语法高亮</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E5%8E%86%E5%8F%B2%E8%AE%B0%E5%BD%95"><span class="toc-number">6.3.</span> <span class="toc-text">3. 历史记录</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96"><span class="toc-number">7.</span> <span class="toc-text">性能优化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">8.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="toc-number">9.</span> <span class="toc-text">参考资料</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

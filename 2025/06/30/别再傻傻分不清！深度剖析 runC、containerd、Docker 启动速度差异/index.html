@@ -1,0 +1,262 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>别再傻傻分不清！深度剖析 runC、containerd、Docker 启动速度差异 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="兄弟们，今天咱来聊聊容器运行时那点事儿！平时大家用 Docker 用得飞起，但你真的了解它底层是怎么跑起来的吗？ 很多人都把 Docker、containerd、runC 这几个概念搞混，甚至以为它们是同一个东西的不同叫法。其实啊，它们仨可是各司其职，关系密切但又各有不同。 先来捋一捋它们之间的关系： Docker ：大家最熟悉的“老大哥”，提供了一整套容器解决方案，包括镜像构建、分发、运行等。你">
+<meta property="og:type" content="article">
+<meta property="og:title" content="别再傻傻分不清！深度剖析 runC、containerd、Docker 启动速度差异">
+<meta property="og:url" content="https://yhao521.github.io/2025/06/30/%E5%88%AB%E5%86%8D%E5%82%BB%E5%82%BB%E5%88%86%E4%B8%8D%E6%B8%85%EF%BC%81%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90%20runC%E3%80%81containerd%E3%80%81Docker%20%E5%90%AF%E5%8A%A8%E9%80%9F%E5%BA%A6%E5%B7%AE%E5%BC%82/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="兄弟们，今天咱来聊聊容器运行时那点事儿！平时大家用 Docker 用得飞起，但你真的了解它底层是怎么跑起来的吗？ 很多人都把 Docker、containerd、runC 这几个概念搞混，甚至以为它们是同一个东西的不同叫法。其实啊，它们仨可是各司其职，关系密切但又各有不同。 先来捋一捋它们之间的关系： Docker ：大家最熟悉的“老大哥”，提供了一整套容器解决方案，包括镜像构建、分发、运行等。你">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2025-06-29T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-17T16:00:00.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="摘录">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "别再傻傻分不清！深度剖析 runC、containerd、Docker 启动速度差异",
+  "url": "https://yhao521.github.io/2025/06/30/%E5%88%AB%E5%86%8D%E5%82%BB%E5%82%BB%E5%88%86%E4%B8%8D%E6%B8%85%EF%BC%81%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90%20runC%E3%80%81containerd%E3%80%81Docker%20%E5%90%AF%E5%8A%A8%E9%80%9F%E5%BA%A6%E5%B7%AE%E5%BC%82/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2025-06-29T16:00:00.000Z",
+  "dateModified": "2026-05-17T16:00:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2025/06/30/%E5%88%AB%E5%86%8D%E5%82%BB%E5%82%BB%E5%88%86%E4%B8%8D%E6%B8%85%EF%BC%81%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90%20runC%E3%80%81containerd%E3%80%81Docker%20%E5%90%AF%E5%8A%A8%E9%80%9F%E5%BA%A6%E5%B7%AE%E5%BC%82/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '别再傻傻分不清！深度剖析 runC、containerd、Docker 启动速度差异',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">别再傻傻分不清！深度剖析 runC、containerd、Docker 启动速度差异</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">别再傻傻分不清！深度剖析 runC、containerd、Docker 启动速度差异</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-06-29T16:00:00.000Z" title="发表于 2025-06-30 00:00:00">2025-06-30</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-17T16:00:00.000Z" title="更新于 2026-05-18 00:00:00">2026-05-18</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p><em>150</em> <em>0</em> <em>0</em> <em>0</em></p>
+<h2 id="启动速度大比拼"><a href="#启动速度大比拼" class="headerlink" title="启动速度大比拼"></a>启动速度大比拼</h2><h2 id="架构与功能差异"><a href="#架构与功能差异" class="headerlink" title="架构与功能差异"></a>架构与功能差异</h2><h3 id="runC"><a href="#runC" class="headerlink" title="runC"></a>runC</h3><h3 id="containerd"><a href="#containerd" class="headerlink" title="containerd"></a>containerd</h3><h3 id="Docker"><a href="#Docker" class="headerlink" title="Docker"></a>Docker</h3><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>兄弟们，今天咱来聊聊容器运行时那点事儿！平时大家用 Docker 用得飞起，但你真的了解它底层是怎么跑起来的吗？</p>
+<p>很多人都把 Docker、containerd、runC 这几个概念搞混，甚至以为它们是同一个东西的不同叫法。其实啊，它们仨可是各司其职，关系密切但又各有不同。</p>
+<p>先来捋一捋它们之间的关系：</p>
+<ul>
+<li><strong>Docker</strong> ：大家最熟悉的“老大哥”，提供了一整套容器解决方案，包括镜像构建、分发、运行等。你可以把它想象成一个全能管家，啥都帮你搞定。</li>
+<li><strong>containerd</strong> ：Docker 的“幕后功臣”，负责容器的生命周期管理，比如创建、启动、停止、销毁等。它就像一个项目经理，负责协调各个组件的工作。</li>
+<li><strong>runC</strong> ：真正干活的“苦力”，负责创建和运行容器。它按照 OCI（Open Container Initiative）标准，直接与操作系统内核交互，隔离出容器运行环境。你可以把它看作是一个建筑工人，按照图纸搭建房子。</li>
+</ul>
+<p>一句话概括：Docker 使用 containerd 管理容器，containerd 使用 runC 运行容器。</p>
+<h2 id="启动速度大比拼-1"><a href="#启动速度大比拼-1" class="headerlink" title="启动速度大比拼"></a>启动速度大比拼</h2><p>既然它们仨负责不同的工作，那么在容器启动速度上，它们各自的表现又如何呢？</p>
+<p>我们先从理论上分析一下：</p>
+<ul>
+<li><strong>runC</strong> ：作为最底层的容器运行时，runC 直接与操作系统内核打交道，省去了中间环节，理论上启动速度应该是最快的。就好像你直接找工厂拿货，省去了中间商赚差价，速度自然快。</li>
+<li><strong>containerd</strong> ：相比 runC，containerd 多了一层抽象，需要负责更多的管理工作，比如镜像拉取、存储管理、网络配置等，因此理论上启动速度会比 runC 慢一些。但 containerd 做了很多优化，比如使用共享文件系统、优化镜像层加载等，实际使用中差距并不会太大。</li>
+<li><strong>Docker</strong> ：Docker 在 containerd 的基础上又增加了一层，包括 Docker CLI、Docker API、Docker Engine 等组件，功能更丰富，但也带来了更多的开销，因此理论上启动速度是最慢的。但是，Docker 提供了很多便捷的功能，比如镜像构建、网络管理、存储卷管理等，这些功能在实际开发中非常有用，所以大家还是离不开它。</li>
+</ul>
+<p>当然，理论归理论，实际情况还得看具体测试。网上有很多关于 runC、containerd、Docker 启动速度的对比测试，感兴趣的兄弟可以自己去搜一下。这里我简单总结一下：</p>
+<ul>
+<li><strong>对于简单的小型容器</strong> ：runC、containerd、Docker 的启动速度差距并不明显，基本都在毫秒级别。毕竟，容器本身就很轻量级，启动速度本来就很快。</li>
+<li><strong>对于复杂的大型容器</strong> ：runC 的优势会逐渐体现出来，启动速度可能会比 containerd 和 Docker 快一些。但这个差距也不是绝对的，具体还要看容器的配置、镜像的大小、网络环境等因素。</li>
+</ul>
+<h2 id="架构与功能差异-1"><a href="#架构与功能差异-1" class="headerlink" title="架构与功能差异"></a>架构与功能差异</h2><p>除了启动速度，runC、containerd、Docker 在架构和功能上也有很大的差异。</p>
+<h3 id="runC-1"><a href="#runC-1" class="headerlink" title="runC"></a>runC</h3><p>runC 是一个轻量级的命令行工具，主要功能就是创建和运行容器。它遵循 OCI 标准，可以与任何符合 OCI 标准的容器镜像一起使用。runC 的架构非常简单，主要包括以下几个组件：</p>
+<ul>
+<li><strong>runc init</strong> ：负责初始化容器的命名空间、cgroups、文件系统等。</li>
+<li><strong>runc create</strong> ：负责创建容器。</li>
+<li><strong>runc start</strong> ：负责启动容器。</li>
+<li><strong>runc exec</strong> ：负责在容器中执行命令。</li>
+<li><strong>runc kill</strong> ：负责向容器发送信号。</li>
+<li><strong>runc delete</strong> ：负责删除容器。</li>
+</ul>
+<p>runC 的优点是简单、轻量、快速，但缺点是功能单一，只能用于运行容器，不能进行镜像管理、网络配置等操作。</p>
+<h3 id="containerd-1"><a href="#containerd-1" class="headerlink" title="containerd"></a>containerd</h3><p>containerd 是一个更高级的容器运行时，它不仅可以运行容器，还可以管理容器的整个生命周期。containerd 的架构比 runC 复杂一些，主要包括以下几个组件：</p>
+<ul>
+<li><strong>containerd daemon</strong> ：负责接收客户端请求，管理容器的生命周期。</li>
+<li><strong>containerd-shim</strong> ：负责与 runC 交互，创建和运行容器。</li>
+<li><strong>containerd-ctr</strong> ：提供了一个简单的命令行工具，用于与 containerd daemon 交互。</li>
+</ul>
+<p>containerd 的优点是功能更强大，可以管理容器的整个生命周期，支持镜像拉取、存储管理、网络配置等功能。缺点是比 runC 复杂一些，启动速度可能会稍慢一些。</p>
+<h3 id="Docker-1"><a href="#Docker-1" class="headerlink" title="Docker"></a>Docker</h3><p>Docker 是一个完整的容器平台，它不仅包含了 containerd 的所有功能，还提供了很多额外的功能，比如镜像构建、分发、网络管理、存储卷管理等。Docker 的架构是最复杂的，主要包括以下几个组件：</p>
+<ul>
+<li><strong>Docker CLI</strong> ：用户与 Docker 交互的命令行工具。</li>
+<li><strong>Docker API</strong> ：提供了一组 RESTful API，用于与 Docker Engine 交互。</li>
+<li><strong>Docker Engine</strong> ：负责接收客户端请求，管理镜像、容器、网络、存储等。</li>
+<li><strong>containerd</strong> ：负责容器的生命周期管理。</li>
+<li><strong>runC</strong> ：负责创建和运行容器。</li>
+</ul>
+<p>Docker 的优点是功能最强大，提供了完整的容器解决方案，方便用户构建、分发、运行容器。缺点是比 containerd 和 runC 更复杂，启动速度可能会更慢一些。</p>
+<h2 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h2><p>总的来说，runC、containerd、Docker 各有优缺点，适用于不同的场景：</p>
+<ul>
+<li><strong>如果你只需要运行容器，不需要其他功能，那么 runC 是一个不错的选择。</strong></li>
+<li><strong>如果你需要管理容器的整个生命周期，包括镜像拉取、存储管理、网络配置等，那么 containerd 更适合你。</strong></li>
+<li><strong>如果你需要一个完整的容器解决方案，包括镜像构建、分发、网络管理、存储卷管理等，那么 Docker 是你的首选。</strong></li>
+</ul>
+<p>其实，对于大多数开发者来说，直接使用 Docker 就足够了，不用太纠结底层到底是怎么实现的。毕竟，我们的目标是快速构建和部署应用程序，而不是研究容器运行时的底层原理。当然啦，如果你对容器技术非常感兴趣，想要深入了解底层原理，那么研究 runC 和 containerd 也是很有必要的。只有深入理解了底层原理，才能更好地使用容器技术，解决实际问题。</p>
+<p>好啦，今天就聊到这里。希望这篇文章能帮助你更好地理解 runC、containerd、Docker 这三个容器运行时。如果你还有什么问题，欢迎在评论区留言，咱们一起交流学习！记住，实践出真知，多动手操作才能真正掌握容器技术！</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2025/06/30/%E5%88%AB%E5%86%8D%E5%82%BB%E5%82%BB%E5%88%86%E4%B8%8D%E6%B8%85%EF%BC%81%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90%20runC%E3%80%81containerd%E3%80%81Docker%20%E5%90%AF%E5%8A%A8%E9%80%9F%E5%BA%A6%E5%B7%AE%E5%BC%82/">https://yhao521.github.io/2025/06/30/%E5%88%AB%E5%86%8D%E5%82%BB%E5%82%BB%E5%88%86%E4%B8%8D%E6%B8%85%EF%BC%81%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90%20runC%E3%80%81containerd%E3%80%81Docker%20%E5%90%AF%E5%8A%A8%E9%80%9F%E5%BA%A6%E5%B7%AE%E5%BC%82/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/%E6%91%98%E5%BD%95/">摘录</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/07/02/2025%E5%B9%B4%E4%B8%8B%E5%8D%8A%E5%B9%B4%E9%99%95%E8%A5%BF%E7%9C%81%E5%85%A8%E5%9B%BD%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%AD%89%E7%BA%A7%E8%80%83%E8%AF%95%E6%8A%A5%E5%90%8D%E5%85%AC%E5%91%8A-%E9%99%95%E8%A5%BF%E7%9C%81%E6%95%99%E8%82%B2%E8%80%83%E8%AF%95%E9%99%A2/" title="2025年下半年陕西省全国计算机等级考试报名公告-陕西省教育考试院"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">2025年下半年陕西省全国计算机等级考试报名公告-陕西省教育考试院</div></div><div class="info-2"><div class="info-item-1">2025 年下半年全国计算机等级考试将于 9 月 20 日至 22 日进行，现将网上报名有关事项公告如下： 1 ． 报名时间： 2025 年 6 月 26 日 9 ∶ 00 至 7 月 2 日 17 ∶ 00 ； 2 ． 缴费时段： 2025 年 6 月 26 日 9 ∶ 00 至 7 月 2 日 17 ∶ 00 ； 3 ． 打印准考证时间： 2025 年 9 月 15 日 9 ∶ 00 起至当次考试结束； 4 ． 报名方式及注意事项：考生可登录中国教育考试网报名网址： ncre-bm.neea.cn （公网）或 ncre-bm.neea.edu.cn （教育网）， 选择网页 上 “ （ 61 ）陕西 省 ”报名 入口进入陕西省报名系统 。报考前请认真阅读《报名协议》，按照《陕西省全国计算机等级考试网上报名须知及流程》（附件 1 ），在规定时间内完成网上注册、报名和缴费，逾期不予补报。 特别提醒： 1 ． 同次考试同一考生只能在一个省级承办机构的一个考点报名，不允许跨省报考，否则将按违规进行处理； 2 ． 在校学生原则上应在本校考点报名，本校无考点和非在校考生可选择接收社会考生的...</div></div></div></a><a class="pagination-related" href="/2025/06/30/docker%E3%80%81containerd%E3%80%81runc%E3%80%81shim...%20%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E5%90%8D%E8%AF%8D%E5%85%A8%E8%A7%A3%E6%9E%90-CSDN%E5%8D%9A%E5%AE%A2/" title="docker、containerd、runc、shim... 容器技术名词全解析-CSDN博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">docker、containerd、runc、shim... 容器技术名词全解析-CSDN博客</div></div><div class="info-2"><div class="info-item-1">docker、containerd、runc、shim… 容器技术名词全解析本文链接： https://blog.csdn.net/dillanzhou/article/details/116505401 云原生的概念在最近两年得到了广泛的关注，各大云厂商和技术团队都纷纷推出了各种“云原生”的技术和产品。虽然云原生到底包括哪些概念和技术并没有一个公认的答案，但容器技术是云原生的基础和核心应该是现阶段的一个共识。 但是容器技术经过多年的发展和演变，各种实现方案和早期版本相比已经有了巨大的差异，而且仍然在不断演进的过程中。各种组件的产生、随之而来的接口规范、基于接口规范实现的新可选组件让相关的名称和概念更加复杂。新的开发使用者很难全面理解容器相关的各类名词和概念，以及这些名词和概念在真实的容器部署环境中的作用和关系。 笔者作为容器运行时开发人员，对于容器相关的概念仍然经常犯迷糊。 docker 、libcontainer、containerd、shim、runc分别起什么作用？CRI、OCI是什么层次的规范、有什么区别？各个组件的功能和协作方式是怎样的？使用k8s管理容器后相关组件和...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/08/19/shadcn%20vue%EF%BC%88%E6%89%8B%E6%8A%8A%E6%89%8B%E8%AE%B2%E8%A7%A3%EF%BC%89%20-%20%E5%BC%82%E5%B8%B8%E6%95%99%E7%A8%8B/" title="shadcn vue（手把手讲解） - 异常教程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-08-19</div><div class="info-item-2">shadcn vue（手把手讲解） - 异常教程</div></div><div class="info-2"><div class="info-item-1">shadcn vue（手把手讲解）更新时间: 在现代前端开发中，组件库作为提升开发效率的核心工具，始终占据着重要地位。无论是快速搭建界面、保证设计一致性，还是减少重复劳动，组件库都扮演着不可替代的角色。在 Vue 生态中， shadcn vue 作为一款轻量且高度可定制化的组件库，凭借其简洁的设计理念和强大的功能特性，逐渐成为开发者的新宠。本文将从基础概念、核心功能、实战案例到进阶技巧，全面解析如何利用 shadcn vue 加速 Vue 项目的开发流程，并帮助开发者构建出既美观又高效的用户界面。  一、什么是 shadcn vue？shadcn vue 是一款基于 Vue 3 的现代化组件库，其设计灵感来源于 Shadcn（一个专注于 React 生态的组件库）。它通过提供开箱即用的高质量组件（如按钮、表单、对话框等），结合对 Tailwind CSS 的深度集成，帮助开发者快速构建响应式、可访问性强的用户界面。 核心设计理念 轻量级 ：仅包含基础组件，避免冗余功能，减小项目体积。 主题可定制 ：通过 CSS 变量和 Tailwind 配置，实现灵活的主题切换。 语义化 HTM...</div></div></div></a><a class="pagination-related" href="/2025/05/13/%E3%80%90%E8%87%AA%E5%8A%A8%E5%8C%96%E6%B5%8B%E8%AF%95%E3%80%91%E5%87%A0%E7%A7%8D%E5%B8%B8%E8%A7%81%E7%9A%84%E8%87%AA%E5%8A%A8%E5%8C%96%E6%B5%8B%E8%AF%95%E6%A1%86%E6%9E%B6-CSDN%E5%8D%9A%E5%AE%A2/" title="【自动化测试】几种常见的自动化测试框架-CSDN博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-13</div><div class="info-item-2">【自动化测试】几种常见的自动化测试框架-CSDN博客</div></div><div class="info-2"><div class="info-item-1">在 软件测试 领域，自动化测试框架有很多，这里主要介绍几种常用的自动化测试框架。![[_resources&#x2F;7bfb7786c74ff3259b48a5bd58e72fae_MD5.png]] 1.pytestpytest 是 Python 的一种单元测试框架，与 Python 自带的 unittest 测试框架类似，但是比 unittest 框架使用起来更简洁，效率更高。主要有以下几个特点：  简单灵活，容易上手。 支持参数化。 能够支持简单的单元测试和复杂的功能测试，还可以用来做 selenium &#x2F; appnium 等自动化测试、接口自动化测试（pytest+requests)。 pytest 不是 python 内置库，需要单独安装。  使用 pytest 编写用例，必须遵守以下规则：  测试文件名必须以 test_ 开头或者 _test 结尾(如： test_ab.py) 测试方法必须以 test 开头。 测试类命名以 Test 开头。  2.JunitJunit 是一个 Java 语言的单元测试框架。它由 Kent Beck 和 Erich Gam...</div></div></div></a><a class="pagination-related" href="/2025/05/23/%E5%A6%82%E4%BD%95%E5%88%B6%E4%BD%9C%E4%B8%80%E4%B8%AA%E6%AF%94%E8%BE%83%E5%AE%8C%E7%BE%8E%E7%9A%84elment-pluselement-ui%E7%A6%BB%E7%BA%BF%E6%96%87%E6%A1%A3%E6%9C%AC%E5%9C%B0%E8%BF%90%E8%A1%8C%E6%89%93%E5%8C%85%E5%A5%BD%E7%9A%84html%E6%96%B9%E5%BC%8F_elementplus%E7%A6%BB%E7%BA%BF%E6%96%87%E6%A1%A3-CSDN%E5%8D%9A%E5%AE%A2/" title="如何制作一个比较完美的elment-plus&#x2F;element-ui离线文档&#x2F;本地运行打包好的html方式_elementplus离线文档-CSDN博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-23</div><div class="info-item-2">如何制作一个比较完美的elment-plus&#x2F;element-ui离线文档&#x2F;本地运行打包好的html方式_elementplus离线文档-CSDN博客</div></div><div class="info-2"><div class="info-item-1">如何制作一个比较完美的elment-plus&#x2F;element-ui离线文档&#x2F;本地运行打包好的html方式renovateF5 已于 2025-02-14 14:49:12 修改 分类专栏： 文章标签： github elementui 于 2023-01-29 10:06:14 首次发布 版权声明：本文为博主原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接和本声明。 本文链接： https://blog.csdn.net/renovateF5/article/details/128784830 版权 本文介绍了一种Element Plus组件库的离线部署方法。主要包括从GitHub下载代码、解压缩并使用VSCode配合LiveServer插件预览，或通过安装http-server实现本地服务器访问。 摘要生成于 C知道 ，由 DeepSeek-R1 满血版支持， 前往体验 &gt; 官方给的网站有时候不好用，自己制作的方法 第一步先去下面的网站下载代码，注意一定看看有没有zh-CN这个 文件夹 ， GitHub - element-p...</div></div></div></a><a class="pagination-related" href="/2025/09/14/Java%20%20Android%20%E8%8E%B7%E5%8F%96%E6%9C%AC%E6%9C%BA%E5%BC%80%E5%90%AF%E7%83%AD%E7%82%B9%E3%80%81%E8%BF%9E%E6%8E%A5%20WIFI%20%E6%97%B6%E7%9A%84%20IP_%E5%AE%89%E5%8D%93%E8%8E%B7%E5%8F%96%E7%83%AD%E7%82%B9ip-CSDN%E5%8D%9A%E5%AE%A2/" title="Java &#x2F; Android 获取本机开启热点、连接 WIFI 时的 IP_安卓获取热点ip-CSDN博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-09-14</div><div class="info-item-2">Java &#x2F; Android 获取本机开启热点、连接 WIFI 时的 IP_安卓获取热点ip-CSDN博客</div></div><div class="info-2"><div class="info-item-1">文章讲述了如何在Android中获取通过WIFI连接的局域网IP以及在手机热点模式下找到可用的无线网络接口获取IP地址。作者提供了遍历网络接口并过滤LinkLocalAddress的示例代码。 最近在做一个 Android 关于的无线局域网项目，需要获取本机在所连接局域网上的IP地址。手机可以通过WIFI连接已知的局域网，也可通过打开手机热点去组建一个局域网。 在通过WIFI连接 局域网 时，本机的 IP 地址可以通过 “ WifiManager ” 和“ WifiInfo ”获得，如下： 123456789101112131415161718192021222324public static String getIP(Context context) &#123;        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);        if (wifiManager.isWifiEnabled()) &#123;            // 若已经...</div></div></div></a><a class="pagination-related" href="/2025/06/12/ComfyUI_%E4%BF%AE%E5%A4%8D%E9%9D%A2%E9%83%A8%E4%B8%8E%E6%89%8B%E9%83%A8/" title="ComfyUI_修复面部与手部"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-06-12</div><div class="info-item-2">ComfyUI_修复面部与手部</div></div><div class="info-2"><div class="info-item-1">![[_resources&#x2F;74328415ceb130e3bed9a2be41ea7754_MD5.webp]] ComfyUI_修复面部与手部 在 WebUI 中，有个 ADetailer 插件可修复人物面部，只需点下相应选项即可。ComfyUI 中至今没有同款插件，但有几个替代。本篇分享其中两个我使用中觉得不错的面部修复插件，以及坏手的修复方法，仅限 AI 生图，真实照片的修复方法会另开一篇。  ![[_resources&#x2F;1fb3533f462c0804000868cd2511376a_MD5.jpg]] Impact-Pack最基础的 FaceDetailer 用法很简单，效果明显，能满足大多数需求。虽比不过 WebUI 的 ADetailer 那般一个选项就可以搞定，但 ComfyUI 的修复面部方法让学习者明白其工作流程，对我们更好的理解 AI 及其运作原理非常有益。 另外，拥用同款节点的插件不止 Impact-Pack 这一个，但它是目前更新比较有保障的。 ![[_resources&#x2F;889dde82b046b4e5a4d35c91f...</div></div></div></a><a class="pagination-related" href="/2025/08/18/Wails%20V2%20%E5%A4%87%E5%BF%98%E6%B8%85%E5%8D%95%20&%20%20wails%20cheatsheet%20&%20%20Quick%20Reference/" title="Wails V2 备忘清单 &amp;  wails cheatsheet &amp;  Quick Reference"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-08-18</div><div class="info-item-2">Wails V2 备忘清单 &amp;  wails cheatsheet &amp;  Quick Reference</div></div><div class="info-2"><div class="info-item-1">项目配置核心交互与生命周期方法绑定 (Go &lt;-&gt; JS)在 Go 中定义公共方法，即可在前端直接调用。 1234567891011121314151617181920212223242526272829// app.gotype App struct &#123;    ctx context.Context&#125;func (a *App) Greet(name string) string &#123;    return fmt.Sprintf(&quot;Hello %s!&quot;, name)&#125;// main.goapp := NewApp()err := wails.Run(&amp;options.App&#123;    Title: &quot;My App&quot;,    Bind: []interface&#123;&#125;&#123;        app, // 暴露 app 实例的所有公共方法    &#125;,&#125;) 12345// frontend/main.jsimport &#123; Gree...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%AF%E5%8A%A8%E9%80%9F%E5%BA%A6%E5%A4%A7%E6%AF%94%E6%8B%BC"><span class="toc-number">1.</span> <span class="toc-text">启动速度大比拼</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9E%B6%E6%9E%84%E4%B8%8E%E5%8A%9F%E8%83%BD%E5%B7%AE%E5%BC%82"><span class="toc-number">2.</span> <span class="toc-text">架构与功能差异</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#runC"><span class="toc-number">2.1.</span> <span class="toc-text">runC</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#containerd"><span class="toc-number">2.2.</span> <span class="toc-text">containerd</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Docker"><span class="toc-number">2.3.</span> <span class="toc-text">Docker</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">3.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%AF%E5%8A%A8%E9%80%9F%E5%BA%A6%E5%A4%A7%E6%AF%94%E6%8B%BC-1"><span class="toc-number">4.</span> <span class="toc-text">启动速度大比拼</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9E%B6%E6%9E%84%E4%B8%8E%E5%8A%9F%E8%83%BD%E5%B7%AE%E5%BC%82-1"><span class="toc-number">5.</span> <span class="toc-text">架构与功能差异</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#runC-1"><span class="toc-number">5.1.</span> <span class="toc-text">runC</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#containerd-1"><span class="toc-number">5.2.</span> <span class="toc-text">containerd</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Docker-1"><span class="toc-number">5.3.</span> <span class="toc-text">Docker</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93-1"><span class="toc-number">6.</span> <span class="toc-text">总结</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

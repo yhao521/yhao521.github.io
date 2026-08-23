@@ -1,0 +1,268 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>【Gradle-11】动态修改VersionName和VersionCode | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="前言有个读者问了一个比较有意思又很常见的问题，怎么修改VersionName和VersionCode？这位读者提问的方式也挺好，报错信息和尝试过的方式都提到了。关于报错以及解决方案，正如上图我评论回复所说。 静态修改直接在build.gradle文件改就好了，动态修改还是有点意思的。但是这种需求也比较常见，比如加上git commit id啊，时间戳啊等等，以便于区分，省的测试同学提了bug搞半天">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【Gradle-11】动态修改VersionName和VersionCode">
+<meta property="og:url" content="https://yhao521.github.io/2025/03/25/%E3%80%90Gradle-11%E3%80%91%E5%8A%A8%E6%80%81%E4%BF%AE%E6%94%B9VersionName%E5%92%8CVersionCode/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="前言有个读者问了一个比较有意思又很常见的问题，怎么修改VersionName和VersionCode？这位读者提问的方式也挺好，报错信息和尝试过的方式都提到了。关于报错以及解决方案，正如上图我评论回复所说。 静态修改直接在build.gradle文件改就好了，动态修改还是有点意思的。但是这种需求也比较常见，比如加上git commit id啊，时间戳啊等等，以便于区分，省的测试同学提了bug搞半天">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2025-03-25T05:10:53.000Z">
+<meta property="article:modified_time" content="2025-03-25T05:10:53.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="java&#x2F;programming">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "【Gradle-11】动态修改VersionName和VersionCode",
+  "url": "https://yhao521.github.io/2025/03/25/%E3%80%90Gradle-11%E3%80%91%E5%8A%A8%E6%80%81%E4%BF%AE%E6%94%B9VersionName%E5%92%8CVersionCode/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2025-03-25T05:10:53.000Z",
+  "dateModified": "2025-03-25T05:10:53.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2025/03/25/%E3%80%90Gradle-11%E3%80%91%E5%8A%A8%E6%80%81%E4%BF%AE%E6%94%B9VersionName%E5%92%8CVersionCode/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '【Gradle-11】动态修改VersionName和VersionCode',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">【Gradle-11】动态修改VersionName和VersionCode</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">【Gradle-11】动态修改VersionName和VersionCode</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-03-25T05:10:53.000Z" title="发表于 2025-03-25 13:10:53">2025-03-25</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-03-25T05:10:53.000Z" title="更新于 2025-03-25 13:10:53">2025-03-25</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>有个读者问了一个比较有意思又很常见的问题，怎么修改VersionName和VersionCode？<br><img src="https://i-blog.csdnimg.cn/blog_migrate/74da2bfb20217a03176d26ba30f92255.png" alt="读者.png"><br>这位读者提问的方式也挺好，报错信息和尝试过的方式都提到了。<br>关于报错以及解决方案，正如上图我评论回复所说。</p>
+<p>静态修改直接在build.gradle文件改就好了，动态修改还是有点意思的。<br>但是这种需求也比较常见，比如加上git commit id啊，时间戳啊等等，以便于区分，省的测试同学提了bug搞半天是包不对…<br>那么本文就来带大家实践一下，以及探索有没有其他方式。</p>
+<h2 id="配置BuildType"><a href="#配置BuildType" class="headerlink" title="配置BuildType"></a>配置BuildType</h2><p>我们可以通过配置不同的<code>BuildType</code>，然后使用<code>versionNameSuffix</code>，分别设置对应的版本名称后缀。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">    buildTypes &#123;</span><br><span class="line">        debug&#123;</span><br><span class="line">            versionNameSuffix &quot;-测试包&quot;</span><br><span class="line">        &#125;</span><br><span class="line">        release &#123;</span><br><span class="line">            versionNameSuffix &quot;-正式包&quot;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">12345678AI写代码</span><br></pre></td></tr></table></figure>
+
+<p>现在的版本名称和版本号：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">    defaultConfig &#123;</span><br><span class="line">        versionCode 1</span><br><span class="line">        versionName &quot;1.0&quot;</span><br><span class="line">    &#125;</span><br><span class="line">1234AI写代码</span><br></pre></td></tr></table></figure>
+
+<p>调用看看有没有生效：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">    override fun onResume() &#123;</span><br><span class="line">        super.onResume()</span><br><span class="line"></span><br><span class="line">        val packageInfo = applicationContext.packageManager.getPackageInfo(applicationContext.packageName, 0)</span><br><span class="line">        Log.wtf(&quot;yechaoa&quot;, &quot;versionName = &quot; + packageInfo.versionName)</span><br><span class="line">        Log.wtf(&quot;yechaoa&quot;, &quot;versionCode = &quot; + packageInfo.versionCode)</span><br><span class="line">    &#125;</span><br><span class="line">1234567AI写代码</span><br></pre></td></tr></table></figure>
+
+<p>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">E  versionName = 1.0-测试包</span><br><span class="line">E  versionCode = 1</span><br><span class="line">12AI写代码</span><br></pre></td></tr></table></figure>
+
+<p>生效是生效了，但是这种方式可以改versionName，改不了versionCode，有一定局限性。</p>
+<h2 id="动态Property"><a href="#动态Property" class="headerlink" title="动态Property"></a>动态Property</h2><p>这种呢，就是通过占位符的方式，原有的versionName和versionCode不是写死的，通过动态获取的方式来设置，我们就可以打包脚本里加上VersionName的配置，以达到编译期动态修改的效果，这种方式在<code>CI/CD</code>中比较常见。</p>
+<p>先加两个方法来获取versionName和versionCode：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">def getVersionNameByProperty() &#123;</span><br><span class="line">    def name</span><br><span class="line">    if (hasProperty(&quot;VersionName&quot;) &amp;&amp; getProperty(&#x27;VersionName&#x27;) != null) &#123;</span><br><span class="line">        name = getProperties().get(&#x27;VersionName&#x27;)</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        name = &quot;2.0-default&quot;</span><br><span class="line">    &#125;</span><br><span class="line">    return name</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">def getVersionCodeByProperty() &#123;</span><br><span class="line">    def code</span><br><span class="line">    if (hasProperty(&quot;VersionCode&quot;) &amp;&amp; getProperties().get(&#x27;VersionCode&#x27;) != null) &#123;</span><br><span class="line">        code = getProperties().get(&#x27;VersionCode&#x27;)</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        code = 2</span><br><span class="line">    &#125;</span><br><span class="line">    return code</span><br><span class="line">&#125;</span><br><span class="line">12345678910111213141516171819AI写代码</span><br></pre></td></tr></table></figure>
+
+<p>defaultConfig引用方法：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">    defaultConfig &#123;</span><br><span class="line">        versionCode getVersionCodeByProperty()</span><br><span class="line">        versionName getVersionNameByProperty()</span><br><span class="line">    &#125;</span><br><span class="line">1234AI写代码</span><br></pre></td></tr></table></figure>
+
+<p>如上，正常点击按钮编译versionName应该是”2.0-default”，versionCode应该是的2。<br>我们编译看下是不是符合预期：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"> E  versionName = 2.0-default-测试包</span><br><span class="line"> E  versionCode = 2</span><br><span class="line">12AI写代码</span><br></pre></td></tr></table></figure>
+
+<p>符合预期，而且加上了我们在buildType里面设置的后缀“测试包”。</p>
+<p>那么接下来再用命令执行试试：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">./gradlew installDebug -PVersionName=2.0-property</span><br><span class="line">1AI写代码</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>这里只是加了-PVersionName，VerisonCode同理。</p>
+</blockquote>
+<p>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"> E  versionName = 2.0-property-测试包</span><br><span class="line"> E  versionCode = 2</span><br><span class="line">12AI写代码</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，versionName由「2.0-default-测试包」变成「2.0-property-测试包」了，我们的效果达到了。</p>
+<h2 id="Variants"><a href="#Variants" class="headerlink" title="Variants"></a>Variants</h2><p><code>variants</code>是变体的意思，在构建中通常用来配置不同的版本、不同的环境等，比如多渠道打包，上面刚介绍的buildType也是。<br>但这里要介绍的variants方式，跟buildType的时间要晚一些，是在<code>Configuration</code>阶段，也就是拿到所有的variants之后再去改。<br>variants能力是Gradle提供的，在Android中对应的是<code>applicationVariants</code>。</p>
+<p>首先遍历所有variants，然后通过Flavor拿到versionName和versionCode，然后再赋值。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">    applicationVariants.configureEach &#123; variant -&gt;</span><br><span class="line">        def flavor = variant.mergedFlavor</span><br><span class="line">        flavor.versionName = &#x27;3.0&#x27;</span><br><span class="line">        flavor.versionCode = 3</span><br><span class="line">    &#125;</span><br><span class="line">12345AI写代码</span><br></pre></td></tr></table></figure>
+
+<p>结果编译报错：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Caused by: java.lang.RuntimeException: com.android.build.gradle.internal.crash.ExternalApiUsageException: com.android.builder.errors.EvalIssueException: versionName cannot be set on a mergedFlavor directly.</span><br><span class="line">1AI写代码</span><br></pre></td></tr></table></figure>
+
+<p>然后瞅了下源码，是<code>MergedFlavor</code>里面抛出来的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">class MergedFlavor(</span><br><span class="line">    name: String,</span><br><span class="line">    private val _applicationId: Property&lt;String&gt;,</span><br><span class="line">    private val services: VariantServices</span><br><span class="line">) : AbstractProductFlavor(name), InternalBaseVariant.MergedFlavor &#123;</span><br><span class="line"></span><br><span class="line">  	//...</span><br><span class="line"></span><br><span class="line">    override var versionCode: Int?</span><br><span class="line">        get() = super.versionCode</span><br><span class="line">        set(value) &#123;</span><br><span class="line">            // calling setVersionCode results in a sync Error because the manifest merger doesn&#x27;t pick</span><br><span class="line">            // up the change.</span><br><span class="line">            reportErrorWithWorkaround(&quot;versionCode&quot;, &quot;versionCodeOverride&quot;, value)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    override var versionName: String?</span><br><span class="line">        get() = super.versionName</span><br><span class="line">        set(value) &#123;</span><br><span class="line">            // calling setVersionName results in a sync Error because the manifest merger doesn&#x27;t pick</span><br><span class="line">            // up the change.</span><br><span class="line">            reportErrorWithWorkaround(&quot;versionName&quot;, &quot;versionNameOverride&quot;, value)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    private fun reportErrorWithWorkaround(</span><br><span class="line">        fieldName: String,</span><br><span class="line">        outputFieldName: String,</span><br><span class="line">        fieldValue: Any?</span><br><span class="line">    ) &#123;</span><br><span class="line">        val formattedFieldValue = if (fieldValue is String) &#123;</span><br><span class="line">            &quot;\&quot;&quot; + fieldValue + &quot;\&quot;&quot;</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            fieldValue.toString()</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        val message = &quot;&quot;&quot;$fieldName cannot be set on a mergedFlavor directly.</span><br><span class="line">                |$outputFieldName can instead be set for variant outputs using the following syntax:</span><br><span class="line">                |android &#123;</span><br><span class="line">                |    applicationVariants.all &#123; variant -&gt;</span><br><span class="line">                |        variant.outputs.each &#123; output -&gt;</span><br><span class="line">                |            output.$outputFieldName = $formattedFieldValue</span><br><span class="line">                |        &#125;</span><br><span class="line">                |    &#125;</span><br><span class="line">                |&#125;&quot;&quot;&quot;.trimMargin()</span><br><span class="line"></span><br><span class="line">        services.issueReporter.reportError(IssueReporter.Type.GENERIC, message)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849AI写代码</span><br></pre></td></tr></table></figure>
+
+<p><em>调用setVersionName会导致同步错误，清单文件接收不到更新。</em></p>
+<p>当然异常里面也给了解决方案，使用<code>versionNameOverride</code>。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">    applicationVariants.configureEach &#123; variant -&gt;</span><br><span class="line">        variant.outputs.each &#123; output -&gt;</span><br><span class="line">            if (variant.buildType.name == &quot;debug&quot;) &#123;</span><br><span class="line">                output.versionNameOverride = &quot;3.0&quot;</span><br><span class="line">                output.versionCodeOverride = 3</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">12345678AI写代码</span><br></pre></td></tr></table></figure>
+
+<p>然后我们这里还把versionName和versionCode升级了一下，再来试试。<br>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"> E  versionName = 3.0</span><br><span class="line"> E  versionCode = 3</span><br><span class="line">12AI写代码</span><br></pre></td></tr></table></figure>
+
+<p>ok，这达到我们想要效果了。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本文通过BuildType、Property、Variants三种方式介绍了动态修改VersionCode和VersionName的方法，但是他们的时机却有不同。<br><img src="https://i-blog.csdnimg.cn/blog_migrate/74405910f3ad4f3b249f8efede669934.jpeg"></p>
+<ul>
+<li>BuildType：有局限性，仅能修改VersionName，无法修改VersionCode；</li>
+<li>Property：使用比较方便，在云编译场景比较常见，本地的话可以写在打包脚本里面；</li>
+<li>Variants：比较彻底，能完全覆盖，而且也可以抽成Plugin，但是如果有云编译的话，会导致云编译的更改失效；</li>
+</ul>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>以上即是本文介绍内容，学废了吗，写作不易，记得三连~</p>
+<h2 id="GitHub"><a href="#GitHub" class="headerlink" title="GitHub"></a>GitHub</h2><p><a target="_blank" rel="noopener" href="https://github.com/yechaoa/GradleX">https://github.com/yechaoa/GradleX</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2025/03/25/%E3%80%90Gradle-11%E3%80%91%E5%8A%A8%E6%80%81%E4%BF%AE%E6%94%B9VersionName%E5%92%8CVersionCode/">https://yhao521.github.io/2025/03/25/%E3%80%90Gradle-11%E3%80%91%E5%8A%A8%E6%80%81%E4%BF%AE%E6%94%B9VersionName%E5%92%8CVersionCode/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/java-programming/">java/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/04/28/%E5%A4%9A%E7%A7%8D%E6%96%B9%E6%B3%95%EF%BC%8C%E5%B8%AE%E4%BD%A0%E5%89%AA%E8%97%8F%E7%BD%91%E9%A1%B5%E6%96%87%E7%AB%A0%E5%88%B0obsidian%E4%B8%AD/" title="多种方法，帮你剪藏网页文章到obsidian中"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">多种方法，帮你剪藏网页文章到obsidian中</div></div><div class="info-2"><div class="info-item-1">首发于 从零开始用第二大脑Obsidian 切换模式 登录&#x2F;注册 ![[_resources&#x2F;0cbf5c6958d65923ae032c8d7712efc6_MD5.png]] 多种方法，帮你剪藏网页文章到obsidian中 这是我在「思考者们」 第一期交流会中的分享主题。 小提示：全文约1000字 这里的剪藏，专门指的是对网络上的文章进行本地存储。 剪藏到 OB，就是将网络上值得收藏的文章放在 obsidian 的笔记库中，等待后续回看（稍后读），以及与自己过往思维进行链接。 除此以外，还能避免类似网站关停、文章删除、图片失效等问题…… 剪藏文章到 Obsidian 有多种方式，我将从简单到复杂一级一级介绍。 1 复制到 Obsidian 编辑器通过直接复制网页内容，在 obsidian 的编辑器中将自动转化为 markdown 格式。 最新的版本更新 1.3.3 还强化了复制表格的能力，使得 ob 在复制网页上的简单表格时，自动转化为 markdown 语法的表格。 ![[_resources&#x2F;96bec08b8457e2c9ab19f53df...</div></div></div></a><a class="pagination-related" href="/2025/03/21/vue%E8%8E%B7%E5%8F%96%E7%94%A8%E6%88%B7%E6%9C%AC%E6%9C%BAip%E6%96%B9%E6%B3%95/" title="vue获取用户本机ip方法"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">vue获取用户本机ip方法</div></div><div class="info-2"><div class="info-item-1">记录vue获取用户本机ip方法12345678910111213141516171819202122232425262728293031323334353637383940414243&lt;script setup&gt;import &#123; reactive, toRefs ,onMounted&#125; from &quot;vue&quot;const state = reactive(&#123;  ip:&#x27;&#x27;,&#125;)onMounted(()=&gt;&#123;  //获取ip   getUserIP((ip) =&gt; &#123;    state.ip=ip      console.log(ip)      console.log(state.ip)  &#125;);&#125;)//获取用户本地ip的方法const getUserIP= (onNewIP)=&gt; &#123;  let MyPeerConnection = window.RTCPeerConnection || window.mozRTCPeerC...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/05/15/%E3%80%90%E7%9F%A5%E8%AF%86%E5%9B%BE%E8%B0%B1%E3%80%91Neo4j%E5%85%A5%E9%97%A8%E6%95%99%E7%A8%8B/" title="【知识图谱】Neo4j入门教程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-15</div><div class="info-item-2">【知识图谱】Neo4j入门教程</div></div><div class="info-2"><div class="info-item-1">一、安装参考：Neo4j 第一篇：在Windows环境中安装Neo4j  安装照这篇教程走就可以了，注意环境路径的配置和JAVA-Neo4j版本的适配。  二、入门2.1 Neo4j浏览器 Neo4j服务器具有一个集成的浏览器，在启动neo4j服务之后，可以使用neo4j集成的浏览器管理图数据库。 在一个运行neo4j服务器主机上访问 “http://localhost:7474/”，显示以下的界面：  默认的host是bolt:&#x2F;&#x2F;localhost:7687，默认的用户是neo4j，默认的密码是：neo4j，第一次成功connect到Neo4j服务器之后，需要重置密码。 2.2 创建节点和关系 通过$ 命令行，编写Cypher脚本代码，点击Play按钮，可以在图数据库中创建节点和关系： 1234CREATE (n:Person &#123; name: &#x27;Andres&#x27;, title: &#x27;Developer&#x27; &#125;) return n;CREATE (n:Person &#123; name: &#x27;V...</div></div></div></a><a class="pagination-related" href="/2024/12/15/Vue3+TS%E4%BD%BF%E7%94%A8element-plus%20%E5%8A%A8%E6%80%81Icon%E5%9B%BE%E6%A0%87/" title="Vue3+TS使用element-plus 动态Icon图标"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-12-15</div><div class="info-item-2">Vue3+TS使用element-plus 动态Icon图标</div></div><div class="info-2"><div class="info-item-1">目录 1，前言 2，使用  2.1，方式一 2.2，方式二    1，前言 源于一段话  Element Plus 团队正在将原有组件内的 Font Icon 向 SVG Icon 迁移，请多多留意更新日志, 及时获取到更新信息，Font Icon 将会在第一个正式发布被废弃，请尽快迁移  在此记录一下如何使用element-plus中的icon组件 环境：  Vue：3.2.16 Element-Plus：1.2.0-beta.3 TypeScript：4.4.3 Vite：2.6.4  2，使用  文档原话：如果你想像用例一样直接使用，你需要全局注册组件，才能够直接在项目里使用  在main.ts中先导入 12import * as Icons from &#x27;@element-plus/icons&#x27;1&#x27;运行运行  2.1，方式一 在main.ts中 12345678910111213141516import &#123; createApp &#125; from &#x27;vue&#x27;import App from &#x27;./App...</div></div></div></a><a class="pagination-related" href="/2024/08/04/%E5%8D%87%E7%BA%A7%20Vite%205%20%E5%87%BA%E7%8E%B0%E8%AD%A6%E5%91%8A%20The%20CJS%20build%20of%20Vite%E2%80%98s%20Node%20API%20is/" title="升级 Vite 5 出现警告 The CJS build of Vite‘s Node API is deprecated."><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-04</div><div class="info-item-2">升级 Vite 5 出现警告 The CJS build of Vite‘s Node API is deprecated.</div></div><div class="info-2"><div class="info-item-1"> 🚀 作者主页： 有来技术🔥 开源项目： youlai-mall 🍃 vue3-element-admin 🍃 youlai-boot🌺 仓库主页： Gitee 💫 Github 💫 GitCode💖 欢迎点赞 👍 收藏 ⭐留言 📝 如有错误敬请纠正！  目录 错误描述 问题原因 解决方案  解决方案一 解决方案二   问题扩展  什么是 CJS？ 什么是 ESM? CJS 和 ESM 的区别 Vite 为什么弃用 CJS？   开源项目  错误描述vue3-element-admin 升级 Vite4 至 Vite5 后启动项目出现如下警告： 12The CJS build of Vite&#x27;s Node API is deprecated. See https://vitejs.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.1   问题原因Vite 官方弃用 CJS 说明： deprecate-cjs-node-api 解决方案Vite 官方...</div></div></div></a><a class="pagination-related" href="/2023/09/04/mac%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7/" title="mac命令行工具"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">mac命令行工具</div></div><div class="info-2"><div class="info-item-1"> title: mac命令行工具date: 2023-09-03 20:17:08category:  mactag: macauthor:   8个不可不知的Mac OS X专用命令行工具OS X的终端下通用很多Unix的工具和脚本。如果从Linux迁移到OS X会发现很多熟悉的命令和脚本工具，其实并没有任何区别。 但是OS X也提供了很多其他系统所没有的特别的命令行工具。我们推荐8个这类的工具，希望有助于提高在Mac的命令行环境下的效率。 1. openopen命令用于打开文件、目录或执行程序。就等同于在命令行模式下，重复图形界面“双击”的动作。例如这个命令与在Finder中双击Safari是一样的： 1$ open /Applications/Safari.app/  如果open一个文件，则会使用关联的程序打开之。例如open screenshot.png会在Preview中查看图片。 可以使用-a选项要求自行选择打开的程序，或使用-e强制在TextEdit中编辑此文件。 open一个目录会在Finder窗口中打开此目录。一个很有用的技巧是open .打开当前目录。 Fi...</div></div></div></a><a class="pagination-related" href="/2023/09/04/JSP%E6%B8%A9%E4%B9%A0/" title="JSP温习"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">JSP温习</div></div><div class="info-2"><div class="info-item-1"> title: JSP温习date: 2023-09-03 20:17:08category: tag: author:  **JSP注释**   **语法** **描述**    &lt;%-- 注释 --%&gt; JSP注释，注释内容不会被发送至浏览器甚至不会被编译   &lt;!-- 注释 --&gt; HTML注释，通过浏览器查看网页源代码时可以看见注释内容   &lt;\% 代表静态 &lt;%常量   %\&gt; 代表静态 %&gt; 常量   \&#39; 在属性中使用的单引号   \&quot; 在属性中使用的双引号   **JSP行为**行为标签基本上是一些预先就定义好的函数，下表罗列出了一些可用的JSP行为标签：：    **语法** **描述**    jsp:include 用于在当前页面中包含静态或动态资源   jsp:useBean 寻找和初始化一个JavaBean组件   jsp:setProperty 设置 JavaBean组件的值   jsp:getProperty 将 JavaBean组件的值插入到 output中   jsp:forwar...</div></div></div></a><a class="pagination-related" href="/2025/02/14/%E3%80%90Vue3%E3%80%9120-%E5%85%84%E5%BC%9F%E7%BB%84%E4%BB%B6%E4%BC%A0%E5%80%BC/" title="【Vue3】20-兄弟组件传值"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-02-14</div><div class="info-item-2">【Vue3】20-兄弟组件传值</div></div><div class="info-2"><div class="info-item-1">方式一、以父组件为中间桥梁，借助 emit 和 props1. 整体思路假设 A 和 B 是兄弟组件，A 要传值给 B ① 在 父组件 中使用 A 和 B 组件标签 ② 在 A 标签身上绑定一个 自定义事件 on-click，并且赋值一个回调函数，这个函数是定义在父组件中的 ③ 在 B 标签身上绑定 自定义属性，并且这些属性在 父组件 中要有定义（且是响应式的） ④ 在 A 组件中使用 emit 触发父组件给自己绑定的 自定义事件，并传递参数 ⑤ 在 父组件 中接收这些参数，并赋值给第 ③ 步中的自定义属性 ⑥ 在 B 组件中使用 props 接收父组件给自己绑定的 自定义属性 2. 具体实现父组件中 12345678910111213141516171819202122// App.vue&lt;template&gt;    &lt;bro-a @on-click=&quot;fn&quot;&gt;&lt;/bro-a&gt;    &lt;bro-b :Flag=&quot;Flag&quot;&gt;&lt;/bro-b&gt;&lt;/template&gt;&lt;...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AEBuildType"><span class="toc-number">2.</span> <span class="toc-text">配置BuildType</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8A%A8%E6%80%81Property"><span class="toc-number">3.</span> <span class="toc-text">动态Property</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Variants"><span class="toc-number">4.</span> <span class="toc-text">Variants</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%80%E5%90%8E"><span class="toc-number">6.</span> <span class="toc-text">最后</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#GitHub"><span class="toc-number">7.</span> <span class="toc-text">GitHub</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

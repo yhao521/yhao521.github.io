@@ -1,0 +1,278 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Prometheus特点，架构，组件，局限介绍 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="title: Prometheus特点，架构，组件，局限介绍date: 2023-09-03 20:17:08category: tag: author:  Prometheus特点，架构，组件，局限介绍https:&#x2F;&#x2F;baijiahao.baidu.com&#x2F;s?id&#x3D;1705607085545361413&amp;wfr&#x3D;spider&amp;for&#x3D;pc Prometheus的主要特点Pro">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Prometheus特点，架构，组件，局限介绍">
+<meta property="og:url" content="https://yhao521.github.io/2023/09/04/Prometheus%E7%89%B9%E7%82%B9%EF%BC%8C%E6%9E%B6%E6%9E%84%EF%BC%8C%E7%BB%84%E4%BB%B6%EF%BC%8C%E5%B1%80%E9%99%90%E4%BB%8B%E7%BB%8D/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="title: Prometheus特点，架构，组件，局限介绍date: 2023-09-03 20:17:08category: tag: author:  Prometheus特点，架构，组件，局限介绍https:&#x2F;&#x2F;baijiahao.baidu.com&#x2F;s?id&#x3D;1705607085545361413&amp;wfr&#x3D;spider&amp;for&#x3D;pc Prometheus的主要特点Pro">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2023-09-04T03:18:09.000Z">
+<meta property="article:modified_time" content="2023-09-04T03:18:27.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="golang&#x2F;programming">
+<meta property="article:tag" content="java&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Prometheus特点，架构，组件，局限介绍",
+  "url": "https://yhao521.github.io/2023/09/04/Prometheus%E7%89%B9%E7%82%B9%EF%BC%8C%E6%9E%B6%E6%9E%84%EF%BC%8C%E7%BB%84%E4%BB%B6%EF%BC%8C%E5%B1%80%E9%99%90%E4%BB%8B%E7%BB%8D/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2023-09-04T03:18:09.000Z",
+  "dateModified": "2023-09-04T03:18:27.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2023/09/04/Prometheus%E7%89%B9%E7%82%B9%EF%BC%8C%E6%9E%B6%E6%9E%84%EF%BC%8C%E7%BB%84%E4%BB%B6%EF%BC%8C%E5%B1%80%E9%99%90%E4%BB%8B%E7%BB%8D/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Prometheus特点，架构，组件，局限介绍',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">Prometheus特点，架构，组件，局限介绍</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Prometheus特点，架构，组件，局限介绍</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-09-04T03:18:09.000Z" title="发表于 2023-09-04 11:18:09">2023-09-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-09-04T03:18:27.000Z" title="更新于 2023-09-04 11:18:27">2023-09-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><hr>
+<p>title: Prometheus特点，架构，组件，局限介绍<br>date: 2023-09-03 20:17:08<br>category:</p>
+<p>tag:</p>
+<p>author:</p>
+<hr>
+<h1 id="Prometheus特点，架构，组件，局限介绍"><a href="#Prometheus特点，架构，组件，局限介绍" class="headerlink" title="Prometheus特点，架构，组件，局限介绍"></a>Prometheus特点，架构，组件，局限介绍</h1><p><a target="_blank" rel="noopener" href="https://baijiahao.baidu.com/s?id=1705607085545361413&wfr=spider&for=pc">https://baijiahao.baidu.com/s?id=1705607085545361413&amp;wfr=spider&amp;for=pc</a></p>
+<h1 id="Prometheus的主要特点"><a href="#Prometheus的主要特点" class="headerlink" title="Prometheus的主要特点"></a>Prometheus的主要特点</h1><p>Prometheus官网上的自述是：“From metrics to insight.Power your metrics and alerting with a leading open-source monitoring solution.”翻译过来就是：从指标到洞察力，Prometheus通过领先的开源监控解决方案为用户的指标和告警提供强大的支持。</p>
+<h2 id="Prometheus的特点"><a href="#Prometheus的特点" class="headerlink" title="Prometheus的特点"></a>Prometheus的特点</h2><ul>
+<li>通过PromQL实现多维度数据模型的灵活查询。</li>
+<li>定义了开放指标数据的标准，自定义探针（如Exporter等），编写简单方便。</li>
+<li>PushGateway组件让这款监控系统可以接收监控数据。</li>
+<li>提供了VM和容器化的版本。</li>
+</ul>
+<p>尤其是第一点，这是很多监控系统望尘莫及的。多维度的数据模型和灵活的查询方式，使监控指标可以关联到多个标签，并对时间序列进行切片和切块，以支持各种图形、表格和告警场景。</p>
+<h1 id="Prometheus的架构"><a href="#Prometheus的架构" class="headerlink" title="Prometheus的架构"></a>Prometheus的架构</h1><h2 id="整体架构"><a href="#整体架构" class="headerlink" title="整体架构"></a>整体架构</h2><p><img src="https://pic.rmb.bdstatic.com/bjh/down/eb11ecee64287b9c00c586984a31fd70.png" alt="img"></p>
+<p>image.png</p>
+<p>Prometheus主要由Prometheus Server、Pushgateway、Job&#x2F;Exporter、Service Discovery、Alertmanager、Dashboard这6个核心模块构成。Prometheus通过服务发现机制发现target，这些目标可以是长时间执行的Job，也可以是短时间执行的Job，还可以是通过Exporter监控的第三方应用程序。被抓取的数据会存储起来，通过PromQL语句在仪表盘等可视化系统中供查询，或者向Alertmanager发送告警信息，告警会通过页面、电子邮件、钉钉信息或者其他形式呈现。</p>
+<p>从上述架构图中可以看到，Prometheus不仅是一款时间序列数据库，在整个生态上还是一套完整的监控系统。对于时间序列数据库，在进行技术选型的时候，往往需要从宽列模型存储、类SQL查询支持、水平扩容、读写分离、高性能等角度进行分析。而监控系统的架构，往往还需要考虑通过减少组件、服务来降低成本和复杂性以及水平扩容等因素。</p>
+<h2 id="监控系统使用MQ通信的问题"><a href="#监控系统使用MQ通信的问题" class="headerlink" title="监控系统使用MQ通信的问题"></a>监控系统使用MQ通信的问题</h2><p>很多企业自己研发的监控系统中往往会使用消息队列Kafka和Metrics parser、Metrics process server等Metrics解析处理模块，再辅以Spark等流式处理方式。应用程序将Metric推到消息队列（如Kafaka），然后经过Exposer中转，再被Prometheus拉取。之所以会产生这种方案，是因为考虑到有历史包袱、复用现有组件、通过MQ（消息队列）来提高扩展性等因素。这个方案会有如下几个问题。</p>
+<ul>
+<li>增加了查询组件，比如基础的sum、count、average函数都需要额外进行计算。这一方面多了一层依赖，在查询模块连接失败的情况下会多提供一层故障风险；另一方面，很多基本的查询功能的实现都需要消耗资源。而在Prometheus的架构里，上述这些功能都是得到支持的。</li>
+<li>抓取时间可能会不同步，延迟的数据将会被标记为陈旧数据。如果通过添加时间戳来标识数据，就会失去对陈旧数据的处理逻辑。</li>
+<li>Prometheus适用于监控大量小目标的场景，而不是监控一个大目标，如果将所有数据都放在Exposer中，那么Prometheus的单个Job拉取就会成为CPU的瓶颈。这个架构设计和Pushgateway类似，因此如果不是特别必要的场景，官方都不建议使用。</li>
+<li>缺少服务发现和拉取控制机制，Prometheus只能识别Exposer模块，不知道具体是哪些target，也不知道每个target的UP时间，所以无法使用Scrape_*等指标做查询，也无法用scrape_limit做限制。</li>
+</ul>
+<p>对于上述这些重度依赖，可以考虑将其优化掉，而Prometheus这种采用以拉模式为主的架构，在这方面的实现是一个很好的参考方向。同理，很多企业的监控系统对于cmdb具有强依赖，通过Prometheus这种架构也可以消除标签对cmdb的依赖。</p>
+<h2 id="Prometheus组件"><a href="#Prometheus组件" class="headerlink" title="Prometheus组件"></a>Prometheus组件</h2><h3 id="Job-Exporter"><a href="#Job-Exporter" class="headerlink" title="Job&#x2F;Exporter"></a>Job&#x2F;Exporter</h3><p>Job&#x2F;Exporter属于Prometheus target，是Prometheus监控的对象。</p>
+<p>Job分为长时间执行和短时间执行两种。对于长时间执行的Job，可以使用Prometheus Client集成进行监控；对于短时间执行的Job，可以将监控数据推送到Pushgateway中缓存。</p>
+<p>Prometheus收录的Exporter有上千种，它可以用于第三方系统的监控。Exporter的机制是将第三方系统的监控数据按照Prometheus的格式暴露出来，没有Exporter的第三方系统可以自己定制Exporter。</p>
+<h2 id="notice"><a href="#notice" class="headerlink" title="notice:"></a>notice:</h2><h3 id="Exporter的管理"><a href="#Exporter的管理" class="headerlink" title="Exporter的管理"></a>Exporter的管理</h3><p>Exporter种类繁多，每个Exporter又都是独立的，每个组件各司其职。但是Exporter越多，维护压力越大，尤其是内部自行开发的Agent等工具需要大量的人力来完成资源控制、特性添加、版本升级等工作。</p>
+<p>针对以上问题，可以考虑用Influx Data公司开源的Telegra统一进行管理。Telegraf是一个用Golang编写的用于数据收集的开源Agent，其基于插件驱动。Telegraf提供的输入和输出插件非常丰富，当用户有特殊需求时，也可以自行编写插件（需要重新编译）。</p>
+<h3 id="Telegraf介绍"><a href="#Telegraf介绍" class="headerlink" title="Telegraf介绍"></a>Telegraf介绍</h3><p>Telegraf就是Influx Data公司的时间序列平台TICK（一种高性能时序中台）技术栈中的“T”，主要用于收集时间序列型数据，比如服务器CPU指标、内存指标、各种IoT设备产生的数据等。Telegraf支持各种类型Exporter的集成，可以实现Exporter的多合一。还有一种思路就是通过主进程拉起多个Exporter进程，仍然可以跟着社区版本进行更新。</p>
+<h3 id="Telegraf的优点"><a href="#Telegraf的优点" class="headerlink" title="Telegraf的优点"></a>Telegraf的优点</h3><p>Telegraf的CPU和内存使用率极低，支持几乎所有的集成监控和丰富的社区集成可视化，如Linux、Redis、Apache、StatsD、Java&#x2F;Jolokia、Cassandra、MySQL等。由于Prometheus和InfluxDB都是时间序列存储监控系统，可以变通地将Telegraf对接到Prometheus中。在实际POC环境验证中，使用Telegraf集成Prometheus比单独使用Prometheus会拥有更低的内存使用率和CPU使用率。</p>
+<h2 id="Pushgateway"><a href="#Pushgateway" class="headerlink" title="Pushgateway"></a>Pushgateway</h2><p>Prometheus是拉模式为主的监控系统，它的推模式就是通过Pushgateway组件实现的。Pushgateway是支持临时性Job主动推送指标的中间网关，它本质上是一种用于监控Prometheus服务器无法抓取的资源的解决方案。它也是用Go语言编写的，在Apache 2.0许可证下开源。</p>
+<p><img src="https://pic.rmb.bdstatic.com/bjh/down/438908a9b85f35299d49bd870334f8c6.png" alt="img"></p>
+<p>Pushgateway作为一个独立的服务，位于被采集监控指标的应用程序和Prometheus服务器之间。应用程序主动推送指标到Pushgateway，Pushgateway接收指标，然后Pushgateway也作为target被Prometheus服务器抓取。它的使用场景主要有如下几种:</p>
+<ul>
+<li>临时&#x2F;短作业。</li>
+<li>批处理作业。</li>
+<li>应用程序与Prometheus服务器之间有网络隔离，如安全性（防火墙）、连接性（不在一个网段，服务器或应用程序仅允许特定端口或路径访问）。</li>
+</ul>
+<p>Pushgateway与网关类似，在Prometheus中被建议作为临时性解决方案，主要用于监控不太方便访问到的资源。<strong>它会丢失很多Prometheus服务器提供的功能，比如UP指标和指标过期时进行实例状态监控</strong>。</p>
+<h2 id="服务发现（Service-Discovery）"><a href="#服务发现（Service-Discovery）" class="headerlink" title="服务发现（Service Discovery）"></a>服务发现（Service Discovery）</h2><p>Prometheus通过服务发现机制对云以及容器环境下的监控场景提供了完善的支持。</p>
+<h3 id="服务发现的方式"><a href="#服务发现的方式" class="headerlink" title="服务发现的方式"></a>服务发现的方式</h3><h4 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h4><p>Prometheus会周期性地从文件中读取最新的target信息。</p>
+<p>对于支持文件的服务发现，实践场景下可以衍生为与自动化配置管理工具（Ansible、Cron Job、Puppet、SaltStack等）结合使用。</p>
+<h4 id="通过服务动态感知"><a href="#通过服务动态感知" class="headerlink" title="通过服务动态感知"></a>通过服务动态感知</h4><p>Prometheus还支持多种常见的服务发现组件，如Kubernetes、DNS、Zookeeper、Azure、EC2和GCE等。例如，Prometheus可以使用Kubernetes的API获取容器信息的变化（如容器的创建和删除）来动态更新监控对象。</p>
+<p>通过服务发现的方式，管理员可以在不重启Prometheus服务的情况下动态发现需要监控的target实例信息。</p>
+<p><strong>notice</strong></p>
+<h5 id="Relabeling"><a href="#Relabeling" class="headerlink" title="Relabeling"></a>Relabeling</h5><p>服务发现中有一个高级操作，就是Relabeling机制。Relabeling机制会从Prometheus包含的target实例中获取默认的元标签信息，从而对不同开发环境（测试、预发布、线上）、不同业务团队、不同组织等按照某些规则（比如标签）从服务发现注册中心返回的target实例中有选择性地采集某些Exporter实例的监控数据。</p>
+<p>这句话的意思就是Relabeling机制可以让prometheus按照动态的按照某些规则采集指定监控数据。</p>
+<h2 id="Prometheus服务器（Prometheus-Server）"><a href="#Prometheus服务器（Prometheus-Server）" class="headerlink" title="Prometheus服务器（Prometheus Server）"></a>Prometheus服务器（Prometheus Server）</h2><p><img src="https://pic.rmb.bdstatic.com/bjh/down/fecf854bb544400cb3c1a869277e1225.png" alt="img"></p>
+<p>Prometheus服务器是Prometheus最核心的模块。它主要包含<strong>抓取</strong>、<strong>存储</strong>和<strong>查询</strong>这3个功能</p>
+<h3 id="抓取"><a href="#抓取" class="headerlink" title="抓取"></a>抓取</h3><p>Prometheus Server通过服务发现组件，周期性地从上面介绍的Job、Exporter、Pushgateway这3个组件中通过HTTP轮询的形式拉取监控指标数据。</p>
+<h3 id="存储"><a href="#存储" class="headerlink" title="存储"></a>存储</h3><p>抓取到的监控数据通过一定的规则<strong>清理</strong>和<strong>数据</strong>整理（抓取前使用服务发现提供的relabel_configs方法，抓取后使用作业内的metrics_relabel_configs方法），会把得到的结果存储到<strong>新的时间序列中进行持久化</strong>。多年来，存储模块经历了多次重新设计，Prometheus 2.0版的存储系统是第三次迭代。该存储系统每秒可以处理数百万个样品的摄入，使得使用一台Prometheus服务器监控数千台机器成为可能。使用的压缩算法可以在真实数据上实现每个样本1.3B。建议使用SSD，但不是严格要求。</p>
+<p><strong>notice:</strong><br><strong>Prometheus的存储分为本地存储和远程存储</strong></p>
+<ul>
+<li>本地存储：会直接保留到本地磁盘，性能上建议使用<strong>SSD</strong>且不要保存超过一个月的数据。记住，任何版本的Prometheus都不支持NFS。一些实际生产案例告诉我们，Prometheus存储文件如果使用NFS，则有损坏或丢失历史数据的可能。</li>
+<li>远程存储：适用于存储大量的监控数据。Prometheus支持的远程存储包括OpenTSDB、InfluxDB、Elasticsearch、Graphite、CrateDB、Kakfa、PostgreSQL、TimescaleDB、TiKV等。远程存储需要配合中间层的适配器进行转换，主要涉及Prometheus中的remote_write和remote_read接口。在实际生产中，远程存储会出现各种各样的问题，需要不断地进行优化、压测、架构改造甚至重写上传数据逻辑的模块等工作。</li>
+</ul>
+<h3 id="查询"><a href="#查询" class="headerlink" title="查询"></a>查询</h3><p>Prometheus持久化数据以后，客户端就可以通过PromQL语句对数据进行查询了。</p>
+<h2 id="Dashboard"><a href="#Dashboard" class="headerlink" title="Dashboard"></a>Dashboard</h2><p>在Prometheus架构图中提到，Web UI、Grafana、API client可以统一理解为Prometheus的Dashboard。Prometheus服务器除了内置查询语言PromQL以外，还支持表达式浏览器及表达式浏览器上的数据图形界面。实际工作中使用Grafana等作为前端展示界面，用户也可以直接使用Client向Prometheus Server发送请求以获取数据。</p>
+<h2 id="Alertmanager"><a href="#Alertmanager" class="headerlink" title="Alertmanager"></a>Alertmanager</h2><p>Alertmanager是独立于Prometheus的一个告警组件，需要单独安装部署。Prometheus可以将多个Alertmanager配置为一个集群，通过服务发现动态发现告警集群中节点的上下线从而避免单点问题，Alertmanager也支持集群内多个实例之间的通信。</p>
+<p><img src="https://pic.rmb.bdstatic.com/bjh/down/187d495ab8ff861d6b6e8c2108ae08cf.png" alt="img"></p>
+<p>Alertmanager接收Prometheus推送过来的告警，用于管理、整合和分发告警到不同的目的地。Alertmanager提供了多种内置的第三方告警通知方式，同时还提供了对Webhook通知的支持，通过Webhook用户可以完成对告警的更多个性化的扩展。Alertmanager除了提供基本的告警通知能力以外，还提供了如分组、抑制以及静默等告警特性</p>
+<h1 id="Prometheus的3大局限性"><a href="#Prometheus的3大局限性" class="headerlink" title="Prometheus的3大局限性"></a>Prometheus的3大局限性</h1><p>Prometheus固然强大，但它还是具有一定局限性的。</p>
+<h2 id="1-更多地展示的是趋势性的监控"><a href="#1-更多地展示的是趋势性的监控" class="headerlink" title="1.更多地展示的是趋势性的监控"></a>1.更多地展示的是趋势性的监控</h2><p>Prometheus作为一个基于度量的系统，不适合存储事件或者日志等，它更多地展示的是趋势性的监控。如果用户需要数据的精准性，可以考虑ELK或其他日志架构。另外，APM更适用于链路追踪的场景。</p>
+<h2 id="2-Prometheus本地存储不适合大量历史数据存储"><a href="#2-Prometheus本地存储不适合大量历史数据存储" class="headerlink" title="2.Prometheus本地存储不适合大量历史数据存储"></a>2.Prometheus本地存储不适合大量历史数据存储</h2><p>Prometheus认为只有最近的监控数据才有查询的需要，所有Prometheus本地存储的设计初衷只是保存短期（如一个月）的数据，不会针对大量的历史数据进行存储。如果需要历史数据，则建议使用Prometheus的远端存储，如OpenTSDB、M3DB等。</p>
+<h2 id="3-成熟度没有InfluxDB高"><a href="#3-成熟度没有InfluxDB高" class="headerlink" title="3.成熟度没有InfluxDB高"></a>3.成熟度没有InfluxDB高</h2><p>Prometheus在集群上不论是采用联邦集群还是采用Improbable开源的Thanos等方案，都没有InfluxDB成熟度高，需要解决很多细节上的技术问题（如耗尽CPU、消耗机器资源等问题），这也是本章开头提到的InfluxDB在时序数据库中排名第一的原因之一。部分互联网公司拥有海量业务，出于集群的原因会考虑对单机免费但是集群收费的InfluxDB进行自主研发。</p>
+<p>总之，使用Prometheus一定要了解它的设计理念：<strong>它并不是为了解决大容量存储问题，TB级以上数据建议保存到远端TSDB中</strong>；它是为运行时正确的监控数据准备的，无法做到100%精准，存在由内核故障、刮擦故障等因素造成的微小误差。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2023/09/04/Prometheus%E7%89%B9%E7%82%B9%EF%BC%8C%E6%9E%B6%E6%9E%84%EF%BC%8C%E7%BB%84%E4%BB%B6%EF%BC%8C%E5%B1%80%E9%99%90%E4%BB%8B%E7%BB%8D/">https://yhao521.github.io/2023/09/04/Prometheus%E7%89%B9%E7%82%B9%EF%BC%8C%E6%9E%B6%E6%9E%84%EF%BC%8C%E7%BB%84%E4%BB%B6%EF%BC%8C%E5%B1%80%E9%99%90%E4%BB%8B%E7%BB%8D/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/java-programming/">java/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a><a class="post-meta__tags" href="/tags/golang-programming/">golang/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2023/09/04/README/" title="README"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">README</div></div><div class="info-2"><div class="info-item-1"> title: READMEdate: 2023-09-03 20:17:08category:  开发语言 doc_nodejstag: doc_nodejsauthor:   </div></div></div></a><a class="pagination-related" href="/2023/09/04/Postgresql%E9%94%81%E6%9C%BA%E5%88%B6%E8%AF%A6%E8%A7%A3(%E8%A1%A8%E9%94%81%E5%92%8C%E8%A1%8C%E9%94%81)/" title="Postgresql锁机制详解(表锁和行锁)"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Postgresql锁机制详解(表锁和行锁)</div></div><div class="info-2"><div class="info-item-1"> title: Postgresql锁机制详解(表锁和行锁)date: 2023-09-03 20:17:08category:  数据库 doc_pgsqltag: doc_pgsqlauthor:   Postgresql锁机制详解(表锁和行锁)表锁 LOCK [ TABLE ] [ ONLY ] name [ * ] [, …] [ IN lockmode MODE ] [ NOWAIT ]  lockmode包括以下几种：  ACCESS SHARE | ROW SHARE | ROW EXCLUSIVE | SHARE UPDATE EXCLUSIVE| SHARE | SHARE ROW EXCLUSIVE | EXCLUSIVE | ACCESS EXCLUSIVE  LOCK TABLE命令用于获取一个表锁，获取过程将阻塞一直到等待的锁被其他事务释放。如果使用NOWAIT关键字则如果获取不到锁，将不会等待而是直接返回，放弃执行当前指令并抛出一个错误(error)。一旦获取到锁，将一直持有锁直到事务结束。(没有主动释放锁的命令，锁总是会在事务结束的时候被释放)。 当...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/win/" title="win"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">win</div></div><div class="info-2"><div class="info-item-1"> title: windate: 2023-09-03 20:17:08category:  wintag: winauthor:   Win10-Win+E快捷键失效1.新建x.reg文件，加入4个注册表项12345678910111213Windows Registry Editor Version 5.00[HKEY_CLASSES_ROOT\Folder\shell\explore\command]&quot;DelegateExecute&quot;=&quot;&#123;11dbb47c-a525-400b-9e80-a54615a090c0&#125;&quot;[HKEY_CLASSES_ROOT\Folder\shell\open\command]&quot;DelegateExecute&quot;=&quot;&#123;11dbb47c-a525-400b-9e80-a54615a090c0&#125;&quot;[HKEY_CLASSES_ROOT\Folder\shell\opennewprocess\command]&quot;DelegateEx...</div></div></div></a><a class="pagination-related" href="/2024/08/11/golang%E6%96%87%E4%BB%B6%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%96%B9%E5%BC%8F(%E5%8F%AF%E4%BB%A5%E8%AE%BF%E9%97%AE%E4%BB%BB%E4%BD%95%E7%9B%AE%E5%BD%95)/" title="golang文件服务器的两种方式(可以访问任何目录)"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-11</div><div class="info-item-2">golang文件服务器的两种方式(可以访问任何目录)</div></div><div class="info-2"><div class="info-item-1">一、方法1： 主要用到的方法是http包的FileServer,参数很简单,就是要路由的文件夹的路径。 12345678910111213package main&nbsp;import (&nbsp;&nbsp;"fmt"&nbsp;&nbsp;"net/http")&nbsp;func main() {&nbsp;&nbsp;http.Handle("/", http.FileServer(http.Dir("./")))&nbsp;&nbsp;&nbsp;e := http.ListenAndServe(":8080", nil)&nbsp;&nbsp;fmt.Println(e)}  上面例子的路由只能把根目录也就是“&#x2F;”目录映射出来,例如你写成”http.Handle(“&#x2F;files”, http.FileServer(http.Dir(“.&#x2F;“)))“，就无法把通过访问”&#x2F;files“把当前路径下的文件映射出来。于是就有了http包的StripPrefix方法。 二、方法2： 实现访问任意文件夹下面的文件。 1234567891...</div></div></div></a><a class="pagination-related" href="/2025/02/20/JAVA%20Web%E5%BA%94%E7%94%A8%E5%B8%B8%E8%A7%81%E6%BC%8F%E6%B4%9E%E4%B8%8E%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE/" title="JAVA Web应用常见漏洞与修复建议"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-02-20</div><div class="info-item-2">JAVA Web应用常见漏洞与修复建议</div></div><div class="info-2"><div class="info-item-1">最近负责的项目参与了甲方要求的代码审计，扫出来不少问题，46w+行代码扫出来81种漏洞，涉及1w+行代码，不良代码率高达2.93%，也确实反应了不少问题，这里贴出来供大家参考 目录 跨站脚本 高危：存储型XSS 高危：反射型XSS 输入验证 高危：路径遍历 高危：基于DOM的XSS 高危：重定向 中危：拒绝服务：正则表达式 中危：访问权限修饰符控制 中危：直接绑定敏感字段 低危：拒绝服务：解析Double类型数据 低危：有风险的资源使用 低危：数据跨越信任边界 低危：文件上传 代码注入 中危：HTTP响应截断 中危：有风险的SQL查询：MyBatis 中危：公式注入 中危：资源注入 中危：HTTP响应截断 低危：有风险的反序列化  低危：JavaScript劫持：易受攻击的框架  API误用 中危：不安全的框架绑定 低危：忽略返回值 低危：HTTP响应完成后继续操作输出流 低危：缺少对方法返回值的null检查 密码管理 中危：不安全的随机数 中危：空密码 中危：硬编码密码 中危：弱加密 中危：配置文件中的明文密码 中危：硬编码加密密钥  低危：注释中的密码 低危：不安全的哈希算法...</div></div></div></a><a class="pagination-related" href="/2023/09/04/mac%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7/" title="mac命令行工具"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">mac命令行工具</div></div><div class="info-2"><div class="info-item-1"> title: mac命令行工具date: 2023-09-03 20:17:08category:  mactag: macauthor:   8个不可不知的Mac OS X专用命令行工具OS X的终端下通用很多Unix的工具和脚本。如果从Linux迁移到OS X会发现很多熟悉的命令和脚本工具，其实并没有任何区别。 但是OS X也提供了很多其他系统所没有的特别的命令行工具。我们推荐8个这类的工具，希望有助于提高在Mac的命令行环境下的效率。 1. openopen命令用于打开文件、目录或执行程序。就等同于在命令行模式下，重复图形界面“双击”的动作。例如这个命令与在Finder中双击Safari是一样的： 1$ open /Applications/Safari.app/  如果open一个文件，则会使用关联的程序打开之。例如open screenshot.png会在Preview中查看图片。 可以使用-a选项要求自行选择打开的程序，或使用-e强制在TextEdit中编辑此文件。 open一个目录会在Finder窗口中打开此目录。一个很有用的技巧是open .打开当前目录。 Fi...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E5%91%BD%E4%BB%A4/" title="命令"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">命令</div></div><div class="info-2"><div class="info-item-1"> title: 命令date: 2023-09-03 20:17:08category: tag: author:  12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455CLASSPATH%JAVA_HOME%\lib\dt.jar;%JAVA_HOME%\lib\tools.jar;%JAVA_HOME%\jre\lib;mysqlbinlog  --base64-output=decode-rows -v mysql_bin.000005    &gt;   test000005.sqlmysqlbinlog -vv --base64-output=DECODE-ROWS mysql_bin.000004    &gt;   test000004.sqlcat /paas/iddbs/yanghao_ac/6.sql |grep &#x27;DROP DATABASE IF EXISTS\|^CREATE DATABASE\|^...</div></div></div></a><a class="pagination-related" href="/2024/07/09/%E3%80%90Golang%E3%80%91Golang%E4%BD%BF%E7%94%A8embed%E5%8A%A0%E8%BD%BD%E3%80%81%E6%89%93%E5%8C%85%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E6%96%87%E4%BB%B6/" title="【Golang】Golang使用embed加载、打包静态资源文件"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-09</div><div class="info-item-2">【Golang】Golang使用embed加载、打包静态资源文件</div></div><div class="info-2"><div class="info-item-1">【Golang】Golang使用embed加载、打包静态资源文件 大家好 我是寸铁👊总结了一篇Golang使用embed加载静态资源文件的文章✨喜欢的小伙伴可以点点关注 💝  前言事情是这样的：前不久，有同学问我,golang怎么把静态资源文件打包成一个可执行文件呢？便于后序服务器资源的部署！  经本人同意授权，图像码掉。 这不今天这个问题的答案就来啦！ 背景Go编译的程序非常适合部署，如果没有通过CGO引用其它的库的话，我们一般编译出来的可执行二进制文件都是单个的文件，非常适合复制和部署。在实际使用中，除了二进制文件，可能还需要一些配置文件，或者静态文件，比如html模板、静态的图片、CSS、javascript等文件，如何这些文件也能嵌入到二进制文件中，那就太美妙，我们只需复制、执行单个的可执行文件即可。 一些开源的项目很久以前就开始做这方面的工作，比如gobuffalo/packr、markbates/pkger、rakyll/statik、knadh/stuffbin等等，但是不管怎么说这些都是第三方提供的功能，如果Go官方能内建支持就好了。2019末一个提案被提出i...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Prometheus%E7%89%B9%E7%82%B9%EF%BC%8C%E6%9E%B6%E6%9E%84%EF%BC%8C%E7%BB%84%E4%BB%B6%EF%BC%8C%E5%B1%80%E9%99%90%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.</span> <span class="toc-text">Prometheus特点，架构，组件，局限介绍</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Prometheus%E7%9A%84%E4%B8%BB%E8%A6%81%E7%89%B9%E7%82%B9"><span class="toc-number">2.</span> <span class="toc-text">Prometheus的主要特点</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Prometheus%E7%9A%84%E7%89%B9%E7%82%B9"><span class="toc-number">2.1.</span> <span class="toc-text">Prometheus的特点</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Prometheus%E7%9A%84%E6%9E%B6%E6%9E%84"><span class="toc-number">3.</span> <span class="toc-text">Prometheus的架构</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="toc-number">3.1.</span> <span class="toc-text">整体架构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%91%E6%8E%A7%E7%B3%BB%E7%BB%9F%E4%BD%BF%E7%94%A8MQ%E9%80%9A%E4%BF%A1%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">3.2.</span> <span class="toc-text">监控系统使用MQ通信的问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Prometheus%E7%BB%84%E4%BB%B6"><span class="toc-number">3.3.</span> <span class="toc-text">Prometheus组件</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Job-Exporter"><span class="toc-number">3.3.1.</span> <span class="toc-text">Job&#x2F;Exporter</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#notice"><span class="toc-number">3.4.</span> <span class="toc-text">notice:</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Exporter%E7%9A%84%E7%AE%A1%E7%90%86"><span class="toc-number">3.4.1.</span> <span class="toc-text">Exporter的管理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Telegraf%E4%BB%8B%E7%BB%8D"><span class="toc-number">3.4.2.</span> <span class="toc-text">Telegraf介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Telegraf%E7%9A%84%E4%BC%98%E7%82%B9"><span class="toc-number">3.4.3.</span> <span class="toc-text">Telegraf的优点</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Pushgateway"><span class="toc-number">3.5.</span> <span class="toc-text">Pushgateway</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%EF%BC%88Service-Discovery%EF%BC%89"><span class="toc-number">3.6.</span> <span class="toc-text">服务发现（Service Discovery）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%E7%9A%84%E6%96%B9%E5%BC%8F"><span class="toc-number">3.6.1.</span> <span class="toc-text">服务发现的方式</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="toc-number">3.6.1.1.</span> <span class="toc-text">配置文件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%80%9A%E8%BF%87%E6%9C%8D%E5%8A%A1%E5%8A%A8%E6%80%81%E6%84%9F%E7%9F%A5"><span class="toc-number">3.6.1.2.</span> <span class="toc-text">通过服务动态感知</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#Relabeling"><span class="toc-number">3.6.1.2.1.</span> <span class="toc-text">Relabeling</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Prometheus%E6%9C%8D%E5%8A%A1%E5%99%A8%EF%BC%88Prometheus-Server%EF%BC%89"><span class="toc-number">3.7.</span> <span class="toc-text">Prometheus服务器（Prometheus Server）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8A%93%E5%8F%96"><span class="toc-number">3.7.1.</span> <span class="toc-text">抓取</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%98%E5%82%A8"><span class="toc-number">3.7.2.</span> <span class="toc-text">存储</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2"><span class="toc-number">3.7.3.</span> <span class="toc-text">查询</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Dashboard"><span class="toc-number">3.8.</span> <span class="toc-text">Dashboard</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Alertmanager"><span class="toc-number">3.9.</span> <span class="toc-text">Alertmanager</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Prometheus%E7%9A%843%E5%A4%A7%E5%B1%80%E9%99%90%E6%80%A7"><span class="toc-number">4.</span> <span class="toc-text">Prometheus的3大局限性</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E6%9B%B4%E5%A4%9A%E5%9C%B0%E5%B1%95%E7%A4%BA%E7%9A%84%E6%98%AF%E8%B6%8B%E5%8A%BF%E6%80%A7%E7%9A%84%E7%9B%91%E6%8E%A7"><span class="toc-number">4.1.</span> <span class="toc-text">1.更多地展示的是趋势性的监控</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-Prometheus%E6%9C%AC%E5%9C%B0%E5%AD%98%E5%82%A8%E4%B8%8D%E9%80%82%E5%90%88%E5%A4%A7%E9%87%8F%E5%8E%86%E5%8F%B2%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8"><span class="toc-number">4.2.</span> <span class="toc-text">2.Prometheus本地存储不适合大量历史数据存储</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E6%88%90%E7%86%9F%E5%BA%A6%E6%B2%A1%E6%9C%89InfluxDB%E9%AB%98"><span class="toc-number">4.3.</span> <span class="toc-text">3.成熟度没有InfluxDB高</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

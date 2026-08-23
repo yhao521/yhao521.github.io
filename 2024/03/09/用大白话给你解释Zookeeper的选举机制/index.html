@@ -1,0 +1,330 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>用大白话给你解释Zookeeper的选举机制 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="本文首发我的微信公众号『爱笑的架构师』，欢迎大家关注。     人类选举的基本原理 Zookeeper选举的基本原理 什么场景下 Zookeeper 需要选举？ 启动时期的 Leader 选举 运行时期的Leader选举   选举机制中涉及到的核心概念 总结    Zookeeper 是一个分布式服务框架，主要是用来解决分布式应用中遇到的一些数据管理问题如：统一命名服务、状态同步服务、集群管理、">
+<meta property="og:type" content="article">
+<meta property="og:title" content="用大白话给你解释Zookeeper的选举机制">
+<meta property="og:url" content="https://yhao521.github.io/2024/03/09/%E7%94%A8%E5%A4%A7%E7%99%BD%E8%AF%9D%E7%BB%99%E4%BD%A0%E8%A7%A3%E9%87%8AZookeeper%E7%9A%84%E9%80%89%E4%B8%BE%E6%9C%BA%E5%88%B6/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="本文首发我的微信公众号『爱笑的架构师』，欢迎大家关注。     人类选举的基本原理 Zookeeper选举的基本原理 什么场景下 Zookeeper 需要选举？ 启动时期的 Leader 选举 运行时期的Leader选举   选举机制中涉及到的核心概念 总结    Zookeeper 是一个分布式服务框架，主要是用来解决分布式应用中遇到的一些数据管理问题如：统一命名服务、状态同步服务、集群管理、">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2024-03-08T17:29:28.000Z">
+<meta property="article:modified_time" content="2024-03-08T17:29:28.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "用大白话给你解释Zookeeper的选举机制",
+  "url": "https://yhao521.github.io/2024/03/09/%E7%94%A8%E5%A4%A7%E7%99%BD%E8%AF%9D%E7%BB%99%E4%BD%A0%E8%A7%A3%E9%87%8AZookeeper%E7%9A%84%E9%80%89%E4%B8%BE%E6%9C%BA%E5%88%B6/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2024-03-08T17:29:28.000Z",
+  "dateModified": "2024-03-08T17:29:28.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2024/03/09/%E7%94%A8%E5%A4%A7%E7%99%BD%E8%AF%9D%E7%BB%99%E4%BD%A0%E8%A7%A3%E9%87%8AZookeeper%E7%9A%84%E9%80%89%E4%B8%BE%E6%9C%BA%E5%88%B6/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '用大白话给你解释Zookeeper的选举机制',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">用大白话给你解释Zookeeper的选举机制</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">用大白话给你解释Zookeeper的选举机制</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-03-08T17:29:28.000Z" title="发表于 2024-03-09 01:29:28">2024-03-09</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-03-08T17:29:28.000Z" title="更新于 2024-03-09 01:29:28">2024-03-09</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p>本文首发我的微信公众号『<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzIwODI1OTk1Nw==&mid=2650322098&idx=1&sn=100089ec2d8c49b85f4acc5ff2af8ca5&chksm=8f09caa8b87e43be0454c4583a914779a5d78d2ae0493e2ec54fd2337d3be9ae99b391a1a35c&token=1553501157&lang=zh_CN#rd">爱笑的架构师</a>』，欢迎大家关注。</p>
+</blockquote>
+<!-- TOC -->
+
+<ul>
+<li><a href="#%E4%BA%BA%E7%B1%BB%E9%80%89%E4%B8%BE%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86">人类选举的基本原理</a></li>
+<li><a href="#zookeeper%E9%80%89%E4%B8%BE%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86">Zookeeper选举的基本原理</a></li>
+<li><a href="#%E4%BB%80%E4%B9%88%E5%9C%BA%E6%99%AF%E4%B8%8B-zookeeper-%E9%9C%80%E8%A6%81%E9%80%89%E4%B8%BE">什么场景下 Zookeeper 需要选举？</a><ul>
+<li><a href="#%E5%90%AF%E5%8A%A8%E6%97%B6%E6%9C%9F%E7%9A%84-leader-%E9%80%89%E4%B8%BE">启动时期的 Leader 选举</a></li>
+<li><a href="#%E8%BF%90%E8%A1%8C%E6%97%B6%E6%9C%9F%E7%9A%84leader%E9%80%89%E4%B8%BE">运行时期的Leader选举</a></li>
+</ul>
+</li>
+<li><a href="#%E9%80%89%E4%B8%BE%E6%9C%BA%E5%88%B6%E4%B8%AD%E6%B6%89%E5%8F%8A%E5%88%B0%E7%9A%84%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5">选举机制中涉及到的核心概念</a></li>
+<li><a href="#%E6%80%BB%E7%BB%93">总结</a></li>
+</ul>
+<!-- /TOC -->
+
+<p><code>Zookeeper</code> 是一个分布式服务框架，主要是用来解决分布式应用中遇到的一些数据管理问题如：<code>统一命名服务</code>、<code>状态同步服务</code>、<code>集群管理</code>、<code>分布式应用配置项的管理</code>等。</p>
+<p>我们可以简单把 <code>Zookeeper</code> 理解为分布式家庭的大管家，那么管家团队是如何选出<code>Leader</code>的呢？好奇吗，接下来带领大家一探究竟。</p>
+<h1 id="人类选举的基本原理"><a href="#人类选举的基本原理" class="headerlink" title="人类选举的基本原理"></a>人类选举的基本原理</h1><p>讲解 <code>Zookeeper</code> 选举过程前先来介绍一下人类的选举。</p>
+<p>我们每个人或多或少都经历过几次选举，在投票的过程中可能会遇到这样几种情况：</p>
+<p><strong>情况1</strong>：自己与几个候选人都比较熟，你会将票投给你认为<code>能力比较强的人</code>；</p>
+<img src="https://cdn.jsdelivr.net/gh/CoderLeixiaoshuai/assets/202102/20210504231519-2021-05-04-23-15-20.png" alt="20210504231519-2021-05-04-23-15-20">
+
+<p><strong>情况2</strong>：自己也是候选人，并且与其他几个候选人都不熟，这个时候你肯定想着要去拉票，因为觉得自己才是最厉害的人呀，所有人都应该把票投给我。但是遗憾的是在拉票的过程中，你<code>发现别人比你强</code>，你开始自卑了，最终还是把票投给了自己认为最强的人。</p>
+<img src="https://cdn.jsdelivr.net/gh/CoderLeixiaoshuai/assets/202102/20210504231548-2021-05-04-23-15-49.png" alt="20210504231548-2021-05-04-23-15-49">
+
+
+<p>所有人都投完票之后，最后从投票箱中进行统计，获得票数最多的人当选。</p>
+<img src="https://cdn.jsdelivr.net/gh/CoderLeixiaoshuai/assets/202102/20210504231603-2021-05-04-23-16-04.png" alt="20210504231603-2021-05-04-23-16-04">
+
+<p>在整个投票过程中我们可以提炼出四个最核心的概念：</p>
+<ul>
+<li><code>候选人能力</code>：投票的基本原则是选最强的人。</li>
+<li><code>遇强改投</code>：如果后面发现更强的人可以改投票。</li>
+<li><code>投票箱</code>：所有人的票都会放在投票箱。</li>
+<li><code>领导者</code>：得票最多的人即为领导者。</li>
+</ul>
+<p>从人类选举的原理我们来简单推导一下Zookeeper的选举原理。</p>
+<h1 id="Zookeeper选举的基本原理"><a href="#Zookeeper选举的基本原理" class="headerlink" title="Zookeeper选举的基本原理"></a>Zookeeper选举的基本原理</h1><blockquote>
+<p>注意如果 Zookeeper 是单机部署是不需要选举的，集群模式下才需要选举。</p>
+</blockquote>
+<p>Zookeeper 的选举原理和人类选举的逻辑类似，套用一下人类选举的四个基本概念详细解释一下Zookeeper。</p>
+<ul>
+<li><strong>个人能力</strong></li>
+</ul>
+<p>如何衡量 Zookeeper 节点个人能力？答案是靠<code>数据是否够新</code>，如果节点的数据越新就代表这个节点的个人能力越强，是不是感觉很奇怪，就是这么定的！</p>
+<p>在 Zookeeper 中通常是以事务id（后面简称<code>zxid</code>）来标识数据的新旧程度（版本），节点最新的zxid越大代表这个节点的数据越新，也就代表这个节点能力越强。</p>
+<blockquote>
+<p>zxid 的全称是 <code>ZooKeeper Transaction Id</code>，即 Zookeeper 事务id。</p>
+</blockquote>
+<ul>
+<li><strong>遇强改投</strong></li>
+</ul>
+<p>在集群选举开始时，节点首先认为自己时最强的（即数据是最新的），然后在选票上写上自己的名字（包括<code>zxid</code>和<code>sid</code>），zxid 是事务id，sid 唯一标识自己。</p>
+<p>紧接着会将选票传递给其他节点，同时自己也会接收其他节点传过来的选票。每个节点接收到选票后会做比较，这个人是不是比我强（zxid比我大），如果比较强，那我就需要<code>改票</code>，明明别人比我强，我也不能厚着脸皮对吧。</p>
+<ul>
+<li><strong>投票箱</strong></li>
+</ul>
+<p>与人类选举投票箱稍微有点不一样，Zookeeper 集群会在每个节点的内存中维护一个投票箱。节点会将自己的选票以及其他节点的选票都放在这个投票箱中。由于选票时互相传阅的，所以最终每个节点投票箱中的选票会是一样的。</p>
+<ul>
+<li><strong>领导者</strong></li>
+</ul>
+<p>在投票的过程中会去统计是否有超过一半的选票和自己选择的是同一个节点，即都认为某个节点是最强的。一旦集群中有<code>超过半数</code>的节点都认为某个节点最强，那该节点就是领导者了，投票也宣告结束。</p>
+<h1 id="什么场景下-Zookeeper-需要选举？"><a href="#什么场景下-Zookeeper-需要选举？" class="headerlink" title="什么场景下 Zookeeper 需要选举？"></a>什么场景下 Zookeeper 需要选举？</h1><p>当 Zookeeper 集群中的一台服务器出现以下两种情况之一时，需要进入 <code>Leader 选举</code>。</p>
+<p>（1）服务器初始化启动。</p>
+<p>（2）服务器运行期间 Leader 故障。</p>
+<h2 id="启动时期的-Leader-选举"><a href="#启动时期的-Leader-选举" class="headerlink" title="启动时期的 Leader 选举"></a>启动时期的 Leader 选举</h2><p>假设一个 Zookeeper 集群中有5台服务器，id从1到5编号，并且它们都是最新启动的，没有历史数据。</p>
+<img src="https://cdn.jsdelivr.net/gh/CoderLeixiaoshuai/assets/202102/20210504231624-2021-05-04-23-16-25.png" alt="20210504231624-2021-05-04-23-16-25">
+
+<p>假设服务器依次启动，我们来分析一下选举过程：</p>
+<p><strong>（1）服务器1启动</strong></p>
+<p>发起一次选举，服务器1投自己一票，此时服务器1票数一票，不够半数以上（3票），选举无法完成。</p>
+<p>投票结果：服务器1为1票。</p>
+<p>服务器1状态保持为<code>LOOKING</code>。</p>
+<p><strong>（2）服务器2启动</strong></p>
+<p>发起一次选举，服务器1和2分别投自己一票，此时服务器1发现服务器2的id比自己大，更改选票投给服务器2。</p>
+<p>投票结果：服务器1为0票，服务器2为2票。</p>
+<p>服务器1，2状态保持<code>LOOKING</code></p>
+<p><strong>（3）服务器3启动</strong></p>
+<p>发起一次选举，服务器1、2、3先投自己一票，然后因为服务器3的id最大，两者更改选票投给为服务器3；</p>
+<p>投票结果：服务器1为0票，服务器2为0票，服务器3为3票。 此时服务器3的票数已经超过半数（3票），<strong>服务器3当选<code>Leader</code></strong>。</p>
+<p>服务器1，2更改状态为<code>FOLLOWING</code>，服务器3更改状态为<code>LEADING</code>。</p>
+<p><strong>（4）服务器4启动</strong></p>
+<p>发起一次选举，此时服务器1，2，3已经不是LOOKING 状态，不会更改选票信息。交换选票信息结果：服务器3为3票，服务器4为1票。此时服务器4服从多数，更改选票信息为服务器3。</p>
+<p>服务器4并更改状态为<code>FOLLOWING</code>。</p>
+<p><strong>（5）服务器5启动</strong></p>
+<p>与服务器4一样投票给3，此时服务器3一共5票，服务器5为0票。</p>
+<p>服务器5并更改状态为<code>FOLLOWING</code>。</p>
+<p><strong>最终的结果</strong>：</p>
+<p>服务器3是 <code>Leader</code>，状态为 <code>LEADING</code>；其余服务器是 <code>Follower</code>，状态为 <code>FOLLOWING</code>。</p>
+<h2 id="运行时期的Leader选举"><a href="#运行时期的Leader选举" class="headerlink" title="运行时期的Leader选举"></a>运行时期的Leader选举</h2><p>在 Zookeeper运行期间 <code>Leader</code> 和 <code>非 Leader</code> 各司其职，当有非 Leader 服务器宕机或加入不会影响 Leader，但是一旦 Leader 服务器挂了，那么整个 Zookeeper 集群将暂停对外服务，会触发新一轮的选举。</p>
+<p>初始状态下服务器3当选为<code>Leader</code>，假设现在服务器3故障宕机了，此时每个服务器上zxid可能都不一样，server1为99，server2为102，server4为100，server5为101</p>
+<img src="https://cdn.jsdelivr.net/gh/CoderLeixiaoshuai/assets/202102/20210504231642-2021-05-04-23-16-43.png" alt="20210504231642-2021-05-04-23-16-43">
+
+<p>运行期选举与初始状态投票过程基本类似，大致可以分为以下几个步骤：</p>
+<p>（1）状态变更。Leader 故障后，余下的<code>非 Observer</code> 服务器都会将自己的服务器状态变更为<code>LOOKING</code>，然后开始进入<code>Leader选举过程</code>。</p>
+<p>（2）每个Server会发出投票。</p>
+<p>（3）接收来自各个服务器的投票，如果其他服务器的数据比自己的新会改投票。</p>
+<p>（4）处理和统计投票，没一轮投票结束后都会统计投票，超过半数即可当选。</p>
+<p>（5）改变服务器的状态，宣布当选。</p>
+<p>话不多说先来一张图：</p>
+<img src="https://cdn.jsdelivr.net/gh/CoderLeixiaoshuai/assets/202102/20210504231659-2021-05-04-23-17-00.png" alt="20210504231659-2021-05-04-23-17-00">
+
+<p>（1）第一次投票，每台机器都会将票投给自己。</p>
+<p>（2）接着每台机器都会将自己的投票发给其他机器，如果发现其他机器的zxid比自己大，那么就需要改投票重新投一次。比如server1 收到了三张票，发现server2的xzid为102，pk一下发现自己输了，后面果断改投票选server2为老大。</p>
+<h1 id="选举机制中涉及到的核心概念"><a href="#选举机制中涉及到的核心概念" class="headerlink" title="选举机制中涉及到的核心概念"></a>选举机制中涉及到的核心概念</h1><p>敲黑板了，这些概念是面试必考的。</p>
+<p><strong>（1）Server id（或sid）：服务器ID</strong></p>
+<p>比如有三台服务器，编号分别是1,2,3。编号越大在选择算法中的权重越大，比如初始化启动时就是根据服务器ID进行比较。</p>
+<p><strong>（2）Zxid：事务ID</strong></p>
+<p>服务器中存放的数据的事务ID，值越大说明数据越新，在选举算法中数据越新权重越大。</p>
+<p><strong>（3）Epoch：逻辑时钟</strong></p>
+<p>也叫投票的次数，同一轮投票过程中的逻辑时钟值是相同的，每投完一次票这个数据就会增加。</p>
+<p><strong>（4）Server状态：选举状态</strong></p>
+<p><code>LOOKING</code>，竞选状态。</p>
+<p><code>FOLLOWING</code>，随从状态，同步leader状态，参与投票。</p>
+<p><code>OBSERVING</code>，观察状态,同步leader状态，不参与投票。</p>
+<p><code>LEADING</code>，领导者状态。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>（1）Zookeeper 选举会发生在服务器初始状态和运行状态下。</p>
+<p>（2）初始状态下会根据服务器sid的编号对比，编号越大权值越大，投票过半数即可选出Leader。</p>
+<p>（3）Leader 故障会触发新一轮选举，<code>zxid</code> 代表数据越新，权值也就越大。</p>
+<blockquote>
+<p>没有什么比每天有成长进步更高兴的事情</p>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2024/03/09/%E7%94%A8%E5%A4%A7%E7%99%BD%E8%AF%9D%E7%BB%99%E4%BD%A0%E8%A7%A3%E9%87%8AZookeeper%E7%9A%84%E9%80%89%E4%B8%BE%E6%9C%BA%E5%88%B6/">https://yhao521.github.io/2024/03/09/%E7%94%A8%E5%A4%A7%E7%99%BD%E8%AF%9D%E7%BB%99%E4%BD%A0%E8%A7%A3%E9%87%8AZookeeper%E7%9A%84%E9%80%89%E4%B8%BE%E6%9C%BA%E5%88%B6/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/03/09/%E7%9C%8B%E5%AE%8C%E8%BF%9920%E9%81%93Redis%E9%9D%A2%E8%AF%95%E9%A2%98%EF%BC%8C%E9%98%BF%E9%87%8C%E9%9D%A2%E8%AF%95%E5%8F%AF%E4%BB%A5%E7%BA%A6%E8%B5%B7%E6%9D%A5%E4%BA%86/" title="看完这20道Redis面试题，阿里面试可以约起来了"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">看完这20道Redis面试题，阿里面试可以约起来了</div></div><div class="info-2"><div class="info-item-1"> 本文首发我的微信公众号『爱笑的架构师』，欢迎大家关注。     1、什么是Redis，Redis有哪些特点？ 2、Redis有哪些数据结构？ 3、一个字符串类型的值能存储最大容量是多少？ 4、能说一下Redis每种数据结构的使用场景吗？ 5、Redis如何做持久化的？能说一下RDB和AOF的实现原理吗？ RDB持久化 AOF持久化 RDB和AOF的优缺点   6、讲解一下Redis的线程模型？ 7、缓存雪崩、缓存穿透、缓存预热、缓存击穿、缓存降级的区别是什么？ （1）缓存穿透 （2）缓存击穿 （3）缓存雪崩 （4）缓存预热 （5）缓存降级   8、Redis的内存淘汰机制 9、Redis有事务机制吗？ 10、Redis事务到底是不是原子性的？ 11、Redis为什么不支持回滚（roll back）？ 12、Redis事务相关的命令有哪几个？ 13、什么是Redis主从复制？ 14、Sentinel（哨兵模式）的原理你能讲一下吗？ 15、Cluster（集群）的原理你能讲一下吗？ 16、Memcache与Redis的区别都有哪些？ 17、假如Redis里面有1亿个key，其中有1...</div></div></div></a><a class="pagination-related" href="/2024/03/09/%E6%8E%A8%E8%8D%90%E5%8D%81%E6%AC%BE%E7%B2%BE%E9%80%89IntelliJIdea%E6%8F%92%E4%BB%B6/" title="推荐十款精选IntelliJIdea插件"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">推荐十款精选IntelliJIdea插件</div></div><div class="info-2"><div class="info-item-1">   1 Key Promoter X 2 Alibaba Java Coding Guidelines 3 CodeGlance 4 Maven Helper 5 Lombok 6 JavaDoc 7 .ignore 8RainbowBrackets 9 Activate-power-mode 10 Grep Console 公众号    俗话说：＂工欲善其事必先利其器＂，小主从项目实战的角度在众多的idea插件中挑选了10款开发必备的神器，帮助大家在日常工作学习编码中提升开发效率。 1 Key Promoter X实用指数：★★★★★ 装逼指数：★ 你还在为记不住快捷键烦恼吗，Key Promoter X可以帮助你快速记住常用的快捷键。当你在idea中用鼠标点击菜单，它可以显示对应的快捷键以及点击次数。使用一段时间后有助于过渡到更快、无鼠标的开发。      2 Alibaba Java Coding Guidelines实用指数：★★★★★ 装逼指数：★★ 这是阿里巴巴官方出品的一款代码静态检查插件，它可以针对整个项目或者单个文件进行检查，扫描完成后会生成一份检查报告，根据...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2024/08/07/vue3%20Vite+Ts%20%E6%95%B0%E5%AD%97%E6%BB%9A%E5%8A%A8%E6%95%88%E6%9E%9C%20vue3-count-to%20%E7%BB%84%E4%BB%B6%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/" title="vue3 Vite+Ts 数字滚动效果 vue3-count-to 组件使用方法"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-07</div><div class="info-item-2">vue3 Vite+Ts 数字滚动效果 vue3-count-to 组件使用方法</div></div><div class="info-2"><div class="info-item-1">项目框架：vite + TS (vue3) （setup） 注意事项：兼容性：v1.1.* 仅支持vue3；v1.0.* 同时兼容vue2、vue3，亦能在ts下使用（可能存在ts识别不太对的问题） 如果只使用的 vue2，安装使用 vue-count-to 组件；如果需要使用 vue2-ts 版本，安装 vue-count-to-ts ；如果使用的 vue3，需要安装 vue3-count-to 组件。 使用的版本不对可能就会报错，无法正常使用，报错的话检查下使用的版本是否合适。 npm安装12npm install vue3-count-to --save1  使用：import1.import 导入在vite的单文件组件中 脚本 模块中导入安装好的 ‘vue3-count-to’ 组件 vue3 语法可以使用 setup 写在  标签中，简化开发代码，直接导入后就可以使用，不用导入后还要注册组件;导入后定义 初始数据和 最终数据： 1234567&lt;script setup lang=&quot;ts&quot;&gt;import &#123; CountTo &#1...</div></div></div></a><a class="pagination-related" href="/2021/11/21/%E6%96%B0%E5%BB%BA%E6%96%87%E4%BB%B6/" title="新建文件"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2021-11-21</div><div class="info-item-2">新建文件</div></div><div class="info-2"><div class="info-item-1">便捷铁路Convenient rail 开源仓库地址：https://github.com/josStorer/RWKV-Runner下载地址（RWKV目录）：https://pan.baidu.com/s/1wchIUHgne3gncIiLIeKBEQ?pwd=1111 RWKV官方仓库：https://github.com/BlinkDL/RWKV-LM </div></div></div></a><a class="pagination-related" href="/2023/09/04/sqladvice%E5%AE%89%E8%A3%85&%E4%BD%BF%E7%94%A8/" title="sqladvice安装&amp;使用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">sqladvice安装&amp;使用</div></div><div class="info-2"><div class="info-item-1"> title: sqladvice安装&amp;使用date: 2023-09-03 20:17:08category:  数据库 sql优化工具tag: sql优化工具author:   sqladvice安装&amp;使用Centos7安装美团SQL优化工具SQLAdvisor(示例代码)_136.la 1. SQLAdvisor安装1.1 拉取最新代码1234# git clone https://github.com/Meituan-Dianping/SQLAdvisor.gitsudo yum install -y gitgit clone http://github.com/Meituan-Dianping/SQLAdvisor.git  1.2 安装依赖项12345678910#yum | apt-get  install   cmake libaio-devel libffi-devel glib2 glib2-devel#yum | apt-get  install  --enablerepo=Percona56 Percona-Server-shared-56...</div></div></div></a><a class="pagination-related" href="/2023/09/04/Git%E5%88%A0%E9%99%A4%E5%88%86%E6%94%AF&%E6%81%A2%E5%A4%8D%E5%88%86%E6%94%AF/" title="Git删除分支&amp;恢复分支"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">Git删除分支&amp;恢复分支</div></div><div class="info-2"><div class="info-item-1"> title: Git删除分支&amp;恢复分支date: 2023-09-03 20:17:08category:  gittag: gitauthor:   Git删除分支&#x2F;恢复分支  • 删除一个已被终止的分支 如果需要删除的分支不是当前正在打开的分支，使用branch -d直接删除 git branch -d  • 删除一个正打开的分支 如果我们在试图删除一个分支时自己还没转移到另外的分支上，Git就会给出一个警告，并拒绝该删除操作。 如果坚持要删除该分支的话，就需要在命令中使用-D选项。 git branch -D  • 恢复被删除的分支 Git会自行负责分支的管理，所以当我们删除一个分支时，Git只是删除了指向相关提交的指针，但该提交对象依然会留在版本库中。 因此，如果我们知道删除分支时的散列值，就可以将某个删除的分支恢复过来。在已知提交的散列值的情况下恢复某个分支： git branch   如果我们不知道想要恢复的分支的散列值，可以用reflog命令将它找出来。如：  reflog命令： 显示整个本地仓储的commit，包括所有branch的commit...</div></div></div></a><a class="pagination-related" href="/2023/09/04/docker_tomcat%E5%88%B6%E4%BD%9C/" title="docker_tomcat制作"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">docker_tomcat制作</div></div><div class="info-2"><div class="info-item-1"> title: docker_tomcat制作date: 2023-09-03 20:17:08category:  doc_dockertag: doc_dockerauthor:   tomcat镜像制作 镜像构建使用3中构建的程序包新建构建申请：编写Dockerfile：     FROM 10.142.233.62:8021/m2m_dev/ketty:1.1.13-20170810-1     ADD apache-tomcat-8.0.46.tar.gz /root     RUN chmod +x /root/apache-tomcat-8.0.46/bin/*.sh     ADD lbptest-spring.war /root     RUN mkdir -p /root/webapps/lbptest-spring     RUN unzip /root/lbptest-spring.war -d /root/webapps/lbptest-spring     RUN rm /root/lbptest-spring.war     CMD [&quot;/...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E6%97%A0%E9%99%90%E5%88%B6%E4%B8%8B%E8%BD%BD%E5%99%A8/" title="无限制下载器"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">无限制下载器</div></div><div class="info-2"><div class="info-item-1"> title: 无限制下载器date: 2023-09-03 20:17:08category: tag: author:  无限制下载器直接获取视频和音频二进制流，打破所有下载限制。（只要你可以播放，你就可以下载！） 安装此脚本?  使用ffmpeg -i video.mp4 -i audio.mp4 -c:v copy -c:a aac -strict experimental output.mp4以合并音频和视频文件。 ffmpeg: https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip Script principle (Chinese): https://www.v2ex.com/t/856510 Github: https://github.com/dabaisuv/Tampermonkey-Script Tips: 缓存进度加载到100％之后，视频和音频文件将自动下载〜 您可以使用16倍的速率播放视频（document.querySelector(&#39;video&#39;).plaba...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%BA%E7%B1%BB%E9%80%89%E4%B8%BE%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text">人类选举的基本原理</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Zookeeper%E9%80%89%E4%B8%BE%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86"><span class="toc-number">2.</span> <span class="toc-text">Zookeeper选举的基本原理</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E5%9C%BA%E6%99%AF%E4%B8%8B-Zookeeper-%E9%9C%80%E8%A6%81%E9%80%89%E4%B8%BE%EF%BC%9F"><span class="toc-number">3.</span> <span class="toc-text">什么场景下 Zookeeper 需要选举？</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%AF%E5%8A%A8%E6%97%B6%E6%9C%9F%E7%9A%84-Leader-%E9%80%89%E4%B8%BE"><span class="toc-number">3.1.</span> <span class="toc-text">启动时期的 Leader 选举</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%90%E8%A1%8C%E6%97%B6%E6%9C%9F%E7%9A%84Leader%E9%80%89%E4%B8%BE"><span class="toc-number">3.2.</span> <span class="toc-text">运行时期的Leader选举</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%80%89%E4%B8%BE%E6%9C%BA%E5%88%B6%E4%B8%AD%E6%B6%89%E5%8F%8A%E5%88%B0%E7%9A%84%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5"><span class="toc-number">4.</span> <span class="toc-text">选举机制中涉及到的核心概念</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

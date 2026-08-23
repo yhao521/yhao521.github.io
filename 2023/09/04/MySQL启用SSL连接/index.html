@@ -1,0 +1,315 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>MySQL启用SSL连接 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="title: MySQL启用SSL连接date: 2023-09-04 17:49:38permalink: &#x2F;pages&#x2F;5b9111&#x2F;category:  数据库 doc_mysqltag: doc_mysqlauthor:   #####MySQL启用SSL连接 1.手动创建自认证证书 1.1 创建CA证书 openssl genrsa 2048 &gt; c">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL启用SSL连接">
+<meta property="og:url" content="https://yhao521.github.io/2023/09/04/MySQL%E5%90%AF%E7%94%A8SSL%E8%BF%9E%E6%8E%A5/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="title: MySQL启用SSL连接date: 2023-09-04 17:49:38permalink: &#x2F;pages&#x2F;5b9111&#x2F;category:  数据库 doc_mysqltag: doc_mysqlauthor:   #####MySQL启用SSL连接 1.手动创建自认证证书 1.1 创建CA证书 openssl genrsa 2048 &gt; c">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2023-09-04T03:18:09.000Z">
+<meta property="article:modified_time" content="2023-09-04T03:18:27.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "MySQL启用SSL连接",
+  "url": "https://yhao521.github.io/2023/09/04/MySQL%E5%90%AF%E7%94%A8SSL%E8%BF%9E%E6%8E%A5/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2023-09-04T03:18:09.000Z",
+  "dateModified": "2023-09-04T03:18:27.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2023/09/04/MySQL%E5%90%AF%E7%94%A8SSL%E8%BF%9E%E6%8E%A5/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'MySQL启用SSL连接',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">MySQL启用SSL连接</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">MySQL启用SSL连接</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-09-04T03:18:09.000Z" title="发表于 2023-09-04 11:18:09">2023-09-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-09-04T03:18:27.000Z" title="更新于 2023-09-04 11:18:27">2023-09-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><hr>
+<p>title: MySQL启用SSL连接<br>date: 2023-09-04 17:49:38<br>permalink: &#x2F;pages&#x2F;5b9111&#x2F;<br>category:</p>
+<ul>
+<li>数据库</li>
+<li>doc_mysql<br>tag:</li>
+<li>doc_mysql<br>author:</li>
+</ul>
+<hr>
+<p>#####MySQL启用SSL连接</p>
+<p>1.手动创建自认证证书</p>
+<p>1.1 创建CA证书</p>
+<pre><code>openssl genrsa 2048 &gt; ca-key.pem
+
+openssl req -new -x509 -nodes -days 3600 \
+ -key ca-key.pem -out ca.pem
+</code></pre>
+<p>1.2 创建服务端证书，去除加密，使用CA签名</p>
+<pre><code>server-cert.pem = public key, server-key.pem = private key
+
+openssl req -newkey rsa:2048 -days 3600 \
+ -nodes -keyout server-key.pem -out server-req.pem
+openssl rsa -in server-key.pem -out server-key.pem
+
+openssl x509 -req -in server-req.pem -days 3600 \
+ -CA ca.pem -CAkey ca-key.pem -set_serial 01 -out server-cert.pem
+</code></pre>
+<p>1.3 创建客户端证书，去除加密，使用CA签名</p>
+<pre><code>client-cert.pem = public key, client-key.pem = private key
+
+openssl req -newkey rsa:2048 -days 3600 \
+ -nodes -keyout client-key.pem -out client-req.pem
+openssl rsa -in client-key.pem -out client-key.pem
+
+openssl x509 -req -in client-req.pem -days 3600 \
+ -CA ca.pem -CAkey ca-key.pem -set_serial 01 -out client-cert.pem
+</code></pre>
+<p>1.4 证书生成后，进行校验:</p>
+<pre><code>openssl verify -CAfile ca.pem server-cert.pem client-cert.pem
+</code></pre>
+<p>2.修改my.cnf文件，mysqld下面增加如下配置项</p>
+<pre><code>[mysqld]
+ssl-ca=/home/mysql/sslconfig/ca.pem
+ssl-cert=/home/mysql/sslconfig/server-cert.pem
+ssl-key=/home/mysql/sslconfig/server-key.pem
+</code></pre>
+<p>说明：pem配置文件中在test目录下有，但是最好自己生成</p>
+<pre><code>/home/mysql/mysql-5.5.35-linux2.6-x86_64/mysql-test/std_data
+</code></pre>
+<p>3.重启数据库</p>
+<pre><code>/etc/init.d/mysqld restart
+
+systemctl stop  mysqld
+systemctl start mysqld
+</code></pre>
+<p>4.登陆验证</p>
+<p>4.1查看服务器变量have_ssl，是否支持SSL</p>
+<pre><code>SHOW VARIABLES LIKE &#39;have_%ssl&#39;;
+SHOW VARIABLES LIKE &#39;%ssl%&#39;;
+</code></pre>
+<p>如果为yes，表示服务端已经开启SSL<br>查看服务ssl等状态</p>
+<pre><code>SHOW STATUS LIKE &#39;Ssl_cipher&#39;;
+STATUS或者\s
+SSL: Cipher in use is DHE-RSA-AES256-SHA表示客户端已经 使用SSL连接
+</code></pre>
+<p>日志报错：</p>
+<pre><code>[ERROR] SSL error: Unable to get private key from &#39;/soft/mysql/ca/server-key.pem&#39;
+</code></pre>
+<p>修改 文件权限，再重启mysql</p>
+<p>4.2客户端登陆</p>
+<p>客户端无SSL登陆：</p>
+<pre><code>mysql -uroot -pzdh1234 或者 mysql -uroot -pzdh1234 --ssl=0
+</code></pre>
+<p>客户端开启SSL登陆：</p>
+<pre><code>mysql -uroot -hlocalhost -pzdh1234 --ssl-ca=/home/mysql/sslconfig/ca.pem
+</code></pre>
+<p>4.3创建用户强制使用SSL登陆：</p>
+<pre><code>GRANT ALL PRIVILEGES ON . TO &#39;ssluser&#39;@&#39;%&#39; IDENTIFIED BY &#39;ssluser&#39; REQUIRE SSL;
+</code></pre>
+<p>本机登陆需要单独新增localhost</p>
+<pre><code>GRANT ALL PRIVILEGES ON . TO &#39;ssluser&#39;@&#39;localhost&#39; IDENTIFIED BY &#39;ssluser&#39; REQUIRE SSL;
+</code></pre>
+<p>查看用户：<br>select host,user,password from mysql.user;<br>修改密码，需要重启mysql：</p>
+<pre><code>update user set password=password(&quot;ssluser&quot;) where user=&quot;ssluser&quot; and host=&#39;myhost&#39;;
+</code></pre>
+<p>客户端无SSL登陆：</p>
+<pre><code>mysql -ussluser -pssluser
+</code></pre>
+<p>返回错误：ERROR 1045 (28000): Access denied for user ‘ssluser‘@’localhost’ (using password: YES)<br>客户端开启SSL登陆：</p>
+<pre><code>mysql -ussluser -hlocalhost -pssluser \
+ --ssl-ca=/home/mysql/sslconfig/ca.pem
+</code></pre>
+<p>如果不填密码或者–ssl-ca都无法登陆</p>
+<pre><code>mysql -ussluser -hlocalhost -pssluser \
+ --ssl-cert=/home/mysql/sslconfig/client-cert.pem \
+ --ssl-key=/home/mysql/sslconfig/client-key.pem
+
+mysql -ussluser -hlocalhost -pssluser \
+ --ssl-ca=/home/mysql/sslconfig/ca.pem \
+ --ssl-cert=/home/mysql/sslconfig/client-cert.pem \
+ --ssl-key=/home/mysql/sslconfig/client-key.pem
+</code></pre>
+<p>4.4客户端连接时校验服务端认证：</p>
+<p>由于创建server使用的服务器域名为zdh-11<br>校验失败，无法登陆：</p>
+<pre><code>mysql -uroot -hlocalhost -pzdh1234  --ssl-ca=/home/mysql/sslconfig/ca.pem --ssl-verify-server-cert
+</code></pre>
+<p>校验成功，可以登陆：</p>
+<pre><code>mysql -uroot -hzdh-11 -pzdh1234 --ssl-ca=/home/mysql/sslconfig/ca.pem --ssl-verify-server-cert
+</code></pre>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2023/09/04/MySQL%E5%90%AF%E7%94%A8SSL%E8%BF%9E%E6%8E%A5/">https://yhao521.github.io/2023/09/04/MySQL%E5%90%AF%E7%94%A8SSL%E8%BF%9E%E6%8E%A5/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2023/09/04/MySQL%E5%B8%B8%E7%94%A8%E5%87%BD%E6%95%B0%E6%80%BB%E7%BB%93/" title="MySQL常用函数总结"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">MySQL常用函数总结</div></div><div class="info-2"><div class="info-item-1"> title: MySQL常用函数总结date: 2023-09-04 17:49:38permalink: &#x2F;pages&#x2F;218d68&#x2F;category:  数据库 doc_mysqltag: doc_mysqlauthor:   MySQL常用函数总结本文MySQL的函数方法，涵盖所有的MySQL常见的方法。  一、数字函数  Max min ABS AVG SUM TRUNCATE   二、字符串函数  LENGTH CONCAT TRIM SUBSTR REVERSE   三、日期函数  CURRENT_TIMESTAMP UNIX_TIMESTAMP FROM_UNIXTIME ADDDATE CURDATE DATE_FORMAT   四、MySQL高级函数  IF(expr,v1,v2) VERSION()    （一）数字函数1、ABS(x) 返回x的绝对值 12SELECT ABS(-1);---- 返回1  2、AVG(expression) 返回一个表达式的平均值，expression 是一个字段 SELECT AVG(age)...</div></div></div></a><a class="pagination-related" href="/2023/09/04/MySQL%E4%BA%8B%E5%8A%A1/" title="MySQL事务"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">MySQL事务</div></div><div class="info-2"><div class="info-item-1"> title: MySQL事务date: 2023-09-04 17:49:38permalink: &#x2F;pages&#x2F;56ff8e&#x2F;category:  数据库 doc_mysqltag: doc_mysqlauthor:   MySQL事务1、定义：Transaction Control Language 事务控制语言　　　　一个或一组sql语句组成一个执行单元，这个执行单元要么全部执行，要么全部不执行。 　　　在mysql中用的最多的存储引擎有：innodb，myisam,memory等，但只有使用了Innodb数据库引擎的数据库或表才支持事务 2、事务的特性：ACID原子性 (Atomicity)：事务是最小单位，一个事务不可再分割。事务作为一个整体被执行，包含在其中的对数据库的操作要么全部被执行，要么都不执行。 一致性 (Consistency)：事务应确保数据库的状态从一个一致状态转变为另一个一致状态 隔离性 (Isolation)：多个事务并发执行时，一个事务的执行不应影响其他事务的执行。 持久性 (Durability)：一 个事务一旦提...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2024/05/21/%E7%9B%98%E7%82%B920%E6%AC%BE%E4%BC%98%E8%B4%A8%E7%9A%84%E5%BC%80%E6%BA%90%E6%B8%B8%E6%88%8F%EF%BC%8C2024%E6%9C%80%E6%96%B0%E6%94%B6%E9%9B%86%EF%BC%81/" title="盘点20款优质的开源游戏，2024最新收集！"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-05-21</div><div class="info-item-2">盘点20款优质的开源游戏，2024最新收集！</div></div><div class="info-2"><div class="info-item-1">本文收集了20款优质的开源游戏，部分还可以点击就可以玩，干货满满，建议先收藏一下。 如果你有值得推荐的开源游戏，欢迎评论中指出！ 1、红警https://github.com/electronicarts/CnC_Remastered_Collection 红警，或者更准确地说，应该称为“红色警戒”，是大多数80后记忆中与游戏最深刻的联系之一。  这款游戏是由当年的Westwood工作室打造的一款即时战略游戏，以至于一提到即时战略游戏，我脑海中浮现的第一个就是红警。 然而，在1998年8月17日，EA收购了Westwood。一般情况下，一旦游戏工作室被EA收购，就意味着走向没落。  这次开源的代码实际上是1996年发布的第一代红警，国内也称之为红警95。  此次开源不涉及游戏素材和游戏引擎，只包括TiberianDawn.DLL和RedAlert.dll的源码，允许Mod社区更好地改变游戏行为。 在6月5日，这两款游戏发布了重制版。 命令与征服系列游戏是用C++实现的，打开代码后可以看到非常规范的代码，令人赞叹不已。  下面是一个示例，展示了飞行器寻找新降落点的函数，函数功能、输...</div></div></div></a><a class="pagination-related" href="/2023/09/04/influxdb%E5%AE%89%E8%A3%85/" title="influxdb安装"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">influxdb安装</div></div><div class="info-2"><div class="info-item-1"> title: influxdb安装date: 2023-09-03 20:17:08category:  数据库 doc_influxdbtag: doc_influxdbauthor:   1. influxdb 安装安装位置：    主机 172.18.231.119    位置 &#x2F;paas&#x2F;iddbs&#x2F;a-tools&#x2F;influxdb1.7.4&#x2F;usr&#x2F;bin   端口 25001   客户端连接命令 .&#x2F;influx -precision rfc3339 -host 172.18.231.123 -port 25001    .&#x2F;influx -precision rfc3339 -host 172.18.231.123 -port 25001 -precision rfc3339 时间格式是字符串 -precision rfc333 时间格式是时间戳 启动&amp;停止 nohup &#x2F;paas&#x2F;iddbs&#x2F;crds_web&#x2F;influxdb1.7.4...</div></div></div></a><a class="pagination-related" href="/2021/09/15/%E5%9F%BA%E7%A1%80%E7%AF%87%E8%AE%B2%E4%B9%89/" title="基础篇讲义"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2021-09-15</div><div class="info-item-2">基础篇讲义</div></div><div class="info-2"><div class="info-item-1">基础篇 基础篇要点：算法、数据结构、基础设计模式  1. 二分查找要求  能够用自己语言描述二分查找算法 能够手写二分查找代码 能够解答一些变化后的考法  算法描述  前提：有已排序数组 A（假设已经做好）  定义左边界 L、右边界 R，确定搜索范围，循环执行二分查找（3、4两步）  获取中间索引 M &#x3D; Floor((L+R) &#x2F;2)  中间索引的值  A[M] 与待搜索的值 T 进行比较 ① A[M] &#x3D;&#x3D; T 表示找到，返回中间索引 ② A[M] &gt; T，中间值右侧的其它元素都大于 T，无需比较，中间索引左边去找，M - 1 设置为右边界，重新查找 ③ A[M] &lt; T，中间值左侧的其它元素都小于 T，无需比较，中间索引右边去找， M + 1 设置为左边界，重新查找  当 L &gt; R 时，表示没有找到，应结束循环    更形象的描述请参考：binary_search.html  算法实现 1234567891011121314public static int binarySearch(int[] a, int t)...</div></div></div></a><a class="pagination-related" href="/2023/12/21/F-Droid%E6%B7%BB%E5%8A%A0%E5%9B%BD%E5%86%85%E6%BA%90%E5%92%8C%E5%AD%98%E5%82%A8%E5%BA%93/" title="F-Droid添加国内源和存储库"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-12-21</div><div class="info-item-2">F-Droid添加国内源和存储库</div></div><div class="info-2"><div class="info-item-1">Matrix 首页推荐Matrix 是少数派的写作社区，我们主张分享真实的产品体验，有实用价值的经验与思考。我们会不定期挑选 Matrix 最优质的文章，展示来自用户的最真实的体验和观点。 文章代表作者个人观点，少数派仅对标题和排版略作修改。  F-Droid 是一款专门收录各类自由软件的 Android 应用商店。刚刚度过十岁生日的它，仍然只流行于自由软件爱好者圈子内，这多多少少埋没了其中数以百计的优质应用。事实上，相较于境外的许多应用商店，F-Droid 不仅在国内更易访问，而且更加安全。虽然不能开箱即用，F-Droid 的使用配置并不复杂。 一、添加国内源和存储库从官网处下载 F-Droid 并打开后，首先需要调整存储库设置。F-Droid 管理应用的方式类似于各大 Linux 发行版。存储库是一系列应用的列表和安装包的集合，由开发者或者机构维护。同一存储库在世界各地分设服务器供用户就近下载，可以理解为源。F-Droid 默认使用一个收录应用最多的、和软件同名的库，其访问与下载速度通常相当缓慢。所幸目前已经有了 F-Droid 的国内源，添加后可大幅度改善境内的访问和下载体...</div></div></div></a><a class="pagination-related" href="/2023/09/04/mac%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7/" title="mac命令行工具"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">mac命令行工具</div></div><div class="info-2"><div class="info-item-1"> title: mac命令行工具date: 2023-09-03 20:17:08category:  mactag: macauthor:   8个不可不知的Mac OS X专用命令行工具OS X的终端下通用很多Unix的工具和脚本。如果从Linux迁移到OS X会发现很多熟悉的命令和脚本工具，其实并没有任何区别。 但是OS X也提供了很多其他系统所没有的特别的命令行工具。我们推荐8个这类的工具，希望有助于提高在Mac的命令行环境下的效率。 1. openopen命令用于打开文件、目录或执行程序。就等同于在命令行模式下，重复图形界面“双击”的动作。例如这个命令与在Finder中双击Safari是一样的： 1$ open /Applications/Safari.app/  如果open一个文件，则会使用关联的程序打开之。例如open screenshot.png会在Preview中查看图片。 可以使用-a选项要求自行选择打开的程序，或使用-e强制在TextEdit中编辑此文件。 open一个目录会在Finder窗口中打开此目录。一个很有用的技巧是open .打开当前目录。 Fi...</div></div></div></a><a class="pagination-related" href="/2023/09/04/shell%E7%9A%84map%E4%BD%BF%E7%94%A8/" title="shell的map使用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">shell的map使用</div></div><div class="info-2"><div class="info-item-1"> title: shell的map使用date: 2023-09-03 20:17:08category: tag: author:  Shell中map的使用Shell中的map与array有很多的相似之处，array操作：https://www.cnblogs.com/qq931399960/p/10786111.html 一、在使用map时，需要先声明，否则结果可能与预期不同，array可以不声明 1declare -A map  二、初始化map 与array类似，可以使用括号直接初始化，也可以通过添加的方式来初始化数据，与array不同的是，括号直接初始化时使用的为一个键值对，添加元素时，下标可以不是整数 123map=([&quot;aa&quot;]=&quot;11&quot; [&quot;bb&quot;]=&quot;22&quot;)map[&quot;name&quot;]=&quot;val&quot;map[&quot;apple&quot;]=&quot;pen&quot;  三、输出所有的key 若未使用declare声明map，则此处将输出0，...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

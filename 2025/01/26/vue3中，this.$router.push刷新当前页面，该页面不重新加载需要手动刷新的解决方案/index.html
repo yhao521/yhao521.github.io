@@ -1,0 +1,208 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>vue3中，this.$router.push刷新当前页面，该页面不重新加载需要手动刷新的解决方案 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="12345678910111213141516171819202122232425262728293031323334353637383940414243&#x2F;&#x2F; 1-demo.vue在this.$router.push(&#x27;&#x2F;demo&#x27;)后，demo.vue没有刷新也没有重新加载，但是路由地址已经变了，只是需要手动刷新&#x2F;&#x2F; 2-解决  监听一下当前路由watch: &#123;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="vue3中，this.$router.push刷新当前页面，该页面不重新加载需要手动刷新的解决方案">
+<meta property="og:url" content="https://yhao521.github.io/2025/01/26/vue3%E4%B8%AD%EF%BC%8Cthis.$router.push%E5%88%B7%E6%96%B0%E5%BD%93%E5%89%8D%E9%A1%B5%E9%9D%A2%EF%BC%8C%E8%AF%A5%E9%A1%B5%E9%9D%A2%E4%B8%8D%E9%87%8D%E6%96%B0%E5%8A%A0%E8%BD%BD%E9%9C%80%E8%A6%81%E6%89%8B%E5%8A%A8%E5%88%B7%E6%96%B0%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="12345678910111213141516171819202122232425262728293031323334353637383940414243&#x2F;&#x2F; 1-demo.vue在this.$router.push(&#x27;&#x2F;demo&#x27;)后，demo.vue没有刷新也没有重新加载，但是路由地址已经变了，只是需要手动刷新&#x2F;&#x2F; 2-解决  监听一下当前路由watch: &#123;">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2025-01-26T01:21:37.000Z">
+<meta property="article:modified_time" content="2025-01-26T01:21:37.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="vue">
+<meta property="article:tag" content="web&#x2F;frontend">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "vue3中，this.$router.push刷新当前页面，该页面不重新加载需要手动刷新的解决方案",
+  "url": "https://yhao521.github.io/2025/01/26/vue3%E4%B8%AD%EF%BC%8Cthis.$router.push%E5%88%B7%E6%96%B0%E5%BD%93%E5%89%8D%E9%A1%B5%E9%9D%A2%EF%BC%8C%E8%AF%A5%E9%A1%B5%E9%9D%A2%E4%B8%8D%E9%87%8D%E6%96%B0%E5%8A%A0%E8%BD%BD%E9%9C%80%E8%A6%81%E6%89%8B%E5%8A%A8%E5%88%B7%E6%96%B0%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2025-01-26T01:21:37.000Z",
+  "dateModified": "2025-01-26T01:21:37.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2025/01/26/vue3%E4%B8%AD%EF%BC%8Cthis.$router.push%E5%88%B7%E6%96%B0%E5%BD%93%E5%89%8D%E9%A1%B5%E9%9D%A2%EF%BC%8C%E8%AF%A5%E9%A1%B5%E9%9D%A2%E4%B8%8D%E9%87%8D%E6%96%B0%E5%8A%A0%E8%BD%BD%E9%9C%80%E8%A6%81%E6%89%8B%E5%8A%A8%E5%88%B7%E6%96%B0%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'vue3中，this.$router.push刷新当前页面，该页面不重新加载需要手动刷新的解决方案',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">vue3中，this.$router.push刷新当前页面，该页面不重新加载需要手动刷新的解决方案</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">vue3中，this.$router.push刷新当前页面，该页面不重新加载需要手动刷新的解决方案</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-01-26T01:21:37.000Z" title="发表于 2025-01-26 09:21:37">2025-01-26</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-01-26T01:21:37.000Z" title="更新于 2025-01-26 09:21:37">2025-01-26</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">// 1-demo.vue</span><br><span class="line">在this.$router.push(&#x27;/demo&#x27;)后，demo.vue没有刷新也没有重新加载，但是路由地址已经变了，只是需要手动刷新</span><br><span class="line"></span><br><span class="line">// 2-解决  监听一下当前路由</span><br><span class="line">watch: &#123;</span><br><span class="line">  $route (to, from) &#123;</span><br><span class="line">  	// to表示要跳转的路由，from表示从哪儿跳的路由   to.path</span><br><span class="line">    this.$router.go(0)</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;,</span><br><span class="line">// 以上是我目前可以解决我的问题的方法</span><br><span class="line"></span><br><span class="line">// 以下记录百度搜到的，为了防止以后上述方法失效</span><br><span class="line">// 第一种</span><br><span class="line">// 1-demo.vue  在当前需要刷新的页面demo.vue中，引入router，就是我们写的路由文件</span><br><span class="line">import router from &#x27;@/router/index&#x27;</span><br><span class="line">console.log(router)    // 可以打印一下这个router看看</span><br><span class="line"></span><br><span class="line">// 2-用这个路由对象去push，不要再用this了</span><br><span class="line">router.push(&#123; name: &#x27;demo&#x27;, params: &#123; id, dataId &#125; &#125;)</span><br><span class="line"></span><br><span class="line">// 3-如果要获取路由传的参，就要用currentRoute，它就相当于原来的this.$route</span><br><span class="line">原来获取参数: this.$route.params</span><br><span class="line">现在获取参数: router.currentRouter.value.params.id</span><br><span class="line"></span><br><span class="line">// 4-但是！使用router-link进行的路由跳转，保持不变跟原来一样</span><br><span class="line">&lt;router-link :to=&quot;&#123; name:&#x27;demo&#x27;, params: &#123; id, dataId &#125; &#125;&quot;&gt;&lt;/router-link&gt;</span><br><span class="line"></span><br><span class="line">// 此种方法转载：https://blog.csdn.net/qq_42539194/article/details/113255097?spm=1001.2101.3001.6650.3&amp;utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-3.pc_relevant_paycolumn_v3&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-3.pc_relevant_paycolumn_v3&amp;utm_relevant_index=5</span><br><span class="line"></span><br><span class="line">// 第二种   该方法与我的类似，都是监听路由，只是我的监听路由，是当路由地址发生变化时，执行this.$router.go(0)再跳转一下当前页面以此代替手动刷新</span><br><span class="line">而转载的这种，是监听路由，当路由地址发生变化时，执行this.xxxx()方法，重新走接口渲染列表</span><br><span class="line">methods: &#123;</span><br><span class="line">  getDataList() &#123; &#125;</span><br><span class="line">&#125;,</span><br><span class="line">created() &#123;</span><br><span class="line">  this.getDataList();</span><br><span class="line">&#125;,</span><br><span class="line">watch: &#123;</span><br><span class="line">  // 如果路由发生变化，再次执行该方法</span><br><span class="line">  &#x27;$route&#x27;: &#x27;getDataList&#x27;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2025/01/26/vue3%E4%B8%AD%EF%BC%8Cthis.$router.push%E5%88%B7%E6%96%B0%E5%BD%93%E5%89%8D%E9%A1%B5%E9%9D%A2%EF%BC%8C%E8%AF%A5%E9%A1%B5%E9%9D%A2%E4%B8%8D%E9%87%8D%E6%96%B0%E5%8A%A0%E8%BD%BD%E9%9C%80%E8%A6%81%E6%89%8B%E5%8A%A8%E5%88%B7%E6%96%B0%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/">https://yhao521.github.io/2025/01/26/vue3%E4%B8%AD%EF%BC%8Cthis.$router.push%E5%88%B7%E6%96%B0%E5%BD%93%E5%89%8D%E9%A1%B5%E9%9D%A2%EF%BC%8C%E8%AF%A5%E9%A1%B5%E9%9D%A2%E4%B8%8D%E9%87%8D%E6%96%B0%E5%8A%A0%E8%BD%BD%E9%9C%80%E8%A6%81%E6%89%8B%E5%8A%A8%E5%88%B7%E6%96%B0%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/web-frontend/">web/frontend</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/vue/">vue</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/02/05/LocalSend%E8%B7%A8%E8%AE%BE%E5%A4%87%E4%BC%A0%E8%BE%93%E6%96%87%E4%BB%B6%E4%BC%A0%E8%BE%93%E5%8D%8F%E8%AE%AE%20v2/" title="LocalSend跨设备传输文件传输协议 v2"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">LocalSend跨设备传输文件传输协议 v2</div></div><div class="info-2"><div class="info-item-1">LocalSend仓库地址：GitHub - localsend&#x2F;localsend: An open-source cross-platform alternative to AirDropLocalSend 协议 v2English | 简体中文 主要为了实现一个不依赖于任何外部服务器的简单 REST 协议。 因为计算机网络比较复杂，因此我们不能假设每种方法都可用。某些设备可能不支持多点广播或不能运行 HTTP 服务器。 就是这个原因，所以这协议尝试用多种方式去发现其他 LocalSend 成员，从而执行发送文件。 该协议只需要一方建立 HTTP 服务器即可运行。 目录 LocalSend 协议 v2 目录 1. 默认配置 2. 指纹 3. 搜寻发现 3.1 UDP 广播 3.2 HTTP (传统模式)   4. 文件传输 (HTTP) 4.1 准备工作 (仅元数据) 4.2 发送文件 4.3 取消   5. 反向文件传输 (HTTP) 5.1 浏览器 URL 5.2 接收请求 5.3 接收文件   6. 其他 API 6.1 信息   7. 枚举 7.1 设备类型...</div></div></div></a><a class="pagination-related" href="/2025/01/26/Vue3%E8%B7%AF%E7%94%B1push%E8%B7%B3%E8%BD%AC(%E8%A7%A3%E5%86%B3Vue2this.$router.push%E5%A4%B1%E6%95%88%EF%BC%89/" title="Vue3路由push跳转(解决Vue2this.$router.push失效）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Vue3路由push跳转(解决Vue2this.$router.push失效）</div></div><div class="info-2"><div class="info-item-1"> Vue3.x出来有一阵子了，今天用它的时候发现Vue2中的this.$router.push竟然不能用了！！！！！，真是服了，还得花点时间瞅瞅咋回事，所以…..还是总结下吧  目录1.Vue3.x路由跳转 2.获取参数 3. router-link 4.总结  1.Vue3.x路由跳转不要this了，直接引用路由对象，看下图：  import router from ‘@&#x2F;router&#x2F;index.js’    用这个路由对象router去push（剩下的和Vue2.x一样）  router.push({name:’user’,params:{id:props.videoInfo.author.ID}});   我们打印出这个router看看里头是啥？看到currentRoute熟悉么亲？所以原来this.$route也不用了（虽然他原来也是$router内部的currentRoute）  2.获取参数原来获取参数用this.$route.params获取，现在是这样的。  router.currentRoute.value.params.id  来具体看看...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2024/04/10/%E5%9C%A8Vue%E4%B8%AD%E6%80%8E%E4%B9%88%E4%BD%BF%E7%94%A8cookie%20%E4%B9%8B%20vue-cookies/" title="在Vue中怎么使用cookie 之 vue-cookies"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-10</div><div class="info-item-2">在Vue中怎么使用cookie 之 vue-cookies</div></div><div class="info-2"><div class="info-item-1">cookie 在工作中比较常用, 可以自行封装一些 添加&#x2F;删除&#x2F;获取cookie的方法, 可参考这个在Vue中有个很好用的插件 vue-cookiesgithub地址：https://github.com/cmp-cc/vue-cookies 我们具体来看下怎么使用这个插件的使用 第一步：安装vue-cookie1npm install vue-cookie --save   (a). 默认值设置 1$cookies.config(expireTimes[,path[, domain[, secure[, sameSite]]])  默认: expireTimes &#x3D; 1d, path &#x3D; ‘&#x2F;‘, domain &#x3D; ‘’, secure &#x3D; ‘’, sameSite &#x3D; ‘’  expireTimes: 有效期 默认1d path: cookie 存放的路径 默认 ‘&#x2F;‘ domain: cookie所在的域，默认为请求地址 secure: cookie只能用https协议发送给服务器 s...</div></div></div></a><a class="pagination-related" href="/2024/08/01/%E5%88%9B%E5%BB%BAvue%E4%BB%A5%E5%8F%8A%E6%8A%A5%E9%94%99%E8%A7%A3%E5%86%B3error%20@achrinza_node-ipc@9.2.2_%20The%20eng/" title="创建vue以及报错解决error @achrinza_node-ipc@9.2.2_ The engine “node“ is incompatible with this module. Expec"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-01</div><div class="info-item-2">创建vue以及报错解决error @achrinza_node-ipc@9.2.2_ The engine “node“ is incompatible with this module. Expec</div></div><div class="info-2"><div class="info-item-1">使用vue时先配置好环境node等，否则用不用了vue，网上有，这里就不累赘了， 一、打开cmd：核实是否安装node以及配置图片:  二、创建vue项目：vue create myvue 注意：2.1、安装时如果出错：1、 注意：出现这个，先进行更新即可New version available 4.5.13 → 5.0.8 ││ Run npm i -g @vue&#x2F;cli to update! 2、 更新：npm -i g @vue&#x2F;cli to update上面语句不行就用这个，或者用这个语句：npm install -g @vue&#x2F;cli cnpm –registry&#x3D;https://registry.npm.taobao.orgvu  三、安装vue，选择第三行： 可能报错：error @achrinza&#x2F;node-ipc@9.2.2: The engine “node” is incompatible with this module. Expected version “8 || 10 || 12 || 14 || ...</div></div></div></a><a class="pagination-related" href="/2023/09/04/nexus_npm%E5%8F%91%E5%B8%83/" title="nexus_npm发布"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">nexus_npm发布</div></div><div class="info-2"><div class="info-item-1"> title: npm发布前端项目到nexuslang: en-USdate: 2023-09-03 20:17:08category:  nexustag: nexusauthor:   npm发布前端项目到nexus https://www.jianshu.com/p/bd60a277a448?utm_campaign=maleskine&amp;utm_content=note&amp;utm_medium=seo_notes&amp;utm_source=recommendation https://www.freesion.com/article/5266934647/ https://www.cnblogs.com/Jaffray/p/11627359.html 把打包好的vue组件发布到私服1.创建npm仓库2.发布组件 创建npm仓库设置–&gt;Repository–&gt;Repositories–&gt;Create repository 好了，现在我们把做好的vue组件发布试试！先登录私服：npm login –registry&#x3D;http://1...</div></div></div></a><a class="pagination-related" href="/2024/08/12/%E9%98%BF%E9%87%8C%E5%A6%88%E5%A6%88%E5%8F%88%E5%81%9A%E4%BA%86%E6%96%B0%E5%B7%A5%E5%85%B7%EF%BC%8C%E5%B8%AE%E4%BD%A0%E6%8A%8A%20Vue2%20%E4%BB%A3%E7%A0%81%E6%94%B9%E6%88%90%20Vue3%20%E7%9A%84/" title="阿里妈妈又做了新工具，帮你把 Vue2 代码改成 Vue3 的"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-12</div><div class="info-item-2">阿里妈妈又做了新工具，帮你把 Vue2 代码改成 Vue3 的</div></div><div class="info-2"><div class="info-item-1">Vue3 已经出来有一段时间了，很多朋友早已熟读了文档，写了好几个 Demo，馋 Composition API 等新特性已久了。无奈，在实际工作中，大部分朋友还是不得不守着成千上万行的 Vue2 老项目过日子，做一次框架升级就像给老房子装修——念头总是充沛，决心总是匮乏。 其实 Vue 团队已经尽可能地减少了破坏性更新，还提供了一份细致的迁移指南，条数不少，但定睛一看，大部分都是体力活，有些很简单，比如异步组件要多包上一层： 还有一些就改起来有点麻烦，比如自定义指令生命周期的更名，和传入参数的一些细微变化：  看到这种变化后，作为厌恶重复的程序员，已经开始盘算着能不能写个代码帮我们把这些规则批量给改好了，当然，写转换代码的代码要比写网页难上不少，还好我们之前已经有了一个趁手的工具： GoGoCode。 我们之前的文章《阿里妈妈出的新工具，给批量修改项目代码减轻了痛苦》介绍过它，作为一个更简单的 AST处理工具，能大大减轻转换逻辑的书写难度，简直就是为了这事儿量身打造的！ 于是我们梳理了迁移指南里提到的，附带上 vue-router \ vuex 升级的一些 API 变化，配合 ...</div></div></div></a><a class="pagination-related" href="/2024/04/14/Vue3+TypeScript%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E8%BF%9B%E9%98%B6%EF%BC%88%E4%BA%94%EF%BC%89%E2%80%94%E2%80%94Vue3%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%82%B9%EF%BC%88%E4%B8%8B%EF%BC%89/" title="Vue3+TypeScript从入门到进阶（五）——Vue3基础知识点（下）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-14</div><div class="info-item-2">Vue3+TypeScript从入门到进阶（五）——Vue3基础知识点（下）</div></div><div class="info-2"><div class="info-item-1">文章目录   一、简介 二、Vue2和Vue3区别 三、Vue知识点学习  九、Composition API  1、Mixin和extends 2、Composition API 3、Reactive API、Ref API和readonly 4、toRefs、toRef和ref其他的API 5、computed、watch和watchEffect 6、生命周期钩子 7、Provide函数和Inject函数 8、compositionAPI练习 9、h函数 10、jsx 11、自定义指令 12、Teleport 13、Vue插件   十、Vue3源码学习  1、真实DOM和虚拟DOM 2、Vue三大核心系统 3、实现Mini-Vue 4、源码阅读   十一、VueRouter路由使用  1、认识前端路由 2、vue-router   十二、Vuex的状态管理  1、Vuex介绍和安装 2、Store 3、mapState 4、getters 5、Mutation 6、actions 7、module     四、TypeScript知识点 五、项目实战 六、项目打包和自动化部署...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E6%89%8B%E6%8A%8A%E6%89%8B%E6%95%99%E4%BD%A0%E4%BD%BF%E7%94%A8Electron5+vue-cli3%E5%BC%80%E5%8F%91%E8%B7%A8%E5%B9%B3%E5%8F%B0%E6%A1%8C%E9%9D%A2%E5%BA%94%E7%94%A8/" title="手把手教你使用Electron5+vue-cli3开发跨平台桌面应用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">手把手教你使用Electron5+vue-cli3开发跨平台桌面应用</div></div><div class="info-2"><div class="info-item-1"> title: 手把手教你使用Electron5+vue-cli3开发跨平台桌面应用date: 2023-09-03 20:17:08category:  mactag: macauthor:   手把手教你使用Electron5+vue-cli3开发跨平台桌面应用Electron是一个基于Chromium和 Node.js，可以使用 HTML、CSS和JavaScript构建跨平台应用的技术框架，兼容 Mac、Windows 和 Linux。虽然B&#x2F;S是目前开发的主流，但是C&#x2F;S仍然有很大的市场需求。受限于浏览器的沙盒限制，网页应用无法满足某些场景下的使用需求，而桌面应用可以读写本地文件、调用更多系统资源，再加上Web开发的低成本、高效率的优势，这种方式越来越受到开发者的喜爱。 本文一步一步教你如何使用Electron5和vue-cli3，在完全保留vue开发web应用的习惯下，搭建桌面应用。 本文不涉及Electron和vue的开发教程，仅以实现两者结合为目的，如深入学习Electron和vue，请访问官方： Electron: https://elect...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

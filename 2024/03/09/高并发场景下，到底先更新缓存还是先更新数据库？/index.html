@@ -1,0 +1,293 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>高并发场景下，到底先更新缓存还是先更新数据库？ | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="本文首发我的微信公众号『爱笑的架构师』，欢迎大家关注。     Cache aside Cache aside踩坑 Read through Write through Write behind 总结一下    在大型系统中，为了减少数据库压力通常会引入缓存机制，一旦引入缓存又很容易造成缓存和数据库数据不一致，导致用户看到的是旧数据。 为了减少数据不一致的情况，更新缓存和数据库的机制显得尤为重要">
+<meta property="og:type" content="article">
+<meta property="og:title" content="高并发场景下，到底先更新缓存还是先更新数据库？">
+<meta property="og:url" content="https://yhao521.github.io/2024/03/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E5%9C%BA%E6%99%AF%E4%B8%8B%EF%BC%8C%E5%88%B0%E5%BA%95%E5%85%88%E6%9B%B4%E6%96%B0%E7%BC%93%E5%AD%98%E8%BF%98%E6%98%AF%E5%85%88%E6%9B%B4%E6%96%B0%E6%95%B0%E6%8D%AE%E5%BA%93%EF%BC%9F/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="本文首发我的微信公众号『爱笑的架构师』，欢迎大家关注。     Cache aside Cache aside踩坑 Read through Write through Write behind 总结一下    在大型系统中，为了减少数据库压力通常会引入缓存机制，一旦引入缓存又很容易造成缓存和数据库数据不一致，导致用户看到的是旧数据。 为了减少数据不一致的情况，更新缓存和数据库的机制显得尤为重要">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2024-03-08T17:29:28.000Z">
+<meta property="article:modified_time" content="2024-03-08T17:29:28.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "高并发场景下，到底先更新缓存还是先更新数据库？",
+  "url": "https://yhao521.github.io/2024/03/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E5%9C%BA%E6%99%AF%E4%B8%8B%EF%BC%8C%E5%88%B0%E5%BA%95%E5%85%88%E6%9B%B4%E6%96%B0%E7%BC%93%E5%AD%98%E8%BF%98%E6%98%AF%E5%85%88%E6%9B%B4%E6%96%B0%E6%95%B0%E6%8D%AE%E5%BA%93%EF%BC%9F/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2024-03-08T17:29:28.000Z",
+  "dateModified": "2024-03-08T17:29:28.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2024/03/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E5%9C%BA%E6%99%AF%E4%B8%8B%EF%BC%8C%E5%88%B0%E5%BA%95%E5%85%88%E6%9B%B4%E6%96%B0%E7%BC%93%E5%AD%98%E8%BF%98%E6%98%AF%E5%85%88%E6%9B%B4%E6%96%B0%E6%95%B0%E6%8D%AE%E5%BA%93%EF%BC%9F/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '高并发场景下，到底先更新缓存还是先更新数据库？',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">高并发场景下，到底先更新缓存还是先更新数据库？</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">高并发场景下，到底先更新缓存还是先更新数据库？</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-03-08T17:29:28.000Z" title="发表于 2024-03-09 01:29:28">2024-03-09</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-03-08T17:29:28.000Z" title="更新于 2024-03-09 01:29:28">2024-03-09</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p>本文首发我的微信公众号『<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzIwODI1OTk1Nw==&mid=2650322566&idx=1&sn=2142fe29c6a32e5a2100f4f39ee8953d&chksm=8f09c89cb87e418a3289cdfaf46c8e4593004a120ba709929b4dc97fff5be9aa3cc795ac9ceb&token=875646549&lang=zh_CN#rd">爱笑的架构师</a>』，欢迎大家关注。</p>
+</blockquote>
+<!-- TOC -->
+
+<ul>
+<li><a href="#cache-aside">Cache aside</a></li>
+<li><a href="#cache-aside%E8%B8%A9%E5%9D%91">Cache aside踩坑</a></li>
+<li><a href="#read-through">Read through</a></li>
+<li><a href="#write-through">Write through</a></li>
+<li><a href="#write-behind">Write behind</a></li>
+<li><a href="#%E6%80%BB%E7%BB%93%E4%B8%80%E4%B8%8B">总结一下</a></li>
+</ul>
+<!-- /TOC -->
+
+<p>在大型系统中，为了减少数据库压力通常会引入缓存机制，一旦引入缓存又很容易造成缓存和数据库数据不一致，导致用户看到的是旧数据。</p>
+<p>为了减少数据不一致的情况，更新缓存和数据库的机制显得尤为重要，接下来带领大家踩踩坑。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/smileArchitect/assets@main/202101/20210110203023.png"></p>
+<h2 id="Cache-aside"><a href="#Cache-aside" class="headerlink" title="Cache aside"></a>Cache aside</h2><p><code>Cache aside</code>也就是<code>旁路缓存</code>，是比较常用的缓存策略。</p>
+<p><strong>（1）<code>读请求</code>常见流程</strong></p>
+<p><img src="https://cdn.jsdelivr.net/gh/smileArchitect/assets@main/202101/20210110210243.png" alt="Cache aside 读请求"></p>
+<p>应用首先会判断缓存是否有该数据，缓存命中直接返回数据，缓存未命中即缓存穿透到数据库，从数据库查询数据然后回写到缓存中，最后返回数据给客户端。</p>
+<p><strong>（2）<code>写请求</code>常见流程</strong></p>
+<p><img src="https://cdn.jsdelivr.net/gh/smileArchitect/assets@main/202101/20210110210802.png" alt=" Cache aside 写请求"></p>
+<p>首先更新数据库，然后从缓存中删除该数据。</p>
+<p>看了写请求的图之后，有些同学可能要问了：为什么要删除缓存，直接更新不就行了？这里涉及到几个坑，我们一步一步踩下去。</p>
+<h2 id="Cache-aside踩坑"><a href="#Cache-aside踩坑" class="headerlink" title="Cache aside踩坑"></a>Cache aside踩坑</h2><p>Cache aside策略如果用错就会遇到深坑，下面我们来逐个踩。</p>
+<p><strong>踩坑一：先更新数据库，再更新缓存</strong></p>
+<p>如果同时有两个<code>写请求</code>需要更新数据，每个写请求都先更新数据库再更新缓存，在并发场景可能会出现数据不一致的情况。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/smileArchitect/assets@main/202101/20210111221725.png" alt="先更新数据库，再更新缓存"></p>
+<p>如上图的执行过程：</p>
+<p>（1）<code>写请求1</code>更新数据库，将 age 字段更新为18；</p>
+<p>（2）<code>写请求2</code>更新数据库，将 age 字段更新为20；</p>
+<p>（3）<code>写请求2</code>更新缓存，缓存 age 设置为20；</p>
+<p>（4）<code>写请求1</code>更新缓存，缓存 age 设置为18；</p>
+<p>执行完预期结果是数据库 age 为20，缓存 age 为20，结果缓存 age为18，这就造成了缓存数据不是最新的，出现了脏数据。</p>
+<p><strong>踩坑二：先删缓存，再更新数据库</strong></p>
+<p>如果<code>写请求</code>的处理流程是<code>先删缓存再更新数据库</code>，在一个<code>读请求</code>和一个<code>写请求</code>并发场景下可能会出现数据不一致情况。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/smileArchitect/assets@main/202101/20210111222434.png" alt="先删缓存，再更新数据库"></p>
+<p>如上图的执行过程：</p>
+<p>（1）<code>写请求</code>删除缓存数据；</p>
+<p>（2）<code>读请求</code>查询缓存未击中(Hit Miss)，紧接着查询数据库，将返回的数据回写到缓存中；</p>
+<p>（3）<code>写请求</code>更新数据库。</p>
+<p>整个流程下来发现<code>数据库</code>中age为20，<code>缓存</code>中age为18，缓存和数据库数据不一致，缓存出现了脏数据。</p>
+<p><strong>踩坑三：先更新数据库，再删除缓存</strong></p>
+<p>在实际的系统中针对<code>写请求</code>还是推荐<code>先更新数据库再删除缓存</code>，但是在理论上还是存在问题，以下面这个例子说明。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/smileArchitect/assets@main/202101/20210111222853.png" alt="先更新数据库，再删除缓存"></p>
+<p>如上图的执行过程：</p>
+<p>（1）<code>读请求</code>先查询缓存，缓存未击中，查询数据库返回数据；</p>
+<p>（2）<code>写请求</code>更新数据库，删除缓存；</p>
+<p>（3）<code>读请求</code>回写缓存；</p>
+<p>整个流程操作下来发现<code>数据库age为20</code>，<code>缓存age为18</code>，即数据库与缓存不一致，导致应用程序从缓存中读到的数据都为旧数据。</p>
+<p>但我们仔细想一下，上述问题发生的概率其实非常低，因为通常数据库更新操作比内存操作耗时多出几个数量级，上图中最后一步回写缓存（set age 18）速度非常快，通常会在更新数据库之前完成。</p>
+<p>如果这种极端场景出现了怎么办？我们得想一个兜底的办法：<code>缓存数据设置过期时间</code>。通常在系统中是可以允许少量的数据短时间不一致的场景出现。</p>
+<h2 id="Read-through"><a href="#Read-through" class="headerlink" title="Read through"></a>Read through</h2><p>在 Cache Aside 更新模式中，应用代码需要维护两个数据源头：一个是缓存，一个是数据库。而在 <code>Read-Through</code> 策略下，应用程序无需管理缓存和数据库，只需要将数据库的同步委托给缓存提供程序 <code>Cache Provider</code> 即可。所有数据交互都是通过<code>抽象缓存层</code>完成的。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/smileArchitect/assets@main/202101/20210111232345.png" alt="Read-Through流程"></p>
+<p>如上图，应用程序只需要与<code>Cache Provider</code>交互，不用关心是从缓存取还是数据库。</p>
+<p>在进行大量读取时，<code>Read-Through</code> 可以减少数据源上的负载，也对缓存服务的故障具备一定的弹性。如果缓存服务挂了，则缓存提供程序仍然可以通过直接转到数据源来进行操作。</p>
+<p><code>Read-Through 适用于多次请求相同数据的场景</code>，这与 Cache-Aside 策略非常相似，但是二者还是存在一些差别，这里再次强调一下：</p>
+<ul>
+<li>在 Cache-Aside 中，应用程序负责从数据源中获取数据并更新到缓存。</li>
+<li>在 Read-Through 中，此逻辑通常是由独立的缓存提供程序（Cache Provider）支持。</li>
+</ul>
+<h2 id="Write-through"><a href="#Write-through" class="headerlink" title="Write through"></a>Write through</h2><p><code>Write-Through</code> 策略下，当发生数据更新(Write)时，缓存提供程序 <code>Cache Provider</code> 负责更新底层数据源和缓存。</p>
+<p>缓存与数据源保持一致，并且写入时始终通过<code>抽象缓存层</code>到达数据源。</p>
+<p><code>Cache Provider</code>类似一个代理的作用。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/smileArchitect/assets@main/202101/20210111232404.png" alt="Write-Through流程"></p>
+<h2 id="Write-behind"><a href="#Write-behind" class="headerlink" title="Write behind"></a>Write behind</h2><p><code>Write behind</code>在一些地方也被成为<code>Write back</code>， 简单理解就是：应用程序更新数据时只更新缓存， <code>Cache Provider</code>每隔一段时间将数据刷新到数据库中。说白了就是<code>延迟写入</code>。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/smileArchitect/assets@main/202101/20210111234534.png" alt="Write behind流程"></p>
+<p>如上图，应用程序更新两个数据，Cache Provider 会立即写入缓存中，但是隔一段时间才会批量写入数据库中。</p>
+<p>这种方式有优点也有缺点：</p>
+<ul>
+<li><p><code>优点</code>是数据写入速度非常快，适用于频繁写的场景。</p>
+</li>
+<li><p><code>缺点</code>是缓存和数据库不是强一致性，对一致性要求高的系统慎用。</p>
+</li>
+</ul>
+<h2 id="总结一下"><a href="#总结一下" class="headerlink" title="总结一下"></a>总结一下</h2><p>学了这么多，相信大家对缓存更新的策略都已经有了清晰的认识。最后稍稍总结一下。</p>
+<p>缓存更新的策略主要分为三种：</p>
+<ul>
+<li>Cache aside</li>
+<li>Read&#x2F;Write through</li>
+<li>Write behind</li>
+</ul>
+<p>Cache aside 通常会先更新数据库，然后再删除缓存，为了兜底通常还会将数据设置缓存时间。</p>
+<p>Read&#x2F;Write through 一般是由一个 Cache Provider 对外提供读写操作，应用程序不用感知操作的是缓存还是数据库。</p>
+<p>Write behind简单理解就是延迟写入，Cache Provider 每隔一段时间会批量输入数据库，优点是应用程序写入速度非常快。</p>
+<p>好了，今天先到这里了，大家学会了吗？</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2024/03/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E5%9C%BA%E6%99%AF%E4%B8%8B%EF%BC%8C%E5%88%B0%E5%BA%95%E5%85%88%E6%9B%B4%E6%96%B0%E7%BC%93%E5%AD%98%E8%BF%98%E6%98%AF%E5%85%88%E6%9B%B4%E6%96%B0%E6%95%B0%E6%8D%AE%E5%BA%93%EF%BC%9F/">https://yhao521.github.io/2024/03/09/%E9%AB%98%E5%B9%B6%E5%8F%91%E5%9C%BA%E6%99%AF%E4%B8%8B%EF%BC%8C%E5%88%B0%E5%BA%95%E5%85%88%E6%9B%B4%E6%96%B0%E7%BC%93%E5%AD%98%E8%BF%98%E6%98%AF%E5%85%88%E6%9B%B4%E6%96%B0%E6%95%B0%E6%8D%AE%E5%BA%93%EF%BC%9F/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/03/09/%E9%AB%98%E6%95%88%E5%AD%A6%E4%B9%A0%E8%B5%84%E6%BA%90%E7%BD%91%E7%AB%99%E6%B1%87%E6%80%BB/" title="高效学习资源网站汇总"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">高效学习资源网站汇总</div></div><div class="info-2"><div class="info-item-1">   （1）视频网站 （2）专栏 （3）Github （4）技术博客： （5）搜索引擎： （6）知识问答： （7）刷题： （8）云笔记： （9）在线画图：    （1）视频网站 B站（推荐）：https://www.bilibili.com/ 网易云课堂：https://study.163.com/ 极客学院：https://www.jikexueyuan.com/ 慕课网：https://www.imooc.com/  （2）专栏 极客时间（推荐）：https://time.geekbang.org/ Gitchat https://gitbook.cn/  （3）Github Java八股文（推荐）：https://github.com/CoderLeixiaoshuai/java-eight-part  （4）技术博客： CSDN 博客：https://blog.csdn.net/ 博客园：https://www.cnblogs.com/ 掘金社区（推荐）：https://juejin.cn/ InfoQ：https://xie.infoq.cn/ 思否：https://s...</div></div></div></a><a class="pagination-related" href="/2024/03/09/%E9%9D%A2%E8%AF%95%E5%AE%98%EF%BC%9A%E8%AF%B4%E8%AF%B4Atomic%E5%8E%9F%E5%AD%90%E7%B1%BB%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/" title="面试官：说说Atomic原子类的实现原理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">面试官：说说Atomic原子类的实现原理</div></div><div class="info-2"><div class="info-item-1"> 本文首发我的微信公众号『爱笑的架构师』，欢迎大家关注。     线程安全真的是线程的安全吗？ 什么是 Atomic？ 实现一个计数器 AtomicInteger 源码分析 AtomicLong 和 LongAdder 谁更牛？ 总结    当我们谈论『线程安全』的时候，肯定都会想到 Atomic 类。不错，Atomic 相关类都是线程安全的，在讲 Atomic 类之前我想再聊聊『线程安全』这个概念。 线程安全真的是线程的安全吗？初看『线程安全』这几个字，很容易望文生义，这不就是线程的安全吗？其实不是，线程本身没有好坏，没有『安全的线程』和『不安全的线程』之分，俗话说：人之初性本善，线程天生也是纯洁善良的，真正让线程变坏是因为访问的变量的原因，变量对于操作系统来说其实就是内存块，所以绕了这么一大圈，线程安全称为『内存的安全』可能更为贴切。 简而言之，线程访问的内存决定了这个线程是否是安全的。 变量大致可以分为局部变量和共享变量，局部变量对于 JVM 来说是栈空间，大家都背过八股文，栈是线程私有的是非共享的，那自然也是内存安全的；共享变量对于 JVM 来说一般是存在于堆上，堆上的东...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/liunx%E4%B8%AD%E4%B8%8B%E8%BD%BDnode-sass%E5%A4%B1%E8%B4%A5%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95/" title="liunx中下载node-sass失败解决方法"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">liunx中下载node-sass失败解决方法</div></div><div class="info-2"><div class="info-item-1"> title: liunx中下载node-sass失败解决方法date: 2023-09-03 20:17:08category: tag: author:  liunx中下载node-sass失败解决方法问题描述：liunx内网服务器，无法下载外网资源包，对node-sass 依赖的二进制文件从github无法下载 解决方式：  将设置仓库镜像  12// 永久使用npm config set registry http://xx.xx.xx.xx:xxxx/repository/npm-all/  设置完成之后执行 1npm install  报错如下:Unable to save binary &#x2F;home&#x2F;jenkins&#x2F;workspace&#x2F;wxsbank-supplychain-manager&#x2F;node_modules&#x2F;node-sass&#x2F;vendor&#x2F;linux-x64-72 : Error: EACCES: permission denied, mkdir ‘&#x2F;home&#x2F...</div></div></div></a><a class="pagination-related" href="/2023/09/04/github%E8%AE%BF%E9%97%AE%E5%8A%A0%E9%80%9F/" title="github访问加速"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">github访问加速</div></div><div class="info-2"><div class="info-item-1"> title: github访问加速date: 2023-09-03 20:17:08category: tag: author:  github访问加速 使用镜像网站 使用代理网站下载 cdn加速 转入gitee加速  概括: 如果是下载比较大的项目,比如耗时5min往上,大小30mb往上,十分推荐使用代理网站下载,或者转入gitee的方式下载. 如果仅仅是下载比较小的项目,类似代码性质,文档性质的项目,使用cdn加速,提升到100多KB&#x2F;s也就够用了 github加速神器https://github.com/dotnetcore/FastGithub 一.使用镜像网站使用github的镜像网站 https://hub.fastgit.org/ 进行搜索 二. 使用代理网站下载对于github release中下载的大文件 使用https://toolwa.com/github/来下载，速度起飞,无需注册，亲测有效。  三. cdn加速通过修改系统hosts文件的办法，绕过国内dns解析，直接访问GitHub的CDN节点，从而达到github访问加速的目的。不需要海外...</div></div></div></a><a class="pagination-related" href="/2024/03/09/%E5%9B%BE%E8%A7%A3Java%E4%B8%AD%E9%82%A318%20%E6%8A%8A%E9%94%81/" title="图解Java中那18 把锁"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-09</div><div class="info-item-2">图解Java中那18 把锁</div></div><div class="info-2"><div class="info-item-1"> 本文首发我的微信公众号『爱笑的架构师』，欢迎大家关注。   乐观锁和悲观锁 独占锁和共享锁 互斥锁和读写锁 公平锁和非公平锁 可重入锁 自旋锁 分段锁 锁升级（无锁|偏向锁|轻量级锁|重量级锁） 锁优化技术（锁粗化、锁消除）  乐观锁和悲观锁悲观锁 悲观锁对应于生活中悲观的人，悲观的人总是想着事情往坏的方向发展。 举个生活中的例子，假设厕所只有一个坑位了，悲观锁上厕所会第一时间把门反锁上，这样其他人上厕所只能在门外等候，这种状态就是「阻塞」了。 回到代码世界中，一个共享数据加了悲观锁，那线程每次想操作这个数据前都会假设其他线程也可能会操作这个数据，所以每次操作前都会上锁，这样其他线程想操作这个数据拿不到锁只能阻塞了。   在 Java 语言中 synchronized 和 ReentrantLock等就是典型的悲观锁，还有一些使用了 synchronized 关键字的容器类如 HashTable 等也是悲观锁的应用。 乐观锁 乐观锁 对应于生活中乐观的人，乐观的人总是想着事情往好的方向发展。 举个生活中的例子，假设厕所只有一个坑位了，乐观锁认为：这荒郊野外的，又没有什么人，不会...</div></div></div></a><a class="pagination-related" href="/2023/09/04/npm%E5%8D%87%E7%BA%A7/" title="npm升级"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">npm升级</div></div><div class="info-2"><div class="info-item-1"> title: npm升级date: 2023-09-03 20:17:08category:  开发语言 doc_nodejstag: doc_nodejsauthor:   npm install -g npm-check命令行npm-check -u会出现更新列表，选择后升级 https://www.cnblogs.com/xxflz/p/9835344.html 就算之前你装了webpack，那肯定是非全局安装 所以要全局安装 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273npm-check -u❤️  Your modules look amazing. Keep up the great work. ❤️E:\vscodeProjects_sitech\crds_base_web_view_pack&gt;npm run devnpm WARN...</div></div></div></a><a class="pagination-related" href="/2024/10/10/%E5%88%A9%E7%94%A8js%E5%88%A4%E6%96%AD%E6%96%87%E4%BB%B6%E6%98%AF%E5%90%A6%E4%B8%BAutf-8%E7%BC%96%E7%A0%81/" title="利用js判断文件是否为utf-8编码"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-10-10</div><div class="info-item-2">利用js判断文件是否为utf-8编码</div></div><div class="info-2"><div class="info-item-1">利用js判断文件是否为utf-8编码常规方案使用FileReader以utf-8格式读取文件，根据文件内容是否包含乱码字符�，来判断文件是否为utf-8。 如果存在�，即文件编码非utf-8，反之为utf-8。 代码如下： 123456789101112131415161718192021const isUtf8 = async (file: File) =&gt; &#123;  return await new Promise((resolve, reject) =&gt; &#123;    const reader = new FileReader();    reader.readAsText(file);    reader.onloadend = (e: any): void =&gt; &#123;      const content = e.target.result;      const encodingRight = content.indexOf(&quot;&quot;) === -1;      if (encodingRight) &#123; ...</div></div></div></a><a class="pagination-related" href="/2023/09/04/innotop/" title="innotop"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">innotop</div></div><div class="info-2"><div class="info-item-1"> title: innotopdate: 2023-09-03 20:17:08category:  数据库 MySQL监控和运维tag: MySQL监控和运维author:   </div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Cache-aside"><span class="toc-number">1.</span> <span class="toc-text">Cache aside</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Cache-aside%E8%B8%A9%E5%9D%91"><span class="toc-number">2.</span> <span class="toc-text">Cache aside踩坑</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Read-through"><span class="toc-number">3.</span> <span class="toc-text">Read through</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Write-through"><span class="toc-number">4.</span> <span class="toc-text">Write through</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Write-behind"><span class="toc-number">5.</span> <span class="toc-text">Write behind</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93%E4%B8%80%E4%B8%8B"><span class="toc-number">6.</span> <span class="toc-text">总结一下</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

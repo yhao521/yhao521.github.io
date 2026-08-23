@@ -1,0 +1,243 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Vite 2 + Vue 3 引入 TypeScript (和 JavaScript 混合开发) | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="最近在迁移一个 Vue 2 项目，弄得差不多想起还是有必要整上 TypeScript，但改的过程中并不想一下子把所有文件从.js改成.ts，那么我们可以在tsconfig.json文件的&quot;compilerOptions&quot;配置上 “allowJs”: true，”noEmit”: true。  前提是已经安装了 typescript，没有的话可以全局npm install -g">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Vite 2 + Vue 3 引入 TypeScript (和 JavaScript 混合开发)">
+<meta property="og:url" content="https://yhao521.github.io/2024/09/10/Vite%202%20+%20Vue%203%20%E5%BC%95%E5%85%A5%20TypeScript%20(%E5%92%8C%20JavaScript%20%E6%B7%B7%E5%90%88%E5%BC%80%E5%8F%91)/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="最近在迁移一个 Vue 2 项目，弄得差不多想起还是有必要整上 TypeScript，但改的过程中并不想一下子把所有文件从.js改成.ts，那么我们可以在tsconfig.json文件的&quot;compilerOptions&quot;配置上 “allowJs”: true，”noEmit”: true。  前提是已经安装了 typescript，没有的话可以全局npm install -g">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2024-09-10T04:31:49.000Z">
+<meta property="article:modified_time" content="2024-09-10T04:31:49.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="java&#x2F;programming">
+<meta property="article:tag" content="javascript">
+<meta property="article:tag" content="js&#x2F;programming">
+<meta property="article:tag" content="vue">
+<meta property="article:tag" content="web&#x2F;frontend">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Vite 2 + Vue 3 引入 TypeScript (和 JavaScript 混合开发)",
+  "url": "https://yhao521.github.io/2024/09/10/Vite%202%20+%20Vue%203%20%E5%BC%95%E5%85%A5%20TypeScript%20(%E5%92%8C%20JavaScript%20%E6%B7%B7%E5%90%88%E5%BC%80%E5%8F%91)/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2024-09-10T04:31:49.000Z",
+  "dateModified": "2024-09-10T04:31:49.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2024/09/10/Vite%202%20+%20Vue%203%20%E5%BC%95%E5%85%A5%20TypeScript%20(%E5%92%8C%20JavaScript%20%E6%B7%B7%E5%90%88%E5%BC%80%E5%8F%91)/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Vite 2 + Vue 3 引入 TypeScript (和 JavaScript 混合开发)',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">Vite 2 + Vue 3 引入 TypeScript (和 JavaScript 混合开发)</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Vite 2 + Vue 3 引入 TypeScript (和 JavaScript 混合开发)</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-09-10T04:31:49.000Z" title="发表于 2024-09-10 12:31:49">2024-09-10</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-09-10T04:31:49.000Z" title="更新于 2024-09-10 12:31:49">2024-09-10</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>最近在迁移一个 Vue 2 项目，弄得差不多想起还是有必要整上 TypeScript，但改的过程中并不想一下子把所有文件从<code>.js</code>改成<code>.ts</code>，那么我们可以在<code>tsconfig.json文件</code>的<code>&quot;compilerOptions&quot;</code>配置上 <a target="_blank" rel="noopener" href="https://links.jianshu.com/go?to=https://www.typescriptlang.org/tsconfig%23allowJs">“allowJs”</a>: true，”noEmit”: true。</p>
+<blockquote>
+<p>前提是已经安装了 <a target="_blank" rel="noopener" href="https://links.jianshu.com/go?to=https://www.typescriptlang.org/docs/handbook/typescript-tooling-in-5-minutes.html">typescript</a>，没有的话可以全局<code>npm install -g typescript</code>，或者安装在项目本地。</p>
+</blockquote>
+<p>具体上完整干货：</p>
+<ol>
+<li>cd 到项目根目录，命令行敲上<code>tsc –init</code>，生成<code>tsconfig.json</code>文件，然后修改如下(部分选项根据自己需要来)：</li>
+</ol>
+<p>📃<code>tsconfig.json</code></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;compilerOptions&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;target&quot;</span><span class="punctuation">:</span> <span class="string">&quot;esnext&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;useDefineForClassFields&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span> <span class="comment">// https://cn.vitejs.dev/guide/features.html#typescript-compiler-options</span></span><br><span class="line">    <span class="attr">&quot;module&quot;</span><span class="punctuation">:</span> <span class="string">&quot;esnext&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;moduleResolution&quot;</span><span class="punctuation">:</span> <span class="string">&quot;node&quot;</span><span class="punctuation">,</span> <span class="comment">// 指定模块解析策略，&#x27;node&#x27; 用于 Node.js 的 CommonJS 实现</span></span><br><span class="line">    <span class="attr">&quot;strict&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;allowJs&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span> <span class="comment">// 允许编译器编译JS，JSX文件</span></span><br><span class="line">    <span class="attr">&quot;checkJs&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;noEmit&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span> <span class="comment">// 编译后不输出任何js文件</span></span><br><span class="line">    <span class="attr">&quot;jsx&quot;</span><span class="punctuation">:</span> <span class="string">&quot;preserve&quot;</span><span class="punctuation">,</span> <span class="comment">// 在 .tsx 中支持 JSX</span></span><br><span class="line">    <span class="attr">&quot;sourceMap&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span> <span class="comment">// 生成目标文件的 sourceMap 文件</span></span><br><span class="line">    <span class="attr">&quot;resolveJsonModule&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span> <span class="comment">// 允许导入带有“.json”扩展名的模块</span></span><br><span class="line">    <span class="attr">&quot;esModuleInterop&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span> <span class="comment">// CommonJS/AMD/UMD 模块导入兼容</span></span><br><span class="line">    <span class="attr">&quot;importHelpers&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span> <span class="comment">// 模块导入辅助，通过 tslib 引入 helper 函数，https://www.typescriptlang.org/tsconfig#importHelpers</span></span><br><span class="line">    <span class="attr">&quot;experimentalDecorators&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;skipLibCheck&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span> <span class="comment">// 跳过库声明文件的类型检查</span></span><br><span class="line">    <span class="attr">&quot;allowSyntheticDefaultImports&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span> <span class="comment">// 允许如 import React from &quot;react&quot; 这样的默认导入（从没有设置默认导出的模块中默认导入）</span></span><br><span class="line">    <span class="attr">&quot;suppressImplicitAnyIndexErrors&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span> <span class="comment">// 禁止报告对象索引的隐式 anys 错误</span></span><br><span class="line">    <span class="attr">&quot;baseUrl&quot;</span><span class="punctuation">:</span> <span class="string">&quot;./&quot;</span><span class="punctuation">,</span> <span class="comment">// 非绝对地址的模块会基于这个目录去解析，默认值是当前目录</span></span><br><span class="line">    <span class="attr">&quot;types&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;node&quot;</span><span class="punctuation">,</span> <span class="string">&quot;vite/client&quot;</span><span class="punctuation">]</span><span class="punctuation">,</span> <span class="comment">// 指定加载【哪些】声明文件包，如不设置此项，默认会加载全部能找到的 node_modules/@types/xxx 包</span></span><br><span class="line">    <span class="comment">// &quot;vite/client&quot;用于 vite 项目中的一些类型定义补充，https://www.typescriptlang.org/tsconfig#types</span></span><br><span class="line">    <span class="attr">&quot;isolatedModules&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span> <span class="comment">// https://cn.vitejs.dev/guide/features.html#typescript-compiler-options</span></span><br><span class="line">    <span class="attr">&quot;paths&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="comment">// 配置具体如何解析 require/import 的导入，值是基于 baseUrl 路径的映射列表。https://www.typescriptlang.org/tsconfig#paths</span></span><br><span class="line">      <span class="attr">&quot;@/*&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;src/*&quot;</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">      <span class="comment">// ...</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;lib&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;esnext&quot;</span><span class="punctuation">,</span> <span class="string">&quot;dom&quot;</span><span class="punctuation">,</span> <span class="string">&quot;dom.iterable&quot;</span><span class="punctuation">,</span> <span class="string">&quot;scripthost&quot;</span><span class="punctuation">]</span> <span class="comment">// 编译时引入的 ES 功能库</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;include&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;src/**/*.ts&quot;</span><span class="punctuation">,</span> <span class="string">&quot;src/**/*.d.ts&quot;</span><span class="punctuation">,</span> <span class="string">&quot;src/**/*.tsx&quot;</span><span class="punctuation">,</span> <span class="string">&quot;src/**/*.vue&quot;</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;exclude&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;node_modules&quot;</span><span class="punctuation">]</span> <span class="comment">// 解析时跳过的文件</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>在 src 目录下<a target="_blank" rel="noopener" href="https://links.jianshu.com/go?to=https://cn.vitejs.dev/guide/features.html%23client-types">添加一个 d.ts 声明文件：</a></li>
+</ol>
+<p>如 📃<code>src/shims-vue.d.ts</code></p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// &lt;reference types=&quot;vite/client&quot; /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义 *.vue 文件的类型，否则 import 所有 *.vue 文件都会报错</span></span><br><span class="line"><span class="keyword">declare</span> <span class="variable language_">module</span> <span class="string">&#x27;*.vue&#x27;</span> &#123;</span><br><span class="line">  <span class="keyword">import</span> &#123; <span class="title class_">DefineComponent</span> &#125; <span class="keyword">from</span> <span class="string">&#x27;vue&#x27;</span></span><br><span class="line">  <span class="comment">// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/ban-types</span></span><br><span class="line">  <span class="keyword">const</span> <span class="attr">component</span>: <span class="title class_">DefineComponent</span>&lt;&#123;&#125;, &#123;&#125;, <span class="built_in">any</span>&gt;</span><br><span class="line">  <span class="keyword">export</span> <span class="keyword">default</span> component</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ...</span></span><br></pre></td></tr></table></figure>
+
+<p>这会和<code>compilerOptions.types</code>的<code>&quot;vite/client&quot;</code>项一起，提供以下类型定义补充：</p>
+<ul>
+<li>资源导入 (例如：导入一个 <code>.svg</code> 文件)</li>
+<li><code>import.meta.env</code> 上 Vite 注入的环境变量的类型定义</li>
+<li><code>import.meta.hot</code> 上的 <a target="_blank" rel="noopener" href="https://links.jianshu.com/go?to=https://cn.vitejs.dev/guide/api-hmr.html">HMR API</a> 类型定义</li>
+</ul>
+<p>另外导入一些库的时候可能会报<code>Cannot find module &#39;xxx&#39;..</code>这种找不到模块的错，原因是没有找到对应的声明文件。</p>
+<ul>
+<li>有些库如<code>lodash</code>可以通过安装类型定义包来解决：<code>npm install -S @types/lodash</code>；</li>
+<li>若部分插件尚且没有自己的 typescript 定义文件，就在我们之前的<code>src/shims-vue.d.ts</code>里声明一下，如：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/shims-vue.d.ts</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// remove this part after vue-count-to has its typescript file</span></span><br><span class="line">declare <span class="keyword">module</span> <span class="string">&#x27;vue-count-to&#x27;</span></span><br><span class="line"></span><br><span class="line">declare <span class="keyword">module</span> <span class="string">&#x27;vue-echarts&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>然后就可以逐步将一些<code>*.js</code>改成<code>*.ts</code>并进行类型定义补充和修改了，可以先从<code>main.js</code>做起。</p>
+<p>关于迁移的其他报错和问题，可以参考官网的 <a target="_blank" rel="noopener" href="https://links.jianshu.com/go?to=https://www.typescriptlang.org/docs/handbook/migrating-from-javascript.html">JavaScript 迁移文档</a>。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2024/09/10/Vite%202%20+%20Vue%203%20%E5%BC%95%E5%85%A5%20TypeScript%20(%E5%92%8C%20JavaScript%20%E6%B7%B7%E5%90%88%E5%BC%80%E5%8F%91)/">https://yhao521.github.io/2024/09/10/Vite%202%20+%20Vue%203%20%E5%BC%95%E5%85%A5%20TypeScript%20(%E5%92%8C%20JavaScript%20%E6%B7%B7%E5%90%88%E5%BC%80%E5%8F%91)/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/web-frontend/">web/frontend</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/vue/">vue</a><a class="post-meta__tags" href="/tags/java-programming/">java/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a><a class="post-meta__tags" href="/tags/javascript/">javascript</a><a class="post-meta__tags" href="/tags/js-programming/">js/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/09/10/cordova-sqlite-plugin%E5%B8%B8%E7%94%A8%E6%95%B0%E6%8D%AE%E5%BA%93%E6%93%8D%E4%BD%9C/" title="cordova-sqlite-plugin常用数据库操作"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">cordova-sqlite-plugin常用数据库操作</div></div><div class="info-2"><div class="info-item-1">cordova-sqlite-plugin常用数据库操作ionic项目需要做本地缓存，研究了一番，总结出了常用的数据库操作： 　1、新建数据库，用angularJS+ionic： 12//声明一个数据库对象``var` `db = ``null``;``//事件deviceready就绪后创建数据库document.addEventListener(``&#x27;deviceready&#x27;``, ``function``() &#123;`` ``db = window.sqlitePlugin.openDatabase(&#123;name: ``&#x27;demo.db&#x27;``, location: ``&#x27;default&#x27;``&#125;);``&#125;);  　2、用标准事务API 来布库 123//在一个事务中执行建表插入等sql语句的``db.transaction(``function``(tx) &#123;``  ``//建表``  ``tx.executeSql(``&#x27;CREATE TABLE IF NOT ...</div></div></div></a><a class="pagination-related" href="/2024/09/10/Android%20Cordova%E9%A1%B9%E7%9B%AE%E6%8A%A5Applcation%20error%20the%20connection%20/" title="Android Cordova项目报Applcation error the connection to the server was unsuccessful解决方法"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Android Cordova项目报Applcation error the connection to the server was unsuccessful解决方法</div></div><div class="info-2"><div class="info-item-1"> Cordova Android Applcation error the connection to the server was unsuccessful.(file:&#x2F;&#x2F;androi_assets&#x2F;www&#x2F;index.html)核心原因：手机没有及时完成资源文件的加载。 可能导致的原因：1.代码、数据、图片太大 2.脚本可能有无限循环或较长循环，因此加载时间太长。 3.使用过多的插件、脚本 结合本项目中的情况，排查，发现1.使用本地的视频播放，视频达70m 修复方法： 放在视频放在服务端，将播放源设置为远程地址而不是本地 2.使用的切图打包到www&#x2F;static下的图片资源较大，甚至有一个切图达800多k 修复方法： 优化UI资源，可删除的删除，不可删除的对切图进行压缩 3.index.html加载外部的css样式 修复方法： 将外部的css样式下载到本地，项目启动时加载本地css样式 配合代码：1.延长超时时间  2.加一个过渡页面 2.1新建mian.html,然后将index.html内容剪切到main.html,在i...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2024/10/05/Vite%202%20+%20Vue%203%20%E5%BC%95%E5%85%A5%20TypeScript%20(%E5%92%8C%20JavaScript%20%E6%B7%B7%E5%90%88%E5%BC%80%E5%8F%91)-1/" title="Vite 2 + Vue 3 引入 TypeScript (和 JavaScript 混合开发)-1"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-10-05</div><div class="info-item-2">Vite 2 + Vue 3 引入 TypeScript (和 JavaScript 混合开发)-1</div></div><div class="info-2"><div class="info-item-1">最近在迁移一个 Vue 2 项目，弄得差不多想起还是有必要整上 TypeScript，但改的过程中并不想一下子把所有文件从.js改成.ts，那么我们可以在tsconfig.json文件的&quot;compilerOptions&quot;配置上 “allowJs”: true，”noEmit”: true。  前提是已经安装了 typescript，没有的话可以全局npm install -g typescript，或者安装在项目本地。  具体上完整干货：  cd 到项目根目录，命令行敲上tsc –init，生成tsconfig.json文件，然后修改如下(部分选项根据自己需要来)：  📃tsconfig.json 123456789101112131415161718192021222324252627282930313233&#123;  &quot;compilerOptions&quot;: &#123;    &quot;target&quot;: &quot;esnext&quot;,    &quot;useDefineForClassFields&quot;:...</div></div></div></a><a class="pagination-related" href="/2023/09/04/vue%E7%A6%81%E7%94%A8%E6%B5%8F%E8%A7%88%E5%99%A8%E5%89%8D%E8%BF%9B%E5%90%8E%E9%80%80/" title="vue禁用浏览器前进后退"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">vue禁用浏览器前进后退</div></div><div class="info-2"><div class="info-item-1"> title: vue禁用浏览器前进后退date: 2023-09-03 20:17:08category:  开发语言 vuetag: vueauthor:   vue禁用浏览器前进后退1.main.js中，增加popstate监听 123window.addEventListener(&quot;popstate&quot;, function () &#123;  history.pushState(null, null, document.URL);&#125;);  2.router的index.js中： 1234567const router = new Router(&#123;  mode: &quot;hash&quot;,  routes,  scrollBehavior: () =&gt; &#123;    history.pushState(null, null, document.URL);  &#125;,&#125;); </div></div></div></a><a class="pagination-related" href="/2024/05/21/%E7%9B%98%E7%82%B920%E6%AC%BE%E4%BC%98%E8%B4%A8%E7%9A%84%E5%BC%80%E6%BA%90%E6%B8%B8%E6%88%8F%EF%BC%8C2024%E6%9C%80%E6%96%B0%E6%94%B6%E9%9B%86%EF%BC%81/" title="盘点20款优质的开源游戏，2024最新收集！"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-05-21</div><div class="info-item-2">盘点20款优质的开源游戏，2024最新收集！</div></div><div class="info-2"><div class="info-item-1">本文收集了20款优质的开源游戏，部分还可以点击就可以玩，干货满满，建议先收藏一下。 如果你有值得推荐的开源游戏，欢迎评论中指出！ 1、红警https://github.com/electronicarts/CnC_Remastered_Collection 红警，或者更准确地说，应该称为“红色警戒”，是大多数80后记忆中与游戏最深刻的联系之一。  这款游戏是由当年的Westwood工作室打造的一款即时战略游戏，以至于一提到即时战略游戏，我脑海中浮现的第一个就是红警。 然而，在1998年8月17日，EA收购了Westwood。一般情况下，一旦游戏工作室被EA收购，就意味着走向没落。  这次开源的代码实际上是1996年发布的第一代红警，国内也称之为红警95。  此次开源不涉及游戏素材和游戏引擎，只包括TiberianDawn.DLL和RedAlert.dll的源码，允许Mod社区更好地改变游戏行为。 在6月5日，这两款游戏发布了重制版。 命令与征服系列游戏是用C++实现的，打开代码后可以看到非常规范的代码，令人赞叹不已。  下面是一个示例，展示了飞行器寻找新降落点的函数，函数功能、输...</div></div></div></a><a class="pagination-related" href="/2024/04/14/Vue3+TypeScript%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E8%BF%9B%E9%98%B6%EF%BC%88%E4%B8%83%EF%BC%89%E2%80%94%E2%80%94%E9%A1%B9%E7%9B%AE%E5%AE%9E%E6%88%98/" title="Vue3+TypeScript从入门到进阶（七）——项目实战"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-14</div><div class="info-item-2">Vue3+TypeScript从入门到进阶（七）——项目实战</div></div><div class="info-2"><div class="info-item-1">文章目录   一、简介 二、Vue2和Vue3区别 三、Vue知识点学习 四、TypeScript知识点 五、项目实战  一. 代码规范  1.1. 集成editorconfig配置 1.2. 使用prettier工具 1.3. 使用ESLint检测 1.4. git Husky和eslint 1.5. git commit规范  1.5.1. 代码提交风格 1.5.2. 代码提交验证     二. 第三方库集成  2.1. vue.config.js配置 2.2. vue-router集成 2.3. vuex集成 2.4. element-plus集成  2.4.1. 全局引入 2.4.2. 局部引入 2.4.3 element-plus的icon引入   2.5. axios集成 2.6. VSCode配置     六、项目打包和自动化部署 七、沿途学习代码地址及案例地址  1、沿途学习代码地址 2、项目案例地址   八、知识拓展  1、ES6数组与对象的解构赋值详解  数组的解构赋值 对象的解构赋值 字符串的解构赋值   2、JavaScript的 …（展开运算符） 3、e...</div></div></div></a><a class="pagination-related" href="/2024/09/10/Cordova%E6%89%93%E5%8C%85%E5%AE%89%E5%8D%93APP%E6%95%99%E7%A8%8B%E4%BB%A5%E5%8F%8A%E5%87%BA%E7%8E%B0%E7%9A%84%E9%97%AE%E9%A2%98/" title="Cordova打包安卓APP教程以及出现的问题"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-09-10</div><div class="info-item-2">Cordova打包安卓APP教程以及出现的问题</div></div><div class="info-2"><div class="info-item-1">Cordova打包安卓APP教程以及出现的问题=&#x3D;官网地址 &#x3D;&#x3D; 我的环境：cordova：10.0.0Android studio：3.4.1JDK：jdk1.8.0_301  本文章作为自己参考之用  打包vue项目使用 npm run build 打包vue项目，生成dist文件夹。 打包完成之后，将dist下的index.html文件和static文件夹放入www文件夹中 新建Cordova项目安装cordova在vue项目的根目录命令行执行 npm install -g cordova 使用Cordova新建一个项目，命令执行 cordova create hello com.example.hello HelloWorldhello 是项目名称，com.example.hello是包名，HelloWorld是程序的标题(也就是安装的时候显示界面的app名字) cordova的目录结构如下所示： 检查环境cd hello 进入生成的项目中，命令执行 cordova requirements 查看安装环境是否OK 1234567891011R...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E8%80%81vue%E9%A1%B9%E7%9B%AEwebpack3%E5%8D%87%E7%BA%A7%E5%88%B0webpack5%E5%85%A8%E8%BF%87%E7%A8%8B%E8%AE%B0%E5%BD%95/" title="老vue项目webpack3升级到webpack5全过程记录"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">老vue项目webpack3升级到webpack5全过程记录</div></div><div class="info-2"><div class="info-item-1"> title: 老vue项目webpack3升级到webpack5全过程记录date: 2023-09-03 20:17:08category:  mactag: macauthor:   老vue项目webpack3升级到webpack5全过程记录一、升级过程记录背景19年新建的vue项目，使用的是webpack3，随着项目的积累，组件的增多导致本地构建，线上打包等操作速度极慢，非常影响开发效率和部署效率，基于此问题，本次对webpack及相关插件进行了优化和升级。本博文分为2篇，第 1 篇 会直接附上可运行的代码（去除了一些业务代码配置），直接粘贴复制即可使用（注意是基于vue2.0项目原配置基础上的修改哦，在网上找了一堆都是升级过程的各种坑说明，不如直接粘贴复制运行来的爽丫~~~），第 2 篇也会对相关的修改和遇到的坑进行描述说明。 升级效果1、本地构建第一次构建 5分钟 缩短至 1.5分钟左右， 构建时间提升近 4 倍；更新构建 由 5-10s 缩短至 1-5s ，构建提升 2 倍；2、线上打包执行npm run build 由10-15分钟 缩短至 3-5分钟，构建时间...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>使用FFmpeg合并多个ts视频文件转为mp4格式_ffmpeg合并ts视频-CSDN博客 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="文章浏览阅读1.8w次，点赞12次，收藏59次。本文介绍了如何使用FFmpeg将.ts文件转换为MP4格式，包括单个文件转换和多个文件合并的方法，以及FFmpeg的下载、安装和基本使用。还提到了FFmpeg的组成部分和命令行参数的查阅资源。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用FFmpeg合并多个ts视频文件转为mp4格式_ffmpeg合并ts视频-CSDN博客">
+<meta property="og:url" content="https://yhao521.github.io/2025/06/03/%E4%BD%BF%E7%94%A8FFmpeg%E5%90%88%E5%B9%B6%E5%A4%9A%E4%B8%AAts%E8%A7%86%E9%A2%91%E6%96%87%E4%BB%B6%E8%BD%AC%E4%B8%BAmp4%E6%A0%BC%E5%BC%8F_ffmpeg%E5%90%88%E5%B9%B6ts%E8%A7%86%E9%A2%91-CSDN%E5%8D%9A%E5%AE%A2/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="文章浏览阅读1.8w次，点赞12次，收藏59次。本文介绍了如何使用FFmpeg将.ts文件转换为MP4格式，包括单个文件转换和多个文件合并的方法，以及FFmpeg的下载、安装和基本使用。还提到了FFmpeg的组成部分和命令行参数的查阅资源。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2025-06-02T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-17T16:00:00.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="摘录">
+<meta property="article:tag" content="教程">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "使用FFmpeg合并多个ts视频文件转为mp4格式_ffmpeg合并ts视频-CSDN博客",
+  "url": "https://yhao521.github.io/2025/06/03/%E4%BD%BF%E7%94%A8FFmpeg%E5%90%88%E5%B9%B6%E5%A4%9A%E4%B8%AAts%E8%A7%86%E9%A2%91%E6%96%87%E4%BB%B6%E8%BD%AC%E4%B8%BAmp4%E6%A0%BC%E5%BC%8F_ffmpeg%E5%90%88%E5%B9%B6ts%E8%A7%86%E9%A2%91-CSDN%E5%8D%9A%E5%AE%A2/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2025-06-02T16:00:00.000Z",
+  "dateModified": "2026-05-17T16:00:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2025/06/03/%E4%BD%BF%E7%94%A8FFmpeg%E5%90%88%E5%B9%B6%E5%A4%9A%E4%B8%AAts%E8%A7%86%E9%A2%91%E6%96%87%E4%BB%B6%E8%BD%AC%E4%B8%BAmp4%E6%A0%BC%E5%BC%8F_ffmpeg%E5%90%88%E5%B9%B6ts%E8%A7%86%E9%A2%91-CSDN%E5%8D%9A%E5%AE%A2/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '使用FFmpeg合并多个ts视频文件转为mp4格式_ffmpeg合并ts视频-CSDN博客',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">使用FFmpeg合并多个ts视频文件转为mp4格式_ffmpeg合并ts视频-CSDN博客</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">使用FFmpeg合并多个ts视频文件转为mp4格式_ffmpeg合并ts视频-CSDN博客</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-06-02T16:00:00.000Z" title="发表于 2025-06-03 00:00:00">2025-06-03</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-17T16:00:00.000Z" title="更新于 2026-05-18 00:00:00">2026-05-18</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>本文介绍了如何使用FFmpeg将.ts文件转换为MP4格式，包括单个文件转换和多个文件合并的方法，以及FFmpeg的下载、安装和基本使用。还提到了FFmpeg的组成部分和命令行参数的查阅资源。</p>
+<p>摘要生成于 <a target="_blank" rel="noopener" href="https://ai.csdn.net/?utm_source=cknow_pc_ai_abstract">C知道</a> ，由 DeepSeek-R1 满血版支持， <a target="_blank" rel="noopener" href="https://ai.csdn.net/?utm_source=cknow_pc_ai_abstract">前往体验 &gt;</a></p>
+<h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>爬取完视频发现都是ts文件，而且都是几百KB的视频片段，.ts 全名叫：MPEG Transport Stream，它是一个万能的多媒体容器，可以装下音频、视频、字幕。有时我们需要将.ts文件转换为其他更加广泛被支持的格式，比如mp4格式，这样就可以在各种设备上播放和分享。</p>
+<h4 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h4><p>ts转换有多种方式，可以下载第三方软件（请自行下载安装）进行转换，也可以使用FFmpeg软件进行转换。下面将介绍使用FFmpeg将.ts转换为MP4。</p>
+<h4 id="一、单个-ts文件转为MP4格式。"><a href="#一、单个-ts文件转为MP4格式。" class="headerlink" title="一、单个.ts文件转为MP4格式。"></a>一、单个.ts文件转为MP4格式。</h4><p>1、首先， <strong>下载并安装FFmpeg</strong> 。这是一个功能强大的多媒体工具，它可以把.ts 变成 MP4。你可以在 <a target="_blank" rel="noopener" href="http://www.ffmpeg.org/download.html" title="FFmpeg官网">FFmpeg官网</a> 找到它。 windows 下下载 <a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=zip%E6%96%87%E4%BB%B6%E8%A7%A3%E5%8E%8B&spm=1001.2101.3001.7020">zip文件解压</a> 配置环境就可以使用。</p>
+<p>2、 <strong>打开命令行</strong> ，在Windows上，你可以按下Win + R，输入”cmd”，然后按Enter。在macOS上，找到终端应用。</p>
+<p>3、 <strong>前往目标文件夹</strong> ：使用 “cd” 命令导航到.ts 文件所在的文件夹。比如你的.ts 文件在”D:\Videos”文件夹中，那就输入：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> D:\Videos</span><br></pre></td></tr></table></figure>
+
+<p>3.1、 <strong>输入ffmpeg命令</strong> ，就可以将.ts 转为 MP4</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg -i yourfilename.ts output.mp4</span><br></pre></td></tr></table></figure>
+
+<p>将 yourfilename.ts 替换为你的.ts文件名称，output.mp4为你想要的输出的文件名。</p>
+<p>回车后，等待FFmpeg完成，就可以得到一个全新的MP4文件。</p>
+<h4 id="二、将多个-ts文件合并为一个MP4文件。"><a href="#二、将多个-ts文件合并为一个MP4文件。" class="headerlink" title="二、将多个.ts文件合并为一个MP4文件。"></a>二、将多个.ts文件合并为一个MP4文件。</h4><p><strong>1、合并少量.ts文件</strong></p>
+<p>直接写文件名，文件之间使用 | 隔开。如下所示：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg -i <span class="string">&quot;concat:1.ts|2.ts|3.ts|4.ts|.5.ts|&quot;</span> -c copy output.mp4</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">ffmpeg -i <span class="string">&quot;concat:1.ts|2.ts|3.ts|4.ts|.5.ts&quot;</span> -acodec copy -vcodec copy -absf aac_adtstoasc output.mp4</span><br></pre></td></tr></table></figure>
+
+<p><strong>2、合并多个.ts文件</strong></p>
+<p>需要将多个.ts文件名路径保存再一个txt文档中，而且格式必须一致，不能有中文，比如：file.txt文件，格式如下：file ‘文件路径’</p>
+<p><strong>2.1、新建file.txt文档：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">file <span class="string">&#x27;D:\Videos\1.ts&#x27;</span></span><br><span class="line">file <span class="string">&#x27;D:\Videos\2.ts&#x27;</span></span><br><span class="line">file <span class="string">&#x27;D:\Videos\3.ts&#x27;</span></span><br><span class="line">file <span class="string">&#x27;D:\Videos\4.ts&#x27;</span></span><br><span class="line">file <span class="string">&#x27;D:\Videos\5.ts&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>注意:这里必须是单引号,双引号会报错。</p>
+<p><strong>2.2、执行FFmpeg命令</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -safe 0: 防止Operation not permitted</span></span><br><span class="line"></span><br><span class="line">ffmpeg.exe -f concat -safe 0 -i file.txt -c copy out.mp4</span><br></pre></td></tr></table></figure>
+
+<p>有时使用上面的命令会出现如下错误： alformed AAC bitstream detected: use the audio bitstream filter ‘aac_adtstoasc’ to fix it (‘-bsf:a aac_adtstoasc’ option with ffmpeg)</p>
+<p>![[_resources&#x2F;abd7511b95b7230ebe58776e23176094_MD5.png]]</p>
+<p>原因：<br>音频数据是AAC流，在解码时需要ADTS(Audio Data Transport Stream)头部，不管是容器封装还是流媒体，没有这个，一般都是不能播放的。</p>
+<p>改为输入下面的命令即可解决：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg -f concat -safe 0  -i file.txt -c:v copy -c:a copy -bsf:a aac_adtstoasc output.mp4</span><br></pre></td></tr></table></figure>
+
+<p>至此文件就合并完成啦。</p>
+<h3 id="下面讲解FFmpeg下载与安装过程"><a href="#下面讲解FFmpeg下载与安装过程" class="headerlink" title="下面讲解FFmpeg下载与安装过程"></a>下面讲解FFmpeg下载与安装过程</h3><h4 id="1、首先，打开下载。"><a href="#1、首先，打开下载。" class="headerlink" title="1、首先，打开下载。"></a>1、首先，打开下载。</h4><p>![[_resources&#x2F;c0895978e1b8c91972ecb0bbe887ed97_MD5.png]]</p>
+<p>点开后，下载如下文件</p>
+<p>![[_resources&#x2F;42b761ce8b81a4f2fa5cd5ba6d1b5353_MD5.png]]</p>
+<h4 id="2、下载后解压，配置环境变量"><a href="#2、下载后解压，配置环境变量" class="headerlink" title="2、下载后解压，配置环境变量"></a>2、下载后解压，配置环境变量</h4><p>下载解压后，再bin文件夹下能看到三个可执行程序：ffmpeg、ffplay、ffprobe，将bin文件夹配置到环境变量，配置好后即可使用。</p>
+<p>![[_resources&#x2F;872a3b6ce2e68719a82f1e8b34bb1377_MD5.png]]</p>
+<p>验证是否成功：cmd窗口，输入：ffmpeg -version。如下图所示即表示安装成功。</p>
+<p>![[_resources&#x2F;45cea78b752e8d9b303e858bd847ce49_MD5.png]]</p>
+<h4 id="3、简单使用"><a href="#3、简单使用" class="headerlink" title="3、简单使用"></a>3、简单使用</h4><p>3.1、使用ffmpeg获取视频的一些信息：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ffprobe -show_format D:\恼人的秋风.mp4</span><br></pre></td></tr></table></figure>
+
+<p>3.2、播放音频文件命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ffplay D:\恼人的秋风.mp4</span><br></pre></td></tr></table></figure>
+
+<p>这时候就会弹出来一个窗口，一边播放MP3文件，一边将播放音频的图画到该窗口上。针对该窗口的操作如下：</p>
+<p>点击该窗口的任意一个位置，ffplay会按照点击的位置计算出时间的进度，然后seek到计算出来的时间点继续播放。<br>按下键盘的左键默认快退10s，右键默认快进10s，上键默认快进1min，下键默认快退1min。<br>按ESC就退出播放进程，按W会绘制音频的波形图。</p>
+<h4 id="4、介绍FFmpeg-组成"><a href="#4、介绍FFmpeg-组成" class="headerlink" title="4、介绍FFmpeg 组成"></a>4、介绍FFmpeg 组成</h4><p>构成FFmpeg主要有三个部分</p>
+<p><strong>4.1、第一部分是三个作用不同的工具软件</strong> ，分别是：<br>ffmpeg.exe、ffplay.exe、 ffprobe.exe。</p>
+<p>ffmpeg.exe：音视频转码、转换器<br>ffplay.exe：简单的音视频播放器<br>ffprobe.exe：简单的多媒体码流分析器<br><strong>4.2、第二部分是可以供开发者使用的 SDK，为各个不同平台编译完成的</strong> 库。</p>
+<p>如果说上面的四个工具软件都是完整成品形式的玩具，那么这些库就相当于乐高积木一样，我们可以根据自己的需求使用这些库开发自己的应用程序。这些库有：</p>
+<p>libavcodec：包含音视频编码器和解码器<br>libavutil：包含多媒体应用常用的简化编程的工具，如随机数生成器、数据结构、数学函数等功能<br>libavformat：包含多种多媒体容器格式的封装、解封装工具<br>libavfilter：包含多媒体处理常用的滤镜功能<br>libavdevice：用于音视频数据采集和渲染等功能的设备相关<br>libswscale：用于图像缩放和色彩空间和像素格式转换功能<br>libswresample：用于音频重采样和格式转换等功能</p>
+<p><strong>4.3、第三部分是整个工程的源代码</strong> ，无论是编译出来的可执行程序还是SDK，都是由这些源代码编译出来的。</p>
+<p>FFmpeg 的源代码由C语言实现，主要在 Linux 平台上进行开发。FFmpeg 不是一个孤立的工程，它还存在多个依赖的第三方工程来增强它自身的功能。在当前这一系列的博文&#x2F;视频中，我们暂时不会涉及太多源代码相关的内容，主要以 FFmpeg 的工具和SDK的调用为主。到下一系列我们将专门研究如何编译源代码并根据源代码来进行二次开发。</p>
+<p><strong>5、关于ffmpeg的命令行参数</strong> ，查看 <a target="_blank" rel="noopener" href="https://ffmpeg.org/documentation.html" title="ffmpeg官方文档">ffmpeg官方文档</a></p>
+<p>![[_resources&#x2F;fd408b4d1601ae552db5794662a801f4_MD5.png]]</p>
+<p>登录后您可以享受以下权益：</p>
+<ul>
+<li>免费复制代码</li>
+<li>和博主大V互动</li>
+<li>下载海量资源</li>
+<li>发动态&#x2F;写文章&#x2F;加入社区<br>×</li>
+</ul>
+<p>实付 元</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/loveliqi/article/details/">使用余额支付</a></p>
+<p>点击重新获取</p>
+<p>扫码支付</p>
+<p>钱包余额 0</p>
+<p>抵扣说明：</p>
+<p>1.余额是钱包充值的虚拟货币，按照1:1的比例进行支付金额的抵扣。<br>2.余额无法直接购买下载，可以购买VIP、付费专栏及课程。</p>
+<p><a target="_blank" rel="noopener" href="https://i.csdn.net/#/wallet/balance/recharge">余额充值</a></p>
+<p>举报</p>
+<p> [![[_resources&#x2F;35c7362356adf5a11cd3cc47fd01628f_MD5.png]] 点击体验<br>DeepSeekR1满血版](<a target="_blank" rel="noopener" href="https://ai.csdn.net/?utm_source=cknow_pc_blogdetail&spm=1001.2101.3001.10583">https://ai.csdn.net/?utm_source=cknow_pc_blogdetail&amp;spm=1001.2101.3001.10583</a>) ![[_resources&#x2F;90bd0cbf3aff8fdff8bf9b011b581e20_MD5.png]]</p>
+<p>程序员都在用的中文IT技术交流社区</p>
+<p>![[_resources&#x2F;08a47e60886378fe60a3d9c8f4ae8bc6_MD5.png]]</p>
+<p>专业的中文 IT 技术社区，与千万技术人共成长</p>
+<p>![[_resources&#x2F;a51be6c085b867a5bd82d8dc1cea9b46_MD5.png]]</p>
+<p>关注【CSDN】视频号，行业资讯、技术分享精彩不断，直播好礼送不停！</p>
+<p>客服 返回顶部</p>
+<p>![[_resources&#x2F;abd7511b95b7230ebe58776e23176094_MD5.png]] ![[_resources&#x2F;c0895978e1b8c91972ecb0bbe887ed97_MD5.png]] ![[_resources&#x2F;42b761ce8b81a4f2fa5cd5ba6d1b5353_MD5.png]] ![[_resources&#x2F;872a3b6ce2e68719a82f1e8b34bb1377_MD5.png]] ![[_resources&#x2F;45cea78b752e8d9b303e858bd847ce49_MD5.png]] ![[_resources&#x2F;fd408b4d1601ae552db5794662a801f4_MD5.png]]</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2025/06/03/%E4%BD%BF%E7%94%A8FFmpeg%E5%90%88%E5%B9%B6%E5%A4%9A%E4%B8%AAts%E8%A7%86%E9%A2%91%E6%96%87%E4%BB%B6%E8%BD%AC%E4%B8%BAmp4%E6%A0%BC%E5%BC%8F_ffmpeg%E5%90%88%E5%B9%B6ts%E8%A7%86%E9%A2%91-CSDN%E5%8D%9A%E5%AE%A2/">https://yhao521.github.io/2025/06/03/%E4%BD%BF%E7%94%A8FFmpeg%E5%90%88%E5%B9%B6%E5%A4%9A%E4%B8%AAts%E8%A7%86%E9%A2%91%E6%96%87%E4%BB%B6%E8%BD%AC%E4%B8%BAmp4%E6%A0%BC%E5%BC%8F_ffmpeg%E5%90%88%E5%B9%B6ts%E8%A7%86%E9%A2%91-CSDN%E5%8D%9A%E5%AE%A2/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/%E6%95%99%E7%A8%8B/">教程</a><a class="post-meta__tags" href="/tags/linux/">linux</a><a class="post-meta__tags" href="/tags/%E6%91%98%E5%BD%95/">摘录</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/06/06/%E4%B8%80%E6%AC%BE%E8%B6%85%E7%BA%A7%E5%BC%BA%E5%A4%A7%E7%9A%84%E6%85%A2SQL%E6%8E%92%E6%9F%A5%E5%B7%A5%E5%85%B7%EF%BC%81-%E8%85%BE%E8%AE%AF%E4%BA%91%E5%BC%80%E5%8F%91%E8%80%85%E7%A4%BE%E5%8C%BA-%E8%85%BE%E8%AE%AF%E4%BA%91/" title="一款超级强大的慢SQL排查工具！-腾讯云开发者社区-腾讯云"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">一款超级强大的慢SQL排查工具！-腾讯云开发者社区-腾讯云</div></div><div class="info-2"><div class="info-item-1">开启慢查询日志在项目中我们会经常遇到慢查询，当我们遇到慢查询的时候一般都要开启慢查询日志，并且分析慢查询日志，找到慢sql，然后用explain来分析 系统变量MySQL和慢查询相关的系统变量如下    参数 含义    slow_query_log 是否启用慢查询日志， ON为启用，OFF为没有启用，默认为OFF   log_output 日志输出位置，默认为FILE，即保存为文件，若设置为TABLE，则将日志记录到mysql.show_log表中，支持设置多种格式   slow_query_log_file 指定慢查询日志文件的路径和名字   long_query_time 执行时间超过该值才记录到慢查询日志，单位为秒，默认为10   执行如下语句看是否启用慢查询日志，ON为启用，OFF为没有启用 代码语言：javascript 代码运行次数：0 运行 AI代码解释 1show variables like &quot;%slow_query_log%&quot;  ![[_resources&#x2F;ebc4491b983ccd73519e174d20342872_MD5...</div></div></div></a><a class="pagination-related" href="/2025/05/29/hygen%20%E8%87%AA%E5%8A%A8%E5%8C%96%E5%88%9B%E5%BB%BA%E6%A8%A1%E6%9D%BF%E6%96%87%E4%BB%B6%E7%A5%9E%E5%99%A8-CSDN%E5%8D%9A%E5%AE%A2/" title="hygen 自动化创建模板文件神器-CSDN博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">hygen 自动化创建模板文件神器-CSDN博客</div></div><div class="info-2"><div class="info-item-1">hygen是什么？作者的介绍是：一个简单，快速，可扩展的代码生成器。其用途是帮助开发者自动创建模板文件的工具，旨在提高开发效率，下面就来说说怎么在项目中使用hygen。hygen官方文档 1、全局安装hygen1npm i -g hygen  2、安装成功后cd到项目目录，然后在项目中初始化hygen1hygen init self  初始化之后项目中会多一个_templates的文件夹，generator是构建器文件夹，再下一级的文件夹名是对应创建文件时的命令，ejs.t 文件则是模板文件，详细的后面会讲解。 ![[_resources&#x2F;882d1eec9937f23bdd32d7078b6ee9c8_MD5.png]] 3、构建第一个自己的构建器，我这里跟官方文档一样起名为mygen1hygen generator new mygen  执行完上面的命令后，_templates文件夹下面就会多了一个mygen的文件夹 4、使用构建器创建第一个文件new就是mygen文件夹下面的new文件夹，执行这条命令就会创建new文件夹下面的所有模板 1hygen mygen n...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/10/08/Nacos%E9%83%A8%E7%BD%B2%E5%92%8C%E4%BD%BF%E7%94%A8%EF%BC%88%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C%E4%B8%8E%E5%8F%91%E7%8E%B0%E3%80%81%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83%EF%BC%89/" title="Nacos部署和使用（服务注册与发现、配置中心）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-10-08</div><div class="info-item-2">Nacos部署和使用（服务注册与发现、配置中心）</div></div><div class="info-2"><div class="info-item-1">1. docker部署nacos参考： docker安装nacos-CSDN博客 2.注册中心原理在微服务 远程调用 的过程中，包括两个角色：  服务提供者：提供接口供其它微服务访问，比如 A -service 服务消费者：调用其它微服务提供的接口，比如 B -service  在大型微服务项目中，服务提供者的数量会非常多，为了管理这些服务就引入了 注册中心 的概念。注册中心、服务提供者、服务消费者三者间关系如下： ![[_resources&#x2F;54aafdf158239178b56564502081dc22_MD5.png]] 流程如下：  服务启动时就会注册自己的服务信息（服务名、IP、端口）到注册中心 调用者可以从注册中心订阅想要的服务，获取服务对应的实例列表（1个服务可能多实例部署） 调用者自己对实例列表负载均衡(随机、轮询、IP的hash、最近最少访问…)，挑选一个实例 调用者向该实例发起远程调用  当服务提供者的实例宕机或者启动新实例时，调用者如何得知呢？  服务提供者会定期向注册中心发送请求，报告自己的健康状态（心跳请求） 当注册中心长时间收不到提供者的心跳...</div></div></div></a><a class="pagination-related" href="/2025/05/13/nginx%20%E5%BC%80%E5%90%AF%E7%9B%AE%E5%BD%95%E6%B5%8F%E8%A7%88%E5%8A%9F%E8%83%BD%E5%8F%8A%E4%B8%BB%E9%A2%98%E7%BE%8E%E5%8C%96/" title="nginx 开启目录浏览功能及主题美化"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-13</div><div class="info-item-2">nginx 开启目录浏览功能及主题美化</div></div><div class="info-2"><div class="info-item-1">![[_resources&#x2F;46515eaf0d7b8037451bd4cc691c1efa_MD5.png]] 1.开启目录浏览功能Nginx 提供了相应的 ngx_http_autoindex_module 模块该模块有以下几个命令：    命令 默认值 值域 作用域 EG    autoindex off on：开启目录浏览；off：关闭目录浏览 http, server, location autoindex on; 打开目录浏览功能   autoindex_format html html、xml、json、jsonp 分别用这几个风格展示目录 http, server, location autoindex_format html;  以网页的风格展示目录内容。该属性在 1.7.9 及以上适用   autoindex_exact_size on on：展示文件字节数； off：以可读的方式显示文件大小 http, server, location autoindex_exact_size off; 以可读的方式显示文件大小，单位为 KB、MB 或者 GB，a...</div></div></div></a><a class="pagination-related" href="/2025/08/07/Ollama%E8%BF%9B%E9%98%B6%EF%BC%8C%E5%9C%A8Python%E3%80%81Java%E3%80%81Go%E9%A1%B9%E7%9B%AE%E4%B8%AD%E9%9B%86%E6%88%90Deepseek%E3%80%81QWQ%E5%A4%A7%E6%A8%A1%E5%9E%8B/" title="Ollama进阶，在Python、Java、Go项目中集成Deepseek、QWQ大模型"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-08-07</div><div class="info-item-2">Ollama进阶，在Python、Java、Go项目中集成Deepseek、QWQ大模型</div></div><div class="info-2"><div class="info-item-1">Ollama系列文章：Ollama入门，一键启动本地DeepSeek大模型Ollama入门，Ollama技术架构与原理Ollama进阶，在Python、Java、Go项目中集成Deepseek、QWQ大模型Ollama进阶，在Javascript(nodejs)前后端项目中集成Deepseek、QWQ大模型Ollama高手，玩转本地自定义大模型（LLM）Ollama高手，调优Ollama环境变量，提高性能与安全性Ollama高手，调优Ollama模型参数，提高模型输出质量  在“ Ollama入门，一键启动本地DeepSeek大模型 ”一文中，我们介绍了Ollama的基本使用方法，同时也推荐了ChatBox、Cherry Studio等AI智能客户端来完成文字、图片、语音等多模态输入，实现与 AI 的交互。 但是，仅仅这样常常不足以满足实际的需要，而在线版的Deepseek、ChatGPT、豆包往往可以提供更好功能，这样在本地部署DeepSeek大模型就成了geek的自娱自乐了，因此我们必须将Ollama整合到项目中去，让它与自有系统整合起来，实现更加丰富的功能。 1、如何调用O...</div></div></div></a><a class="pagination-related" href="/2025/05/15/Flux%E2%80%9C%E7%82%BC%E4%B8%B9%E7%82%89%E2%80%9D%E2%80%94%E2%80%94fluxgym%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B-CSDN%E5%8D%9A%E5%AE%A2/" title="Flux“炼丹炉”——fluxgym安装教程-CSDN博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-15</div><div class="info-item-2">Flux“炼丹炉”——fluxgym安装教程-CSDN博客</div></div><div class="info-2"><div class="info-item-1">一、介绍这个炼丹炉目前可以训练除了 flux -dev之外的其它模型，只需更改一个配置文件内容即可。重要的是训练时不需要提前进行图片裁剪、打标等前置工作，只需下图的三个步骤即可开始训练。它就是——fluxgym。 ![[_resources&#x2F;df2678e42e581944c5c0fb9d9966148e_MD5.png]] fluxgym：用于训练具有低 VRAM （12GB&#x2F;16GB&#x2F;20GB） 支持的 FLUX LoRA 的简单 Web UI，它具有 AI-Toolkit WebUI 的简单性和 Kohya Scripts 的 灵活性 。  前端：是从 AI-Toolkit（ https://x.com/multimodalart 创建的 Gradio UI）分叉而来的 WebUI) 后端**：** 由 Kohya Scripts 提供支持的训练脚本  它通过默认隐藏的 Advanced 选项卡支持 100% 的 Kohya sd-scripts 功能。 二、怎么安装？介绍完丹炉，我们来看看如何获取吧，本安装教程属于手把手教学，因为网络问题无法...</div></div></div></a><a class="pagination-related" href="/2025/09/22/%E7%BB%88%E7%AB%AF%E6%95%88%E7%8E%87%E6%8F%90%E5%8D%87%E7%A5%9E%E5%99%A8%EF%BC%9AiTerm2%20%E7%9A%84%E8%BF%9B%E9%98%B6%E6%8A%80%E5%B7%A7%E5%88%86%E4%BA%AB/" title="终端效率提升神器：iTerm2 的进阶技巧分享"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-09-22</div><div class="info-item-2">终端效率提升神器：iTerm2 的进阶技巧分享</div></div><div class="info-2"><div class="info-item-1">目录 收起 Command Composer Snippets Triggers tmux 集成 Shell integration 快速跳转到上一个 prompt 终端内看图片 服务器右键下载文件 AI 能力 配置 一问一答 交互式一步步指导 Status bar ![[_resources&#x2F;db5e50c1e07471fd14b3ba9213ad777c_MD5.jpg]] 用 iTerm2 的人很多，相关分享也很多，但介绍一些“藏得比较深”的功能分享很少见。iTerm2 最优秀的点就在于它打破了很多终端的传统的使用范式，增加了很多实用的、现代的、与图形界面相结合的功能，这些功能时常让人忽然意识到：“对哦，终端为什么不可以这样呢？”。 所以，本文分享一些其中个人觉得十分实用的技巧，也是 iTerm2 区别于绝大部分其它终端的独特功能。 Command Composer 输入长命令的时候，想修改中间的内容一点一点移动光标是不是十分痛苦？为什么不可以搞个文本编辑框呢？Composer 就是做这个的。点击 “View-Show Composer”或按 “Shift+Cmd...</div></div></div></a><a class="pagination-related" href="/2026/03/18/Docker%20%E4%B8%AD%E5%AE%89%E8%A3%85%20PostgreSQL%2016%20%E5%B9%B6%E9%85%8D%E7%BD%AE%20pgvector/" title="Docker 中安装 PostgreSQL 16 并配置 pgvector"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-18</div><div class="info-item-2">Docker 中安装 PostgreSQL 16 并配置 pgvector</div></div><div class="info-2"><div class="info-item-1">一、环境准备1. 确认 Docker 版本123bash docker --version# Docker version 28.3.3, build 980b856# 如版本低于27.0，请先升级  2. 创建专用网络（生产环境必备）1lua docker network create pg-network  作用 ：  隔离数据库流量 避免端口冲突 方便后续扩展（如连接应用容器）  二、PostgreSQL 16 容器化部署1. 搜索镜像1sql docker search postgres  2. 拉取官方镜像（指定版本）1docker pull postgres:16  3. 创建持久化数据卷1lua docker volume create pgdata  生产环境重要性 ：  容器重启&#x2F;删除时数据不丢失 独立于容器生命周期管理 方便备份迁移  4. 启动 PostgreSQL 容器（生产优化版）123456789101112131415161718192021ini docker run -d \  --name postgres \  --network ...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0"><span class="toc-number">2.</span> <span class="toc-text">实现</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%8D%95%E4%B8%AA-ts%E6%96%87%E4%BB%B6%E8%BD%AC%E4%B8%BAMP4%E6%A0%BC%E5%BC%8F%E3%80%82"><span class="toc-number">3.</span> <span class="toc-text">一、单个.ts文件转为MP4格式。</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%B0%86%E5%A4%9A%E4%B8%AA-ts%E6%96%87%E4%BB%B6%E5%90%88%E5%B9%B6%E4%B8%BA%E4%B8%80%E4%B8%AAMP4%E6%96%87%E4%BB%B6%E3%80%82"><span class="toc-number">4.</span> <span class="toc-text">二、将多个.ts文件合并为一个MP4文件。</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8B%E9%9D%A2%E8%AE%B2%E8%A7%A3FFmpeg%E4%B8%8B%E8%BD%BD%E4%B8%8E%E5%AE%89%E8%A3%85%E8%BF%87%E7%A8%8B"><span class="toc-number">5.</span> <span class="toc-text">下面讲解FFmpeg下载与安装过程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1%E3%80%81%E9%A6%96%E5%85%88%EF%BC%8C%E6%89%93%E5%BC%80%E4%B8%8B%E8%BD%BD%E3%80%82"><span class="toc-number">5.1.</span> <span class="toc-text">1、首先，打开下载。</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2%E3%80%81%E4%B8%8B%E8%BD%BD%E5%90%8E%E8%A7%A3%E5%8E%8B%EF%BC%8C%E9%85%8D%E7%BD%AE%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F"><span class="toc-number">5.2.</span> <span class="toc-text">2、下载后解压，配置环境变量</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3%E3%80%81%E7%AE%80%E5%8D%95%E4%BD%BF%E7%94%A8"><span class="toc-number">5.3.</span> <span class="toc-text">3、简单使用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4%E3%80%81%E4%BB%8B%E7%BB%8DFFmpeg-%E7%BB%84%E6%88%90"><span class="toc-number">5.4.</span> <span class="toc-text">4、介绍FFmpeg 组成</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

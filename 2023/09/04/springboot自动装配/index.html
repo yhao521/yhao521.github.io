@@ -1,0 +1,259 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>springboot自动装配 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="title: springboot自动装配date: 2023-09-03 20:17:08category:  开发语言 java springboottag: springbootauthor:   springboot自动装配1、自动装配是什么及作用springboot的自动装配实际上就是为了从spring.factories文件中获取到对应的需要进行自动装配的类，并生成相应的Bean对象">
+<meta property="og:type" content="article">
+<meta property="og:title" content="springboot自动装配">
+<meta property="og:url" content="https://yhao521.github.io/2023/09/04/springboot%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="title: springboot自动装配date: 2023-09-03 20:17:08category:  开发语言 java springboottag: springbootauthor:   springboot自动装配1、自动装配是什么及作用springboot的自动装配实际上就是为了从spring.factories文件中获取到对应的需要进行自动装配的类，并生成相应的Bean对象">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2023-09-04T03:18:09.000Z">
+<meta property="article:modified_time" content="2023-09-04T03:18:27.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="go&#x2F;programming">
+<meta property="article:tag" content="java&#x2F;programming">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "springboot自动装配",
+  "url": "https://yhao521.github.io/2023/09/04/springboot%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2023-09-04T03:18:09.000Z",
+  "dateModified": "2023-09-04T03:18:27.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2023/09/04/springboot%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'springboot自动装配',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">springboot自动装配</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">springboot自动装配</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-09-04T03:18:09.000Z" title="发表于 2023-09-04 11:18:09">2023-09-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-09-04T03:18:27.000Z" title="更新于 2023-09-04 11:18:27">2023-09-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><hr>
+<p>title: springboot自动装配<br>date: 2023-09-03 20:17:08<br>category:</p>
+<ul>
+<li>开发语言</li>
+<li>java</li>
+<li>springboot<br>tag:</li>
+<li>springboot<br>author:</li>
+</ul>
+<hr>
+<h1 id="springboot自动装配"><a href="#springboot自动装配" class="headerlink" title="springboot自动装配"></a>springboot自动装配</h1><h2 id="1、自动装配是什么及作用"><a href="#1、自动装配是什么及作用" class="headerlink" title="1、自动装配是什么及作用"></a>1、自动装配是什么及作用</h2><p>springboot的自动装配实际上就是为了从spring.factories文件中获取到对应的需要进行自动装配的类，并生成相应的Bean对象，然后将它们交给spring容器来帮我们进行管理</p>
+<h2 id="2、spring自动装配的原理"><a href="#2、spring自动装配的原理" class="headerlink" title="2、spring自动装配的原理"></a>2、spring自动装配的原理</h2><h3 id="2-1、启动类上注解的作用"><a href="#2-1、启动类上注解的作用" class="headerlink" title="2.1、启动类上注解的作用"></a>2.1、启动类上注解的作用</h3><p>@SpringBootApplication</p>
+<p>这个注解是springboot启动类上的一个注解，是一个组合注解，也就是由其他注解组合起来，它的主要作用就是标记说明这个类是springboot的主配置类，springboot应该运行这个类里面的main()方法来启动程序</p>
+<p><img src="/img/bfe74f5f2dff4e278df349bf41ae840d.png" alt="在这里插入图片描述"></p>
+<p>这个注解主要由三个子注解组成：</p>
+<p>@SpringBootConfiguration<br>@EnableAutoConfiguration<br>@ComponentScan</p>
+<p><img src="/img/9e064d08a9484af0978f34aa0f519815.png" alt="在这里插入图片描述"></p>
+<p>@SpringBootConfiguration</p>
+<p>这个注解包含了@Configuration，@Configuration里面又包含了一个@Component注解，也就是说，这个注解标注在哪个类上，就表示当前这个类是一个配置类，而配置类也是spring容器中的组件</p>
+<p><img src="/img/9ffcf2fa6a4f41008c8be1f76755bdb8.png" alt="在这里插入图片描述"></p>
+<p><img src="/img/beaf9410c6ff4f368cad756ec38a0602.png" alt="在这里插入图片描述"></p>
+<p>@EnableAutoConfiguration</p>
+<p>这个注解是开启自动配置的功能，里面包含了两个注解</p>
+<p>@AutoConfigurationPackage<br>@Import（AutoConfigurationImportSelector.class）</p>
+<p><img src="/img/8ed81baf3156416497964a2b4688c305.png" alt="在这里插入图片描述"></p>
+<p>@AutoConfigurationPackage</p>
+<p>这个注解的作用说白了就是将主配置类（@SpringBootApplication标注的类）所在包以及子包里面的所有组件扫描并加载到spring的容器中，这也就是为什么我们在利用springboot进行开发的时候，无论是Controller还是Service的路径都是与主配置类同级或者次级的原因</p>
+<p><img src="/img/watermark-1.png" alt="在这里插入图片描述"></p>
+<p>@Import(AutoConfigurationImportSelector.class)</p>
+<p>上一个注解我们把所有组件都加载到了容器里面，这个注解就是将需要自动装配的类以全类名的方式返回，那是怎么找到哪些是需要自动装配的类呢？</p>
+<p>1、AutoConfigurationImportSelector这个类里面有一个方法selectImports()，如下</p>
+<p><img src="/img/1ea8b6a5b9654036945c8dc29448b9d0.png" alt="在这里插入图片描述"></p>
+<p>2、在selectImport()方法里调用了一个getAutoConfigurationEntry()方法，这个方法里面又调用了一个getCandidateConfigurations()方法</p>
+<p><img src="/img/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NET-8.png" alt="在这里插入图片描述"></p>
+<p>3、在getCandidateConfigurations()方法里面调用了loadFactoryNames()方法</p>
+<p><img src="/img/f212ef804fa8476dbf244ba5427f5429.png" alt="在这里插入图片描述"></p>
+<p>4、loadFactoryNames()方法里面又调用了一个loadSpringFactories()方法</p>
+<p><img src="/img/6201de573e2e4730a707f0bceaf818a3.png" alt="在这里插入图片描述"></p>
+<p>5、关键就在这个loadSpringFactories()方法里面，在这个方法里，它会查找所有在META-INF路径下的spring.factories文件</p>
+<p><img src="/img/da917e16f65b409e91c378c4e3694a2e.png" alt="在这里插入图片描述"></p>
+<p><img src="/img/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NET-7.png" alt="在这里插入图片描述"></p>
+<p>6、在META-INF&#x2F;spring.factories这个文件里面的数据是以键&#x3D;值的方式存储，然后解析这些文件，找出以EnableAutoConfiguration为键的所有值，以列表的方式返回</p>
+<p><img src="/img/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NET-10.png" alt="在这里插入图片描述"></p>
+<p><img src="/img/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NET-9.png" alt="在这里插入图片描述"></p>
+<p>@ComponentScan</p>
+<p>这个注解的作用就是扫描当前包及子包的注解</p>
+<h3 id="2-2、springboot自动装配的流程"><a href="#2-2、springboot自动装配的流程" class="headerlink" title="2.2、springboot自动装配的流程"></a>2.2、springboot自动装配的流程</h3><p>1、在springboot启动的时候会创建一个SpringApplication对象，在对象的构造方法里面会进行一些参数的初始化工作，最主要的是判断当前应用程序的类型以及设置初始化器以及监听器，并在这个过程中会加载整个应用程序的spring.factories文件，将文件中的内容放到缓存当中，方便后续获取；</p>
+<p>2、SpringApplication对象创建完成之后会执行run()方法来完成整个应用程序的启动，启动的过程中有两个最主要的方法prepareContext()和refreshContext()，在这两个方法中完成了自动装配的核心功能，在run()方法里还执行了一些包括上下文对象的创建，打印banner图，异常报告期的准备等各个准备工作，方便后续进行调用；</p>
+<p>3、在prepareContext()中主要完成的是对上下文对象的初始化操作，包括属性的设置，比如设置环境变量。在整个过程中有一个load()方法，它主要是完成一件事，那就是将启动类作为一个beanDefinition注册到registry，方便后续在进行BeanFactoryPostProcessor调用执行的时候，可以找到对应执行的主类，来完成对@SpringBootApplication、@EnableAutoConfiguration等注解的解析工作；</p>
+<p>4、在refreshContext()方法中会进行整个容器的刷新过程，会调用spring中的refresh()方法，refresh()方法中有13个非常关键的方法，来完成整个应用程序的启动。而在自动装配过程中，会调用的关键的一个方法就是invokeBeanFactoryPostProcessors()方法，在这个方法中主要是对ConfigurationClassPostProcessor类的处理，这个类是BFPP（BeanFactoryPostProcessor）的子类，因为实现了BDRPP（BeanDefinitionRegistryPostProcessor）接口，在调用的时候会先调用BDRPP中的postProcessBeanDefinitionRegistry()方法，然后再调用BFPP中的postProcessBeanFactory()方法，在执行postProcessBeanDefinitionRegistry()方法的时候会解析处理各种的注解，包含@PropertySource、@ComponentScan、@Bean、@Import等注解，最主要的是对@Import注解的解析；</p>
+<p>5、在解析@Import注解的时候，会有一个getImport()方法，从主类开始递归解析注解，把所有包含@Import的注解都解析到，然后在processImport()方法中对import的类进行分类，例如AutoConfigurationImportSelect归属于ImportSelect的子类，在后续的过程中会调用DeferredImportSelectorHandler类里面的process方法，来完成整个EnableAutoConfiguration的加载。</p>
+<h2 id="3、相关注解的作用"><a href="#3、相关注解的作用" class="headerlink" title="3、相关注解的作用"></a>3、相关注解的作用</h2><p>@Conditional<br>这个注解主要作用在类上，表示条件注入，就是当满足某个条件的时候，这个类才会被注入到 IOC 容器中，例如@ConditionalOnMissingBean，这个注解就是当容器中没有配置特定的Bean的时候，这个组件才会被注册到ioc容器中，否则会直接忽略</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">自动配置中使用的条件化注解</span><br><span class="line">===============================================================================================================</span><br><span class="line"></span><br><span class="line">条件化注解 						    配置生效条件</span><br><span class="line">===============================================================================================================</span><br><span class="line"></span><br><span class="line">@ConditionalOnBean 					配置了某个特定Bean</span><br><span class="line">@ConditionalOnMissingBean 			没有配置特定的Bean</span><br><span class="line">@ConditionalOnClass 				Classpath里有指定的类</span><br><span class="line">@ConditionalOnMissingClass 			Classpath里缺少指定的类</span><br><span class="line">@ConditionalOnExpression 			给定的Spring Expression Language（SpEL）表达式计算结果为true</span><br><span class="line">@ConditionalOnJava 					Java的版本匹配特定值或者一个范围值</span><br><span class="line">@ConditionalOnJndi 					参数中给定的JNDI位置必须存在一个，如果没有给参数，则要有JNDI InitialContext</span><br><span class="line">@ConditionalOnProperty 				指定的配置属性要有一个明确的值</span><br><span class="line">@ConditionalOnResource 				Classpath里有指定的资源</span><br><span class="line">@ConditionalOnWebApplication 		这是一个Web应用程序</span><br><span class="line"></span><br><span class="line">@ConditionalOnNotWebApplication 	这不是一个Web应用程序</span><br><span class="line">===============================================================================================================</span><br><span class="line">来自https://blog.csdn.net/musi_m/article/details/91893357</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2023/09/04/springboot%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D/">https://yhao521.github.io/2023/09/04/springboot%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/java-programming/">java/programming</a><a class="post-meta__tags" href="/tags/go-programming/">go/programming</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2023/09/04/sqladvisor/" title="sqladvisor"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">sqladvisor</div></div><div class="info-2"><div class="info-item-1"> title: sqladvisordate: 2023-09-03 20:17:08category: tag: author:  启动 1docker run -d --name=sqladvisor  ppabc/sqladvisor  交互 1docker exec -it sqladvisor  bash  执行命令 1sqladvisor  -h 172.18.231.117 -u mysql -p mysql -P 3306 -d db1 -q &quot;select count(*) as count from wx_user as a where a.bindTag= 0 and  a.is_follow=1&quot; -v 1  非交互执行命令： 1docker exec  sqladvisor  sqladvisor  -h 172.18.231.117 -u mysql -p mysql -P 3306 -d db1 -q &quot;select count(*) as count from wx_user as a where a.bindTag=...</div></div></div></a><a class="pagination-related" href="/2023/09/04/oh-my-zsh%E5%9B%BD%E5%86%85%E9%95%9C%E5%83%8F/" title="oh-my-zsh国内镜像"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">oh-my-zsh国内镜像</div></div><div class="info-2"><div class="info-item-1"> title: oh-my-zsh国内镜像date: 2023-09-03 20:17:08category:  mactag: macauthor:   oh-my-zsh国内镜像安装依赖 git zsh  安装gitCentOS 升级安装最新版git 下载码云安装包sh 1wget https://gitee.com/mirrors/oh-my-zsh/raw/master/tools/install.sh  编辑install.sh找到以下部分 sh 12345# Default settingsZSH=$&#123;ZSH:-~/.oh-my-zsh&#125;REPO=$&#123;REPO:-ohmyzsh/ohmyzsh&#125;REMOTE=$&#123;REMOTE:-https://github.com/$&#123;REPO&#125;.git&#125;BRANCH=$&#123;BRANCH:-master&#125;  把 sh 12REPO=$&#123;REPO:-ohmyzsh/ohmyzsh&#125;REMOTE=$&#123;REMOTE...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/ulimit%E5%91%BD%E4%BB%A4/" title="ulimit命令"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">ulimit命令</div></div><div class="info-2"><div class="info-item-1"> title: ulimit命令date: 2023-09-03 20:17:08category: tag: author:  ulimit 命令。ulimit用于shell启动进程所占用的资源. 12345678910111213141516-H 设置硬资源限制.-S 设置软资源限制.-a 显示当前所有的资源限制.-c size:设置core文件的最大值.单位:blocks-d size:设置数据段的最大值.单位:kbytes-f size:设置创建文件的最大值.单位:blocks-l size:设置在内存中锁定进程的最大值.单位:kbytes-m size:设置可以使用的常驻内存的最大值.单位:kbytes-n size:设置内核可以同时打开的文件描述符的最大值.单位:n-p size:设置管道缓冲区的最大值.单位:kbytes-s size:设置堆栈的最大值.单位:kbytes-t size:设置CPU使用时间的最大上限.单位:seconds-v size:设置虚拟内存的最大值.单位:kbytes-u &lt;程序数目&gt; 　用户最多可开启的程序数目  ulimit ...</div></div></div></a><a class="pagination-related" href="/2024/03/09/%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2%E7%9A%84%E5%8E%9F%E5%9B%A0%E6%89%BE%E5%88%B0%E4%BA%86%EF%BC%8C%E7%BD%AA%E9%AD%81%E7%A5%B8%E9%A6%96%E5%B1%85%E7%84%B6%E6%98%AFJava%20TheadLocal/" title="内存泄露的原因找到了，罪魁祸首居然是Java TheadLocal"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-09</div><div class="info-item-2">内存泄露的原因找到了，罪魁祸首居然是Java TheadLocal</div></div><div class="info-2"><div class="info-item-1"> 本文首发我的微信公众号『爱笑的架构师』，欢迎大家关注。     ThreadLocal的value值存在哪里？ ThreadLocal类set方法 ThreadLocal类get方法   ThreadLocal相关类的关系总结 ThreadLocal内存模型原理 强引用弱引用的概念 强引用 弱引用 软引用 虚引用   内存泄露是不是弱引用的锅？ ThreadLocal最佳实践    组内来了一个实习生，看这小伙子春光满面、精神抖擞、头发微少，我心头一喜：绝对是个潜力股。于是我找经理申请亲自来带他，为了帮助小伙子快速成长，我给他分了一个需求，这不需求刚上线几天就出网上问题了😭后台监控服务发现内存一直在缓慢上升，初步怀疑是内存泄露。 把实习生的PR都找出来仔细review，果然发现问题了。由于公司内部代码是保密的，这里简单写一个demo还原场景（忽略代码风格问题）。 1234567891011121314151617181920public class ThreadPoolDemo &#123;    private static final ThreadPoolExecutor...</div></div></div></a><a class="pagination-related" href="/2023/09/04/Mac%E5%A4%9A%E7%89%88%E6%9C%ACjdk%E7%9A%84%E5%88%87%E6%8D%A2/" title="Mac多版本jdk的切换"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">Mac多版本jdk的切换</div></div><div class="info-2"><div class="info-item-1"> title: Mac多版本jdk的切换date: 2023-09-03 20:17:08category:  mactag: macauthor:   Mac多版本jdk的切换1.我有两个版本的jdk：15 和 8 默认安装路径：&#x2F;Library&#x2F;Java&#x2F;JavaVirtualMachines&#x2F; 2.在15和8之间切换： ​ 2.1打开终端，输入如下命令：open -e .bash_profile ​ 2.2在文本里加入如下代码： 1234567891011121314export JAVA_8_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_333.jdk/Contents/Homeexport JAVA_19_HOME=/Users/yhao521/storage/Environment/java/openjdk-19.jdk/Contents/Homeexport JAVA_18_HOME=/Library/Java/JavaVirtualMachines/jdk-18.0.2.1....</div></div></div></a><a class="pagination-related" href="/2023/09/04/mac%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E8%AE%BE%E7%BD%AE/" title="mac环境变量设置"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">mac环境变量设置</div></div><div class="info-2"><div class="info-item-1"> title: mac环境变量设置date: 2023-09-03 20:17:08category:  mactag: macauthor:   mac环境变量设置123456789101112131415161718192021222324# my envenv_path=/Volumes/storage/Environmentexport JAVA_HOME=/Users/yhao521/Library/Java/JavaVirtualMachines/liberica-1.8.0_312export MAVEN_HOME=$env_path/apache-maven-3.8.4export ALLURE_COMMAND=$env_path/allure-2.15.0export CHROME_DRIVER=$env_path/webdriversexport PATH=$JAVA_HOME/bin:$MAVEN_HOME/bin:$ALLURE_COMMAND/bin:$CHROME_DRIVER:$PATH:.export PATH=~/npm_global/bin:$...</div></div></div></a><a class="pagination-related" href="/2023/09/04/web%E9%A1%B9%E7%9B%AE%E6%94%B9%E4%B8%BAmaven/" title="web项目改为maven"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">web项目改为maven</div></div><div class="info-2"><div class="info-item-1"> title: web项目改为mavendate: 2023-09-03 20:17:08category: tag: author:  web项目改为maven1.1 **web项目改为maven**1.1.1 **改造过程**1)选中当前项目–&gt;右键–&gt;Configure–&gt;Convert to Maven Project； 2)创建目录 src&#x2F;main&#x2F;java,src&#x2F;main&#x2F;resources,src&#x2F;test&#x2F;java,src&#x2F;test&#x2F;resources，并将源src目录下的内容进行迁移到src&#x2F;main&#x2F;java ; Conf目录下内容迁移到src&#x2F;main&#x2F;resources 3)创建src&#x2F;main&#x2F;webapp目录并将WebRoot目录下的内容进行迁移到该目录下 4)jar包通过pom.xml文件引入 5)打开pom.xml文件–&gt;切换到pom.xml视图–&gt;删除标签：sourceDir...</div></div></div></a><a class="pagination-related" href="/2024/03/09/Java%E5%9F%BA%E7%A1%80%E5%85%A5%E9%97%A880%E9%97%AE/" title="Java基础入门80问"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-09</div><div class="info-item-2">Java基础入门80问</div></div><div class="info-2"><div class="info-item-1"> 本文首发我的微信公众号『爱笑的架构师』，欢迎大家关注。     1.一个”.java”源文件中是否可以包括多个类（不是内部类）？有什么限制？ 2.Java有没有goto? 3.说说&amp;和&amp;&amp;的区别 4.在JAVA中如何跳出当前的多重嵌套循环？ 5.switch语句能否作用在byte上，能否作用在long上，能否作用在String上? 6.short s1 &#x3D; 1; s1 &#x3D; s1 + 1;有什么错? short s1 &#x3D; 1; s1 +&#x3D; 1;有什么错? 7.char型变量中能不能存贮一个中文汉字?为什么? 8.用最有效率的方法算出2乘以8等于几? 9.请设计一个一百亿的计算器 10.使用final关键字修饰一个变量时，是引用不能变，还是引用的对象不能变？ 11.”&#x3D;&#x3D;”和equals方法究竟有什么区别？ 12.静态变量和实例变量的区别？ 13.是否可以从一个static方法内部发出对非static方法的调用？ 14.Integer与int的区别 15.Math.round(11.5)等于多少? ...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#springboot%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D"><span class="toc-number">1.</span> <span class="toc-text">springboot自动装配</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1%E3%80%81%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D%E6%98%AF%E4%BB%80%E4%B9%88%E5%8F%8A%E4%BD%9C%E7%94%A8"><span class="toc-number">1.1.</span> <span class="toc-text">1、自动装配是什么及作用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2%E3%80%81spring%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D%E7%9A%84%E5%8E%9F%E7%90%86"><span class="toc-number">1.2.</span> <span class="toc-text">2、spring自动装配的原理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1%E3%80%81%E5%90%AF%E5%8A%A8%E7%B1%BB%E4%B8%8A%E6%B3%A8%E8%A7%A3%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="toc-number">1.2.1.</span> <span class="toc-text">2.1、启动类上注解的作用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2%E3%80%81springboot%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D%E7%9A%84%E6%B5%81%E7%A8%8B"><span class="toc-number">1.2.2.</span> <span class="toc-text">2.2、springboot自动装配的流程</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3%E3%80%81%E7%9B%B8%E5%85%B3%E6%B3%A8%E8%A7%A3%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="toc-number">1.3.</span> <span class="toc-text">3、相关注解的作用</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

@@ -1,0 +1,238 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>管控平台@Fastjson反序列化漏洞修复@20220530 | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="管控平台@Fastjson反序列化漏洞修复@20220530关于Fastjson反序列化漏洞的安全通告Fastjson是阿里巴巴公司的一个开源java库，可用于将Java对象转换为其JSON表示，还可用于将JSON字符串转换为等效的Java对象，其性能从未被其他Java实现的JSON库超越。近日，Fastjson官方发布了安全公告，解决了在Fastjson中存在的一个反序列化漏洞，请受影响用户尽快">
+<meta property="og:type" content="article">
+<meta property="og:title" content="管控平台@Fastjson反序列化漏洞修复@20220530">
+<meta property="og:url" content="https://yhao521.github.io/2022/05/30/%E7%AE%A1%E6%8E%A7%E5%B9%B3%E5%8F%B0@Fastjson%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%E4%BF%AE%E5%A4%8D@20220530/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="管控平台@Fastjson反序列化漏洞修复@20220530关于Fastjson反序列化漏洞的安全通告Fastjson是阿里巴巴公司的一个开源java库，可用于将Java对象转换为其JSON表示，还可用于将JSON字符串转换为等效的Java对象，其性能从未被其他Java实现的JSON库超越。近日，Fastjson官方发布了安全公告，解决了在Fastjson中存在的一个反序列化漏洞，请受影响用户尽快">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2022-05-29T21:50:24.000Z">
+<meta property="article:modified_time" content="2022-05-29T21:50:24.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="java&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "管控平台@Fastjson反序列化漏洞修复@20220530",
+  "url": "https://yhao521.github.io/2022/05/30/%E7%AE%A1%E6%8E%A7%E5%B9%B3%E5%8F%B0@Fastjson%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%E4%BF%AE%E5%A4%8D@20220530/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2022-05-29T21:50:24.000Z",
+  "dateModified": "2022-05-29T21:50:24.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2022/05/30/%E7%AE%A1%E6%8E%A7%E5%B9%B3%E5%8F%B0@Fastjson%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%E4%BF%AE%E5%A4%8D@20220530/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '管控平台@Fastjson反序列化漏洞修复@20220530',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">管控平台@Fastjson反序列化漏洞修复@20220530</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">管控平台@Fastjson反序列化漏洞修复@20220530</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-05-29T21:50:24.000Z" title="发表于 2022-05-30 05:50:24">2022-05-30</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-05-29T21:50:24.000Z" title="更新于 2022-05-30 05:50:24">2022-05-30</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="管控平台-Fastjson反序列化漏洞修复-20220530"><a href="#管控平台-Fastjson反序列化漏洞修复-20220530" class="headerlink" title="管控平台@Fastjson反序列化漏洞修复@20220530"></a>管控平台@Fastjson反序列化漏洞修复@20220530</h1><h1 id="关于Fastjson反序列化漏洞的安全通告"><a href="#关于Fastjson反序列化漏洞的安全通告" class="headerlink" title="关于Fastjson反序列化漏洞的安全通告"></a><strong>关于Fastjson反序列化漏洞的安全通告</strong></h1><p>Fastjson是阿里巴巴公司的一个开源java库，可用于将Java对象转换为其JSON表示，还可用于将JSON字符串转换为等效的Java对象，其性能从未被其他Java实现的JSON库超越。近日，Fastjson官方发布了安全公告，解决了在Fastjson中存在的一个反序列化漏洞，请受影响用户尽快安装更新补丁，避免受到影响。</p>
+<h2 id="一、-漏洞详情"><a href="#一、-漏洞详情" class="headerlink" title="一、 漏洞详情"></a>一、 <strong>漏洞详情</strong></h2><p>该漏洞是由于Fastjson在1.2.80及以下版本中使用黑白名单用于防御反序列化漏洞，但是该防御策略在特定条件下可绕过默认 autoType。恶意攻击者通过发送特制的反序列化数据至服务器，能够在目标系统上执行任意代码。</p>
+<h2 id="二、-影响范围"><a href="#二、-影响范围" class="headerlink" title="二、 影响范围"></a>二、 <strong>影响范围</strong></h2><p>Fastjson &lt;&#x3D; 1.2.80</p>
+<h2 id="三、-漏洞等级"><a href="#三、-漏洞等级" class="headerlink" title="三、 漏洞等级"></a>三、 <strong>漏洞等级</strong></h2><p>高危</p>
+<h2 id="四、-修复建议"><a href="#四、-修复建议" class="headerlink" title="四、 修复建议"></a>四、 <strong>修复建议</strong></h2><p><strong>漏洞检测</strong></p>
+<p>相关用户可使用以下命令检测当前使用的Fastjson版本：lsof | grep fastjson</p>
+<p><strong>官方补丁</strong></p>
+<p>目前官方已发布更新补丁，请受影响用户及时关注并尽快更新，官方链接：<a target="_blank" rel="noopener" href="https://github.com/alibaba/fastjson/releases/tag/1.2.83">https://github.com/alibaba/fastjson/releases/tag/1.2.83</a></p>
+<p><strong>开启安全模式</strong></p>
+<p>fastjson 在 1.2.68 及以后的版本引入了safeMode，配置该模式之后，无论白名单和黑名单，都不支持 autoType，可杜绝反序列化Gadgets类变种攻击（关闭autoType前请评估对业务的影响），配置safeMode方法可参考官方链接：<a target="_blank" rel="noopener" href="https://github.com/alibaba/fastjson/wiki/fastjson_safemode">https://github.com/alibaba/fastjson/wiki/fastjson_safemode</a></p>
+<p><strong>升级到Fastjson v2</strong></p>
+<p>Fastjson v2版本已经发布，2.0版本不受此反序列化漏洞影响，但是不完全兼容1.x版本，升级前需要做兼容测试，可参考官方链接：<a target="_blank" rel="noopener" href="https://github.com/alibaba/fastjson2/releases">https://github.com/alibaba/fastjson2/releases</a></p>
+<p>参考链接</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/alibaba/fastjson/wiki/security_update_20220523">https://github.com/alibaba/fastjson/wiki/security_update_20220523</a></p>
+<h2 id="五、问题检测"><a href="#五、问题检测" class="headerlink" title="五、问题检测"></a>五、问题检测</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mvn dependency:tree | grep &quot;com.alibaba.fastjson:&quot;| grep -v sec01 | grep -v 1.2.25 | grep -v 1.2.26 | grep -v 1.2.27 | grep -v 1.2.28 | grep -v 1.2.29 | grep -v 1.2.30 | grep -v 1.2.31</span><br></pre></td></tr></table></figure>
+
+
+
+<p>检测结果：</p>
+<p>[INFO] |  +- com.sitech.ijcf:ijcf-boot:jar:3.3.0.RELEASE:compile<br>[INFO] |  |  +- org.springframework:spring-aop:jar:5.1.13.RELEASE:compile<br>[INFO] |  |  +- org.springframework:spring-beans:jar:5.1.13.RELEASE:compile<br>[INFO] |  |  +- org.springframework:spring-context:jar:5.1.13.RELEASE:compile<br>[INFO] |  |  +- org.springframework:spring-context-support:jar:5.1.13.RELEASE:compile<br>[INFO] |  |  +- org.springframework:spring-jdbc:jar:5.1.13.RELEASE:compile<br>[INFO] |  |  |  - org.springframework:spring-tx:jar:5.1.13.RELEASE:compile<br>[INFO] |  |  +- org.slf4j:jcl-over-slf4j:jar:1.7.25:compile<br>[INFO] |  |  +- com.alibaba:fastjson:jar:1.2.71:compile</p>
+<h2 id="六、修复方案"><a href="#六、修复方案" class="headerlink" title="六、修复方案"></a>六、修复方案</h2><p>分析结果：1.2.83只是添加了补丁；管控平台没有使用autotype，所以采用去掉autotype的版本</p>
+<ol>
+<li><p>现场修复方案：使用 <a target="_blank" rel="noopener" href="https://repo1.maven.org/maven2/com/alibaba/fastjson/1.2.71_noneautotype/fastjson-1.2.71_noneautotype.jar">https://repo1.maven.org/maven2/com/alibaba/fastjson/1.2.71_noneautotype/fastjson-1.2.71_noneautotype.jar</a> 替换crds_web&#x2F;lib下的fastjson-1.2.71.jar，然后sh app.sh restart重启管控平台</p>
+</li>
+<li><p>管控平台迭代版本修复： fastjson-1.2.71_noneautotype.jar 替换fastjson-1.2.71.jar</p>
+</li>
+</ol>
+<p>参考链接： <a target="_blank" rel="noopener" href="https://qqe2.com/java/post/3778.html">https://qqe2.com/java/post/3778.html</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/alibaba/fastjson/wiki/security_update_20220523">https://github.com/alibaba/fastjson/wiki/security_update_20220523</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/blood_Z/article/details/124987814">https://blog.csdn.net/blood_Z/article/details/124987814</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/hosaos/article/details/106982555?spm=1001.2101.3001.6661.1&utm_medium=distribute.pc_relevant_t0.none-task-blog-2~default~CTRLIST~Rate-1-106982555-blog-124987814.pc_relevant_paycolumn_v3&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-2~default~CTRLIST~Rate-1-106982555-blog-124987814.pc_relevant_paycolumn_v3&utm_relevant_index=1">https://blog.csdn.net/hosaos/article/details/106982555?spm=1001.2101.3001.6661.1&amp;utm_medium=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-1-106982555-blog-124987814.pc_relevant_paycolumn_v3&amp;depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-1-106982555-blog-124987814.pc_relevant_paycolumn_v3&amp;utm_relevant_index=1</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2022/05/30/%E7%AE%A1%E6%8E%A7%E5%B9%B3%E5%8F%B0@Fastjson%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%E4%BF%AE%E5%A4%8D@20220530/">https://yhao521.github.io/2022/05/30/%E7%AE%A1%E6%8E%A7%E5%B9%B3%E5%8F%B0@Fastjson%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%E4%BF%AE%E5%A4%8D@20220530/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/java-programming/">java/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2022/06/09/build.xml/" title="build.xml"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">build.xml</div></div><div class="info-2"><div class="info-item-1">1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;project name=&quot;ant-jmeter-test&quot; default=&quot;run&quot; basedir=&quot;.&quot;&gt;    &lt;tstamp&gt;        &lt;format property=&quot;time&quot; pattern=&quot;yyyyMMddhhmm&quot; /&gt;    &lt;/tstamp&gt;    &lt;!--本地的jmeter安装路径--&gt;    &lt;property name=&quot;jmeter.home&quot; value=&quot;D:\apache-jmeter-5.4.1&quot;...</div></div></div></a><a class="pagination-related" href="/2021/11/21/%E6%96%B0%E5%BB%BA%E6%96%87%E4%BB%B6/" title="新建文件"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">新建文件</div></div><div class="info-2"><div class="info-item-1">便捷铁路Convenient rail 开源仓库地址：https://github.com/josStorer/RWKV-Runner下载地址（RWKV目录）：https://pan.baidu.com/s/1wchIUHgne3gncIiLIeKBEQ?pwd=1111 RWKV官方仓库：https://github.com/BlinkDL/RWKV-LM </div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/%E5%AE%9E%E8%B7%B5%E4%BA%91%E7%AC%94%E8%AE%B0/" title="实践云笔记"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">实践云笔记</div></div><div class="info-2"><div class="info-item-1"> title: 实践云笔记date: 2023-09-03 20:17:08category:  othertag: otherauthor:   实践云原生25步@学习笔记其实我们在很多的技术大会上，看到的都是分层架构图，就像上一节我们分的六个层次一样，这容易给希望落地云原生的企业造成误解，因为大部分公司的云原生体系的建设都不是按层次来建设的，不会IaaS完全建设完毕，再建设PaaS，一定是根据业务的演进，交替迭代出来的。 一定是业务遇到问题了，需要底层的技术，底层技术提升了，促进业务的发展。如下图所示，应用层和技术底座之间的良性循环，才是云原生这个词的本质，我把他称为云原生怪圈。  虽然按照这个顺序来讲，你会感觉体系有点乱，但是才是最落地的演进路径。而沿着这个演进路径发展，你才能感受到“云原生”三个字的准确含义。 很多企业应用层服务化或者微服务化，而技术底座没有跟上，从而系统陷入混乱，没日没夜加班，却怪服务化不好，另外一些企业花了大价钱卖了一个技术底座平台，但是应用层没有跟上，无法促进业务发展，嫌技术底座白花了钱，这两个误区都在于没有沿着这个怪圈逐渐演进。 为了解决体系混乱的...</div></div></div></a><a class="pagination-related" href="/2024/04/19/antlr%E7%94%9F%E6%88%90%E8%A7%A3%E6%9E%90%E5%99%A8%E4%BB%A3%E7%A0%81/" title="antlr生成解析器代码"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-19</div><div class="info-item-2">antlr生成解析器代码</div></div><div class="info-2"><div class="info-item-1">antlr生成解析器代码安装123456cd ~/Applications/Developer &amp;&amp; curl -O https://www.antlr.org/download/antlr-4.13.1-complete.jarexport CLASSPATH=&quot;.:~/Applications/Developer/antlr-4.13.1-complete.jar:$CLASSPATH&quot;alias antlr4=&#x27;java -Xmx500M -cp &quot;~/Applications/Developer/antlr-4.13.1-complete.jar:$CLASSPATH&quot; org.antlr.v4.Tool&#x27;alias grun=&#x27;java -Xmx500M -cp &quot;~/Applications/Developer/antlr-4.13.1-complete.jar:$CLASSPATH&quot; org.antlr.v4.gui.TestRig&#x27;  https:/...</div></div></div></a><a class="pagination-related" href="/2023/09/04/windows%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E8%AE%BE%E7%BD%AE/" title="windows环境变量设置"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">windows环境变量设置</div></div><div class="info-2"><div class="info-item-1"> title: windows环境变量设置date: 2023-09-03 20:17:08category:  wintag: winauthor:   windows环境变量设置nodejs npm 环境变量解压安装；node-v12.8.0-win-x64.zip 123【NODE_HOME】=【D:\Develop\node-v12.8.0-win-x64\node_global】【NODE_PATH】=【%NODE_HOME%\node_modules】【Path】增加【%NODE_HOME%】  测试 命令行执行 12npm -vnode -v  JDK环境变量123【JAVA_HOME】=【E:\jdk\jdk1.7.0_80】【Path】增加【%JAVA_HOME%\bin;%JAVA_HOME%\jre\bin】【CLASSPATH】=【%JAVA_HOME%\lib\dt.jar;%JAVA_HOME%\lib\tools.jar】  测试 命令行执行 1java --version  linux 配置jdk环境变量vim &#x2F;etc&#x2F;pro...</div></div></div></a><a class="pagination-related" href="/2024/10/20/Ionic%E6%96%87%E4%BB%B6%E9%80%89%E6%8B%A9%E6%8F%92%E4%BB%B6filechooser%E9%80%89%E6%8B%A9%E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0%E7%9A%84%E9%97%AE%E9%A2%98/" title="Ionic文件选择插件filechooser选择图片上传的问题"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-10-20</div><div class="info-item-2">Ionic文件选择插件filechooser选择图片上传的问题</div></div><div class="info-2"><div class="info-item-1">Ionic3&#x2F;4文件选择插件filechooser选择图片上传的问题  插件安装 文件选择 filechooser 获取文件的实际路径 读取选择的图片     选择图库中的文件上传请看另一文章  在移动项目开发中，使用的是Ionic框架，当中涉及到文件上传。 开发思路：  使用文件选择插件获取路径 使用路径上传文件  开发流程涉及到的组件有(Ionic官方文档)  文件选择 https://ionicframework.com/docs/native/file-chooser 文件打开 https://ionicframework.com/docs/native/file-opener （在已上传的文件列表中可能你会使用上） 文件路径 https://ionicframework.com/docs/native/file-path  插件安装下面只列举文件选择的插件安装方法。文件打开和文件路径安装方式同理，文档有具体描述，文件选择插件有版本的注意事项 Ionic3.x 123$ ionic cordova plugin add cordova-plugin-filech...</div></div></div></a><a class="pagination-related" href="/2023/09/04/%E5%91%BD%E4%BB%A4/" title="命令"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">命令</div></div><div class="info-2"><div class="info-item-1"> title: 命令date: 2023-09-03 20:17:08category: tag: author:  12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455CLASSPATH%JAVA_HOME%\lib\dt.jar;%JAVA_HOME%\lib\tools.jar;%JAVA_HOME%\jre\lib;mysqlbinlog  --base64-output=decode-rows -v mysql_bin.000005    &gt;   test000005.sqlmysqlbinlog -vv --base64-output=DECODE-ROWS mysql_bin.000004    &gt;   test000004.sqlcat /paas/iddbs/yanghao_ac/6.sql |grep &#x27;DROP DATABASE IF EXISTS\|^CREATE DATABASE\|^...</div></div></div></a><a class="pagination-related" href="/2023/09/04/java%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86/" title="java代码混淆"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">java代码混淆</div></div><div class="info-2"><div class="info-item-1"> title: java代码混淆date: 2023-09-03 20:17:08category: tag: author:  java代码混淆Spring Boot使用Allatori代码混淆的方法商业收费，不考虑 Allatori混淆技术介绍 :Allatori是一个Java 混淆器，它属于第二代混淆器，因此它能够全方位地保护你的知识产权。 Allatori具有以下几种保护方式：命名混淆，流混淆，调试信息混淆，字符串混淆，以及水印技术。对于教育和非商业项目来说这个混淆器是免费的。支持war和jar文件格式，并且允许对需要混淆代码的应用程序添加有效日期。 有项目需要对代码进行保护，比较初级的方案就是对代码进行混淆，打包之后的文件进行反编译后，就可以看到效果。此外，使用Allatori打的包体积也会小一点。 jni 加密一款软件工具 工具是对java class文件进行加密保护防止反编译的工具！本工具全面支持linux&#x2F;unix&#x2F;windows操作系统。继推出v1.0版本后，获得了用户大量的支持与的反馈，我们再次推出本v2.0版，对加密算法进行了更大的改进，...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AE%A1%E6%8E%A7%E5%B9%B3%E5%8F%B0-Fastjson%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%E4%BF%AE%E5%A4%8D-20220530"><span class="toc-number">1.</span> <span class="toc-text">管控平台@Fastjson反序列化漏洞修复@20220530</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%85%B3%E4%BA%8EFastjson%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%E7%9A%84%E5%AE%89%E5%85%A8%E9%80%9A%E5%91%8A"><span class="toc-number">2.</span> <span class="toc-text">关于Fastjson反序列化漏洞的安全通告</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81-%E6%BC%8F%E6%B4%9E%E8%AF%A6%E6%83%85"><span class="toc-number">2.1.</span> <span class="toc-text">一、 漏洞详情</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81-%E5%BD%B1%E5%93%8D%E8%8C%83%E5%9B%B4"><span class="toc-number">2.2.</span> <span class="toc-text">二、 影响范围</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81-%E6%BC%8F%E6%B4%9E%E7%AD%89%E7%BA%A7"><span class="toc-number">2.3.</span> <span class="toc-text">三、 漏洞等级</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81-%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-number">2.4.</span> <span class="toc-text">四、 修复建议</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E9%97%AE%E9%A2%98%E6%A3%80%E6%B5%8B"><span class="toc-number">2.5.</span> <span class="toc-text">五、问题检测</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E4%BF%AE%E5%A4%8D%E6%96%B9%E6%A1%88"><span class="toc-number">2.6.</span> <span class="toc-text">六、修复方案</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

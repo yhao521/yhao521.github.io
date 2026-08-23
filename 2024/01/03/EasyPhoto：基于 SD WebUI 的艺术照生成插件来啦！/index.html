@@ -1,0 +1,330 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>EasyPhoto：基于 SD WebUI 的艺术照生成插件来啦！ | 匆匆过客的博客</title><meta name="author" content="yhao521"><meta name="copyright" content="yhao521"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="EasyPhoto 是一个基于 SD WebUI 的艺术照生成插件。支持低代码操作、自定义风格，让更多开发者灵活地开发自己的风格化艺术照生成应用。  项目地址： https:&#x2F;&#x2F;github.com&#x2F;aigc-apps&#x2F;sd-webui-EasyPhoto  背景介绍最近，基于生成式AI技术批量产出真&#x2F;像&#x2F;美的个人写真应用非常受欢迎。同时，随着 Stable Diffusion">
+<meta property="og:type" content="article">
+<meta property="og:title" content="EasyPhoto：基于 SD WebUI 的艺术照生成插件来啦！">
+<meta property="og:url" content="https://yhao521.github.io/2024/01/03/EasyPhoto%EF%BC%9A%E5%9F%BA%E4%BA%8E%20SD%20WebUI%20%E7%9A%84%E8%89%BA%E6%9C%AF%E7%85%A7%E7%94%9F%E6%88%90%E6%8F%92%E4%BB%B6%E6%9D%A5%E5%95%A6%EF%BC%81/index.html">
+<meta property="og:site_name" content="匆匆过客的博客">
+<meta property="og:description" content="EasyPhoto 是一个基于 SD WebUI 的艺术照生成插件。支持低代码操作、自定义风格，让更多开发者灵活地开发自己的风格化艺术照生成应用。  项目地址： https:&#x2F;&#x2F;github.com&#x2F;aigc-apps&#x2F;sd-webui-EasyPhoto  背景介绍最近，基于生成式AI技术批量产出真&#x2F;像&#x2F;美的个人写真应用非常受欢迎。同时，随着 Stable Diffusion">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://yhao521.github.io/img/avatar.png">
+<meta property="article:published_time" content="2024-01-03T00:43:45.000Z">
+<meta property="article:modified_time" content="2024-01-03T00:43:45.000Z">
+<meta property="article:author" content="yhao521">
+<meta property="article:tag" content="c&#x2F;programming">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yhao521.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "EasyPhoto：基于 SD WebUI 的艺术照生成插件来啦！",
+  "url": "https://yhao521.github.io/2024/01/03/EasyPhoto%EF%BC%9A%E5%9F%BA%E4%BA%8E%20SD%20WebUI%20%E7%9A%84%E8%89%BA%E6%9C%AF%E7%85%A7%E7%94%9F%E6%88%90%E6%8F%92%E4%BB%B6%E6%9D%A5%E5%95%A6%EF%BC%81/",
+  "image": "https://yhao521.github.io/img/avatar.png",
+  "datePublished": "2024-01-03T00:43:45.000Z",
+  "dateModified": "2024-01-03T00:43:45.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "yhao521",
+      "url": "https://yhao521.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yhao521.github.io/2024/01/03/EasyPhoto%EF%BC%9A%E5%9F%BA%E4%BA%8E%20SD%20WebUI%20%E7%9A%84%E8%89%BA%E6%9C%AF%E7%85%A7%E7%94%9F%E6%88%90%E6%8F%92%E4%BB%B6%E6%9D%A5%E5%95%A6%EF%BC%81/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'EasyPhoto：基于 SD WebUI 的艺术照生成插件来啦！',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/bg.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">匆匆过客的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">EasyPhoto：基于 SD WebUI 的艺术照生成插件来啦！</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">EasyPhoto：基于 SD WebUI 的艺术照生成插件来啦！</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-01-03T00:43:45.000Z" title="发表于 2024-01-03 08:43:45">2024-01-03</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-01-03T00:43:45.000Z" title="更新于 2024-01-03 08:43:45">2024-01-03</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2/">博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>EasyPhoto 是一个基于 SD WebUI 的艺术照生成插件。支持低代码操作、自定义风格，让更多开发者灵活地开发自己的风格化艺术照生成应用。</p>
+<blockquote>
+<p>项目地址： <a target="_blank" rel="noopener" href="https://github.com/aigc-apps/sd-webui-EasyPhoto?spm=a2c6h.13046898.publish-article.47.532a6ffaeMIEDz">https://github.com/aigc-apps/sd-webui-EasyPhoto</a></p>
+</blockquote>
+<h2 id="背景介绍"><a href="#背景介绍" class="headerlink" title="背景介绍"></a>背景介绍</h2><p>最近，基于生成式AI技术批量产出真&#x2F;像&#x2F;美的个人写真应用非常受欢迎。同时，随着 Stable Diffusion 领域开源社区的快速发展，社区也涌现了类似 FaceChain 的开源项目，帮助开发者开发个性化的真人写真生成应用。越来越多开发者对这个方向投来关注，希望得到更多灵活的开发方式。</p>
+<h3 id="EasyPhoto项目介绍"><a href="#EasyPhoto项目介绍" class="headerlink" title="EasyPhoto项目介绍"></a>EasyPhoto项目介绍</h3><p>作为FaceChain-Inpaint功能的开发团队，我们快速上线了一款基于 SD WebUI 插件生态的个性化写真生成开源插件 EasyPhoto。这款插件允许用户通过上传几张同一个人的照片，快速训练Lora模型，然后结合用户自定义的模板图片，生成 真&#x2F;像&#x2F;美的写真图片。</p>
+<p><img src="https://pic3.zhimg.com/v2-17d233e764eb52a91abca6ecba4614de_r.jpg"></p>
+<p>图1</p>
+<blockquote>
+<p><strong>项目地址：</strong> <a target="_blank" rel="noopener" href="https://github.com/aigc-apps/sd-webui-EasyPhoto?spm=a2c6h.13046898.publish-article.48.532a6ffaeMIEDz">https://github.com/aigc-apps/sd-webui-EasyPhoto</a></p>
+</blockquote>
+<p>欢迎大家多多提ISSUE，一同优化，让每个AIGCer都拥有自己的AI写真相机！</p>
+<h2 id="原理介绍"><a href="#原理介绍" class="headerlink" title="原理介绍"></a>原理介绍</h2><p>AI真人写真是一个基于 StableDiffusion和AI人脸相关技术，实现的定制化人像Lora模型训练和指定图像生成链路的集合，这里我们简单介绍我们在EasyPhoto中实现的相关技术,下图是EasyPhoto的生成链路介绍，</p>
+<p><img src="https://pic4.zhimg.com/v2-c8f984dd0585b0dbcfee35f4a0f84107_r.jpg"></p>
+<p>图2</p>
+<p>EasyPhoto整体分为训练和推理两个阶段， 下文图3详细展示了训练阶段，上图2展示了生成阶段。</p>
+<h3 id="EasyPhoto生成"><a href="#EasyPhoto生成" class="headerlink" title="EasyPhoto生成"></a>EasyPhoto生成</h3><p>EasyPhoto生成采用基于开源模型StableDiffusion + 人物定制Lora的方式 + ControlNet 的方式完成艺术照生成</p>
+<ol>
+<li>使用人脸检测模型对输入的指定模板进行人脸检测(crop &amp; warp)并结合数字分身进行模板替换。</li>
+<li>采用FaceID模型挑选用户输入的最佳ID Photo和模板照片进行人脸融合(face fusion)。</li>
+<li>使用融合后的图片作为基底图片，使用替换后的人脸作为control条件，加上数字分身对应的Lora，进行图到图局部重绘生成。</li>
+<li>采用基于StableDiffusion + 超分的方式进一步在保持ID的前提下生成高清结果图。</li>
+</ol>
+<h3 id="EasyPhoto训练"><a href="#EasyPhoto训练" class="headerlink" title="EasyPhoto训练"></a>EasyPhoto训练</h3><p><img src="https://pic2.zhimg.com/v2-7f94fe65aae432473672b8483e5b2141_r.jpg"></p>
+<p>图3</p>
+<p>EasyPhoto训练采用了大量的人脸预处理技术，用于把用户上传的图片进行筛选和预处理，并引入相关验证和模型融合技术，参考图3.</p>
+<ol>
+<li>采用FaceID和图像质量分数对所有图片进行聚类和评分，筛选非同ID照片。</li>
+<li>采用人脸检测和主体分割，抠出1筛选后的人脸图片进行人脸检测抠图，并分割去除背景。</li>
+<li>采用美肤模型优化部分低质量人脸，推升训练数据的图片质量。</li>
+<li>采用单一标注的方案，对处理后的训练图片进行打标，并使用相关的Lora 训练。</li>
+<li>训练过程中采用基于FaceID的验证步骤，间隔一定的step保存模型，并最后根据相似度融合模型。</li>
+</ol>
+<p>我们将从在后续的章节简单介绍涉及到的相关技术的原理，更多细节也欢迎大家参考Repo的代码。(如果你已经对这一技术路线非常熟悉，欢迎直接跳到第三章 EasyPhoto &amp; SDWebUI)</p>
+<h3 id="文图生成-SD-Control-Lora"><a href="#文图生成-SD-Control-Lora" class="headerlink" title="文图生成(SD&#x2F;Control&#x2F;Lora)"></a>文图生成(SD&#x2F;Control&#x2F;Lora)</h3><p><strong>StableDiffusion</strong></p>
+<p>StableDiffusion作为Stability-AI开源图像<a target="_blank" rel="noopener" href="https://www.zhihu.com/search?spm=a2c6h.13046898.publish-article.49.532a6ffaeMIEDz&q=%E7%94%9F%E6%88%90%E6%A8%A1%E5%9E%8B&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra=%7B%22sourceType%22:%22article%22,%22sourceId%22:%22634573765%22%7D">生成模型</a>，通常分为SD1.5&#x2F;SD2.1&#x2F;SDXL等版本， 是通过对海量的图像文本(<a target="_blank" rel="noopener" href="https://laion.ai/blog/laion-5b/?spm=a2c6h.13046898.publish-article.50.532a6ffaeMIEDz">LAION-5B</a>)对进行训练结合文本引导的扩散模型(DiffusionModel)，使用训练后的模型，通过对输入的文字进行特征提取，引导扩散模型在多次的迭代中生成高质量且符合输入语义的图像。感兴趣的同学可以参考 <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/634573765?spm=a2c6h.13046898.publish-article.51.532a6ffaeMIEDz">《stable diffusion原理解读通俗易懂，史诗级万字爆肝长文,..》</a>, 下面的图像就是 stablediffusion 官网 <a target="_blank" rel="noopener" href="https://github.com/Stability-AI/stablediffusion?spm=a2c6h.13046898.publish-article.52.532a6ffaeMIEDz">Repo</a> 贴出来的他们的效果。</p>
+<p><strong>ControlNet&#x2F;Lora</strong></p>
+<p>针对使用文本控制的StableDiffusion模型，如何对生成的图像内容进行更好的控制，一直是学术界和工业界试图解决的问题，本小节介绍的ControlNet和Lora就是常用的两种技术。也是图2中使用的部分技术，用于控制边缘连贯性和指定ID生成。</p>
+<p><strong>ControlNet ：</strong> 由<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2302.05543?spm=a2c6h.13046898.publish-article.53.532a6ffaeMIEDz&file=2302.05543">《Adding Conditional Control to Text-to-Image Diffusion Models》</a>提出的通过添加部分训练过的参数，对StableDiffsion模型进行扩展，用于处理一些额外的输入信号，例如骨架图&#x2F;边缘图&#x2F;深度图&#x2F;人体姿态图等等输入，从而完成利用这些额外输入的信号，引导扩散模型生成与信号相关的图像内容。例如我们在官方 <a target="_blank" rel="noopener" href="https://github.com/lllyasviel/ControlNet?spm=a2c6h.13046898.publish-article.54.532a6ffaeMIEDz">Repo</a> 可以看到的，使用Canny边缘作为信号，控制输出的小狗。</p>
+<p><img src="https://pic4.zhimg.com/v2-b5fc0a078894c94141dafcf17babb1ff_r.jpg"></p>
+<p>图4</p>
+<p>我们在图2中看到 StableDiffusion有2个输入，其中一个部分就是用于控制边缘连贯性和脸型提示的ControlNet，我们使用了部分的Canny边缘和OpenPose人体姿态。</p>
+<p>**Lora ：**由<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2106.09685?spm=a2c6h.13046898.publish-article.55.532a6ffaeMIEDz&file=2106.09685">《LoRA: Low-Rank Adaptation of Large Language Models》</a> 提出的一种基于低秩矩阵的对大参数模型进行少量参数微调训练的方法，广泛引用在各种大模型的下游使用中。AI真人写真需要保证最后生成的图像和我们想要生成的人是相像的，这就需要我们使用Lora 技术，对输入的少量图片，进行一个简单的训练，从而使得我们可以得到一个小的指定人脸(ID)的模型。当然这一技术也可以广泛用于，风格，物品等其他指定形象的Lora模型训练，大家可以在civitai.com等相关网页上寻找自己想要的Lora模型。</p>
+<h3 id="人脸相关AI模型"><a href="#人脸相关AI模型" class="headerlink" title="人脸相关AI模型"></a>人脸相关AI模型</h3><p>针对AI写真这一特定领域，<strong>如何使用尽量少的图片，快速的训练出又真实又相像的人脸Lora模型，是我们能够产出高质量AI写真的关键</strong>，网络上也有大量的文章和视频资料为大家介绍如何训练。这里我们介绍一些在这个过程中，我们使用的开源AI模型，用于提升最后人脸Lora训练的效果。</p>
+<p>在这个过程中我们大量的使用了 <a target="_blank" rel="noopener" href="https://www.modelscope.cn/?spm=a2c6h.13046898.publish-article.56.532a6ffaeMIEDz">ModelScope</a> 和其他Github的开源模型，用于完成如下的人脸功能</p>
+<table data-draft-node="block" data-draft-type="table" data-size="normal" data-row-style="normal"><tbody><tr><td>人脸模型</td><td>模型卡片</td><td>功能</td><td>使用</td></tr><tr><td>FaceID</td><td><a href="https://github.com/deepinsight/insightface" class=" external" target="_blank" rel="nofollow noreferrer" data-za-detail-view-id="1043"><span class="invisible">https://</span><span class="visible">github.com/deepinsight/</span><span class="invisible">insightface</span><span class="ellipsis"></span></a></td><td>对矫正后的人脸提取特征，同一个人的特征距离会更接近</td><td>EasyPhoto图片预处理,过滤非同ID人脸<br>EasyPhoto训练中途验证模型效果<br>EasyPhoto预测挑选基图片</td></tr><tr><td>人脸检测</td><td>cv_resnet50_face</td><td>输出一张图片中人脸的检测框和关键点</td><td>训练预处理，处理图片并抠图<br>预测定位模板人脸和关键点</td></tr><tr><td>人脸分割</td><td>cv_u2net_salient</td><td>显著目标分割</td><td>训练预处理，处理图片并去除背景</td></tr><tr><td>人脸融合</td><td>cv_unet-image-face-fusion</td><td>融合两张输入的人脸图像</td><td>预测，用于融合挑选出的基图片和生成图片，使得图片更像ID对应的人</td></tr><tr><td>人脸美肤</td><td>cv_unet_skin_retouching_torch</td><td>对输入的人脸进行美肤</td><td>训练预处理：处理训练图片，提升图片质量<br>预测：用于提升输出图片的质量。</td></tr></tbody></table>
+
+<h2 id="EasyPhoto-SDWebUI"><a href="#EasyPhoto-SDWebUI" class="headerlink" title="EasyPhoto &amp; SDWebUI"></a>EasyPhoto &amp; SDWebUI</h2><p>SDWebUI [<a target="_blank" rel="noopener" href="https://github.com/AUTOMATIC1111/stable-diffusion-webui?spm=a2c6h.13046898.publish-article.62.532a6ffaeMIEDz">Repo</a>]是社区最常用的StableDiffusion开发工具，从年初开源至今，已在Github 拥有100k 的star，我们提到的文图生成&#x2F;ControlNet&#x2F;Lora等功能，都被社区开发者贡献到这一工具中，用于大家快速部署一个可以调试的文图生成服务，所以我们也在SDWebUI下实现了EasyPhoto插件，将上述原理提到的 人脸预处理&#x2F;训练&#x2F;艺术照生成全部集成到了这一插件中。</p>
+<blockquote>
+<p>项目地址：<a target="_blank" rel="noopener" href="https://github.com/aigc-apps/sd-webui-EasyPhoto?spm=a2c6h.13046898.publish-article.63.532a6ffaeMIEDz">https://github.com/aigc-apps/sd-webui-EasyPhoto</a></p>
+</blockquote>
+<p>用户可以参考SDWebUI的插件使用方式进行安装使用。</p>
+<h3 id="EasyPhoto插件简介"><a href="#EasyPhoto插件简介" class="headerlink" title="EasyPhoto插件简介"></a>EasyPhoto插件简介</h3><p>EasyPhoto是一款Webui UI插件，用于生成AI肖像画，该代码可用于训练与用户相关的数字分身。</p>
+<ul>
+<li>建议使用 5 到 20 张肖像图片进行训练，最好是半身照片且不要佩戴眼镜（少量可以接受）。</li>
+<li>训练完成后，EasyPhoto可以在推理部分生成图像。</li>
+<li>EasyPhoto支持使用预设模板图片与上传自己的图片进行推理。</li>
+</ul>
+<p>图1, 图5这些是插件的生成结果，从生成结果来看，插件的生成效果还是非常不错的：</p>
+<p><img src="https://pic3.zhimg.com/v2-55a227ea67e2a1208b21c13b4dac268e_r.jpg"></p>
+<p>图5</p>
+<p>每个图片背后都有一个模板，EasyPhoto会对模板进行修改使其符合用户的特征。在EasyPhoto插件中，Inference侧已经预置了一些模板，可以用插件预置的模板进行体验；另外，EasyPhoto同样可以自定义模板，在Inference侧有另外一个tab页面，可以用于上传自定义的模板。如下图所示。</p>
+<p><img src="https://pic3.zhimg.com/v2-f589057caf12230b3f69233e49cb745a_r.jpg"></p>
+<p>图6</p>
+<p>而在Inference预测前，我们需要进行训练，训练需要上传一定数量的用户个人照片，训练的产出是一个Lora模型。该Lora模型会用于Inference预测。</p>
+<p>总结而言，EasyPhoto的执行流程非常简单：<strong>1、上传用户图片，训练一个与用户相关的Lora模型；2、选择模板进行预测，获得预测结果。</strong></p>
+<h3 id="安装方式一-SDWebUI界面安装"><a href="#安装方式一-SDWebUI界面安装" class="headerlink" title="安装方式一: SDWebUI界面安装"></a>安装方式一: SDWebUI界面安装</h3><p>网络良好的情况下！！！在SDWebUI中跳转到Extentions，然后选择install from URL。输入<a target="_blank" rel="noopener" href="https://github.com/aigc-apps/sd-webui-EasyPhoto?spm=a2c6h.13046898.publish-article.64.532a6ffaeMIEDz">https://github.com/aigc-apps/sd-webui-EasyPhoto</a>，点击下方的install即可安装。</p>
+<p>在安装过程中，会自动安装依赖包，这个需要耐心等待一下。<strong>安装完需要重启WebUI。</strong></p>
+<p><img src="https://pic2.zhimg.com/v2-24ee3fc960a5ac15abfa3e72014c4ea1_r.jpg"></p>
+<p>图7</p>
+<h3 id="安装方式二：源码安装"><a href="#安装方式二：源码安装" class="headerlink" title="安装方式二：源码安装"></a>安装方式二：源码安装</h3><p>如果你想要使用项目源码安装，直接进入到Webui的extensions文件夹，打开git工具，git clone即可。下载完成后，重新启动webui，便会检查需要的环境库并且安装。</p>
+<p><img src="https://pic3.zhimg.com/v2-45db689fce931f6a4f107103fa645a22_r.jpg"></p>
+<p>图8</p>
+<h3 id="其他安装项：ControlNet"><a href="#其他安装项：ControlNet" class="headerlink" title="其他安装项：ControlNet"></a>其他安装项：ControlNet</h3><p>EasyPhoto需要SDWebUI支持ControlNet，具体使用的相关插件是<a target="_blank" rel="noopener" href="https://github.com/Mikubill/sd-webui-controlnet?spm=a2c6h.13046898.publish-article.65.532a6ffaeMIEDz">Mikubill&#x2F;sd-webui-controlnet</a>。在使用 EasyPhoto 之前，您需要安装这个软件源。</p>
+<ul>
+<li>此外，我们至少需要三个 Controlnets 用于推理。因此，您需要设置 <strong>Multi ControlNet: Max models amount (requires restart)</strong>。</li>
+</ul>
+<p><img src="https://pic1.zhimg.com/v2-02ec684ced0cb08c019d956b79d422a4_r.jpg"></p>
+<p>图9</p>
+<h2 id="EasyPhoto训练-1"><a href="#EasyPhoto训练-1" class="headerlink" title="EasyPhoto训练"></a>EasyPhoto训练</h2><p>EasyPhoto训练包含如下2个步骤 1. 上传个人图片 2. 调整训练参数 3点击训练并设置ID, 整体界面如下</p>
+<p><img src="https://pic1.zhimg.com/v2-d01121f51600a84ceabeee1756c4ece0_r.jpg"></p>
+<p>图10</p>
+<h3 id="上传训练图片"><a href="#上传训练图片" class="headerlink" title="上传训练图片"></a>上传训练图片</h3><p>左边是训练图片，点击Upload Photos即可上传图片，点击Clear Photos可以删除已经上传的图片</p>
+<h3 id="调整训练参数"><a href="#调整训练参数" class="headerlink" title="调整训练参数"></a>调整训练参数</h3><p>上传完图片后，右边是训练参数，初次训练可不做参数调整。</p>
+<p><img src="https://pic3.zhimg.com/v2-a155269e318a75569ac43e86d044be76_r.jpg"></p>
+<p>图11</p>
+<p>这里我们也对参数进行一个介绍</p>
+<table data-draft-node="block" data-draft-type="table" data-size="normal" data-row-style="normal"><tbody><tr><td>参数名</td><td>含义</td></tr><tr><td>resolution</td><td>训练时喂入网络的图片大小，默认值为512</td></tr><tr><td>validation &amp; save steps</td><td>验证图片与保存中间权重的steps数，默认值为100，代表每100步验证一次图片并保存权重</td></tr><tr><td>max train steps</td><td>最大训练步数，默认值为800</td></tr><tr><td>max steps per photos</td><td>每张图片的最大训练数，默认为200，与max train steps结合取小。</td></tr><tr><td>train batch size</td><td>训练的批次大小，默认值为1</td></tr><tr><td>gradient accumulationsteps</td><td>进行梯度累计，默认值为4，train batch size=1的时候，每个step相当于喂入四张图片</td></tr><tr><td>dataloader num workers</td><td>数据加载的works数量，windows下不生效，因为设置了会报错，Linux正常设置</td></tr><tr><td>learning rate</td><td>训练Lora的学习率，默认为1e-4</td></tr><tr><td>rank Lora</td><td>权重的特征长度，默认为128</td></tr><tr><td>network alpha</td><td>Lora训练的正则化参数，一般为rank的二分之一，默认为64</td></tr></tbody></table>
+
+<p>根据上述表格最终训练步数的计算公式也比较简单。</p>
+<p><img src="https://pic1.zhimg.com/v2-68b7aec7f7a79b36ccf527b307f7519c_r.jpg"></p>
+<p><strong>简单来理解就是：图片数量少的时候，训练步数为photo_num * max_steps_per_photos。图片数量多的时候，训练步数为max_train_steps。</strong></p>
+<h3 id="训练-设置ID"><a href="#训练-设置ID" class="headerlink" title="训练&amp;设置ID"></a>训练&amp;设置ID</h3><p>完成设置后，点击下方的开始训练，此时需要在上方填入一下User ID，比如 用户的名字，然后就可以开始训练了。</p>
+<p><img src="https://pic2.zhimg.com/v2-d99fa150c3546b6d00f37c975fe928f1_r.jpg"></p>
+<p>图12</p>
+<h3 id="观察训练"><a href="#观察训练" class="headerlink" title="观察训练"></a>观察训练</h3><p>初次训练时会从我们预备的oss(公用)上下载一部分预训练模型的权重，我们耐心等待即可，下载进度需要关注终端。</p>
+<p><img src="https://pic4.zhimg.com/v2-0f1a7651699ed0cf2383992e3279fbdf_r.jpg"></p>
+<p>图13</p>
+<p>训练正常开始的相关log</p>
+<p><img src="https://pic3.zhimg.com/v2-5a035a46d0af59afd1f4059764c569d6_r.jpg"></p>
+<p>图14</p>
+<p>终端显示成这样就已经训练完了，最后这步是在计算验证图像与用户图像之间的人脸 ID 差距，从而实现 Lora 融合，确保我们的 Lora 是用户的完美数字分身。</p>
+<p><img src="https://pic1.zhimg.com/v2-130557377e345725271530f9f43c8c78_r.jpg"></p>
+<p>图15</p>
+<h2 id="EasyPhoto预测"><a href="#EasyPhoto预测" class="headerlink" title="EasyPhoto预测"></a>EasyPhoto预测</h2><p>训练完后，我们需要将tab页转到Inference。由于Gradio的特性，刚训练好的模型不会自动刷新，<strong>可以点击Used id旁的蓝色旋转按钮进行模型刷新</strong>。</p>
+<p><img src="https://pic4.zhimg.com/v2-38a6c81be1158bfda50a1ec7fe1119b3_r.jpg"></p>
+<p>图16</p>
+<ul>
+<li><strong>刷新完后选择刚刚训练的模型</strong>，然后选择对应的模板即可开始预测。</li>
+<li><strong>初次预测需要下载一些modelscope的模型</strong>，耐心等待一下即可。</li>
+</ul>
+<p>预置了部分模板，也可以切到upload image，直接自己上传模板进行预测。然后我们就可以获得预测结果了。</p>
+<p><img src="https://pic3.zhimg.com/v2-cfc7ae961e2ad5ee4f1fccb6d8e8ad7e_r.jpg"></p>
+<p>图17</p>
+<h3 id="预测参数说明"><a href="#预测参数说明" class="headerlink" title="预测参数说明"></a>预测参数说明</h3><p>关于预测界面的部分参数说明</p>
+<table data-draft-node="block" data-draft-type="table" data-size="normal" data-row-style="normal"><tbody><tr><td>参数名</td><td>含义</td></tr><tr><td>After Face Fusion Ratio</td><td>第二次人脸融合的比例，越大代表越像</td></tr><tr><td>First Diffusion steps</td><td>第一次Stable Diffusion的步数</td></tr><tr><td>First Diffusion denoising strength</td><td>第一次Stable Diffusion重建的比例</td></tr><tr><td>Second Diffusion steps</td><td>第二次Stable Diffusion的步数</td></tr><tr><td>Second Diffusion denoising strength</td><td>第二次Stable Diffusion重建的比例</td></tr><tr><td>Crop Face Preprocess</td><td>是否先裁剪人脸后再进行处理，适合大图</td></tr><tr><td>Apply Face Fusion Before</td><td>是否进行第一次人脸融合</td></tr><tr><td>Apply Face Fusion After</td><td>是否进行第一次人脸融合</td></tr></tbody></table>
+
+<h2 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h2><p>EasyPhoto全部使用来自开源社区的模型和相关技术，旨在探讨StableDiffusion在AIGC X 真人写真领域的技术和相关应用，文章所有涉及的图片仅做演示使用，如有侵权请及时联系我们，也请大家引用时表明转载！！！</p>
+<p><strong>作者</strong> ：<a target="_blank" rel="noopener" href="https://github.com/bubbliiiing?spm=a2c6h.12873639.article-detail.8.3b6c6ad6w2OnzH">bubbliiiing</a> 、wuziheng</p>
+<blockquote>
+<p><strong><a target="_blank" rel="noopener" href="https://click.aliyun.com/m/1000373503/">点击立即免费试用云产品 开启云上实践之旅！</a></strong></p>
+</blockquote>
+<p><strong><a target="_blank" rel="noopener" href="https://click.aliyun.com/m/1000380014/">原文链接</a></strong></p>
+<p><strong>本文为阿里云原创内容，未经允许不得转载</strong></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yhao521.github.io">yhao521</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yhao521.github.io/2024/01/03/EasyPhoto%EF%BC%9A%E5%9F%BA%E4%BA%8E%20SD%20WebUI%20%E7%9A%84%E8%89%BA%E6%9C%AF%E7%85%A7%E7%94%9F%E6%88%90%E6%8F%92%E4%BB%B6%E6%9D%A5%E5%95%A6%EF%BC%81/">https://yhao521.github.io/2024/01/03/EasyPhoto%EF%BC%9A%E5%9F%BA%E4%BA%8E%20SD%20WebUI%20%E7%9A%84%E8%89%BA%E6%9C%AF%E7%85%A7%E7%94%9F%E6%88%90%E6%8F%92%E4%BB%B6%E6%9D%A5%E5%95%A6%EF%BC%81/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yhao521.github.io" target="_blank">匆匆过客的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86/">知识</a><a class="post-meta__tags" href="/tags/c-programming/">c/programming</a><a class="post-meta__tags" href="/tags/linux/">linux</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/01/04/JAVA%E9%9D%A2%E8%AF%95%E5%AE%9D%E5%85%B8%EF%BC%88%E9%9D%9E%E5%B8%B8%E8%AF%A6%E7%BB%86%EF%BC%8C%E4%BA%B2%E8%BA%AB%E7%BB%8F%E9%AA%8C%E6%80%BB%E7%BB%93%EF%BC%89/" title="JAVA面试宝典（非常详细，亲身经验总结）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">JAVA面试宝典（非常详细，亲身经验总结）</div></div><div class="info-2"><div class="info-item-1">一、 Java基础 1.Java 基础 知识 2.集合(必会) 3. 多线程(必会) 4.线程池 6. Jvm 二、 Web 1.网络通讯部分 2.cookie和session的区别？（必会） 3.Jsp和Servlet（了解） 4.Ajax的介绍（必会） 三、 数据库 1.连接查询（必会） 2.聚合函数（必会） 3.SQL关键字(必会) 4. SQL Select 语句完整的执行顺序: (必会) 5. 数据库三范式(必会) 6. 存储引擎 （高薪常问） 1.MyISAM存储引擎 2.InnoDB存储引擎 7.数据库事务（必会） 8.索引 9.数据库锁(高薪常问) 1.行锁和表锁 2.悲观锁和乐观锁 10.MySql优化(高薪常问) 1) 定位执行效率慢的sql语句.(了解) 2) 优化索引(高薪) 3) Sql语句调优(高薪) 4) 合理的数据库设计(了解) 四. 框架 1. Mybatis框架 2. Spring框架 3.SpringMVC框架 4. Dubbo 5. Zookeeper 6.SpringBoot 7. SpringCloud 五.技术点 1. Redis 2...</div></div></div></a><a class="pagination-related" href="/2023/12/21/F-Droid%E6%B7%BB%E5%8A%A0%E5%9B%BD%E5%86%85%E6%BA%90%E5%92%8C%E5%AD%98%E5%82%A8%E5%BA%93/" title="F-Droid添加国内源和存储库"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">F-Droid添加国内源和存储库</div></div><div class="info-2"><div class="info-item-1">Matrix 首页推荐Matrix 是少数派的写作社区，我们主张分享真实的产品体验，有实用价值的经验与思考。我们会不定期挑选 Matrix 最优质的文章，展示来自用户的最真实的体验和观点。 文章代表作者个人观点，少数派仅对标题和排版略作修改。  F-Droid 是一款专门收录各类自由软件的 Android 应用商店。刚刚度过十岁生日的它，仍然只流行于自由软件爱好者圈子内，这多多少少埋没了其中数以百计的优质应用。事实上，相较于境外的许多应用商店，F-Droid 不仅在国内更易访问，而且更加安全。虽然不能开箱即用，F-Droid 的使用配置并不复杂。 一、添加国内源和存储库从官网处下载 F-Droid 并打开后，首先需要调整存储库设置。F-Droid 管理应用的方式类似于各大 Linux 发行版。存储库是一系列应用的列表和安装包的集合，由开发者或者机构维护。同一存储库在世界各地分设服务器供用户就近下载，可以理解为源。F-Droid 默认使用一个收录应用最多的、和软件同名的库，其访问与下载速度通常相当缓慢。所幸目前已经有了 F-Droid 的国内源，添加后可大幅度改善境内的访问和下载体...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/09/04/JVM%20%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E5%B7%A5%E5%85%B7/" title="JVM 常见问题排查工具"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">JVM 常见问题排查工具</div></div><div class="info-2"><div class="info-item-1"> title: JVM 常见问题排查工具date: 2023-09-03 20:17:08category: tag: author:  一. 背景 在使用 Java开发的过程中， 可能会碰到 线程卡死，cpu高耗， 内存泄漏OOM等问题， 因此需要一些工具和方法排查相关问题。 二. JDK 自带工具使用介绍 常用的 JDK 自带的工具主要包括 jps， jstat, jstack, jinfo 等。 1. jps主要用来打印主机上运行 Java 进程号， 和 ps -ef |grep xxx 效果是一样的 。  2. jstat一般用来监控 JVM 的 gc情况， class加载情况 。 使用用法 ： (1) 监控 JVM GC 情况 ： jstat -gcutil [pid] 1000 10 监控指定 Java 进程的 gc概况, 每 1000ms 打印一次，一共打印 10次 。  如果需要监控 gc 更详细的信息， 可以将 -gcutil 选项替换为其他参数 ：  -gc -gccapacity -gccause -gcmetacapacity -gcnew -gcnewc...</div></div></div></a><a class="pagination-related" href="/2025/02/05/LocalSend%E8%B7%A8%E8%AE%BE%E5%A4%87%E4%BC%A0%E8%BE%93%E6%96%87%E4%BB%B6%E4%BC%A0%E8%BE%93%E5%8D%8F%E8%AE%AE%20v2/" title="LocalSend跨设备传输文件传输协议 v2"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-02-05</div><div class="info-item-2">LocalSend跨设备传输文件传输协议 v2</div></div><div class="info-2"><div class="info-item-1">LocalSend仓库地址：GitHub - localsend&#x2F;localsend: An open-source cross-platform alternative to AirDropLocalSend 协议 v2English | 简体中文 主要为了实现一个不依赖于任何外部服务器的简单 REST 协议。 因为计算机网络比较复杂，因此我们不能假设每种方法都可用。某些设备可能不支持多点广播或不能运行 HTTP 服务器。 就是这个原因，所以这协议尝试用多种方式去发现其他 LocalSend 成员，从而执行发送文件。 该协议只需要一方建立 HTTP 服务器即可运行。 目录 LocalSend 协议 v2 目录 1. 默认配置 2. 指纹 3. 搜寻发现 3.1 UDP 广播 3.2 HTTP (传统模式)   4. 文件传输 (HTTP) 4.1 准备工作 (仅元数据) 4.2 发送文件 4.3 取消   5. 反向文件传输 (HTTP) 5.1 浏览器 URL 5.2 接收请求 5.3 接收文件   6. 其他 API 6.1 信息   7. 枚举 7.1 设备类型...</div></div></div></a><a class="pagination-related" href="/2023/09/04/sqladvice%E5%AE%89%E8%A3%85&%E4%BD%BF%E7%94%A8/" title="sqladvice安装&amp;使用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">sqladvice安装&amp;使用</div></div><div class="info-2"><div class="info-item-1"> title: sqladvice安装&amp;使用date: 2023-09-03 20:17:08category:  数据库 sql优化工具tag: sql优化工具author:   sqladvice安装&amp;使用Centos7安装美团SQL优化工具SQLAdvisor(示例代码)_136.la 1. SQLAdvisor安装1.1 拉取最新代码1234# git clone https://github.com/Meituan-Dianping/SQLAdvisor.gitsudo yum install -y gitgit clone http://github.com/Meituan-Dianping/SQLAdvisor.git  1.2 安装依赖项12345678910#yum | apt-get  install   cmake libaio-devel libffi-devel glib2 glib2-devel#yum | apt-get  install  --enablerepo=Percona56 Percona-Server-shared-56...</div></div></div></a><a class="pagination-related" href="/2023/09/04/docker-compose/" title="docker-compose"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">docker-compose</div></div><div class="info-2"><div class="info-item-1"> title: docker-composedate: 2023-09-03 20:17:08category:  doc_dockertag: doc_dockerauthor:   docker-compose使用安装包网址：https://github.com/docker/compose/releases/tag/1.24.0 指令教学： https://www.cnblogs.com/regit/p/8309959.html http://www.cnblogs.com/youclk/p/8453526.html 安装命令: sudo curl -L https://github.com/docker/compose/releases/download/1.24.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose &amp;&amp;  chmod +x /usr/local/bin/docker-compose  需要root用户 或sudo用户执行安装命令 安装该命令 doc...</div></div></div></a><a class="pagination-related" href="/2023/09/04/npm%E5%8D%87%E7%BA%A7/" title="npm升级"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-04</div><div class="info-item-2">npm升级</div></div><div class="info-2"><div class="info-item-1"> title: npm升级date: 2023-09-03 20:17:08category:  开发语言 doc_nodejstag: doc_nodejsauthor:   npm install -g npm-check命令行npm-check -u会出现更新列表，选择后升级 https://www.cnblogs.com/xxflz/p/9835344.html 就算之前你装了webpack，那肯定是非全局安装 所以要全局安装 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273npm-check -u❤️  Your modules look amazing. Keep up the great work. ❤️E:\vscodeProjects_sitech\crds_base_web_view_pack&gt;npm run devnpm WARN...</div></div></div></a><a class="pagination-related" href="/2024/05/06/Mac%E5%AE%89%E8%A3%85Oracle%2019.3.0/" title="Mac安装Oracle 19.3.0"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-05-06</div><div class="info-item-2">Mac安装Oracle 19.3.0</div></div><div class="info-2"><div class="info-item-1">目前学校在教数据库设计需要用到Oracle，但是Oracle不能直接安装在Mac上，按住了新买一台电脑的冲动，经过一个小时的研究，找到了个方法在Mac上运行Oracle以及与DataGrip相连，希望能帮助到大家。 在最开始我想先简单说说这个方法最大缺点 -&gt; 需要占用大量电脑的储存空间，大概是55个G左右，如果能接受这个缺点就请往下看  首先用Docker安装Oracle需要两个文件  docker-images-master.zip (3.1MB)在 https://github.com/oracle/docker-images下载Oracle Docker build files.   LINUX.X64_193000_db_home.zip (3.07GB)访问http://www.oracle.com/technetwork/database/enterprise-edition/downloads/index.html下载 (需要注册Oracle)  ![在这里插入图片描述](&#x2F;img&#x2F;CleanShot 2024-05-07 at 09.4...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">yhao521</div><div class="author-info-description">包含:Java、vue、element、Java 部分源码，JVM，Spring，Spring Boot，Spring Cloud，数据库原理，MySQL，Redis，Docker，CI&CD，Linux，DevOps，分布式，中间件，开发工具，Git，IDE，源码阅读，读书笔记，开源项目</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">701</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yhao521"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yhao521" target="_blank" title="fab fa-github"><i class="GitHub"></i></a><a class="social-icon" href="mailto:yhao521@example.com" target="_blank" title="fa fa-envelope"><i class="Email"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%83%8C%E6%99%AF%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.</span> <span class="toc-text">背景介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#EasyPhoto%E9%A1%B9%E7%9B%AE%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.1.</span> <span class="toc-text">EasyPhoto项目介绍</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8E%9F%E7%90%86%E4%BB%8B%E7%BB%8D"><span class="toc-number">2.</span> <span class="toc-text">原理介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#EasyPhoto%E7%94%9F%E6%88%90"><span class="toc-number">2.1.</span> <span class="toc-text">EasyPhoto生成</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#EasyPhoto%E8%AE%AD%E7%BB%83"><span class="toc-number">2.2.</span> <span class="toc-text">EasyPhoto训练</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%87%E5%9B%BE%E7%94%9F%E6%88%90-SD-Control-Lora"><span class="toc-number">2.3.</span> <span class="toc-text">文图生成(SD&#x2F;Control&#x2F;Lora)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%BA%E8%84%B8%E7%9B%B8%E5%85%B3AI%E6%A8%A1%E5%9E%8B"><span class="toc-number">2.4.</span> <span class="toc-text">人脸相关AI模型</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#EasyPhoto-SDWebUI"><span class="toc-number">3.</span> <span class="toc-text">EasyPhoto &amp; SDWebUI</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#EasyPhoto%E6%8F%92%E4%BB%B6%E7%AE%80%E4%BB%8B"><span class="toc-number">3.1.</span> <span class="toc-text">EasyPhoto插件简介</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E6%96%B9%E5%BC%8F%E4%B8%80-SDWebUI%E7%95%8C%E9%9D%A2%E5%AE%89%E8%A3%85"><span class="toc-number">3.2.</span> <span class="toc-text">安装方式一: SDWebUI界面安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E6%96%B9%E5%BC%8F%E4%BA%8C%EF%BC%9A%E6%BA%90%E7%A0%81%E5%AE%89%E8%A3%85"><span class="toc-number">3.3.</span> <span class="toc-text">安装方式二：源码安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B6%E4%BB%96%E5%AE%89%E8%A3%85%E9%A1%B9%EF%BC%9AControlNet"><span class="toc-number">3.4.</span> <span class="toc-text">其他安装项：ControlNet</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#EasyPhoto%E8%AE%AD%E7%BB%83-1"><span class="toc-number">4.</span> <span class="toc-text">EasyPhoto训练</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8A%E4%BC%A0%E8%AE%AD%E7%BB%83%E5%9B%BE%E7%89%87"><span class="toc-number">4.1.</span> <span class="toc-text">上传训练图片</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B0%83%E6%95%B4%E8%AE%AD%E7%BB%83%E5%8F%82%E6%95%B0"><span class="toc-number">4.2.</span> <span class="toc-text">调整训练参数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%AD%E7%BB%83-%E8%AE%BE%E7%BD%AEID"><span class="toc-number">4.3.</span> <span class="toc-text">训练&amp;设置ID</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%82%E5%AF%9F%E8%AE%AD%E7%BB%83"><span class="toc-number">4.4.</span> <span class="toc-text">观察训练</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#EasyPhoto%E9%A2%84%E6%B5%8B"><span class="toc-number">5.</span> <span class="toc-text">EasyPhoto预测</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A2%84%E6%B5%8B%E5%8F%82%E6%95%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">5.1.</span> <span class="toc-text">预测参数说明</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%99%E5%9C%A8%E6%9C%80%E5%90%8E"><span class="toc-number">6.</span> <span class="toc-text">写在最后</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/ComfyUI%20%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%94%BB%E7%95%A5/" title="ComfyUI 提示词攻略">ComfyUI 提示词攻略</a><time datetime="2026-08-23T04:16:59.685Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/Claude%20Code%209%20%E5%A4%A7%E7%A5%9E%E7%BA%A7%20Skills%EF%BC%8C%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87%E7%9B%B4%E6%8E%A5%E7%BF%BB%E5%80%8D%EF%BC%88%E5%AE%89%E8%A3%85%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%B8%A9%E5%9D%91%E7%BB%8F%E9%AA%8C%EF%BC%89/" title="Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）">Claude Code 9 大神级 Skills，开发效率直接翻倍（安装、使用场景、踩坑经验）</a><time datetime="2026-08-23T04:16:59.684Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/08/23/%E6%9C%AC%E5%9C%B0Qwen%20+%20ComfyUI%20%E5%88%B6%E4%BD%9CAI%E6%BC%AB%E5%89%A7%E5%AE%8C%E6%95%B4%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%882026%E5%B9%B43%E6%9C%88%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/" title="本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）">本地Qwen + ComfyUI 制作AI漫剧完整保姆级教程（2026年3月最新版）</a><time datetime="2026-08-23T04:16:59.680Z" title="发表于 2026-08-23 12:16:59">2026-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="grep排查日志技巧">grep排查日志技巧</a><time datetime="2026-05-19T16:00:00.000Z" title="发表于 2026-05-20 00:00:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="https://yhao521.github.io" title="Redis面试题回答">Redis面试题回答</a><time datetime="2026-05-17T16:00:00.000Z" title="发表于 2026-05-18 00:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By yhao521</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
